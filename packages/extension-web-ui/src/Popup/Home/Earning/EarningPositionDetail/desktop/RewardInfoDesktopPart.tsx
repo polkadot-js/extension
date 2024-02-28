@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
@@ -13,10 +14,10 @@ import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transacti
 import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import { AlertDialogProps, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { ActivityIndicator, Button, ModalContext, Number } from '@subwallet/react-ui';
+import { ActivityIndicator, Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { CheckCircle } from 'phosphor-react';
+import { CheckCircle, Clock } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -97,10 +98,10 @@ function Component ({ className, closeAlert, compound,
     } else {
       openAlert({
         title: t('Rewards unavailable'),
+        type: NotificationType.ERROR,
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
-          schema: 'danger',
           onClick: closeAlert,
           icon: CheckCircle
         }
@@ -173,8 +174,14 @@ function Component ({ className, closeAlert, compound,
 
         <Button
           block={true}
-          className={'__rewards-history-button'}
+          className={'__rewards-history-button -ghost-type-3'}
           disabled={!rewardHistories?.length}
+          icon={
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={Clock}
+            />
+          }
           onClick={onOpenRewardsHistoryModal}
           type={'ghost'}
         >{t('Reward history')}</Button>

@@ -245,8 +245,8 @@ const Component: React.FC<Props> = ({ className, compound,
               disabled={disableButton}
               icon={
                 <Icon
+                  customSize={'24px'}
                   phosphorIcon={ArrowSquareOut}
-                  size={'sm'}
                 />
               }
               onClick={createOpenNomination(row)}
@@ -529,7 +529,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       marginBottom: 0
     },
 
-    '.__tr-list, .__loading-area, .empty-list': {
+    '.__loading-area, .empty-list': {
       minHeight: 376
     },
 

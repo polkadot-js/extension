@@ -66,22 +66,22 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
     {
       icon: {
         type: 'phosphor',
-        phosphorIcon: Rocket,
-        weight: 'fill'
-      },
-      label: t('Crowdloans'),
-      key: 'crowdloans',
-      url: '/home/crowdloans'
-    },
-    {
-      icon: {
-        type: 'phosphor',
         phosphorIcon: Vault,
         weight: 'fill'
       },
       label: t('Earning'),
       key: 'earning',
       url: '/home/earning'
+    },
+    {
+      icon: {
+        type: 'phosphor',
+        phosphorIcon: Rocket,
+        weight: 'fill'
+      },
+      label: t('Crowdloans'),
+      key: 'crowdloans',
+      url: '/home/crowdloans'
     },
     {
       icon: {
@@ -149,10 +149,18 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
 
   useEffect(() => {
     setShowBackButtonOnHeader(props.showBackButton);
+
+    return () => {
+      setShowBackButtonOnHeader(undefined);
+    };
   }, [props.showBackButton, setShowBackButtonOnHeader]);
 
   useEffect(() => {
     setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
   }, [onBack, setOnBack]);
 
   return (

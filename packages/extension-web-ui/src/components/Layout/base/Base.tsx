@@ -149,10 +149,18 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
 
   useEffect(() => {
     setShowBackButtonOnHeader(props.showBackButton);
+
+    return () => {
+      setShowBackButtonOnHeader(undefined);
+    };
   }, [props.showBackButton, setShowBackButtonOnHeader]);
 
   useEffect(() => {
     setOnBack(onBack);
+
+    return () => {
+      setOnBack(undefined);
+    };
   }, [onBack, setOnBack]);
 
   return (

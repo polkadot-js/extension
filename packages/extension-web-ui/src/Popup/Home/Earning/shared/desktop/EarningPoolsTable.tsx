@@ -232,25 +232,22 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     '.__table-staking-type-col.__table-staking-type-col': {
       flex: 0.8
     },
+
     '.__table-staking-type-col': {
       display: 'flex',
       justifyContent: 'flex-start'
     },
 
-    ['.__table-staking-type-col, .__table-total-value-stake-col, ' +
-        '.__table-rewards-col']: {
-      textAlign: 'center'
-    },
-
-    ['th.__table-staking-type-col.__table-staking-type-col, ' +
-        'th.__table-total-value-stake-col.__table-total-value-stake-col, ' +
-        'th.__table-rewards-col.__table-rewards-col, ']: {
-      textAlign: 'center'
+    '.__table-total-value-stake-col, .__table-rewards-col': {
+      display: 'flex',
+      justifyContent: 'flex-end'
     },
 
     '.__tr': {
       'white-space': 'nowrap',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      paddingTop: token.padding,
+      paddingBottom: token.padding
     },
 
     '.__row-total-stake-value': {
@@ -298,6 +295,7 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     '.__td': {
       overflow: 'hidden'
     },
+
     '.__tbd': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG
@@ -331,7 +329,8 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       'white-space': 'nowrap',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      fontWeight: token.fontWeightStrong
+      fontWeight: token.fontWeightStrong,
+      marginBottom: token.marginXXS
     },
     '.__row-token-meta': {
       display: 'flex',
@@ -367,7 +366,6 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
     '.__table-detail_action-col.__table-detail_action-col': {
       flex: 1,
       minWidth: 140,
-      maxWidth: 180,
       display: 'flex',
       justifyContent: 'flex-end'
     },

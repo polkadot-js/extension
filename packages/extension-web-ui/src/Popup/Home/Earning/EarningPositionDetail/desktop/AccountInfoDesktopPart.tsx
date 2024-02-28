@@ -245,8 +245,8 @@ const Component: React.FC<Props> = ({ className, compound,
               disabled={disableButton}
               icon={
                 <Icon
+                  customSize={'24px'}
                   phosphorIcon={ArrowSquareOut}
-                  size={'sm'}
                 />
               }
               onClick={createOpenNomination(row)}

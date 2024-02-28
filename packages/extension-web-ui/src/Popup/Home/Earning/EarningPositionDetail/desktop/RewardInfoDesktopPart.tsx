@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardHistoryItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
@@ -97,10 +98,10 @@ function Component ({ className, closeAlert, compound,
     } else {
       openAlert({
         title: t('Rewards unavailable'),
+        type: NotificationType.ERROR,
         content: t("You don't have any rewards to claim at the moment. Try again later."),
         okButton: {
           text: t('I understand'),
-          schema: 'danger',
           onClick: closeAlert,
           icon: CheckCircle
         }

@@ -1,21 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { AccountSelector, AmountInput, TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
 import { TransactionFeeQuotes } from '@subwallet/extension-web-ui/components/Swap/TransactionFeeQuote';
 import { SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useTransactionContext } from '@subwallet/extension-web-ui/hooks';
+import { useSelector, useTransactionContext } from '@subwallet/extension-web-ui/hooks';
+import { handleSwapRequest } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, TransactionContent } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
 import { Button, Form, Icon, ModalContext, Number, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsDownUp, CaretRight, Info, PencilSimpleLine } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -61,6 +64,36 @@ const fakeTokenDest: TokenItemType[] = [
   }
 ];
 
+const fakeSwapPairs = [
+  {
+    from: 'polkadot-NATIVE-DOT',
+    to: 'ethereum-NATIVE-ETH'
+  },
+  {
+    from: 'acala-LOCAL-DOT',
+    to: 'ethereum-NATIVE-ETH'
+  },
+  {
+    from: 'acala-LOCAL-GLMR',
+    to: 'ethereum-NATIVE-ETH'
+  },
+  {
+    from: 'ethereum-NATIVE-ETH',
+    to: 'polkadot-NATIVE-DOT'
+  },
+  {
+    from: 'ethereum-NATIVE-ETH',
+    to: 'acala-LOCAL-DOT'
+  }
+];
+
+type TokenSelectorItemType = {
+  name: string;
+  slug: string;
+  symbol: string;
+  originChain: string;
+};
+
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
   const { setTitle } = useContext(WebUIContext);
@@ -69,12 +102,71 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
   const { defaultData } = useTransactionContext<TransferParams>();
   const [form] = Form.useForm<TransferParams>();
+  const swapPairs = useSelector((state) => state.swap.swapPairs);
+  const { assetRegistry } = useSelector((root) => root.assetRegistry);
+  const [fromSlug, setFromSlug] = useState('polkadot-NATIVE-DOT');
+  const dataContext = useContext(DataContext);
+
+  useEffect(() => {
+    handleSwapRequest({
+      address: '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
+      pair: swapPairs[0],
+      fromAmount: '40000000000',
+      slippage: 0.05
+    }).then((result) => {
+      console.log('swap result', result);
+    }).catch(console.error);
+  }, [swapPairs]);
 
   const formDefault = useMemo((): TransferParams => {
     return {
       ...defaultData
     };
   }, [defaultData]);
+
+  const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {};
+
+    fakeSwapPairs.forEach((pair) => {
+      if (!result[pair.from]) {
+        result[pair.from] = [pair.to];
+      } else {
+        result[pair.from].push(pair.to);
+      }
+    });
+
+    return result;
+  }, []);
+
+  const fromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
+    return Object.keys(fromAndToTokenMap).map((key) => {
+      const objectItem = assetRegistry[key];
+
+      return {
+        originChain: objectItem.originChain,
+        slug: objectItem.slug,
+        symbol: objectItem.symbol,
+        name: objectItem.name
+      };
+    });
+  }, [assetRegistry, fromAndToTokenMap]);
+
+  const toTokenItems = useMemo<TokenSelectorItemType[]>(() => {
+    const toArray = fromAndToTokenMap[fromSlug];
+    const assetDetails: TokenSelectorItemType[] = [];
+
+    toArray.forEach((item) => {
+      const objectItem = assetRegistry[item];
+
+      if (objectItem) {
+        const { name, originChain, slug, symbol } = objectItem;
+
+        assetDetails.push({ originChain, slug, symbol, name });
+      }
+    });
+
+    return assetDetails;
+  }, [assetRegistry, fromSlug, fromAndToTokenMap]);
 
   useEffect(() => {
     if (location.pathname === '/home/swap-test') {

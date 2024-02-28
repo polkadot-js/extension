@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField, TokenItemType } from '@subwallet/extension-web-ui/components';
+import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
@@ -22,26 +23,24 @@ type Props = ThemeProps;
 
 const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug'];
 
-const fakeTokenItems: TokenItemType[] = [
-  {
-    name: 'Polkadot',
-    slug: 'polkadot-NATIVE-DOT',
-    symbol: 'DOT',
-    originChain: 'polkadot'
-  },
-  {
-    name: 'Kusama',
-    slug: 'kusama-NATIVE-KSM',
-    symbol: 'KSM',
-    originChain: 'kusama'
-  },
-  {
-    name: 'Aleph Zero',
-    slug: 'aleph-NATIVE-AZERO',
-    symbol: 'AZERO',
-    originChain: 'aleph'
-  }
-];
+function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<string, _ChainAsset>): TokenSelectorItemType[] {
+  const result: TokenSelectorItemType[] = [];
+
+  tokenSlugs.forEach((slug) => {
+    const asset = assetRegistryMap[slug];
+
+    if (asset) {
+      result.push({
+        originChain: asset.originChain,
+        slug,
+        symbol: asset.symbol,
+        name: asset.name
+      });
+    }
+  });
+
+  return result;
+}
 
 const Component = () => {
   const { t } = useTranslation();
@@ -50,7 +49,6 @@ const Component = () => {
 
   const { isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
-  // @ts-ignore
   const swapPairs = useSelector((state) => state.swap.swapPairs);
 
   const [form] = Form.useForm<SwapParams>();
@@ -61,16 +59,26 @@ const Component = () => {
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
-    return {};
-  }, []);
+    const result: Record<string, string[]> = {};
+
+    swapPairs.forEach((pair) => {
+      if (!result[pair.from]) {
+        result[pair.from] = [pair.to];
+      } else {
+        result[pair.from].push(pair.to);
+      }
+    });
+
+    return result;
+  }, [swapPairs]);
 
   const fromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
-    return [];
-  }, []);
+    return getTokenSelectorItem(Object.keys(fromAndToTokenMap), assetRegistryMap);
+  }, [assetRegistryMap, fromAndToTokenMap]);
 
   const toTokenItems = useMemo<TokenSelectorItemType[]>(() => {
-    return [];
-  }, []);
+    return getTokenSelectorItem(fromAndToTokenMap[fromTokenSlugValue] || [], assetRegistryMap);
+  }, [assetRegistryMap, fromAndToTokenMap, fromTokenSlugValue]);
 
   const isSwitchable = useMemo(() => {
     return fromAndToTokenMap[toTokenSlugValue];
@@ -125,13 +133,19 @@ const Component = () => {
     };
   }, [setCustomScreenTitle, t]);
 
+  useEffect(() => {
+    if (!fromTokenSlugValue && fromTokenItems.length) {
+      form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+    }
+  }, [form, fromTokenItems, fromTokenSlugValue]);
+
   return (
     <>
       <>
         <div className={'__transaction-form-block'}>
           <TransactionContent>
             <Form
-              className={'form-container form-space-sm'}
+              className={'form-container'}
               form={form}
               initialValues={formDefault}
               onFinish={onSubmit}
@@ -162,7 +176,7 @@ const Component = () => {
                   decimals={fromDecimals}
                   label={t('From')}
                   onSelectToken={onSelectFromToken}
-                  tokenSelectorItems={fakeTokenItems || fromTokenItems}
+                  tokenSelectorItems={fromTokenItems}
                   tokenSelectorValue={fromTokenSlugValue}
                 />
 
@@ -186,6 +200,7 @@ const Component = () => {
                   decimals={toDecimals}
                   onSelectToken={onSelectToToken}
                   tokenSelectorItems={toTokenItems}
+                  tokenSelectorValue={toTokenSlugValue}
                 />
               </div>
 

@@ -53,7 +53,7 @@ export const fetchInfuraFeeData = async (chainId: number, infuraAuth?: string): 
 
 export const fetchSubWalletFeeData = async (chainId: number, networkKey: string): Promise<EvmFeeInfo | null> => {
   return await new Promise<EvmFeeInfo | null>((resolve) => {
-    const baseUrl = 'https://gas.api.infura.io/networks/{{chain}}/suggestedGasFees';
+    const baseUrl = 'https://api-cache.subwallet.app/sw-evm-gas/{{chain}}';
     const url = baseUrl.replaceAll('{{chain}}', networkKey);
 
     fetch(url,
@@ -104,7 +104,7 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
   return needMulti ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
 };
 
-export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string, useOnline = true, useInfura = true): Promise<EvmFeeInfo> => {
+export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string, useOnline = true, useInfura = false): Promise<EvmFeeInfo> => {
   if (useOnline) {
     try {
       const chainId = await web3.api.eth.getChainId();

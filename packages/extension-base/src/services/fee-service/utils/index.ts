@@ -21,8 +21,8 @@ export const parseInfuraFee = (info: InfuraFeeInfo): EvmFeeInfo => {
     busyNetwork,
     gasPrice: undefined,
     baseGasFee: base,
-    maxFeePerGas: new BigN(data.suggestedMaxFeePerGas).multipliedBy(BN_WEI),
-    maxPriorityFeePerGas: new BigN(data.suggestedMaxPriorityFeePerGas).multipliedBy(BN_WEI)
+    maxFeePerGas: new BigN(data.suggestedMaxFeePerGas).multipliedBy(BN_WEI).integerValue(BigN.ROUND_UP),
+    maxPriorityFeePerGas: new BigN(data.suggestedMaxPriorityFeePerGas).multipliedBy(BN_WEI).integerValue(BigN.ROUND_UP)
   };
 };
 

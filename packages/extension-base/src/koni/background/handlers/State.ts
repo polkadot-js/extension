@@ -1485,18 +1485,14 @@ export default class KoniState {
   }
 
   async calculateAllGasFeeOnChain (infuraChainIds: number[], infuraAuth: string, timeout = 10000): Promise<Record<string, EvmFeeInfo | null>> {
-    const chainInfoMap = this.chainService.getChainInfoMap();
-    const evmChainInfoMap = Object.values(chainInfoMap).reduce((acc, chainInfo) => {
-      if (chainInfo.evmInfo?.evmChainId) {
-        acc[chainInfo.slug] = chainInfo;
-      }
-
-      return acc;
-    }, {} as Record<string, _ChainInfo>);
+    const evmChainInfos = this.chainService.getEvmChainInfoMap();
+    const activeEvmChains = Object.entries(evmChainInfos).filter(([slug, chainInfo]) => {
+      return chainInfo.chainStatus === 'ACTIVE';
+    });
 
     const promiseList: Promise<[string, EvmFeeInfo | null]>[] = [];
 
-    Object.entries(evmChainInfoMap).forEach(([slug, chainInfo]) => {
+    activeEvmChains.forEach(([slug, chainInfo]) => {
       const chainId = chainInfo.evmInfo?.evmChainId;
       const timeoutPromise = new Promise<null>((resolve) => {
         setTimeout(() => resolve(null), timeout);
@@ -1516,7 +1512,15 @@ export default class KoniState {
       })();
 
       promiseList.push(Promise.race([promise, timeoutPromise]).then((result) => {
-        return [slug, result];
+        return [slug, result
+          ? {
+            ...result,
+            gasPrice: result.gasPrice?.toString(),
+            maxFeePerGas: result.maxFeePerGas?.toString(),
+            maxPriorityFeePerGas: result.maxPriorityFeePerGas?.toString(),
+            baseGasFee: result.baseGasFee?.toString()
+          } as EvmFeeInfo
+          : null];
       }));
     });
 

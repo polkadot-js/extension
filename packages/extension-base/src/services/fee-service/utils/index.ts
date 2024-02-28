@@ -26,7 +26,7 @@ export const parseInfuraFee = (info: InfuraFeeInfo): EvmFeeInfo => {
   };
 };
 
-export const fetchInfuraFeeData = async (chainId: number, networkKey: string): Promise<EvmFeeInfo | null> => {
+export const fetchInfuraFeeData = async (chainId: number, infuraAuth?: string): Promise<EvmFeeInfo | null> => {
   return await new Promise<EvmFeeInfo | null>((resolve) => {
     const baseUrl = 'https://gas.api.infura.io/networks/{{chainId}}/suggestedGasFees';
     const url = baseUrl.replaceAll('{{chainId}}', chainId.toString());
@@ -35,7 +35,7 @@ export const fetchInfuraFeeData = async (chainId: number, networkKey: string): P
       {
         method: 'GET',
         headers: {
-          Authorization: INFURA_AUTH
+          Authorization: infuraAuth || INFURA_AUTH
         }
       })
       .then((rs) => {
@@ -104,24 +104,18 @@ export const recalculateGasPrice = (_price: string, chain: string) => {
   return needMulti ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
 };
 
-export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string, useInfura = true): Promise<EvmFeeInfo> => {
-  try {
-    const chainId = await web3.api.eth.getChainId();
-    const onlineData = await fetchOnlineFeeData(chainId, networkKey, useInfura);
+export const calculateGasFeeParams = async (web3: _EvmApi, networkKey: string, useOnline = true, useInfura = true): Promise<EvmFeeInfo> => {
+  if (useOnline) {
+    try {
+      const chainId = await web3.api.eth.getChainId();
+      const onlineData = await fetchOnlineFeeData(chainId, networkKey, useInfura);
 
-    if (onlineData) {
-      console.log({
-        gasPrice: onlineData.gasPrice,
-        maxFeePerGas: onlineData.maxFeePerGas?.dividedBy(BN_WEI).toFixed(),
-        maxPriorityFeePerGas: onlineData.maxPriorityFeePerGas?.dividedBy(BN_WEI).toFixed(),
-        baseGasFee: onlineData.baseGasFee?.dividedBy(BN_WEI).toFixed(),
-        busyNetwork: onlineData.busyNetwork
-      });
+      if (onlineData) {
+        return onlineData;
+      }
+    } catch (e) {
 
-      return onlineData;
     }
-  } catch (e) {
-
   }
 
   try {

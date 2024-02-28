@@ -20,7 +20,7 @@ import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isA
 import EarningService from '@subwallet/extension-base/services/earning-service/service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import FeeService from '@subwallet/extension-base/services/fee-service/service';
-import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
+import { calculateGasFeeParams, fetchInfuraFeeData } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
@@ -37,7 +37,7 @@ import TransactionService from '@subwallet/extension-base/services/transaction-s
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
+import { BalanceItem, BalanceJson, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -1482,6 +1482,45 @@ export default class KoniState {
           throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
         }
       });
+  }
+
+  async calculateAllGasFeeOnChain (infuraChainIds: number[], infuraAuth: string, timeout = 10000): Promise<Record<string, EvmFeeInfo | null>> {
+    const chainInfoMap = this.chainService.getChainInfoMap();
+    const evmChainInfoMap = Object.values(chainInfoMap).reduce((acc, chainInfo) => {
+      if (chainInfo.evmInfo?.evmChainId) {
+        acc[chainInfo.slug] = chainInfo;
+      }
+
+      return acc;
+    }, {} as Record<string, _ChainInfo>);
+
+    const promiseList: Promise<[string, EvmFeeInfo | null]>[] = [];
+
+    Object.entries(evmChainInfoMap).forEach(([slug, chainInfo]) => {
+      const chainId = chainInfo.evmInfo?.evmChainId;
+      const timeoutPromise = new Promise<null>((resolve) => {
+        setTimeout(() => resolve(null), timeout);
+      });
+      const promise = (async () => {
+        if (chainId && infuraChainIds.includes(chainId)) {
+          const onlineData = await fetchInfuraFeeData(chainId, infuraAuth);
+
+          if (onlineData !== null) {
+            return onlineData;
+          }
+        }
+
+        const web3Api = this.chainService.getEvmApi(slug);
+
+        return await calculateGasFeeParams(web3Api, slug, false, false);
+      })();
+
+      promiseList.push(Promise.race([promise, timeoutPromise]).then((result) => {
+        return [slug, result];
+      }));
+    });
+
+    return Object.fromEntries(await Promise.all(promiseList));
   }
 
   public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {

@@ -127,6 +127,7 @@ export interface SigData {
 
 export * from './account';
 export * from './balance';
+export * from './field';
 export * from './buy';
 export * from './chain';
 export * from './confirmation';

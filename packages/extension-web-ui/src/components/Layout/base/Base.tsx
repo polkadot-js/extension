@@ -76,16 +76,6 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
     {
       icon: {
         type: 'phosphor',
-        phosphorIcon: Rocket,
-        weight: 'fill'
-      },
-      label: t('Crowdloans'),
-      key: 'crowdloans',
-      url: '/home/crowdloans'
-    },
-    {
-      icon: {
-        type: 'phosphor',
         phosphorIcon: Globe,
         weight: 'fill'
       },
@@ -102,6 +92,16 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
       label: t('Mission Pools'),
       key: 'mission-pools',
       url: '/home/mission-pools'
+    },
+    {
+      icon: {
+        type: 'phosphor',
+        phosphorIcon: Rocket,
+        weight: 'fill'
+      },
+      label: t('Crowdloans'),
+      key: 'crowdloans',
+      url: '/home/crowdloans'
     },
     {
       icon: {

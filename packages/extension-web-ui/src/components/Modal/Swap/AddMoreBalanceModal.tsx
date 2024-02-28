@@ -71,7 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const AddMoreBalance = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const AddMoreBalanceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '&.add-more-balance-container .ant-sw-modal-footer': {
       display: 'flex'
@@ -80,4 +80,4 @@ const AddMoreBalance = styled(Component)<Props>(({ theme: { token } }: Props) =>
   };
 });
 
-export default AddMoreBalance;
+export default AddMoreBalanceModal;

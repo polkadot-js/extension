@@ -1,33 +1,27 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
-import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelector, AmountInput, TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
+import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
+import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
 import { TransactionFeeQuotes } from '@subwallet/extension-web-ui/components/Swap/TransactionFeeQuote';
-import { SWAP_ALL_QUOTES_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useIsMantaPayEnabled, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useTransactionContext } from '@subwallet/extension-web-ui/hooks';
 import { FreeBalance, TransactionContent } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
-import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
-import { findAccountByAddress, findNetworkJsonByGenesisHash } from '@subwallet/extension-web-ui/utils';
 import { Button, Form, Icon, ModalContext, Number, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsDownUp, Book, CaretRight, Info, PencilSimpleLine } from 'phosphor-react';
+import { ArrowsDownUp, CaretRight, Info, PencilSimpleLine } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
-import AddMoreBalance from '../../../components/Modal/Swap/AddMoreBalance';
+import AddMoreBalanceModal from '../../../components/Modal/Swap/AddMoreBalanceModal';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 
 type Props = ThemeProps;
@@ -73,8 +67,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const location = useLocation();
   const { isWebUI } = useContext(ScreenContext);
   const { activeModal } = useContext(ModalContext);
-  const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
-  const { defaultData, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData } = useTransactionContext<TransferParams>();
   const [form] = Form.useForm<TransferParams>();
 
   const formDefault = useMemo((): TransferParams => {
@@ -83,126 +76,11 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     };
   }, [defaultData]);
 
-  const { defaultSlug: sendFundSlug } = defaultData;
-
-  const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
-  const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
-  const chain = useWatchTransaction('chain', form, defaultData);
-  const from = useWatchTransaction('from', form, defaultData);
-  const asset = useWatchTransaction('asset', form, defaultData);
-  const isZKModeEnabled = useIsMantaPayEnabled(from);
-
   useEffect(() => {
     if (location.pathname === '/home/swap-test') {
       setTitle(t('Swap for Testing Purposes'));
     }
   }, [location.pathname, setTitle, t]);
-
-  function isAssetTypeValid (
-    chainAsset: _ChainAsset,
-    chainInfoMap: Record<string, _ChainInfo>,
-    isAccountEthereum: boolean
-  ) {
-    return _isChainEvmCompatible(chainInfoMap[chainAsset.originChain]) === isAccountEthereum;
-  }
-
-  function getTokenItems (
-    address: string,
-    accounts: AccountJson[],
-    chainInfoMap: Record<string, _ChainInfo>,
-    assetRegistry: Record<string, _ChainAsset>,
-    assetSettingMap: Record<string, AssetSetting>,
-    multiChainAssetMap: Record<string, _MultiChainAsset>,
-    tokenGroupSlug?: string, // is ether a token slug or a multiChainAsset slug
-    isZkModeEnabled?: boolean
-  ): TokenItemType[] {
-    const account = findAccountByAddress(accounts, address);
-
-    if (!account) {
-      return [];
-    }
-
-    const isLedger = !!account.isHardware;
-    const validGen: string[] = account.availableGenesisHashes || [];
-    const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug);
-    const isAccountEthereum = isEthereumAddress(address);
-    const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
-    const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
-
-    if (tokenGroupSlug) {
-      if (!(isSetTokenSlug || isSetMultiChainAssetSlug)) {
-        return [];
-      }
-
-      const chainAsset = assetRegistry[tokenGroupSlug];
-      const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
-
-      if (isSetTokenSlug) {
-        if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
-          const { name, originChain, slug, symbol } = assetRegistry[tokenGroupSlug];
-
-          return [
-            {
-              name,
-              slug,
-              symbol,
-              originChain
-            }
-          ];
-        } else {
-          return [];
-        }
-      }
-    }
-
-    const items: TokenItemType[] = [];
-
-    Object.values(assetRegistry).forEach((chainAsset) => {
-      const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
-      const isTokenFungible = _isAssetFungibleToken(chainAsset);
-
-      if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
-        return;
-      }
-
-      if (!isZkModeEnabled && _isMantaZkAsset(chainAsset)) {
-        return;
-      }
-
-      if (isSetMultiChainAssetSlug) {
-        if (chainAsset.multiChainAsset === tokenGroupSlug) {
-          items.push({
-            name: chainAsset.name,
-            slug: chainAsset.slug,
-            symbol: chainAsset.symbol,
-            originChain: chainAsset.originChain
-          });
-        }
-      } else {
-        items.push({
-          name: chainAsset.name,
-          slug: chainAsset.slug,
-          symbol: chainAsset.symbol,
-          originChain: chainAsset.originChain
-        });
-      }
-    });
-
-    return items;
-  }
-
-  const tokenItems = useMemo<TokenItemType[]>(() => {
-    return getTokenItems(
-      from,
-      accounts,
-      chainInfoMap,
-      assetRegistry,
-      assetSettingMap,
-      multiChainAssetMap,
-      sendFundSlug,
-      isZKModeEnabled
-    );
-  }, [accounts, assetRegistry, assetSettingMap, chainInfoMap, from, isZKModeEnabled, multiChainAssetMap, sendFundSlug]);
 
   const onOpenSlippageModal = useCallback(() => {
     activeModal(SWAP_SLIPPAGE_MODAL);
@@ -223,6 +101,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onClickSwapIcon = useCallback(() => {
     alert('Swap Icon Clicked');
   }, []);
+
+  const openChooFeeToken = useCallback(() => {
+    activeModal(SWAP_CHOOSE_FEE_TOKEN_MODAL);
+  }, [activeModal]);
 
   return (
     <div className={className}>
@@ -339,6 +221,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 </Form.Item>
               </div>
             </Form>
+            <div className={'__item-slippage'}>
+              <span>Slippage:</span>
+                &nbsp;<span>2%</span>
+              <div onClick={onOpenSlippageModal}>
+                <Icon
+                  className={'__item-slippage-icon'}
+                  phosphorIcon={PencilSimpleLine}
+                  size='sm'
+                />
+              </div>
+
+            </div>
             <Button
               block={true}
               className={'__footer-left-button'}
@@ -364,10 +258,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                     size='xs'
                   ></Button>
                 </div>
-                <div className={'__text'}>Swap quote</div>
+                <div className={'__text'}> Swap quote</div>
               </div>
               <div className={'__item-right-part'}>
-                <div className={'__item-right-part-text'}>All quote</div>
+                <div className={'__item-right-part-text'}>View quote</div>
                 <div className={'__item-right-part-button'}>
                   <Button
                     icon={(
@@ -392,6 +286,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             >
               <div className={'__quote-area-1'}>
                 <MetaInfo.Default
+                  className={'__quote-rate'}
                   label={t('Quote rate')}
                   valueColorSchema={'gray'}
                 >
@@ -401,7 +296,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                       suffix={'DOT'}
                       value={1}
                     />
-                    &nbsp;=&nbsp;
+                    &nbsp;~&nbsp;
                     <Number
                       decimal={0}
                       suffix={'USDT'}
@@ -409,73 +304,54 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                     />
                   </div>
                 </MetaInfo.Default>
-                <MetaInfo.Number
-                  className={'__item-max-slippage'}
-                  decimals={0}
-                  label={t('Max slippage')}
-                  suffix={'%'}
-                  suffixNode={
-                    <Button
-                      icon={(
-                        <Icon
-                          customSize={'20px'}
-                          phosphorIcon={PencilSimpleLine}
-                        />
-                      )}
-                      onClick={onOpenSlippageModal}
-                      size='xs'
-                      type='ghost'
-                    >
-                    </Button>}
-                  value={2}
+                <MetaInfo.Chain
+                  chain={'polkadot'}
+                  label={t('Swap provider')}
                 />
-                <MetaInfo.Account
-                  address={'5GBw5o91TwwLwpj24ucJimWZhpg9bc5W9mBTMERjiaYYsENd'}
-                  className={'__item-recipient'}
-                  label={t('Recipient')}
-                  name={'Dung Nguyen wallet 01'}
-                  suffixNode={
-                    <Button
-                      icon={(
-                        <Icon
-                          customSize={'20px'}
-                          phosphorIcon={Book}
-                        />
-                      )}
-                      onClick={onOpenSlippageModal}
-                      size='xs'
-                      type='ghost'
-                    >
-                    </Button>
-                  }
-                />
-                <MetaInfo.Default
-                  label={t('Service provider')}
-                  valueColorSchema={'gray'}
-                >
-                ABBC
-                </MetaInfo.Default>
+                <SwapRoute />
               </div>
-              <TransactionFeeQuotes />
-              <div className={'__separator'}></div>
-              <MetaInfo.Number
-                className={'__item-min-receivable'}
-                decimals={0}
-                label={t('Min receivable')}
-                suffix={'USDT'}
-                value={200}
-              />
             </MetaInfo>
             <div className={'__item-footer-time'}>
               Quote reset in: 2s
             </div>
+            <MetaInfo
+              className={CN('__swap-quote')}
+              labelColorScheme={'gray'}
+              spaceSize={'sm'}
+              valueColorScheme={'gray'}
+            >
+              <TransactionFeeQuotes />
+              <div className={'__separator'}></div>
+              <MetaInfo.Chain
+                chain={'kusama'}
+                className='__item-fee-paid'
+                label={t('Fee paid in')}
+                suffixNode={
+                  <Button
+                    icon={(
+                      <Icon
+                        customSize={'20px'}
+                        phosphorIcon={PencilSimpleLine}
+                      />
+                    )}
+                    onClick={openChooFeeToken}
+                    size='xs'
+                    type='ghost'
+                  >
+                  </Button>
+                }
+              />
+            </MetaInfo>
           </div>
         </div>
       </TransactionContent>
+      <ChooseFeeTokenModal
+        modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
+      />
       <SlippageModal
         modalId={SWAP_SLIPPAGE_MODAL}
       />
-      <AddMoreBalance
+      <AddMoreBalanceModal
         modalId={SWAP_MORE_BALANCE_MODAL}
       />
       <AllSwapQuotes
@@ -494,6 +370,14 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
       gap: 16,
       justifyContent: 'center'
     },
+    '.__item-slippage': {
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      color: token.colorSuccess,
+      cursor: 'pointer',
+      marginBottom: 24
+    },
     '.__left-part': {
       flex: 1,
       maxWidth: 384
@@ -503,7 +387,7 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexDirection: 'column',
       flex: 1,
       maxWidth: 384,
-      gap: 12
+      gap: 4
     },
     '.__estimate-swap-value': {
       display: 'flex'
@@ -512,6 +396,9 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
       backgroundColor: token.colorBgSecondary,
       padding: 12,
       borderRadius: 8
+    },
+    '.__quote-rate .__label': {
+      fontWeight: token.bodyFontWeight
     },
     '.__item-quote-header': {
       display: 'flex',
@@ -525,12 +412,19 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
     '.__item-right-part': {
       display: 'flex',
-      gap: 8,
       alignItems: 'center'
     },
     '.__quote-area-1': {
       paddingLeft: 12,
-      paddingRight: 12
+      paddingRight: 12,
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12
+    },
+    '.__item-right-part-text': {
+      fontSize: 14,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeight
     },
     '.__separator': {
       height: 2,
@@ -541,7 +435,13 @@ const Swap = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.__item-footer-time': {
       color: token.colorWarningText,
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'flex-end',
+      paddingLeft: 8,
+      paddingRight: 8,
+      marginBottom: 12
+    },
+    '.__item-fee-paid .__chain-name': {
+      color: token.colorWhite
     },
     '.__item-max-slippage .-to-right': {
       display: 'flex',

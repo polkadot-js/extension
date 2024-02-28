@@ -1,18 +1,32 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import {
+  ASTAR_PORTAL_URL,
+  CREATE_RETURN,
+  DEFAULT_EARN_PARAMS,
+  DEFAULT_ROUTER_PATH,
+  EARN_TRANSACTION,
+  EARNING_INSTRUCTION_MODAL,
+  EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE
+} from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import {
+  useFilterModal,
+  useHandleChainConnection,
+  usePreviewYieldGroupInfo,
+  useSelector,
+  useSetSelectedAccountTypes,
+  useTranslation
+} from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
-import { autoSelectValidatorOptimally, isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Vault } from 'phosphor-react';
@@ -20,6 +34,8 @@ import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, use
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+import {_isChainEvmCompatible} from "@subwallet/extension-base/services/chain-service/utils";
+import {analysisAccounts} from "@subwallet/extension-web-ui/hooks/common/useGetChainSlugsByCurrentAccount";
 
 type Props = ThemeProps & {
 //
@@ -81,11 +97,11 @@ function Component ({ className }: Props) {
   const data = usePreviewYieldGroupInfo(poolInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
-  const currentAccount = useSelector((state) => state.accountState.currentAccount);
+  const { currentAccount, accounts } = useSelector((state) => state.accountState);
   const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
-
+  const [isContainOnlySubstrate, isContainOnlyEthereum] = analysisAccounts(accounts);
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
-
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
@@ -139,12 +155,36 @@ function Component ({ className }: Props) {
     };
   }, [filterOptions.length, selectedFilters]);
 
+  const checkIsAnyAccountValid = useCallback(() => {
+    const chainInfo = chainInfoMap[chainParam];
+
+    if (chainInfo) {
+      const isEvmChain = _isChainEvmCompatible(chainInfo);
+
+      if (isEvmChain) {
+
+        return !isContainOnlySubstrate;
+      } else {
+        return !isContainOnlyEthereum;
+      }
+    } else {
+      return false;
+    }
+  }, [isContainOnlyEthereum, isContainOnlySubstrate]);
+
   const navigateToEarnTransaction = useCallback(
     () => {
       if (isNoAccount) {
         setReturnStorage('/transaction/earn');
         navigate(DEFAULT_ROUTER_PATH);
       } else {
+        const isAnyAccountValid = checkIsAnyAccountValid();
+        if (!isAnyAccountValid) {
+          const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;
+          setSelectedAccountTypes([accountType]);
+          navigate('/home/earning', { state: { view: 'position', isBackFromEarningPreview: true } });
+          return;
+        }
         navigate('/transaction/earn');
       }
     },
@@ -345,14 +385,23 @@ function Component ({ className }: Props) {
               slug: poolInfo.slug,
               chain: poolInfo.chain,
               from: transactionFromValue,
-              redirectFromPreview: true
+              redirectFromPreview: true,
+              target: targetParam
             };
 
-            if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-              const validators = autoSelectValidatorOptimally(rs, poolInfo?.statistic?.maxCandidatePerFarmer, targetParam);
+            if (rs && rs.length) {
+              const isValidatorSupported = rs.some(item => item.address === targetParam);
 
-              defaultEarnParams.target = validators.length ? validators.map((v) => `${v.address}___${v.identity || ''}`).join(',') : '';
+              if (!isValidatorSupported) {
+                defaultEarnParams.target = 'not-support'
+              }
             }
+
+            // if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+            //   const validators = autoSelectValidatorOptimally(rs, poolInfo?.statistic?.maxCandidatePerFarmer, targetParam);
+            //
+            //   defaultEarnParams.target = validators.length ? validators.map((v) => `${v.address}___${v.identity || ''}`).join(',') : '';
+            // }
 
             setSelectedPoolInfoSlug(poolInfo.slug);
             setEarnStorage(defaultEarnParams);

@@ -26,7 +26,7 @@ import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, 
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { CheckCircle, PlusCircle } from 'phosphor-react';
+import {CheckCircle, PlusCircle, XCircle} from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Divider } from 'semantic-ui-react';
@@ -37,6 +37,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 import useNotification from '../../../hooks/common/useNotification';
 import { getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
+import {fetchStaticCache} from "@subwallet/extension-base/utils/fetchStaticCache";
 
 type Props = ThemeProps;
 
@@ -70,8 +71,8 @@ const Component = () => {
     openAlert, persistData,
     setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
-  const { redirectFromPreview, slug } = defaultData;
-
+  const { redirectFromPreview, slug, target } = defaultData;
+  const defaultTarget = useRef<string>(target);
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
@@ -109,7 +110,7 @@ const Component = () => {
 
   const [isBalanceReady, setIsBalanceReady] = useState<boolean>(true);
   const [forceFetchValidator, setForceFetchValidator] = useState(false);
-  const [targetLoading, setTargetLoading] = useState(false);
+  const [targetLoading, setTargetLoading] = useState(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [screenLoading, setScreenLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
@@ -683,6 +684,32 @@ const Component = () => {
   }, [chainAsset, poolInfo]);
 
   useEffect(() => {
+    fetchStaticCache<ValidatorInfo[]>(`earning/targets/${slug}.json`, []).then(rs => {
+      const isValidatorSupported = rs.some(item => item.address === defaultTarget.current);
+      if (!targetLoading && !isValidatorSupported && defaultTarget.current) {
+        openAlert({
+          title: t('Unrecommended validator'),
+          type: NotificationType.ERROR,
+          content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
+          cancelButton: {
+            text: 'Dismiss',
+            onClick: closeAlert,
+            icon: XCircle
+          },
+          okButton: {
+            text: t('Select validators'),
+            onClick: () => {
+              closeAlert();
+              activeModal('target');
+            },
+            icon: CheckCircle
+          }
+        });
+      }
+    })
+  }, [targetLoading]);
+
+  useEffect(() => {
     if (poolChain) {
       if (altChain) {
         if (checkChainConnected(poolChain) && checkChainConnected(altChain)) {
@@ -1048,7 +1075,7 @@ const Component = () => {
                     >
                       <EarningValidatorSelector
                         chain={chainValue}
-                        defaultValue={defaultData.target}
+                        defaultValue={defaultData.target === 'not-support' ? '' : defaultData.target}
                         disabled={submitLoading}
                         from={fromValue}
                         loading={targetLoading}

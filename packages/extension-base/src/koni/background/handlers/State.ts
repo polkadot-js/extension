@@ -19,6 +19,8 @@ import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '
 import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import EarningService from '@subwallet/extension-base/services/earning-service/service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import FeeService from '@subwallet/extension-base/services/fee-service/service';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
@@ -37,7 +39,6 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
-import { calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -135,6 +136,7 @@ export default class KoniState {
   readonly campaignService: CampaignService;
   readonly buyService: BuyService;
   readonly earningService: EarningService;
+  readonly feeService: FeeService;
 
   // Handle the general status of the extension
   private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
@@ -164,6 +166,7 @@ export default class KoniState {
     this.buyService = new BuyService(this);
     this.transactionService = new TransactionService(this);
     this.earningService = new EarningService(this);
+    this.feeService = new FeeService(this);
 
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);

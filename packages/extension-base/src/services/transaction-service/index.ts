@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
@@ -22,9 +22,10 @@ import { isWalletConnectRequest } from '@subwallet/extension-base/services/walle
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { anyNumberToBN, recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
+import { anyNumberToBN, calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
+import { BN_ZERO } from '@subwallet/extension-base/utils/number';
 import keyring from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
@@ -118,10 +119,11 @@ export default class TransactionService {
     };
 
     // Estimate fee
-    const estimateFee: AmountData = {
+    const estimateFee: FeeData = {
       symbol: '',
       decimals: 0,
-      value: ''
+      value: '',
+      tooHigh: false
     };
 
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
@@ -144,11 +146,19 @@ export default class TransactionService {
             if (!web3) {
               validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
             } else {
-              const _price = await web3.api.eth.getGasPrice();
-              const gasPrice = recalculateGasPrice(_price, chainInfo.slug);
               const gasLimit = await web3.api.eth.estimateGas(transaction);
 
-              estimateFee.value = (gasLimit * parseInt(gasPrice)).toString();
+              const priority = await calculateGasFeeParams(web3, chainInfo.slug);
+
+              if (priority.baseGasFee) {
+                const maxFee = priority.maxFeePerGas; // TODO: Need review
+
+                estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
+              } else {
+                estimateFee.value = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
+              }
+
+              estimateFee.tooHigh = priority.busyNetwork;
             }
           }
         } catch (e) {
@@ -394,6 +404,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const extrinsicType = transaction.extrinsicType;
 
+    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const formattedTransactionAddress = reformatAddress(transaction.address);
 
     const historyItem: TransactionHistoryItem = {
@@ -401,7 +412,7 @@ export default class TransactionService {
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,
-      from: formattedTransactionAddress,
+      from: transaction.address,
       to: '',
       chainType: transaction.chainType,
       address: formattedTransactionAddress,
@@ -416,7 +427,6 @@ export default class TransactionService {
       startBlock: startBlock || 0
     };
 
-    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
     const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
 
@@ -569,6 +579,7 @@ export default class TransactionService {
       case ExtrinsicType.MINT_QDOT:
       case ExtrinsicType.MINT_LDOT:
       case ExtrinsicType.MINT_SDOT:
+      case ExtrinsicType.MINT_VMANTA:
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.MINT_VDOT: {
@@ -624,12 +635,14 @@ export default class TransactionService {
       }
 
       case ExtrinsicType.UNSTAKE_VDOT:
+      case ExtrinsicType.UNSTAKE_VMANTA:
       case ExtrinsicType.UNSTAKE_LDOT:
       case ExtrinsicType.UNSTAKE_SDOT:
       case ExtrinsicType.UNSTAKE_STDOT:
       case ExtrinsicType.REDEEM_STDOT:
       case ExtrinsicType.REDEEM_LDOT:
       case ExtrinsicType.REDEEM_SDOT:
+      case ExtrinsicType.REDEEM_VMANTA:
 
       // eslint-disable-next-line no-fallthrough
       case ExtrinsicType.REDEEM_VDOT: {
@@ -740,11 +753,14 @@ export default class TransactionService {
 
     if ([
       ExtrinsicType.STAKING_JOIN_POOL,
+      ExtrinsicType.STAKING_BOND,
       ExtrinsicType.JOIN_YIELD_POOL,
       ExtrinsicType.MINT_LDOT,
       ExtrinsicType.MINT_QDOT,
       ExtrinsicType.MINT_SDOT,
-      ExtrinsicType.MINT_VDOT
+      ExtrinsicType.MINT_STDOT,
+      ExtrinsicType.MINT_VDOT,
+      ExtrinsicType.MINT_VMANTA
     ].includes(transaction.extrinsicType)) {
       this.handlePostEarningTransaction(id);
     }
@@ -867,15 +883,34 @@ export default class TransactionService {
   public generateHashPayload (chain: string, transaction: TransactionConfig): HexString {
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
-    const txObject: TransactionLike = {
-      nonce: transaction.nonce ?? 0,
-      gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
-      gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
-      to: transaction.to !== undefined ? transaction.to : '',
-      value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
-      data: transaction.data,
-      chainId: _getEvmChainId(chainInfo)
-    };
+    let txObject: TransactionLike;
+
+    const max = anyNumberToBN(transaction.maxFeePerGas);
+
+    if (max.gt(BN_ZERO)) {
+      txObject = {
+        nonce: transaction.nonce ?? 0,
+        maxFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxFeePerGas).toString(16)),
+        maxPriorityFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxPriorityFeePerGas).toString(16)),
+        gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
+        data: transaction.data,
+        chainId: _getEvmChainId(chainInfo),
+        type: 2
+      };
+    } else {
+      txObject = {
+        nonce: transaction.nonce ?? 0,
+        gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
+        gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
+        to: transaction.to !== undefined ? transaction.to : '',
+        value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
+        data: transaction.data,
+        chainId: _getEvmChainId(chainInfo),
+        type: 0
+      };
+    }
 
     return ethers.Transaction.from(txObject).unsignedSerialized as HexString;
   }
@@ -949,6 +984,8 @@ export default class TransactionService {
       nonce: payload.nonce ?? 0,
       from: payload.from as string,
       gasPrice: anyNumberToBN(payload.gasPrice).toNumber(),
+      maxFeePerGas: anyNumberToBN(payload.maxFeePerGas).toNumber(),
+      maxPriorityFeePerGas: anyNumberToBN(payload.maxPriorityFeePerGas).toNumber(),
       gasLimit: anyNumberToBN(payload.gas).toNumber(),
       to: payload.to !== undefined ? payload.to : '',
       value: anyNumberToBN(payload.value).toNumber(),

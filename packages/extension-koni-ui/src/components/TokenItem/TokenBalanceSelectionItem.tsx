@@ -152,7 +152,7 @@ export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { to
       lineHeight: token.lineHeightHeading5,
       fontWeight: token.fontWeightStrong,
       color: token.colorWhite,
-
+      'white-space': 'nowrap',
       '.__token-name': {
         color: token.colorTextTertiary,
         display: 'flex',

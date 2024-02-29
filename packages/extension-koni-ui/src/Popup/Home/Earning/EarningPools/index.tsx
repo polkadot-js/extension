@@ -1,21 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useHandleChainConnection, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-koni-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryParam, EarningEntryView, EarningPoolsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { Database, FadersHorizontal } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
+import { FadersHorizontal, Vault } from 'phosphor-react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -39,6 +39,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const pools = useYieldPoolInfoByGroup(poolGroup);
 
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const { currentAccount } = useSelector((state) => state.accountState);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
@@ -141,29 +142,64 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     closeConnectChainModal,
     connectingChain,
     onConnectChain,
-    openConnectChainModal } = useHandleChainConnection({
+    openConnectChainModal, setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
     connectChainModalId
   }, onConnectChainSuccess);
 
+  const [currentAltChain, setCurrentAltChain] = useState<string | undefined>();
+
+  const getAltChain = useCallback((poolInfo: YieldPoolInfo) => {
+    if (isLiquidPool(poolInfo) || isLendingPool(poolInfo)) {
+      const asset = assetRegistry[poolInfo.metadata.altInputAssets || ''];
+
+      return asset ? asset.originChain : '';
+    }
+
+    return '';
+  }, [assetRegistry]);
+
   const onClickItem = useCallback((item: YieldPoolInfo) => {
     return () => {
       setSelectedPool(item);
 
+      const altChain = getAltChain(item);
+
       if (!checkChainConnected(item.chain)) {
+        if (altChain) {
+          setCurrentAltChain(altChain);
+        }
+
         openConnectChainModal(item.chain);
-      } else {
-        navigateToEarnTransaction(item);
+
+        return;
       }
+
+      navigateToEarnTransaction(item);
     };
-  }, [checkChainConnected, navigateToEarnTransaction, openConnectChainModal]);
+  }, [checkChainConnected, getAltChain, navigateToEarnTransaction, openConnectChainModal]);
+
+  const _onConnectChain = useCallback((chain: string) => {
+    if (currentAltChain) {
+      turnOnChain(currentAltChain);
+    }
+
+    onConnectChain(chain);
+  }, [currentAltChain, onConnectChain, turnOnChain]);
+
+  useEffect(() => {
+    if (currentAltChain) {
+      setExtraSuccessFlag(checkChainConnected(currentAltChain));
+    } else {
+      setExtraSuccessFlag(true);
+    }
+  }, [checkChainConnected, currentAltChain, setExtraSuccessFlag]);
 
   const renderItem = useCallback(
     (item: YieldPoolInfo) => {
       return (
         <EarningPoolItem
-          chain={chainInfoMap[item.chain]}
           className={'earning-pool-item'}
           key={item.slug}
           onClick={onClickItem(item)}
@@ -171,7 +207,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         />
       );
     },
-    [chainInfoMap, onClickItem]
+    [onClickItem]
   );
 
   const emptyList = useCallback(() => {
@@ -179,7 +215,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       <EmptyList
         emptyMessage={t('Change your search and try again')}
         emptyTitle={t('No earning option found')}
-        phosphorIcon={Database}
+        phosphorIcon={Vault}
       />
     );
   }, [t]);
@@ -195,6 +231,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     },
     [chainInfoMap]
   );
+
   const onClickFilterButton = useCallback(
     (e?: SyntheticEvent) => {
       e && e.stopPropagation();
@@ -217,7 +254,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       closeConnectChainModal={closeConnectChainModal}
       connectChainModalId={connectChainModalId}
       connectingChain={connectingChain}
-      onConnectChain={onConnectChain}
+      onConnectChain={_onConnectChain}
     >
       <Layout.Base
         className={'__screen-container'}
@@ -298,6 +335,10 @@ const Wrapper = ({ className }: Props) => {
 };
 
 const EarningPools = styled(Wrapper)<Props>(({ theme: { token } }: Props) => ({
+  '.ant-sw-sub-header-container': {
+    marginBottom: token.marginXS
+  },
+
   '.__section-list-container': {
     height: '100%',
     flex: 1

@@ -35,12 +35,17 @@ export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 // XOrigin
 export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 
-export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
-
-export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
+// deprecated
+// export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+// export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
 
 export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql';
 
+export const UNIQUE_SCAN_ENDPOINT = 'https://api-unique.uniquescan.io/v1/graphql';
+
+export const QUARTZ_SCAN_ENDPOINT = 'https://api-quartz.uniquescan.io/v1/graphql';
+
+export const OPAL_SCAN_ENDPOINT = 'https://api-opal.uniquescan.io/v1/graphql';
 // GATEWAY
 
 export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';

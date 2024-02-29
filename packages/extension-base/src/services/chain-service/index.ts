@@ -15,7 +15,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { addLazy, fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -532,7 +532,6 @@ export class ChainService {
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
-    this.updateChainStateMapSubscription();
     this.assetRegistrySubject.next(this.getAssetRegistry());
     this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
 
@@ -570,12 +569,6 @@ export class ChainService {
 
   checkLatestData () {
     clearInterval(this.refreshLatestChainDataTimeOut);
-    this.handleLatestData();
-
-    this.handleLatestData();
-
-    this.handleLatestData();
-
     this.handleLatestData();
 
     this.refreshLatestChainDataTimeOut = setInterval(this.handleLatestData.bind(this), LATEST_CHAIN_DATA_FETCHING_INTERVAL);
@@ -1112,7 +1105,9 @@ export class ChainService {
   }
 
   private updateChainStateMapSubscription () {
-    this.chainStateMapSubject.next(this.getChainStateMap());
+    addLazy('updateChainStateMapSubscription', () => {
+      this.chainStateMapSubject.next(this.getChainStateMap());
+    }, 300, 900);
   }
 
   private updateChainInfoMapSubscription () {

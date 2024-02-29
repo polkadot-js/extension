@@ -1,5 +1,66 @@
 # CHANGELOG
 
+## 1.1.40
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Update pool default for VARA (#2678)
+
+## 1.1.39
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Adjust showing/validating address on Send fund (#2628)
+- Update IPFS domain for NFTs from Unique network (#2609)
+- Update filtering out blocked validators (#2632)
+- Re-check case send token on Acala-EVM with Ledger account (#2625)
+- Turn off popup remind claim rewards for dApp staking (#2622)
+- Update tab bar (#2631)
+- Update validation logic for Chainlist (#2617)
+
+Bugs fixed:
+- Fixed bug related to earning feature (#2598)
+- Fixed bug showing positions (#2612)
+- Fixed bug show incorrect token in case the wallet has only 1 account type (#2616)
+
+## 1.1.38
+Build date: Feb 17, 2024.
+
+Features & Update:
+- Update estimating EVM transaction fee for Energy Web Chain (#2606)
+- Update chain-list (#2570)
+  - Add support more tokens: PINK (Statemint), xcPINK (Moonbeam), INTR (HydraDX)
+  - Update explorer for Subspace Gemini 3g & 3h
+  - Update price_id for Energy Web X
+  - Update hasValue info for some tokens
+
+Bugs fixed:
+- Fixed some UI bug (#2509)
+
+## 1.1.37
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Add popup Introducing Earning feature (#2599)
+
+Bugs fixed:
+- Fixed bug Unable to connect with eip6763 dApp (#2590)
+
+
+## 1.1.36
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Update staking APY formula for relaychain (#2563)
+- Unique Network and Quartz NFTs support (#2580)
+- Migrate to earning feature (#2361, #2558, #2561)
+- Support vManta liquid staking on Bifrost (#2569)
+- Update position and options actions for Astar Staking DApp (#2594)
+- Update chain-list (#2586)
+- Remove explorer on Genshiro network
+- Update chain subspace gemini 3h
+- Check fee estimation on EVM networks (#2336)
+
 ## 1.1.35
 Build date: Feb 02, 2024.
 

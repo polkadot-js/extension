@@ -81,6 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
         }
         id={modalId}
+        onCancel={onCloseModal}
         title={'Claim ASTR staking rewards'}
       >
         <div className={'page-icon-astar-modal'}>

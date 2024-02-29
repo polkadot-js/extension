@@ -3,15 +3,15 @@
 
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
-import { useAccountBalance, useGetChainSlugsByAccountType, useSelector, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
+import { useAccountBalance, useGetChainSlugsByCurrentAccount, useSelector, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { BalanceValueInfo, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
 import { useMemo } from 'react';
 
 const useYieldGroupInfo = (): YieldGroupInfo[] => {
-  const { poolInfoMap } = useSelector((state) => state.earning);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const chainsByAccountType = useGetChainSlugsByAccountType();
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
+  const chainsByAccountType = useGetChainSlugsByCurrentAccount();
   const { tokenGroupMap } = useTokenGroup(chainsByAccountType);
   const { tokenBalanceMap, tokenGroupBalanceMap } = useAccountBalance(tokenGroupMap, true);
 
@@ -44,8 +44,14 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
           }
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
+          exists.poolSlugs.push(pool.slug);
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
+
+          if (!token) {
+            continue;
+          }
+
           const balance = tokenGroupBalanceMap[group] || tokenBalanceMap[group];
           const freeBalance: BalanceValueInfo = balance?.free || {
             value: BN_ZERO,
@@ -53,16 +59,27 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             pastConvertedValue: BN_ZERO
           };
 
+          let apy: undefined | number;
+
+          if (pool.statistic?.totalApy) {
+            apy = pool.statistic?.totalApy;
+          }
+
+          if (pool.statistic?.totalApr) {
+            apy = calculateReward(pool.statistic?.totalApr).apy;
+          }
+
           result[group] = {
             group: group,
             token: token.slug,
-            maxApy: pool.statistic?.totalApy,
+            maxApy: apy,
             symbol: token.symbol,
             balance: freeBalance,
             isTestnet: chainInfo.isTestnet,
             name: token.name,
             chain: chain,
-            poolListLength: 1
+            poolListLength: 1,
+            poolSlugs: [pool.slug]
           };
         }
       }

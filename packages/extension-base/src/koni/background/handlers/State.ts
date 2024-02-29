@@ -37,12 +37,14 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceJson, BalanceMap } from '@subwallet/extension-base/types';
 import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
-import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
+import { calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
 import { keyring } from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
+import BN from 'bn.js';
 import SimpleKeyring from 'eth-simple-keyring';
 import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
@@ -50,7 +52,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import { assert, BN, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -1517,12 +1519,30 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
-    const _price = await web3.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, networkKey);
+    let estimateGas: string;
 
-    transaction.gasPrice = gasPrice;
+    // TODO: Review, If not override, transaction maybe fail because fee too low
+    if (transactionParams.maxPriorityFeePerGas && transactionParams.maxFeePerGas) {
+      const maxFee = new BigN(transactionParams.maxFeePerGas);
 
-    const estimateGas = new BN(gasPrice.toString()).mul(new BN(transaction.gas)).toString();
+      estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+    } else if (transactionParams.gasPrice) {
+      estimateGas = new BigN(transactionParams.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+    } else {
+      const priority = await calculateGasFeeParams(evmApi, networkKey);
+
+      if (priority.baseGasFee) {
+        transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
+        transaction.maxFeePerGas = priority.maxFeePerGas.toString();
+
+        const maxFee = priority.maxFeePerGas;
+
+        estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+      } else {
+        transaction.gasPrice = priority.gasPrice;
+        estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+      }
+    }
 
     // Address is validated in before step
     const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
@@ -1542,7 +1562,7 @@ export default class KoniState {
     // Validate balance
     const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
-    if (balance.lt(new BN(gasPrice.toString()).mul(new BN(transaction.gas)).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
+    if (balance.lt(new BN(estimateGas).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Insufficient balance'));
     }
 
@@ -1889,6 +1909,8 @@ export default class KoniState {
     await this.keyringService.resetWallet(resetAll);
     this.requestService.resetWallet();
     this.transactionService.resetWallet();
+    await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
+    await this.earningService.resetWallet();
     await this.dbService.resetWallet(resetAll);
     this.accountRefStore.set('refList', []);
 

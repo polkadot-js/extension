@@ -484,18 +484,21 @@ export enum ExtrinsicType {
   MINT_SDOT = 'earn.mint_sdot',
   MINT_QDOT = 'earn.mint_qdot',
   MINT_STDOT = 'earn.mint_stdot',
+  MINT_VMANTA = 'earn.mint_vmanta',
 
   REDEEM_QDOT = 'earn.redeem_qdot',
   REDEEM_VDOT = 'earn.redeem_vdot',
   REDEEM_LDOT = 'earn.redeem_ldot',
   REDEEM_SDOT = 'earn.redeem_sdot',
   REDEEM_STDOT = 'earn.redeem_stdot',
+  REDEEM_VMANTA = 'earn.redeem_vmanta',
 
   UNSTAKE_QDOT = 'earn.unstake_qdot',
   UNSTAKE_VDOT = 'earn.unstake_vdot',
   UNSTAKE_LDOT = 'earn.unstake_ldot',
   UNSTAKE_SDOT = 'earn.unstake_sdot',
   UNSTAKE_STDOT = 'earn.unstake_stdot',
+  UNSTAKE_VMANTA = 'earn.unstake_vmanta',
 
   TOKEN_APPROVE = 'evm.token_approve',
 
@@ -532,18 +535,21 @@ export interface ExtrinsicDataTypeMap {
   [ExtrinsicType.MINT_QDOT]: SubmitYieldStepData,
   [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
   [ExtrinsicType.MINT_STDOT]: SubmitYieldStepData,
+  [ExtrinsicType.MINT_VMANTA]: SubmitYieldStepData,
 
   [ExtrinsicType.UNSTAKE_VDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_QDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_LDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_SDOT]: RequestYieldLeave,
   [ExtrinsicType.UNSTAKE_STDOT]: RequestYieldLeave,
+  [ExtrinsicType.UNSTAKE_VMANTA]: RequestYieldLeave,
 
   [ExtrinsicType.REDEEM_VDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_QDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_LDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_SDOT]: RequestYieldLeave,
   [ExtrinsicType.REDEEM_STDOT]: RequestYieldLeave,
+  [ExtrinsicType.REDEEM_VMANTA]: RequestYieldLeave,
 
   [ExtrinsicType.TOKEN_APPROVE]: TokenApproveData,
 
@@ -593,6 +599,10 @@ export interface AmountData extends BasicTokenInfo {
   value: string;
 }
 
+export interface FeeData extends AmountData {
+  tooHigh?: boolean;
+}
+
 export interface AmountDataWithId extends AmountData {
   id: string;
 }
@@ -611,16 +621,19 @@ export type TransactionAdditionalInfo = {
   [ExtrinsicType.TRANSFER_XCM]: XCMTransactionAdditionalInfo,
   [ExtrinsicType.SEND_NFT]: NFTTransactionAdditionalInfo,
   [ExtrinsicType.MINT_VDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
+  [ExtrinsicType.MINT_VMANTA]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_QDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_SDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_LDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.MINT_STDOT]: Pick<SubmitYieldStepData, 'derivativeTokenSlug' | 'exchangeRate' | 'slug'>,
   [ExtrinsicType.REDEEM_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.REDEEM_VMANTA]: LeavePoolAdditionalData,
   [ExtrinsicType.REDEEM_QDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.REDEEM_SDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.REDEEM_LDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.REDEEM_STDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.UNSTAKE_VDOT]: LeavePoolAdditionalData,
+  [ExtrinsicType.UNSTAKE_VMANTA]: LeavePoolAdditionalData,
   [ExtrinsicType.UNSTAKE_QDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.UNSTAKE_SDOT]: LeavePoolAdditionalData,
   [ExtrinsicType.UNSTAKE_LDOT]: LeavePoolAdditionalData,
@@ -1182,6 +1195,7 @@ export interface RequestTransferExistentialDeposit {
 
 export interface RequestSaveRecentAccount {
   accountId: string;
+  chain?: string;
 }
 
 export interface SubstrateNftTransaction {

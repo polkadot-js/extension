@@ -82,6 +82,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     * 3. Generate optimal process for that quote
     * */
     const quoteAskResponses = await this.askProvidersForQuote(request);
+
     const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote); // todo
     const selectedQuote = quoteAskResponses[0]?.quote as SwapQuote; // todo: more logic to select the best quote
     const quoteError = quoteAskResponses[0]?.error as SwapError; // todo
@@ -103,6 +104,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
 
   public async getLatestSwapQuote (swapQuote: SwapQuote): Promise<SwapQuote> {
     swapQuote.rate *= 0.005;
+    swapQuote.aliveUntil = +Date.now() + 30000;
 
     return Promise.resolve(swapQuote);
   }

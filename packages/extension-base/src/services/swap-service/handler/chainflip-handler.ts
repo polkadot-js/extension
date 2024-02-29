@@ -211,7 +211,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       } as SwapQuote;
     } catch (e) {
       console.error('Error getting quote from Chainflip', e);
-
       // todo: handle more error from chainflip
 
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);

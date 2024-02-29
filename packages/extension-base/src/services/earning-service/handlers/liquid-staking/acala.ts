@@ -162,6 +162,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
       const balances = _balances as unknown as TokenBalanceRaw[];
       const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
+      // This rate is multiple with decimals
       const exchangeRate = await this.getExchangeRate();
       const decimals = BN_TEN.pow(new BN(this.rateDecimals));
 
@@ -177,22 +178,20 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
+          // If withdrawable = false, redeem request is claimed
           const [redeemAmount, withdrawable] = redeemRequest;
 
-          // If withdrawable = false, redeem request is claimed
-          if (withdrawable) {
-            // Redeem amount in derivative token
-            const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
+          // Redeem amount in derivative token
+          const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
 
-            totalBalance = totalBalance.add(amount);
-            unlockingBalance = unlockingBalance.add(amount);
+          totalBalance = totalBalance.add(amount);
+          unlockingBalance = unlockingBalance.add(amount);
 
-            unstakings.push({
-              chain: this.chain,
-              status: UnstakingStatus.CLAIMABLE,
-              claimable: redeemAmount.toString()
-            });
-          }
+          unstakings.push({
+            chain: this.chain,
+            status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            claimable: amount.toString()
+          });
         }
 
         const result: YieldPositionInfo = {

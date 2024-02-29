@@ -579,7 +579,7 @@ export function getValidatorPointsList (eraRewardMap: Record<string, PalletStaki
   // mapping store validator and totalPoints
   const validatorTotalPointsMap: Record<string, BigNumber> = {};
 
-  Object.entries(eraRewardMap).forEach(([era, info]) => {
+  Object.values(eraRewardMap).forEach((info) => {
     const individual = info.individual;
 
     Object.entries(individual).forEach(([validator, rawPoints]) => {

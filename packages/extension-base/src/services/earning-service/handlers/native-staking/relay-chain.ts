@@ -371,8 +371,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
 
     for (const item of _eraRewardPoints[0]) {
-      // @ts-ignore
-      eraRewardMap[startEraForPoints] = item.toHuman();
+      eraRewardMap[startEraForPoints] = item.toHuman() as unknown as PalletStakingEraRewardPoints;
       startEraForPoints++;
     }
 

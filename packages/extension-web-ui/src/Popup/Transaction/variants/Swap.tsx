@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapQuote } from '@subwallet/extension-base/types/swap';
+import { SwapFeeComponent, SwapQuote } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import { SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
@@ -18,6 +18,7 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/e
 import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { BackgroundIcon, Button, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, PencilSimpleLine, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -75,7 +76,7 @@ const Component = () => {
   const { isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
-
+  const priceMap = useSelector((state) => state.price.priceMap);
   const [form] = Form.useForm<SwapParams>();
   const formDefault = useMemo((): SwapParams => ({ ...defaultData }), [defaultData]);
 
@@ -181,6 +182,8 @@ const Component = () => {
       slippage: 0.05
     }).then((result) => {
       if (sync) {
+        console.log('result', result);
+
         if (result.quote) {
           setQuoteOptions(result.quote.quotes);
           setCurrentQuote(result.quote.optimalQuote);
@@ -194,6 +197,58 @@ const Component = () => {
       sync = false;
     };
   }, [swapPairs]);
+
+  const getTotalConvertedBalance = useMemo(() => {
+    let totalBalance = BN_ZERO;
+
+    currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
+      const asset = assetRegistryMap[feeItem.tokenSlug];
+
+      if (asset) {
+        const { decimals, priceId } = asset;
+        const price = priceMap[priceId || ''] || 0;
+
+        totalBalance = totalBalance.plus(new BigN(feeItem.amount).div(BN_TEN.pow(decimals || 0)).multipliedBy(price));
+      }
+    });
+
+    return totalBalance;
+  }, [assetRegistryMap, currentQuote?.feeInfo.feeComponent, priceMap]);
+
+  const getConvertedBalance = useCallback((feeItem: SwapFeeComponent) => {
+    const asset = assetRegistryMap[feeItem.tokenSlug];
+
+    if (asset) {
+      const { decimals, priceId } = asset;
+      const price = priceMap[priceId || ''] || 0;
+
+      return new BigN(feeItem.amount).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
+    }
+
+    return BN_ZERO;
+  }, [assetRegistryMap, priceMap]);
+
+  const getTotalFeeByType = useMemo(() => {
+    const totalFeeByType: { [key: string]: BigN } = {};
+    const feeTypeMapping: { [key: string]: string } = {
+      NETWORK_FEE: 'Network fee',
+      PLATFORM_FEE: 'Protocol fee',
+      WALLET_FEE: 'Wallet commission'
+    };
+
+    currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
+      const { feeType } = feeItem;
+      const mappedFeeType = feeTypeMapping[feeType] || feeType;
+
+      if (!totalFeeByType[mappedFeeType]) {
+        totalFeeByType[mappedFeeType] = BN_ZERO;
+      }
+
+      totalFeeByType[mappedFeeType] = totalFeeByType[mappedFeeType].plus(getConvertedBalance(feeItem));
+    });
+
+    return totalFeeByType;
+  }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
 
   useEffect(() => {
     setCustomScreenTitle(t('Swap'));
@@ -451,24 +506,21 @@ const Component = () => {
                       phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
                     />
                   }
-                  value={0.03}
+                  value={getTotalConvertedBalance}
                 />
 
                 {
                   isViewFeeDetails && (
                     <div className={'__quote-fee-details-block'}>
-                      <MetaInfo.Number
-                        decimals={0}
-                        label={t('Network fee')}
-                        prefix={'$'}
-                        value={0.01}
-                      />
-                      <MetaInfo.Number
-                        decimals={0}
-                        label={t('Protocol fee')}
-                        prefix={'$'}
-                        value={0.02}
-                      />
+                      {Object.entries(getTotalFeeByType).map(([feeType, totalFee], index) => (
+                        <MetaInfo.Number
+                          decimals={0}
+                          key={index}
+                          label={t(feeType)}
+                          prefix={'$'}
+                          value={totalFee}
+                        />
+                      ))}
                     </div>
                   )
                 }
@@ -493,6 +545,7 @@ const Component = () => {
       </>
 
       <ChooseFeeTokenModal
+        estimatedFee={getTotalConvertedBalance}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
       />
       <SlippageModal
@@ -518,7 +571,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={dataContext.awaitStores(['swap'])}
+      resolve={dataContext.awaitStores(['swap', 'price'])}
     >
       <Component />
     </PageWrapper>
@@ -540,6 +593,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__item-right-title': {
       color: token.colorTextTertiary
+    },
+    '.__item-right-title:hover': {
+      color: token.colorWhite
     },
     '.__item-right-part-button:hover': {
       color: token.colorWhite
@@ -620,7 +676,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'center',
       position: 'absolute',
       alignItems: 'center',
-      top: '45%',
+      top: '41%',
       right: '50%',
       left: '50%'
     }

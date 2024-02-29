@@ -5,8 +5,8 @@ import { Asset, SwapSDK } from '@chainflip/sdk/swap';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 interface ChainflipPreValidationMetadata {
@@ -213,9 +213,18 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
   }
 
   generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
-    return Promise.resolve({
-      totalFee: [],
-      steps: []
+    const result: OptimalSwapPath = {
+      totalFee: [MOCK_SWAP_FEE],
+      steps: [DEFAULT_SWAP_FIRST_STEP]
+    };
+
+    result.totalFee.push(params.selectedQuote.feeInfo);
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Swap',
+      type: SwapStepType.SWAP
     });
+
+    return Promise.resolve(result);
   }
 }

@@ -4,6 +4,7 @@
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import {SwapFeeInfo, SwapStepDetail, SwapStepType} from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export function chainFlipConvertChainId (chainSlug: string): Chain {
@@ -20,6 +21,17 @@ export const CHAIN_FLIP_SUPPORTED_ASSET_MAPPING: Record<string, Asset> = {
   'polkadot-NATIVE-DOT': Assets.DOT,
   'ethereum-NATIVE-ETH': Assets.ETH,
   'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+};
+
+export const DEFAULT_SWAP_FIRST_STEP: SwapStepDetail = {
+  id: 0,
+  name: 'Fill information',
+  type: SwapStepType.DEFAULT
+};
+
+export const MOCK_SWAP_FEE: SwapFeeInfo = {
+  feeComponent: [],
+  defaultFeeToken: ''
 };
 
 export function calculateSwapRate (fromAmount: string, toAmount: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {

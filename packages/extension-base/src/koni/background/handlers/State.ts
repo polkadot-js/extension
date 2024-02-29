@@ -20,7 +20,7 @@ import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isA
 import EarningService from '@subwallet/extension-base/services/earning-service/service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import FeeService from '@subwallet/extension-base/services/fee-service/service';
-import { calculateGasFeeParams, fetchInfuraFeeData } from '@subwallet/extension-base/services/fee-service/utils';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
@@ -1484,31 +1484,25 @@ export default class KoniState {
       });
   }
 
-  async calculateAllGasFeeOnChain (infuraChainIds: number[], infuraAuth: string, timeout = 10000): Promise<Record<string, EvmFeeInfo | null>> {
-    const evmChainInfos = this.chainService.getEvmChainInfoMap();
-    const activeEvmChains = Object.entries(evmChainInfos).filter(([slug, chainInfo]) => {
-      return chainInfo.chainStatus === 'ACTIVE';
-    });
-
+  async calculateAllGasFeeOnChain (activeEvmChains: string[], timeout = 10000): Promise<Record<string, EvmFeeInfo | null>> {
     const promiseList: Promise<[string, EvmFeeInfo | null]>[] = [];
 
-    activeEvmChains.forEach(([slug, chainInfo]) => {
-      const chainId = chainInfo.evmInfo?.evmChainId;
+    activeEvmChains.forEach((slug) => {
       const timeoutPromise = new Promise<null>((resolve) => {
         setTimeout(() => resolve(null), timeout);
       });
       const promise = (async () => {
-        if (chainId && infuraChainIds.includes(chainId)) {
-          const onlineData = await fetchInfuraFeeData(chainId, infuraAuth);
+        try {
+          const web3Api = this.chainService.getEvmApi(slug);
 
-          if (onlineData !== null) {
-            return onlineData;
-          }
+          await web3Api.isReady;
+
+          return await calculateGasFeeParams(web3Api, slug, false, false);
+        } catch (e) {
+          console.error(e);
+
+          return null;
         }
-
-        const web3Api = this.chainService.getEvmApi(slug);
-
-        return await calculateGasFeeParams(web3Api, slug, false, false);
       })();
 
       promiseList.push(Promise.race([promise, timeoutPromise]).then((result) => {

@@ -137,7 +137,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       });
 
       // todo: handle route
-      // todo: handle fees
+      // todo: handle fees, filter and aggregate by tokens, NOT calculate total fee value
       quoteResponse.quote.includedFees.forEach((fee) => {
         switch (fee.type) {
           case ChainflipFeeType.INGRESS:
@@ -180,7 +180,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
             },
             {
               tokenSlug: 'polkadot-NATIVE-DOT',
-              amount: '32997',
+              amount: '197300000',
               feeType: SwapFeeType.NETWORK_FEE
             },
             {
@@ -189,7 +189,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
               feeType: SwapFeeType.NETWORK_FEE
             }
           ],
-          feeValue: 0.3,
           defaultFeeToken: 'polkadot-NATIVE-DOT',
           feeOptions: [
             'polkadot-NATIVE-DOT',
@@ -206,6 +205,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       } as SwapQuote;
     } catch (e) {
       console.error('Error getting quote from Chainflip', e);
+
+      // todo: handle more error from chainflip
 
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }

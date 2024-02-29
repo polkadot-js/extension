@@ -11,6 +11,11 @@ export interface SwapRoute {
   // todo: there might be more info
 }
 
+export interface QuoteAskResponse {
+  quote?: SwapQuote;
+  error?: SwapError;
+}
+
 export interface SwapQuote {
   pair: SwapPair;
   fromAmount: string;
@@ -109,9 +114,7 @@ export interface SwapFeeComponent {
 }
 
 export interface SwapFeeInfo {
-  feeComponent?: SwapFeeComponent[];
-  feeValue: number;
-  amount?: string; // todo: might be derived from feeComponent
+  feeComponent: SwapFeeComponent[];
   defaultFeeToken: string;
   feeOptions?: string[]; // list of tokenSlug
 }

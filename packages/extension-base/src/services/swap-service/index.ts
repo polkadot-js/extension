@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetRefPath } from '@subwallet/chain-list/types';
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
@@ -11,10 +12,9 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
-import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, SwapPair, SwapQuote, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
+import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
-import {SwapError} from "@subwallet/extension-base/background/errors/SwapError";
 
 const MOCK_ASSET_REF: Record<string, _AssetRef> = {
   'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
@@ -44,18 +44,24 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     this.chainService = state.chainService;
   }
 
-  private async askProvidersForQuote (request: SwapRequest): Promise<SwapQuote[]> {
-    const availableQuotes: SwapQuote[] = [];
+  private async askProvidersForQuote (request: SwapRequest): Promise<QuoteAskResponse[]> {
+    const availableQuotes: QuoteAskResponse[] = [];
 
     await Promise.all(Object.values(this.handlers).map(async (handler) => {
       const quote = await handler.getSwapQuote(request);
 
       if (!(quote instanceof SwapError)) {
-        availableQuotes.push(quote);
+        availableQuotes.push({
+          quote
+        });
+      } else {
+        availableQuotes.push({
+          error: quote
+        });
       }
     }));
 
-    return availableQuotes;
+    return availableQuotes; // todo: need to propagate error for further handling
   }
 
   public async generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
@@ -76,8 +82,8 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     * 3. Generate optimal process for that quote
     * */
     const availableQuotes = await this.askProvidersForQuote(request);
-    const selectedQuote = availableQuotes[0]; // todo: more logic to select the best quote
-    const quoteError = selectedQuote.error; // todo
+    const selectedQuote = availableQuotes[0]?.quote as SwapQuote; // todo: more logic to select the best quote
+    const quoteError = availableQuotes[0]?.error as SwapError; // todo
 
     const optimalProcess = await this.generateOptimalProcess({
       request,

@@ -91,8 +91,8 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   );
 
   const canWithdraw = useMemo(() => {
-    return totalWithdrawable.gt(BN_ZERO);
-  }, [totalWithdrawable]);
+    return poolInfo.metadata.availableMethod.withdraw && totalWithdrawable.gt(BN_ZERO);
+  }, [poolInfo.metadata.availableMethod.withdraw, totalWithdrawable]);
 
   const onWithDraw = useCallback(() => {
     setWithdrawStorage({
@@ -118,17 +118,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     (item: UnstakingInfo) => {
       if (!poolInfo.metadata.availableMethod.withdraw) {
         return (
-          <>
-            <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
+          <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
         );
       } else {
         if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {

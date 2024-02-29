@@ -153,10 +153,14 @@ const SwapTokenSelector = styled(Component)<Props>(({ theme: { token } }: Props)
     },
     '.__item-token-info': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      color: token.colorWhite
     },
     '.__item-token-name': {
       color: token.colorTextTertiary
+    },
+    '.__token-selector-wrapper .ant-select-modal-input-suffix': {
+      color: token.colorWhite
     },
 
     // TODO: delete this when fix component in ui-base

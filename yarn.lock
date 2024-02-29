@@ -5946,14 +5946,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.42-beta.0":
-  version: 0.2.42-beta.0
-  resolution: "@subwallet/chain-list@npm:0.2.42-beta.0"
+"@subwallet/chain-list@npm:0.2.42-beta.5":
+  version: 0.2.42-beta.5
+  resolution: "@subwallet/chain-list@npm:0.2.42-beta.5"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: 8cb785f599feb5515c0303835aa6275c9bae5db8b258750ff68b91957634c44d4484633e9fb74fba94aad96c7bf25ccaf3725c3a4a9c6ca5040620a14a309ea3
+  checksum: bdc8917ef0a305e7390dfd626c18b1f54b68221ff64f32cee58fa25e01492aa760e2513a5883c5cc5fe1ffc0deca4a5cdab0aa48f025927931e8cfe755d4d1cf
   languageName: node
   linkType: hard
 

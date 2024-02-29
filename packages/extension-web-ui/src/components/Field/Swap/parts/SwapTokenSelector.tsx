@@ -5,7 +5,7 @@ import { BaseSelectModal, GeneralEmptyList, TokenItemType } from '@subwallet/ext
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { Icon } from '@subwallet/react-ui';
+import { Icon, Logo } from '@subwallet/react-ui';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback } from 'react';
@@ -29,7 +29,6 @@ const Component = (props: Props) => {
     items, label, onSelect, placeholder, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const searchFunction = useCallback((item: TokenItemType, searchText: string) => {
@@ -46,10 +45,21 @@ const Component = (props: Props) => {
   const renderTokenSelected = useCallback((item: TokenItemType) => {
     return (
       <div className={'__selected-item'}>
-        {item.symbol}
+        <Logo
+          className='token-logo'
+          isShowSubLogo={true}
+          shape='squircle'
+          size={token.controlHeightSM}
+          subNetwork={item.originChain}
+          token={item.slug.toLowerCase()}
+        />
+        <div className={'__item-token-info'}>
+          <span>{item.symbol}</span>
+          <span className={'__item-token-name'}>{item.name}</span>
+        </div>
       </div>
     );
-  }, []);
+  }, [token.controlHeightSM]);
 
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (
@@ -137,6 +147,17 @@ const SwapTokenSelector = styled(Component)<Props>(({ theme: { token } }: Props)
       textWrap: 'nowrap',
       whiteSpace: 'nowrap'
     },
+    '.__selected-item': {
+      display: 'flex',
+      gap: 8
+    },
+    '.__item-token-info': {
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    '.__item-token-name': {
+      color: token.colorTextTertiary
+    },
 
     // TODO: delete this when fix component in ui-base
     '.token-item .ant-network-item-sub-name': {
@@ -146,7 +167,9 @@ const SwapTokenSelector = styled(Component)<Props>(({ theme: { token } }: Props)
     '.token-logo': {
       bottom: 0,
       right: 0,
-      margin: '-1px 0',
+      display: 'flex',
+      alignItems: 'center',
+      margin: '6px 0',
 
       '.-sub-logo': {
         '.ant-image': {

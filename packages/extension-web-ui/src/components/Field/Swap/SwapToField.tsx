@@ -47,8 +47,9 @@ const Component = (props: Props) => {
           </div>
 
           {
-            convertedAmountValue && (
+            (
               <Number
+                prefix={'$'}
                 decimal={0}
                 value={convertedAmountValue}
               />
@@ -62,12 +63,27 @@ const Component = (props: Props) => {
 
 const SwapToField = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    backgroundColor: token.colorBgSecondary,
+    borderRadius: 8,
+    marginBottom: 12,
+    paddingBottom: 8,
     '.__input-container': {
       display: 'flex'
     },
 
     '.__amount-wrapper': {
-      flex: 1
+      flex: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'flex-end',
+      alignItems: 'flex-end',
+      paddingRight: 16
+    },
+    '.__label': {
+      paddingRight: 16,
+      paddingLeft: 16,
+      paddingTop: 8,
+      paddingBottom: 8
     }
   };
 });

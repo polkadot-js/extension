@@ -61,6 +61,8 @@ const Component = (props: Props) => {
           {
             convertedAmountValue && (
               <Number
+                className={'__amount-convert'}
+                prefix={'$'}
                 decimal={0}
                 value={convertedAmountValue}
               />
@@ -74,12 +76,51 @@ const Component = (props: Props) => {
 
 const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    backgroundColor: token.colorBgSecondary,
+    borderRadius: 8,
+    paddingBottom: 8,
+    position: 'relative',
     '.__input-container': {
       display: 'flex'
     },
+    '.__token-selector-wrapper .ant-select-modal-input-wrapper': {
+      color: token.colorWhite
+    },
 
     '.__amount-wrapper': {
-      flex: 1
+      flex: 1,
+      display: 'flex',
+      justifyContent: 'flex-end',
+      flexDirection: 'column',
+      alignItems: 'end',
+      paddingRight: 4
+    },
+    '.__amount-wrapper .ant-input': {
+      textAlign: 'right'
+    },
+    '.__amount-wrapper .ant-input-container': {
+      borderTopLeftRadius: 0,
+      borderBottomLeftRadius: 0
+    },
+    '.__amount-wrapper .__amount-convert': {
+      paddingRight: 12,
+      color: token.colorTextTertiary
+    },
+    '.__label-wrapper': {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 16,
+      paddingLeft: 16,
+      paddingTop: 8,
+      paddingBottom: 8
+    },
+    '.max-btn-text': {
+      color: token.colorSuccess
+    },
+    '.__token-selector-wrapper .ant-select-modal-input-border-default': {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0
     }
   };
 });

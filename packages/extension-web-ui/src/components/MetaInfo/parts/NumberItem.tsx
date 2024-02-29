@@ -19,20 +19,22 @@ export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   size?: number
   subFloatNumber?: boolean
   suffixNode?: React.ReactNode
+  onClickValue?: VoidFunction;
+  disableClickValue?: boolean;
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
   const { className,
     decimalOpacity = 1,
     decimals = 0,
+    disableClickValue,
     label,
+    onClickValue,
     prefix,
     size = 30,
     subFloatNumber = false,
     suffix,
-    suffixNode,
-    value,
-    valueColorSchema = 'default' } = props;
+    suffixNode, value, valueColorSchema = 'default' } = props;
 
   return (
     <div className={CN(className, '__row -type-number')}>
@@ -46,19 +48,29 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
         )
       }
       <div className={'__col __value-col -to-right'}>
-        <Number
-          className={`__number-item __value -schema-${valueColorSchema}`}
-          decimal={decimals}
-          decimalOpacity={decimalOpacity}
-          intOpacity={1}
-          prefix={prefix}
-          size={size}
-          subFloatNumber={subFloatNumber}
-          suffix={suffix}
-          unitOpacity={1}
-          value={value}
-        />
-        {suffixNode}
+        <div
+          className={CN(
+            `__number-item __value -is-wrapper -schema-${valueColorSchema}`,
+            {
+              '-disabled': disableClickValue,
+              '-clickable': !!onClickValue
+            }
+          )}
+          onClick={!disableClickValue ? onClickValue : undefined}
+        >
+          <Number
+            decimal={decimals}
+            decimalOpacity={decimalOpacity}
+            intOpacity={1}
+            prefix={prefix}
+            size={size}
+            subFloatNumber={subFloatNumber}
+            suffix={suffix}
+            unitOpacity={1}
+            value={value}
+          />
+          {suffixNode}
+        </div>
       </div>
     </div>
   );

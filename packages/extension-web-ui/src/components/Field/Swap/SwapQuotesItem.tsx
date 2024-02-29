@@ -1,34 +1,42 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleWavyCheck } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  recommendIcon?: boolean,
-  estReceiveValue: string,
-  symbol: string,
-  selected?: boolean
+  isRecommend?: boolean,
+  quote: SwapQuote;
+  selected?: boolean,
+  onSelect?: (quote: SwapQuote) => void,
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, estReceiveValue, recommendIcon, selected, symbol } = props;
+  const { className, isRecommend, onSelect, quote, selected } = props;
+
+  const _onSelect = useCallback(() => {
+    onSelect?.(quote);
+  }, [onSelect, quote]);
 
   return (
     <>
-      <div className={CN(className, 'swap-quotes-container')}>
+      <div
+        className={CN(className, 'swap-quotes-container')}
+        onSelect={_onSelect}
+      >
         <div className={'__left-part'}>
           <div className={'__line-1'}>
-            <span className={'__provider-name'}>Provider name</span>
-            {recommendIcon && (
+            <span className={'__provider-name'}>{quote.provider.name}</span>
+            {isRecommend && (
               <Icon
                 className='wavy-icon'
-                phosphorIcon={CircleWavyCheck}
                 customSize={'16px'}
+                phosphorIcon={CircleWavyCheck}
                 size='md'
                 weight='fill'
               />
@@ -36,7 +44,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div className={'__line-2'}>
             <span className={'__item-label'}>Est.receive</span>
-            <span className={'__item-value'}>{estReceiveValue}&nbsp;{symbol}</span>
+            <span className={'__item-value'}></span>
           </div>
         </div>
         {selected && (<div className={'__right-part'}>

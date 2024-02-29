@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
 import SwapQuotesItem from '@subwallet/extension-web-ui/components/Field/Swap/SwapQuotesItem';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -10,29 +11,14 @@ import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  modalId: string
+  modalId: string,
+  items: SwapQuote[],
+  onSelectItem: (quote: SwapQuote) => void;
+  selectedItem?: SwapQuote,
 }
-const fakedatas =
-  [{
-    symbol: 'DOT',
-    estReceiveValue: '500',
-    recommendIcon: true,
-    selected: true
-  },
-  {
-    symbol: 'KSM',
-    estReceiveValue: '600',
-    recommendIcon: false
-  },
-  {
-    symbol: 'AZERO',
-    estReceiveValue: '700',
-    recommendIcon: true
-  }
-  ];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, modalId } = props;
+  const { className, items, modalId, onSelectItem, selectedItem } = props;
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -50,13 +36,12 @@ const Component: React.FC<Props> = (props: Props) => {
         onCancel={onCancel}
         title={'Swap quotes'}
       >
-        {fakedatas.map((fakedata, index) => (
+        {items.map((item) => (
           <SwapQuotesItem
-            estReceiveValue={fakedata.estReceiveValue}
-            key={index}
-            recommendIcon={fakedata.recommendIcon}
-            selected={fakedata.selected}
-            symbol={fakedata.symbol}
+            key={item.provider.id}
+            onSelect={onSelectItem}
+            quote={item}
+            selected={selectedItem?.provider.id === item.provider.id}
           />
         ))}
       </BaseModal>

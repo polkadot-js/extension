@@ -9,7 +9,6 @@ import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import { TransactionFeeQuotes } from '@subwallet/extension-web-ui/components/Swap/TransactionFeeQuote';
 import { SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -20,7 +19,7 @@ import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@s
 import { BackgroundIcon, Button, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import CN from 'classnames';
-import { ArrowsDownUp, CaretRight, Info, PencilSimpleLine, PlusCircle } from 'phosphor-react';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, PencilSimpleLine, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -61,6 +60,7 @@ function getSymbol (assetInfo?: _ChainAsset) {
   return assetInfo ? _getAssetSymbol(assetInfo) : '';
 }
 
+// @ts-ignore
 function getOriginChain (assetInfo?: _ChainAsset) {
   return assetInfo ? _getAssetOriginChain(assetInfo) : '';
 }
@@ -79,7 +79,10 @@ const Component = () => {
   const [form] = Form.useForm<SwapParams>();
   const formDefault = useMemo((): SwapParams => ({ ...defaultData }), [defaultData]);
 
+  const [quoteOptions, setQuoteOptions] = useState<SwapQuote[]>([]);
   const [currentQuote, setCurrentQuote] = useState<SwapQuote | undefined>(undefined);
+
+  const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
 
   const fromValue = useWatchTransaction('from', form, defaultData);
   const fromTokenSlugValue = useWatchTransaction('fromTokenSlug', form, defaultData);
@@ -156,9 +159,17 @@ const Component = () => {
     activeModal(SWAP_ALL_QUOTES_MODAL);
   }, [activeModal]);
 
-  const openChooFeeToken = useCallback(() => {
+  const openChooseFeeToken = useCallback(() => {
     activeModal(SWAP_CHOOSE_FEE_TOKEN_MODAL);
   }, [activeModal]);
+
+  const onSelectQuote = useCallback((quote: SwapQuote) => {
+    setCurrentQuote(quote);
+  }, []);
+
+  const onToggleFeeDetails = useCallback(() => {
+    setIsViewFeeDetails((prev) => !prev);
+  }, []);
 
   useEffect(() => {
     let sync = true;
@@ -170,7 +181,8 @@ const Component = () => {
       slippage: 0.05
     }).then((result) => {
       if (sync) {
-        if (result.quote?.optimalQuote) {
+        if (result.quote) {
+          setQuoteOptions(result.quote.quotes);
           setCurrentQuote(result.quote.optimalQuote);
         } else {
           setCurrentQuote(undefined);
@@ -354,8 +366,8 @@ const Component = () => {
                 backgroundColor='#004BFF'
                 iconColor='#fff'
                 phosphorIcon={Info}
-                weight={'fill'}
                 size={'md'}
+                weight={'fill'}
               />
               <div className={'__text'}>Swap quote</div>
             </div>
@@ -370,8 +382,8 @@ const Component = () => {
                     View quote
                   </span>
                   <Icon
-                    size={'sm'}
                     phosphorIcon={CaretRight}
+                    size={'sm'}
                   />
                 </Button>
               </div>
@@ -415,35 +427,64 @@ const Component = () => {
             Quote reset in: 2s
           </div>
 
-          <MetaInfo
-            className={CN('__quote-info-block')}
-            hasBackgroundWrapper
-            labelColorScheme={'gray'}
-            spaceSize={'sm'}
-            valueColorScheme={'gray'}
-          >
-            <TransactionFeeQuotes />
-            <div className={'__separator'}></div>
-            <MetaInfo.Chain
-              chain={'kusama'}
-              className='__item-fee-paid'
-              label={t('Fee paid in')}
-              suffixNode={
-                <Button
-                  icon={(
+          {
+            !!currentQuote && (
+              <MetaInfo
+                className={CN('__quote-info-block')}
+                hasBackgroundWrapper
+                labelColorScheme={'gray'}
+                spaceSize={'xs'}
+                valueColorScheme={'gray'}
+              >
+                <MetaInfo.Number
+                  decimals={0}
+                  label={t('Estimated fee')}
+                  onClickValue={onToggleFeeDetails}
+                  prefix={'$'}
+                  suffixNode={
+                    <Icon
+                      customSize={'20px'}
+                      phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
+                    />
+                  }
+                  value={0.03}
+                />
+
+                {
+                  isViewFeeDetails && (
+                    <div className={'__quote-fee-details-block'}>
+                      <MetaInfo.Number
+                        decimals={0}
+                        label={t('Network fee')}
+                        prefix={'$'}
+                        value={0.01}
+                      />
+                      <MetaInfo.Number
+                        decimals={0}
+                        label={t('Protocol fee')}
+                        prefix={'$'}
+                        value={0.02}
+                      />
+                    </div>
+                  )
+                }
+
+                <div className={'__separator'}></div>
+                <MetaInfo.Chain
+                  chain={'kusama'}
+                  className='__item-fee-paid'
+                  label={t('Fee paid in')}
+                  onClickValue={openChooseFeeToken}
+                  suffixNode={
                     <Icon
                       customSize={'20px'}
                       phosphorIcon={PencilSimpleLine}
                     />
-                  )}
-                  onClick={openChooFeeToken}
-                  size='xs'
-                  type='ghost'
-                >
-                </Button>
-              }
-            />
-          </MetaInfo>
+                  }
+                />
+              </MetaInfo>
+            )
+          }
         </div>
       </>
 
@@ -457,7 +498,10 @@ const Component = () => {
         modalId={SWAP_MORE_BALANCE_MODAL}
       />
       <AllSwapQuotes
+        items={quoteOptions}
         modalId={SWAP_ALL_QUOTES_MODAL}
+        onSelectItem={onSelectQuote}
+        selectedItem={currentQuote}
       />
     </>
   );
@@ -522,6 +566,16 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__quote-info-block': {
 
+    },
+
+    '.__quote-fee-details-block': {
+      paddingLeft: token.paddingXS
+    },
+
+    '.__separator': {
+      height: 2,
+      opacity: 0.8,
+      backgroundColor: token.colorBgBorder
     },
 
     '.__item-quote-header': {

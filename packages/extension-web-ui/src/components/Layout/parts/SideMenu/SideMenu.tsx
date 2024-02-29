@@ -54,7 +54,7 @@ function Component ({ className,
       // },
       {
         label: t('Swap'),
-        value: '/home/swap-test',
+        value: '/transaction/swap',
         icon: ArrowsLeftRight
       },
       {

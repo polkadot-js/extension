@@ -531,6 +531,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.__transaction-swap-quote-info-area': {
         flex: '1'
       }
+    },
+    '.__switch-side-button': {
+      display: 'flex',
+      justifyContent: 'center'
     }
   };
 });

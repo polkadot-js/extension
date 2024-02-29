@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SwapRoute as SwapRouteType } from '@subwallet/extension-base/types/swap';
 import { TokenItemType } from '@subwallet/extension-web-ui/components';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Logo } from '@subwallet/react-ui';
@@ -8,7 +9,9 @@ import CN from 'classnames';
 import React from 'react';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps & {
+  swapRoute: SwapRouteType;
+}
 
 const fakedatas: TokenItemType[] = [
   {

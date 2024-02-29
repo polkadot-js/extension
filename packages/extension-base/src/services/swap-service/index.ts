@@ -14,6 +14,7 @@ import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-se
 import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, SwapPair, SwapQuote, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
+import {SwapError} from "@subwallet/extension-base/background/errors/SwapError";
 
 const MOCK_ASSET_REF: Record<string, _AssetRef> = {
   'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
@@ -49,7 +50,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     await Promise.all(Object.values(this.handlers).map(async (handler) => {
       const quote = await handler.getSwapQuote(request);
 
-      if (quote) {
+      if (!(quote instanceof SwapError)) {
         availableQuotes.push(quote);
       }
     }));
@@ -76,6 +77,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     * */
     const availableQuotes = await this.askProvidersForQuote(request);
     const selectedQuote = availableQuotes[0]; // todo: more logic to select the best quote
+    const quoteError = selectedQuote.error; // todo
 
     const optimalProcess = await this.generateOptimalProcess({
       request,
@@ -86,7 +88,8 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
       process: optimalProcess,
       quote: {
         optimalQuote: selectedQuote,
-        quotes: availableQuotes
+        quotes: availableQuotes,
+        error: quoteError
       }
     } as SwapRequestResult;
   }

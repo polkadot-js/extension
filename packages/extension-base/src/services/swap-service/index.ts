@@ -98,15 +98,17 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   public async getLatestQuotes (request: SwapRequest): Promise<SwapQuoteResponse> {
     const quoteAskResponses = await this.askProvidersForQuote(request);
 
-    const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote); // todo
-    const selectedQuote = quoteAskResponses[0]?.quote as SwapQuote; // todo: more logic to select the best quote
-    const quoteError = quoteAskResponses[0]?.error as SwapError; // todo
+    // todo: more logic to select the best quote
+    const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote);
+    const selectedQuote = quoteAskResponses[0]?.quote as SwapQuote;
+    const quoteError = quoteAskResponses[0]?.error as SwapError;
+    const aliveUntil = selectedQuote.aliveUntil;
 
     return {
       optimalQuote: selectedQuote,
       quotes: availableQuotes,
       error: quoteError,
-      aliveUntil: +Date.now() + 30000
+      aliveUntil
     } as SwapQuoteResponse;
   }
 

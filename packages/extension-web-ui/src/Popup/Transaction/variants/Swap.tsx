@@ -278,8 +278,9 @@ const Component = () => {
                   tokenSelectorValue={fromTokenSlugValue}
                 />
 
-                <div className='__switch-side-button'>
+                <div className='__switch-side-container'>
                   <Button
+                    className={'__switch-button'}
                     disabled={!isSwitchable}
                     icon={(
                       <Icon
@@ -290,6 +291,7 @@ const Component = () => {
                     )}
                     shape='circle'
                     size='xs'
+                    type={'ghost'}
                   >
                   </Button>
                 </div>
@@ -326,12 +328,14 @@ const Component = () => {
               </Form.Item>
             </Form>
 
-            <div className={'__slippage-info'}>
+            <div
+              className={'__slippage-info'}
+              onClick={onOpenSlippageModal}
+            >
               <span>Slippage:</span>
               &nbsp;<span>2%</span>
               <div
                 className={'__slippage-editor-button'}
-                onClick={onOpenSlippageModal}
               >
                 <Icon
                   className={'__slippage-editor-button-icon'}
@@ -537,6 +541,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__item-right-title': {
       color: token.colorTextTertiary
     },
+    '.__item-right-part-button:hover': {
+      color: token.colorWhite
+    },
+    '.__switch-button': {
+      backgroundColor: token['gray-2'],
+      borderRadius: '50%'
+    },
 
     '.__slippage-info': {
       display: 'flex',
@@ -604,13 +615,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         flex: '1'
       }
     },
-    '.__switch-side-button': {
+    '.__switch-side-container': {
       display: 'flex',
       justifyContent: 'center',
       position: 'absolute',
       alignItems: 'center',
-      width: '100%',
-      top: '46%'
+      top: '45%',
+      right: '50%',
+      left: '50%'
     }
   };
 });

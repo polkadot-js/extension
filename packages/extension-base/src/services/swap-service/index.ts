@@ -12,7 +12,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
-import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
+import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -81,32 +81,33 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     * 2. Select the best quote
     * 3. Generate optimal process for that quote
     * */
+
+    const swapQuoteResponse = await this.getLatestQuotes(request);
+
+    const optimalProcess = await this.generateOptimalProcess({
+      request,
+      selectedQuote: swapQuoteResponse.optimalQuote
+    });
+
+    return {
+      process: optimalProcess,
+      quote: swapQuoteResponse
+    } as SwapRequestResult;
+  }
+
+  public async getLatestQuotes (request: SwapRequest): Promise<SwapQuoteResponse> {
     const quoteAskResponses = await this.askProvidersForQuote(request);
 
     const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote); // todo
     const selectedQuote = quoteAskResponses[0]?.quote as SwapQuote; // todo: more logic to select the best quote
     const quoteError = quoteAskResponses[0]?.error as SwapError; // todo
 
-    const optimalProcess = await this.generateOptimalProcess({
-      request,
-      selectedQuote
-    });
-
     return {
-      process: optimalProcess,
-      quote: {
-        optimalQuote: selectedQuote,
-        quotes: availableQuotes,
-        error: quoteError
-      }
-    } as SwapRequestResult;
-  }
-
-  public async getLatestSwapQuote (swapQuote: SwapQuote): Promise<SwapQuote> {
-    swapQuote.rate *= 0.005;
-    swapQuote.aliveUntil = +Date.now() + 30000;
-
-    return Promise.resolve(swapQuote);
+      optimalQuote: selectedQuote,
+      quotes: availableQuotes,
+      error: quoteError,
+      aliveUntil: +Date.now() + 30000
+    } as SwapQuoteResponse;
   }
 
   private initHandlers () {

@@ -69,6 +69,7 @@ export interface SwapRequestResult {
 export interface SwapQuoteResponse {
   optimalQuote: SwapQuote;
   quotes: SwapQuote[];
+  aliveUntil: number; // timestamp
   error?: SwapError; // only if there's no available quote
 }
 

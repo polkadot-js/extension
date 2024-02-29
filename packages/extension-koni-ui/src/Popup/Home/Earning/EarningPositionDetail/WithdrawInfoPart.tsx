@@ -116,10 +116,10 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   const renderWithdrawTime = useCallback(
     (item: UnstakingInfo) => {
-      if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+      if (!poolInfo.metadata.availableMethod.withdraw) {
         return (
           <>
-            <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+            <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
             {item.status === UnstakingStatus.CLAIMABLE && (
               <Icon
                 iconColor={token.colorSecondary}
@@ -131,22 +131,38 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
           </>
         );
       } else {
-        return (
-          <>
-            <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
-        );
+        if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        } else {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        }
       }
     },
-    [currentTimestampMs, t, token.colorSecondary]
+    [currentTimestampMs, poolInfo.metadata.availableMethod.withdraw, t, token.colorSecondary]
   );
 
   useEffect(() => {

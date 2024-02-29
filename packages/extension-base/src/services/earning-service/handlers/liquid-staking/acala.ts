@@ -46,7 +46,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     defaultUnstake: true,
     fastUnstake: true,
     cancelUnstake: false,
-    withdraw: true,
+    withdraw: false, // TODO: Change after verify unstake info
     claimReward: false
   };
 

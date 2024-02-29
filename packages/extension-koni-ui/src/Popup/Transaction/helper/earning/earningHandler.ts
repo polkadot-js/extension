@@ -26,10 +26,10 @@ export function getWaitingTime (t: TFunction, currentTimestampMs: number, target
   if (targetTimestampMs !== undefined) {
     remainingTimestampMs = targetTimestampMs - currentTimestampMs;
   } else {
-    if (waitingTime) {
+    if (waitingTime !== undefined) {
       remainingTimestampMs = waitingTime * 60 * 60 * 1000;
     } else {
-      remainingTimestampMs = 0;
+      return t('Automatic withdrawal');
     }
   }
 

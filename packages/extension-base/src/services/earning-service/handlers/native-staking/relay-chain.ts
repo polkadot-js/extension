@@ -10,7 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -348,12 +348,30 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const allValidators: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
 
-    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards] = await Promise.all([
+    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
       chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
       chainApi.api.query.staking.minNominatorBond(),
-      chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data()
+      chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data(),
+      chainApi.api.query.staking.validators.entries()
     ]);
+
+    // filter blocked validators
+    const validators = _validators as any[];
+    const blockValidatorList: string[] = [];
+
+    for (const validator of validators) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const validatorAddress = validator[0].toHuman()[0] as string;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+      const isBlocked = validatorPrefs.blocked;
+
+      if (isBlocked) {
+        blockValidatorList.push(validatorAddress);
+      }
+    }
 
     const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
 
@@ -375,39 +393,42 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const rawValidatorStat = item[1].toHuman() as Record<string, any>;
 
       const validatorAddress = rawValidatorInfo[1] as string;
-      const rawTotalStake = rawValidatorStat.total as string;
-      const rawOwnStake = rawValidatorStat.own as string;
 
-      const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
-      const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
-      const otherStake = bnTotalStake.sub(bnOwnStake);
+      if (!blockValidatorList.includes(validatorAddress)) {
+        const rawTotalStake = rawValidatorStat.total as string;
+        const rawOwnStake = rawValidatorStat.own as string;
 
-      totalStakeMap[validatorAddress] = bnTotalStake;
+        const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
+        const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
+        const otherStake = bnTotalStake.sub(bnOwnStake);
 
-      let nominatorCount = 0;
+        totalStakeMap[validatorAddress] = bnTotalStake;
 
-      if ('others' in rawValidatorStat) {
-        const others = rawValidatorStat.others as Record<string, any>[];
+        let nominatorCount = 0;
 
-        nominatorCount = others.length;
+        if ('others' in rawValidatorStat) {
+          const others = rawValidatorStat.others as Record<string, any>[];
+
+          nominatorCount = others.length;
+        }
+
+        allValidators.push(validatorAddress);
+
+        validatorInfoList.push({
+          address: validatorAddress,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: otherStake.toString(),
+          nominatorCount,
+          // to be added later
+          commission: 0,
+          expectedReturn: 0,
+          blocked: false,
+          isVerified: false,
+          minBond,
+          isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
+        } as ValidatorInfo);
       }
-
-      allValidators.push(validatorAddress);
-
-      validatorInfoList.push({
-        address: validatorAddress,
-        totalStake: bnTotalStake.toString(),
-        ownStake: bnOwnStake.toString(),
-        otherStake: otherStake.toString(),
-        nominatorCount,
-        // to be added later
-        commission: 0,
-        expectedReturn: 0,
-        blocked: false,
-        isVerified: false,
-        minBond,
-        isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
-      } as ValidatorInfo);
     }
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};

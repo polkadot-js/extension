@@ -1195,6 +1195,7 @@ export interface RequestTransferExistentialDeposit {
 
 export interface RequestSaveRecentAccount {
   accountId: string;
+  chain?: string;
 }
 
 export interface SubstrateNftTransaction {

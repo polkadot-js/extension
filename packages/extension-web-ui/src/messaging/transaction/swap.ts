@@ -8,6 +8,6 @@ export async function handleSwapRequest (request: SwapRequest) {
   return sendMessage('pri(swapService.handleSwapRequest)', request);
 }
 
-export async function getLatestSwapQuote (request: SwapQuote) {
+export async function getLatestSwapQuote (request: SwapRequest) {
   return sendMessage('pri(swapService.getLatestQuote)', request);
 }

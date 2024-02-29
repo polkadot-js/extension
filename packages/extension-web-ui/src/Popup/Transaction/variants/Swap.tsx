@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapQuote } from '@subwallet/extension-base/types/swap';
+import { SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
@@ -13,8 +13,8 @@ import { SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_M
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
-import { handleSwapRequest } from '@subwallet/extension-web-ui/messaging/transaction/swap';
-import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import { getLatestSwapQuote, handleSwapRequest } from '@subwallet/extension-web-ui/messaging/transaction/swap';
+import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { BackgroundIcon, Button, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -81,10 +81,15 @@ const Component = () => {
 
   const [quoteOptions, setQuoteOptions] = useState<SwapQuote[]>([]);
   const [currentQuote, setCurrentQuote] = useState<SwapQuote | undefined>(undefined);
+  const [quoteAliveUntil, setQuoteAliveUntil] = useState<number | undefined>(undefined);
+  const [quoteCountdownTime, setQuoteCountdownTime] = useState<number>(0);
+  const [currentQuoteRequest, setCurrentQuoteRequet] = useState<SwapRequest | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
 
+  // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
+  const fromAmountValue = useWatchTransaction('fromAmount', form, defaultData);
   const fromTokenSlugValue = useWatchTransaction('fromTokenSlug', form, defaultData);
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
 
@@ -171,19 +176,30 @@ const Component = () => {
     setIsViewFeeDetails((prev) => !prev);
   }, []);
 
+  const onChangeAmount = useCallback((value: string) => {
+    form.setFieldValue('fromAmount', value);
+  }, [form]);
+
   useEffect(() => {
     let sync = true;
 
-    handleSwapRequest({
+    const currentRequest: SwapRequest = {
       address: '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
       pair: swapPairs[0],
       fromAmount: '40000000000',
       slippage: 0.05
-    }).then((result) => {
+    };
+
+    // todo: simple validate before do this
+
+    setCurrentQuoteRequet(currentRequest);
+
+    handleSwapRequest(currentRequest).then((result) => {
       if (sync) {
         if (result.quote) {
           setQuoteOptions(result.quote.quotes);
           setCurrentQuote(result.quote.optimalQuote);
+          setQuoteAliveUntil(result.quote.aliveUntil);
         } else {
           setCurrentQuote(undefined);
         }
@@ -194,6 +210,61 @@ const Component = () => {
       sync = false;
     };
   }, [swapPairs]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+
+    if (quoteAliveUntil) {
+      timer = setInterval(() => {
+        const _time = (quoteAliveUntil - Date.now()) / 1000;
+
+        if (_time < 0) {
+          setQuoteCountdownTime(0);
+          clearInterval(timer);
+        } else {
+          setQuoteCountdownTime(_time);
+        }
+      }, 1000);
+    } else {
+      setQuoteCountdownTime(0);
+    }
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [quoteAliveUntil]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+    let isSync = true;
+
+    const updateQuote = () => {
+      if (currentQuoteRequest) {
+        getLatestSwapQuote(currentQuoteRequest).then((rs) => {
+          if (isSync) {
+            setCurrentQuote(rs.optimalQuote);
+            setQuoteAliveUntil(rs.aliveUntil);
+          }
+        }).catch((e) => {
+          console.log('Error when getLatestSwapQuote', e);
+        });
+      }
+    };
+
+    if (quoteAliveUntil) {
+      timer = setInterval(() => {
+        if ((quoteAliveUntil - Date.now()) < 0) {
+          updateQuote();
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      isSync = false;
+      clearInterval(timer);
+    };
+  }, [currentQuote, quoteAliveUntil]);
 
   useEffect(() => {
     setCustomScreenTitle(t('Swap'));
@@ -231,7 +302,7 @@ const Component = () => {
         <Number
           decimal={0}
           suffix={getSymbol(toAssetInfo)}
-          value={1 / currentQuote.rate}
+          value={currentQuote.rate}
         />
       </div>
     );
@@ -260,19 +331,21 @@ const Component = () => {
               </Form.Item>
 
               <div className={'__balance-display-area'}>
-                <FreeBalance
-                  address={fromValue}
-                  chain={''}
-                  isSubscribe={true}
-                  label={`${t('Available balance')}:`}
-                  tokenSlug={fromTokenSlugValue}
-                />
+                {/* <FreeBalance */}
+                {/*  address={fromValue} */}
+                {/*  chain={''} */}
+                {/*  isSubscribe={true} */}
+                {/*  label={`${t('Available balance')}:`} */}
+                {/*  tokenSlug={fromTokenSlugValue} */}
+                {/* /> */}
               </div>
 
               <div className={'__swap-field-area'}>
                 <SwapFromField
+                  amountValue={fromAmountValue}
                   decimals={getDecimals(fromAssetInfo)}
                   label={t('From')}
+                  onChangeAmount={onChangeAmount}
                   onSelectToken={onSelectFromToken}
                   tokenSelectorItems={fromTokenItems}
                   tokenSelectorValue={fromTokenSlugValue}
@@ -428,7 +501,7 @@ const Component = () => {
           }
 
           <div className={'__item-footer-time'}>
-            Quote reset in: 2s
+            Quote reset in: {quoteCountdownTime}s
           </div>
 
           {

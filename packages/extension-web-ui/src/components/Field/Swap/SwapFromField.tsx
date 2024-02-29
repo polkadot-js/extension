@@ -1,10 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { getInputValuesFromString, getOutputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Button, Input, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { useCallback, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -19,16 +20,30 @@ type Props = ThemeProps & {
   amountMaxValue?: string;
   amountValue?: string;
   onSetMax?: (value: boolean) => void;
+  onChangeAmount: (value: string) => void;
 }
 
 const Component = (props: Props) => {
-  const { className, label, onSelectToken, tokenSelectorItems, tokenSelectorValue } = props;
+  const { amountValue, className, decimals, label,
+    onChangeAmount, onSelectToken, tokenSelectorItems,
+    tokenSelectorValue } = props;
   const { t } = useTranslation();
   const [convertedAmountValue] = useState<BigN | undefined>(undefined);
+  const [inputValue, setInputValue] = useState(amountValue ? getInputValuesFromString(amountValue, decimals) : amountValue);
 
   const _onClickMaxBtn = useCallback(() => {
     //
   }, []);
+
+  const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
+    const value = event.target.value;
+
+    setInputValue(value);
+
+    const transformVal = getOutputValuesFromString(value, decimals);
+
+    onChangeAmount(transformVal);
+  }, [decimals, onChangeAmount]);
 
   return (
     <div className={className}>
@@ -57,6 +72,9 @@ const Component = (props: Props) => {
         <div className={'__amount-wrapper'}>
           <Input
             className={className}
+            onChange={onChangeInput}
+            type={'number'}
+            value={inputValue}
           />
 
           {

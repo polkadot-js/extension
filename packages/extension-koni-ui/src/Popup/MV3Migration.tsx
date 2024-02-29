@@ -18,6 +18,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const learnMore = useCallback(() => {
     window.open('https://developer.chrome.com/docs/extensions/develop/migrate/what-is-mv3');
+    setTimeout(() => {
+      window.close();
+    }, 300);
   }, []);
 
   const dismiss = useCallback(() => {

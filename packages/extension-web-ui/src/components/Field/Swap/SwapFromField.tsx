@@ -80,6 +80,7 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
     borderRadius: 8,
     paddingBottom: 8,
     position: 'relative',
+    marginBottom: 8,
     '.__input-container': {
       display: 'flex'
     },

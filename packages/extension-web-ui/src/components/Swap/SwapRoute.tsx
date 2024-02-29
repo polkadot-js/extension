@@ -3,10 +3,11 @@
 
 import { SwapRoute as SwapRouteType } from '@subwallet/extension-base/types/swap';
 import { TokenItemType } from '@subwallet/extension-web-ui/components';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -35,25 +36,35 @@ const fakedatas: TokenItemType[] = [
 ];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className } = props;
+  const { className, swapRoute } = props;
+  const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
+
+  const getSwapRoute = useMemo(() => {
+    const results: TokenSelectorItemType[] = [];
+
+    swapRoute.path.forEach((slug) => {
+      const asset = assetRegistryMap[slug];
+
+      if (asset) {
+        results.push({
+          originChain: asset.originChain,
+          slug,
+          symbol: asset.symbol,
+          name: asset.name
+        });
+      }
+    });
+
+    return results;
+  }, [assetRegistryMap, swapRoute.path]);
 
   return (
     <>
       <div className={CN(className, '__swap-route-container')}>
-        <div className={'__token-item'}>
-          <Logo
-            className='token-logo'
-            isShowSubLogo={false}
-            shape='squircle'
-            size={24}
-            token={'polkadot-NATIVE-DOT'.toLowerCase()}
-          />
-          <span className={'__item-token'}>DOT</span>
-        </div>
         <div className='__first-separator'>
           <div className='__arrow'></div>
         </div>
-        {fakedatas.map((fakedata, index) => (
+        {getSwapRoute.map((result, index) => (
           <div
             className={'__token-item'}
             key={index}
@@ -63,22 +74,11 @@ const Component: React.FC<Props> = (props: Props) => {
               isShowSubLogo={false}
               shape='squircle'
               size={24}
-              token={fakedata.slug.toLowerCase()}
+              token={result.slug.toLowerCase()}
             />
-            <span className='__item-token'>{fakedata.symbol}</span>
+            <span className='__item-token'>{result.symbol}</span>
           </div>
         ))}
-
-        <div className={'__token-item'}>
-          <Logo
-            className='token-logo'
-            isShowSubLogo={false}
-            shape='squircle'
-            size={24}
-            token={'ethereum-NATIVE-ETH'.toLowerCase()}
-          />
-          <span className={'__item-token'}>ETH</span>
-        </div>
       </div>
     </>
   );

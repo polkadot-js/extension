@@ -355,6 +355,7 @@ const Component = () => {
                 iconColor='#fff'
                 phosphorIcon={Info}
                 weight={'fill'}
+                size={'md'}
               />
               <div className={'__text'}>Swap quote</div>
             </div>
@@ -365,11 +366,11 @@ const Component = () => {
                   size='xs'
                   type='ghost'
                 >
-                  <span>
+                  <span className={'__item-right-title'}>
                     View quote
                   </span>
                   <Icon
-                    customSize={'28px'}
+                    size={'sm'}
                     phosphorIcon={CaretRight}
                   />
                 </Button>
@@ -486,6 +487,12 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     marginLeft: 'auto',
     marginRight: 'auto',
     gap: token.size,
+    '.__swap-field-area': {
+      position: 'relative'
+    },
+    '.__item-right-title': {
+      color: token.colorTextTertiary
+    },
 
     '.__slippage-info': {
       display: 'flex',
@@ -495,11 +502,22 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       cursor: 'pointer',
       marginBottom: 24
     },
+    '.__item-footer-time': {
+      color: token.colorWarningText,
+      display: 'flex',
+      justifyContent: 'flex-end',
+      paddingLeft: 8,
+      paddingRight: 8,
+      marginBottom: 12
+    },
 
     // swap quote
 
     '.__transaction-swap-quote-info-area': {
 
+    },
+    '.__quote-estimate-swap-value': {
+      display: 'flex'
     },
 
     '.__quote-info-block': {
@@ -534,7 +552,11 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__switch-side-button': {
       display: 'flex',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      position: 'absolute',
+      alignItems: 'center',
+      width: '100%',
+      top: '46%'
     }
   };
 });

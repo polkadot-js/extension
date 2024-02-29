@@ -108,7 +108,6 @@ export enum SwapFeeType {
 
 export interface SwapFeeComponent {
   feeType: SwapFeeType;
-  feeValue: string;
   amount: string;
   tokenSlug: string;
 }

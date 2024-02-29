@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Asset, SwapSDK } from '@chainflip/sdk/swap';
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 interface ChainflipPreValidationMetadata {
@@ -22,6 +23,7 @@ enum ChainflipFeeType {
 }
 
 const CHAINFLIP_QUOTE_TIMEOUT = 30000;
+const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
@@ -112,6 +114,14 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
   }
 
+  private parseSwapPath (fromAsset: _ChainAsset, toAsset: _ChainAsset) {
+    if (toAsset.slug !== INTERMEDIARY_ASSET_SLUG) { // Chainflip always use USDC as intermediary
+      return [fromAsset.slug, INTERMEDIARY_ASSET_SLUG, toAsset.slug]; // todo: generalize this
+    }
+
+    return [fromAsset.slug, toAsset.slug];
+  }
+
   public async getSwapQuote (request: SwapRequest): Promise<SwapQuote | SwapError> {
     const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
     const toAsset = this.chainService.getAssetBySlug(request.pair.to);
@@ -136,18 +146,37 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         destAsset: toAsset.symbol as Asset
       });
 
+      const feeComponent: SwapFeeComponent[] = [];
+
       // todo: handle route
       // todo: handle fees, filter and aggregate by tokens, NOT calculate total fee value
       quoteResponse.quote.includedFees.forEach((fee) => {
         switch (fee.type) {
           case ChainflipFeeType.INGRESS:
-            break;
           case ChainflipFeeType.NETWORK:
+
+          // eslint-disable-next-line no-fallthrough
+          case ChainflipFeeType.EGRESS: {
+            const tokenSlug = Object.keys(CHAIN_FLIP_SUPPORTED_ASSET_MAPPING).find((assetSlug) => CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[assetSlug] === fee.asset) as string;
+
+            feeComponent.push({
+              tokenSlug,
+              amount: fee.amount,
+              feeType: SwapFeeType.NETWORK_FEE
+            });
             break;
-          case ChainflipFeeType.EGRESS:
+          }
+
+          case ChainflipFeeType.LIQUIDITY: {
+            const tokenSlug = Object.keys(CHAIN_FLIP_SUPPORTED_ASSET_MAPPING).find((assetSlug) => CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[assetSlug] === fee.asset) as string;
+
+            feeComponent.push({
+              tokenSlug,
+              amount: fee.amount,
+              feeType: SwapFeeType.PLATFORM_FEE
+            });
             break;
-          case ChainflipFeeType.LIQUIDITY:
-            break;
+          }
         }
       });
 
@@ -172,35 +201,12 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         minSwap: metadata.minSwap,
         maxSwap: metadata.maxSwap,
         feeInfo: {
-          feeComponent: [
-            {
-              tokenSlug: 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-              amount: '39802700',
-              feeType: SwapFeeType.PLATFORM_FEE
-            },
-            {
-              tokenSlug: 'polkadot-NATIVE-DOT',
-              amount: '197300000',
-              feeType: SwapFeeType.NETWORK_FEE
-            },
-            {
-              tokenSlug: 'ethereum-NATIVE-ETH',
-              amount: '2240000000000000',
-              feeType: SwapFeeType.NETWORK_FEE
-            }
-          ],
-          defaultFeeToken: 'polkadot-NATIVE-DOT',
-          feeOptions: [
-            'polkadot-NATIVE-DOT',
-            'ethereum-NATIVE-ETH'
-          ]
+          feeComponent: feeComponent,
+          defaultFeeToken: fromAsset.slug, // todo
+          feeOptions: [fromAsset.slug] // todo
         },
         route: {
-          path: [
-            'polkadot-NATIVE-DOT',
-            'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
-            'ethereum-NATIVE-ETH'
-          ]
+          path: this.parseSwapPath(fromAsset, toAsset)
         }
       } as SwapQuote;
     } catch (e) {
@@ -213,9 +219,18 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
   }
 
   generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
-    return Promise.resolve({
-      totalFee: [],
-      steps: []
+    const result: OptimalSwapPath = {
+      totalFee: [MOCK_SWAP_FEE],
+      steps: [DEFAULT_SWAP_FIRST_STEP]
+    };
+
+    result.totalFee.push(params.selectedQuote.feeInfo);
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Swap',
+      type: SwapStepType.SWAP
     });
+
+    return Promise.resolve(result);
   }
 }

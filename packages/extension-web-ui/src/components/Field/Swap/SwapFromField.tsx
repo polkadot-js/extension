@@ -1,11 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SwapFeeComponent } from '@subwallet/extension-base/types/swap';
 import { getInputValuesFromString, getOutputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
+import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
+import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Button, Input, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import React, { ChangeEventHandler, useCallback, useState } from 'react';
+import React, { ChangeEventHandler, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -28,8 +31,9 @@ const Component = (props: Props) => {
     onChangeAmount, onSelectToken, tokenSelectorItems,
     tokenSelectorValue } = props;
   const { t } = useTranslation();
-  const [convertedAmountValue] = useState<BigN | undefined>(undefined);
   const [inputValue, setInputValue] = useState(amountValue ? getInputValuesFromString(amountValue, decimals) : amountValue);
+  const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
+  const priceMap = useSelector((state) => state.price.priceMap);
 
   const _onClickMaxBtn = useCallback(() => {
     //
@@ -44,6 +48,20 @@ const Component = (props: Props) => {
 
     onChangeAmount(transformVal);
   }, [decimals, onChangeAmount]);
+
+  const getConvertedInputValue = useMemo(() => {
+    if (tokenSelectorValue && inputValue && assetRegistryMap[tokenSelectorValue]) {
+      const asset = assetRegistryMap[tokenSelectorValue];
+      const { priceId } = asset;
+
+      const transformVal = getOutputValuesFromString(inputValue, decimals);
+      const price = priceMap[priceId || ''] || 0;
+
+      return new BigN(transformVal).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
+    }
+
+    return BN_ZERO;
+  }, [assetRegistryMap, decimals, inputValue, priceMap, tokenSelectorValue]);
 
   return (
     <div className={className}>
@@ -78,13 +96,12 @@ const Component = (props: Props) => {
           />
 
           {
-            convertedAmountValue && (
-              <Number
-                className={'__amount-convert'}
-                decimal={0}
-                value={convertedAmountValue}
-              />
-            )
+            <Number
+              className={'__amount-convert'}
+              decimal={0}
+              prefix={'$'}
+              value={getConvertedInputValue}
+            />
           }
         </div>
       </div>

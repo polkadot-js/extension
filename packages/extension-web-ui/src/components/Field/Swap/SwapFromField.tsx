@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SwapFeeComponent } from '@subwallet/extension-base/types/swap';
 import { getInputValuesFromString, getOutputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -161,7 +160,7 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontWeight: token.headingFontWeight,
       color: token.colorTextTertiary,
 
-      '.ant-number-integer, .ant-number-prefix': {
+      '.ant-typography': {
         color: 'inherit !important',
         fontSize: 'inherit !important',
         fontWeight: 'inherit !important',

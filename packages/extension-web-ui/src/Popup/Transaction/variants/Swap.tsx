@@ -163,10 +163,6 @@ const Component = () => {
     form.setFieldValue('toTokenSlug', tokenSlug);
   }, [form]);
 
-  const onSubmit: FormCallbacks<SwapParams>['onFinish'] = useCallback((values: SwapParams) => {
-    //
-  }, []);
-
   const onOpenSlippageModal = useCallback(() => {
     activeModal(SWAP_SLIPPAGE_MODAL);
   }, [activeModal]);
@@ -415,6 +411,10 @@ const Component = () => {
     );
   };
 
+  const onSubmit: FormCallbacks<SwapParams>['onFinish'] = useCallback((values: SwapParams) => {
+    //
+  }, []);
+
   return (
     <>
       <>
@@ -477,11 +477,13 @@ const Component = () => {
                 </div>
 
                 <SwapToField
-                  decimals={getDecimals(toAssetInfo)}
-                  onSelectToken={onSelectToToken}
-                  tokenSelectorItems={toTokenItems}
-                  tokenSelectorValue={fromTokenSlugValue}
                   currentQuote={currentQuote}
+                  decimals={getDecimals(toAssetInfo)}
+                  fromAsset={fromAssetInfo}
+                  onSelectToken={onSelectToToken}
+                  toAsset={toAssetInfo}
+                  tokenSelectorItems={toTokenItems}
+                  tokenSelectorValue={toTokenSlugValue}
                 />
               </div>
 
@@ -561,13 +563,13 @@ const Component = () => {
                 <div className={'__item-right-part'}>
                   <div className={'__item-right-part-button'}>
                     <Button
+                      disabled={!quoteOptions.length}
                       onClick={openAllQuotesModal}
                       size='xs'
                       type='ghost'
                     >
-                      <span className={'__item-right-title'}>
-                    View quote
-                      </span>
+                      <span className={'__item-right-title'}>{t('View quote')}</span>
+
                       <Icon
                         phosphorIcon={CaretRight}
                         size={'sm'}

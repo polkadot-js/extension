@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { SwapTokenSelector } from '@subwallet/extension-web-ui/components/Field/Swap/parts';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
@@ -16,6 +17,8 @@ type Props = ThemeProps & {
   label?: string;
   onSelectToken: (tokenSlug: string) => void;
   tokenSelectorValue?: string;
+  fromAsset?: _ChainAsset;
+  toAsset?: _ChainAsset;
   tokenSelectorItems: TokenSelectorItemType[];
   decimals: number;
   amountValue?: string;
@@ -23,26 +26,25 @@ type Props = ThemeProps & {
 }
 
 const Component = (props: Props) => {
-  const { className, currentQuote, label, onSelectToken, tokenSelectorItems, tokenSelectorValue } = props;
+  const { className, currentQuote, fromAsset, label, onSelectToken, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
-  const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const getConvertedBalance = useMemo(() => {
-    if (tokenSelectorValue && currentQuote && assetRegistryMap[tokenSelectorValue]) {
-      const asset = assetRegistryMap[tokenSelectorValue];
-      const { decimals, priceId } = asset;
+    if (tokenSelectorValue && currentQuote && fromAsset && toAsset) {
+      const { decimals } = fromAsset;
+      const { priceId } = toAsset;
       const price = priceMap[priceId || ''] || 0;
 
       const destinationValue = new BigN(currentQuote?.fromAmount).div(BN_TEN.pow(decimals || 0)).multipliedBy(currentQuote?.rate);
 
-      const convertValue = new BigN(currentQuote.fromAmount).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
+      const convertValue = destinationValue.multipliedBy(price);
 
       return { destinationValue, convertValue };
     }
 
     return { destinationValue: BN_ZERO, convertValue: BN_ZERO };
-  }, [assetRegistryMap, currentQuote, priceMap, tokenSelectorValue]);
+  }, [currentQuote, fromAsset, priceMap, toAsset, tokenSelectorValue]);
 
   const { convertValue, destinationValue } = getConvertedBalance;
 
@@ -74,6 +76,7 @@ const Component = (props: Props) => {
           {
             (
               <Number
+                className={'__amount-convert'}
                 decimal={0}
                 prefix={'$'}
                 value={convertValue}
@@ -109,6 +112,19 @@ const SwapToField = styled(Component)<Props>(({ theme: { token } }: Props) => {
       paddingLeft: 16,
       paddingTop: 8,
       paddingBottom: 8
+    },
+    '.__amount-convert': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      fontWeight: token.headingFontWeight,
+      color: token.colorTextTertiary,
+
+      '.ant-typography': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      }
     }
   };
 });

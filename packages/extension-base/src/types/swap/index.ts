@@ -2,20 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import {ChainType, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
+import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import {TransactionData} from "@subwallet/extension-base/types";
-import {ExtrinsicType} from "@subwallet/extension-base/background/KoniTypes";
 
+// core
 export type SwapRate = number;
 
-export interface SwapRoute {
-  path: string[]; // list of tokenSlug
-  // todo: there might be more info
-}
-
-export interface QuoteAskResponse {
-  quote?: SwapQuote;
-  error?: SwapError;
+export interface SwapPair {
+  slug: string;
+  from: string;
+  to: string;
 }
 
 export interface SwapQuote {
@@ -33,25 +30,9 @@ export interface SwapQuote {
   feeInfo: SwapFeeInfo;
 }
 
-export interface SwapPair {
-  slug: string;
-  from: string;
-  to: string;
-}
-
-export interface SwapProvider {
-  id: SwapProviderId;
-  name: string;
-
-  faq?: string;
-}
-
-export interface SwapRequest {
-  address: string;
-  pair: SwapPair;
-  fromAmount: string;
-  slippage: number; // Example: 0.01 for 1%
-  recipient?: string;
+export interface SwapRoute {
+  path: string[]; // list of tokenSlug
+  // todo: there might be more info
 }
 
 export enum SwapErrorType {
@@ -61,6 +42,67 @@ export enum SwapErrorType {
   NO_AVAILABLE_PROVIDER = 'NO_AVAILABLE_PROVIDER',
   UNKNOWN = 'UNKNOWN',
   ASSET_NOT_SUPPORTED = 'ASSET_NOT_SUPPORTED'
+}
+
+export enum SwapStepType {
+  DEFAULT = 'DEFAULT',
+  TOKEN_APPROVAL = 'TOKEN_APPROVAL',
+  SWAP = 'SWAP'
+}
+
+export enum SwapProviderId {
+  CHAIN_FLIP = 'CHAIN_FLIP'
+}
+
+export const _SUPPORTED_SWAP_PROVIDERS = ['CHAIN_FLIP'];
+
+export interface SwapProvider {
+  id: SwapProviderId;
+  name: string;
+
+  faq?: string;
+}
+
+// process handling
+export enum SwapFeeType {
+  PLATFORM_FEE = 'PLATFORM_FEE',
+  NETWORK_FEE = 'NETWORK_FEE',
+  WALLET_FEE = 'WALLET_FEE'
+}
+
+export interface SwapFeeComponent {
+  feeType: SwapFeeType;
+  amount: string;
+  tokenSlug: string;
+}
+
+export interface SwapFeeInfo {
+  feeComponent: SwapFeeComponent[];
+  defaultFeeToken: string;
+  feeOptions?: string[]; // list of tokenSlug
+}
+
+export interface SwapStepDetail extends BaseStepDetail {
+  id: number;
+}
+
+export interface OptimalSwapPath { // path means the steps to complete the swap, not the quote itself
+  totalFee: SwapFeeInfo[]; // each item in the array is tx fee for a step
+  steps: SwapStepDetail[];
+}
+
+// parameters & responses
+export interface QuoteAskResponse {
+  quote?: SwapQuote;
+  error?: SwapError;
+}
+
+export interface SwapRequest {
+  address: string;
+  pair: SwapPair;
+  fromAmount: string;
+  slippage: number; // Example: 0.01 for 1%
+  recipient?: string;
 }
 
 export interface SwapRequestResult {
@@ -90,49 +132,12 @@ export interface SwapSubmitStepData {
   extrinsic: TransactionData;
   transferNativeAmount: string;
   extrinsicType: ExtrinsicType;
+  chainType: ChainType
 }
 
 export interface OptimalSwapPathParams {
   request: SwapRequest;
   selectedQuote?: SwapQuote;
-}
-
-export enum SwapStepType {
-  DEFAULT = 'DEFAULT',
-  TOKEN_APPROVAL = 'TOKEN_APPROVAL',
-  SWAP = 'SWAP'
-}
-
-export interface SwapStepDetail extends BaseStepDetail {
-  id: number;
-}
-
-export interface OptimalSwapPath { // path means the steps to complete the swap, not the quote itself
-  totalFee: SwapFeeInfo[]; // each item in the array is tx fee for a step
-  steps: SwapStepDetail[];
-  connectionError?: string;
-}
-
-export enum SwapFeeType {
-  PLATFORM_FEE = 'PLATFORM_FEE',
-  NETWORK_FEE = 'NETWORK_FEE',
-  WALLET_FEE = 'WALLET_FEE'
-}
-
-export interface SwapFeeComponent {
-  feeType: SwapFeeType;
-  amount: string;
-  tokenSlug: string;
-}
-
-export interface SwapFeeInfo {
-  feeComponent: SwapFeeComponent[];
-  defaultFeeToken: string;
-  feeOptions?: string[]; // list of tokenSlug
-}
-
-export enum SwapProviderId {
-  CHAIN_FLIP = 'CHAIN_FLIP'
 }
 
 export interface SwapEarlyValidation {
@@ -142,8 +147,6 @@ export interface SwapEarlyValidation {
 
 export interface ValidateSwapProcessParams {
   address: string;
-  path: OptimalSwapPath;
+  process: OptimalSwapPath;
   selectedQuote: SwapQuote;
 }
-
-export const _SUPPORTED_SWAP_PROVIDERS = ['CHAIN_FLIP'];

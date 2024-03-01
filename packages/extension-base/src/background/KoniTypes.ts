@@ -11,14 +11,7 @@ import { CrowdloanContributionsResponse } from '@subwallet/extension-base/servic
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
-import {
-  SwapPair,
-  SwapQuoteResponse,
-  SwapRequest,
-  SwapRequestResult,
-  SwapSubmitParams,
-  ValidateSwapProcessParams
-} from '@subwallet/extension-base/types/swap';
+import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -510,7 +503,7 @@ export enum ExtrinsicType {
 
   TOKEN_APPROVE = 'evm.token_approve',
 
-  SWAP='swap',
+  SWAP = 'swap',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -2520,7 +2513,7 @@ export interface KoniRequestSignatures {
   /* Swap */
   'pri(swapService.subscribePairs)': [null, SwapPair[], SwapPair[]];
   'pri(swapService.handleSwapRequest)': [SwapRequest, SwapRequestResult];
-  'pri(swapService.handleSwapProcess)': [SwapSubmitParams, SWTransactionResponse];
+  'pri(swapService.handleSwapStep)': [SwapSubmitParams, SWTransactionResponse];
   'pri(swapService.getLatestQuote)': [SwapRequest, SwapQuoteResponse];
   'pri(swapService.validateSwapProcess)': [ValidateSwapProcessParams, TransactionError[]];
   /* Swap */

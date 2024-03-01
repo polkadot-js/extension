@@ -37,13 +37,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
-import {
-  SwapPair,
-  SwapQuoteResponse,
-  SwapRequest,
-  SwapRequestResult,
-  ValidateSwapProcessParams
-} from '@subwallet/extension-base/types/swap';
+import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -4297,6 +4291,42 @@ export default class KoniExtension {
   private async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     return this.#koniState.swapService.validateSwapProcess(params);
   }
+
+  private async handleSwapStep (inputData: SwapSubmitParams): Promise<SWTransactionResponse> {
+    const { address, process, quote } = inputData;
+
+    if (!quote || !address || !process) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const isLastStep = inputData.currentStep + 1 === process.steps.length;
+
+    const swapValidations: TransactionError[] = await this.#koniState.swapService.validateSwapProcess({ address, process, selectedQuote: quote });
+
+    if (swapValidations.length > 0) {
+      return this.#koniState.transactionService
+        .generateBeforeHandleResponseErrors(swapValidations);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { chainType, extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.swapService.handleSwapProcess(inputData);
+
+    const isSwapStep = extrinsicType === ExtrinsicType.SWAP; // todo
+
+    return await this.#koniState.transactionService.handleTransaction({
+      address,
+      chain: txChain,
+      transaction: extrinsic,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      data: txData,
+      extrinsicType, // change this depends on step
+      chainType,
+      resolveOnDone: !isLastStep,
+      transferNativeAmount,
+      skipFeeValidation: isSwapStep
+    });
+  }
   /* Swap service */
 
   // --------------------------------------------------------------
@@ -4855,6 +4885,7 @@ export default class KoniExtension {
         return this.#koniState.dbService.getExportJson();
         /* Database */
 
+        /* Swap service */
       case 'pri(swapService.subscribePairs)':
         return this.subscribeSwapPairs(id, port);
       case 'pri(swapService.handleSwapRequest)':
@@ -4863,6 +4894,9 @@ export default class KoniExtension {
         return this.getLatestSwapQuote(request as SwapRequest);
       case 'pri(swapService.validateSwapProcess)':
         return this.validateSwapProcess(request as ValidateSwapProcessParams);
+      case 'pri(swapService.handleSwapStep)':
+        return this.handleSwapStep(request as SwapSubmitParams);
+        /* Swap service */
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

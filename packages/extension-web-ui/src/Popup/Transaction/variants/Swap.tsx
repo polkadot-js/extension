@@ -4,7 +4,8 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { OptimalSwapPath, SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
@@ -14,15 +15,16 @@ import { BN_TEN, BN_ZERO, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SW
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
-import { getLatestSwapQuote, handleSwapRequest } from '@subwallet/extension-web-ui/messaging/transaction/swap';
+import { getLatestSwapQuote, handleSwapRequest, handleSwapStep } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { BackgroundIcon, Button, Form, Icon, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -30,6 +32,7 @@ import { isAddress } from '@polkadot/util-crypto';
 
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
+import useNotification from '../../../hooks/common/useNotification';
 
 type Props = ThemeProps;
 
@@ -69,7 +72,8 @@ function getOriginChain (assetInfo?: _ChainAsset) {
 
 const Component = () => {
   const { t } = useTranslation();
-  const { defaultData, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const notify = useNotification();
+  const { defaultData, onDone, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
@@ -90,15 +94,19 @@ const Component = () => {
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
   const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
+  const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   const showQuoteAreRef = useRef(false);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
   const fromAmountValue = useWatchTransaction('fromAmount', form, defaultData);
   const fromTokenSlugValue = useWatchTransaction('fromTokenSlug', form, defaultData);
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
+
+  const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
     const result: Record<string, string[]> = {};
@@ -218,6 +226,7 @@ const Component = () => {
 
         handleSwapRequest(currentRequest).then((result) => {
           if (sync) {
+            setOptimalSwapPath(result.process);
             setQuoteOptions(result.quote.quotes);
             setCurrentQuote(result.quote.optimalQuote);
             setQuoteAliveUntil(result.quote.aliveUntil);
@@ -411,9 +420,143 @@ const Component = () => {
     );
   };
 
+  const onError = useCallback(
+    (error: Error) => {
+      notify({
+        message: error.message,
+        type: 'error',
+        duration: 8
+      });
+
+      dispatchProcessState({
+        type: SwapActionType.STEP_ERROR_ROLLBACK,
+        payload: error
+      });
+    },
+    [notify]
+  );
+
+  const onSuccess = useCallback(
+    (lastStep: boolean, needRollback: boolean): ((rs: SWTransactionResponse) => boolean) => {
+      return (rs: SWTransactionResponse): boolean => {
+        const { errors: _errors, id, warnings } = rs;
+
+        if (_errors.length || warnings.length) {
+          if (_errors[0]?.message !== 'Rejected by user') {
+            if (
+              _errors[0]?.message.startsWith('UnknownError Connection to Indexed DataBase server lost') ||
+              _errors[0]?.message.startsWith('Provided address is invalid, the capitalization checksum test failed') ||
+              _errors[0]?.message.startsWith('connection not open on send()')
+            ) {
+              notify({
+                message: t('Your selected network has lost connection. Update it by re-enabling it or changing network provider'),
+                type: 'error',
+                duration: 8
+              });
+
+              return false;
+            }
+
+            // hideAll();
+            onError(_errors[0]);
+
+            return false;
+          } else {
+            dispatchProcessState({
+              type: needRollback ? SwapActionType.STEP_ERROR_ROLLBACK : SwapActionType.STEP_ERROR,
+              payload: _errors[0]
+            });
+
+            return false;
+          }
+        } else if (id) {
+          dispatchProcessState({
+            type: SwapActionType.STEP_COMPLETE,
+            payload: rs
+          });
+
+          if (lastStep) {
+            onDone(id);
+
+            return false;
+          }
+
+          return true;
+        } else {
+          return false;
+        }
+      };
+    },
+    [notify, onDone, onError, t]
+  );
+
   const onSubmit: FormCallbacks<SwapParams>['onFinish'] = useCallback((values: SwapParams) => {
-    //
-  }, []);
+    if (!currentQuote || !currentOptimalSwapPath) {
+      return;
+    }
+
+    setSubmitLoading(true);
+
+    const { from, recipient } = values;
+
+    const submitData = async (step: number): Promise<boolean> => {
+      dispatchProcessState({
+        type: SwapActionType.STEP_SUBMIT,
+        payload: null
+      });
+
+      const isFirstStep = step === 0;
+      const isLastStep = step === processState.steps.length - 1;
+      const needRollback = step === 1;
+
+      try {
+        if (isFirstStep) {
+          // todo: use background validation
+
+          dispatchProcessState({
+            type: SwapActionType.STEP_COMPLETE,
+            payload: true
+          });
+          dispatchProcessState({
+            type: SwapActionType.STEP_SUBMIT,
+            payload: null
+          });
+
+          return await submitData(step + 1);
+        } else {
+          const submitPromise: Promise<SWTransactionResponse> = handleSwapStep({
+            process: currentOptimalSwapPath,
+            currentStep: step,
+            quote: currentQuote,
+            address: from,
+            slippage: currentSlippage,
+            recipient
+          });
+
+          const rs = await submitPromise;
+          const success = onSuccess(isLastStep, needRollback)(rs);
+
+          if (success) {
+            return await submitData(step + 1);
+          } else {
+            return false;
+          }
+        }
+      } catch (e) {
+        onError(e as Error);
+
+        return false;
+      }
+    };
+
+    setTimeout(() => {
+      submitData(processState.currentStep)
+        .catch(onError)
+        .finally(() => {
+          setSubmitLoading(false);
+        });
+    }, 300);
+  }, [currentOptimalSwapPath, currentQuote, currentSlippage, onError, onSuccess, processState.currentStep, processState.steps.length]);
 
   return (
     <>
@@ -533,12 +676,14 @@ const Component = () => {
             <Button
               block={true}
               className={'__swap-submit-button'}
+              disabled={submitLoading}
               icon={(
                 <Icon
                   phosphorIcon={PlusCircle}
                   weight={'fill'}
                 />
               )}
+              loading={submitLoading}
               onClick={form.submit}
             >
               {t('Swap')}

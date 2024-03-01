@@ -4,7 +4,7 @@
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import {SwapFeeInfo, SwapStepDetail, SwapStepType} from '@subwallet/extension-base/types/swap';
+import {SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType} from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export function chainFlipConvertChainId (chainSlug: string): Chain {
@@ -21,6 +21,11 @@ export const CHAIN_FLIP_SUPPORTED_ASSET_MAPPING: Record<string, Asset> = {
   'polkadot-NATIVE-DOT': Assets.DOT,
   'ethereum-NATIVE-ETH': Assets.ETH,
   'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+};
+
+export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in milliseconds
+  default: 30000,
+  [SwapProviderId.CHAIN_FLIP]: 30000
 };
 
 export const DEFAULT_SWAP_FIRST_STEP: SwapStepDetail = {

@@ -503,6 +503,8 @@ export enum ExtrinsicType {
 
   TOKEN_APPROVE = 'evm.token_approve',
 
+  SWAP='swap',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }

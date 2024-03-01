@@ -2,21 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MenuItem, MenuItemType } from '@subwallet/extension-web-ui/components/Layout/parts/SideMenu/MenuItem';
-import { CONTACT_US, FAQS_URL, TERMS_OF_SERVICE_URL } from '@subwallet/extension-web-ui/constants';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { CONTACT_US, DEFAULT_SWAP_PARAMS, FAQS_URL, SWAP_TRANSACTION, TERMS_OF_SERVICE_URL } from '@subwallet/extension-web-ui/constants';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import usePreloadView from '@subwallet/extension-web-ui/hooks/router/usePreloadView';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { isAccountAll, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleLeft, ArrowCircleRight, ArrowsLeftRight, ArrowSquareUpRight, Clock, Gear, Globe, Info, MessengerLogo, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocalStorage } from 'usehooks-ts';
 
 export type Props = ThemeProps & {
   isCollapsed: boolean,
   setCollapsed: React.Dispatch<React.SetStateAction<boolean>>
 };
+
+const swapPath = '/transaction/swap';
 
 function Component ({ className,
   isCollapsed,
@@ -25,6 +28,14 @@ function Component ({ className,
   const navigate = useNavigate();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const { t } = useTranslation();
+  const currentAccount = useSelector((root) => root.accountState.currentAccount);
+  const [swapStorage, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+
+  console.log('swapStorage----------', swapStorage);
+
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
 
   usePreloadView([
     'Home',
@@ -47,11 +58,6 @@ function Component ({ className,
         value: '/home/earning',
         icon: Vault
       },
-      // {
-      //   label: t('Swap'),
-      //   value: '/home/swap',
-      //   icon: ArrowsLeftRight
-      // },
       {
         label: t('Swap'),
         value: '/transaction/swap',
@@ -123,8 +129,15 @@ function Component ({ className,
   const handleNavigate = useCallback((
     value: string
   ) => {
+    if (value === swapPath) {
+      setSwapStorage({
+        ...DEFAULT_SWAP_PARAMS,
+        from: transactionFromValue
+      });
+    }
+
     navigate(`${value}`);
-  }, [navigate]);
+  }, [navigate, setSwapStorage, transactionFromValue]);
 
   const goHome = useCallback(() => {
     navigate('/home');
@@ -144,6 +157,10 @@ function Component ({ className,
 
       if (transaction === 'earn') {
         return ['/home/earning/'];
+      }
+
+      if (transaction === 'swap') {
+        return [swapPath];
       }
 
       return ['/home/staking'];

@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
@@ -183,34 +183,45 @@ const Component = () => {
 
   useEffect(() => {
     let sync = true;
-
-    const currentRequest: SwapRequest = {
-      address: '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
-      pair: swapPairs[0],
-      fromAmount: '40000000000',
-      slippage: 0.05
-    };
+    let timeout: NodeJS.Timeout;
 
     // todo: simple validate before do this
+    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
+      timeout = setTimeout(() => {
+        const currentRequest: SwapRequest = {
+          address: fromValue,
+          pair: {
+            slug: _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue),
+            from: fromTokenSlugValue,
+            to: toTokenSlugValue
+          },
+          fromAmount: fromAmountValue,
+          slippage: 0.05
+        };
 
-    setCurrentQuoteRequet(currentRequest);
+        setCurrentQuoteRequet(currentRequest);
 
-    handleSwapRequest(currentRequest).then((result) => {
-      if (sync) {
-        if (result.quote) {
-          setQuoteOptions(result.quote.quotes);
-          setCurrentQuote(result.quote.optimalQuote);
-          setQuoteAliveUntil(result.quote.aliveUntil);
-        } else {
-          setCurrentQuote(undefined);
-        }
-      }
-    }).catch(console.error);
+        handleSwapRequest(currentRequest).then((result) => {
+          if (sync) {
+            if (result.quote) {
+              setQuoteOptions(result.quote.quotes);
+              setCurrentQuote(result.quote.optimalQuote);
+              setQuoteAliveUntil(result.quote.aliveUntil);
+            } else {
+              setCurrentQuote(undefined);
+            }
+          }
+        }).catch((e) => {
+          console.log('handleSwapRequest error', e);
+        });
+      }, 300);
+    }
 
     return () => {
       sync = false;
+      clearTimeout(timeout);
     };
-  }, [swapPairs]);
+  }, [fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
 
   useEffect(() => {
     let timer: NodeJS.Timer;
@@ -267,6 +278,7 @@ const Component = () => {
     };
   }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
 
+  // todo: will optimize fee display logic later
   const getTotalConvertedBalance = useMemo(() => {
     let totalBalance = BN_ZERO;
 

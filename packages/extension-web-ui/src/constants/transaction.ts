@@ -3,18 +3,7 @@
 
 import { ExtrinsicType, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import {
-  CancelUnStakeParams,
-  ClaimRewardParams,
-  EarnParams,
-  SendNftParams,
-  StakeParams,
-  SwapParams,
-  TransactionFormBaseProps,
-  TransferParams,
-  UnStakeParams,
-  WithdrawParams
-} from '@subwallet/extension-web-ui/types';
+import { CancelUnStakeParams, ClaimRewardParams, EarnParams, SendNftParams, StakeParams, SwapParams, TransactionFormBaseProps, TransferParams, UnStakeParams, WithdrawParams } from '@subwallet/extension-web-ui/types';
 
 import { ALL_KEY } from './common';
 
@@ -62,7 +51,8 @@ export const TRANSACTION_TITLE_MAP: Record<ExtrinsicType, string> = {
   [ExtrinsicType.UNSTAKE_QDOT]: detectTranslate('Unstake qDOT'),
   [ExtrinsicType.UNSTAKE_VMANTA]: detectTranslate('Unstake vMANTA'),
 
-  [ExtrinsicType.TOKEN_APPROVE]: detectTranslate('Token approve')
+  [ExtrinsicType.TOKEN_APPROVE]: detectTranslate('Token approve'),
+  [ExtrinsicType.SWAP]: detectTranslate('Swap')
 };
 
 export const ALL_STAKING_ACTIONS: ExtrinsicType[] = [

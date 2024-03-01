@@ -65,7 +65,7 @@ export enum SwapErrorType {
 
 export interface SwapRequestResult {
   process: OptimalSwapPath;
-  quote?: SwapQuoteResponse;
+  quote: SwapQuoteResponse;
 }
 
 export interface SwapQuoteResponse {

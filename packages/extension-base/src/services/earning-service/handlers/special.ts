@@ -56,6 +56,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     this.exchangeRatePromise.resolve(true);
   }
 
+  /** Exchange rate before divine with decimals */
   protected async getExchangeRate (): Promise<number> {
     await this.exchangeRatePromise.promise;
 

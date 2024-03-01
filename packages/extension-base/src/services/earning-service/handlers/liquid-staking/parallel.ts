@@ -26,7 +26,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
-  public override readonly minAmountPercent = 0.97;
+  public override readonly minAmountPercent = 0.96;
   protected readonly rateDecimals = 18;
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
@@ -177,6 +177,8 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
             const remainingEra = chunk.era - currentEra;
             const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default;
             const waitingTime = remainingEra * eraTime;
+            // const currentTimestampMs = Date.now();
+            // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             totalBalance = totalBalance.add(amount);
             unlockingBalance = unlockingBalance.add(amount);
@@ -185,6 +187,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: amount.toString(),
               waitingTime: waitingTime
+              // targetTimestampMs: targetTimestampMs
             } as UnstakingInfo);
           }
         }

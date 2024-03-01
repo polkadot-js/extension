@@ -232,7 +232,13 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   }
 
   public async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+    const handler = this.handlers[params.quote.provider.id];
 
+    if (handler) {
+      return handler.handleSwapProcess(params);
+    } else {
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    }
   }
 
   public subscribeSwapPairs () {

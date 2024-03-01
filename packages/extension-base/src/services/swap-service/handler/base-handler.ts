@@ -3,7 +3,7 @@
 
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 
 export abstract class SwapBaseHandler {
   protected providerSlug: string;
@@ -18,6 +18,8 @@ export abstract class SwapBaseHandler {
   public abstract generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
   protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
   public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
+  public abstract handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
+  protected abstract handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
 
   get name (): string {
     return this.providerName;

@@ -91,6 +91,12 @@ export interface OptimalSwapPath { // path means the steps to complete the swap,
   steps: SwapStepDetail[];
 }
 
+export interface ChainflipTxData {
+  depositChannelId: string;
+  depositAddress: string;
+  estimatedDepositChannelExpiryTime?: number;
+}
+
 // parameters & responses
 export interface QuoteAskResponse {
   quote?: SwapQuote;

@@ -5,11 +5,18 @@ import { Asset, SwapSDK } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
+import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { TransactionData } from '@subwallet/extension-base/types';
+import { ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
+
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 
 interface ChainflipPreValidationMetadata {
   minSwap: string;
@@ -148,8 +155,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       const feeComponent: SwapFeeComponent[] = [];
 
-      // todo: handle route
-      // todo: handle fees, filter and aggregate by tokens, NOT calculate total fee value
       quoteResponse.quote.includedFees.forEach((fee) => {
         switch (fee.type) {
           case ChainflipFeeType.INGRESS:
@@ -180,17 +185,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         }
       });
 
-      // const depositAddress = await this.swapSdk.requestDepositAddress({
-      //   srcChain: chainFlipConvertChainId(fromAsset.originChain),
-      //   destChain: chainFlipConvertChainId(toAsset.originChain),
-      //   srcAsset: fromAsset.symbol as Asset,
-      //   destAsset: toAsset.symbol as Asset,
-      //   destAddress: request.address,
-      //   amount: request.fromAmount
-      // });
-      //
-      // console.log('depositAddress', depositAddress);
-
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
@@ -219,6 +213,79 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
   public validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     return Promise.resolve([]);
+  }
+
+  protected async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+    const { address, quote, recipient } = params;
+
+    const pair = quote.pair;
+    const fromAsset = this.chainService.getAssetBySlug(pair.from);
+    const toAsset = this.chainService.getAssetBySlug(pair.to);
+    const chainInfo = this.chainService.getChainInfoByKey(fromAsset.originChain);
+    const chainType = _isSubstrateChain(chainInfo) ? ChainType.SUBSTRATE : ChainType.EVM;
+    const receiver = recipient ?? address;
+
+    const depositAddressResponse = await this.swapSdk.requestDepositAddress({
+      srcChain: chainFlipConvertChainId(fromAsset.originChain),
+      destChain: chainFlipConvertChainId(toAsset.originChain),
+      srcAsset: fromAsset.symbol as Asset,
+      destAsset: toAsset.symbol as Asset,
+      destAddress: receiver,
+      amount: quote.fromAmount
+    });
+
+    const txData: ChainflipTxData = {
+      depositChannelId: depositAddressResponse.depositChannelId,
+      depositAddress: depositAddressResponse.depositAddress
+    };
+
+    let extrinsic: TransactionData;
+
+    // todo: handle different chain type and assets
+    if (chainType === ChainType.SUBSTRATE) {
+      const chainApi = this.chainService.getSubstrateApi(chainInfo.slug);
+
+      const substrateApi = await chainApi.isReady;
+
+      const [submittableExtrinsic] = await createTransferExtrinsic({
+        from: address,
+        networkKey: chainInfo.slug,
+        substrateApi,
+        to: receiver,
+        tokenInfo: fromAsset,
+        transferAll: false, // todo
+        value: quote.fromAmount
+      });
+
+      extrinsic = submittableExtrinsic as SubmittableExtrinsic<'promise'>;
+    } else {
+      const [transactionConfig] = await getEVMTransactionObject(chainInfo, address, receiver, quote.fromAmount, false, this.chainService.getEvmApiMap());
+
+      extrinsic = transactionConfig;
+    }
+
+    return {
+      txChain: fromAsset.originChain,
+      txData,
+      extrinsic,
+      transferNativeAmount: quote.fromAmount,
+      extrinsicType: ExtrinsicType.SWAP,
+      chainType
+    } as SwapSubmitStepData;
+  }
+
+  public override async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+    const { currentStep, process } = params;
+    const type = process.steps[currentStep].type;
+
+    switch (type) {
+      case SwapStepType.DEFAULT:
+        return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+      case SwapStepType.SWAP:
+        return this.handleSubmitStep(params);
+      default:
+        return this.handleSubmitStep(params);
+    }
   }
 
   generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {

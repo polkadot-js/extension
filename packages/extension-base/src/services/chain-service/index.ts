@@ -613,14 +613,19 @@ export class ChainService {
   }
 
   handleLatestPriceId (latestPriceIds: Record<string, string | null>) {
+    let isUpdated = false;
+
     Object.entries(latestPriceIds).forEach(([slug, priceId]) => {
-      if (this.dataMap.assetRegistry[slug]) {
+      if (this.dataMap.assetRegistry[slug] && this.dataMap.assetRegistry[slug].priceId !== priceId) {
+        isUpdated = true;
         this.dataMap.assetRegistry[slug].priceId = priceId;
       }
     });
 
-    this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-    this.eventService.emit('asset.updateState', '');
+    if (isUpdated) {
+      this.assetRegistrySubject.next(this.dataMap.assetRegistry);
+      this.eventService.emit('asset.updateState', '');
+    }
 
     this.logger.log('Finished updating latest price IDs');
   }

@@ -452,7 +452,8 @@ const Component = () => {
                   decimals={getDecimals(toAssetInfo)}
                   onSelectToken={onSelectToToken}
                   tokenSelectorItems={toTokenItems}
-                  tokenSelectorValue={toTokenSlugValue}
+                  tokenSelectorValue={fromTokenSlugValue}
+                  currentQuote={currentQuote}
                 />
               </div>
 

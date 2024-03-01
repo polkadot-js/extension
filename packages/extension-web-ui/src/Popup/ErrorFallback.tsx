@@ -1,15 +1,17 @@
 // Copyright 2019-2022 @polkadot/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { reportError } from '@subwallet/extension-base/utils/reportError';
 import { PageWrapper } from '@subwallet/extension-web-ui/components';
+import { useNotification } from '@subwallet/extension-web-ui/hooks';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-web-ui/hooks/router/useDefaultNavigate';
 import { Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { House, Robot } from 'phosphor-react';
-import React, { useContext } from 'react';
-import { useRouteError } from 'react-router-dom';
+import { House, Robot, Share } from 'phosphor-react';
+import React, { useCallback, useContext, useState } from 'react';
+import { useLocation, useRouteError } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 import { ScreenContext } from '../contexts/ScreenContext';
@@ -18,13 +20,27 @@ type Props = ThemeProps;
 
 function Component ({ className = '' }: Props) {
   const error = useRouteError();
+  const location = useLocation();
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const goHome = useDefaultNavigate().goHome;
 
   const { isWebUI } = useContext(ScreenContext);
+  const [isUploading, setIsUploading] = useState(false);
+  const notify = useNotification();
 
-  console.error(error);
+  const uploadCrashLog = useCallback(() => {
+    setIsUploading(true);
+    reportError(error as Error, location.pathname)
+      .catch(() => notify({
+        message: 'Failed to send report',
+        type: 'error'
+      }))
+      .finally(() => {
+        setIsUploading(false);
+        goHome();
+      });
+  }, [error, goHome, location.pathname, notify]);
 
   return (
     <PageWrapper className={CN('main-page-container', className)}>
@@ -41,9 +57,7 @@ function Component ({ className = '' }: Props) {
           />
           <div className={'__title'}>{t('Opps! An Error Occurred')}</div>
           <div className={'__content'}>
-            <span>{t('Sorry, something went wrong.')}</span>
-            <br />
-            <span>{t('Please try again later.')}</span>
+            <span>{t('Something went wrong. Help us fix the problem by sending a report anonymously!')}</span>
           </div>
         </div>
 
@@ -53,11 +67,27 @@ function Component ({ className = '' }: Props) {
             icon={(
               <Icon
                 className={'icon-submit'}
+                phosphorIcon={Share}
+                weight='fill'
+              />
+            )}
+            loading={isUploading}
+            onClick={uploadCrashLog}
+          >
+            {t('Send report')}
+          </Button>
+          <Button
+            block={true}
+            disabled={isUploading}
+            icon={(
+              <Icon
+                className={'icon-submit'}
                 phosphorIcon={House}
                 weight='fill'
               />
             )}
             onClick={goHome}
+            schema={'secondary'}
           >
             {t('Back to home')}
           </Button>
@@ -131,8 +161,11 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
     },
 
     '.__footer-area': {
+      display: 'flex',
       paddingTop: token.padding,
-      paddingBottom: token.paddingXL
+      paddingBottom: token.paddingXL,
+      flexDirection: 'column',
+      gap: token.paddingSM
     }
   });
 });

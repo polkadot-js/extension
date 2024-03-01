@@ -110,6 +110,10 @@ export function _getTokenOnChainInfo (tokenInfo: _ChainAsset): Record<string, an
   return tokenInfo.metadata?.onChainInfo as Record<string, any>;
 }
 
+export function _isBridgedToken (tokenInfo: _ChainAsset) {
+  return tokenInfo.metadata?.isBridged as boolean;
+}
+
 export function _getTokenMinAmount (tokenInfo: _ChainAsset) {
   return tokenInfo.minAmount || '0';
 }

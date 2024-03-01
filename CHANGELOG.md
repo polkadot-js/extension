@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.40
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Update pool default for VARA (#2678)
+
 ## 1.1.39
 Build date: Feb 24, 2024.
 

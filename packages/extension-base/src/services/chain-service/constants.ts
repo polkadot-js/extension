@@ -32,7 +32,7 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude', 'continuum_network'],
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge'],
@@ -51,7 +51,7 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network', 'quartz', 'opal'],
-  bitcountry: ['bitcountry', 'pioneer'],
+  bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
   vara: ['vara_network']
 };
 

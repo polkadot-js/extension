@@ -18,6 +18,17 @@ import { BN, BN_ZERO } from '@polkadot/util';
 
 import BaseParaNativeStakingPoolHandler from './base-para';
 
+interface PalletParachainStakingRoundInfo {
+  current: string,
+  first: string,
+  length: string
+}
+
+interface PalletParachainStakingSetOrderedSet {
+  owner: string,
+  amount: string
+}
+
 export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
   /* Subscribe pool info */
 
@@ -298,14 +309,37 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
   /* Get pool targets */
 
   async getPoolTargets (): Promise<ValidatorInfo[]> {
+    const POINTS_PER_BLOCK = 20; // producing 1 block will get 20 points
+    const MIN_DELEGATION = 500; // staking 500 manta at least
+
     const apiProps = await this.substrateApi.isReady;
 
     const allCollators: ValidatorInfo[] = [];
 
-    const [_allCollators, _collatorCommission] = await Promise.all([
+    const [_allCollators, _collatorCommission, _allCollatorsPool, _selectedCollators, _round, _totalIssuance] = await Promise.all([
       apiProps.api.query.parachainStaking.candidateInfo.entries(),
-      apiProps.api.query.parachainStaking.collatorCommission()
+      apiProps.api.query.parachainStaking.collatorCommission(),
+      apiProps.api.query.parachainStaking.candidatePool(),
+      apiProps.api.query.parachainStaking.selectedCandidates(),
+      apiProps.api.query.parachainStaking.round(),
+      apiProps.api.query.balances.totalIssuance()
     ]);
+
+    const round = _round.toPrimitive() as unknown as PalletParachainStakingRoundInfo;
+    const totalIssuance = _totalIssuance.toString();
+
+    const allCollatorsPoolInfo = _allCollatorsPool.toPrimitive() as unknown as PalletParachainStakingSetOrderedSet[];
+    const allCollatorsPool = allCollatorsPoolInfo.map((collator) => collator.owner.toString());
+    const selectedCollators = _selectedCollators.toPrimitive() as string[];
+    const activeCollators = allCollatorsPool.map((address) => selectedCollators.includes(address));
+
+    // todo: util blockPreviousRound
+    // const blockPreviousRound = getBlocksPreviousRound(apiProps, round, allCollatorsPool);
+    const args = allCollatorsPool.map((address) => [parseInt(round.current) - 1, address]);
+
+    const pointsPreviousRoundRaw = (await apiProps.api.query.parachainStaking.awardedPts.multi(args));
+
+    const blockPreviousRound = pointsPreviousRoundRaw.map((pointsRaw) => parseInt(pointsRaw.toString()) / POINTS_PER_BLOCK);
 
     const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
     const rawCollatorCommission = _collatorCommission.toHuman() as string;

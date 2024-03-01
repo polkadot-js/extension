@@ -40,8 +40,6 @@ const Component: React.FC<Props> = (props: Props) => {
     onApplySlippage?.(SLIPPAGE_TOLERANCE[selectedSlippage]);
   }, [inactiveModal, modalId, onApplySlippage, selectedSlippage]);
 
-  console.log('selectedSlippage', selectedSlippage);
-
   return (
     <>
       <BaseModal

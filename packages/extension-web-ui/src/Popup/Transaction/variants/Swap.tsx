@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
@@ -16,12 +17,12 @@ import { useSelector, useTransactionContext, useWatchTransaction } from '@subwal
 import { getLatestSwapQuote, handleSwapRequest } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { BackgroundIcon, Button, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Form, Icon, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, PencilSimpleLine, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, PlusCircle, XCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -88,6 +89,8 @@ const Component = () => {
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
   const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
+  const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
+  const showQuoteAreRef = useRef(false);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
 
@@ -224,6 +227,8 @@ const Component = () => {
             setQuoteAliveUntil(result.quote.aliveUntil);
             setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
             setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
+            setSwapError(result.quote.error);
+            showQuoteAreRef.current = true;
           }
         }).catch((e) => {
           console.log('handleSwapRequest error', e);
@@ -387,6 +392,29 @@ const Component = () => {
     );
   };
 
+  const renderQuoteEmptyBlock = () => {
+    const isError = !!swapError;
+
+    const message = isError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
+
+    return (
+      <div className={CN('__quote-empty-block', {
+        '-error': isError
+      })}
+      >
+        <PageIcon
+          color='var(--empty-quote-icon-color)'
+          iconProps={{
+            weight: isError ? 'fill' : undefined,
+            phosphorIcon: isError ? XCircle : ListBullets
+          }}
+        />
+
+        <div>{message}</div>
+      </div>
+    );
+  };
+
   return (
     <>
       <>
@@ -515,130 +543,138 @@ const Component = () => {
           </TransactionFooter>
         </div>
 
-        <div className={'__transaction-swap-quote-info-area'}>
-          <div className={'__item-quote-header'}>
-            <div className={'__item-left-part'}>
-              <BackgroundIcon
-                backgroundColor='#004BFF'
-                iconColor='#fff'
-                phosphorIcon={Info}
-                size={'md'}
-                weight={'fill'}
-              />
-              <div className={'__text'}>Swap quote</div>
-            </div>
-            <div className={'__item-right-part'}>
-              <div className={'__item-right-part-button'}>
-                <Button
-                  onClick={openAllQuotesModal}
-                  size='xs'
-                  type='ghost'
-                >
-                  <span className={'__item-right-title'}>
-                    View quote
-                  </span>
-                  <Icon
-                    phosphorIcon={CaretRight}
-                    size={'sm'}
+        {
+          showQuoteAreRef.current && (
+            <div className={'__transaction-swap-quote-info-area'}>
+              <div className={'__item-quote-header'}>
+                <div className={'__item-left-part'}>
+                  <BackgroundIcon
+                    backgroundColor='#004BFF'
+                    iconColor='#fff'
+                    phosphorIcon={Info}
+                    size={'md'}
+                    weight={'fill'}
                   />
-                </Button>
+                  <div className={'__text'}>Swap quote</div>
+                </div>
+                <div className={'__item-right-part'}>
+                  <div className={'__item-right-part-button'}>
+                    <Button
+                      onClick={openAllQuotesModal}
+                      size='xs'
+                      type='ghost'
+                    >
+                      <span className={'__item-right-title'}>
+                    View quote
+                      </span>
+                      <Icon
+                        phosphorIcon={CaretRight}
+                        size={'sm'}
+                      />
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          {
-            !!currentQuote && (
-              <MetaInfo
-                className={CN('__quote-info-block')}
-                hasBackgroundWrapper
-                labelColorScheme={'gray'}
-                spaceSize={'sm'}
-                valueColorScheme={'gray'}
-              >
-                <MetaInfo.Default
-                  className={'__quote-rate'}
-                  label={t('Quote rate')}
-                  valueColorSchema={'gray'}
-                >
-                  {renderRateInfo()}
-                </MetaInfo.Default>
+              {
+                !!currentQuote && (
+                  <MetaInfo
+                    className={CN('__quote-info-block')}
+                    hasBackgroundWrapper
+                    labelColorScheme={'gray'}
+                    spaceSize={'sm'}
+                    valueColorScheme={'gray'}
+                  >
+                    <MetaInfo.Default
+                      className={'__quote-rate'}
+                      label={t('Quote rate')}
+                      valueColorSchema={'gray'}
+                    >
+                      {renderRateInfo()}
+                    </MetaInfo.Default>
 
-                <MetaInfo.Default
-                  label={t('Swap provider')}
-                >
-                  {currentQuote.provider.name}
-                </MetaInfo.Default>
+                    <MetaInfo.Default
+                      label={t('Swap provider')}
+                    >
+                      {currentQuote.provider.name}
+                    </MetaInfo.Default>
 
-                <MetaInfo.Default
-                  className={'-d-column'}
-                  label={t('Swap route')}
-                >
-                </MetaInfo.Default>
-                <SwapRoute swapRoute={currentQuote.route} />
-              </MetaInfo>
-            )
-          }
+                    <MetaInfo.Default
+                      className={'-d-column'}
+                      label={t('Swap route')}
+                    >
+                    </MetaInfo.Default>
+                    <SwapRoute swapRoute={currentQuote.route} />
+                  </MetaInfo>
+                )
+              }
 
-          <div className={'__item-footer-time'}>
-            Quote reset in: {quoteCountdownTime}s
-          </div>
+              {
+                !currentQuote && renderQuoteEmptyBlock()
+              }
 
-          {
-            !!currentQuote && (
-              <MetaInfo
-                className={CN('__quote-info-block')}
-                hasBackgroundWrapper
-                labelColorScheme={'gray'}
-                spaceSize={'xs'}
-                valueColorScheme={'gray'}
-              >
-                <MetaInfo.Number
-                  decimals={0}
-                  label={t('Estimated fee')}
-                  onClickValue={onToggleFeeDetails}
-                  prefix={'$'}
-                  suffixNode={
-                    <Icon
-                      customSize={'20px'}
-                      phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
-                    />
-                  }
-                  value={getTotalConvertedBalance}
-                />
+              <div className={'__item-footer-time'}>
+                Quote reset in: {quoteCountdownTime}s
+              </div>
 
-                {
-                  isViewFeeDetails && (
-                    <div className={'__quote-fee-details-block'}>
-                      {Object.entries(getTotalFeeByType).map(([feeType, totalFee], index) => (
-                        <MetaInfo.Number
-                          decimals={0}
-                          key={index}
-                          label={t(feeType)}
-                          prefix={'$'}
-                          value={totalFee}
+              {
+                !!currentQuote && (
+                  <MetaInfo
+                    className={CN('__quote-info-block')}
+                    hasBackgroundWrapper
+                    labelColorScheme={'gray'}
+                    spaceSize={'xs'}
+                    valueColorScheme={'gray'}
+                  >
+                    <MetaInfo.Number
+                      decimals={0}
+                      label={t('Estimated fee')}
+                      onClickValue={onToggleFeeDetails}
+                      prefix={'$'}
+                      suffixNode={
+                        <Icon
+                          customSize={'20px'}
+                          phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
                         />
-                      ))}
-                    </div>
-                  )
-                }
-
-                <div className={'__separator'}></div>
-                <MetaInfo.Chain
-                  chain={getOriginChain(feeAssetInfo)}
-                  className='__item-fee-paid'
-                  label={t('Fee paid in')}
-                  onClickValue={openChooseFeeToken}
-                  suffixNode={
-                    <Icon
-                      customSize={'20px'}
-                      phosphorIcon={PencilSimpleLine}
+                      }
+                      value={getTotalConvertedBalance}
                     />
-                  }
-                />
-              </MetaInfo>
-            )
-          }
-        </div>
+
+                    {
+                      isViewFeeDetails && (
+                        <div className={'__quote-fee-details-block'}>
+                          {Object.entries(getTotalFeeByType).map(([feeType, totalFee], index) => (
+                            <MetaInfo.Number
+                              decimals={0}
+                              key={index}
+                              label={t(feeType)}
+                              prefix={'$'}
+                              value={totalFee}
+                            />
+                          ))}
+                        </div>
+                      )
+                    }
+
+                    <div className={'__separator'}></div>
+                    <MetaInfo.Chain
+                      chain={getOriginChain(feeAssetInfo)}
+                      className='__item-fee-paid'
+                      label={t('Fee paid in')}
+                      onClickValue={openChooseFeeToken}
+                      suffixNode={
+                        <Icon
+                          customSize={'20px'}
+                          phosphorIcon={PencilSimpleLine}
+                        />
+                      }
+                    />
+                  </MetaInfo>
+                )
+              }
+            </div>
+          )
+        }
       </>
 
       <ChooseFeeTokenModal
@@ -725,15 +761,27 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     // swap quote
 
-    '.__transaction-swap-quote-info-area': {
-
-    },
+    '.__transaction-swap-quote-info-area': {},
     '.__quote-estimate-swap-value': {
       display: 'flex'
     },
 
-    '.__quote-info-block': {
+    '.__quote-info-block': {},
 
+    '.__quote-empty-block': {
+      background: token.colorBgSecondary,
+      borderRadius: token.borderRadiusLG,
+      padding: token.paddingSM,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      textAlign: 'center',
+
+      '--empty-quote-icon-color': token['gray-6']
+    },
+
+    '.__quote-empty-block.-error': {
+      '--empty-quote-icon-color': token.colorError
     },
 
     '.__quote-fee-details-block': {

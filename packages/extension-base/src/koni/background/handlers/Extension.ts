@@ -37,7 +37,13 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
-import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
+import {
+  SwapPair,
+  SwapQuoteResponse,
+  SwapRequest,
+  SwapRequestResult,
+  ValidateSwapProcessParams
+} from '@subwallet/extension-base/types/swap';
 import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -4287,6 +4293,10 @@ export default class KoniExtension {
   private async getLatestSwapQuote (swapQuote: SwapRequest): Promise<SwapQuoteResponse> {
     return this.#koniState.swapService.getLatestQuotes(swapQuote);
   }
+
+  private async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+    return this.#koniState.swapService.validateSwapProcess(params);
+  }
   /* Swap service */
 
   // --------------------------------------------------------------
@@ -4851,6 +4861,8 @@ export default class KoniExtension {
         return this.handleSwapRequest(request as SwapRequest);
       case 'pri(swapService.getLatestQuote)':
         return this.getLatestSwapQuote(request as SwapRequest);
+      case 'pri(swapService.validateSwapProcess)':
+        return this.validateSwapProcess(request as ValidateSwapProcessParams);
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

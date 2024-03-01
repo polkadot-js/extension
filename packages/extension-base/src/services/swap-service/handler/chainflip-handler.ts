@@ -4,10 +4,11 @@
 import { Asset, SwapSDK } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 interface ChainflipPreValidationMetadata {
@@ -22,7 +23,6 @@ enum ChainflipFeeType {
   LIQUIDITY = 'LIQUIDITY'
 }
 
-const CHAINFLIP_QUOTE_TIMEOUT = 30000;
 const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
@@ -197,7 +197,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         toAmount: quoteResponse.quote.egressAmount.toString(),
         rate: calculateSwapRate(request.fromAmount, quoteResponse.quote.egressAmount.toString(), fromAsset, toAsset),
         provider: this.providerInfo,
-        aliveUntil: +Date.now() + CHAINFLIP_QUOTE_TIMEOUT,
+        aliveUntil: +Date.now() + SWAP_QUOTE_TIMEOUT_MAP[this.slug],
         minSwap: metadata.minSwap,
         maxSwap: metadata.maxSwap,
         feeInfo: {
@@ -217,18 +217,34 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
   }
 
+  public validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+    return Promise.resolve([]);
+  }
+
   generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
     const result: OptimalSwapPath = {
       totalFee: [MOCK_SWAP_FEE],
       steps: [DEFAULT_SWAP_FIRST_STEP]
     };
 
-    result.totalFee.push(params.selectedQuote.feeInfo);
-    result.steps.push({
-      id: result.steps.length,
-      name: 'Swap',
-      type: SwapStepType.SWAP
-    });
+    if (params.selectedQuote) {
+      result.totalFee.push(params.selectedQuote.feeInfo);
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Swap',
+        type: SwapStepType.SWAP
+      });
+    } else { // todo: improve this
+      result.totalFee.push({
+        feeComponent: [],
+        defaultFeeToken: params.request.pair.from
+      });
+      result.steps.push({
+        id: result.steps.length,
+        name: 'Swap',
+        type: SwapStepType.SWAP
+      });
+    }
 
     return Promise.resolve(result);
   }

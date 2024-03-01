@@ -20,7 +20,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     handleSwapRequest({
       address: '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
       pair: swapPairs[0],
-      fromAmount: '40000000000',
+      fromAmount: '4000',
       slippage: 0.05
     }).then((result) => {
       console.log('swap result', result);

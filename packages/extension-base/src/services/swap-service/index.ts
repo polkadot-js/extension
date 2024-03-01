@@ -12,7 +12,8 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
-import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult } from '@subwallet/extension-base/types/swap';
+import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -64,14 +65,37 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     return availableQuotes; // todo: need to propagate error for further handling
   }
 
-  public async generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
-    const providerId = params.selectedQuote.provider.id;
-    const handler = this.handlers[providerId];
+  private getDefaultProcess (params: OptimalSwapPathParams): OptimalSwapPath {
+    const result: OptimalSwapPath = {
+      totalFee: [MOCK_SWAP_FEE],
+      steps: [DEFAULT_SWAP_FIRST_STEP]
+    };
 
-    if (handler) {
-      return handler.generateOptimalProcess(params);
+    result.totalFee.push({
+      feeComponent: [],
+      defaultFeeToken: params.request.pair.from
+    });
+    result.steps.push({
+      id: result.steps.length,
+      name: 'Swap',
+      type: SwapStepType.SWAP
+    });
+
+    return result;
+  }
+
+  public async generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+    if (!params.selectedQuote) {
+      return this.getDefaultProcess(params);
     } else {
-      throw new TransactionError(BasicTxErrorType.INTERNAL_ERROR);
+      const providerId = params.selectedQuote.provider.id;
+      const handler = this.handlers[providerId];
+
+      if (handler) {
+        return handler.generateOptimalProcess(params);
+      } else {
+        return this.getDefaultProcess(params);
+      }
     }
   }
 
@@ -98,11 +122,14 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   public async getLatestQuotes (request: SwapRequest): Promise<SwapQuoteResponse> {
     const quoteAskResponses = await this.askProvidersForQuote(request);
 
+    // todo: handle error to return back to UI
     // todo: more logic to select the best quote
+
     const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote);
-    const selectedQuote = quoteAskResponses[0]?.quote as SwapQuote;
+
+    const selectedQuote = quoteAskResponses[0]?.quote;
     const quoteError = quoteAskResponses[0]?.error as SwapError;
-    const aliveUntil = selectedQuote.aliveUntil;
+    const aliveUntil = selectedQuote?.aliveUntil ?? (+Date.now() + SWAP_QUOTE_TIMEOUT_MAP.default);
 
     return {
       optimalQuote: selectedQuote,
@@ -191,6 +218,21 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
         to: assetRef.destAsset
       } as SwapPair;
     });
+  }
+
+  public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+    const providerId = params.selectedQuote.provider.id;
+    const handler = this.handlers[providerId];
+
+    if (handler) {
+      return handler.validateSwapProcess(params);
+    } else {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+  }
+
+  public async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+
   }
 
   public subscribeSwapPairs () {

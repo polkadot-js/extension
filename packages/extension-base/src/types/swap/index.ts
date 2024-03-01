@@ -3,6 +3,8 @@
 
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import {TransactionData} from "@subwallet/extension-base/types";
+import {ExtrinsicType} from "@subwallet/extension-base/background/KoniTypes";
 
 export type SwapRate = number;
 
@@ -63,26 +65,36 @@ export enum SwapErrorType {
 
 export interface SwapRequestResult {
   process: OptimalSwapPath;
-  quote?: SwapQuoteResponse;
+  quote: SwapQuoteResponse;
 }
 
 export interface SwapQuoteResponse {
-  optimalQuote: SwapQuote;
+  optimalQuote?: SwapQuote; // if no optimalQuote then there's an error
   quotes: SwapQuote[];
   aliveUntil: number; // timestamp
   error?: SwapError; // only if there's no available quote
 }
 
-export interface SwapSubmitTransaction {
+export interface SwapSubmitParams {
+  process: OptimalSwapPath;
+  currentStep: number;
   quote: SwapQuote;
   address: string;
   slippage: number; // Example: 0.01 for 1%
   recipient?: string;
 }
 
+export interface SwapSubmitStepData {
+  txChain: string;
+  txData: any;
+  extrinsic: TransactionData;
+  transferNativeAmount: string;
+  extrinsicType: ExtrinsicType;
+}
+
 export interface OptimalSwapPathParams {
   request: SwapRequest;
-  selectedQuote: SwapQuote;
+  selectedQuote?: SwapQuote;
 }
 
 export enum SwapStepType {
@@ -126,6 +138,12 @@ export enum SwapProviderId {
 export interface SwapEarlyValidation {
   error?: SwapErrorType;
   metadata?: unknown;
+}
+
+export interface ValidateSwapProcessParams {
+  address: string;
+  path: OptimalSwapPath;
+  selectedQuote: SwapQuote;
 }
 
 export const _SUPPORTED_SWAP_PROVIDERS = ['CHAIN_FLIP'];

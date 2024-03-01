@@ -38,11 +38,16 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
+  private useOnlineCacheOnly = true;
 
   constructor (state: KoniState) {
     this.state = state;
     this.dbService = state.dbService;
     this.eventService = state.eventService;
+  }
+
+  public disableOnlineCacheOnly () {
+    this.useOnlineCacheOnly = false;
   }
 
   private async initHandlers () {
@@ -295,11 +300,12 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   public async getYieldPool (slug: string): Promise<YieldPoolInfo | undefined> {
     await this.eventService.waitEarningReady;
+    const poolInfoMap = this.yieldPoolInfoSubject.getValue();
 
-    return this.yieldPoolInfoSubject.getValue()[slug];
+    return poolInfoMap[slug];
   }
 
-  public async subscribePoolsInfo (callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
+  public async subscribePoolsInfo (onlineData: Record<string, YieldPoolInfo>, callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
     await this.eventService.waitChainReady;
@@ -307,15 +313,20 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      handler.subscribePoolInfo(callback)
-        .then((unsub) => {
-          if (!cancel) {
-            unsubList.push(unsub);
-          } else {
-            unsub();
-          }
-        })
-        .catch(console.error);
+      // Force subscribe onchain data
+      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING;
+
+      if (!this.useOnlineCacheOnly || forceSubscribe) {
+        handler.subscribePoolInfo(callback)
+          .then((unsub) => {
+            if (!cancel) {
+              unsubList.push(unsub);
+            } else {
+              unsub();
+            }
+          })
+          .catch(console.error);
+      }
     }
 
     return () => {
@@ -382,6 +393,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
     Object.values(onlineData).forEach((item) => {
       this.updateYieldPoolInfo(item);
     });
+
+    return onlineData;
   }
 
   private yieldPoolsInfoUnsub: VoidFunction | undefined;
@@ -391,14 +404,14 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribePoolsInfo();
 
     // Fetching online data
-    this.fetchingPoolsInfoOnline().catch(console.error);
+    const onlineData = await this.fetchingPoolsInfoOnline();
 
     const interval = setInterval(() => {
       this.fetchingPoolsInfoOnline().catch(console.error);
     }, CRON_REFRESH_CHAIN_STAKING_METADATA);
 
     // Fetching from chains
-    this.subscribePoolsInfo((data) => {
+    this.subscribePoolsInfo(onlineData, (data) => {
       data.lastUpdated = Date.now();
       this.updateYieldPoolInfo(data);
     }).then((rs) => {
@@ -772,15 +785,20 @@ export default class EarningService implements StoppableServiceInterface, Persis
    * @return {Promise<YieldPoolTarget[]>} List of pool's target
    * */
   public async getPoolTargets (slug: string): Promise<YieldPoolTarget[]> {
-    await this.eventService.waitChainReady;
+    let targets: YieldPoolTarget[] = [];
+
+    if (this.useOnlineCacheOnly) {
+      targets = await fetchStaticCache(`earning/targets/${slug}.json`, []);
+    }
 
     const handler = this.getPoolHandler(slug);
 
-    if (handler) {
-      return await handler.getPoolTargets();
-    } else {
-      return [];
+    if (!targets.length && handler) {
+      await this.eventService.waitChainReady;
+      targets = await handler.getPoolTargets();
     }
+
+    return targets;
   }
 
   /* Get pool's targets */

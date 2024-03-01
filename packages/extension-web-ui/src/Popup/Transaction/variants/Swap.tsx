@@ -178,9 +178,11 @@ const Component = () => {
 
   const onSelectQuote = useCallback((quote: SwapQuote) => {
     setCurrentQuote(quote);
+    setFeeOptions(quote.feeInfo.feeOptions);
+    setCurrentFeeOption(quote.feeInfo.feeOptions?.[0]);
   }, []);
 
-  const onSelectFeeOptions = useCallback((slug: string) => {
+  const onSelectFeeOption = useCallback((slug: string) => {
     setCurrentFeeOption(slug);
   }, []);
   const onSelectSlippage = useCallback((slippage: number) => {
@@ -225,6 +227,7 @@ const Component = () => {
               setCurrentFeeOption(result.quote.optimalQuote.feeInfo.feeOptions?.[0]);
             } else {
               setCurrentQuote(undefined);
+              setQuoteAliveUntil(Date.now() + 300000);
             }
           }
         }).catch((e) => {
@@ -647,7 +650,7 @@ const Component = () => {
         estimatedFee={getTotalConvertedBalance}
         items={feeOptions}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
-        onSelectItem={onSelectFeeOptions}
+        onSelectItem={onSelectFeeOption}
         selectedItem={currentFeeOption}
       />
       <SlippageModal

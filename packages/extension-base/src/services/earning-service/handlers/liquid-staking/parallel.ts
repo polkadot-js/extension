@@ -26,7 +26,7 @@ export default class ParallelLiquidStakingPoolHandler extends BaseLiquidStakingP
   protected readonly inputAsset: string = 'parallel-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['parallel-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['parallel-NATIVE-PARA'];
-  public override readonly minAmountPercent = 0.97;
+  public override readonly minAmountPercent = 0.96;
   protected readonly rateDecimals = 18;
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,

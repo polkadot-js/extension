@@ -162,6 +162,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
       const balances = _balances as unknown as TokenBalanceRaw[];
       const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
+      // This rate is multiple with decimals
       const exchangeRate = await this.getExchangeRate();
       const decimals = BN_TEN.pow(new BN(this.rateDecimals));
 
@@ -177,8 +178,11 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
+          // If withdrawable = false, redeem request is claimed
           const [redeemAmount, withdrawable] = redeemRequest;
-          const amount = new BN(redeemAmount);
+
+          // Redeem amount in derivative token
+          const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
 
           totalBalance = totalBalance.add(amount);
           unlockingBalance = unlockingBalance.add(amount);
@@ -186,7 +190,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
           unstakings.push({
             chain: this.chain,
             status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-            claimable: redeemAmount.toString()
+            claimable: amount.toString()
           });
         }
 
@@ -267,6 +271,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
   async handleYieldRedeem (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const substrateApi = await this.substrateApi.isReady;
     const weightedMinAmount = await this.createParamToRedeem(amount, address);
+    // const extrinsic = substrateApi.api.tx.stableAsset.swap(0, 1, 0, amount, weightedMinAmount);
     const extrinsic = substrateApi.api.tx.aggregatedDex.swapWithExactSupply(
       // Swap path
       [

@@ -135,6 +135,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
     const rate = parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio);
 
+    /** Special for bifrost, the rate is divined and unknown decimals to convert (asset decimal is 10 but the rate length is 18) */
     this.updateExchangeRate(rate);
 
     return {

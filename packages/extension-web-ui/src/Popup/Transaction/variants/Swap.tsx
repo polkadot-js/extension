@@ -219,16 +219,11 @@ const Component = () => {
 
         handleSwapRequest(currentRequest).then((result) => {
           if (sync) {
-            if (result.quote) {
-              setQuoteOptions(result.quote.quotes);
-              setCurrentQuote(result.quote.optimalQuote);
-              setQuoteAliveUntil(result.quote.aliveUntil);
-              setFeeOptions(result.quote.optimalQuote.feeInfo.feeOptions);
-              setCurrentFeeOption(result.quote.optimalQuote.feeInfo.feeOptions?.[0]);
-            } else {
-              setCurrentQuote(undefined);
-              setQuoteAliveUntil(Date.now() + 300000);
-            }
+            setQuoteOptions(result.quote.quotes);
+            setCurrentQuote(result.quote.optimalQuote);
+            setQuoteAliveUntil(result.quote.aliveUntil);
+            setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
+            setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
           }
         }).catch((e) => {
           console.log('handleSwapRequest error', e);

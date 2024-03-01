@@ -5,12 +5,14 @@ import { BaseModal } from '@subwallet/extension-web-ui/components';
 import ChooseFeeItem from '@subwallet/extension-web-ui/components/Field/Swap/ChooseFeeItem';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ModalContext, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  modalId: string
+  modalId: string,
+  estimatedFee: string | number | BigN
 }
 const fakedatas =
   [{
@@ -37,7 +39,7 @@ const fakedatas =
   ];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, modalId } = props;
+  const { className, estimatedFee, modalId } = props;
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -60,11 +62,11 @@ const Component: React.FC<Props> = (props: Props) => {
             <span className={'__title'}>Estimated  fee</span>
             <Number
               className={'__value'}
-              decimal={3}
+              decimal={0}
               decimalOpacity={0.45}
               prefix={'$'}
               size={30}
-              value={1092}
+              value={estimatedFee}
             />
             <span className={'__pay-with'}>Pay with token:</span>
           </div>

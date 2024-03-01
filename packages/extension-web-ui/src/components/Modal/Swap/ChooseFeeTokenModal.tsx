@@ -12,34 +12,14 @@ import styled from 'styled-components';
 
 type Props = ThemeProps & {
   modalId: string,
-  estimatedFee: string | number | BigN
+  estimatedFee: string | number | BigN,
+  items: string[] | undefined,
+  onSelectItem: (slug: string) => void,
+  selectedItem?: string,
 }
-const fakedatas =
-  [{
-    slug: 'polkadot-NATIVE-DOT',
-    symbol: 'DOT',
-    haveToPay: '100',
-    availableBalance: '500',
-    selected: true
-  },
-  {
-    slug: 'kusama-NATIVE-KSM',
-    symbol: 'KSM',
-    haveToPay: '100',
-    availableBalance: '500',
-    selected: false
-  },
-  {
-    slug: 'aleph-NATIVE-AZERO',
-    symbol: 'AZERO',
-    haveToPay: '100',
-    availableBalance: '500',
-    selected: true
-  }
-  ];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, estimatedFee, modalId } = props;
+  const { className, estimatedFee, items, modalId, onSelectItem, selectedItem } = props;
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -70,14 +50,15 @@ const Component: React.FC<Props> = (props: Props) => {
             />
             <span className={'__pay-with'}>Pay with token:</span>
           </div>
-          {fakedatas.map((fakedata, index) => (
+          {items && items.map((item, index) => (
             <ChooseFeeItem
-              availableBalance={fakedata.availableBalance}
-              haveToPay={fakedata.haveToPay}
+              availableBalance={'100'}
+              haveToPay={'100'}
               key={index}
-              selected={fakedata.selected}
-              slug={fakedata.slug}
-              symbol={fakedata.symbol}
+              onSelect={onSelectItem}
+              selected={!!selectedItem}
+              slug={item}
+              symbol={'DOT'}
             />
           ))}
         </div>

@@ -10,17 +10,18 @@ import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  modalId: string
+  modalId: string,
+  onApplySlippage?: (slippage: number) => void
 }
-const SLIPPAGE_TOLERANCE = {
-  option_1: 0.5,
-  option_2: 1,
-  option_3: 2
+const SLIPPAGE_TOLERANCE: Record<string, number> = {
+  option_1: 0.005,
+  option_2: 0.01,
+  option_3: 0.02
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, modalId } = props;
-  const [selectedSlippage, setSelectedSlippage] = useState<string>('');
+  const { className, modalId, onApplySlippage } = props;
+  const [selectedSlippage, setSelectedSlippage] = useState<string>('option_3');
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -33,6 +34,13 @@ const Component: React.FC<Props> = (props: Props) => {
       setSelectedSlippage(item);
     };
   }, []);
+
+  const handleApplySlippage = useCallback(() => {
+    inactiveModal(modalId);
+    onApplySlippage?.(SLIPPAGE_TOLERANCE[selectedSlippage]);
+  }, [inactiveModal, modalId, onApplySlippage, selectedSlippage]);
+
+  console.log('selectedSlippage', selectedSlippage);
 
   return (
     <>
@@ -67,7 +75,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   weight={'fill'}
                 />
               )}
-              onClick={onCancel}
+              onClick={handleApplySlippage}
             >
               {'Apply'}
             </Button>
@@ -89,7 +97,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   onClick={handleSelectSlippage(key)}
                   type='ghost'
                 >
-                  {value}%
+                  {value * 100}%
                 </Button>
               </div>
             ))}

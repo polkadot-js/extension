@@ -85,6 +85,9 @@ const Component = () => {
   const [quoteAliveUntil, setQuoteAliveUntil] = useState<number | undefined>(undefined);
   const [quoteCountdownTime, setQuoteCountdownTime] = useState<number>(0);
   const [currentQuoteRequest, setCurrentQuoteRequet] = useState<SwapRequest | undefined>(undefined);
+  const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
+  const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
+  const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
 
@@ -133,6 +136,10 @@ const Component = () => {
     return assetRegistryMap[toTokenSlugValue] || undefined;
   }, [assetRegistryMap, toTokenSlugValue]);
 
+  const feeAssetInfo = useMemo(() => {
+    return (currentFeeOption ? assetRegistryMap[currentFeeOption] : undefined);
+  }, [assetRegistryMap, currentFeeOption]);
+
   const recipientAddressValidator = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
       return Promise.reject(t('Recipient address is required'));
@@ -173,6 +180,13 @@ const Component = () => {
     setCurrentQuote(quote);
   }, []);
 
+  const onSelectFeeOptions = useCallback((slug: string) => {
+    setCurrentFeeOption(slug);
+  }, []);
+  const onSelectSlippage = useCallback((slippage: number) => {
+    setCurrentSlippage(slippage);
+  }, []);
+
   const onToggleFeeDetails = useCallback(() => {
     setIsViewFeeDetails((prev) => !prev);
   }, []);
@@ -207,6 +221,8 @@ const Component = () => {
               setQuoteOptions(result.quote.quotes);
               setCurrentQuote(result.quote.optimalQuote);
               setQuoteAliveUntil(result.quote.aliveUntil);
+              setFeeOptions(result.quote.optimalQuote.feeInfo.feeOptions);
+              setCurrentFeeOption(result.quote.optimalQuote.feeInfo.feeOptions?.[0]);
             } else {
               setCurrentQuote(undefined);
             }
@@ -471,7 +487,7 @@ const Component = () => {
               onClick={onOpenSlippageModal}
             >
               <span>Slippage:</span>
-              &nbsp;<span>2%</span>
+              &nbsp;<span>{currentSlippage * 100}%</span>
               <div
                 className={'__slippage-editor-button'}
               >
@@ -610,7 +626,7 @@ const Component = () => {
 
                 <div className={'__separator'}></div>
                 <MetaInfo.Chain
-                  chain={'kusama'}
+                  chain={getOriginChain(feeAssetInfo)}
                   className='__item-fee-paid'
                   label={t('Fee paid in')}
                   onClickValue={openChooseFeeToken}
@@ -629,10 +645,14 @@ const Component = () => {
 
       <ChooseFeeTokenModal
         estimatedFee={getTotalConvertedBalance}
+        items={feeOptions}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
+        onSelectItem={onSelectFeeOptions}
+        selectedItem={currentFeeOption}
       />
       <SlippageModal
         modalId={SWAP_SLIPPAGE_MODAL}
+        onApplySlippage={onSelectSlippage}
       />
       <AddMoreBalanceModal
         modalId={SWAP_MORE_BALANCE_MODAL}

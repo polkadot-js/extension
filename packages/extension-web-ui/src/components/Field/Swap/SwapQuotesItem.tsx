@@ -27,7 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
     <>
       <div
         className={CN(className, 'swap-quotes-container')}
-        onSelect={_onSelect}
+        onClick={_onSelect}
       >
         <div className={'__left-part'}>
           <div className={'__line-1'}>

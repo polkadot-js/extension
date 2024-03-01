@@ -5,7 +5,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Icon, Logo } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -13,15 +13,22 @@ type Props = ThemeProps & {
   haveToPay: string,
   symbol: string;
   availableBalance: string,
-  selected?: boolean
+  selected?: boolean,
+  onSelect?: (slug: string) => void,
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { availableBalance, className, haveToPay, selected, slug, symbol } = props;
+  const { availableBalance, className, haveToPay, onSelect, selected, slug, symbol } = props;
+  const _onSelect = useCallback(() => {
+    onSelect?.(slug);
+  }, [onSelect, slug]);
 
   return (
     <>
-      <div className={CN(className, '__choose-fee-item-wrapper')}>
+      <div
+        className={CN(className, '__choose-fee-item-wrapper')}
+        onClick={_onSelect}
+      >
         <div className={'__left-part'}>
           <Logo
             className='token-logo'

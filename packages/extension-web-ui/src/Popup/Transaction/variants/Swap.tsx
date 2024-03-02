@@ -18,7 +18,8 @@ import { useSelector, useTransactionContext, useWatchTransaction } from '@subwal
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
-import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
+import { EarnParams, FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
+import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
 import { BackgroundIcon, Button, Form, Icon, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -73,7 +74,7 @@ function getOriginChain (assetInfo?: _ChainAsset) {
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { defaultData, onDone, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { defaultData, onDone, persistData, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
@@ -213,6 +214,12 @@ const Component = () => {
       });
     }
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
+
+  const onFieldsChange: FormCallbacks<EarnParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
+    const values = convertFieldToObject<EarnParams>(allFields);
+
+    persistData(values);
+  }, [persistData]);
 
   useEffect(() => {
     form.setFieldValue('chain', getOriginChain(fromAssetInfo));
@@ -624,6 +631,7 @@ const Component = () => {
               className={'form-container'}
               form={form}
               initialValues={formDefault}
+              onFieldsChange={onFieldsChange}
               onFinish={onSubmit}
             >
               <HiddenInput fields={hideFields} />

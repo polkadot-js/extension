@@ -7,6 +7,9 @@ import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-serv
 import { SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
+export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
+export const CHAIN_FLIP_MAINNET_EXPLORER = 'https://scan.chainflip.io';
+
 export const CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING: Record<string, Chain> = {
   polkadot: Chains.Polkadot,
   ethereum: Chains.Ethereum,

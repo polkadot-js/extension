@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SwapRoute as SwapRouteType } from '@subwallet/extension-base/types/swap';
-import { TokenItemType } from '@subwallet/extension-web-ui/components';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Logo } from '@subwallet/react-ui';

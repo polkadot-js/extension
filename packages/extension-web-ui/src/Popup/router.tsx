@@ -143,7 +143,6 @@ const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResul
 const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-web-ui/Popup/MissionPool'));
 
 const Swap = new LazyLoader('Swap', () => import('@subwallet/extension-web-ui/Popup/Home/Swap'));
-const SwapTest = new LazyLoader('SwapTest', () => import('@subwallet/extension-web-ui/Popup/Home/SwapTest'));
 
 /* 404 */
 

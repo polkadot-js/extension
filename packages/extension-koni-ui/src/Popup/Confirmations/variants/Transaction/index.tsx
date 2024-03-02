@@ -70,6 +70,7 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return DefaultWithdrawTransactionConfirmation;
     case ExtrinsicType.TOKEN_APPROVE:
       return TokenApproveConfirmation;
+    case ExtrinsicType.SWAP:
     case ExtrinsicType.CROWDLOAN:
     case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
     case ExtrinsicType.STAKING_COMPOUNDING:

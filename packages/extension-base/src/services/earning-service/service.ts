@@ -161,9 +161,11 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.handleActions();
   }
 
+  private delayReloadTimeout: NodeJS.Timeout | undefined;
+
   handleActions () {
     this.eventService.onLazy((events, eventTypes) => {
-      let needReload = false;
+      let delayReload = false;
 
       (async () => {
         const removedAddresses: string[] = [];
@@ -192,8 +194,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
               ExtrinsicType.CROWDLOAN
             ];
 
-            if (!notRequireReloadTypes.indexOf(transactionData.extrinsicType)) {
-              needReload = true;
+            if (notRequireReloadTypes.indexOf(transactionData.extrinsicType) === -1) {
+              delayReload = true;
             }
           }
         });
@@ -205,8 +207,16 @@ export default class EarningService implements StoppableServiceInterface, Persis
         // Account changed or chain changed (active or inactive)
         // Chain changed (active or inactive)
         // Todo: Optimize performance of chain active or inactive in the future
-        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState') || needReload) {
-          await this.reloadEarning();
+        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState') || delayReload) {
+          if (delayReload) {
+            this.delayReloadTimeout = setTimeout(() => {
+              this.reloadEarning().catch(console.error); // Timeout is removed inside reloadEarning > runUnsubscribePoolsPosition
+            }, 3000);
+          } else {
+            this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+            this.delayReloadTimeout = undefined;
+            await this.reloadEarning();
+          }
         }
       })().catch(console.error);
     });
@@ -609,6 +619,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.yieldPositionUnsub?.();
     removeLazy('persistYieldPositionInfo');
     this.yieldPositionPersistQueue = [];
+
+    // Remove delay reload
+    this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+    this.delayReloadTimeout = undefined;
   }
 
   /* Pools' position methods */

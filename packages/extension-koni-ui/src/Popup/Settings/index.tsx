@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { DISCORD_URL, EXTENSION_VERSION, PRIVACY_AND_POLICY_URL, SUPPORT_MAIL, TELEGRAM_URL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { EXTENSION_VERSION, SUPPORT_MAIL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -11,9 +12,10 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Button, ButtonProps, Icon, SettingItem, SwHeader, SwIconProps } from '@subwallet/react-ui';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, BookOpen, CaretRight, ChatTeardropText, Coin, DiscordLogo, FrameCorners, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, TelegramLogo, TwitterLogo, X } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
+import CN from 'classnames';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -65,6 +67,8 @@ function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode 
   );
 }
 
+const modalId = 'about-subwallet-modal';
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -73,6 +77,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { goHome } = useDefaultNavigate();
   const { t } = useTranslation();
   const [locking, setLocking] = useState(false);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   const { isUILocked, lock, unlock } = useUILock();
 
@@ -132,15 +137,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/security', { state: true });
           }
-        },
+        }
+      ]
+    },
+    {
+      key: 'website-access',
+      label: t('Website access'),
+      items: [
         {
-          key: 'manage-address-book',
-          leftIcon: BookBookmark,
-          leftIconBgColor: token['blue-6'],
+          key: 'manage-website-access',
+          leftIcon: GlobeHemisphereEast,
+          leftIconBgColor: token['blue-7'],
           rightIcon: CaretRight,
-          title: t('Manage address book'),
+          title: t('Manage website access'),
           onClick: () => {
-            navigate('/settings/address-book');
+            navigate('/settings/dapp-access');
           }
         },
         {
@@ -161,8 +172,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       ]
     },
     {
-      key: 'networks-&-tokens',
-      label: t('Networks & tokens'),
+      key: 'assets-&-addresses',
+      label: t('Assets & addresses'),
       items: [
         {
           key: 'manage-networks',
@@ -183,6 +194,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/tokens/manage');
           }
+        },
+        {
+          key: 'manage-address-book',
+          leftIcon: BookBookmark,
+          leftIconBgColor: token['blue-6'],
+          rightIcon: CaretRight,
+          title: t('Manage address book'),
+          onClick: () => {
+            navigate('/settings/address-book');
+          }
         }
       ]
     },
@@ -190,6 +211,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       key: 'community-&-support',
       label: t('Community & support'),
       items: [
+        {
+          key: 'contact-support',
+          leftIcon: EnvelopeSimple,
+          leftIconBgColor: token['geekblue-6'],
+          rightIcon: ArrowSquareOut,
+          title: t('Contact support'),
+          onClick: () => {
+            window.open(`${SUPPORT_MAIL}?subject=[In-app Support]`, '_self');
+          }
+        },
+        {
+          key: 'user-manual',
+          leftIcon: Book,
+          leftIconBgColor: token['green-6'],
+          rightIcon: ArrowSquareOut,
+          title: t('User guide'),
+          onClick: openInNewTab(WIKI_URL)
+        },
         {
           key: 'request-a-feature',
           leftIcon: ChatTeardropText,
@@ -201,70 +240,63 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }
         },
         {
-          key: 'twitter',
-          leftIcon: TwitterLogo,
-          leftIconBgColor: token['blue-6'],
-          rightIcon: ArrowSquareOut,
-          title: t('Twitter'),
-          onClick: openInNewTab(TWITTER_URL)
-        },
-        {
-          key: 'discord',
-          leftIcon: DiscordLogo,
-          leftIconBgColor: token['geekblue-8'],
-          rightIcon: ArrowSquareOut,
-          title: t('Discord'),
-          onClick: openInNewTab(DISCORD_URL)
-        },
-        {
-          key: 'telegram',
-          leftIcon: TelegramLogo,
-          leftIconBgColor: token['blue-5'],
-          rightIcon: ArrowSquareOut,
-          title: t('Telegram'),
-          onClick: openInNewTab(TELEGRAM_URL)
+          key: 'about-subwallet',
+          leftIcon: (
+            <Image
+              className='__subwallet-logo'
+              height={24}
+              shape='squircle'
+              src={DefaultLogosMap.subwallet}
+              width={24}
+            />
+          ),
+          leftIconBgColor: token['magenta-7'],
+          rightIcon: CaretRight,
+          title: t('About SubWallet'),
+          onClick: () => {
+            activeModal(modalId);
+          }
         }
-      ]
-    },
-    {
-      key: 'about',
-      label: t('About SubWallet'),
-      items: [
-        {
-          key: 'website',
-          leftIcon: ShieldCheck,
-          leftIconBgColor: token['red-6'],
-          rightIcon: ArrowSquareOut,
-          title: t('Website'),
-          onClick: openInNewTab(WEBSITE_URL)
-        },
-        {
-          key: 'user-manual',
-          leftIcon: Book,
-          leftIconBgColor: token['green-6'],
-          rightIcon: ArrowSquareOut,
-          title: t('User guide'),
-          onClick: openInNewTab(WIKI_URL)
-        },
-        {
-          key: 'term-of-service',
-          leftIcon: BookOpen,
-          leftIconBgColor: token['volcano-7'],
-          rightIcon: ArrowSquareOut,
-          title: t('Terms of service'),
-          onClick: openInNewTab(TERMS_OF_SERVICE_URL)
-        },
-        {
-          key: 'privacy-policy',
-          leftIcon: BookBookmark,
-          leftIconBgColor: token['geekblue-6'],
-          rightIcon: ArrowSquareOut,
-          title: t('Privacy policy'),
-          onClick: openInNewTab(PRIVACY_AND_POLICY_URL)
-        }
+
       ]
     }
-  ]), [isPopup, navigate, t, token]);
+  ]), [activeModal, isPopup, navigate, t, token]);
+
+  const aboutSubwalletType = useMemo<SettingItemType[]>(() => {
+    return [
+      {
+        key: 'website',
+        leftIcon: Globe,
+        rightIcon: ArrowSquareOut,
+        leftIconBgColor: token['purple-7'],
+        title: t('Website'),
+        onClick: openInNewTab(WEBSITE_URL)
+      },
+      {
+        key: 'terms-of-use',
+        leftIcon: BookBookmark,
+        rightIcon: ArrowSquareOut,
+        leftIconBgColor: token['volcano-7'],
+        title: t('Terms of use'),
+        onClick: openInNewTab(TERMS_OF_SERVICE_URL)
+      },
+      {
+        key: 'x',
+        leftIcon: (
+          <Image
+            height={24}
+            shape='squircle'
+            src={DefaultLogosMap.xtwitter}
+            width={24}
+          />
+        ),
+        rightIcon: ArrowSquareOut,
+        leftIconBgColor: token.colorBgSecondary,
+        title: t('X (Twitter)'),
+        onClick: openInNewTab(TWITTER_URL)
+      }
+    ];
+  }, [t, token]);
 
   const headerIcons = useMemo<ButtonProps[]>(() => {
     return [
@@ -282,10 +314,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [goHome]);
 
+  const closeModal = useCallback(() => {
+    inactiveModal(modalId);
+  }, [inactiveModal]);
+
   return (
     <PageWrapper className={`settings ${className}`}>
       <>
         <SwHeader
+          className={'setting-header'}
           left='logo'
           onClickLeft={goHome}
           rightButtons={headerIcons}
@@ -309,7 +346,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                       ? null
                       : (
                         <SettingItem
-                          className={'__setting-item'}
+                          className={'__setting-item setting-item'}
                           key={item.key}
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                           name={item.title}
@@ -343,8 +380,31 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           SubWallet v {EXTENSION_VERSION}
           </div>
         </div>
-
         <Outlet />
+        <SwModal
+          className={CN(className, 'about-subwallet-modal')}
+          id={modalId}
+          onCancel={closeModal}
+          title={t('About SubWallet')}
+        >
+          {aboutSubwalletType.map((item) => (
+            <div
+              className='about-subwallet-item'
+              key={item.key}
+            >
+              <div className=''>
+                <SettingItem
+                  className='__setting-about-item setting-item'
+                  key={item.key}
+                  leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
+                  name={item.title}
+                  onPressItem={item.onClick}
+                  rightItem={generateRightIcon(item.rightIcon)}
+                />
+              </div>
+            </div>
+          ))}
+        </SwModal>
       </>
     </PageWrapper>
   );
@@ -352,68 +412,88 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
 export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    height: '100%',
-    backgroundColor: token.colorBgDefault,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-
-    '.ant-sw-header-container': {
-      paddingTop: token.padding,
-      paddingBottom: token.padding,
-      backgroundColor: token.colorBgDefault
-    },
-
-    '.ant-sw-header-center-part': {
-      color: token.colorTextLight1,
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
-      fontWeight: token.headingFontWeight
-    },
-
-    '.__scroll-container': {
-      overflow: 'auto',
-      paddingTop: token.padding,
-      paddingRight: token.padding,
-      paddingLeft: token.padding,
-      paddingBottom: token.paddingLG
-    },
-
-    '.__group-label': {
-      color: token.colorTextLight3,
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM,
-      marginBottom: token.margin,
-      textTransform: 'uppercase'
-    },
-
-    '.__group-container': {
-      paddingBottom: token.paddingLG
-    },
-
-    '.__setting-item + .__setting-item': {
-      marginTop: token.marginXS
-    },
-
-    '.ant-web3-block-right-item': {
-      minWidth: 40,
+    '&.settings': {
+      height: '100%',
+      backgroundColor: token.colorBgDefault,
       display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: -token.marginXS,
-      color: token['gray-4']
-    },
+      flexDirection: 'column',
+      overflow: 'hidden',
 
-    '.__setting-item:hover .ant-web3-block-right-item': {
-      color: token['gray-6']
-    },
+      '.ant-sw-header-container': {
+        paddingTop: token.padding,
+        paddingBottom: token.padding,
+        backgroundColor: token.colorBgDefault
+      },
+      '.__setting-item': {
+        height: 52,
+        display: 'flex',
+        alignItems: 'center'
+      },
 
-    '.__version': {
-      paddingTop: token.padding,
-      textAlign: 'center',
-      color: token.colorTextLight3,
-      fontSize: token.size,
-      lineHeight: token.lineHeight
+      '.ant-sw-header-center-part': {
+        color: token.colorTextLight1,
+        fontSize: token.fontSizeHeading4,
+        lineHeight: token.lineHeightHeading4,
+        fontWeight: token.headingFontWeight
+      },
+
+      '.__scroll-container': {
+        overflow: 'auto',
+        paddingTop: token.padding,
+        paddingRight: token.padding,
+        paddingLeft: token.padding,
+        paddingBottom: token.paddingLG
+      },
+
+      '.__group-label': {
+        color: token.colorTextLight3,
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM,
+        marginBottom: token.marginXS,
+        textTransform: 'uppercase'
+      },
+
+      '.__group-container': {
+        paddingBottom: token.padding
+      },
+
+      '.__setting-item + .__setting-item': {
+        marginTop: token.marginXS
+      },
+
+      '.ant-web3-block-right-item': {
+        minWidth: 40,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        color: token['gray-4']
+      },
+
+      '.__setting-item:hover .ant-web3-block-right-item': {
+        color: token['gray-6']
+      },
+
+      '.__version': {
+        paddingTop: token.padding,
+        textAlign: 'center',
+        color: token.colorTextLight3,
+        fontSize: token.size,
+        lineHeight: token.lineHeight
+      },
+      '.__subwallet-logo': {
+        borderRadius: '50%'
+      }
+    },
+    '&.about-subwallet-modal': {
+      '.__setting-about-item': {
+        marginBottom: 8
+      },
+      '.ant-web3-block-right-item': {
+        display: 'flex',
+        minWidth: 40,
+        justifyContent: 'center',
+        alignContent: 'center'
+      }
     }
   });
 });

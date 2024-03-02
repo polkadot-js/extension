@@ -10,7 +10,7 @@ import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { subscribeERC20Interval } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, PalletNominationPoolsPoolMember, TokenBalanceRaw } from '@subwallet/extension-base/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -30,6 +30,7 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
   let unsubLocalToken: () => void;
   let unsubEvmContractToken: () => void;
   let unsubWasmContractToken: () => void;
+  let unsubBridgedToken: () => void;
 
   try {
     if (_BALANCE_CHAIN_GROUP.bifrost.includes(chain)) {
@@ -42,6 +43,10 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
       unsubLocalToken = await subscribeEquilibriumTokenBalance(addresses, chain, networkAPI.api, callBack, true);
     } else if (_BALANCE_CHAIN_GROUP.centrifuge.includes(chain)) {
       unsubLocalToken = await subscribeOrmlTokensPallet(addresses, chain, networkAPI.api, callBack);
+    }
+
+    if (_BALANCE_CHAIN_GROUP.supportBridged.includes(chain)) {
+      unsubBridgedToken = await subscribeBridgedBalance(addresses, chain, networkAPI.api, callBack);
     }
 
     if (_isChainEvmCompatible(chainInfo)) {
@@ -60,6 +65,7 @@ export async function subscribeSubstrateBalance (addresses: string[], chainInfo:
     unsubLocalToken && unsubLocalToken();
     unsubEvmContractToken && unsubEvmContractToken();
     unsubWasmContractToken && unsubWasmContractToken();
+    unsubBridgedToken && unsubBridgedToken();
   };
 }
 
@@ -133,6 +139,69 @@ async function subscribeWithSystemAccountPallet (addresses: string[], chainInfo:
 
   return () => {
     unsub();
+  };
+}
+
+async function subscribeBridgedBalance (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void) {
+  const tokenMap = state.getAssetByChainAndAsset(chain, [_AssetType.LOCAL]);
+
+  // @ts-ignore
+  const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
+    try {
+      const isBridgedToken = _isBridgedToken(tokenInfo);
+
+      if (isBridgedToken) {
+        const multiLocation = _getXcmAssetMultilocation(tokenInfo);
+
+        return await api.query.foreignAssets.account.multi(addresses.map((address) => [multiLocation, address]), (balances) => {
+          const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
+            const bdata = balance?.toHuman();
+
+            let frozen = BN_ZERO;
+            let total = BN_ZERO;
+
+            if (bdata) {
+              // @ts-ignore
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
+              const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
+
+              // @ts-ignore
+              if (bdata?.isFrozen) {
+                frozen = addressBalance;
+              } else {
+                total = addressBalance;
+              }
+            }
+
+            const free = total.sub(frozen);
+
+            return {
+              address: addresses[index],
+              tokenSlug: tokenInfo.slug,
+              free: free.toString(),
+              locked: frozen.toString(),
+              state: APIItemState.READY,
+              substrateInfo: {
+                miscFrozen: frozen.toString(),
+                reserved: '0'
+              }
+            };
+          });
+
+          callBack(items);
+        });
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+
+    return undefined;
+  }));
+
+  return () => {
+    unsubList.forEach((unsub) => {
+      unsub && unsub();
+    });
   };
 }
 

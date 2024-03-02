@@ -32,10 +32,11 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude', 'continuum_network'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
-  centrifuge: ['centrifuge']
+  centrifuge: ['centrifuge'],
+  supportBridged: ['rococo_assethub']
 };
 
 export const _BALANCE_TOKEN_GROUP = {
@@ -50,7 +51,7 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network', 'quartz', 'opal'],
-  bitcountry: ['bitcountry', 'pioneer'],
+  bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
   vara: ['vara_network']
 };
 
@@ -74,6 +75,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shibuya: 24,
   bifrost_testnet: 0.5,
   bifrost: 2,
+  bifrost_dot: 24,
   ternoa: 24,
   calamari: 6,
   calamari_test: 6,
@@ -199,7 +201,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
-  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel'],
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest'],
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
@@ -237,7 +239,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 ];
 
 export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
-  arbitrum_one: ['*']
+  arbitrum_one: ['*'],
+  okxTest: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

@@ -30,6 +30,8 @@ export interface UnstakingInfo {
   claimable: string;
   /** Time remains to wait (in hours) */
   waitingTime?: number;
+  /** Timestamp to withdraw */
+  targetTimestampMs?: number;
   /** Address of validator */
   validatorAddress?: string;
 }

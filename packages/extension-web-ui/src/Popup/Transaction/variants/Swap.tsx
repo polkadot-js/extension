@@ -205,6 +205,15 @@ const Component = () => {
     form.setFieldValue('fromAmount', value);
   }, [form]);
 
+  const onSwitchSide = useCallback(() => {
+    if (fromTokenSlugValue && toTokenSlugValue) {
+      form.setFieldsValue({
+        fromTokenSlug: toTokenSlugValue,
+        toTokenSlug: fromTokenSlugValue
+      });
+    }
+  }, [form, fromTokenSlugValue, toTokenSlugValue]);
+
   useEffect(() => {
     let sync = true;
     let timeout: NodeJS.Timeout;
@@ -380,8 +389,10 @@ const Component = () => {
   }, [form, fromTokenItems, fromTokenSlugValue]);
 
   useEffect(() => {
-    if (!toTokenSlugValue && toTokenItems.length) {
-      form.setFieldValue('toTokenSlug', toTokenItems[0].slug);
+    if (toTokenItems.length) {
+      if (!toTokenSlugValue || !toTokenItems.some((t) => t.slug === toTokenSlugValue)) {
+        form.setFieldValue('toTokenSlug', toTokenItems[0].slug);
+      }
     }
   }, [form, toTokenItems, toTokenSlugValue]);
 
@@ -656,6 +667,7 @@ const Component = () => {
                         weight='fill'
                       />
                     )}
+                    onClick={onSwitchSide}
                     shape='circle'
                     size='xs'
                     type={'ghost'}

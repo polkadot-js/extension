@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { Asset, SwapSDK } from '@chainflip/sdk/swap';
+import { SwapSDK } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
@@ -11,7 +11,7 @@ import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/toke
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, chainFlipConvertChainId, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData } from '@subwallet/extension-base/types';
 import { ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
@@ -30,7 +30,8 @@ enum ChainflipFeeType {
   LIQUIDITY = 'LIQUIDITY'
 }
 
-const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+// const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
@@ -40,7 +41,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     super(providerSlug, providerName);
 
     this.swapSdk = new SwapSDK({
-      network: 'mainnet'
+      network: 'perseverance'
     });
     this.chainService = chainService;
   }
@@ -144,13 +145,19 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       return new SwapError(earlyValidation.error);
     }
 
+    const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[fromAsset.originChain];
+    const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[toAsset.originChain];
+
+    const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
+    const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+
     try {
       const quoteResponse = await this.swapSdk.getQuote({
-        srcChain: chainFlipConvertChainId(fromAsset.originChain),
-        amount: request.fromAmount,
-        destChain: chainFlipConvertChainId(toAsset.originChain),
-        srcAsset: fromAsset.symbol as Asset,
-        destAsset: toAsset.symbol as Asset
+        srcChain: srcChainId,
+        destChain: destChainId,
+        srcAsset: fromAssetId,
+        destAsset: toAssetId,
+        amount: request.fromAmount
       });
 
       const feeComponent: SwapFeeComponent[] = [];
@@ -225,16 +232,20 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     const chainType = _isSubstrateChain(chainInfo) ? ChainType.SUBSTRATE : ChainType.EVM;
     const receiver = recipient ?? address;
 
+    const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[fromAsset.originChain];
+    const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[toAsset.originChain];
+
+    const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
+    const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+
     const depositAddressResponse = await this.swapSdk.requestDepositAddress({
-      srcChain: chainFlipConvertChainId(fromAsset.originChain),
-      destChain: chainFlipConvertChainId(toAsset.originChain),
-      srcAsset: fromAsset.symbol as Asset,
-      destAsset: toAsset.symbol as Asset,
+      srcChain: srcChainId,
+      destChain: destChainId,
+      srcAsset: fromAssetId,
+      destAsset: toAssetId,
       destAddress: receiver,
       amount: quote.fromAmount
     });
-
-    console.log('depositAddressResponse', depositAddressResponse);
 
     const txData: ChainflipTxData = {
       address,

@@ -4,23 +4,24 @@
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import {SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType} from '@subwallet/extension-base/types/swap';
+import { SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
-
-export function chainFlipConvertChainId (chainSlug: string): Chain {
-  // todo: more logic here
-  return (chainSlug[0].toUpperCase() + chainSlug.slice(1)) as Chain;
-}
 
 export const CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING: Record<string, Chain> = {
   polkadot: Chains.Polkadot,
-  ethereum: Chains.Ethereum
+  ethereum: Chains.Ethereum,
+  ethereum_goerli: Chains.Ethereum,
+  chainflip_dot: Chains.Polkadot
 };
 
 export const CHAIN_FLIP_SUPPORTED_ASSET_MAPPING: Record<string, Asset> = {
   'polkadot-NATIVE-DOT': Assets.DOT,
   'ethereum-NATIVE-ETH': Assets.ETH,
-  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC,
+
+  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
+  'ethereum_goerli-NATIVE-GoerliETH': Assets.ETH,
+  'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC
 };
 
 export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in milliseconds

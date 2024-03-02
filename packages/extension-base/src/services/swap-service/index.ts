@@ -17,13 +17,37 @@ import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, Quot
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
+// const MOCK_ASSET_REF: Record<string, _AssetRef> = {
+//   'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
+//     path: _AssetRefPath.XCM,
+//     srcChain: 'polkadot',
+//     srcAsset: 'polkadot-NATIVE-DOT',
+//     destChain: 'ethereum',
+//     destAsset: 'ethereum-NATIVE-ETH'
+//   }
+// };
+
 const MOCK_ASSET_REF: Record<string, _AssetRef> = {
-  'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
+  'chainflip_dot-NATIVE-pDOT___ethereum_goerli-NATIVE-GoerliETH': {
     path: _AssetRefPath.XCM,
-    srcChain: 'polkadot',
-    srcAsset: 'polkadot-NATIVE-DOT',
-    destChain: 'ethereum',
-    destAsset: 'ethereum-NATIVE-ETH'
+    srcChain: 'chainflip_dot',
+    srcAsset: 'chainflip_dot-NATIVE-pDOT',
+    destChain: 'ethereum_goerli',
+    destAsset: 'ethereum_goerli-NATIVE-GoerliETH'
+  },
+  'ethereum_goerli-NATIVE-GoerliETH___chainflip_dot-NATIVE-pDOT': {
+    path: _AssetRefPath.XCM,
+    srcChain: 'ethereum_goerli',
+    srcAsset: 'ethereum_goerli-NATIVE-GoerliETH',
+    destChain: 'chainflip_dot',
+    destAsset: 'chainflip_dot-NATIVE-pDOT'
+  },
+  'chainflip_dot-NATIVE-pDOT___ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': {
+    path: _AssetRefPath.XCM,
+    srcChain: 'chainflip_dot',
+    srcAsset: 'chainflip_dot-NATIVE-pDOT',
+    destChain: 'ethereum_goerli',
+    destAsset: 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
   }
 };
 

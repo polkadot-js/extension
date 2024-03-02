@@ -212,7 +212,6 @@ export const router = createBrowserRouter([
             ]
           },
           Swap.generateRouterObject('swap'),
-          SwapTest.generateRouterObject('swap-test'),
           MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId'),

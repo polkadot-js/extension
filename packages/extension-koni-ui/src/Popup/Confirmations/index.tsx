@@ -229,6 +229,8 @@ const Component = function ({ className }: Props) {
           return t('Cancel compound confirm');
         case ExtrinsicType.TOKEN_APPROVE:
           return t('Token approve');
+        case ExtrinsicType.SWAP:
+          return t('Swap confirm');
         case ExtrinsicType.CROWDLOAN:
         case ExtrinsicType.EVM_EXECUTE:
         case ExtrinsicType.UNKNOWN:

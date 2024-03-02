@@ -36,7 +36,7 @@ import useNotification from '../../../hooks/common/useNotification';
 
 type Props = ThemeProps;
 
-const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug'];
+const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug', 'chain'];
 
 function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<string, _ChainAsset>): TokenSelectorItemType[] {
   const result: TokenSelectorItemType[] = [];

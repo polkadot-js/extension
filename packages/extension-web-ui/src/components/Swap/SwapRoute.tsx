@@ -14,27 +14,6 @@ type Props = ThemeProps & {
   swapRoute: SwapRouteType;
 }
 
-const fakedatas: TokenItemType[] = [
-  {
-    name: 'Polkadot',
-    slug: 'polkadot-NATIVE-DOT',
-    symbol: 'DOT',
-    originChain: 'polkadot'
-  },
-  {
-    name: 'Kusama',
-    slug: 'kusama-NATIVE-KSM',
-    symbol: 'KSM',
-    originChain: 'kusama'
-  },
-  {
-    name: 'Aleph Zero',
-    slug: 'aleph-NATIVE-AZERO',
-    symbol: 'AZERO',
-    originChain: 'aleph'
-  }
-];
-
 const Component: React.FC<Props> = (props: Props) => {
   const { className, swapRoute } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
@@ -76,7 +55,7 @@ const Component: React.FC<Props> = (props: Props) => {
               size={24}
               token={result.slug.toLowerCase()}
             />
-            <span className='__item-token'>{result.symbol}</span>
+            <span className='__token-item-symbol'>{result.symbol}</span>
           </div>
         ))}
       </div>
@@ -104,6 +83,12 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginBottom: 16,
       left: 33,
       right: 40
+    },
+    '.__token-item-symbol': {
+      fontSize: token.fontSizeSM,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextTertiary
     },
 
     '.__arrow': {

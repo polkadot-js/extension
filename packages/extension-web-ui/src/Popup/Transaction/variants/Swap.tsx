@@ -440,7 +440,10 @@ const Component = () => {
           }}
         />
 
-        <div>{message}</div>
+        <div className={CN('__message-error', {
+          '-message': isError
+        })}
+        >{message}</div>
       </div>
     );
   };
@@ -802,6 +805,7 @@ const Component = () => {
                     </MetaInfo.Default>
 
                     <MetaInfo.Default
+                      className={'__swap-provider'}
                       label={t('Swap provider')}
                     >
                       {currentQuote.provider.name}
@@ -835,6 +839,7 @@ const Component = () => {
                     valueColorScheme={'gray'}
                   >
                     <MetaInfo.Number
+                      className={'__total-fee-value'}
                       decimals={0}
                       label={t('Estimated fee')}
                       onClickValue={onToggleFeeDetails}
@@ -872,6 +877,7 @@ const Component = () => {
                       onClickValue={openChooseFeeToken}
                       suffixNode={
                         <Icon
+                          className={'__edit-token'}
                           customSize={'20px'}
                           phosphorIcon={PencilSimpleLine}
                         />
@@ -933,21 +939,15 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     marginLeft: 'auto',
     marginRight: 'auto',
     gap: token.size,
-    '.__swap-field-area': {
-      position: 'relative'
-    },
     '.__item-right-title': {
       color: token.colorTextTertiary
     },
+
     '.__item-right-title:hover': {
       color: token.colorWhite
     },
     '.__item-right-part-button:hover': {
       color: token.colorWhite
-    },
-    '.__switch-button': {
-      backgroundColor: token['gray-2'],
-      borderRadius: '50%'
     },
 
     '.__slippage-info': {
@@ -964,7 +964,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'flex-end',
       paddingLeft: 8,
       paddingRight: 8,
-      marginBottom: 12
+      marginBottom: 16,
+      marginTop: 4
+    },
+    '.__slippage-editor-button': {
+      paddingLeft: token.paddingXXS
+    },
+    '.__edit-token': {
+      paddingLeft: token.paddingXXS
     },
 
     // swap quote
@@ -973,17 +980,35 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__quote-estimate-swap-value': {
       display: 'flex'
     },
+    '.__quote-rate .__value': {
+      fontSize: token.fontSize,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight,
+      color: token.colorWhite
+    },
+    '.__swap-provider .__value': {
+      fontSize: token.fontSize,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight,
+      color: token.colorWhite
+    },
 
-    '.__quote-info-block': {},
+    '.__quote-info-block': {
+      paddingLeft: 24,
+      paddingRight: 24,
+      paddingTop: 16,
+      paddingBottom: 16
+    },
 
     '.__quote-empty-block': {
       background: token.colorBgSecondary,
       borderRadius: token.borderRadiusLG,
-      padding: token.paddingSM,
+      padding: token.padding,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       textAlign: 'center',
+      gap: token.size,
 
       '--empty-quote-icon-color': token['gray-6']
     },
@@ -992,14 +1017,69 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '--empty-quote-icon-color': token.colorError
     },
 
-    '.__quote-fee-details-block': {
-      paddingLeft: token.paddingXS
+    '.__message-error': {
+      color: token.colorTextTertiary,
+      fontSize: token.fontSize,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight
+    },
+    '.__message-error.-message': {
+      color: token.colorError,
+      fontSize: token.fontSize,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight,
+      textAlign: 'center'
     },
 
+    '.__total-fee-value': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextLight2,
+      paddingRight: token.paddingXXS,
+
+      '.ant-number-integer': {
+        color: `${token.colorTextLight2} !important`,
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal, .ant-number-prefix': {
+        color: `${token.colorTextLight2} !important`,
+        fontSize: `${token.fontSize}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.colorTextLight2
+      }
+    },
+    '.__quote-fee-details-block': {
+      marginTop: token.marginXS,
+      paddingLeft: token.paddingXS,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorWhite,
+
+      '.ant-number-integer': {
+        color: `${token.colorWhite} !important`,
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal, .ant-number-prefix': {
+        color: `${token.colorWhite} !important`,
+        fontSize: `${token.fontSize}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.colorTextLight2
+      }
+    },
     '.__separator': {
       height: 2,
       opacity: 0.8,
-      backgroundColor: token.colorBgBorder
+      backgroundColor: token.colorBgBorder,
+      marginTop: 12,
+      marginBottom: 12
     },
     '.__error-message': {
       color: token.colorError
@@ -1008,7 +1088,8 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__item-quote-header': {
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      marginBottom: 4
     },
     '.__item-left-part': {
       display: 'flex',
@@ -1018,6 +1099,18 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__item-right-part': {
       display: 'flex',
       alignItems: 'center'
+    },
+
+    '.__transaction-form-area .transaction-footer': {
+      paddingTop: 0,
+      paddingBottom: 0
+    },
+    '.__transaction-form-area .ant-form-item ': {
+      marginBottom: 12
+    },
+    '.__token-selector-wrapper .ant-select-modal-input-wrapper': {
+      color: token.colorWhite,
+      paddingLeft: 16
     },
 
     // desktop
@@ -1032,13 +1125,18 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       }
     },
     '.__switch-side-container': {
-      display: 'flex',
-      justifyContent: 'center',
-      position: 'absolute',
-      alignItems: 'center',
-      top: '41%',
-      right: '50%',
-      left: '50%'
+      position: 'relative',
+      '.__switch-button': {
+        position: 'absolute',
+        backgroundColor: token['gray-2'],
+        borderRadius: '50%',
+        alignItems: 'center',
+        bottom: -16,
+        right: '50%',
+        left: '50%',
+        display: 'flex',
+        justifyContent: 'center'
+      }
     }
   };
 });

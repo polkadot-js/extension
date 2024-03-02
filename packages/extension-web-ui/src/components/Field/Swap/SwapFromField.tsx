@@ -7,6 +7,7 @@ import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Button, Input, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import React, { ChangeEventHandler, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -63,7 +64,7 @@ const Component = (props: Props) => {
   }, [assetRegistryMap, decimals, inputValue, priceMap, tokenSelectorValue]);
 
   return (
-    <div className={className}>
+    <div className={CN(className, 'swap-form-field')}>
       <div className={'__label-wrapper'}>
         <div className='__label'>{label}</div>
 
@@ -114,13 +115,36 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
     borderRadius: 8,
     paddingBottom: 8,
     position: 'relative',
-    marginBottom: 8,
+    marginBottom: 4,
+    '&.swap-form-field': {
+      '.ant-input-container::before': {
+        display: 'none'
+      },
+      '.ant-select-modal-input-container::before': {
+        display: 'none'
+      },
+      '.ant-select-modal-input-wrapper': {
+        paddingTop: 0,
+        paddingBottom: 0
+      },
+      '.ant-input-affix-wrapper': {
+        maxHeight: 24
+      },
+      '.ant-input': {
+        paddingTop: 0,
+        paddingBottom: 0,
+        height: 24
+      },
+      '.ant-input-container': {
+        paddingBottom: 0,
+        marginBottom: 0
+      }
+    },
+
     '.__input-container': {
       display: 'flex'
     },
-    '.__token-selector-wrapper .ant-select-modal-input-wrapper': {
-      color: token.colorWhite
-    },
+
     '.__label-wrapper .__max-button': {
       maxHeight: 20
     },
@@ -133,7 +157,7 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.__amount-wrapper': {
       flex: 1,
       display: 'flex',
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
       flexDirection: 'column',
       alignItems: 'end',
       paddingRight: 4
@@ -143,7 +167,8 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontSize: 16,
       lineHeight: token.lineHeightLG,
       fontWeight: token.fontWeightStrong,
-      color: token.colorWhite
+      color: token.colorWhite,
+      cursor: 'pointer'
 
     },
     '.__amount-wrapper .ant-input-container': {

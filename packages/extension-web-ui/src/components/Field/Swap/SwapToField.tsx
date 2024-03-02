@@ -9,6 +9,7 @@ import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
+import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -49,7 +50,7 @@ const Component = (props: Props) => {
   const { convertValue, destinationValue } = getConvertedBalance;
 
   return (
-    <div className={className}>
+    <div className={CN(className, 'swap-to-field')}>
       <div className={'__label-wrapper'}>
         <div className='__label'>{label || t('To')}</div>
       </div>
@@ -67,6 +68,7 @@ const Component = (props: Props) => {
           <div>
             {
               <Number
+                className={'__amount-destination'}
                 decimal={0}
                 value={destinationValue}
               />
@@ -95,23 +97,39 @@ const SwapToField = styled(Component)<Props>(({ theme: { token } }: Props) => {
     borderRadius: 8,
     marginBottom: 12,
     paddingBottom: 8,
+
+    '&.swap-to-field': {
+      '.ant-select-modal-input-border-default::before': {
+        display: 'none'
+      },
+      '.ant-select-modal-input-wrapper': {
+        paddingTop: 0,
+        paddingBottom: 0
+      }
+    },
     '.__input-container': {
       display: 'flex'
+    },
+    '.__label': {
+      fontSize: token.fontSizeSM,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightSM,
+      paddingRight: 16,
+      paddingLeft: 16,
+      paddingTop: 8,
+      paddingBottom: 8
     },
 
     '.__amount-wrapper': {
       flex: 1,
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'flex-end',
+      justifyContent: 'center',
       alignItems: 'flex-end',
       paddingRight: 16
     },
-    '.__label': {
-      paddingRight: 16,
-      paddingLeft: 16,
-      paddingTop: 8,
-      paddingBottom: 8
+    '.__amount-destination': {
+      maxHeight: 24
     },
     '.__amount-convert': {
       fontSize: token.fontSizeSM,

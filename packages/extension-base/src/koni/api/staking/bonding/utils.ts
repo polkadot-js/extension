@@ -241,51 +241,6 @@ export function getCommission (commissionString: string) {
   return parseFloat(commissionString.split('%')[0]); // Example: 12%
 }
 
-// // Calculate APY for MANTA colaltors
-// const getBlocksPreviousRound = async (api, round, collatorAddresses) => {
-//   if (round.current === 0) {
-//     return 0;
-//   }
-//   const args = collatorAddresses.map((address) => [parseInt(round.current) - 1, address])
-//   const pointsPreviousRoundRaw = await api.query.parachainStaking.awardedPts.multi(args);
-//   // producing 1 block will get 20 points
-//   // how many blocks this collator produces in last round
-//   return pointsPreviousRoundRaw.map((pointsRaw) => pointsRaw.toNumber() / POINTS_PER_BLOCK);
-// };
-//
-// export function calculateMantaNominatorReturn (totalActiveCollators: number, bnAnnualInflation: BN, blocksPreviousRound: number, collatorExpectedBlocksPerRound: number, bnCollatorTotalStaked: BN) { // collatorTotalStaked = collatorsCandidates.length
-//   // todo: query the constant
-//   // todo: optimize by promise all from caller function '///'
-//   // const BLOCKS_PER_ROUND = 1800;
-//   const MIN_DELEGATION = 500;
-//   const COMMISSION = 0.1;
-//   const DECIMAL = 18; // todo: get this info from chainInfo
-//   // const POINTS_PER_BLOCK = 20;
-//
-//   // const blocksPreviousRound = 0; ///
-//   // const collatorExpectedBlocksPerRound = 0; ///
-//   const factor = new BN(10).pow(new BN(DECIMAL));
-//   const annualInflation = bnAnnualInflation.div(factor).toNumber();
-//   const collatorTotalStaked = bnCollatorTotalStaked.div(factor).toNumber();
-//
-//   const annualRewardsPerCollator = annualInflation * totalActiveCollators;
-//   // const collatorTotalStaked = 0; ///
-//
-//   const adjustmentFactor = blocksPreviousRound / collatorExpectedBlocksPerRound;
-//   const marginalReward = annualRewardsPerCollator * MIN_DELEGATION / (collatorTotalStaked + MIN_DELEGATION);
-//
-//   // console.log((1 - COMMISSION) * 100 * adjustmentFactor * marginalReward / MIN_DELEGATION);
-//   // console.log('z', adjustmentFactor, marginalReward);
-//   // console.log('y', annualRewardsPerCollator, collatorTotalStaked);
-//
-//   return (1 - COMMISSION) * 100 * adjustmentFactor * marginalReward / MIN_DELEGATION;
-// }
-//
-// export function calculateMantaChainStakedReturn () {
-//
-//   // todo: apy chain
-// }
-
 export interface InflationConfig {
   expect: {
     min: string,

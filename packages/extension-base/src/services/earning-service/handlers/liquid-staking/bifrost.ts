@@ -135,6 +135,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
     const rate = parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio);
 
+    /** Special for bifrost, the rate is divined and unknown decimals to convert (asset decimal is 10 but the rate length is 18) */
     this.updateExchangeRate(rate);
 
     return {
@@ -203,7 +204,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       const exchangeRate = new BigNumber(rate);
 
       const currentRelayEraObj = _currentRelayEra.toPrimitive() as Record<string, number>;
-      const currentRelayEra = currentRelayEraObj.Era;
+
+      const currentRelayEra = currentRelayEraObj.era;
 
       const unlockLedgerList: BifrostUnlockLedger[] = [];
 
@@ -277,6 +279,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             const isClaimable = unlocking.era - currentRelayEra < 0;
             const remainingEra = unlocking.era - currentRelayEra;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[this.chain];
+            // const currentTimestampMs = Date.now();
+            // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             unlockBalance = unlockBalance.add(new BN(unlocking.balance));
             unstakingList.push({
@@ -284,6 +288,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: unlocking.balance,
               waitingTime: waitingTime
+              // targetTimestampMs: targetTimestampMs
             } as UnstakingInfo);
           });
         }

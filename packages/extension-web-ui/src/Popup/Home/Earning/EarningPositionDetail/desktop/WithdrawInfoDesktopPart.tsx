@@ -13,9 +13,10 @@ import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transacti
 import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake';
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, ModalContext, Number } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { Eye } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -174,14 +175,20 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
         <Button
           block={true}
-          className={'rewards-history'}
+          className={'rewards-history -ghost-type-3'}
+          icon={
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={Eye}
+            />
+          }
           onClick={onOpenDetailModal}
           type={'ghost'}
         >{t('View details')}</Button>
       </div>
 
       <EarningWithdrawalDetailModal
-        canWithdraw={true}
+        canWithdraw={canWithdraw}
         inputAsset={inputAsset}
         modalId={withdrawalDetailModalId}
         onCancelWithDraw={onCancelWithDraw}

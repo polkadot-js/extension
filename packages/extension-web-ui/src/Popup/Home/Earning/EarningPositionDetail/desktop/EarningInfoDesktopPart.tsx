@@ -57,6 +57,7 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
         <div className='__separator' />
         <div className={'__earning-actions'}>
           <Button
+            className={'__left-item -ghost-type-3'}
             block={true}
             icon={(
               <Icon
@@ -71,6 +72,7 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
           </Button>
 
           <Button
+            className={'__right-item -ghost-type-3'}
             block={true}
             icon={(
               <Icon

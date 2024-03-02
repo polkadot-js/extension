@@ -1139,7 +1139,7 @@ const Component = () => {
                       />
                     )
                   }
-                  <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM }} />
+                  <Divider style={{ backgroundColor: token.colorBgDivider, marginTop: token.marginSM, marginBottom: token.marginSM, height: 2 }} />
 
                   <Typography.Text style={{ color: token.colorTextLight4 }}>
                     {t('All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.')}
@@ -1254,12 +1254,19 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flex: 1
     },
+
     '.web-ui-enable &': {
+      '.__transaction-block, .__transaction-process': {
+        flex: 1
+      },
 
       '.__transaction-block': {
-        display: 'block',
-        maxWidth: 384,
-        flex: '1 0 auto'
+        display: 'block'
+      },
+
+      '.transaction-content, .transaction-footer': {
+        paddingRight: 0,
+        paddingLeft: 0
       },
 
       '.meta-info': {

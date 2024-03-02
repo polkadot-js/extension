@@ -761,9 +761,9 @@ const Component = () => {
                 <div className={'__item-left-part'}>
                   <BackgroundIcon
                     backgroundColor='#004BFF'
+                    className={'__quote-icon-info'}
                     iconColor='#fff'
                     phosphorIcon={Info}
-                    size={'md'}
                     weight={'fill'}
                   />
                   <div className={'__text'}>Swap quote</div>
@@ -943,6 +943,17 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__item-right-title': {
       color: token.colorTextTertiary
     },
+    '.__quote-icon-info': {
+      height: 16,
+      width: 16,
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    '.ant-background-icon': {
+      width: 24,
+      height: 24
+    },
     '.__transaction-form-area.-no-right-part': {
       maxWidth: 383
     },
@@ -1093,12 +1104,16 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 4
+      marginBottom: 4,
+      marginTop: -7
     },
     '.__item-left-part': {
       display: 'flex',
       gap: 8,
       alignItems: 'center'
+    },
+    '.__item-right-part-button .ant-btn >span+.anticon': {
+      marginInlineStart: 0
     },
     '.__item-right-part': {
       display: 'flex',

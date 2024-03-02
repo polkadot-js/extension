@@ -275,7 +275,7 @@ const Component = () => {
 
     if (quoteAliveUntil) {
       timer = setInterval(() => {
-        const _time = (quoteAliveUntil - Date.now()) / 1000;
+        const _time = Math.floor((quoteAliveUntil - Date.now()) / 1000 + 0.5);
 
         if (_time < 0) {
           setQuoteCountdownTime(0);
@@ -618,7 +618,7 @@ const Component = () => {
   return (
     <>
       <>
-        <div className={'__transaction-form-area'}>
+        <div className={CN('__transaction-form-area', { '-no-right-part': !showQuoteAreRef.current })}>
           <TransactionContent>
             <Form
               className={'form-container'}
@@ -938,9 +938,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
+    justifyContent: 'center',
     gap: token.size,
     '.__item-right-title': {
       color: token.colorTextTertiary
+    },
+    '.__transaction-form-area.-no-right-part': {
+      maxWidth: 383
     },
 
     '.__item-right-title:hover': {
@@ -1103,7 +1107,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__transaction-form-area .transaction-footer': {
       paddingTop: 0,
-      paddingBottom: 0
+      paddingBottom: 0,
+      paddingRight: 0,
+      paddingLeft: 0
+    },
+    '.__transaction-form-area .transaction-content': {
+      paddingRight: 0,
+      paddingLeft: 0
     },
     '.__transaction-form-area .ant-form-item ': {
       marginBottom: 12
@@ -1112,16 +1122,27 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWhite,
       paddingLeft: 16
     },
+    '.__token-selector-wrapper': {
+      flex: 1,
+      overflow: 'hidden',
+      minWidth: 160,
+      maxWidth: 182
+    },
+    '.__amount-wrapper': {
+      flex: 1
+    },
 
     // desktop
 
     '.web-ui-enable &': {
       '.__transaction-form-area': {
-        flex: '1'
+        flex: '1',
+        overflowX: 'hidden'
       },
 
       '.__transaction-swap-quote-info-area': {
-        flex: '1'
+        flex: '1',
+        overflowX: 'hidden'
       }
     },
     '.__switch-side-container': {
@@ -1132,7 +1153,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         borderRadius: '50%',
         alignItems: 'center',
         bottom: -16,
-        right: '50%',
+        marginLeft: -20,
         left: '50%',
         display: 'flex',
         justifyContent: 'center'

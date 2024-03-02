@@ -160,7 +160,8 @@ const SwapFromField = styled(Component)<Props>(({ theme: { token } }: Props) => 
       justifyContent: 'center',
       flexDirection: 'column',
       alignItems: 'end',
-      paddingRight: 4
+      paddingRight: 4,
+      overflow: 'hidden'
     },
     '.ant-input-wrapper .ant-input': {
       textAlign: 'right',

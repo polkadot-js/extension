@@ -101,7 +101,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
 
   const needMigrate = useMemo(
     () => !!accounts
-      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected && !acc.pendingMigrate)
       .filter((acc) => !acc.isMasterPassword)
       .length
     , [accounts]

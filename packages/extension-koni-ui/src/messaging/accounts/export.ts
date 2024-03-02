@@ -15,6 +15,6 @@ export async function exportAccountPrivateKey (address: string, password: string
   return sendMessage('pri(accounts.exportPrivateKey)', { address, password });
 }
 
-export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
-  return sendMessage('pri(accounts.batchExport)', { addresses, password });
+export async function exportAccountsV2 (password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
+  return sendMessage('pri(accounts.batchExportV2)', { password });
 }

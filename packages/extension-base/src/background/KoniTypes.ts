@@ -789,6 +789,16 @@ export interface ResponseAccountExportPrivateKey {
   publicKey: string;
 }
 
+// Export batch accounts
+
+export interface RequestAccountBatchExportV2 {
+  password: string;
+}
+
+export interface ResponseAccountBatchExportV2 {
+  exportedJson: KeyringPairs$Json;
+}
+
 // Get account info with private key
 
 export interface RequestCheckPublicAndSecretKey {
@@ -2284,6 +2294,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
 
   // Export account
+  'pri(accounts.batchExportV2)': [RequestAccountBatchExportV2, ResponseAccountBatchExportV2];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
 
   // Current account

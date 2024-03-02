@@ -215,6 +215,10 @@ const Component = () => {
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
 
   useEffect(() => {
+    form.setFieldValue('chain', getOriginChain(fromAssetInfo));
+  }, [form, fromAssetInfo]);
+
+  useEffect(() => {
     let sync = true;
     let timeout: NodeJS.Timeout;
 

@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
@@ -28,7 +28,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef,
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
@@ -82,6 +82,7 @@ const Component = () => {
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
   const priceMap = useSelector((state) => state.price.priceMap);
+  const { chainInfoMap } = useSelector((root) => root.chainStore);
   const [form] = Form.useForm<SwapParams>();
   const formDefault = useMemo((): SwapParams => ({ ...defaultData }), [defaultData]);
 
@@ -420,6 +421,23 @@ const Component = () => {
     );
   };
 
+  const validateSwapFromAccount = useCallback((rule: Rule, fromValue: string): Promise<void> => {
+    if (!fromValue) {
+      return Promise.reject(t('Swap from account is required'));
+    }
+
+    if (fromAssetInfo?.originChain && chainInfoMap[fromAssetInfo?.originChain]) {
+      const isAddressEvm = isEthereumAddress(fromValue);
+      const isEvmCompatible = _isChainEvmCompatible(chainInfoMap[fromAssetInfo?.originChain]);
+
+      if ((isAddressEvm && !isEvmCompatible) || (!isAddressEvm && isEvmCompatible)) {
+        return Promise.reject(t('Invalid swap from account'));
+      }
+    }
+
+    return Promise.resolve();
+  }, [chainInfoMap, fromAssetInfo?.originChain, t]);
+
   const onError = useCallback(
     (error: Error) => {
       notify({
@@ -573,6 +591,11 @@ const Component = () => {
 
               <Form.Item
                 name={'from'}
+                rules={[
+                  {
+                    validator: validateSwapFromAccount
+                  }
+                ]}
               >
                 <AccountSelector
                   disabled={!isAllAccount}
@@ -940,6 +963,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       height: 2,
       opacity: 0.8,
       backgroundColor: token.colorBgBorder
+    },
+    '.__error-message': {
+      color: token.colorError
     },
 
     '.__item-quote-header': {

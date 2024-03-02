@@ -5,7 +5,7 @@ import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
 import { AddressBookState, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -121,6 +121,7 @@ export interface AssetRegistryStore extends BaseReduxStore {
 export interface ChainStore extends BaseReduxStore {
   chainInfoMap: Record<string, _ChainInfo>,
   chainStateMap: Record<string, _ChainState>
+  chainStatusMap: Record<string, _ChainApiStatus>
 }
 
 export interface BalanceStore extends BaseReduxStore {

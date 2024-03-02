@@ -161,6 +161,11 @@ export interface PalletStakingStakingLedger {
   claimedRewards: number[]
 }
 
+export interface PalletStakingActiveEraInfo {
+  index: string,
+  start: string
+}
+
 export interface RuntimeDispatchInfo {
   weight: {
     refTime: number,

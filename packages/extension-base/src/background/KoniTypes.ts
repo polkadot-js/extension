@@ -1619,7 +1619,8 @@ export interface UnstakingInfo {
   chain: string;
   status: UnstakingStatus;
   claimable: string; // amount to be withdrawn
-  waitingTime: number; // in hours
+  waitingTime?: number;
+  targetTimestampMs?: number;
   validatorAddress?: string; // might unstake from a validator or not
 }
 
@@ -2196,6 +2197,7 @@ export interface KoniRequestSignatures {
   // Chains, assets functions
   'pri(chainService.subscribeChainInfoMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeChainStateMap)': [null, Record<string, any>, Record<string, any>];
+  'pri(chainService.subscribeChainStatusMap)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeAssetRegistry)': [null, Record<string, any>, Record<string, any>];
   'pri(chainService.subscribeMultiChainAssetMap)': [null, Record<string, _MultiChainAsset>, Record<string, _MultiChainAsset>];
   'pri(chainService.subscribeXcmRefMap)': [null, Record<string, _AssetRef>, Record<string, _AssetRef>];

@@ -26,8 +26,9 @@ import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
-import { _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -38,8 +39,7 @@ import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, Wall
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
-import { convertSubjectInfoToAddresses, isSameAddress, reformatAddress, uniqueStringArray } from '@subwallet/extension-base/utils';
-import { calculateGasFeeParams, createTransactionFromRLP, signatureToHex, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
+import { convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import { MetadataDef } from '@subwallet/extension-inject/types';
@@ -3399,6 +3399,23 @@ export default class KoniExtension {
     return this.#koniState.getChainStateMap();
   }
 
+  private subscribeChainStatusMap (id: string, port: chrome.runtime.Port): Record<string, _ChainApiStatus> {
+    const cb = createSubscription<'pri(chainService.subscribeChainStatusMap)'>(id, port);
+    const chainStateMapSubscription = this.#koniState.chainService.subscribeChainStatusMap().subscribe({
+      next: (rs) => {
+        cb(rs);
+      }
+    });
+
+    this.createUnsubscriptionHandle(id, chainStateMapSubscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getChainStatusMap();
+  }
+
   private async subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Promise<Record<string, _ChainAsset>> {
     const cb = createSubscription<'pri(chainService.subscribeAssetRegistry)'>(id, port);
     let ready = false;
@@ -3733,7 +3750,7 @@ export default class KoniExtension {
       this.#koniState.chainService.setMantaZkAssetSettings(true);
 
       const mnemonic = this.keyringExportMnemonic({ address, password });
-      const { connectionStatus } = this.#koniState.chainService.getChainStateByKey(_DEFAULT_MANTA_ZK_CHAIN);
+      const { connectionStatus } = this.#koniState.chainService.getChainStatusByKey(_DEFAULT_MANTA_ZK_CHAIN);
 
       if (connectionStatus !== _ChainConnectionStatus.CONNECTED) { // TODO: do better
         await timeout();
@@ -4639,6 +4656,8 @@ export default class KoniExtension {
         return this.subscribeChainInfoMap(id, port);
       case 'pri(chainService.subscribeChainStateMap)':
         return this.subscribeChainStateMap(id, port);
+      case 'pri(chainService.subscribeChainStatusMap)':
+        return this.subscribeChainStatusMap(id, port);
       case 'pri(chainService.subscribeXcmRefMap)':
         return this.subscribeXcmRefMap(id, port);
       case 'pri(chainService.getSupportedContractTypes)':

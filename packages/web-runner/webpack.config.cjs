@@ -49,7 +49,9 @@ const packages = [
 const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
 
 const _additionalEnv = {
-  NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST)
+  NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST),
+  INFURA_API_KEY: JSON.stringify(process.env.INFURA_API_KEY),
+  INFURA_API_KEY_SECRET: JSON.stringify(process.env.INFURA_API_KEY_SECRET)
 };
 
 // Overwrite babel babel config from polkadot dev

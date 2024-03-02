@@ -182,6 +182,23 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         marginInlineEnd: 'auto'
       }
     },
+    '.setting-item': {
+      '.ant-web3-block-left-item': {
+        paddingRight: 0
+      },
+      '.ant-web3-block': {
+        gap: token.sizeSM,
+        paddingLeft: token.paddingSM,
+        paddingRight: token.paddingXXS,
+        paddingTop: 6,
+        paddingBottom: 6,
+        flex: 1
+      },
+      '.ant-web3-block-right-item.ant-web3-block-right-item': {
+        marginRight: 0,
+        padding: 10
+      }
+    },
 
     '.ant-input-affix-wrapper': {
       overflow: 'hidden',

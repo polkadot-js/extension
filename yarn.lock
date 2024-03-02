@@ -62,13 +62,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@adraffy/ens-normalize@npm:1.10.1":
-  version: 1.10.1
-  resolution: "@adraffy/ens-normalize@npm:1.10.1"
-  checksum: 0836f394ea256972ec19a0b5e78cb7f5bcdfd48d8a32c7478afc94dd53ae44c04d1aa2303d7f3077b4f3ac2323b1f557ab9188e8059978748fdcd83e04a80dcc
-  languageName: node
-  linkType: hard
-
 "@adraffy/ens-normalize@npm:1.9.2":
   version: 1.9.2
   resolution: "@adraffy/ens-normalize@npm:1.9.2"
@@ -1837,18 +1830,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/sdk@npm:^1.2.0-rc.2":
-  version: 1.2.0
-  resolution: "@chainflip/sdk@npm:1.2.0"
-  dependencies:
-    "@polkadot/util": ^12.6.2
-    "@polkadot/util-crypto": ^12.6.2
-    axios: ^1.6.7
-    ethers: ^6.11.1
-  checksum: 7544b6e265266f233d8c1d7fd11cd23690d82644c11ed8cdf7f4ac1fd09b0455ad94a1b29dbb6d94e556e42f52bae66663667d8f902a4f63519525a041279b5e
-  languageName: node
-  linkType: hard
-
 "@coinbase/cbpay-js@npm:^1.7.0":
   version: 1.7.0
   resolution: "@coinbase/cbpay-js@npm:1.7.0"
@@ -3432,6 +3413,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/devices@npm:^8.2.1":
+  version: 8.2.1
+  resolution: "@ledgerhq/devices@npm:8.2.1"
+  dependencies:
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/logs": ^6.12.0
+    rxjs: ^7.8.1
+    semver: ^7.3.5
+  checksum: 5c7fa3004a4ebd30b0dcb8563642db308478bbec115102e5404dd0affcc99f880d094137e88c1f2cc064f78d65a5e946d5ebd8db89141977e32860885ea23ebe
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/domain-service@npm:^1.1.2":
   version: 1.1.16
   resolution: "@ledgerhq/domain-service@npm:1.1.16"
@@ -3458,6 +3451,13 @@ __metadata:
   version: 6.16.1
   resolution: "@ledgerhq/errors@npm:6.16.1"
   checksum: 6bbcedee7103d8aa878a7e84e4824796e1505ef32013e1e98679827a72696d01da897adb95a996ad30fa120bf126b98d68107870001b950a55bf9af4372f42af
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/errors@npm:^6.16.2":
+  version: 6.16.2
+  resolution: "@ledgerhq/errors@npm:6.16.2"
+  checksum: 2dd796c78b8428339c8906cfe2325e62c211f484576835198a9bf4efc8fed38b4ca5d342bfb08aef6c623720753ea3e5ce77e50367f2808ad5610e3ff54cec70
   languageName: node
   linkType: hard
 
@@ -3504,6 +3504,34 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-transport-node-hid-noevents@npm:^6.29.4":
+  version: 6.29.4
+  resolution: "@ledgerhq/hw-transport-node-hid-noevents@npm:6.29.4"
+  dependencies:
+    "@ledgerhq/devices": ^8.2.1
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/hw-transport": ^6.30.4
+    "@ledgerhq/logs": ^6.12.0
+    node-hid: ^2.1.2
+  checksum: 6acb3b56e238e94bdfb4ef00936f814d2451261aaaf4ff7b9bbe8a2153c17ed30684b160a06e9ef71f4134d6bf56f2693d50d1a17ccf2a7203675776ef90d0aa
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-node-hid-singleton@npm:^6.28.12":
+  version: 6.30.4
+  resolution: "@ledgerhq/hw-transport-node-hid-singleton@npm:6.30.4"
+  dependencies:
+    "@ledgerhq/devices": ^8.2.1
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/hw-transport": ^6.30.4
+    "@ledgerhq/hw-transport-node-hid-noevents": ^6.29.4
+    "@ledgerhq/logs": ^6.12.0
+    node-hid: ^2.1.2
+    usb: 2.9.0
+  checksum: 1e366741263503cd2fc1ee925f92c287f12c99a8c8aad1c9d54a9992947a7a7b8c1469ac05393f24d07a76b419b059ab29a82ebe558a2f1d433b7a509b1a429b
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/hw-transport-node-hid-singleton@npm:^6.30.1":
   version: 6.30.3
   resolution: "@ledgerhq/hw-transport-node-hid-singleton@npm:6.30.3"
@@ -3519,6 +3547,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ledgerhq/hw-transport-webhid@npm:^6.27.15":
+  version: 6.28.4
+  resolution: "@ledgerhq/hw-transport-webhid@npm:6.28.4"
+  dependencies:
+    "@ledgerhq/devices": ^8.2.1
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/hw-transport": ^6.30.4
+    "@ledgerhq/logs": ^6.12.0
+  checksum: 9f1dec320b71b5cd892c1cad9c48be43fe8f1d60d842af1ceeb52c1751fb3cb9056684b20d6f7f6b1b7111c1e7f7dbb8a360031ee795d9d141356bda3f47c489
+  languageName: node
+  linkType: hard
+
 "@ledgerhq/hw-transport-webhid@npm:^6.28.1":
   version: 6.28.3
   resolution: "@ledgerhq/hw-transport-webhid@npm:6.28.3"
@@ -3528,6 +3568,18 @@ __metadata:
     "@ledgerhq/hw-transport": ^6.30.3
     "@ledgerhq/logs": ^6.12.0
   checksum: d0d9a706a90ce9123c200d2eb40c9937ad9f88abb86e17421e2f2944d37005a499bd978db65bbc93a9a552ba1769057a81076ace913277d255d20912e25306a1
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport-webusb@npm:^6.27.15":
+  version: 6.28.4
+  resolution: "@ledgerhq/hw-transport-webusb@npm:6.28.4"
+  dependencies:
+    "@ledgerhq/devices": ^8.2.1
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/hw-transport": ^6.30.4
+    "@ledgerhq/logs": ^6.12.0
+  checksum: 41e3c71b11c9cc8363e42c11874d00f3b4673a3ea6dde738d8f483ea08a4bfe7c529e5db92e17c6e3fe9d585f22eafd90d8c803320fe2e79de09fb31e998240b
   languageName: node
   linkType: hard
 
@@ -3575,6 +3627,18 @@ __metadata:
     "@ledgerhq/logs": ^6.12.0
     events: ^3.3.0
   checksum: 745b13b66afe02231c20a338a4a6e8d2cfd2ff3f17e033c89a6da9b7e64b0812e73dc6ce5cd44147058d208a17c152aa7cf138c31be4aa094d15b1921642c920
+  languageName: node
+  linkType: hard
+
+"@ledgerhq/hw-transport@npm:^6.30.4":
+  version: 6.30.4
+  resolution: "@ledgerhq/hw-transport@npm:6.30.4"
+  dependencies:
+    "@ledgerhq/devices": ^8.2.1
+    "@ledgerhq/errors": ^6.16.2
+    "@ledgerhq/logs": ^6.12.0
+    events: ^3.3.0
+  checksum: f4878e0b1ea093c69d2905c94bc9567c1c6694af9cff034634dd9639bd318666f131f2394f67c95d3cfd96b64693e14e4735883136545a19d8df902e3b59bf5e
   languageName: node
   linkType: hard
 
@@ -3694,15 +3758,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@noble/curves@npm:1.2.0":
-  version: 1.2.0
-  resolution: "@noble/curves@npm:1.2.0"
-  dependencies:
-    "@noble/hashes": 1.3.2
-  checksum: bb798d7a66d8e43789e93bc3c2ddff91a1e19fdb79a99b86cd98f1e5eff0ee2024a2672902c2576ef3577b6f282f3b5c778bebd55761ddbb30e36bf275e83dd0
-  languageName: node
-  linkType: hard
-
 "@noble/curves@npm:1.3.0, @noble/curves@npm:^1.3.0, @noble/curves@npm:~1.3.0":
   version: 1.3.0
   resolution: "@noble/curves@npm:1.3.0"
@@ -3716,13 +3771,6 @@ __metadata:
   version: 1.1.2
   resolution: "@noble/hashes@npm:1.1.2"
   checksum: 3c2a8cb7c2e053811032f242155d870c5eb98844d924d69702244d48804cb03b42d4a666c49c2b71164420d8229cb9a6f242b972d50d5bb2f1d673b98b041de2
-  languageName: node
-  linkType: hard
-
-"@noble/hashes@npm:1.3.2":
-  version: 1.3.2
-  resolution: "@noble/hashes@npm:1.3.2"
-  checksum: fe23536b436539d13f90e4b9be843cc63b1b17666a07634a2b1259dded6f490be3d050249e6af98076ea8f2ea0d56f578773c2197f2aa0eeaa5fba5bc18ba474
   languageName: node
   linkType: hard
 
@@ -4402,6 +4450,23 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot/hw-ledger-transports@npm:12.3.2":
+  version: 12.3.2
+  resolution: "@polkadot/hw-ledger-transports@npm:12.3.2"
+  dependencies:
+    "@ledgerhq/hw-transport": ^6.28.4
+    "@ledgerhq/hw-transport-node-hid-singleton": ^6.28.12
+    "@ledgerhq/hw-transport-webhid": ^6.27.15
+    "@ledgerhq/hw-transport-webusb": ^6.27.15
+    "@polkadot/util": 12.3.2
+    tslib: ^2.5.3
+  dependenciesMeta:
+    "@ledgerhq/hw-transport-node-hid-singleton":
+      optional: true
+  checksum: 20ed068e552b60e11df5a0770b6c30b0078356e5afa1415eb0762e1369dd3921c81160f799202da4411106a71dc2aae1f30d2ba3699e47c05b57c09684db96f1
+  languageName: node
+  linkType: hard
+
 "@polkadot/hw-ledger-transports@npm:12.6.2":
   version: 12.6.2
   resolution: "@polkadot/hw-ledger-transports@npm:12.6.2"
@@ -4416,6 +4481,18 @@ __metadata:
     "@ledgerhq/hw-transport-node-hid-singleton":
       optional: true
   checksum: 8e593fc2dcec920b55b65454eb111dd06f90de5f3c687b4ff1a1494b8c5d93a42ed8a90654b52c7b3b25fb0fa625220f5996ffea93542b71b4b665e85c6572b8
+  languageName: node
+  linkType: hard
+
+"@polkadot/hw-ledger@npm:12.3.2":
+  version: 12.3.2
+  resolution: "@polkadot/hw-ledger@npm:12.3.2"
+  dependencies:
+    "@polkadot/hw-ledger-transports": 12.3.2
+    "@polkadot/util": 12.3.2
+    "@zondax/ledger-substrate": ^0.40.7
+    tslib: ^2.5.3
+  checksum: 11c3f215c79980b43a3551ddc085cbb1d6cec5da91d1d077ea045720e7750cbb680c39192b75aa84a0d6b07fccd77345df37777cb029e053b663bc6044570985
   languageName: node
   linkType: hard
 
@@ -4748,6 +4825,18 @@ __metadata:
     "@polkadot/util": ^12.6.2
     tslib: ^2.6.2
   checksum: 74d6efbac15dd20ce1f4c47adccdc1bf9cabed577c53ae964cf14ab943346c0fb4d0965e93b1276055f42f136d51de4bf10115ef79942bf12f8b309344e57fa4
+  languageName: node
+  linkType: hard
+
+"@polkadot/types-augment@npm:10.9.1":
+  version: 10.9.1
+  resolution: "@polkadot/types-augment@npm:10.9.1"
+  dependencies:
+    "@polkadot/types": 10.9.1
+    "@polkadot/types-codec": 10.9.1
+    "@polkadot/util": ^12.3.1
+    tslib: ^2.5.3
+  checksum: d643f83ab0a9498267037d95b878fa4e3b0087882195c3bd609038e8c934a092d9c82f7164ac97989305805aabe0d9186736c50a372498c81c22b3d7f4cfcccb
   languageName: node
   linkType: hard
 
@@ -5981,25 +6070,24 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.42-beta.6":
-  version: 0.2.42-beta.6
-  resolution: "@subwallet/chain-list@npm:0.2.42-beta.6"
+"@subwallet/chain-list@npm:0.2.42":
+  version: 0.2.42
+  resolution: "@subwallet/chain-list@npm:0.2.42"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: ee168743f6642a9b1de0592ceafd2dbea10c719b4352e5b6b4b5ca9b8996d348ae5e1d21997568deb80c94fe6402a038c00ed9cee10aea700e887e38635b79f0
+  checksum: f24460ceb9dd589bf73a0819ea6aa40ae42d1be386be3a4130e26005b1099ff2d08fb08fe3bf1472c679ceb45ab59a2586ad862f77f1caf7f36abf96afc9ce72
   languageName: node
   linkType: hard
 
-"@subwallet/extension-base@^1.1.40-0, @subwallet/extension-base@workspace:packages/extension-base":
+"@subwallet/extension-base@^1.1.40-1, @subwallet/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-base@workspace:packages/extension-base"
   dependencies:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@chainflip/sdk": ^1.2.0-rc.2
     "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
@@ -6025,12 +6113,12 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.42-beta.6
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-chains": ^1.1.40-0
-    "@subwallet/extension-dapp": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-mocks": ^1.1.40-0
+    "@subwallet/chain-list": 0.2.42
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-chains": ^1.1.40-1
+    "@subwallet/extension-dapp": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-mocks": ^1.1.40-1
     "@subwallet/keyring": ^0.1.3
     "@subwallet/ui-keyring": ^0.1.3
     "@types/uuid": ^9.0.1
@@ -6070,7 +6158,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-chains@^1.1.40-0, @subwallet/extension-chains@workspace:packages/extension-chains":
+"@subwallet/extension-chains@^1.1.40-1, @subwallet/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-chains@workspace:packages/extension-chains"
   dependencies:
@@ -6078,7 +6166,7 @@ __metadata:
     "@polkadot/networks": ^12.6.2
     "@polkadot/util": ^12.6.2
     "@polkadot/util-crypto": ^12.6.2
-    "@subwallet/extension-inject": ^1.1.40-0
+    "@subwallet/extension-inject": ^1.1.40-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/types": "*"
@@ -6093,21 +6181,21 @@ __metadata:
     "@metamask/detect-provider": ^1.2.0
     "@polkadot/types": ^10.11.2
     "@polkadot/util": ^12.6.2
-    "@subwallet/extension-inject": ^1.1.40-0
+    "@subwallet/extension-inject": ^1.1.40-1
     web3: ^1.10.0
   peerDependencies:
     "@polkadot/util": "*"
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-dapp@^1.1.40-0, @subwallet/extension-dapp@workspace:packages/extension-dapp":
+"@subwallet/extension-dapp@^1.1.40-1, @subwallet/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/util": ^12.6.2
     "@polkadot/util-crypto": ^12.6.2
-    "@subwallet/extension-inject": ^1.1.40-0
+    "@subwallet/extension-inject": ^1.1.40-1
   peerDependencies:
     "@polkadot/api": "*"
     "@polkadot/util": "*"
@@ -6115,7 +6203,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-inject@^1.1.40-0, @subwallet/extension-inject@workspace:packages/extension-inject":
+"@subwallet/extension-inject@^1.1.40-1, @subwallet/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -6133,7 +6221,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-koni-ui@^1.1.40-0, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
+"@subwallet/extension-koni-ui@^1.1.40-1, @subwallet/extension-koni-ui@workspace:packages/extension-koni-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-koni-ui@workspace:packages/extension-koni-ui"
   dependencies:
@@ -6145,22 +6233,22 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": ^6.2.1
     "@fortawesome/react-fontawesome": ^0.2.0
     "@ledgerhq/hw-app-eth": ^6.35.0
-    "@polkadot/api-contract": ^10.11.2
-    "@polkadot/hw-ledger": ^12.6.2
-    "@polkadot/networks": ^12.6.2
-    "@polkadot/types": ^10.11.2
-    "@polkadot/types-augment": ^10.11.2
+    "@polkadot/api-contract": 10.9.1
+    "@polkadot/hw-ledger": 12.3.2
+    "@polkadot/networks": 12.3.2
+    "@polkadot/types": 10.9.1
+    "@polkadot/types-augment": 10.9.1
     "@polkadot/ui-settings": ^3.6.4
-    "@polkadot/util": ^12.6.2
-    "@polkadot/util-crypto": ^12.6.2
+    "@polkadot/util": 12.3.2
+    "@polkadot/util-crypto": 12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.42-beta.0
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-chains": ^1.1.40-0
-    "@subwallet/extension-dapp": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-mocks": ^1.1.40-0
+    "@subwallet/chain-list": 0.2.42
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-chains": ^1.1.40-1
+    "@subwallet/extension-dapp": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-mocks": ^1.1.40-1
     "@subwallet/keyring": ^0.1.3
     "@subwallet/react-ui": 5.1.2-b74
     "@subwallet/ui-keyring": ^0.1.3
@@ -6228,9 +6316,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-koni-ui": ^1.1.40-0
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-koni-ui": ^1.1.40-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6256,7 +6344,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-mocks@^1.1.40-0, @subwallet/extension-mocks@workspace:packages/extension-mocks":
+"@subwallet/extension-mocks@^1.1.40-1, @subwallet/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -6265,7 +6353,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@subwallet/extension-web-ui@^1.1.40-0, @subwallet/extension-web-ui@workspace:packages/extension-web-ui":
+"@subwallet/extension-web-ui@^1.1.40-1, @subwallet/extension-web-ui@workspace:packages/extension-web-ui":
   version: 0.0.0-use.local
   resolution: "@subwallet/extension-web-ui@workspace:packages/extension-web-ui"
   dependencies:
@@ -6288,12 +6376,12 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.2.42-beta.6
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-chains": ^1.1.40-0
-    "@subwallet/extension-dapp": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-mocks": ^1.1.40-0
+    "@subwallet/chain-list": ^0.2.42-beta.5
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-chains": ^1.1.40-1
+    "@subwallet/extension-dapp": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-mocks": ^1.1.40-1
     "@subwallet/keyring": ^0.1.1
     "@subwallet/react-ui": 5.1.2-b74
     "@subwallet/ui-keyring": ^0.1.1
@@ -6475,9 +6563,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-koni-ui": ^1.1.40-0
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-koni-ui": ^1.1.40-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -6508,9 +6596,9 @@ __metadata:
   dependencies:
     "@babel/runtime": ^7.20.6
     "@polkadot/dev": ^0.65.23
-    "@subwallet/extension-base": ^1.1.40-0
-    "@subwallet/extension-inject": ^1.1.40-0
-    "@subwallet/extension-web-ui": ^1.1.40-0
+    "@subwallet/extension-base": ^1.1.40-1
+    "@subwallet/extension-inject": ^1.1.40-1
+    "@subwallet/extension-web-ui": ^1.1.40-1
     assert: ^2.0.0
     babel-loader: ^8.2.5
     browser-resolve: ^2.0.0
@@ -8437,6 +8525,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@zondax/ledger-substrate@npm:^0.40.7":
+  version: 0.40.7
+  resolution: "@zondax/ledger-substrate@npm:0.40.7"
+  dependencies:
+    "@ledgerhq/hw-transport": ^6.27.1
+    bip32: ^4.0.0
+    bip32-ed25519: "git+https://github.com/Zondax/bip32-ed25519.git"
+    bip39: ^3.0.4
+    blakejs: ^1.2.1
+    bs58: ^5.0.0
+    chalk: ^4.1.0
+    hash.js: ^1.1.7
+  bin:
+    ledger-substrate: dist/cmd/cli.js
+  checksum: c88f74b8b42482aff880d5d66df430801abc151e16c4a8eddecf787813dc1d56f892a42b7fd0791f43d7c70fb8e3face93aa9f965bb510c77b0cf43ac4a619f6
+  languageName: node
+  linkType: hard
+
 "@zondax/ledger-substrate@npm:^0.41.3":
   version: 0.41.3
   resolution: "@zondax/ledger-substrate@npm:0.41.3"
@@ -9265,17 +9371,6 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: 7fb6a4313bae7f45e89d62c70a800913c303df653f19eafec88e56cea2e3821066b8409bc68be1930ecca80e861c52aa787659df0ffec6ad4d451c7816b9386b
-  languageName: node
-  linkType: hard
-
-"axios@npm:^1.6.7":
-  version: 1.6.7
-  resolution: "axios@npm:1.6.7"
-  dependencies:
-    follow-redirects: ^1.15.4
-    form-data: ^4.0.0
-    proxy-from-env: ^1.1.0
-  checksum: 87d4d429927d09942771f3b3a6c13580c183e31d7be0ee12f09be6d5655304996bb033d85e54be81606f4e89684df43be7bf52d14becb73a12727bf33298a082
   languageName: node
   linkType: hard
 
@@ -13519,21 +13614,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ethers@npm:^6.11.1":
-  version: 6.11.1
-  resolution: "ethers@npm:6.11.1"
-  dependencies:
-    "@adraffy/ens-normalize": 1.10.1
-    "@noble/curves": 1.2.0
-    "@noble/hashes": 1.3.2
-    "@types/node": 18.15.13
-    aes-js: 4.0.0-beta.5
-    tslib: 2.4.0
-    ws: 8.5.0
-  checksum: e8027c5071ad0370c61a1978f0602ab950d840c5923948f55e88b9808300e4e02e792bb793ea109ce7fa0e748f30a40a05f1202204a2b0402cdffbcb64a218e4
-  languageName: node
-  linkType: hard
-
 "ethers@npm:^6.4.2":
   version: 6.4.2
   resolution: "ethers@npm:6.4.2"
@@ -14178,16 +14258,6 @@ __metadata:
     debug:
       optional: true
   checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
-  languageName: node
-  linkType: hard
-
-"follow-redirects@npm:^1.15.4":
-  version: 1.15.5
-  resolution: "follow-redirects@npm:1.15.5"
-  peerDependenciesMeta:
-    debug:
-      optional: true
-  checksum: 5ca49b5ce6f44338cbfc3546823357e7a70813cecc9b7b768158a1d32c1e62e7407c944402a918ea8c38ae2e78266312d617dc68783fac502cbb55e1047b34ec
   languageName: node
   linkType: hard
 

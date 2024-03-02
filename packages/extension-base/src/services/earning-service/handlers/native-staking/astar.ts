@@ -27,8 +27,7 @@ export function getAstarWithdrawable (yieldPosition: YieldPositionInfo): Unstaki
   const unstakingInfo: UnstakingInfo = {
     chain: yieldPosition.chain,
     status: UnstakingStatus.CLAIMABLE,
-    claimable: '0',
-    waitingTime: 0
+    claimable: '0'
   };
 
   let bnWithdrawable = BN_ZERO;
@@ -249,12 +248,15 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
         const isClaimable = unlockingChunk.unlockEra - parseInt(currentEra) < 0;
         const remainingEra = unlockingChunk.unlockEra - parseInt(currentEra);
         const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
+        // const currentTimestampMs = Date.now();
+        // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
         unstakingList.push({
           chain: chainInfo.slug,
           status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
           claimable: unlockingChunk.amount.toString(),
           waitingTime
+          // targetTimestampMs: targetTimestampMs
         });
       }
     }

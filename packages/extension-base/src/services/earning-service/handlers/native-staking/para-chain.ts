@@ -56,7 +56,7 @@ function calculateMantaNominatorReturn (decimal: number, commission: number, tot
 
   const marginalReward = annualRewardsPerCollator.multipliedBy(MIN_DELEGATION).dividedBy((collatorTotalStaked.plus(MIN_DELEGATION)));
 
-  const bnApy = new BigN((1 - commission) * 100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+  const bnApy = new BigN(100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
 
   return bnApy.toNumber();
 }

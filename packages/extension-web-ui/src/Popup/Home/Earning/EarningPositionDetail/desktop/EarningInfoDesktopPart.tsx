@@ -57,8 +57,8 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
         <div className='__separator' />
         <div className={'__earning-actions'}>
           <Button
-            className={'__left-item -ghost-type-3'}
             block={true}
+            className={'__left-item -ghost-type-3'}
             icon={(
               <Icon
                 phosphorIcon={MinusCircle}
@@ -72,8 +72,8 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
           </Button>
 
           <Button
-            className={'__right-item -ghost-type-3'}
             block={true}
+            className={'__right-item -ghost-type-3'}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

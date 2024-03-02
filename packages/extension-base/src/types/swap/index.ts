@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import {ChainType, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
+import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 

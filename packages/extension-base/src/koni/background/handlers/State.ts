@@ -33,6 +33,7 @@ import SettingService from '@subwallet/extension-base/services/setting-service/S
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
 import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SwapService } from '@subwallet/extension-base/services/swap-service';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -60,7 +61,6 @@ import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
-import { SwapService } from '@subwallet/extension-base/services/swap-service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 const passworder = require('browser-passworder');

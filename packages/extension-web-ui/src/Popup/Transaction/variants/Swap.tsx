@@ -15,7 +15,7 @@ import { BN_TEN, BN_ZERO, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SW
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
-import { getLatestSwapQuote, handleSwapRequest, handleSwapStep } from '@subwallet/extension-web-ui/messaging/transaction/swap';
+import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
@@ -228,6 +228,15 @@ const Component = () => {
         handleSwapRequest(currentRequest).then((result) => {
           if (sync) {
             setOptimalSwapPath(result.process);
+
+            dispatchProcessState({
+              payload: {
+                steps: result.process.steps,
+                feeStructure: result.process.totalFee
+              },
+              type: SwapActionType.STEP_CREATE
+            });
+
             setQuoteOptions(result.quote.quotes);
             setCurrentQuote(result.quote.optimalQuote);
             setQuoteAliveUntil(result.quote.aliveUntil);
@@ -529,18 +538,30 @@ const Component = () => {
 
       try {
         if (isFirstStep) {
-          // todo: use background validation
-
-          dispatchProcessState({
-            type: SwapActionType.STEP_COMPLETE,
-            payload: true
-          });
-          dispatchProcessState({
-            type: SwapActionType.STEP_SUBMIT,
-            payload: null
+          const validatePromise = validateSwapProcess({
+            address: from,
+            process: currentOptimalSwapPath,
+            selectedQuote: currentQuote
           });
 
-          return await submitData(step + 1);
+          const _errors = await validatePromise;
+
+          if (_errors.length) {
+            onError(_errors[0]);
+
+            return false;
+          } else {
+            dispatchProcessState({
+              type: SwapActionType.STEP_COMPLETE,
+              payload: true
+            });
+            dispatchProcessState({
+              type: SwapActionType.STEP_SUBMIT,
+              payload: null
+            });
+
+            return await submitData(step + 1);
+          }
         } else {
           const submitPromise: Promise<SWTransactionResponse> = handleSwapStep({
             process: currentOptimalSwapPath,

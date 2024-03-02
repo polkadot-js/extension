@@ -5,6 +5,8 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { SwapFeeInfo, SwapStepDetail } from '@subwallet/extension-base/types/swap';
 import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
+// todo: review this file again and remove unnecessary logic
+
 export enum SwapStepStatus {
   QUEUED = 'QUEUED',
   PROCESSING = 'PROCESSING',

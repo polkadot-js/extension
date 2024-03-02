@@ -206,7 +206,8 @@ export const _TRANSFER_CHAIN_GROUP = {
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
   pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
-  centrifuge: ['centrifuge']
+  centrifuge: ['centrifuge'],
+  disable_transfer: ['invarch', 'continuum_network']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

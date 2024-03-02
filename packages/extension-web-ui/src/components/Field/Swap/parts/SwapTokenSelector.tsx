@@ -49,7 +49,7 @@ const Component = (props: Props) => {
           className='token-logo'
           isShowSubLogo={true}
           shape='squircle'
-          size={token.controlHeightSM}
+          size={token.sizeXL}
           subNetwork={item.originChain}
           token={item.slug.toLowerCase()}
         />
@@ -59,7 +59,7 @@ const Component = (props: Props) => {
         </div>
       </div>
     );
-  }, [token.controlHeightSM]);
+  }, [token.sizeXL]);
 
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (
@@ -154,10 +154,14 @@ const SwapTokenSelector = styled(Component)<Props>(({ theme: { token } }: Props)
     '.__item-token-info': {
       display: 'flex',
       flexDirection: 'column',
-      color: token.colorWhite
+      color: token.colorWhite,
+      overflow: 'hidden'
     },
     '.__item-token-name': {
-      color: token.colorTextTertiary
+      color: token.colorTextTertiary,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
     '.__token-selector-wrapper .ant-select-modal-input-suffix': {
       color: token.colorWhite

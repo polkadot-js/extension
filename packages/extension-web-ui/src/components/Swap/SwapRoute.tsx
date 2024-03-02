@@ -44,7 +44,11 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
         {getSwapRoute.map((result, index) => (
           <div
-            className={'__token-item'}
+            className={CN('__token-item', {
+              '-is-first': index === 0,
+              '-is-last': index === getSwapRoute.length - 1,
+              '-is-center': (index !== 0) && (index !== getSwapRoute.length - 1)
+            })}
             key={index}
           >
             <Logo
@@ -68,11 +72,28 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
     justifyContent: 'space-between',
     position: 'relative',
     '.__token-item': {
-      display: 'flex',
+      height: 48,
       flexDirection: 'column',
       gap: 4,
       justifyContent: 'center',
       alignItems: 'center'
+    },
+    '.__token-item.-is-first': {
+      alignItems: 'flex-start',
+      '.__token-item-symbol': {
+      }
+    },
+    '.__token-item.-is-center': {
+      '.__token-item-symbol': {
+        left: '50%',
+        transform: 'translateX(-50%)'
+      }
+    },
+    '.__token-item.-is-last': {
+      alignItems: 'flex-end',
+      '.__token-item-symbol': {
+        right: 3
+      }
     },
     '.__first-separator': {
       position: 'absolute',
@@ -87,7 +108,12 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       fontSize: token.fontSizeSM,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeightSM,
-      color: token.colorTextTertiary
+      color: token.colorTextTertiary,
+      position: 'absolute',
+      whitespace: 'nowrap',
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      maxWidth: 70
     },
 
     '.__arrow': {

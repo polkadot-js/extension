@@ -11,6 +11,7 @@ import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning
 import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler, removeLazy } from '@subwallet/extension-base/utils';
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
@@ -160,8 +161,12 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.handleActions();
   }
 
+  private delayReloadTimeout: NodeJS.Timeout | undefined;
+
   handleActions () {
     this.eventService.onLazy((events, eventTypes) => {
+      let delayReload = false;
+
       (async () => {
         const removedAddresses: string[] = [];
         const removeChains: string[] = [];
@@ -178,6 +183,21 @@ export default class EarningService implements StoppableServiceInterface, Persis
               removeChains.push(event.data[0] as string);
             }
           }
+
+          if (event.type === 'transaction.done') {
+            const transactionData = event.data[0] as SWTransaction;
+            const notRequireReloadTypes = [
+              ExtrinsicType.TRANSFER_BALANCE,
+              ExtrinsicType.TRANSFER_TOKEN,
+              ExtrinsicType.TRANSFER_XCM,
+              ExtrinsicType.SEND_NFT,
+              ExtrinsicType.CROWDLOAN
+            ];
+
+            if (notRequireReloadTypes.indexOf(transactionData.extrinsicType) === -1) {
+              delayReload = true;
+            }
+          }
         });
 
         if (removeChains.length || removedAddresses.length) {
@@ -187,8 +207,16 @@ export default class EarningService implements StoppableServiceInterface, Persis
         // Account changed or chain changed (active or inactive)
         // Chain changed (active or inactive)
         // Todo: Optimize performance of chain active or inactive in the future
-        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState')) {
-          await this.reloadEarning();
+        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState') || delayReload) {
+          if (delayReload) {
+            this.delayReloadTimeout = setTimeout(() => {
+              this.reloadEarning().catch(console.error); // Timeout is removed inside reloadEarning > runUnsubscribePoolsPosition
+            }, 3000);
+          } else {
+            this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+            this.delayReloadTimeout = undefined;
+            await this.reloadEarning();
+          }
         }
       })().catch(console.error);
     });
@@ -591,6 +619,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.yieldPositionUnsub?.();
     removeLazy('persistYieldPositionInfo');
     this.yieldPositionPersistQueue = [];
+
+    // Remove delay reload
+    this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+    this.delayReloadTimeout = undefined;
   }
 
   /* Pools' position methods */

@@ -234,14 +234,20 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       amount: quote.fromAmount
     });
 
+    console.log('depositAddressResponse', depositAddressResponse);
+
     const txData: ChainflipTxData = {
+      address,
+      provider: this.providerInfo,
+      quote: params.quote,
+      slippage: params.slippage,
+      recipient,
       depositChannelId: depositAddressResponse.depositChannelId,
       depositAddress: depositAddressResponse.depositAddress
     };
 
     let extrinsic: TransactionData;
 
-    // todo: handle different chain type and assets
     if (chainType === ChainType.SUBSTRATE) {
       const chainApi = this.chainService.getSubstrateApi(chainInfo.slug);
 
@@ -251,7 +257,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         from: address,
         networkKey: chainInfo.slug,
         substrateApi,
-        to: receiver,
+        to: depositAddressResponse.depositAddress,
         tokenInfo: fromAsset,
         transferAll: false, // todo
         value: quote.fromAmount
@@ -259,7 +265,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       extrinsic = submittableExtrinsic as SubmittableExtrinsic<'promise'>;
     } else {
-      const [transactionConfig] = await getEVMTransactionObject(chainInfo, address, receiver, quote.fromAmount, false, this.chainService.getEvmApiMap());
+      const [transactionConfig] = await getEVMTransactionObject(chainInfo, address, depositAddressResponse.depositAddress, quote.fromAmount, false, this.chainService.getEvmApiMap());
 
       extrinsic = transactionConfig;
     }

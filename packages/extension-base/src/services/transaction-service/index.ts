@@ -688,6 +688,16 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.SWAP: {
+        const data = parseTransactionData<ExtrinsicType.SWAP>(transaction.data); // TODO: switch by provider
+        const inputAsset = this.state.chainService.getAssetBySlug(data.quote.pair.from);
+
+        historyItem.amount = { value: data.quote.fromAmount, symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
+        historyItem.additionalInfo = data;
+
+        break;
+      }
+
       case ExtrinsicType.UNKNOWN:
         break;
     }

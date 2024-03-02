@@ -33,6 +33,7 @@ export interface ValidatorInfo {
   isVerified: boolean;
   icon?: string;
   isCrowded: boolean;
+  eraRewardPoint?: string;
   topQuartile?: boolean;
 }
 

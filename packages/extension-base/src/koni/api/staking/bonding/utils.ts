@@ -575,7 +575,7 @@ export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupported
   }
 }
 
-export function getValidatorPointsList (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
   // mapping store validator and totalPoints
   const validatorTotalPointsMap: Record<string, BigNumber> = {};
 

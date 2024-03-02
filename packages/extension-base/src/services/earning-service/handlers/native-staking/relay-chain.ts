@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth, getTopValidatorByPoints, getValidatorPointsList } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth, getTopValidatorByPoints, getValidatorPointsMap } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -374,8 +374,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       startEraForPoints++;
     }
 
-    const validatorPointsList = getValidatorPointsList(eraRewardMap);
-    const topValidatorList = getTopValidatorByPoints(validatorPointsList);
+    const validatorPointsMap = getValidatorPointsMap(eraRewardMap);
+    const topValidatorList = getTopValidatorByPoints(validatorPointsMap);
 
     // filter blocked validators
     const validators = _validators as any[];
@@ -454,6 +454,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           isVerified: false,
           minBond,
           isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded),
+          eraRewardPoint: (validatorPointsMap[validatorAddress] ?? BN_ZERO).toString(),
           topQuartile: isTopQuartile
         } as ValidatorInfo);
       }

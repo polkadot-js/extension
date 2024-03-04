@@ -16,7 +16,7 @@ import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
-import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
@@ -107,6 +107,7 @@ const Component = () => {
   const fromAmountValue = useWatchTransaction('fromAmount', form, defaultData);
   const fromTokenSlugValue = useWatchTransaction('fromTokenSlug', form, defaultData);
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
+  const chainValue = useWatchTransaction('chain', form, defaultData);
 
   const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
@@ -212,6 +213,9 @@ const Component = () => {
         fromTokenSlug: toTokenSlugValue,
         toTokenSlug: fromTokenSlugValue
       });
+      form.validateFields(['from']).catch((e) => {
+        console.log('Error when validating', e);
+      });
     }
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
 
@@ -220,117 +224,6 @@ const Component = () => {
 
     persistData(values);
   }, [persistData]);
-
-  useEffect(() => {
-    form.setFieldValue('chain', getOriginChain(fromAssetInfo));
-  }, [form, fromAssetInfo]);
-
-  useEffect(() => {
-    let sync = true;
-    let timeout: NodeJS.Timeout;
-
-    // todo: simple validate before do this
-    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
-      timeout = setTimeout(() => {
-        const currentRequest: SwapRequest = {
-          address: fromValue,
-          pair: {
-            slug: _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue),
-            from: fromTokenSlugValue,
-            to: toTokenSlugValue
-          },
-          fromAmount: fromAmountValue,
-          slippage: 0.05
-        };
-
-        setCurrentQuoteRequet(currentRequest);
-
-        handleSwapRequest(currentRequest).then((result) => {
-          if (sync) {
-            setOptimalSwapPath(result.process);
-
-            dispatchProcessState({
-              payload: {
-                steps: result.process.steps,
-                feeStructure: result.process.totalFee
-              },
-              type: SwapActionType.STEP_CREATE
-            });
-
-            setQuoteOptions(result.quote.quotes);
-            setCurrentQuote(result.quote.optimalQuote);
-            setQuoteAliveUntil(result.quote.aliveUntil);
-            setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
-            setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
-            setSwapError(result.quote.error);
-            showQuoteAreRef.current = true;
-          }
-        }).catch((e) => {
-          console.log('handleSwapRequest error', e);
-        });
-      }, 300);
-    }
-
-    return () => {
-      sync = false;
-      clearTimeout(timeout);
-    };
-  }, [fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timer;
-
-    if (quoteAliveUntil) {
-      timer = setInterval(() => {
-        const _time = Math.floor((quoteAliveUntil - Date.now()) / 1000 + 0.5);
-
-        if (_time < 0) {
-          setQuoteCountdownTime(0);
-          clearInterval(timer);
-        } else {
-          setQuoteCountdownTime(_time);
-        }
-      }, 1000);
-    } else {
-      setQuoteCountdownTime(0);
-    }
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [quoteAliveUntil]);
-
-  useEffect(() => {
-    let timer: NodeJS.Timer;
-    let isSync = true;
-
-    const updateQuote = () => {
-      if (currentQuoteRequest) {
-        getLatestSwapQuote(currentQuoteRequest).then((rs) => {
-          if (isSync) {
-            setCurrentQuote(rs.optimalQuote);
-            setQuoteAliveUntil(rs.aliveUntil);
-          }
-        }).catch((e) => {
-          console.log('Error when getLatestSwapQuote', e);
-        });
-      }
-    };
-
-    if (quoteAliveUntil) {
-      timer = setInterval(() => {
-        if ((quoteAliveUntil - Date.now()) < 0) {
-          updateQuote();
-          clearInterval(timer);
-        }
-      }, 1000);
-    }
-
-    return () => {
-      isSync = false;
-      clearInterval(timer);
-    };
-  }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
 
   // todo: will optimize fee display logic later
   const getTotalConvertedBalance = useMemo(() => {
@@ -385,27 +278,13 @@ const Component = () => {
     return totalFeeByType;
   }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
 
-  useEffect(() => {
-    setCustomScreenTitle(t('Swap'));
-
-    return () => {
-      setCustomScreenTitle(undefined);
-    };
-  }, [setCustomScreenTitle, t]);
-
-  useEffect(() => {
-    if (!fromTokenSlugValue && fromTokenItems.length) {
-      form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+  const canShowAvailableBalance = useMemo(() => {
+    if (fromValue && chainValue && chainInfoMap[chainValue]) {
+      return isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[chainValue]);
     }
-  }, [form, fromTokenItems, fromTokenSlugValue]);
 
-  useEffect(() => {
-    if (toTokenItems.length) {
-      if (!toTokenSlugValue || !toTokenItems.some((t) => t.slug === toTokenSlugValue)) {
-        form.setFieldValue('toTokenSlug', toTokenItems[0].slug);
-      }
-    }
-  }, [form, toTokenItems, toTokenSlugValue]);
+    return false;
+  }, [fromValue, chainValue, chainInfoMap]);
 
   const renderRateInfo = () => {
     if (!currentQuote) {
@@ -622,6 +501,139 @@ const Component = () => {
     }, 300);
   }, [currentOptimalSwapPath, currentQuote, currentSlippage, onError, onSuccess, processState.currentStep, processState.steps.length]);
 
+  useEffect(() => {
+    form.setFieldValue('chain', getOriginChain(fromAssetInfo));
+  }, [form, fromAssetInfo]);
+
+  useEffect(() => {
+    let sync = true;
+    let timeout: NodeJS.Timeout;
+
+    // todo: simple validate before do this
+    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
+      timeout = setTimeout(() => {
+        const currentRequest: SwapRequest = {
+          address: fromValue,
+          pair: {
+            slug: _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue),
+            from: fromTokenSlugValue,
+            to: toTokenSlugValue
+          },
+          fromAmount: fromAmountValue,
+          slippage: 0.05
+        };
+
+        setCurrentQuoteRequet(currentRequest);
+
+        handleSwapRequest(currentRequest).then((result) => {
+          if (sync) {
+            setOptimalSwapPath(result.process);
+
+            dispatchProcessState({
+              payload: {
+                steps: result.process.steps,
+                feeStructure: result.process.totalFee
+              },
+              type: SwapActionType.STEP_CREATE
+            });
+
+            setQuoteOptions(result.quote.quotes);
+            setCurrentQuote(result.quote.optimalQuote);
+            setQuoteAliveUntil(result.quote.aliveUntil);
+            setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
+            setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
+            setSwapError(result.quote.error);
+            showQuoteAreRef.current = true;
+          }
+        }).catch((e) => {
+          console.log('handleSwapRequest error', e);
+        });
+      }, 300);
+    }
+
+    return () => {
+      sync = false;
+      clearTimeout(timeout);
+    };
+  }, [fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+
+    if (quoteAliveUntil) {
+      timer = setInterval(() => {
+        const _time = Math.floor((quoteAliveUntil - Date.now()) / 1000 + 0.5);
+
+        if (_time < 0) {
+          setQuoteCountdownTime(0);
+          clearInterval(timer);
+        } else {
+          setQuoteCountdownTime(_time);
+        }
+      }, 1000);
+    } else {
+      setQuoteCountdownTime(0);
+    }
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [quoteAliveUntil]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+    let isSync = true;
+
+    const updateQuote = () => {
+      if (currentQuoteRequest) {
+        getLatestSwapQuote(currentQuoteRequest).then((rs) => {
+          if (isSync) {
+            setCurrentQuote(rs.optimalQuote);
+            setQuoteAliveUntil(rs.aliveUntil);
+          }
+        }).catch((e) => {
+          console.log('Error when getLatestSwapQuote', e);
+        });
+      }
+    };
+
+    if (quoteAliveUntil) {
+      timer = setInterval(() => {
+        if ((quoteAliveUntil - Date.now()) < 0) {
+          updateQuote();
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      isSync = false;
+      clearInterval(timer);
+    };
+  }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
+
+  useEffect(() => {
+    setCustomScreenTitle(t('Swap'));
+
+    return () => {
+      setCustomScreenTitle(undefined);
+    };
+  }, [setCustomScreenTitle, t]);
+
+  useEffect(() => {
+    if (!fromTokenSlugValue && fromTokenItems.length) {
+      form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+    }
+  }, [form, fromTokenItems, fromTokenSlugValue]);
+
+  useEffect(() => {
+    if (toTokenItems.length) {
+      if (!toTokenSlugValue || !toTokenItems.some((t) => t.slug === toTokenSlugValue)) {
+        form.setFieldValue('toTokenSlug', toTokenItems[0].slug);
+      }
+    }
+  }, [form, toTokenItems, toTokenSlugValue]);
+
   return (
     <>
       <>
@@ -651,13 +663,14 @@ const Component = () => {
               </Form.Item>
 
               <div className={'__balance-display-area'}>
-                {/* <FreeBalance */}
-                {/*  address={fromValue} */}
-                {/*  chain={''} */}
-                {/*  isSubscribe={true} */}
-                {/*  label={`${t('Available balance')}:`} */}
-                {/*  tokenSlug={fromTokenSlugValue} */}
-                {/* /> */}
+                <FreeBalance
+                  address={fromValue}
+                  chain={chainValue}
+                  hidden={!canShowAvailableBalance}
+                  isSubscribe={true}
+                  label={`${t('Available balance')}:`}
+                  tokenSlug={fromTokenSlugValue}
+                />
               </div>
 
               <div className={'__swap-field-area'}>
@@ -881,8 +894,10 @@ const Component = () => {
                     <div className={'__separator'}></div>
                     <div className={'__item-fee-wrapper'}>
                       <div className={'__item-fee-paid-label'}>Fee paid in</div>
-                      <div className={'__item-fee-token'}
-                        onClick={openChooseFeeToken}>
+                      <div
+                        className={'__item-fee-token'}
+                        onClick={openChooseFeeToken}
+                      >
                         <Logo
                           className='token-logo'
                           isShowSubLogo={false}
@@ -1022,6 +1037,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__edit-token': {
       paddingLeft: token.paddingXXS
+    },
+
+    '.free-balance': {
+      marginBottom: token.marginSM
     },
 
     // swap quote

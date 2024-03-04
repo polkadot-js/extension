@@ -689,7 +689,7 @@ const Component = () => {
               <div className={'__swap-field-area'}>
                 <SwapFromField
                   amountValue={fromAmountValue}
-                  decimals={getDecimals(fromAssetInfo)}
+                  fromAsset={fromAssetInfo}
                   label={t('From')}
                   onChangeAmount={onChangeAmount}
                   onSelectToken={onSelectFromToken}

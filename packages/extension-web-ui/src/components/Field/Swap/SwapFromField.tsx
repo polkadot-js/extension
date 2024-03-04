@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _getAssetDecimals, _getAssetPriceId } from '@subwallet/extension-base/services/chain-service/utils';
 import { getInputValuesFromString, getOutputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -19,7 +21,7 @@ type Props = ThemeProps & {
   onSelectToken: (tokenSlug: string) => void;
   tokenSelectorValue?: string;
   tokenSelectorItems: TokenSelectorItemType[];
-  decimals: number;
+  fromAsset: _ChainAsset | undefined;
   amountMaxValue?: string;
   amountValue?: string;
   onSetMax?: (value: boolean) => void;
@@ -27,12 +29,13 @@ type Props = ThemeProps & {
 }
 
 const Component = (props: Props) => {
-  const { amountValue, className, decimals, label,
+  const { amountValue, className, fromAsset, label,
     onChangeAmount, onSelectToken, tokenSelectorItems,
     tokenSelectorValue } = props;
   const { t } = useTranslation();
+  const decimals = fromAsset ? _getAssetDecimals(fromAsset) : 0;
+  const priceId = fromAsset ? _getAssetPriceId(fromAsset) : '';
   const [inputValue, setInputValue] = useState(amountValue ? getInputValuesFromString(amountValue, decimals) : amountValue);
-  const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const _onClickMaxBtn = useCallback(() => {
@@ -50,18 +53,15 @@ const Component = (props: Props) => {
   }, [decimals, onChangeAmount]);
 
   const getConvertedInputValue = useMemo(() => {
-    if (tokenSelectorValue && inputValue && assetRegistryMap[tokenSelectorValue]) {
-      const asset = assetRegistryMap[tokenSelectorValue];
-      const { priceId } = asset;
-
+    if (tokenSelectorValue && inputValue) {
       const transformVal = getOutputValuesFromString(inputValue, decimals);
-      const price = priceMap[priceId || ''] || 0;
+      const price = priceMap[priceId] || 0;
 
       return new BigN(transformVal).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
     }
 
     return BN_ZERO;
-  }, [assetRegistryMap, decimals, inputValue, priceMap, tokenSelectorValue]);
+  }, [decimals, inputValue, priceId, priceMap, tokenSelectorValue]);
 
   return (
     <div className={CN(className, 'swap-form-field')}>
@@ -69,7 +69,7 @@ const Component = (props: Props) => {
         <div className='__label'>{label}</div>
 
         <Button
-          className={'__max-button'}
+          className={'__max-button hidden'}
           onClick={_onClickMaxBtn}
           size='xs'
           type='ghost'

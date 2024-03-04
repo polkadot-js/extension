@@ -804,21 +804,20 @@ const Component = () => {
                   <div className={'__text'}>Swap quote</div>
                 </div>
                 <div className={'__item-right-part'}>
-                  <div className={'__item-right-part-button'}>
-                    <Button
-                      disabled={!quoteOptions.length}
-                      onClick={openAllQuotesModal}
-                      size='xs'
-                      type='ghost'
-                    >
-                      <span className={'__item-right-title'}>{t('View quote')}</span>
+                  <Button
+                    className={'__view-quote-button'}
+                    disabled={!quoteOptions.length}
+                    onClick={openAllQuotesModal}
+                    size='xs'
+                    type='ghost'
+                  >
+                    <span className={'__item-right-title'}>{t('View quote')}</span>
 
-                      <Icon
-                        phosphorIcon={CaretRight}
-                        size={'sm'}
-                      />
-                    </Button>
-                  </div>
+                    <Icon
+                      phosphorIcon={CaretRight}
+                      size={'sm'}
+                    />
+                  </Button>
                 </div>
               </div>
 
@@ -1020,13 +1019,19 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__transaction-form-area.-no-right-part': {
       maxWidth: 383
     },
-
-    '.__item-right-part-button:hover': {
-      color: token.colorWhite
-    },
-    '.__item-right-part-button .ant-btn': {
+    '.__view-quote-button': {
       paddingLeft: 0,
-      paddingRight: 0
+      paddingRight: 0,
+      color: token.colorTextTertiary
+    },
+
+    '.__view-quote-button > span+.anticon': {
+      marginInlineStart: 0,
+      width: 40
+    },
+
+    '.__view-quote-button:hover': {
+      color: token.colorWhite
     },
 
     '.__slippage-info': {
@@ -1185,9 +1190,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       gap: 8,
       alignItems: 'center'
     },
-    '.__item-right-part-button .ant-btn >span+.anticon': {
-      marginInlineStart: 0
-    },
+
     '.__item-right-part': {
       display: 'flex',
       alignItems: 'center'

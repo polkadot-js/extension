@@ -634,6 +634,19 @@ const Component = () => {
     }
   }, [form, toTokenItems, toTokenSlugValue]);
 
+  const minReceivable = useMemo(() => {
+    if (currentQuote) {
+      const decimals = getDecimals(fromAssetInfo);
+
+      return new BigN(currentQuote.fromAmount)
+        .div(BN_TEN.pow(decimals))
+        .multipliedBy(currentQuote.rate)
+        .multipliedBy(1 - currentSlippage);
+    }
+
+    return BN_ZERO;
+  }, [fromAssetInfo, currentQuote, currentSlippage]);
+
   return (
     <>
       <>
@@ -838,6 +851,14 @@ const Component = () => {
                     >
                     </MetaInfo.Default>
                     <SwapRoute swapRoute={currentQuote.route} />
+                    <div className={'__min-receivale'}>
+                      <MetaInfo.Number
+                        decimals={0}
+                        label={t('Min receivable')}
+                        suffix={getSymbol(toAssetInfo)}
+                        value={minReceivable}
+                      />
+                    </div>
                   </MetaInfo>
                 )
               }
@@ -1198,6 +1219,21 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__amount-wrapper': {
       flex: 1
+    },
+    '.__min-receivale': {
+      marginTop: 12
+    },
+    '.__min-receivale .__label-col': {
+      fontSize: 14,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight,
+      color: token.colorTextTertiary
+    },
+    '.__min-receivale .__value': {
+      fontSize: 14,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight,
+      color: token.colorWhite
     },
 
     // desktop

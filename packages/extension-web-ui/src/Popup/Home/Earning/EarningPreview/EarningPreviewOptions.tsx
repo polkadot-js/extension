@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
@@ -10,6 +12,7 @@ import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PA
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { analysisAccounts } from '@subwallet/extension-web-ui/hooks/common/useGetChainSlugsByCurrentAccount';
+import { saveCurrentAccountAddress } from '@subwallet/extension-web-ui/messaging';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
@@ -21,6 +24,8 @@ import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, use
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps & {
 //
@@ -50,6 +55,18 @@ const apyOrdinal = (group: YieldGroupInfo): number => {
 
 const getPoolInfoByChainAndType = (poolInfoMap: Record<string, YieldPoolInfo>, chain: string, type: YieldPoolType): YieldPoolInfo | undefined => {
   return Object.values(poolInfoMap).find((item) => item.chain === chain && item.type === type);
+};
+
+const getFilteredAccount = (chainInfo: _ChainInfo) => (account: AccountJson) => {
+  if (isAccountAll(account.address)) {
+    return false;
+  }
+
+  if (account.originGenesisHash && _getSubstrateGenesisHash(chainInfo) !== account.originGenesisHash) {
+    return false;
+  }
+
+  return _isChainEvmCompatible(chainInfo) === isEthereumAddress(account.address);
 };
 
 const connectChainModalId = 'earning-options-connect-chain-modal';
@@ -84,7 +101,7 @@ function Component ({ className }: Props) {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { accounts, currentAccount } = useSelector((state) => state.accountState);
   const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
-  const [isContainOnlySubstrate, isContainOnlyEthereum] = analysisAccounts(accounts);
+  const [isContainOnlySubstrate] = analysisAccounts(accounts);
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
@@ -140,21 +157,18 @@ function Component ({ className }: Props) {
     };
   }, [filterOptions.length, selectedFilters]);
 
-  const checkIsAnyAccountValid = useCallback(() => {
+  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[]) => {
     const chainInfo = chainInfoMap[chainParam];
+    let accountList: AccountJson[] = [];
 
-    if (chainInfo) {
-      const isEvmChain = _isChainEvmCompatible(chainInfo);
-
-      if (isEvmChain) {
-        return !isContainOnlySubstrate;
-      } else {
-        return !isContainOnlyEthereum;
-      }
-    } else {
+    if (!chainInfo) {
       return false;
     }
-  }, [chainInfoMap, chainParam, isContainOnlyEthereum, isContainOnlySubstrate]);
+
+    accountList = accounts.filter(getFilteredAccount(chainInfo));
+
+    return !!accountList.length;
+  }, [chainInfoMap, chainParam]);
 
   const navigateToEarnTransaction = useCallback(
     () => {
@@ -163,21 +177,27 @@ function Component ({ className }: Props) {
         navigate(DEFAULT_ROUTER_PATH);
       } else {
         const chainInfo = chainInfoMap[chainParam];
-        const isAnyAccountValid = checkIsAnyAccountValid();
+        const isAnyAccountValid = checkIsAnyAccountValid(accounts);
 
         if (!isAnyAccountValid) {
           const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;
 
           setSelectedAccountTypes([accountType]);
-          navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, accountType, chainName: chainInfo?.name } });
+          navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfo?.name } });
 
           return;
         }
 
-        navigate('/transaction/earn');
+        const accountList = accounts.filter(getFilteredAccount(chainInfo));
+
+        if (accountList.length === 1) {
+          saveCurrentAccountAddress(accountList[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
+        } else {
+          saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+        }
       }
     },
-    [chainInfoMap, chainParam, checkIsAnyAccountValid, isContainOnlySubstrate, isNoAccount, navigate, setReturnStorage, setSelectedAccountTypes]
+    [accounts, chainInfoMap, chainParam, checkIsAnyAccountValid, isContainOnlySubstrate, isNoAccount, navigate, setReturnStorage, setSelectedAccountTypes]
   );
 
   const onConnectChainSuccess = useCallback(() => {

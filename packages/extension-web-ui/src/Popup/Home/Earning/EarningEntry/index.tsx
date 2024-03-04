@@ -3,7 +3,6 @@
 
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AlertModal, LoadingScreen, PageWrapper } from '@subwallet/extension-web-ui/components';
-import { SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { useAlert, useGroupYieldPosition, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import EarningOptions from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry/EarningOptions';
@@ -15,8 +14,6 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { KeypairType } from '@polkadot/util-crypto/types';
-
 type Props = ThemeProps;
 const alertModalId = 'earning-entry-alert-modal';
 
@@ -27,7 +24,6 @@ function Component () {
   const [entryView, setEntryView] = useState<EarningEntryView>(locationState?.view || EarningEntryView.POSITIONS);
   const [loading, setLoading] = useState<boolean>(false);
   const redirectFromPreviewRef = useRef<boolean>(locationState?.redirectFromPreview || false);
-  const accountTypeRef = useRef<KeypairType | undefined>(locationState?.accountType);
   const chainNameRef = useRef<string>(locationState?.chainName || '');
   const { t } = useTranslation();
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
@@ -35,13 +31,11 @@ function Component () {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (redirectFromPreviewRef.current && accountTypeRef.current) {
-      const accountTypeLabel = accountTypeRef.current === SUBSTRATE_ACCOUNT_TYPE ? 'Polkadot' : 'Ethereum';
-
+    if (redirectFromPreviewRef.current) {
       openAlert({
         title: t('Invalid account type'),
         type: NotificationType.ERROR,
-        content: t('You don’t have a {{accountType}} account to stake on {{chainName}} network yet. Create a new account and try again.', { replace: { accountType: accountTypeLabel, chainName: chainNameRef.current } }),
+        content: t('You don’t have any account to stake on {{chainName}} network yet. Create a new account and try again.', { replace: { chainName: chainNameRef.current } }),
         cancelButton: {
           text: 'Dismiss',
           onClick: closeAlert,

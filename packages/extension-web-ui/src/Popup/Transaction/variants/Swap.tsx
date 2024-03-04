@@ -992,9 +992,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     marginRight: 'auto',
     justifyContent: 'center',
     gap: token.size,
-    '.__item-right-title': {
-      color: token.colorTextTertiary
-    },
     '.__item-fee-wrapper': {
       color: token.colorTextTertiary,
       display: 'flex',
@@ -1024,11 +1021,12 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       maxWidth: 383
     },
 
-    '.__item-right-title:hover': {
-      color: token.colorWhite
-    },
     '.__item-right-part-button:hover': {
       color: token.colorWhite
+    },
+    '.__item-right-part-button .ant-btn': {
+      paddingLeft: 0,
+      paddingRight: 0
     },
 
     '.__slippage-info': {

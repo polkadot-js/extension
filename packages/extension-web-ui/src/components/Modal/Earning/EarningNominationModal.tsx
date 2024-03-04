@@ -83,10 +83,6 @@ const EarningPoolDetailModal = styled(Component)<Props>(({ theme: { token } }: P
         alignItems: 'center',
         gap: token.sizeXS,
         overflow: 'hidden'
-      },
-
-      '.__value-col': {
-        flex: '0 1 auto'
       }
     },
 

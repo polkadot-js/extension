@@ -48,7 +48,7 @@ function Component ({ className,
         icon: Vault
       },
       {
-        label: t('DApps'),
+        label: t('dApps'),
         value: '/home/dapps',
         icon: Globe
       },

@@ -634,18 +634,21 @@ const Component = () => {
     }
   }, [form, toTokenItems, toTokenSlugValue]);
 
-  const minReceivable = useMemo(() => {
+  const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
       const decimals = getDecimals(fromAssetInfo);
 
       return new BigN(currentQuote.fromAmount)
         .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate)
-        .multipliedBy(1 - currentSlippage);
+        .multipliedBy(currentQuote.rate);
     }
 
     return BN_ZERO;
-  }, [fromAssetInfo, currentQuote, currentSlippage]);
+  }, [currentQuote, fromAssetInfo]);
+
+  const minReceivable = useMemo(() => {
+    return destinationSwapValue.multipliedBy(1 - currentSlippage);
+  }, [destinationSwapValue, currentSlippage]);
 
   return (
     <>
@@ -717,10 +720,8 @@ const Component = () => {
                 </div>
 
                 <SwapToField
-                  currentQuote={currentQuote}
-                  decimals={getDecimals(toAssetInfo)}
-                  fromAsset={fromAssetInfo}
                   onSelectToken={onSelectToToken}
+                  swapValue={destinationSwapValue}
                   toAsset={toAssetInfo}
                   tokenSelectorItems={toTokenItems}
                   tokenSelectorValue={toTokenSlugValue}

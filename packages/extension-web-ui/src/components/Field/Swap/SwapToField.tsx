@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { SwapTokenSelector } from '@subwallet/extension-web-ui/components/Field/Swap/parts';
-import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
@@ -18,36 +17,26 @@ type Props = ThemeProps & {
   label?: string;
   onSelectToken: (tokenSlug: string) => void;
   tokenSelectorValue?: string;
-  fromAsset?: _ChainAsset;
   toAsset?: _ChainAsset;
   tokenSelectorItems: TokenSelectorItemType[];
-  decimals: number;
-  amountValue?: string;
-  currentQuote: SwapQuote | undefined,
+  swapValue: BigN;
 }
 
 const Component = (props: Props) => {
-  const { className, currentQuote, fromAsset, label, onSelectToken, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
+  const { className, label, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const getConvertedBalance = useMemo(() => {
-    if (tokenSelectorValue && currentQuote && fromAsset && toAsset) {
-      const { decimals } = fromAsset;
+    if (toAsset) {
       const { priceId } = toAsset;
       const price = priceMap[priceId || ''] || 0;
 
-      const destinationValue = new BigN(currentQuote?.fromAmount).div(BN_TEN.pow(decimals || 0)).multipliedBy(currentQuote?.rate);
-
-      const convertValue = destinationValue.multipliedBy(price);
-
-      return { destinationValue, convertValue };
+      return swapValue.multipliedBy(price);
     }
 
-    return { destinationValue: BN_ZERO, convertValue: BN_ZERO };
-  }, [currentQuote, fromAsset, priceMap, toAsset, tokenSelectorValue]);
-
-  const { convertValue, destinationValue } = getConvertedBalance;
+    return BN_ZERO;
+  }, [priceMap, swapValue, toAsset]);
 
   return (
     <div className={CN(className, 'swap-to-field')}>
@@ -70,7 +59,7 @@ const Component = (props: Props) => {
               <Number
                 className={'__amount-destination'}
                 decimal={0}
-                value={destinationValue}
+                value={swapValue}
               />
             }
           </div>
@@ -81,7 +70,7 @@ const Component = (props: Props) => {
                 className={'__amount-convert'}
                 decimal={0}
                 prefix={'$'}
-                value={convertValue}
+                value={getConvertedBalance}
               />
             )
           }

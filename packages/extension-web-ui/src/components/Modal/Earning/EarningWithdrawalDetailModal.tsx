@@ -22,9 +22,10 @@ type Props = ThemeProps & {
   onCancelWithDraw: VoidFunction;
   canWithdraw: boolean;
   onWithdraw: VoidFunction;
+  currentTimestampMs: number;
 };
 
-function Component ({ canWithdraw, className, inputAsset, modalId, onCancelWithDraw, onWithdraw, poolInfo, unstakingItems }: Props) {
+function Component ({ canWithdraw, className, currentTimestampMs, inputAsset, modalId, onCancelWithDraw, onWithdraw, poolInfo, unstakingItems }: Props) {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
 
@@ -36,37 +37,43 @@ function Component ({ canWithdraw, className, inputAsset, modalId, onCancelWithD
 
   const renderWithdrawTime = useCallback(
     (item: UnstakingInfo) => {
-      if (item.waitingTime === undefined) {
+      if (!poolInfo.metadata.availableMethod.withdraw) {
         return (
-          <>
-            <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
+          <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
         );
       } else {
-        return (
-          <>
-            <div className={'__withdraw-time-label'}>{getWaitingTime(item.waitingTime, item.status, t)}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
-        );
+        if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        } else {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        }
       }
     },
-    [t, token.colorSecondary]
+    [currentTimestampMs, poolInfo.metadata.availableMethod.withdraw, t, token.colorSecondary]
   );
 
   const haveUnlocking = useMemo(() => unstakingItems.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakingItems]);

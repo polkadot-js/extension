@@ -59,7 +59,7 @@ export default function useChainChecker () {
           duration: 3,
           btn
         });
-      } else if (chainStatus.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
+      } else if (chainStatus?.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
         const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
 
         notify({

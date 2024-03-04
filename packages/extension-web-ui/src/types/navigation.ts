@@ -4,6 +4,8 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { EarningEntryView } from '@subwallet/extension-web-ui/types/earning';
 
+import { KeypairType } from '@polkadot/util-crypto/types';
+
 export type CreateDoneParam = {
   accounts: AccountJson[];
 };
@@ -50,7 +52,9 @@ export type CrowdloanContributionsResultParam = {
 
 export type EarningEntryParam = {
   view: EarningEntryView;
-  isBackFromEarningPreview?: boolean;
+  redirectFromPreview?: boolean;
+  accountType?: KeypairType;
+  chainName?: string;
 };
 
 export type EarningPoolsParam = {

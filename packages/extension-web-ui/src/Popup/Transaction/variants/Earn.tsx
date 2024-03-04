@@ -796,12 +796,12 @@ const Component = () => {
   }, [form, inputAsset?.slug]);
 
   useEffect(() => {
-    if (!fromValue) {
+    if (!fromValue && isAllAccount) {
       if ((redirectFromPreview && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
         form.setFieldValue('from', accountSelectorList[0].address);
       }
     }
-  }, [accountSelectorList, form, fromValue, redirectFromPreview]);
+  }, [accountSelectorList, form, fromValue, isAllAccount, redirectFromPreview]);
 
   useEffect(() => {
     if (currentStep === 0) {

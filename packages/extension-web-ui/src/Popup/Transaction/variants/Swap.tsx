@@ -419,7 +419,7 @@ const Component = () => {
           suffix={getSymbol(fromAssetInfo)}
           value={1}
         />
-        <span>~</span>
+        <span>&nbsp;~&nbsp;</span>
         <Number
           decimal={0}
           suffix={getSymbol(toAssetInfo)}

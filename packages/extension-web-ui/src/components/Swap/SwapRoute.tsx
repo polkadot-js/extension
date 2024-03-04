@@ -53,9 +53,10 @@ const Component: React.FC<Props> = (props: Props) => {
           >
             <Logo
               className='token-logo'
-              isShowSubLogo={false}
-              shape='squircle'
+              isShowSubLogo={true}
+              shape='circle'
               size={24}
+              subNetwork={result.originChain}
               token={result.slug.toLowerCase()}
             />
             <span className='__token-item-symbol'>{result.symbol}</span>
@@ -72,7 +73,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
     justifyContent: 'space-between',
     position: 'relative',
     '.__token-item': {
-      height: 48,
+      height: 44,
       flexDirection: 'column',
       gap: 4,
       justifyContent: 'center',
@@ -113,7 +114,8 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       whitespace: 'nowrap',
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      maxWidth: 70
+      maxWidth: 70,
+      bottom: -4
     },
 
     '.__arrow': {
@@ -122,9 +124,9 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'absolute',
       width: 0,
       height: 0,
-      borderTop: '6px solid transparent',
-      borderBottom: '6px solid transparent',
-      borderLeft: `6px solid ${token['gray-3']}`
+      borderTop: '5px solid transparent',
+      borderBottom: '5px solid transparent',
+      borderLeft: `9px solid ${token['gray-3']}`
     }
   };
 });

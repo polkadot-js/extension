@@ -1142,8 +1142,17 @@ const Component = () => {
 
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { defaultData } = useTransactionContext<EarnParams>();
+  const { setWebBaseClassName } = useContext(WebUIContext);
 
   const { className } = props;
+
+  useEffect(() => {
+    setWebBaseClassName(`${className || ''}-web-base-container`);
+
+    return () => {
+      setWebBaseClassName('');
+    };
+  }, [className, setWebBaseClassName]);
 
   return (
     <EarnOutlet
@@ -1161,7 +1170,6 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
     flexDirection: 'row',
-    paddingTop: 24,
     maxWidth: 784,
     width: '100%',
     marginLeft: 'auto',
@@ -1243,6 +1251,12 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
       '.meta-info': {
         marginBottom: token.marginSM
+      }
+    },
+
+    '&-web-base-container': {
+      '.common-pages': {
+        height: 'auto'
       }
     }
   };

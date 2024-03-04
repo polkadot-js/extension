@@ -79,7 +79,7 @@ export interface SwapFeeComponent {
 export interface SwapFeeInfo {
   feeComponent: SwapFeeComponent[];
   defaultFeeToken: string;
-  feeOptions?: string[]; // list of tokenSlug
+  feeOptions: string[]; // list of tokenSlug
 }
 
 export interface SwapStepDetail extends BaseStepDetail {

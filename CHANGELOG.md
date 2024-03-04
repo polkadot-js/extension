@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 1.1.41
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Restructure Settings screen (#2647)
+- Support Send crash log feature (#2649)
+- Optimize Earning Performance Round 2 (Caching most of data) (#2636)
+- Enable price-id online (#2664)
+- Improve EVM network fee (#2670)
+- Optimize performance by separate chain status and chain state (#2550)
+- Update chain-list
+   - Support NFT and Send token on Continuum network (#2585)
+   - Update priceId for Cypress on Moonbeam
+   - Support Rococo asset hub (#2604)
+   - Support X1 OKX Testnet
+   - Support Liberland Testnet and Liberland Mainnet
+   - Disable support staking for Ternoa Testnet.
+
+Bugs fixed:
+- Fixed bug showing withdrawal time on un-staking (#2581)
+- Fixed bug sending AVL on Avail Goldberg testnet (#2538)
+- Re-check case update data after performing actions (unstake, cancel unstake, withdraw) (#2682)
+
 ## 1.1.40
 Build date: Feb 24, 2024.
 

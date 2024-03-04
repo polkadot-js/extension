@@ -39,7 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div className={CN(className, '__swap-route-container')}>
-        <div className='__first-separator'>
+        <div className='__line-arrow'>
           <div className='__arrow'></div>
         </div>
         {getSwapRoute.map((result, index) => (
@@ -93,17 +93,19 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.__token-item.-is-last': {
       alignItems: 'flex-end',
       '.__token-item-symbol': {
-        right: 3
+        right: 0,
+        'white-space': 'nowrap',
+        direction: 'rtl'
       }
     },
-    '.__first-separator': {
+    '.__line-arrow': {
       position: 'absolute',
       height: 2,
       backgroundColor: token['gray-3'],
       marginTop: 12,
       marginBottom: 16,
-      left: 33,
-      right: 40
+      left: 28,
+      right: 33
     },
     '.__token-item-symbol': {
       fontSize: token.fontSizeSM,
@@ -111,7 +113,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       lineHeight: token.lineHeightSM,
       color: token.colorTextTertiary,
       position: 'absolute',
-      whitespace: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       maxWidth: 70,

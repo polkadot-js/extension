@@ -20,7 +20,7 @@ import { TransactionContent, TransactionFooter } from '@subwallet/extension-web-
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Button, Form, Icon, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -854,6 +854,7 @@ const Component = () => {
                       prefix={'$'}
                       suffixNode={
                         <Icon
+                          className={'__caret-icon-button'}
                           customSize={'20px'}
                           phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
                         />
@@ -878,19 +879,25 @@ const Component = () => {
                     }
 
                     <div className={'__separator'}></div>
-                    <MetaInfo.Chain
-                      chain={getOriginChain(feeAssetInfo)}
-                      className='__item-fee-paid'
-                      label={t('Fee paid in')}
-                      onClickValue={openChooseFeeToken}
-                      suffixNode={
+                    <div className={'__item-fee-wrapper'}>
+                      <div className={'__item-fee-paid-label'}>Fee paid in</div>
+                      <div className={'__item-fee-token'}
+                        onClick={openChooseFeeToken}>
+                        <Logo
+                          className='token-logo'
+                          isShowSubLogo={false}
+                          shape='circle'
+                          size={24}
+                          token={currentQuote.pair.from}
+                        />
+                        <div className={'__token-fee-paid-item'}>{getSymbol(feeAssetInfo)}</div>
                         <Icon
                           className={'__edit-token'}
                           customSize={'20px'}
                           phosphorIcon={PencilSimpleLine}
                         />
-                      }
-                    />
+                      </div>
+                    </div>
                   </MetaInfo>
                 )
               }
@@ -951,9 +958,23 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__item-right-title': {
       color: token.colorTextTertiary
     },
+    '.__item-fee-wrapper': {
+      color: token.colorTextTertiary,
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      cursor: 'pointer'
+    },
+    '.__item-fee-token': {
+      display: 'flex',
+      alignItems: 'center'
+    },
+    '.__token-fee-paid-item': {
+      paddingLeft: 8,
+      color: token.colorWhite
+    },
     '.__quote-icon-info': {
-      height: 16,
-      width: 16,
+      fontSize: 16,
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center'
@@ -985,12 +1006,18 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWarningText,
       display: 'flex',
       justifyContent: 'flex-end',
-      paddingLeft: 8,
-      paddingRight: 8,
-      marginBottom: 16,
-      marginTop: 4
+      paddingLeft: token.paddingXS,
+      paddingRight: token.paddingXS,
+      marginBottom: token.margin,
+      marginTop: token.marginXXS,
+      fontSize: token.fontSize,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeight
     },
     '.__slippage-editor-button': {
+      paddingLeft: token.paddingXXS
+    },
+    '.__caret-icon-button': {
       paddingLeft: token.paddingXXS
     },
     '.__edit-token': {
@@ -1059,7 +1086,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       lineHeight: token.lineHeight,
       fontWeight: token.bodyFontWeight,
       color: token.colorTextLight2,
-      paddingRight: token.paddingXXS,
 
       '.ant-number-integer': {
         color: `${token.colorTextLight2} !important`,

@@ -15,6 +15,7 @@ export interface Message extends MessageEvent {
 export * from './balance';
 export * from './buy';
 export * from './campaigns';
+export * from './fee';
 export * from './ordinal';
 export * from './transaction';
 export * from './yield';

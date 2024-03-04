@@ -321,6 +321,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     } else { // todo: improve this
       result.totalFee.push({
         feeComponent: [],
+        feeOptions: [params.request.pair.from],
         defaultFeeToken: params.request.pair.from
       });
       result.steps.push({

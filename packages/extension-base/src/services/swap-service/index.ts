@@ -97,6 +97,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
 
     result.totalFee.push({
       feeComponent: [],
+      feeOptions: [params.request.pair.from],
       defaultFeeToken: params.request.pair.from
     });
     result.steps.push({

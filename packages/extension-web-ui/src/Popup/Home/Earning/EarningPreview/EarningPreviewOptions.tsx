@@ -109,6 +109,7 @@ function Component ({ className }: Props) {
 
   const [selectedPoolInfoSlug, setSelectedPoolInfoSlug] = React.useState<string | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [selectedChain, setSelectedChain] = useState<string>(chainParam);
 
   const isAutoOpenInstructionViaParamsRef = useRef(true);
 
@@ -158,7 +159,7 @@ function Component ({ className }: Props) {
   }, [filterOptions.length, selectedFilters]);
 
   const checkIsAnyAccountValid = useCallback((accounts: AccountJson[]) => {
-    const chainInfo = chainInfoMap[chainParam];
+    const chainInfo = chainInfoMap[selectedChain];
     let accountList: AccountJson[] = [];
 
     if (!chainInfo) {
@@ -168,7 +169,7 @@ function Component ({ className }: Props) {
     accountList = accounts.filter(getFilteredAccount(chainInfo));
 
     return !!accountList.length;
-  }, [chainInfoMap, chainParam]);
+  }, [chainInfoMap, selectedChain]);
 
   const navigateToEarnTransaction = useCallback(
     () => {
@@ -176,7 +177,7 @@ function Component ({ className }: Props) {
         setReturnStorage('/transaction/earn');
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        const chainInfo = chainInfoMap[chainParam];
+        const chainInfo = chainInfoMap[selectedChain];
         const isAnyAccountValid = checkIsAnyAccountValid(accounts);
 
         if (!isAnyAccountValid) {
@@ -184,20 +185,22 @@ function Component ({ className }: Props) {
 
           setSelectedAccountTypes([accountType]);
           navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfo?.name } });
-
-          return;
-        }
-
-        const accountList = accounts.filter(getFilteredAccount(chainInfo));
-
-        if (accountList.length === 1) {
-          saveCurrentAccountAddress(accountList[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
         } else {
-          saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+          const accountList = accounts.filter(getFilteredAccount(chainInfo));
+
+          if (accountList.length === 1) {
+            setEarnStorage((prevState) => ({
+              ...prevState,
+              from: accountList[0].address
+            }));
+            saveCurrentAccountAddress(accountList[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
+          } else {
+            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+          }
         }
       }
     },
-    [accounts, chainInfoMap, chainParam, checkIsAnyAccountValid, isContainOnlySubstrate, isNoAccount, navigate, setReturnStorage, setSelectedAccountTypes]
+    [accounts, chainInfoMap, selectedChain, checkIsAnyAccountValid, isContainOnlySubstrate, isNoAccount, navigate, setEarnStorage, setReturnStorage, setSelectedAccountTypes]
   );
 
   const onConnectChainSuccess = useCallback(() => {
@@ -275,6 +278,7 @@ function Component ({ className }: Props) {
           return;
         }
 
+        setSelectedChain(poolInfo.chain);
         setEarnStorage({
           ...DEFAULT_EARN_PARAMS,
           slug: poolInfo.slug,

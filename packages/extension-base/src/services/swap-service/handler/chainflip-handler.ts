@@ -12,9 +12,9 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { TransactionData } from '@subwallet/extension-base/types';
+import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
 import { ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
-import BigN from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 
@@ -35,15 +35,13 @@ const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e0
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
-  private chainService: ChainService;
 
   constructor (providerSlug: string, providerName: string, chainService: ChainService) {
-    super(providerSlug, providerName);
+    super(providerSlug, providerName, chainService);
 
     this.swapSdk = new SwapSDK({
       network: 'perseverance'
     });
-    this.chainService = chainService;
   }
 
   protected async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
@@ -55,7 +53,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       const srcChain = fromAsset.originChain;
       const destChain = toAsset.originChain;
 
-      const bnAmount = new BigN(request.fromAmount);
+      const bnAmount = new BigNumber(request.fromAmount);
 
       const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[srcChain];
       const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[destChain];
@@ -83,7 +81,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         return { error: SwapErrorType.ASSET_NOT_SUPPORTED };
       }
 
-      const bnMinSwap = new BigN(srcAssetData.minimumSwapAmount);
+      const bnMinSwap = new BigNumber(srcAssetData.minimumSwapAmount);
 
       if (bnAmount.lt(bnMinSwap)) {
         return {
@@ -96,7 +94,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       }
 
       if (srcAssetData.maximumSwapAmount) {
-        const bnMaxSwap = new BigN(srcAssetData.maximumSwapAmount);
+        const bnMaxSwap = new BigNumber(srcAssetData.maximumSwapAmount);
 
         if (bnAmount.gt(bnMaxSwap)) {
           return {
@@ -218,8 +216,41 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
   }
 
-  public validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
-    return Promise.resolve([]);
+  public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+    // todo: validate fee
+    const amount = params.selectedQuote.fromAmount;
+    const bnAmount = new BigNumber(amount);
+
+    if (bnAmount.lte(0)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
+
+    let isXcmOk = false;
+
+    for (const step of params.process.steps) {
+      const getErrors = async (): Promise<TransactionError[]> => {
+        switch (step.type) {
+          case SwapStepType.DEFAULT:
+            return Promise.resolve([]);
+          case SwapStepType.XCM:
+            return this.validateXcmStep(params);
+          case SwapStepType.TOKEN_APPROVAL:
+            return this.validateTokenApproveStep(params);
+          default:
+            return this.validateJoinStep(params, isXcmOk);
+        }
+      };
+
+      const errors = await getErrors();
+
+      if (errors.length) {
+        return errors;
+      } else if (step.type === YieldStepType.XCM) {
+        isXcmOk = true;
+      }
+    }
+
+    return [];
   }
 
   protected async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
@@ -285,7 +316,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       txChain: fromAsset.originChain,
       txData,
       extrinsic,
-      transferNativeAmount: quote.fromAmount,
+      transferNativeAmount: quote.fromAmount, // todo
       extrinsicType: ExtrinsicType.SWAP,
       chainType
     } as SwapSubmitStepData;

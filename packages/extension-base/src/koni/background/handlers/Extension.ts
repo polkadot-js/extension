@@ -4310,7 +4310,7 @@ export default class KoniExtension {
   }
 
   private async handleSwapStep (inputData: SwapSubmitParams): Promise<SWTransactionResponse> {
-    const { address, process, quote } = inputData;
+    const { address, process, quote, recipient } = inputData;
 
     if (!quote || !address || !process) {
       return this.#koniState.transactionService
@@ -4319,7 +4319,7 @@ export default class KoniExtension {
 
     const isLastStep = inputData.currentStep + 1 === process.steps.length;
 
-    const swapValidations: TransactionError[] = await this.#koniState.swapService.validateSwapProcess({ address, process, selectedQuote: quote });
+    const swapValidations: TransactionError[] = await this.#koniState.swapService.validateSwapProcess({ address, process, selectedQuote: quote, recipient });
 
     if (swapValidations.length > 0) {
       return this.#koniState.transactionService

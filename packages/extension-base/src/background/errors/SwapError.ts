@@ -18,6 +18,10 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     message: detectTranslate('Amount exceeds max swap'),
     code: undefined
   },
+  QUOTE_TIMEOUT: {
+    message: detectTranslate('Quote timeout'),
+    code: undefined
+  },
   NO_AVAILABLE_PROVIDER: {
     message: detectTranslate('No available provider'),
     code: undefined

@@ -41,13 +41,16 @@ export enum SwapErrorType {
   EXCEED_MAX_SWAP = 'EXCEED_MAX_SWAP',
   NO_AVAILABLE_PROVIDER = 'NO_AVAILABLE_PROVIDER',
   UNKNOWN = 'UNKNOWN',
-  ASSET_NOT_SUPPORTED = 'ASSET_NOT_SUPPORTED'
+  ASSET_NOT_SUPPORTED = 'ASSET_NOT_SUPPORTED',
+  QUOTE_TIMEOUT = 'QUOTE_TIMEOUT',
+  INVALID_RECIPIENT = 'INVALID_RECIPIENT',
 }
 
 export enum SwapStepType {
   DEFAULT = 'DEFAULT',
   TOKEN_APPROVAL = 'TOKEN_APPROVAL',
-  SWAP = 'SWAP'
+  SWAP = 'SWAP',
+  XCM = 'XCM'
 }
 
 export enum SwapProviderId {
@@ -165,4 +168,5 @@ export interface ValidateSwapProcessParams {
   address: string;
   process: OptimalSwapPath;
   selectedQuote: SwapQuote;
+  recipient?: string;
 }

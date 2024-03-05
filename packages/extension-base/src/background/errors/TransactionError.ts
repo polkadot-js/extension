@@ -6,6 +6,7 @@ import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxE
 import { YieldValidationStatus } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
+import {SwapErrorType} from "@subwallet/extension-base/types/swap";
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -95,6 +96,10 @@ const defaultErrorMap = {
   },
   [YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL]: {
     message: detectTranslate('Not enough min earning amount'),
+    code: undefined
+  },
+  [SwapErrorType.QUOTE_TIMEOUT]: {
+    message: detectTranslate('Quote timeout'),
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

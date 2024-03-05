@@ -19,7 +19,7 @@ type Props = ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, optimalQuoteItem, items, modalId, onSelectItem, selectedItem } = props;
+  const { className, items, modalId, onSelectItem, optimalQuoteItem, selectedItem } = props;
 
   const { inactiveModal } = useContext(ModalContext);
 

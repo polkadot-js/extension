@@ -40,7 +40,8 @@ export const DEFAULT_SWAP_FIRST_STEP: SwapStepDetail = {
 
 export const MOCK_SWAP_FEE: SwapFeeInfo = {
   feeComponent: [],
-  defaultFeeToken: ''
+  defaultFeeToken: '',
+  feeOptions: []
 };
 
 export function calculateSwapRate (fromAmount: string, toAmount: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {

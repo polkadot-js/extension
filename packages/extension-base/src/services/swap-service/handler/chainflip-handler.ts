@@ -31,7 +31,7 @@ enum ChainflipFeeType {
 }
 
 // const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
+const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;

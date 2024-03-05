@@ -92,6 +92,18 @@ export class ChainService {
     return result;
   }
 
+  get swapRefMap () {
+    const result: Record<string, _AssetRef> = {};
+
+    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+      if (assetRef.path === _AssetRefPath.SWAP) {
+        result[key] = assetRef;
+      }
+    });
+
+    return result;
+  }
+
   public getEvmApi (slug: string) {
     return this.evmChainHandler.getEvmApiByChain(slug);
   }

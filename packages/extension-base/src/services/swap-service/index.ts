@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _AssetRefPath } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
@@ -18,38 +17,28 @@ import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/
 import { BehaviorSubject } from 'rxjs';
 
 // const MOCK_ASSET_REF: Record<string, _AssetRef> = {
-//   'polkadot-NATIVE-DOT___ethereum-NATIVE-ETH': {
+//   'chainflip_dot-NATIVE-pDOT___ethereum_goerli-NATIVE-GoerliETH': {
+//     path: _AssetRefPath.SWAP,
+//     srcChain: 'chainflip_dot',
+//     srcAsset: 'chainflip_dot-NATIVE-pDOT',
+//     destChain: 'ethereum_goerli',
+//     destAsset: 'ethereum_goerli-NATIVE-GoerliETH'
+//   },
+//   'ethereum_goerli-NATIVE-GoerliETH___chainflip_dot-NATIVE-pDOT': {
 //     path: _AssetRefPath.XCM,
-//     srcChain: 'polkadot',
-//     srcAsset: 'polkadot-NATIVE-DOT',
-//     destChain: 'ethereum',
-//     destAsset: 'ethereum-NATIVE-ETH'
+//     srcChain: 'ethereum_goerli',
+//     srcAsset: 'ethereum_goerli-NATIVE-GoerliETH',
+//     destChain: 'chainflip_dot',
+//     destAsset: 'chainflip_dot-NATIVE-pDOT'
+//   },
+//   'chainflip_dot-NATIVE-pDOT___ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': {
+//     path: _AssetRefPath.XCM,
+//     srcChain: 'chainflip_dot',
+//     srcAsset: 'chainflip_dot-NATIVE-pDOT',
+//     destChain: 'ethereum_goerli',
+//     destAsset: 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
 //   }
 // };
-
-const MOCK_ASSET_REF: Record<string, _AssetRef> = {
-  'chainflip_dot-NATIVE-pDOT___ethereum_goerli-NATIVE-GoerliETH': {
-    path: _AssetRefPath.XCM,
-    srcChain: 'chainflip_dot',
-    srcAsset: 'chainflip_dot-NATIVE-pDOT',
-    destChain: 'ethereum_goerli',
-    destAsset: 'ethereum_goerli-NATIVE-GoerliETH'
-  },
-  'ethereum_goerli-NATIVE-GoerliETH___chainflip_dot-NATIVE-pDOT': {
-    path: _AssetRefPath.XCM,
-    srcChain: 'ethereum_goerli',
-    srcAsset: 'ethereum_goerli-NATIVE-GoerliETH',
-    destChain: 'chainflip_dot',
-    destAsset: 'chainflip_dot-NATIVE-pDOT'
-  },
-  'chainflip_dot-NATIVE-pDOT___ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': {
-    path: _AssetRefPath.XCM,
-    srcChain: 'chainflip_dot',
-    srcAsset: 'chainflip_dot-NATIVE-pDOT',
-    destChain: 'ethereum_goerli',
-    destAsset: 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
-  }
-};
 
 export class SwapService extends BaseServiceWithProcess implements StoppableServiceInterface {
   protected readonly state: KoniState;
@@ -236,7 +225,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   }
 
   public getSwapPairs (): SwapPair[] {
-    return Object.entries(MOCK_ASSET_REF).map(([slug, assetRef]) => {
+    return Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
       return {
         slug,
         from: assetRef.srcAsset,

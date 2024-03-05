@@ -796,7 +796,7 @@ const Component = () => {
   }, [form, inputAsset?.slug]);
 
   useEffect(() => {
-    if (!fromValue && isAllAccount) {
+    if (!fromValue && (isAllAccount || accountSelectorList.length === 1)) {
       if ((redirectFromPreview && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
         form.setFieldValue('from', accountSelectorList[0].address);
       }

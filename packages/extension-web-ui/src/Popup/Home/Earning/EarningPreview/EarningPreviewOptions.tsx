@@ -195,12 +195,18 @@ function Component ({ className }: Props) {
             }));
             saveCurrentAccountAddress(accountList[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
           } else {
+            if (currentAccount && accountList.some((acc) => acc.address === currentAccount.address)) {
+              navigate('/transaction/earn');
+
+              return;
+            }
+
             saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
           }
         }
       }
     },
-    [accounts, chainInfoMap, selectedChain, checkIsAnyAccountValid, isContainOnlySubstrate, isNoAccount, navigate, setEarnStorage, setReturnStorage, setSelectedAccountTypes]
+    [isNoAccount, setReturnStorage, navigate, chainInfoMap, selectedChain, checkIsAnyAccountValid, accounts, isContainOnlySubstrate, setSelectedAccountTypes, setEarnStorage, currentAccount]
   );
 
   const onConnectChainSuccess = useCallback(() => {

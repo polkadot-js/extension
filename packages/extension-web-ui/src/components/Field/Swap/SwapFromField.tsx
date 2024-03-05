@@ -3,14 +3,14 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals, _getAssetPriceId } from '@subwallet/extension-base/services/chain-service/utils';
-import { getInputValuesFromString, getOutputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
+import { AmountInput, BasicInputEvent } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { Button, Input, Number } from '@subwallet/react-ui';
+import { Button, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { ChangeEventHandler, useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -28,6 +28,8 @@ type Props = ThemeProps & {
   onChangeAmount: (value: string) => void;
 }
 
+// todo: support max later
+
 const Component = (props: Props) => {
   const { amountValue, className, fromAsset, label,
     onChangeAmount, onSelectToken, tokenSelectorItems,
@@ -35,33 +37,25 @@ const Component = (props: Props) => {
   const { t } = useTranslation();
   const decimals = fromAsset ? _getAssetDecimals(fromAsset) : 0;
   const priceId = fromAsset ? _getAssetPriceId(fromAsset) : '';
-  const [inputValue, setInputValue] = useState(amountValue ? getInputValuesFromString(amountValue, decimals) : amountValue);
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const _onClickMaxBtn = useCallback(() => {
     //
   }, []);
 
-  const onChangeInput: ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
-    const value = event.target.value;
-
-    setInputValue(value);
-
-    const transformVal = getOutputValuesFromString(value, decimals);
-
-    onChangeAmount(transformVal);
-  }, [decimals, onChangeAmount]);
-
   const getConvertedInputValue = useMemo(() => {
-    if (tokenSelectorValue && inputValue) {
-      const transformVal = getOutputValuesFromString(inputValue, decimals);
+    if (amountValue) {
       const price = priceMap[priceId] || 0;
 
-      return new BigN(transformVal).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
+      return new BigN(amountValue).div(BN_TEN.pow(decimals || 0)).multipliedBy(price);
     }
 
     return BN_ZERO;
-  }, [decimals, inputValue, priceId, priceMap, tokenSelectorValue]);
+  }, [amountValue, decimals, priceId, priceMap]);
+
+  const onChangeInput = useCallback((event: BasicInputEvent) => {
+    onChangeAmount(event.target.value);
+  }, [onChangeAmount]);
 
   return (
     <div className={CN(className, 'swap-form-field')}>
@@ -88,11 +82,12 @@ const Component = (props: Props) => {
         </div>
 
         <div className={'__amount-wrapper'}>
-          <Input
-            className={className}
+          <AmountInput
+            decimals={decimals}
+            maxValue={'0'} // support later
             onChange={onChangeInput}
-            type={'number'}
-            value={inputValue}
+            showMaxButton={false}
+            value={amountValue}
           />
 
           {

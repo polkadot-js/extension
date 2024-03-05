@@ -35,8 +35,8 @@ const Component = (props: Props) => {
     onChangeAmount, onSelectToken, tokenSelectorItems,
     tokenSelectorValue } = props;
   const { t } = useTranslation();
-  const decimals = fromAsset ? _getAssetDecimals(fromAsset) : 0;
-  const priceId = fromAsset ? _getAssetPriceId(fromAsset) : '';
+  const decimals = _getAssetDecimals(fromAsset);
+  const priceId = _getAssetPriceId(fromAsset);
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const _onClickMaxBtn = useCallback(() => {

@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
@@ -21,14 +20,6 @@ type Props = ThemeProps & {
   onSelect?: (quote: SwapQuote) => void,
 }
 
-function getDecimals (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetDecimals(assetInfo) : 0;
-}
-
-function getSymbol (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetSymbol(assetInfo) : '';
-}
-
 const Component: React.FC<Props> = (props: Props) => {
   const { className, isRecommend, onSelect, quote, selected } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
@@ -45,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [assetRegistryMap, quote.pair.to]);
 
   const destinationSwapValue = useMemo(() => {
-    const decimals = getDecimals(fromAssetInfo);
+    const decimals = _getAssetDecimals(fromAssetInfo);
 
     return new BigN(quote.fromAmount)
       .div(BN_TEN.pow(decimals))
@@ -76,7 +67,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <Number
               className={'__est-receive-value'}
               decimal={0}
-              suffix={getSymbol(toAssetInfo)}
+              suffix={_getAssetSymbol(toAssetInfo)}
               value={destinationSwapValue}
             />
           </div>

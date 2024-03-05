@@ -324,11 +324,11 @@ export function _isAssetValuable (assetInfo: _ChainAsset) {
   return assetInfo.hasValue;
 }
 
-export function _getMultiChainAsset (assetInfo: _ChainAsset) {
+export function _getMultiChainAsset (assetInfo?: _ChainAsset) {
   return assetInfo?.multiChainAsset || '';
 }
 
-export function _getAssetPriceId (assetInfo: _ChainAsset) {
+export function _getAssetPriceId (assetInfo?: _ChainAsset) {
   return assetInfo?.priceId || '';
 }
 
@@ -336,7 +336,7 @@ export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset?.priceId || '';
 }
 
-export function _getAssetSymbol (assetInfo: _ChainAsset) {
+export function _getAssetSymbol (assetInfo?: _ChainAsset) {
   return assetInfo?.symbol || '';
 }
 
@@ -344,16 +344,16 @@ export function _getMultiChainAssetSymbol (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset.symbol;
 }
 
-export function _getAssetOriginChain (assetInfo: _ChainAsset) {
-  return assetInfo.originChain;
+export function _getAssetOriginChain (assetInfo?: _ChainAsset) {
+  return assetInfo?.originChain || '';
 }
 
 export function _getChainName (chainInfo: _ChainInfo) {
   return chainInfo.name;
 }
 
-export function _getAssetDecimals (assetInfo: _ChainAsset): number {
-  return assetInfo.decimals || 0;
+export function _getAssetDecimals (assetInfo?: _ChainAsset): number {
+  return assetInfo?.decimals || 0;
 }
 
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {

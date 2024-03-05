@@ -58,19 +58,6 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
   return result;
 }
 
-function getDecimals (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetDecimals(assetInfo) : 0;
-}
-
-function getSymbol (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetSymbol(assetInfo) : '';
-}
-
-// @ts-ignore
-function getOriginChain (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetOriginChain(assetInfo) : '';
-}
-
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -91,7 +78,7 @@ const Component = () => {
   const [currentQuote, setCurrentQuote] = useState<SwapQuote | undefined>(undefined);
   const [quoteAliveUntil, setQuoteAliveUntil] = useState<number | undefined>(undefined);
   const [quoteCountdownTime, setQuoteCountdownTime] = useState<number>(0);
-  const [currentQuoteRequest, setCurrentQuoteRequet] = useState<SwapRequest | undefined>(undefined);
+  const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
   const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
@@ -296,13 +283,13 @@ const Component = () => {
       <div className={'__quote-estimate-swap-value'}>
         <Number
           decimal={0}
-          suffix={getSymbol(fromAssetInfo)}
+          suffix={_getAssetSymbol(fromAssetInfo)}
           value={1}
         />
         <span>&nbsp;~&nbsp;</span>
         <Number
           decimal={0}
-          suffix={getSymbol(toAssetInfo)}
+          suffix={_getAssetSymbol(toAssetInfo)}
           value={currentQuote.rate}
         />
       </div>
@@ -503,7 +490,7 @@ const Component = () => {
   }, [currentOptimalSwapPath, currentQuote, currentSlippage, onError, onSuccess, processState.currentStep, processState.steps.length]);
 
   useEffect(() => {
-    form.setFieldValue('chain', getOriginChain(fromAssetInfo));
+    form.setFieldValue('chain', _getAssetOriginChain(fromAssetInfo));
   }, [form, fromAssetInfo]);
 
   useEffect(() => {
@@ -524,7 +511,7 @@ const Component = () => {
           slippage: 0.05
         };
 
-        setCurrentQuoteRequet(currentRequest);
+        setCurrentQuoteRequest(currentRequest);
 
         handleSwapRequest(currentRequest).then((result) => {
           if (sync) {
@@ -638,7 +625,7 @@ const Component = () => {
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
-      const decimals = getDecimals(fromAssetInfo);
+      const decimals = _getAssetDecimals(fromAssetInfo);
 
       return new BigN(currentQuote.fromAmount)
         .div(BN_TEN.pow(decimals))
@@ -857,7 +844,7 @@ const Component = () => {
                       <MetaInfo.Number
                         decimals={0}
                         label={t('Min receivable')}
-                        suffix={getSymbol(toAssetInfo)}
+                        suffix={_getAssetSymbol(toAssetInfo)}
                         value={minReceivable}
                       />
                     </div>
@@ -928,7 +915,7 @@ const Component = () => {
                           size={24}
                           token={currentQuote.pair.from}
                         />
-                        <div className={'__token-fee-paid-item'}>{getSymbol(feeAssetInfo)}</div>
+                        <div className={'__token-fee-paid-item'}>{_getAssetSymbol(feeAssetInfo)}</div>
                         <Icon
                           className={'__edit-token'}
                           customSize={'20px'}

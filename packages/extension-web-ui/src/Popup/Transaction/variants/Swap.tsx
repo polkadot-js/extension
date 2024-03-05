@@ -19,7 +19,7 @@ import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/e
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Form, Icon, Image, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -34,8 +34,16 @@ import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
+import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
 
 type Props = ThemeProps;
+
+interface FeeItem {
+  value: BigN,
+  label: string,
+  prefix?: string,
+  suffix?: string
+}
 
 const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug', 'chain'];
 
@@ -267,8 +275,8 @@ const Component = () => {
     return BN_ZERO;
   }, [assetRegistryMap, priceMap]);
 
-  const getTotalFeeByType = useMemo(() => {
-    const totalFeeByType: { [key: string]: BigN } = {};
+  const listFeeComponent = useMemo(() => {
+    const result: FeeItem[] = [];
     const feeTypeMapping: { [key: string]: string } = {
       NETWORK_FEE: 'Network fee',
       PLATFORM_FEE: 'Protocol fee',
@@ -277,18 +285,18 @@ const Component = () => {
 
     currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
       const { feeType } = feeItem;
-      const mappedFeeType = feeTypeMapping[feeType] || feeType;
+      const label = feeTypeMapping[feeType] || feeType;
+      const existingItemIndex = result.findIndex((item) => item.label === label);
 
-      if (!totalFeeByType[mappedFeeType]) {
-        totalFeeByType[mappedFeeType] = BN_ZERO;
+      if (existingItemIndex !== -1) {
+        result[existingItemIndex].value = result[existingItemIndex].value.plus(getConvertedBalance(feeItem));
+      } else {
+        result.push({ value: getConvertedBalance(feeItem), label });
       }
-
-      totalFeeByType[mappedFeeType] = totalFeeByType[mappedFeeType].plus(getConvertedBalance(feeItem));
     });
 
-    return totalFeeByType;
+    return result;
   }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
-
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {
       return isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[chainValue]);
@@ -857,6 +865,14 @@ const Component = () => {
                       className={'__swap-provider'}
                       label={t('Swap provider')}
                     >
+                      {currentQuote.provider.id === 'CHAIN_FLIP' &&
+                        (<Image
+                        className={'__provider-logo'}
+                        height={24}
+                        shape='squircle'
+                        src={DefaultLogosMap.chainflip}
+                        width={24}
+                      />)}
                       {currentQuote.provider.name}
                     </MetaInfo.Default>
 
@@ -914,13 +930,13 @@ const Component = () => {
                     {
                       isViewFeeDetails && (
                         <div className={'__quote-fee-details-block'}>
-                          {Object.entries(getTotalFeeByType).map(([feeType, totalFee], index) => (
+                          {listFeeComponent.map(({ label, value }, index) => (
                             <MetaInfo.Number
                               decimals={0}
                               key={index}
-                              label={t(feeType)}
+                              label={t(label)}
                               prefix={'$'}
-                              value={totalFee}
+                              value={value}
                             />
                           ))}
                         </div>
@@ -939,7 +955,7 @@ const Component = () => {
                           isShowSubLogo={false}
                           shape='circle'
                           size={24}
-                          token={currentQuote.pair.from}
+                          token={currentQuote.pair.from.toLowerCase()}
                         />
                         <div className={'__token-fee-paid-item'}>{_getAssetSymbol(feeAssetInfo)}</div>
                         <Icon
@@ -1027,6 +1043,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       justifyContent: 'center',
       alignItems: 'center'
+    },
+    '.__swap-provider .__value ': {
+      display: 'flex',
+      gap: 8
     },
     '.ant-background-icon': {
       width: 24,

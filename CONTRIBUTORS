@@ -1,19 +1,20 @@
-    2282	AnhMTV                        	Release version 1.1.40
+    2310	AnhMTV                        	Release version 1.1.41
     2166	Nam Phạm                      	[Issue 2609] reuse previous logic
-    1930	S2kael                        	[Issue-2617] Update input address display length
-     617	lw-cdm                        	
+    1948	S2kael                        	[Issue-2658] Update stable chain-list version
+     618	lw-cdm                        	Update earning withdraw logic
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       99	lw-cdm                        	
-      87	dominhquang                   	#Fix responsive for Mission Pools
+      88	dominhquang                   	[Issue-2649] Add send crash log feature
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       80	leewong                       	Update account filter for earn transaction
       63	Roman                         	fix ui issues
-      54	nguyentiendung                	
+      57	nguyentiendung                	[Issue-2647] Extension - Restructure Settings screen
       53	Dominhquangdev                	update Bridge code
-      44	bluedot                       	update priceId for EWT on Energy Web X
+      47	bluedot                       	update priceId for EWT on Energy Web X
+      34	bluezdot                      	[Issue-2658] Hotfix temporary disable transfer for NUUM token
       29	Automation Bot                	[CI Skip] Auto increase webapp build number
       27	Thiendekaco                   	update locate of file
       24	S2kael                        	
@@ -23,7 +24,6 @@
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        5	anhnhu                        	[issue-2231]: add condition branch_name webapp-dev auto increase run scripts change build number
-       5	bluezdot                      	[Issue-2632] filtering out blocked validators from pool target
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	

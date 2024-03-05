@@ -29,9 +29,7 @@ function Component ({ className,
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const { t } = useTranslation();
   const currentAccount = useSelector((root) => root.accountState.currentAccount);
-  const [swapStorage, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
-
-  console.log('swapStorage----------', swapStorage);
+  const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
 
   const transactionFromValue = useMemo(() => {
     return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
@@ -64,7 +62,7 @@ function Component ({ className,
         icon: ArrowsLeftRight
       },
       {
-        label: t('DApps'),
+        label: t('dApps'),
         value: '/home/dapps',
         icon: Globe
       },

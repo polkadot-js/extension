@@ -319,7 +319,8 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
       maxWidth: 56
     },
     '.__table-pool-col .__row-pool-wrapper': {
-      maxWidth: 220
+      maxWidth: 220,
+      color: token.colorWhite
     },
     '.__table-active-stake-col, .__table-total-stake-col, .__table-unstake-col, .__table-nomination-col, .__table-pool-col': {
       display: 'flex',
@@ -353,7 +354,8 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     },
 
     '.__tr': {
-      'white-space': 'nowrap'
+      'white-space': 'nowrap',
+      color: token.colorWhite
     },
     '.__tr:hover': {
       backgroundColor: token.colorBgSecondary
@@ -487,7 +489,7 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
 
     '.__derivative-balance': {
       display: 'flex',
-      alignItems: 'center',
+      alignItems: 'baseline',
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
       color: token.colorTextLight4
@@ -508,12 +510,15 @@ const AccountInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: P
     },
 
     '.__table-pool-col': {
-      color: token.colorTextLight4,
+      color: token.colorWhite,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       justifyContent: 'flex-end'
+    },
+    '.__table-pool-col .__col-title': {
+      color: token.colorTextSecondary
     },
 
     '.__row-active-stake-wrapper': {

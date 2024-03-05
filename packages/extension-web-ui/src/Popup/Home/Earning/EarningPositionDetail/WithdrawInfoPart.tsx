@@ -13,7 +13,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, ProhibitInset } from 'phosphor-react';
-import React, { Context, useCallback, useContext, useMemo } from 'react';
+import React, { Context, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled, { ThemeContext } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
@@ -36,22 +36,35 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
   const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  const [currentTimestampMs, setCurrentTimestampMs] = useState(Date.now());
 
   const items = useMemo(() => {
     return [...unstakings].sort((a, b) => {
-      if (a.waitingTime === undefined && b.waitingTime === undefined) {
-        return 0;
+      if (a.targetTimestampMs === undefined && b.targetTimestampMs === undefined) {
+        if (a.waitingTime === undefined && b.waitingTime === undefined) {
+          return 0;
+        }
+
+        if (a.waitingTime === undefined) {
+          return -1;
+        }
+
+        if (b.waitingTime === undefined) {
+          return 1;
+        }
+
+        return a.waitingTime - b.waitingTime;
       }
 
-      if (a.waitingTime === undefined) {
+      if (a.targetTimestampMs === undefined) {
         return -1;
       }
 
-      if (b.waitingTime === undefined) {
+      if (b.targetTimestampMs === undefined) {
         return 1;
       }
 
-      return a.waitingTime - b.waitingTime;
+      return a.targetTimestampMs - b.targetTimestampMs;
     });
   }, [unstakings]);
 
@@ -59,13 +72,17 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
     let result = BN_ZERO;
 
     unstakings.forEach((value) => {
-      if (value.status === UnstakingStatus.CLAIMABLE) {
+      const canClaim = value.targetTimestampMs
+        ? value.targetTimestampMs <= currentTimestampMs
+        : value.status === UnstakingStatus.CLAIMABLE;
+
+      if (canClaim) {
         result = result.plus(value.claimable);
       }
     });
 
     return result;
-  }, [unstakings]);
+  }, [currentTimestampMs, unstakings]);
 
   const haveUnlocking = useMemo(() => unstakings.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakings]);
 
@@ -75,8 +92,8 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
   );
 
   const canWithdraw = useMemo(() => {
-    return totalWithdrawable.gt(BN_ZERO);
-  }, [totalWithdrawable]);
+    return poolInfo.metadata.availableMethod.withdraw && totalWithdrawable.gt(BN_ZERO);
+  }, [poolInfo.metadata.availableMethod.withdraw, totalWithdrawable]);
 
   const onWithDraw = useCallback(() => {
     setWithdrawStorage({
@@ -100,38 +117,54 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   const renderWithdrawTime = useCallback(
     (item: UnstakingInfo) => {
-      if (item.waitingTime === undefined) {
+      if (!poolInfo.metadata.availableMethod.withdraw) {
         return (
-          <>
-            <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
+          <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
         );
       } else {
-        return (
-          <>
-            <div className={'__withdraw-time-label'}>{getWaitingTime(item.waitingTime, item.status, t)}</div>
-            {item.status === UnstakingStatus.CLAIMABLE && (
-              <Icon
-                iconColor={token.colorSecondary}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )}
-          </>
-        );
+        if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        } else {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        }
       }
     },
-    [t, token.colorSecondary]
+    [currentTimestampMs, poolInfo.metadata.availableMethod.withdraw, t, token.colorSecondary]
   );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimestampMs(Date.now());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
   if (!unstakings.length) {
     return null;
@@ -139,7 +172,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
 
   return (
     <div
-      className={CN(className, '__withdraw-info-part')}
+      className={CN(className)}
     >
       <CollapsiblePanel
         className={'__collapsible-panel'}

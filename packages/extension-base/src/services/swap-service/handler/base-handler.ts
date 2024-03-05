@@ -1,24 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import {SwapError} from '@subwallet/extension-base/background/errors/SwapError';
-import {TransactionError} from '@subwallet/extension-base/background/errors/TransactionError';
-import {
-  OptimalSwapPath,
-  OptimalSwapPathParams,
-  SwapEarlyValidation, SwapErrorType,
-  SwapProvider,
-  SwapProviderId,
-  SwapQuote,
-  SwapRequest,
-  SwapSubmitParams,
-  SwapSubmitStepData,
-  ValidateSwapProcessParams
-} from '@subwallet/extension-base/types/swap';
-import {BasicTxErrorType} from "@subwallet/extension-base/background/KoniTypes";
-import {isEthereumAddress} from "@polkadot/util-crypto";
-import {ChainService} from "@subwallet/extension-base/services/chain-service";
-import {_isChainEvmCompatible} from "@subwallet/extension-base/services/chain-service/utils";
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export abstract class SwapBaseHandler {
   protected providerSlug: string;
@@ -28,7 +18,7 @@ export abstract class SwapBaseHandler {
   protected constructor (providerSlug: string, providerName: string, chainService: ChainService) {
     this.providerName = providerName;
     this.providerSlug = providerSlug;
-    this.chainService =  chainService;
+    this.chainService = chainService;
   }
 
   public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;

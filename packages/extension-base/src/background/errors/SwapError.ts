@@ -33,6 +33,10 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
   ASSET_NOT_SUPPORTED: {
     message: detectTranslate('Asset not supported'),
     code: undefined
+  },
+  INVALID_RECIPIENT: {
+    message: detectTranslate('Invalid recipient'),
+    code: undefined
   }
 };
 

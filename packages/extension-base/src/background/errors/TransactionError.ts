@@ -4,9 +4,9 @@
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { YieldValidationStatus } from '@subwallet/extension-base/types';
+import { SwapErrorType } from '@subwallet/extension-base/types/swap';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
-import {SwapErrorType} from "@subwallet/extension-base/types/swap";
 
 // Todo: finish this map in the future
 const defaultErrorMap = {
@@ -100,6 +100,10 @@ const defaultErrorMap = {
   },
   [SwapErrorType.QUOTE_TIMEOUT]: {
     message: detectTranslate('Quote timeout'),
+    code: undefined
+  },
+  [SwapErrorType.INVALID_RECIPIENT]: {
+    message: detectTranslate('Invalid recipient'),
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

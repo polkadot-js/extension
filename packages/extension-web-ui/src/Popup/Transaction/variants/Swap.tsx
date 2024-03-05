@@ -7,7 +7,6 @@ import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCo
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
-import { AllSwapQuotes } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
@@ -33,6 +32,7 @@ import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
+import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
 
 type Props = ThemeProps;
@@ -98,6 +98,7 @@ const Component = () => {
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   const showQuoteAreRef = useRef(false);
+  const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -544,6 +545,7 @@ const Component = () => {
             setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
             setSwapError(result.quote.error);
             showQuoteAreRef.current = true;
+            optimalQuoteRef.current = result.quote.optimalQuote;
           }
         }).catch((e) => {
           console.log('handleSwapRequest error', e);
@@ -956,7 +958,8 @@ const Component = () => {
       <AddMoreBalanceModal
         modalId={SWAP_MORE_BALANCE_MODAL}
       />
-      <AllSwapQuotes
+      <SwapQuotesSelectorModal
+        optimalQuoteItem={optimalQuoteRef.current}
         items={quoteOptions}
         modalId={SWAP_ALL_QUOTES_MODAL}
         onSelectItem={onSelectQuote}

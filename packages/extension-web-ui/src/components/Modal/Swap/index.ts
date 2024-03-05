@@ -3,4 +3,4 @@
 
 export { default as SlippageModal } from './SlippageModal';
 export { default as AddMoreBalance } from './AddMoreBalanceModal';
-export { default as AllSwapQuotes } from './AllSwapQuotesModal';
+export { default as SwapQuotesSelectorModal } from './SwapQuotesSelectorModal';

@@ -1025,7 +1025,7 @@ export default class KoniState {
   }
 
   public getXcmRefMap () {
-    return this.chainService.getXcmRefMap();
+    return this.chainService.xcmRefMap;
   }
 
   public getAssetByChainAndAsset (chain: string, assetTypes: _AssetType[]) {

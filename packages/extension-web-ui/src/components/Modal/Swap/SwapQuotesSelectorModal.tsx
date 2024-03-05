@@ -15,10 +15,11 @@ type Props = ThemeProps & {
   items: SwapQuote[],
   onSelectItem: (quote: SwapQuote) => void;
   selectedItem?: SwapQuote,
+  optimalQuoteItem?: SwapQuote
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, items, modalId, onSelectItem, selectedItem } = props;
+  const { className, optimalQuoteItem, items, modalId, onSelectItem, selectedItem } = props;
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -38,6 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         {items.map((item) => (
           <SwapQuotesItem
+            isRecommend={optimalQuoteItem?.provider.id === item.provider.id}
             key={item.provider.id}
             onSelect={onSelectItem}
             quote={item}
@@ -49,10 +51,10 @@ const Component: React.FC<Props> = (props: Props) => {
   );
 };
 
-const AllSwapQuotesModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const SwapQuotesSelectorModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
 
   };
 });
 
-export default AllSwapQuotesModal;
+export default SwapQuotesSelectorModal;

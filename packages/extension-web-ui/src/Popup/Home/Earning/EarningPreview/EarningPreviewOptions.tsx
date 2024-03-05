@@ -5,14 +5,13 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
+import { NominationPoolInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { analysisAccounts } from '@subwallet/extension-web-ui/hooks/common/useGetChainSlugsByCurrentAccount';
-import { saveCurrentAccountAddress } from '@subwallet/extension-web-ui/messaging';
+import { fetchPoolTarget, saveCurrentAccountAddress } from '@subwallet/extension-web-ui/messaging';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
@@ -397,7 +396,7 @@ function Component ({ className }: Props) {
       const poolInfo = getPoolInfoByChainAndType(poolInfoMap, chainParam, earningTypeParam);
 
       if (poolInfo) {
-        fetchStaticCache<ValidatorInfo[]>(`earning/targets/${poolInfo.slug}.json`, []).then((rs) => {
+        fetchPoolTarget({ slug: poolInfo.slug }).then((rs) => {
           if (isSync) {
             const defaultEarnParams: EarnParams = {
               ...DEFAULT_EARN_PARAMS,
@@ -408,8 +407,16 @@ function Component ({ className }: Props) {
               target: targetParam
             };
 
-            if (rs && rs.length) {
-              const isValidatorSupported = rs.some((item) => item.address === targetParam);
+            if (rs && rs.targets && rs.targets.length) {
+              const isValidatorSupported = rs.targets.some((item) => {
+                if (earningTypeParam === YieldPoolType.NOMINATION_POOL) {
+                  return (item as NominationPoolInfo).id.toString() === targetParam;
+                } else if (earningTypeParam === YieldPoolType.NATIVE_STAKING) {
+                  return item.address === targetParam;
+                } else {
+                  return false;
+                }
+              });
 
               if (!isValidatorSupported) {
                 defaultEarnParams.target = 'not-support';

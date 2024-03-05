@@ -687,7 +687,15 @@ const Component = () => {
     if (redirectFromPreview && autoCheckValidatorGetFromPreview.current && !targetLoading) {
       autoCheckValidatorGetFromPreview.current = false;
       fetchPoolTarget({ slug }).then((rs) => {
-        const isValidatorSupported = rs.targets.some((item) => item.address === defaultTarget.current);
+        const isValidatorSupported = rs.targets.some((item) => {
+          if (poolType === YieldPoolType.NOMINATION_POOL) {
+            return (item as NominationPoolInfo).id.toString() === defaultTarget.current;
+          } else if (poolType === YieldPoolType.NATIVE_STAKING) {
+            return item.address === defaultTarget.current;
+          } else {
+            return false;
+          }
+        });
 
         if (!isValidatorSupported && defaultTarget.current) {
           openAlert({
@@ -711,7 +719,7 @@ const Component = () => {
         }
       }).catch((e) => console.error(e));
     }
-  }, [activeModal, closeAlert, openAlert, redirectFromPreview, slug, t, targetLoading]);
+  }, [activeModal, closeAlert, openAlert, poolType, redirectFromPreview, slug, t, targetLoading]);
 
   useEffect(() => {
     if (poolChain) {

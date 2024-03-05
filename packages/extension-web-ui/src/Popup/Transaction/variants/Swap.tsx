@@ -224,7 +224,7 @@ const Component = () => {
         fromTokenSlug: toTokenSlugValue,
         toTokenSlug: fromTokenSlugValue
       });
-      form.validateFields(['from']).catch((e) => {
+      form.validateFields(['from', 'recipient']).catch((e) => {
         console.log('Error when validating', e);
       });
     }
@@ -535,30 +535,33 @@ const Component = () => {
         };
 
         setCurrentQuoteRequest(currentRequest);
+        form.validateFields(['from', 'recipient']).then(() => {
+          handleSwapRequest(currentRequest).then((result) => {
+            if (sync) {
+              setOptimalSwapPath(result.process);
 
-        handleSwapRequest(currentRequest).then((result) => {
-          if (sync) {
-            setOptimalSwapPath(result.process);
+              dispatchProcessState({
+                payload: {
+                  steps: result.process.steps,
+                  feeStructure: result.process.totalFee
+                },
+                type: SwapActionType.STEP_CREATE
+              });
 
-            dispatchProcessState({
-              payload: {
-                steps: result.process.steps,
-                feeStructure: result.process.totalFee
-              },
-              type: SwapActionType.STEP_CREATE
-            });
-
-            setQuoteOptions(result.quote.quotes);
-            setCurrentQuote(result.quote.optimalQuote);
-            setQuoteAliveUntil(result.quote.aliveUntil);
-            setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
-            setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
-            setSwapError(result.quote.error);
-            showQuoteAreRef.current = true;
-            optimalQuoteRef.current = result.quote.optimalQuote;
-          }
+              setQuoteOptions(result.quote.quotes);
+              setCurrentQuote(result.quote.optimalQuote);
+              setQuoteAliveUntil(result.quote.aliveUntil);
+              setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
+              setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
+              setSwapError(result.quote.error);
+              showQuoteAreRef.current = true;
+              optimalQuoteRef.current = result.quote.optimalQuote;
+            }
+          }).catch((e) => {
+            console.log('handleSwapRequest error', e);
+          });
         }).catch((e) => {
-          console.log('handleSwapRequest error', e);
+          console.log('Error when validating', e);
         });
       }, 300);
     }
@@ -567,7 +570,7 @@ const Component = () => {
       sync = false;
       clearTimeout(timeout);
     };
-  }, [fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
+  }, [form, fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
 
   useEffect(() => {
     let timer: NodeJS.Timer;

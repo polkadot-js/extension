@@ -151,8 +151,31 @@ const Component = () => {
       return Promise.reject(t('Invalid recipient address'));
     }
 
+    if (toAssetInfo?.originChain && chainInfoMap[toAssetInfo?.originChain]) {
+      const isAddressEvm = isEthereumAddress(_recipientAddress);
+      const isEvmCompatible = _isChainEvmCompatible(chainInfoMap[toAssetInfo?.originChain]);
+
+      if (isAddressEvm !== isEvmCompatible) {
+        return Promise.reject(t('Invalid swap recipient account'));
+      }
+    }
+
     return Promise.resolve();
-  }, [t]);
+  }, [chainInfoMap, t, toAssetInfo]);
+
+  const showRecipientForm = useMemo(() => {
+    if (fromValue && toAssetInfo?.originChain &&
+      chainInfoMap[toAssetInfo?.originChain]) {
+      const isAddressEvm = isEthereumAddress(fromValue);
+      const isEvmCompatibleTo = _isChainEvmCompatible(
+        chainInfoMap[toAssetInfo?.originChain]
+      );
+
+      return isAddressEvm !== isEvmCompatibleTo;
+    }
+
+    return false; // Add a default return value in case none of the conditions are met
+  }, [chainInfoMap, fromValue, toAssetInfo?.originChain]);
 
   const onSelectFromToken = useCallback((tokenSlug: string) => {
     form.setFieldValue('fromTokenSlug', tokenSlug);
@@ -331,7 +354,7 @@ const Component = () => {
       const isAddressEvm = isEthereumAddress(fromValue);
       const isEvmCompatible = _isChainEvmCompatible(chainInfoMap[fromAssetInfo?.originChain]);
 
-      if ((isAddressEvm && !isEvmCompatible) || (!isAddressEvm && isEvmCompatible)) {
+      if ((isAddressEvm !== isEvmCompatible)) {
         return Promise.reject(t('Invalid swap from account'));
       }
     }
@@ -717,7 +740,7 @@ const Component = () => {
                 />
               </div>
 
-              <Form.Item
+              {showRecipientForm && (<Form.Item
                 name={'recipient'}
                 rules={[
                   {
@@ -738,7 +761,7 @@ const Component = () => {
                   showAddressBook={true}
                   showScanner={true}
                 />
-              </Form.Item>
+              </Form.Item>)}
             </Form>
 
             <div
@@ -946,10 +969,10 @@ const Component = () => {
         modalId={SWAP_MORE_BALANCE_MODAL}
       />
       <SwapQuotesSelectorModal
-        optimalQuoteItem={optimalQuoteRef.current}
         items={quoteOptions}
         modalId={SWAP_ALL_QUOTES_MODAL}
         onSelectItem={onSelectQuote}
+        optimalQuoteItem={optimalQuoteRef.current}
         selectedItem={currentQuote}
       />
     </>

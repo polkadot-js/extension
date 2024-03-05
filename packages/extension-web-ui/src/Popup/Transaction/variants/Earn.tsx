@@ -22,7 +22,7 @@ import { unlockDotCheckCanMint } from '@subwallet/extension-web-ui/messaging/cam
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-web-ui/reducer';
 import { store } from '@subwallet/extension-web-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
+import { convertFieldToObject, getValidatorKey, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number, Typography } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -691,7 +691,10 @@ const Component = () => {
           if (poolType === YieldPoolType.NOMINATION_POOL) {
             return (item as NominationPoolInfo).id.toString() === defaultTarget.current;
           } else if (poolType === YieldPoolType.NATIVE_STAKING) {
-            return item.address === defaultTarget.current;
+            const _item = item as ValidatorInfo;
+            const key = getValidatorKey(_item.address, _item.identity);
+
+            return key === defaultTarget.current;
           } else {
             return false;
           }

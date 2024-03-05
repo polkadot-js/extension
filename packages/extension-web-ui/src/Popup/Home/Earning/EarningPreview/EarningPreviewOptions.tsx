@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { NominationPoolInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -15,7 +15,7 @@ import { fetchPoolTarget, saveCurrentAccountAddress } from '@subwallet/extension
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
-import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { getValidatorKey, isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Vault } from 'phosphor-react';
@@ -408,7 +408,7 @@ function Component ({ className }: Props) {
             };
 
             if (rs && rs.targets && rs.targets.length) {
-              const isValidatorSupported = rs.targets.some((item) => {
+              const isValidatorSupported = rs.targets.find((item) => {
                 if (earningTypeParam === YieldPoolType.NOMINATION_POOL) {
                   return (item as NominationPoolInfo).id.toString() === targetParam;
                 } else if (earningTypeParam === YieldPoolType.NATIVE_STAKING) {
@@ -420,6 +420,10 @@ function Component ({ className }: Props) {
 
               if (!isValidatorSupported) {
                 defaultEarnParams.target = 'not-support';
+              } else {
+                if (earningTypeParam === YieldPoolType.NATIVE_STAKING) {
+                  defaultEarnParams.target = getValidatorKey(isValidatorSupported.address, (isValidatorSupported as ValidatorInfo).identity);
+                }
               }
             }
 

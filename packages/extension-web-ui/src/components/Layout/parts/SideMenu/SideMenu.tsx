@@ -30,7 +30,6 @@ function Component ({ className,
   const { t } = useTranslation();
   const currentAccount = useSelector((root) => root.accountState.currentAccount);
   const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
-
   const transactionFromValue = useMemo(() => {
     return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
   }, [currentAccount?.address]);

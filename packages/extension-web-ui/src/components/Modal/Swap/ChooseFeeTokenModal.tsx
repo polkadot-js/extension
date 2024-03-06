@@ -58,7 +58,6 @@ const Component: React.FC<Props> = (props: Props) => {
               onSelect={onSelectItem}
               selected={!!selectedItem}
               slug={item}
-              symbol={'DOT'}
             />
           ))}
         </div>

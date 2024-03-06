@@ -1,45 +1,96 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
-import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SwapFeeComponent, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
-import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
+import {_ChainAsset} from '@subwallet/chain-list/types';
+import {SwapError} from '@subwallet/extension-base/background/errors/SwapError';
+import {
+  _getAssetDecimals,
+  _getAssetOriginChain,
+  _getAssetSymbol,
+  _isChainEvmCompatible,
+  _parseAssetRefKey
+} from '@subwallet/extension-base/services/chain-service/utils';
+import {SWTransactionResponse} from '@subwallet/extension-base/services/transaction-service/types';
+import {
+  OptimalSwapPath,
+  SwapFeeComponent,
+  SwapFeeType,
+  SwapQuote,
+  SwapRequest
+} from '@subwallet/extension-base/types/swap';
+import {
+  AccountSelector,
+  AddressInput,
+  HiddenInput,
+  PageWrapper,
+  SwapFromField,
+  SwapToField
+} from '@subwallet/extension-web-ui/components';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import { BN_TEN, BN_ZERO, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
-import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
-import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
-import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
-import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
-import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
-import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Button, Form, Icon, Image, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
-import { Rule } from '@subwallet/react-ui/es/form';
+import {
+  BN_TEN,
+  BN_ZERO,
+  CONFIRM_SWAP_TERM,
+  SWAP_ALL_QUOTES_MODAL,
+  SWAP_CHOOSE_FEE_TOKEN_MODAL,
+  SWAP_MORE_BALANCE_MODAL,
+  SWAP_SLIPPAGE_MODAL,
+  SWAP_TERM_AND_SERVICE_MODAL
+} from '@subwallet/extension-web-ui/constants';
+import {DataContext} from '@subwallet/extension-web-ui/contexts/DataContext';
+import {ScreenContext} from '@subwallet/extension-web-ui/contexts/ScreenContext';
+import {useSelector, useTransactionContext, useWatchTransaction} from '@subwallet/extension-web-ui/hooks';
+import {
+  getLatestSwapQuote,
+  handleSwapRequest,
+  handleSwapStep,
+  validateSwapProcess
+} from '@subwallet/extension-web-ui/messaging/transaction/swap';
+import {FreeBalance, TransactionContent, TransactionFooter} from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import {DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer} from '@subwallet/extension-web-ui/reducer';
+import {
+  FormCallbacks,
+  FormFieldData,
+  SwapParams,
+  ThemeProps,
+  TokenSelectorItemType
+} from '@subwallet/extension-web-ui/types';
+import {convertFieldToObject} from '@subwallet/extension-web-ui/utils';
+import {BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon} from '@subwallet/react-ui';
+import {Rule} from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {
+  ArrowsDownUp,
+  CaretDown,
+  CaretRight,
+  CaretUp,
+  Info,
+  ListBullets,
+  PencilSimpleLine,
+  PlusCircle,
+  XCircle
+} from 'phosphor-react';
+import React, {useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState} from 'react';
+import {useTranslation} from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
+import {isAddress, isEthereumAddress} from '@polkadot/util-crypto';
 
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
-import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
+import {TeamsOfServiceModal} from "@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal";
+import {useLocalStorage} from "usehooks-ts";
 
 type Props = ThemeProps;
 
 interface FeeItem {
   value: BigN,
+  slug: string,
   label: string,
   prefix?: string,
   suffix?: string
@@ -92,12 +143,12 @@ const Component = () => {
   const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
+  const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const showQuoteAreRef = useRef(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-
   // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
   const fromAmountValue = useWatchTransaction('fromAmount', form, defaultData);
@@ -275,28 +326,33 @@ const Component = () => {
     return BN_ZERO;
   }, [assetRegistryMap, priceMap]);
 
-  const listFeeComponent = useMemo(() => {
+  const feeItems = useMemo(() => {
     const result: FeeItem[] = [];
-    const feeTypeMapping: { [key: string]: string } = {
-      NETWORK_FEE: 'Network fee',
-      PLATFORM_FEE: 'Protocol fee',
-      WALLET_FEE: 'Wallet commission'
+    const feeTypeMap: Record<SwapFeeType, FeeItem> = {
+      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
+      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
+      WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), prefix: '$', suffix: '', slug: '' }
     };
+
+    if (!currentQuote?.feeInfo?.feeComponent) { return []; }
 
     currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
       const { feeType } = feeItem;
-      const label = feeTypeMapping[feeType] || feeType;
-      const existingItemIndex = result.findIndex((item) => item.label === label);
+      const { label, prefix, suffix } = feeTypeMap[feeType];
+      const totalAmount = feeTypeMap[feeType].value.plus(getConvertedBalance(feeItem));
 
-      if (existingItemIndex !== -1) {
-        result[existingItemIndex].value = result[existingItemIndex].value.plus(getConvertedBalance(feeItem));
-      } else {
-        result.push({ value: getConvertedBalance(feeItem), label });
-      }
+      feeTypeMap[feeType] = { label, value: totalAmount, slug: feeType, prefix, suffix };
     });
+
+    result.push(
+      feeTypeMap.NETWORK_FEE,
+      feeTypeMap.PLATFORM_FEE
+    );
 
     return result;
   }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
+
+
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {
       return isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[chainValue]);
@@ -644,6 +700,12 @@ const Component = () => {
   }, [setCustomScreenTitle, t]);
 
   useEffect(() => {
+    if (!confirmedTerm) {
+      activeModal(SWAP_TERM_AND_SERVICE_MODAL);
+    }
+  }, [activeModal, confirmedTerm]);
+
+  useEffect(() => {
     if (!fromTokenSlugValue && fromTokenItems.length) {
       form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
     }
@@ -672,6 +734,10 @@ const Component = () => {
   const minReceivable = useMemo(() => {
     return destinationSwapValue.multipliedBy(1 - currentSlippage);
   }, [destinationSwapValue, currentSlippage]);
+
+  const onAfterConfirmTermModal = useCallback(() => {
+    return setConfirmedTerm('swap-term-confirmed');
+  }, [setConfirmedTerm]);
 
   return (
     <>
@@ -865,14 +931,14 @@ const Component = () => {
                       className={'__swap-provider'}
                       label={t('Swap provider')}
                     >
-                      {currentQuote.provider.id === 'CHAIN_FLIP' &&
-                        (<Image
-                        className={'__provider-logo'}
-                        height={24}
-                        shape='squircle'
-                        src={DefaultLogosMap.chainflip}
-                        width={24}
-                      />)}
+                        <Logo
+                          className='__provider-logo'
+                          isShowSubLogo={false}
+                          shape='squircle'
+                          size={24}
+                          network={currentQuote.provider.id.toLowerCase()}
+                        />
+
                       {currentQuote.provider.name}
                     </MetaInfo.Default>
 
@@ -930,12 +996,13 @@ const Component = () => {
                     {
                       isViewFeeDetails && (
                         <div className={'__quote-fee-details-block'}>
-                          {listFeeComponent.map(({ label, value }, index) => (
+                          {feeItems.map(({ label, prefix, slug, suffix, value }) => (
                             <MetaInfo.Number
                               decimals={0}
-                              key={index}
+                              key={slug}
                               label={t(label)}
-                              prefix={'$'}
+                              prefix={prefix}
+                              suffix={suffix}
                               value={value}
                             />
                           ))}
@@ -994,6 +1061,7 @@ const Component = () => {
         optimalQuoteItem={optimalQuoteRef.current}
         selectedItem={currentQuote}
       />
+      <TeamsOfServiceModal onOk={onAfterConfirmTermModal} />
     </>
   );
 };

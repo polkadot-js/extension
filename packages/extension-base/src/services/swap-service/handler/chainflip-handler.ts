@@ -140,6 +140,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
+      // todo: switch error to return corresponding message
       return new SwapError(earlyValidation.error);
     }
 

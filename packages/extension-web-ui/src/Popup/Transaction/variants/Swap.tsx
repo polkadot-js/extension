@@ -109,6 +109,7 @@ const Component = () => {
   const fromTokenSlugValue = useWatchTransaction('fromTokenSlug', form, defaultData);
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
+  const recipientValue = useWatchTransaction('recipient', form, defaultData);
 
   const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
@@ -555,6 +556,8 @@ const Component = () => {
             return;
           }
 
+          showQuoteAreRef.current = true;
+
           setHandleRequestLoading(true);
 
           const currentRequest: SwapRequest = {
@@ -565,7 +568,8 @@ const Component = () => {
               to: toTokenSlugValue
             },
             fromAmount: fromAmountValue,
-            slippage: 0.05
+            slippage: currentSlippage,
+            recipient: recipientValue || undefined
           };
 
           setCurrentQuoteRequest(currentRequest);
@@ -606,7 +610,7 @@ const Component = () => {
       sync = false;
       clearTimeout(timeout);
     };
-  }, [form, fromAmountValue, fromTokenSlugValue, fromValue, swapPairs, toTokenSlugValue]);
+  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, swapPairs, toTokenSlugValue]);
 
   useEffect(() => {
     let timer: NodeJS.Timer;
@@ -817,19 +821,20 @@ const Component = () => {
               className={'__slippage-info'}
             >
               <div
-              className={'__right-action'}
-                onClick={onOpenSlippageModal}>
-              <span>Slippage:</span>
-              &nbsp;<span>{currentSlippage * 100}%</span>
-              <div
-                className={'__slippage-editor-button'}
+                className={'__right-action'}
+                onClick={onOpenSlippageModal}
               >
-                <Icon
-                  className={'__slippage-editor-button-icon'}
-                  phosphorIcon={PencilSimpleLine}
-                  size='sm'
-                />
-              </div>
+                <span>Slippage:</span>
+              &nbsp;<span>{currentSlippage * 100}%</span>
+                <div
+                  className={'__slippage-editor-button'}
+                >
+                  <Icon
+                    className={'__slippage-editor-button-icon'}
+                    phosphorIcon={PencilSimpleLine}
+                    size='sm'
+                  />
+                </div>
               </div>
 
             </div>

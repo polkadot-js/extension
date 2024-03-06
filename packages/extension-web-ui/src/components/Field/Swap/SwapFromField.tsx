@@ -84,6 +84,7 @@ const Component = (props: Props) => {
         <div className={'__amount-wrapper'}>
           <AmountInput
             decimals={decimals}
+            defaultInvalidOutputValue={'00'}
             maxValue={'0'} // support later
             onChange={onChangeInput}
             showMaxButton={false}

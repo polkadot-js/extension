@@ -7,7 +7,7 @@ import { detectTranslate } from '@subwallet/extension-base/utils';
 
 const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }> = {
   ERROR_FETCHING_QUOTE: {
-    message: detectTranslate('Cannot find suitable quote'),
+    message: detectTranslate('Cannot find a suitable quote for your request. Please try changing your swap amount'),
     code: undefined
   },
   NOT_MEET_MIN_SWAP: {
@@ -36,6 +36,10 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
   },
   INVALID_RECIPIENT: {
     message: detectTranslate('Invalid recipient'),
+    code: undefined
+  },
+  SWAP_EXCEED_BALANCE: {
+    message: detectTranslate('Swap exceed balance'),
     code: undefined
   }
 };

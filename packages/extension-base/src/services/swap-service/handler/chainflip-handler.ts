@@ -8,8 +8,9 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
@@ -36,8 +37,8 @@ const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
 
-  constructor (providerSlug: string, providerName: string, chainService: ChainService) {
-    super(providerSlug, providerName, chainService);
+  constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
+    super(providerSlug, providerName, chainService, balanceService);
 
     this.swapSdk = new SwapSDK({
       network: 'perseverance'
@@ -60,6 +61,16 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
       const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+
+      const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug);
+
+      const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+
+      if (bnFromAssetBalance.gte(bnAmount)) {
+        return {
+          error: SwapErrorType.SWAP_EXCEED_BALANCE
+        };
+      }
 
       if (!srcChainId || !destChainId || !fromAssetId || !toAssetId) {
         return {
@@ -218,7 +229,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
   }
 
   public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
-    // todo: validate fee
     const amount = params.selectedQuote.fromAmount;
     const bnAmount = new BigNumber(amount);
 
@@ -302,7 +312,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         substrateApi,
         to: depositAddressResponse.depositAddress,
         tokenInfo: fromAsset,
-        transferAll: false, // todo
+        transferAll: false, // always false, because we do not allow swapping all the balance
         value: quote.fromAmount
       });
 
@@ -317,7 +327,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       txChain: fromAsset.originChain,
       txData,
       extrinsic,
-      transferNativeAmount: quote.fromAmount, // todo
+      transferNativeAmount: _isNativeToken(fromAsset) ? quote.fromAmount : '0', // todo
       extrinsicType: ExtrinsicType.SWAP,
       chainType
     } as SwapSubmitStepData;

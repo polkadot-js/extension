@@ -4,6 +4,7 @@
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
@@ -14,11 +15,13 @@ export abstract class SwapBaseHandler {
   protected providerSlug: string;
   protected providerName: string;
   protected chainService: ChainService;
+  protected balanceService: BalanceService;
 
-  protected constructor (providerSlug: string, providerName: string, chainService: ChainService) {
+  protected constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
     this.providerName = providerName;
     this.providerSlug = providerSlug;
     this.chainService = chainService;
+    this.balanceService = balanceService;
   }
 
   public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;

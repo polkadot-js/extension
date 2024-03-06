@@ -43,7 +43,7 @@ import { BehaviorSubject } from 'rxjs';
 export class SwapService extends BaseServiceWithProcess implements StoppableServiceInterface {
   protected readonly state: KoniState;
   private eventService: EventService;
-  private chainService: ChainService;
+  private readonly chainService: ChainService;
   private swapPairSubject: BehaviorSubject<SwapPair[]> = new BehaviorSubject<SwapPair[]>([]);
   private handlers: Record<string, SwapBaseHandler> = {};
 
@@ -157,7 +157,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     _SUPPORTED_SWAP_PROVIDERS.forEach((providerId) => {
       switch (providerId) {
         case 'CHAIN_FLIP':
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService);
+          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService, this.state.balanceService);
 
           break;
         default:

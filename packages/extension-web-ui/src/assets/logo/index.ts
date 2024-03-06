@@ -33,7 +33,8 @@ export const DefaultLogosMap: Record<string, string> = {
   talisman: '/images/projects/talisman.png',
   talisman_mc: '/images/projects/talisman-monochrome.svg',
   nova: '/images/projects/nova-wallet.png',
-  nova_mc: '/images/projects/nova-wallet-monochrome.svg'
+  nova_mc: '/images/projects/nova-wallet-monochrome.svg',
+  chain_flip: '/images/projects/chainflip.png'
 };
 
 export const IconMap = {

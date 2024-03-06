@@ -694,10 +694,28 @@ const Component = () => {
   }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
-    if (!fromTokenSlugValue && fromTokenItems.length) {
-      form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+    if (!fromTokenSlugValue && fromTokenItems.length > 0) {
+      if (isAllAccount) {
+        form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+      } else {
+        const isEvmAddress = isEthereumAddress(fromValue);
+        const compatibleToken = fromTokenItems.find((item) => {
+          const isEvmCompatibleItem = _isChainEvmCompatible(chainInfoMap[item.originChain]);
+
+          return isEvmAddress === isEvmCompatibleItem;
+        });
+
+        if (compatibleToken) {
+          form.setFieldValue('fromTokenSlug', compatibleToken.slug);
+        } else {
+          form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+          form.validateFields(['from']).catch((e) => {
+            console.log('Error when validating', e);
+          });
+        }
+      }
     }
-  }, [form, fromTokenItems, fromTokenSlugValue]);
+  }, [chainInfoMap, form, fromAssetInfo?.originChain, fromTokenItems, fromTokenSlugValue, fromValue, isAllAccount]);
 
   useEffect(() => {
     if (toTokenItems.length) {

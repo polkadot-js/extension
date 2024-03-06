@@ -815,8 +815,10 @@ const Component = () => {
 
             <div
               className={'__slippage-info'}
-              onClick={onOpenSlippageModal}
             >
+              <div
+              className={'__right-action'}
+                onClick={onOpenSlippageModal}>
               <span>Slippage:</span>
               &nbsp;<span>{currentSlippage * 100}%</span>
               <div
@@ -827,6 +829,7 @@ const Component = () => {
                   phosphorIcon={PencilSimpleLine}
                   size='sm'
                 />
+              </div>
               </div>
 
             </div>
@@ -1128,8 +1131,12 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'flex-end',
       alignItems: 'center',
       color: token.colorSuccess,
-      cursor: 'pointer',
       marginBottom: 24
+    },
+    '.__right-action': {
+      cursor: 'pointer',
+      alignItems: 'center',
+      display: 'flex'
     },
     '.__item-footer-time': {
       color: token.colorWarningText,

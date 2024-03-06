@@ -55,11 +55,11 @@ const Component = (props: Props) => {
         />
         <div className={'__item-token-info'}>
           <span>{item.symbol}</span>
-          <span className={'__item-token-name'}>{item.name}</span>
+          <span className={'__item-token-name'}>{chainInfoMap[item.originChain]?.name}</span>
         </div>
       </div>
     );
-  }, [token.sizeXL]);
+  }, [chainInfoMap, token.sizeXL]);
 
   const renderItem = useCallback((item: TokenItemType, selected: boolean) => {
     return (

@@ -1,96 +1,48 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainAsset} from '@subwallet/chain-list/types';
-import {SwapError} from '@subwallet/extension-base/background/errors/SwapError';
-import {
-  _getAssetDecimals,
-  _getAssetOriginChain,
-  _getAssetSymbol,
-  _isChainEvmCompatible,
-  _parseAssetRefKey
-} from '@subwallet/extension-base/services/chain-service/utils';
-import {SWTransactionResponse} from '@subwallet/extension-base/services/transaction-service/types';
-import {
-  OptimalSwapPath,
-  SwapFeeComponent,
-  SwapFeeType,
-  SwapQuote,
-  SwapRequest
-} from '@subwallet/extension-base/types/swap';
-import {
-  AccountSelector,
-  AddressInput,
-  HiddenInput,
-  PageWrapper,
-  SwapFromField,
-  SwapToField
-} from '@subwallet/extension-web-ui/components';
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
+import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import {
-  BN_TEN,
-  BN_ZERO,
-  CONFIRM_SWAP_TERM,
-  SWAP_ALL_QUOTES_MODAL,
-  SWAP_CHOOSE_FEE_TOKEN_MODAL,
-  SWAP_MORE_BALANCE_MODAL,
-  SWAP_SLIPPAGE_MODAL,
-  SWAP_TERM_AND_SERVICE_MODAL
-} from '@subwallet/extension-web-ui/constants';
-import {DataContext} from '@subwallet/extension-web-ui/contexts/DataContext';
-import {ScreenContext} from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import {useSelector, useTransactionContext, useWatchTransaction} from '@subwallet/extension-web-ui/hooks';
-import {
-  getLatestSwapQuote,
-  handleSwapRequest,
-  handleSwapStep,
-  validateSwapProcess
-} from '@subwallet/extension-web-ui/messaging/transaction/swap';
-import {FreeBalance, TransactionContent, TransactionFooter} from '@subwallet/extension-web-ui/Popup/Transaction/parts';
-import {DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer} from '@subwallet/extension-web-ui/reducer';
-import {
-  FormCallbacks,
-  FormFieldData,
-  SwapParams,
-  ThemeProps,
-  TokenSelectorItemType
-} from '@subwallet/extension-web-ui/types';
-import {convertFieldToObject} from '@subwallet/extension-web-ui/utils';
-import {BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon} from '@subwallet/react-ui';
-import {Rule} from '@subwallet/react-ui/es/form';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
+import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
+import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
+import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
+import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
+import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
+import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
+import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import {
-  ArrowsDownUp,
-  CaretDown,
-  CaretRight,
-  CaretUp,
-  Info,
-  ListBullets,
-  PencilSimpleLine,
-  PlusCircle,
-  XCircle
-} from 'phosphor-react';
-import React, {useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState} from 'react';
-import {useTranslation} from 'react-i18next';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, PlusCircle, XCircle } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-import {isAddress, isEthereumAddress} from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
-import {TeamsOfServiceModal} from "@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal";
-import {useLocalStorage} from "usehooks-ts";
 
 type Props = ThemeProps;
 
 interface FeeItem {
   value: BigN,
-  slug: string,
+  type: SwapFeeType,
   label: string,
   prefix?: string,
   suffix?: string
@@ -149,6 +101,8 @@ const Component = () => {
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [handleRequestLoading, setHandleRequestLoading] = useState(false);
+
   // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
   const fromAmountValue = useWatchTransaction('fromAmount', form, defaultData);
@@ -329,19 +283,15 @@ const Component = () => {
   const feeItems = useMemo(() => {
     const result: FeeItem[] = [];
     const feeTypeMap: Record<SwapFeeType, FeeItem> = {
-      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
-      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
-      WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), prefix: '$', suffix: '', slug: '' }
+      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', type: SwapFeeType.NETWORK_FEE },
+      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', type: SwapFeeType.PLATFORM_FEE },
+      WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), suffix: '%', type: SwapFeeType.WALLET_FEE }
     };
-
-    if (!currentQuote?.feeInfo?.feeComponent) { return []; }
 
     currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
       const { feeType } = feeItem;
-      const { label, prefix, suffix } = feeTypeMap[feeType];
-      const totalAmount = feeTypeMap[feeType].value.plus(getConvertedBalance(feeItem));
 
-      feeTypeMap[feeType] = { label, value: totalAmount, slug: feeType, prefix, suffix };
+      feeTypeMap[feeType].value = feeTypeMap[feeType].value.plus(getConvertedBalance(feeItem));
     });
 
     result.push(
@@ -351,7 +301,6 @@ const Component = () => {
 
     return result;
   }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
-
 
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {
@@ -390,21 +339,35 @@ const Component = () => {
 
     return (
       <div className={CN('__quote-empty-block', {
-        '-error': isError
+        '-error': isError,
+        '-loading': handleRequestLoading
       })}
       >
-        <PageIcon
-          color='var(--empty-quote-icon-color)'
-          iconProps={{
-            weight: isError ? 'fill' : undefined,
-            phosphorIcon: isError ? XCircle : ListBullets
-          }}
-        />
+        {
+          handleRequestLoading && (
+            <div>
+              <ActivityIndicator size={32} />
+            </div>
+          )
+        }
+        {
+          !handleRequestLoading && (
+            <>
+              <PageIcon
+                color='var(--empty-quote-icon-color)'
+                iconProps={{
+                  weight: isError ? 'fill' : undefined,
+                  phosphorIcon: isError ? XCircle : ListBullets
+                }}
+              />
 
-        <div className={CN('__message-error', {
-          '-message': isError
-        })}
-        >{message}</div>
+              <div className={CN('__message-error', {
+                '-message': isError
+              })}
+              >{message}</div>
+            </>
+          )
+        }
       </div>
     );
   };
@@ -587,19 +550,26 @@ const Component = () => {
     // todo: simple validate before do this
     if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
       timeout = setTimeout(() => {
-        const currentRequest: SwapRequest = {
-          address: fromValue,
-          pair: {
-            slug: _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue),
-            from: fromTokenSlugValue,
-            to: toTokenSlugValue
-          },
-          fromAmount: fromAmountValue,
-          slippage: 0.05
-        };
-
-        setCurrentQuoteRequest(currentRequest);
         form.validateFields(['from', 'recipient']).then(() => {
+          if (!sync) {
+            return;
+          }
+
+          setHandleRequestLoading(true);
+
+          const currentRequest: SwapRequest = {
+            address: fromValue,
+            pair: {
+              slug: _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue),
+              from: fromTokenSlugValue,
+              to: toTokenSlugValue
+            },
+            fromAmount: fromAmountValue,
+            slippage: 0.05
+          };
+
+          setCurrentQuoteRequest(currentRequest);
+
           handleSwapRequest(currentRequest).then((result) => {
             if (sync) {
               setOptimalSwapPath(result.process);
@@ -623,6 +593,8 @@ const Component = () => {
             }
           }).catch((e) => {
             console.log('handleSwapRequest error', e);
+          }).finally(() => {
+            setHandleRequestLoading(false);
           });
         }).catch((e) => {
           console.log('Error when validating', e);
@@ -911,7 +883,7 @@ const Component = () => {
               </div>
 
               {
-                !!currentQuote && (
+                !!currentQuote && !handleRequestLoading && (
                   <MetaInfo
                     className={CN('__quote-info-block')}
                     hasBackgroundWrapper
@@ -931,13 +903,13 @@ const Component = () => {
                       className={'__swap-provider'}
                       label={t('Swap provider')}
                     >
-                        <Logo
-                          className='__provider-logo'
-                          isShowSubLogo={false}
-                          shape='squircle'
-                          size={24}
-                          network={currentQuote.provider.id.toLowerCase()}
-                        />
+                      <Logo
+                        className='__provider-logo'
+                        isShowSubLogo={false}
+                        network={currentQuote.provider.id.toLowerCase()}
+                        shape='squircle'
+                        size={24}
+                      />
 
                       {currentQuote.provider.name}
                     </MetaInfo.Default>
@@ -961,15 +933,19 @@ const Component = () => {
               }
 
               {
-                !currentQuote && renderQuoteEmptyBlock()
+                (!currentQuote || handleRequestLoading) && renderQuoteEmptyBlock()
               }
 
-              <div className={'__item-footer-time'}>
-                Quote reset in: {quoteCountdownTime}s
-              </div>
+              {
+                !handleRequestLoading && (
+                  <div className={'__item-footer-time'}>
+                    Quote reset in: {quoteCountdownTime}s
+                  </div>
+                )
+              }
 
               {
-                !!currentQuote && (
+                !!currentQuote && !handleRequestLoading && (
                   <MetaInfo
                     className={CN('__quote-info-block')}
                     hasBackgroundWrapper
@@ -996,14 +972,14 @@ const Component = () => {
                     {
                       isViewFeeDetails && (
                         <div className={'__quote-fee-details-block'}>
-                          {feeItems.map(({ label, prefix, slug, suffix, value }) => (
+                          {feeItems.map((item) => (
                             <MetaInfo.Number
                               decimals={0}
-                              key={slug}
-                              label={t(label)}
-                              prefix={prefix}
-                              suffix={suffix}
-                              value={value}
+                              key={item.type}
+                              label={t(item.label)}
+                              prefix={item.prefix}
+                              suffix={item.suffix}
+                              value={item.value}
                             />
                           ))}
                         </div>
@@ -1069,6 +1045,15 @@ const Component = () => {
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const dataContext = useContext(DataContext);
+  const { setWebBaseClassName } = useContext(WebUIContext);
+
+  useEffect(() => {
+    setWebBaseClassName(`${className || ''}-web-base-container`);
+
+    return () => {
+      setWebBaseClassName('');
+    };
+  }, [className, setWebBaseClassName]);
 
   return (
     <PageWrapper
@@ -1207,8 +1192,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center',
       textAlign: 'center',
       gap: token.size,
+      minHeight: 184,
 
       '--empty-quote-icon-color': token['gray-6']
+    },
+
+    '.__quote-empty-block.-loading': {
+      justifyContent: 'center'
     },
 
     '.__quote-empty-block.-error': {
@@ -1345,6 +1335,11 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     // desktop
 
     '.web-ui-enable &': {
+      // todo: use react solution, not CSS, to hide the back button
+      '.title-group .ant-btn': {
+        display: 'none'
+      },
+
       '.__transaction-form-area': {
         flex: '1',
         overflowX: 'hidden'

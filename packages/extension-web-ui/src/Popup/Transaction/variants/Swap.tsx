@@ -94,6 +94,7 @@ const Component = () => {
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
   const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
+  const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const showQuoteAreRef = useRef(false);
@@ -238,8 +239,11 @@ const Component = () => {
         fromTokenSlug: toTokenSlugValue,
         toTokenSlug: fromTokenSlugValue
       });
-      form.validateFields(['from', 'recipient']).catch((e) => {
+      form.validateFields(['from', 'recipient']).then(() => {
+        setIsFormInvalid(false);
+      }).catch((e) => {
         console.log('Error when validating', e);
+        setIsFormInvalid(true);
       });
     }
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
@@ -334,13 +338,19 @@ const Component = () => {
   };
 
   const renderQuoteEmptyBlock = () => {
-    const isError = !!swapError;
+    const isError = !!swapError || isFormInvalid;
 
-    const message = isError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
+    let message = '';
+
+    if (isFormInvalid) {
+      message = t('Please recheck form value');
+    } else {
+      message = swapError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
+    }
 
     return (
       <div className={CN('__quote-empty-block', {
-        '-error': isError,
+        '-error': !!swapError || isFormInvalid,
         '-loading': handleRequestLoading
       })}
       >
@@ -599,9 +609,11 @@ const Component = () => {
             console.log('handleSwapRequest error', e);
           }).finally(() => {
             setHandleRequestLoading(false);
+            setIsFormInvalid(false);
           });
         }).catch((e) => {
           console.log('Error when validating', e);
+          setIsFormInvalid(true);
         });
       }, 300);
     }
@@ -875,7 +887,7 @@ const Component = () => {
                 <div className={'__item-right-part'}>
                   <Button
                     className={'__view-quote-button'}
-                    disabled={!quoteOptions.length}
+                    disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
                     onClick={openAllQuotesModal}
                     size='xs'
                     type='ghost'
@@ -891,7 +903,7 @@ const Component = () => {
               </div>
 
               {
-                !!currentQuote && !handleRequestLoading && (
+                !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                   <MetaInfo
                     className={CN('__quote-info-block')}
                     hasBackgroundWrapper
@@ -941,11 +953,11 @@ const Component = () => {
               }
 
               {
-                (!currentQuote || handleRequestLoading) && renderQuoteEmptyBlock()
+                (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
               }
 
               {
-                !handleRequestLoading && (
+                !handleRequestLoading && !isFormInvalid && (
                   <div className={'__item-footer-time'}>
                     Quote reset in: {quoteCountdownTime}s
                   </div>
@@ -953,7 +965,7 @@ const Component = () => {
               }
 
               {
-                !!currentQuote && !handleRequestLoading && (
+                !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                   <MetaInfo
                     className={CN('__quote-info-block')}
                     hasBackgroundWrapper

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import {AmountData, ChainType, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 
@@ -112,6 +112,11 @@ export interface ChainflipTxData extends SwapBaseTxData {
 }
 
 // parameters & responses
+export interface ChainflipPreValidationMetadata {
+  minSwap: AmountData;
+  maxSwap?: AmountData;
+}
+
 export interface QuoteAskResponse {
   quote?: SwapQuote;
   error?: SwapError;

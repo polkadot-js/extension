@@ -3,8 +3,10 @@
 
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { ChainflipPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
@@ -52,4 +54,38 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   const bnRate = bnFromAmount.div(bnToAmount);
 
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
+}
+
+export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, fromAssetBalance: AmountData): SwapError { // todo: support more providers
+  const parsedFromAssetBalance = (new BigN(fromAssetBalance.value)).div(10 ** fromAssetBalance.decimals);
+
+  switch (error) {
+    case SwapErrorType.NOT_MEET_MIN_SWAP: {
+      const parsedMinSwapValue = (new BigN(metadata.minSwap.value)).div(10 ** metadata.minSwap.decimals);
+      const message = `You need to swap at least ${parsedMinSwapValue.toString()} ${metadata.minSwap.symbol}`;
+
+      return new SwapError(error, message);
+    }
+
+    case SwapErrorType.EXCEED_MAX_SWAP: {
+      if (metadata.maxSwap) {
+        const parsedMaxSwapValue = (new BigN(metadata.maxSwap.value)).div(10 ** parseInt(metadata.maxSwap.symbol));
+
+        return new SwapError(error, `You can only swap a maximum of ${parsedMaxSwapValue.toString()} ${metadata.maxSwap.symbol}`);
+      } else {
+        return new SwapError(error, 'Your requested amount has exceeded the maximum swap limit, please try with a smaller amount');
+      }
+    }
+
+    case SwapErrorType.ASSET_NOT_SUPPORTED:
+      return new SwapError(error, 'This swap pair is not supported');
+    case SwapErrorType.SWAP_EXCEED_BALANCE:
+      return new SwapError(error, `You cannot swap more than your free balance of ${parsedFromAssetBalance.toString()} ${fromAssetBalance.symbol}`);
+    case SwapErrorType.UNKNOWN:
+      return new SwapError(error, 'Unknown error. Please contact SubWallet support for help');
+    case SwapErrorType.ERROR_FETCHING_QUOTE:
+      return new SwapError(error, 'Cannot find a suitable quote for your request. Please try again later or reloading the page');
+    default:
+      return new SwapError(error);
+  }
 }

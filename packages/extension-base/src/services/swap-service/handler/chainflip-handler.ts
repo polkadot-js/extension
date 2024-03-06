@@ -12,17 +12,12 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
-import { ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-
-interface ChainflipPreValidationMetadata {
-  minSwap: string;
-  maxSwap?: string;
-}
 
 enum ChainflipFeeType {
   INGRESS = 'INGRESS',
@@ -98,8 +93,16 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         return {
           error: SwapErrorType.NOT_MEET_MIN_SWAP,
           metadata: {
-            minSwap: srcAssetData.minimumSwapAmount,
-            maxSwap: srcAssetData.maximumSwapAmount
+            minSwap: {
+              value: srcAssetData.minimumSwapAmount,
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            maxSwap: {
+              value: srcAssetData.maximumSwapAmount,
+              decimals: toAsset.decimals,
+              symbol: toAsset.symbol
+            }
           } as ChainflipPreValidationMetadata
         };
       }
@@ -111,8 +114,16 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
           return {
             error: SwapErrorType.EXCEED_MAX_SWAP,
             metadata: {
-              minSwap: srcAssetData.minimumSwapAmount,
-              maxSwap: srcAssetData.maximumSwapAmount
+              minSwap: {
+                value: srcAssetData.minimumSwapAmount,
+                decimals: fromAsset.decimals,
+                symbol: fromAsset.symbol
+              },
+              maxSwap: {
+                value: srcAssetData.maximumSwapAmount,
+                decimals: toAsset.decimals,
+                symbol: toAsset.symbol
+              }
             } as ChainflipPreValidationMetadata
           };
         }
@@ -120,8 +131,16 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       return {
         metadata: {
-          minSwap: srcAssetData.minimumSwapAmount,
-          maxSwap: srcAssetData.maximumSwapAmount
+          minSwap: {
+            value: srcAssetData.minimumSwapAmount,
+            decimals: fromAsset.decimals,
+            symbol: fromAsset.symbol
+          },
+          maxSwap: {
+            value: srcAssetData.maximumSwapAmount,
+            decimals: toAsset.decimals,
+            symbol: toAsset.symbol
+          }
         } as ChainflipPreValidationMetadata
       };
     } catch (e) {
@@ -148,11 +167,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
 
     const earlyValidation = await this.validateSwapRequest(request);
+    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
-      // todo: switch error to return corresponding message
-      return new SwapError(earlyValidation.error);
+      return getSwapEarlyValidationError(earlyValidation.error, metadata, fromAssetBalance);
     }
 
     const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[fromAsset.originChain];
@@ -209,7 +228,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         rate: calculateSwapRate(request.fromAmount, quoteResponse.quote.egressAmount.toString(), fromAsset, toAsset),
         provider: this.providerInfo,
         aliveUntil: +Date.now() + SWAP_QUOTE_TIMEOUT_MAP[this.slug],
-        minSwap: metadata.minSwap,
+        minSwap: metadata.minSwap.value,
         maxSwap: metadata.maxSwap,
         feeInfo: {
           feeComponent: feeComponent,

@@ -56,7 +56,7 @@ const getPoolInfoByChainAndType = (poolInfoMap: Record<string, YieldPoolInfo>, c
   return Object.values(poolInfoMap).find((item) => item.chain === chain && item.type === type);
 };
 
-const getFilteredAccount = (chainInfo: _ChainInfo) => (account: AccountJson) => {
+export const getFilteredAccount = (chainInfo: _ChainInfo) => (account: AccountJson) => {
   if (isAccountAll(account.address)) {
     return false;
   }

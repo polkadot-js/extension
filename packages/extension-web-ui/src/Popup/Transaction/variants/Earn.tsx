@@ -29,6 +29,7 @@ import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { Divider } from 'semantic-ui-react';
 import styled, { useTheme } from 'styled-components';
 
@@ -65,6 +66,7 @@ const Component = () => {
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
+  const navigate = useNavigate();
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
@@ -73,6 +75,7 @@ const Component = () => {
   const { redirectFromPreview, slug, target } = defaultData;
   const defaultTarget = useRef<string>(target);
   const autoCheckValidatorGetFromPreview = useRef<boolean>(true);
+  const autoCheckCompoundRef = useRef<boolean>(true);
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
@@ -113,6 +116,7 @@ const Component = () => {
   const [targetLoading, setTargetLoading] = useState(true);
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [screenLoading, setScreenLoading] = useState(true);
+  const [checkValidAccountLoading, setCheckValidAccountLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
   const [, setCanMint] = useState(false);
@@ -684,45 +688,90 @@ const Component = () => {
   }, [chainAsset, poolInfo]);
 
   useEffect(() => {
-    if (redirectFromPreview && autoCheckValidatorGetFromPreview.current && !targetLoading) {
-      autoCheckValidatorGetFromPreview.current = false;
-      fetchPoolTarget({ slug }).then((rs) => {
-        const isValidatorSupported = rs.targets.some((item) => {
-          if (poolType === YieldPoolType.NOMINATION_POOL) {
-            return (item as NominationPoolInfo).id.toString() === defaultTarget.current;
-          } else if (poolType === YieldPoolType.NATIVE_STAKING) {
-            const _item = item as ValidatorInfo;
-            const key = getValidatorKey(_item.address, _item.identity);
+    if (redirectFromPreview && !accountSelectorList.length && checkValidAccountLoading) {
+      navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfoMap[poolChain]?.name || '' } });
+      setCheckValidAccountLoading(false);
+    } else {
+      setCheckValidAccountLoading(false);
+    }
+  }, [accountSelectorList.length, chainInfoMap, checkValidAccountLoading, navigate, poolChain, redirectFromPreview]);
 
-            return key === defaultTarget.current;
-          } else {
-            return false;
+  const checkUnrecommendedValidator = useCallback((onValid?: () => void) => {
+    fetchPoolTarget({ slug }).then((rs) => {
+      const isValidatorSupported = rs.targets.some((item) => {
+        if (poolType === YieldPoolType.NOMINATION_POOL) {
+          return (item as NominationPoolInfo).id.toString() === defaultTarget.current;
+        } else if (poolType === YieldPoolType.NATIVE_STAKING) {
+          const _item = item as ValidatorInfo;
+          const key = getValidatorKey(_item.address, _item.identity);
+
+          return key === defaultTarget.current;
+        } else {
+          return false;
+        }
+      });
+
+      if (!isValidatorSupported && defaultTarget.current) {
+        openAlert({
+          title: t('Unrecommended validator'),
+          type: NotificationType.ERROR,
+          content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
+          cancelButton: {
+            text: t('Dismiss'),
+            onClick: closeAlert,
+            icon: XCircle
+          },
+          okButton: {
+            text: t('Select validators'),
+            onClick: () => {
+              closeAlert();
+              activeModal('target');
+            },
+            icon: CheckCircle
           }
         });
+      } else {
+        onValid && onValid();
+      }
+    }).catch((e) => console.error(e));
+  }, [activeModal, closeAlert, openAlert, poolType, slug, t]);
 
-        if (!isValidatorSupported && defaultTarget.current) {
-          openAlert({
-            title: t('Unrecommended validator'),
-            type: NotificationType.ERROR,
-            content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
-            cancelButton: {
-              text: 'Dismiss',
-              onClick: closeAlert,
-              icon: XCircle
-            },
-            okButton: {
-              text: t('Select validators'),
-              onClick: () => {
-                closeAlert();
-                activeModal('target');
-              },
-              icon: CheckCircle
-            }
-          });
-        }
-      }).catch((e) => console.error(e));
+  useEffect(() => {
+    if (redirectFromPreview && !targetLoading) {
+      if (compound && autoCheckCompoundRef.current) {
+        autoCheckCompoundRef.current = false;
+
+        const onPressContinue = () => {
+          if (poolType === YieldPoolType.NOMINATION_POOL) {
+            goBack();
+          } else if (poolType === YieldPoolType.NATIVE_STAKING) {
+            checkUnrecommendedValidator(() => form.setFieldValue('target', defaultTarget.current));
+          }
+
+          closeAlert();
+        };
+
+        openAlert({
+          title: 'Do you want to continue',
+          content: 'lorem30',
+          type: NotificationType.INFO,
+          cancelButton: {
+            text: t('Dismiss'),
+            onClick: closeAlert,
+            icon: XCircle
+          },
+          okButton: {
+            text: t('Confirm'),
+            onClick: onPressContinue,
+            icon: CheckCircle
+          }
+        });
+      } else if (autoCheckValidatorGetFromPreview.current) {
+        autoCheckValidatorGetFromPreview.current = false;
+        checkUnrecommendedValidator();
+      }
     }
-  }, [activeModal, closeAlert, openAlert, poolType, redirectFromPreview, slug, t, targetLoading]);
+  }, [checkUnrecommendedValidator, closeAlert, compound, form, goBack, openAlert, poolType, redirectFromPreview, t, targetLoading]);
 
   useEffect(() => {
     if (poolChain) {
@@ -981,13 +1030,13 @@ const Component = () => {
   return (
     <>
       {
-        screenLoading && (
+        (screenLoading || checkValidAccountLoading) && (
           <LoadingScreen />
         )
       }
 
       {
-        !screenLoading && (
+        (!screenLoading && !checkValidAccountLoading) && (
           <>
             <div className={'__transaction-block'}>
               <TransactionContent>
@@ -1074,7 +1123,7 @@ const Component = () => {
                     >
                       <EarningPoolSelector
                         chain={poolChain}
-                        defaultValue={defaultData.target === 'not-support' ? '' : defaultData.target}
+                        defaultValue={defaultData.target === 'not-support' || !!compound ? '' : defaultData.target}
                         disabled={submitLoading}
                         from={fromValue}
                         label={t('Select pool')}
@@ -1091,7 +1140,7 @@ const Component = () => {
                     >
                       <EarningValidatorSelector
                         chain={chainValue}
-                        defaultValue={defaultData.target === 'not-support' ? '' : defaultData.target}
+                        defaultValue={(defaultData.target === 'not-support' || !!compound) ? undefined : defaultData.target}
                         disabled={submitLoading}
                         from={fromValue}
                         loading={targetLoading}

@@ -61,7 +61,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
-      if (bnFromAssetBalance.gte(bnAmount)) {
+      if (bnAmount.gte(bnFromAssetBalance)) {
         return {
           error: SwapErrorType.SWAP_EXCEED_BALANCE
         };

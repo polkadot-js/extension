@@ -90,7 +90,7 @@ type Props = ThemeProps;
 
 interface FeeItem {
   value: BigN,
-  slug: string,
+  type: SwapFeeType,
   label: string,
   prefix?: string,
   suffix?: string
@@ -329,19 +329,15 @@ const Component = () => {
   const feeItems = useMemo(() => {
     const result: FeeItem[] = [];
     const feeTypeMap: Record<SwapFeeType, FeeItem> = {
-      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
-      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', suffix: '', slug: '' },
-      WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), prefix: '$', suffix: '', slug: '' }
+      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', type: SwapFeeType.NETWORK_FEE },
+      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', type: SwapFeeType.PLATFORM_FEE},
+      WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), suffix: '%', type: SwapFeeType.WALLET_FEE}
     };
-
-    if (!currentQuote?.feeInfo?.feeComponent) { return []; }
 
     currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
       const { feeType } = feeItem;
-      const { label, prefix, suffix } = feeTypeMap[feeType];
-      const totalAmount = feeTypeMap[feeType].value.plus(getConvertedBalance(feeItem));
 
-      feeTypeMap[feeType] = { label, value: totalAmount, slug: feeType, prefix, suffix };
+      feeTypeMap[feeType].value = feeTypeMap[feeType].value.plus(getConvertedBalance(feeItem));
     });
 
     result.push(
@@ -996,10 +992,10 @@ const Component = () => {
                     {
                       isViewFeeDetails && (
                         <div className={'__quote-fee-details-block'}>
-                          {feeItems.map(({ label, prefix, slug, suffix, value }) => (
+                          {feeItems.map(({ label, prefix, type, suffix, value }) => (
                             <MetaInfo.Number
                               decimals={0}
-                              key={slug}
+                              key={type}
                               label={t(label)}
                               prefix={prefix}
                               suffix={suffix}

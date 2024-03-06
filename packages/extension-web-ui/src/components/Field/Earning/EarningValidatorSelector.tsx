@@ -77,6 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
+  const defaultValueRef = useRef({ _default: '_', selected: '_' });
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -292,11 +293,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
     const selected = defaultValue || (isSingleSelect ? '' : _default);
 
+    if (defaultValueRef.current._default === _default && defaultValueRef.current.selected === selected) {
+      return;
+    }
+
     onInitValidators(_default, selected);
     onChange && onChange({ target: { value: selected } });
 
+    defaultValueRef.current = { _default, selected };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators, isSingleSelect]);
+  }, [nominations, onInitValidators, isSingleSelect, defaultValue]);
 
   useEffect(() => {
     if (!isActive) {

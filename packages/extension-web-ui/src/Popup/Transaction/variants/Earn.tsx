@@ -3,10 +3,12 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
+import { EarningStatus, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
 import { addLazy } from '@subwallet/extension-base/utils';
 import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningValidatorSelector, HiddenInput, InfoIcon, LoadingScreen, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earning';
@@ -40,6 +42,7 @@ import { getJoinYieldParams } from '../helper';
 import { EarnOutlet, FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '../parts';
 
 type Props = ThemeProps;
+type ComponentProps = { className?: string; }
 
 const hideFields: Array<keyof EarnParams> = ['slug', 'chain', 'asset'];
 const validateFields: Array<keyof EarnParams> = ['from'];
@@ -59,7 +62,7 @@ const earningTypeLabelMap = {
   [YieldPoolType.SINGLE_FARMING]: 'single farming'
 };
 
-const Component = () => {
+const Component = ({ className }: ComponentProps) => {
   const { t } = useTranslation();
   const notify = useNotification();
   const { activeModal } = useContext(ModalContext);
@@ -106,6 +109,7 @@ const Component = () => {
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
   const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
+  const [useParamValidator, setUseParamValidator] = useState<boolean>(redirectFromPreview);
 
   const poolInfo = poolInfoMap[slug] as YieldPoolInfo | undefined;
   const poolType = poolInfo?.type || '';
@@ -522,6 +526,38 @@ const Component = () => {
       }
     };
 
+    const maxCount = poolInfo?.statistic?.maxCandidatePerFarmer ?? 1;
+    const userSelectedPoolCount = poolTargetValue.split(',').length ?? 1;
+    const label = getValidatorLabel(chainValue);
+
+    if (userSelectedPoolCount < maxCount && label === 'Validator') {
+      openAlert({
+        title: t('Pay attention!'),
+        content: t('You are recommended to choose {{maxCount}} validators to optimize your earnings. Do you wish to continue with {{userSelectedPoolCount}} validator{{x}}?', { replace: { maxCount, userSelectedPoolCount, x: userSelectedPoolCount === 1 ? '' : 's' } }),
+        okButton: {
+          text: t('Continue'),
+          onClick: () => {
+            submitData(currentStep)
+              .catch(onError)
+              .finally(() => {
+                setSubmitLoading(false);
+                closeAlert();
+              });
+          }
+        },
+        cancelButton: {
+          text: t('Go back'),
+          onClick: () => {
+            setSubmitLoading(false);
+            closeAlert();
+          }
+        },
+        closable: false
+      });
+
+      return;
+    }
+
     setTimeout(() => {
       submitData(currentStep)
         .catch(onError)
@@ -529,7 +565,7 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps]);
+  }, [chainValue, closeAlert, currentStep, onError, onSuccess, openAlert, poolInfo, poolTargetValue, poolTargets, processState.feeStructure, processState.steps, t]);
 
   const renderMetaInfo = useCallback(() => {
     if (!poolInfo || !inputAsset) {
@@ -736,42 +772,104 @@ const Component = () => {
     }).catch((e) => console.error(e));
   }, [activeModal, closeAlert, openAlert, poolType, slug, t]);
 
-  useEffect(() => {
-    if (redirectFromPreview && !targetLoading) {
-      if (compound && autoCheckCompoundRef.current) {
-        autoCheckCompoundRef.current = false;
-
-        const onPressContinue = () => {
-          if (poolType === YieldPoolType.NOMINATION_POOL) {
-            goBack();
-          } else if (poolType === YieldPoolType.NATIVE_STAKING) {
-            checkUnrecommendedValidator(() => form.setFieldValue('target', defaultTarget.current));
-          }
-
-          closeAlert();
-        };
-
-        openAlert({
-          title: 'Do you want to continue',
-          content: 'lorem30',
-          type: NotificationType.INFO,
-          cancelButton: {
-            text: t('Dismiss'),
-            onClick: closeAlert,
-            icon: XCircle
-          },
-          okButton: {
-            text: t('Confirm'),
-            onClick: onPressContinue,
-            icon: CheckCircle
-          }
-        });
-      } else if (autoCheckValidatorGetFromPreview.current) {
-        autoCheckValidatorGetFromPreview.current = false;
-        checkUnrecommendedValidator();
+  const isUnstakeAll = useMemo(() => {
+    if (compound) {
+      if (compound.nominations && compound.nominations.length) {
+        return compound.nominations.some((item) => item.activeStake === '0' && item.status === EarningStatus.NOT_EARNING);
+      } else {
+        return true;
       }
     }
-  }, [checkUnrecommendedValidator, closeAlert, compound, form, goBack, openAlert, poolType, redirectFromPreview, t, targetLoading]);
+
+    return false;
+  }, [compound]);
+
+  useEffect(() => {
+    if (redirectFromPreview && !targetLoading) {
+      if (compound) {
+        if (autoCheckCompoundRef.current) {
+          autoCheckCompoundRef.current = false;
+
+          if (isUnstakeAll) {
+            if (poolType === YieldPoolType.NOMINATION_POOL) {
+              openAlert({
+                title: t('Pay attention'),
+                content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
+                type: NotificationType.WARNING,
+                okButton: {
+                  text: t('I understand'),
+                  onClick: closeAlert,
+                  icon: CheckCircle
+                }
+              });
+
+              return;
+            } else if (poolType === YieldPoolType.NATIVE_STAKING) {
+              if (_STAKING_CHAIN_GROUP.para.includes(chainValue)) {
+                openAlert({
+                  title: t('Pay attention'),
+                  content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
+                  type: NotificationType.WARNING,
+                  okButton: {
+                    text: t('I understand'),
+                    onClick: closeAlert,
+                    icon: CheckCircle
+                  }
+                });
+
+                return;
+              } else {
+                return;
+              }
+            }
+          }
+
+          const content = poolType === YieldPoolType.NATIVE_STAKING
+            ? t('This account is currently nominating {{number}} validators. You can change validators or change your account on the Account tab', { number: compound.nominations.length })
+            : poolType === YieldPoolType.NOMINATION_POOL
+              ? t('This account is currently a member of a nomination pool. You can continue using nomination pool, explore other Earning options or change your account on the Account tab', { x: compound?.nominations[0]?.validatorIdentity || compound?.nominations[0]?.validatorAddress || '' })
+              : '';
+
+          const onPressContinue = () => {
+            if (poolType === YieldPoolType.NATIVE_STAKING) {
+              checkUnrecommendedValidator(() => form.setFieldValue('target', defaultTarget.current));
+            }
+
+            closeAlert();
+          };
+
+          const onPressCancel = () => {
+            if (poolType === YieldPoolType.NOMINATION_POOL) {
+              goBack();
+            }
+
+            setUseParamValidator(false);
+            closeAlert();
+          };
+
+          openAlert({
+            title: t('Pay attention'),
+            content: content,
+            className: CN(className, 'earning-alert-modal'),
+            type: NotificationType.WARNING,
+            cancelButton: {
+              text: poolType === YieldPoolType.NATIVE_STAKING ? t('Keep current validators') : poolType === YieldPoolType.NOMINATION_POOL ? t('Explore Earning options') : '',
+              onClick: onPressCancel
+            },
+            okButton: {
+              text: poolType === YieldPoolType.NATIVE_STAKING ? t('Change validators') : poolType === YieldPoolType.NOMINATION_POOL ? t('Use nomination pool') : '',
+              onClick: onPressContinue
+            }
+          });
+        }
+      } else {
+        if (autoCheckValidatorGetFromPreview.current) {
+          autoCheckValidatorGetFromPreview.current = false;
+          checkUnrecommendedValidator();
+        }
+      }
+    }
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, redirectFromPreview, t, targetLoading, chainValue]);
 
   useEffect(() => {
     if (poolChain) {
@@ -1027,6 +1125,18 @@ const Component = () => {
     }
   }, [amountInputRef, redirectFromPreview]);
 
+  const validatorDefaultValue = (() => {
+    if (useParamValidator) {
+      return defaultTarget.current;
+    } else {
+      if (defaultData.target === 'not-support' || !!compound) {
+        return undefined;
+      } else {
+        return defaultTarget.current;
+      }
+    }
+  })();
+
   return (
     <>
       {
@@ -1140,7 +1250,7 @@ const Component = () => {
                     >
                       <EarningValidatorSelector
                         chain={chainValue}
-                        defaultValue={(defaultData.target === 'not-support' || !!compound) ? undefined : defaultData.target}
+                        defaultValue={validatorDefaultValue}
                         disabled={submitLoading}
                         from={fromValue}
                         loading={targetLoading}
@@ -1254,7 +1364,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
       path={'/transaction/earn'}
       stores={['price', 'chainStore', 'assetRegistry', 'earning']}
     >
-      <Component />
+      <Component className={className} />
     </EarnOutlet>
   );
 };
@@ -1268,6 +1378,28 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     marginLeft: 'auto',
     marginRight: 'auto',
     gap: token.size,
+
+    '&.earning-alert-modal': {
+      alignItems: 'center',
+
+      '.ant-sw-modal-body': {
+        paddingBottom: token.padding
+      },
+
+      '.ant-sw-modal-footer': {
+        flexWrap: 'wrap',
+        gap: token.paddingSM
+      },
+
+      '.ant-btn.ant-btn.ant-btn': {
+        marginInlineStart: 0,
+        order: 2
+      },
+
+      '.ant-btn.ant-btn.ant-btn:last-child': {
+        order: 1
+      }
+    },
 
     '.__process-item-wrapper': {
       paddingBottom: token.paddingSM,

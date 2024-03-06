@@ -2,16 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { MenuItem, MenuItemType } from '@subwallet/extension-web-ui/components/Layout/parts/SideMenu/MenuItem';
-import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
-import { CONFIRM_SWAP_GENERAL_TERM, CONTACT_US, DEFAULT_SWAP_PARAMS, FAQS_URL, SWAP_TERM_AND_SERVICE_MODAL, SWAP_TRANSACTION, TERMS_OF_SERVICE_URL } from '@subwallet/extension-web-ui/constants';
+import { CONTACT_US, DEFAULT_SWAP_PARAMS, FAQS_URL, SWAP_TRANSACTION, TERMS_OF_SERVICE_URL } from '@subwallet/extension-web-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import usePreloadView from '@subwallet/extension-web-ui/hooks/router/usePreloadView';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, Image, ModalContext } from '@subwallet/react-ui';
+import { Button, Icon, Image } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleLeft, ArrowCircleRight, ArrowsLeftRight, ArrowSquareUpRight, Clock, Gear, Globe, Info, MessengerLogo, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -27,13 +26,10 @@ function Component ({ className,
   setCollapsed }: Props): React.ReactElement<Props> {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { activeModal } = useContext(ModalContext);
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const { t } = useTranslation();
   const currentAccount = useSelector((root) => root.accountState.currentAccount);
   const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
-  const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_SWAP_GENERAL_TERM, 'nonConfirmed');
-
   const transactionFromValue = useMemo(() => {
     return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
   }, [currentAccount?.address]);
@@ -131,10 +127,6 @@ function Component ({ className,
     value: string
   ) => {
     if (value === swapPath) {
-      if (isConfirmedTermGeneral.includes('nonConfirmed')) {
-        activeModal(SWAP_TERM_AND_SERVICE_MODAL);
-      }
-
       setSwapStorage({
         ...DEFAULT_SWAP_PARAMS,
         from: transactionFromValue
@@ -142,7 +134,7 @@ function Component ({ className,
     }
 
     navigate(`${value}`);
-  }, [activeModal, isConfirmedTermGeneral, navigate, setSwapStorage, transactionFromValue]);
+  }, [navigate, setSwapStorage, transactionFromValue]);
 
   const goHome = useCallback(() => {
     navigate('/home');
@@ -198,10 +190,6 @@ function Component ({ className,
       return prev;
     });
   }, [getSelectedKeys, pathname]);
-
-  const onAfterConfirmTermModal = useCallback(() => {
-    setIsConfirmedTermGeneral('confirmed');
-  }, [setIsConfirmedTermGeneral]);
 
   return (
     <div
@@ -272,7 +260,6 @@ function Component ({ className,
           }
         </div>
       </div>
-      <TeamsOfServiceModal onOk={onAfterConfirmTermModal} />
     </div>
   );
 }

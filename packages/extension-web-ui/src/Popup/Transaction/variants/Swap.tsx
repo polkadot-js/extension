@@ -25,7 +25,7 @@ import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalConte
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, PlusCircle, XCircle } from 'phosphor-react';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -69,6 +69,9 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
   return result;
 }
 
+// todo: change to to when it is ready
+const supportSlippageSelection = false;
+
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -92,7 +95,7 @@ const Component = () => {
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
-  const [currentSlippage, setCurrentSlippage] = useState<number>(0.02);
+  const [currentSlippage, setCurrentSlippage] = useState<number>(0);
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
@@ -102,7 +105,7 @@ const Component = () => {
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [handleRequestLoading, setHandleRequestLoading] = useState(false);
+  const [handleRequestLoading, setHandleRequestLoading] = useState(true);
 
   // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
@@ -201,7 +204,9 @@ const Component = () => {
   }, [form]);
 
   const onOpenSlippageModal = useCallback(() => {
-    activeModal(SWAP_SLIPPAGE_MODAL);
+    if (supportSlippageSelection) {
+      activeModal(SWAP_SLIPPAGE_MODAL);
+    }
   }, [activeModal]);
 
   const openAllQuotesModal = useCallback(() => {
@@ -608,12 +613,17 @@ const Component = () => {
           }).catch((e) => {
             console.log('handleSwapRequest error', e);
           }).finally(() => {
-            setHandleRequestLoading(false);
-            setIsFormInvalid(false);
+            if (sync) {
+              setHandleRequestLoading(false);
+              setIsFormInvalid(false);
+            }
           });
         }).catch((e) => {
           console.log('Error when validating', e);
-          setIsFormInvalid(true);
+
+          if (sync) {
+            setIsFormInvalid(true);
+          }
         });
       }, 300);
     }
@@ -649,24 +659,32 @@ const Component = () => {
 
   useEffect(() => {
     let timer: NodeJS.Timer;
-    let isSync = true;
+    let sync = true;
 
     const updateQuote = () => {
       if (currentQuoteRequest) {
+        if (sync) {
+          setHandleRequestLoading(true);
+        }
+
         getLatestSwapQuote(currentQuoteRequest).then((rs) => {
-          if (isSync) {
+          if (sync) {
             setCurrentQuote(rs.optimalQuote);
             setQuoteAliveUntil(rs.aliveUntil);
           }
         }).catch((e) => {
           console.log('Error when getLatestSwapQuote', e);
+        }).finally(() => {
+          if (sync) {
+            setHandleRequestLoading(false);
+          }
         });
       }
     };
 
     if (quoteAliveUntil) {
       timer = setInterval(() => {
-        if ((quoteAliveUntil - Date.now()) < 0) {
+        if (quoteAliveUntil < Date.now()) {
           updateQuote();
           clearInterval(timer);
         }
@@ -674,7 +692,7 @@ const Component = () => {
     }
 
     return () => {
-      isSync = false;
+      sync = false;
       clearInterval(timer);
     };
   }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
@@ -856,15 +874,20 @@ const Component = () => {
               >
                 <span>Slippage:</span>
               &nbsp;<span>{currentSlippage * 100}%</span>
-                <div
-                  className={'__slippage-editor-button'}
-                >
-                  <Icon
-                    className={'__slippage-editor-button-icon'}
-                    phosphorIcon={PencilSimpleLine}
-                    size='sm'
-                  />
-                </div>
+
+                {
+                  supportSlippageSelection && (
+                    <div
+                      className={'__slippage-editor-button'}
+                    >
+                      <Icon
+                        className={'__slippage-editor-button-icon'}
+                        phosphorIcon={PencilSimpleLine}
+                        size='sm'
+                      />
+                    </div>
+                  )
+                }
               </div>
 
             </div>
@@ -873,13 +896,7 @@ const Component = () => {
             <Button
               block={true}
               className={'__swap-submit-button'}
-              disabled={submitLoading}
-              icon={(
-                <Icon
-                  phosphorIcon={PlusCircle}
-                  weight={'fill'}
-                />
-              )}
+              disabled={submitLoading || handleRequestLoading}
               loading={submitLoading}
               onClick={form.submit}
             >
@@ -1169,7 +1186,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       marginBottom: 24
     },
     '.__right-action': {
-      cursor: 'pointer',
+      // cursor: 'pointer',
       alignItems: 'center',
       display: 'flex'
     },

@@ -43,8 +43,8 @@ interface InflationInfo {
   max: string
 }
 
-function calculateMantaNominatorReturn (decimal: number, commission: number, totalActiveCollators: number, bnAnnualInflation: BigN, blocksPreviousRound: number, bnCollatorExpectedBlocksPerRound: BigN, bnCollatorTotalStaked: BigN) {
-  const MIN_DELEGATION = new BigN(MANTA_MIN_DELEGATION);
+function calculateMantaNominatorReturn (decimal: number, commission: number, totalActiveCollators: number, bnAnnualInflation: BigN, blocksPreviousRound: number, bnCollatorExpectedBlocksPerRound: BigN, bnCollatorTotalStaked: BigN, isCountCommission: boolean) {
+  const MIN_DELEGATION = new BigN(MANTA_MIN_DELEGATION as number);
 
   const factor = new BigN(10).pow(decimal);
   const annualInflation = bnAnnualInflation.dividedBy(factor);
@@ -56,7 +56,11 @@ function calculateMantaNominatorReturn (decimal: number, commission: number, tot
 
   const marginalReward = annualRewardsPerCollator.multipliedBy(MIN_DELEGATION).dividedBy((collatorTotalStaked.plus(MIN_DELEGATION)));
 
-  const bnApy = new BigN(100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+  let bnApy = new BigN(100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+
+  if (isCountCommission) {
+    bnApy = new BigN((1 - commission) * 100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+  }
 
   return bnApy.toNumber();
 }
@@ -345,9 +349,8 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const allCollators: ValidatorInfo[] = [];
 
     if (_STAKING_CHAIN_GROUP.manta.includes(this.chain)) {
-      // @ts-ignore
-      const DECIMAL = this.chainInfo.substrateInfo.decimals;
-      const POINTS_PER_BLOCK = MANTA_VALIDATOR_POINTS_PER_BLOCK; // producing 1 block will get 20 points for validator
+      const DECIMAL = this.chainInfo.substrateInfo?.decimals as number;
+      const POINTS_PER_BLOCK = MANTA_VALIDATOR_POINTS_PER_BLOCK as number; // producing 1 block will get 20 points for validator
 
       const [_allCollators, _collatorCommission, _allCollatorsPool, _selectedCollators, _round, _totalIssuance, _inflationConfig] = await Promise.all([
         apiProps.api.query.parachainStaking.candidateInfo.entries(),
@@ -414,7 +417,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           const collatorPoints = _collatorPoints.toPrimitive() as number;
           const blocksPreviousRound = collatorPoints / POINTS_PER_BLOCK;
 
-          collator.expectedReturn = calculateMantaNominatorReturn(DECIMAL, collatorCommissionPercent, totalActiveCollators, bnAnnualInflation, blocksPreviousRound, bnCollatorExpectedBlocksPerRound, new BigN(collator.totalStake));
+          collator.expectedReturn = calculateMantaNominatorReturn(DECIMAL, collatorCommissionPercent, totalActiveCollators, bnAnnualInflation, blocksPreviousRound, bnCollatorExpectedBlocksPerRound, new BigN(collator.totalStake), false);
         }
       }));
 

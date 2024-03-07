@@ -43,12 +43,12 @@ interface InflationInfo {
   max: string
 }
 
-function calculateMantaNominatorReturn (decimal: number, commission: number, totalActiveCollators: number, bnAnnualInflation: BigN, blocksPreviousRound: number, bnCollatorExpectedBlocksPerRound: BigN, bnCollatorTotalStaked: BN) {
+function calculateMantaNominatorReturn (decimal: number, commission: number, totalActiveCollators: number, bnAnnualInflation: BigN, blocksPreviousRound: number, bnCollatorExpectedBlocksPerRound: BigN, bnCollatorTotalStaked: BigN) {
   const MIN_DELEGATION = new BigN(MANTA_MIN_DELEGATION);
 
   const factor = new BigN(10).pow(decimal);
   const annualInflation = bnAnnualInflation.dividedBy(factor);
-  const collatorTotalStaked = new BigN(bnCollatorTotalStaked.toString()).dividedBy(factor);
+  const collatorTotalStaked = bnCollatorTotalStaked.dividedBy(factor);
 
   const annualRewardsPerCollator = annualInflation.dividedBy(totalActiveCollators);
 
@@ -391,13 +391,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           const bnOtherStake = bnTotalStake.sub(bnOwnStake);
           const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
 
-          // noted: number of blocks = total points / points per block
-          const _collatorPoints = await apiProps.api.query.parachainStaking.awardedPts(parseInt(round.current) - 1, collatorAddress);
-          const collatorPoints = _collatorPoints.toPrimitive() as number;
-          const blocksPreviousRound = collatorPoints / POINTS_PER_BLOCK;
-
-          const apy = calculateMantaNominatorReturn(DECIMAL, collatorCommissionPercent, totalActiveCollators, bnAnnualInflation, blocksPreviousRound, bnCollatorExpectedBlocksPerRound, bnTotalStake);
-
           allCollators.push({
             commission: 0,
             address: collatorAddress,
@@ -409,11 +402,21 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
             isVerified: false,
             minBond: bnMinBond.toString(),
             chain: this.chain,
-            expectedReturn: apy,
             isCrowded: parseInt(maxDelegationPerCollator) > 0
           });
         }
       }
+
+      await Promise.all(allCollators.map(async (collator) => {
+        if (allCollatorsPool.includes(collator.address)) {
+          // noted: number of blocks = total points / points per block
+          const _collatorPoints = await apiProps.api.query.parachainStaking.awardedPts(parseInt(round.current) - 1, collator.address);
+          const collatorPoints = _collatorPoints.toPrimitive() as number;
+          const blocksPreviousRound = collatorPoints / POINTS_PER_BLOCK;
+
+          collator.expectedReturn = calculateMantaNominatorReturn(DECIMAL, collatorCommissionPercent, totalActiveCollators, bnAnnualInflation, blocksPreviousRound, bnCollatorExpectedBlocksPerRound, new BigN(collator.totalStake));
+        }
+      }));
 
       const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 

@@ -6070,14 +6070,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.43-beta.1":
-  version: 0.2.43-beta.1
-  resolution: "@subwallet/chain-list@npm:0.2.43-beta.1"
+"@subwallet/chain-list@file:/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 0.2.43-beta.3
+  resolution: "@subwallet/chain-list@file:/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build#/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build::hash=4a909b&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: fdf97312ffbc4de548f24b4b21967e18c7532835d4b29259f88e5003ea0fc05170c7e9933bfd14f2d5420894520070938e926d8f543362030f78e352f1775aef
+  checksum: 37c9e7bb0860bd99df0b18c0b4baebc722d1b3cd99e8bd78c9d2f33a4b0ceaf0996d8d180e5592e3cc315f3ca273a46a19f8af22b2397c0e6df92e1310f1dc57
   languageName: node
   linkType: hard
 

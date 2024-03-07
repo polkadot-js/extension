@@ -7,6 +7,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { isAccountAll } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
@@ -38,7 +39,6 @@ import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
-import { isAccountAll } from '@subwallet/extension-base/utils';
 
 type Props = ThemeProps;
 
@@ -641,13 +641,13 @@ const Component = () => {
 
     if (quoteAliveUntil) {
       timer = setInterval(() => {
-        const _time = Math.floor((quoteAliveUntil - Date.now()) / 1000 + 0.5);
+        const dateNow = Date.now();
 
-        if (_time < 0) {
+        if (dateNow > quoteAliveUntil) {
           setQuoteCountdownTime(0);
           clearInterval(timer);
         } else {
-          setQuoteCountdownTime(_time);
+          setQuoteCountdownTime(Math.round((quoteAliveUntil - dateNow) / 1000));
         }
       }, 1000);
     } else {

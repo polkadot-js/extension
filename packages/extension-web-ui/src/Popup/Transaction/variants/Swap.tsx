@@ -3,6 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
@@ -37,6 +38,7 @@ import MetaInfo from '../../../components/MetaInfo/MetaInfo';
 import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
 import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
 import useNotification from '../../../hooks/common/useNotification';
+import { isAccountAll } from '@subwallet/extension-base/utils';
 
 type Props = ThemeProps;
 
@@ -745,6 +747,10 @@ const Component = () => {
     return setConfirmedTerm('swap-term-confirmed');
   }, [setConfirmedTerm]);
 
+  const accountSelectorFilter = useCallback((account: AccountJson) => {
+    return !account.isHardware && !isAccountAll(account.address);
+  }, []);
+
   return (
     <>
       <>
@@ -770,6 +776,7 @@ const Component = () => {
                 <AccountSelector
                   disabled={!isAllAccount}
                   label={t('Swap from account')}
+                  filter={accountSelectorFilter}
                 />
               </Form.Item>
 

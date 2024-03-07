@@ -22,7 +22,6 @@ import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProc
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -77,7 +76,7 @@ const supportSlippageSelection = false;
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { defaultData, onDone, persistData, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { defaultData, onDone, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
@@ -256,10 +255,8 @@ const Component = () => {
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
 
   const onFieldsChange: FormCallbacks<SwapParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
-    const values = convertFieldToObject<SwapParams>(allFields);
-
-    persistData(values);
-  }, [persistData]);
+    //
+  }, []);
 
   // todo: will optimize fee display logic later
   const getTotalConvertedBalance = useMemo(() => {
@@ -793,8 +790,8 @@ const Component = () => {
               >
                 <AccountSelector
                   disabled={!isAllAccount}
-                  label={t('Swap from account')}
                   filter={accountSelectorFilter}
+                  label={t('Swap from account')}
                 />
               </Form.Item>
 
@@ -1075,7 +1072,7 @@ const Component = () => {
               }
             </div>
           )
-        }`
+        }
       </>
 
       <ChooseFeeTokenModal

@@ -10,7 +10,7 @@ import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { Coin, DiceSix, GlobeHemisphereWest, MagicWand, PlusCircle, SelectionBackground, TwitterLogo, User } from 'phosphor-react';
+import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, Trophy, TwitterLogo, User } from 'phosphor-react';
 import { IconWeight } from 'phosphor-react/src/lib';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,6 +27,13 @@ enum TagType {
   POINTS='points',
   LUCKY_DRAW='lucky_draw',
   MANUAL_SELECTION='manual_selection'
+}
+
+enum MissionPoolsStatusTag {
+  UPCOMING='upcoming',
+  LIVE='live',
+  ARCHIVED='archived',
+  CLAIMABLE='claimable'
 }
 
 type TagInfo = {
@@ -99,6 +106,34 @@ function Component (props: Props): React.ReactElement<Props> {
         name: t('Manual selection'),
         slug: TagType.MANUAL_SELECTION,
         icon: SelectionBackground
+      },
+      [MissionPoolsStatusTag.UPCOMING]: {
+        theme: 'gray',
+        name: t('Upcoming'),
+        slug: MissionPoolsStatusTag.UPCOMING,
+        icon: MegaphoneSimple,
+        iconWeight: 'fill'
+      },
+      [MissionPoolsStatusTag.LIVE]: {
+        theme: 'green',
+        name: t('Live'),
+        slug: MissionPoolsStatusTag.LIVE,
+        icon: CheckCircle,
+        iconWeight: 'fill'
+      },
+      [MissionPoolsStatusTag.ARCHIVED]: {
+        theme: 'blue',
+        name: t('Archived'),
+        slug: MissionPoolsStatusTag.ARCHIVED,
+        icon: Cube,
+        iconWeight: 'fill'
+      },
+      [MissionPoolsStatusTag.CLAIMABLE]: {
+        theme: 'lime',
+        name: t('Claimable'),
+        slug: MissionPoolsStatusTag.CLAIMABLE,
+        icon: Trophy,
+        iconWeight: 'fill'
       }
     };
   }, [t]);
@@ -109,27 +144,53 @@ function Component (props: Props): React.ReactElement<Props> {
     }
 
     const tagSlug = data.tags[0];
-
-    const theme = tagMap[tagSlug]?.theme || 'gray';
+    const theme = tagMap[tagSlug]?.theme || 'gray'
     const name = tagMap[tagSlug]?.name || t(capitalize(tagSlug.replace('_', ' ')));
     const iconWeight = tagMap[tagSlug]?.iconWeight;
     const icon = tagMap[tagSlug]?.icon || MagicWand;
+    let missionTheme, missionName, missionIconWeight, missionIcon;
+    const missionStatus = data?.status;
+
+    if (missionStatus) {
+      missionTheme = tagMap[missionStatus]?.theme || 'gray';
+      missionName = tagMap[missionStatus]?.name;
+      missionIconWeight = tagMap[missionStatus]?.iconWeight;
+      missionIcon = tagMap[missionStatus]?.icon;
+    }
 
     return (
-      <Tag
-        className='__item-tag'
-        color={theme}
-      >
-        <Icon
-          className={'__item-tag-icon'}
-          customSize={'12px'}
-          phosphorIcon={icon}
-          weight={iconWeight}
-        />
-        {name}
-      </Tag>
+      <>
+        <Tag
+          className='__item-tag'
+          color={theme}
+        >
+          <Icon
+            className={'__item-tag-icon'}
+            customSize={'12px'}
+            phosphorIcon={icon}
+            weight={iconWeight}
+          />
+          {name}
+        </Tag>
+        {
+          missionStatus && (
+            <Tag
+              className='__item-tag'
+              color={missionTheme}
+            >
+              <Icon
+                className={'__item-tag-icon'}
+                customSize={'12px'}
+                phosphorIcon={missionIcon}
+                weight={missionIconWeight}
+              />
+              {missionName}
+            </Tag>
+          )
+        }
+      </>
     );
-  }, [data.tags, t, tagMap]);
+  }, [data.tags, data.status, t, tagMap]);
 
   if (compactMode) {
     return (
@@ -360,6 +421,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__item-tags': {
+      display: 'flex',
+      gap: 12,
       minHeight: 22,
       marginBottom: token.margin
     },

@@ -46,6 +46,7 @@ const Component = ({ className, onOk }: Props) => {
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean bibendum tempor orci.
           In feugiat gravida sodales. Suspendisse quis turpis facilisis, pellentesque enim sit amet, sollicitudin dui.
           Vestibulum condimentum lectus eget dolor euismod venenatis. Mauris facilisis tincidunt quam ac hendrerit.
+        {/* eslint-disable-next-line no-irregular-whitespace */}
           Praesent in lorem arcu. Donec egestas tempus felis eget ullamcorper. Read more</p>
       </div>
       <div className={'term-footer'}>

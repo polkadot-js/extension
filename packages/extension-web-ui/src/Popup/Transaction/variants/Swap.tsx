@@ -876,7 +876,7 @@ const Component = () => {
               className={'__slippage-info'}
             >
               <div
-                className={'__right-action'}
+                className={'__slippage-right-action'}
                 onClick={onOpenSlippageModal}
               >
                 <span>Slippage:</span>
@@ -916,7 +916,7 @@ const Component = () => {
           showQuoteAreRef.current && (
             <div className={'__transaction-swap-quote-info-area'}>
               <div className={'__item-quote-header'}>
-                <div className={'__item-left-part'}>
+                <div className={'__header-left-part'}>
                   <BackgroundIcon
                     backgroundColor='#004BFF'
                     className={'__quote-icon-info'}
@@ -926,7 +926,7 @@ const Component = () => {
                   />
                   <div className={'__text'}>Swap quote</div>
                 </div>
-                <div className={'__item-right-part'}>
+                <div className={'__header-right-part'}>
                   <Button
                     className={'__view-quote-button'}
                     disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
@@ -934,7 +934,7 @@ const Component = () => {
                     size='xs'
                     type='ghost'
                   >
-                    <span className={'__item-right-title'}>{t('View quote')}</span>
+                    <span>{t('View quote')}</span>
 
                     <Icon
                       phosphorIcon={CaretRight}
@@ -1000,7 +1000,7 @@ const Component = () => {
 
               {
                 !handleRequestLoading && !isFormInvalid && (
-                  <div className={'__item-footer-time'}>
+                  <div className={'__quote-reset-time'}>
                     Quote reset in: {quoteCountdownTime}s
                   </div>
                 )
@@ -1023,7 +1023,7 @@ const Component = () => {
                       prefix={'$'}
                       suffixNode={
                         <Icon
-                          className={'__caret-icon-button'}
+                          className={'__estimated-fee-button'}
                           customSize={'20px'}
                           phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
                         />
@@ -1049,10 +1049,10 @@ const Component = () => {
                     }
 
                     <div className={'__separator'}></div>
-                    <div className={'__item-fee-wrapper'}>
-                      <div className={'__item-fee-paid-label'}>Fee paid in</div>
+                    <div className={'__fee-paid-wrapper'}>
+                      <div className={'__fee-paid-label'}>Fee paid in</div>
                       <div
-                        className={'__item-fee-token'}
+                        className={'__fee-paid-token'}
                         onClick={openChooseFeeToken}
                       >
                         <Logo
@@ -1062,7 +1062,7 @@ const Component = () => {
                           size={24}
                           token={currentQuote.pair.from.toLowerCase()}
                         />
-                        <div className={'__token-fee-paid-item'}>{_getAssetSymbol(feeAssetInfo)}</div>
+                        <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
                         <Icon
                           className={'__edit-token'}
                           customSize={'20px'}
@@ -1075,7 +1075,7 @@ const Component = () => {
               }
             </div>
           )
-        }
+        }`
       </>
 
       <ChooseFeeTokenModal
@@ -1138,18 +1138,18 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     marginRight: 'auto',
     justifyContent: 'center',
     gap: token.size,
-    '.__item-fee-wrapper': {
+    '.__fee-paid-wrapper': {
       color: token.colorTextTertiary,
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
       cursor: 'pointer'
     },
-    '.__item-fee-token': {
+    '.__fee-paid-token': {
       display: 'flex',
       alignItems: 'center'
     },
-    '.__token-fee-paid-item': {
+    '.__fee-paid-token-symbol': {
       paddingLeft: 8,
       color: token.colorWhite
     },
@@ -1192,12 +1192,12 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorSuccess,
       marginBottom: 24
     },
-    '.__right-action': {
+    '.__slippage-right-action': {
       // cursor: 'pointer',
       alignItems: 'center',
       display: 'flex'
     },
-    '.__item-footer-time': {
+    '.__quote-reset-time': {
       color: token.colorWarningText,
       display: 'flex',
       justifyContent: 'flex-end',
@@ -1212,7 +1212,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__slippage-editor-button': {
       paddingLeft: token.paddingXXS
     },
-    '.__caret-icon-button': {
+    '.__estimated-fee-button': {
       paddingLeft: token.paddingXXS
     },
     '.__edit-token': {
@@ -1224,8 +1224,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
 
     // swap quote
-
-    '.__transaction-swap-quote-info-area': {},
     '.__quote-estimate-swap-value': {
       display: 'flex'
     },
@@ -1334,9 +1332,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       marginTop: 12,
       marginBottom: 12
     },
-    '.__error-message': {
-      color: token.colorError
-    },
 
     '.__item-quote-header': {
       display: 'flex',
@@ -1345,13 +1340,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       marginBottom: 4,
       marginTop: -7
     },
-    '.__item-left-part': {
+    '.__header-left-part': {
       display: 'flex',
       gap: 8,
       alignItems: 'center'
     },
 
-    '.__item-right-part': {
+    '.__header-right-part': {
       display: 'flex',
       alignItems: 'center'
     },
@@ -1378,9 +1373,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden',
       minWidth: 160,
       maxWidth: 182
-    },
-    '.__amount-wrapper': {
-      flex: 1
     },
     '.__min-receivale': {
       marginTop: 12

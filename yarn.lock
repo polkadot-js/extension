@@ -6070,14 +6070,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@file:/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build::locator=root-workspace-0b6124%40workspace%3A.":
+"@subwallet/chain-list@npm:0.2.43-beta.3":
   version: 0.2.43-beta.3
-  resolution: "@subwallet/chain-list@file:/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build#/Users/bluedot/tets/SubWallet-ChainList/packages/chain-list/build::hash=4a909b&locator=root-workspace-0b6124%40workspace%3A."
+  resolution: "@subwallet/chain-list@npm:0.2.43-beta.3"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: 37c9e7bb0860bd99df0b18c0b4baebc722d1b3cd99e8bd78c9d2f33a4b0ceaf0996d8d180e5592e3cc315f3ca273a46a19f8af22b2397c0e6df92e1310f1dc57
+  checksum: 2be75b8bd8ab283ca26cf30293959d809695facb2cb3170a80de881b752d299b8f73346729da7efa3e3a0303411bd1645c3c85a6b7b4fe6a59b131cab9fa2384
   languageName: node
   linkType: hard
 
@@ -6113,7 +6113,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.43-beta.1
+    "@subwallet/chain-list": 0.2.43-beta.3
     "@subwallet/extension-base": ^1.1.41-0
     "@subwallet/extension-chains": ^1.1.41-0
     "@subwallet/extension-dapp": ^1.1.41-0
@@ -6243,7 +6243,7 @@ __metadata:
     "@polkadot/util-crypto": 12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.43-beta.1
+    "@subwallet/chain-list": 0.2.43-beta.3
     "@subwallet/extension-base": ^1.1.41-0
     "@subwallet/extension-chains": ^1.1.41-0
     "@subwallet/extension-dapp": ^1.1.41-0
@@ -6376,7 +6376,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.2.43-beta.1
+    "@subwallet/chain-list": ^0.2.43-beta.3
     "@subwallet/extension-base": ^1.1.41-0
     "@subwallet/extension-chains": ^1.1.41-0
     "@subwallet/extension-dapp": ^1.1.41-0

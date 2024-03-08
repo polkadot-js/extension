@@ -374,17 +374,17 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
     result.push(YieldAction.STAKE);
 
-    const bnActiveStake = new BN(yieldPosition.activeStake);
+    const bnActiveStake = new BigNumber(yieldPosition.activeStake);
 
-    if (yieldPosition.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    if (yieldPosition.activeStake && bnActiveStake.gt('0')) {
       result.push(YieldAction.UNSTAKE);
 
       const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
       const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
-      const bnUnclaimedReward = new BN(unclaimedReward || '0');
+      const bnUnclaimedReward = new BigNumber(unclaimedReward || '0');
 
       if (
-        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt('0')) ||
         isAstarNetwork
       ) {
         result.push(YieldAction.CLAIM_REWARD);
@@ -402,9 +402,9 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
     result.push(YieldAction.START_EARNING);
 
-    const activeBalance = new BN(yieldPosition.activeStake || '0');
+    const activeBalance = new BigNumber(yieldPosition.activeStake);
 
-    if (activeBalance.gt(BN_ZERO)) {
+    if (activeBalance.gt('0')) {
       result.push(YieldAction.UNSTAKE);
     }
 

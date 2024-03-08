@@ -1223,7 +1223,8 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__transaction-block': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     },
 
     '.__alert-box': {
@@ -1255,8 +1256,17 @@ const Earn = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
 
     '&-web-base-container': {
+      '.web-layout-content': {
+        position: 'relative'
+      },
+
       '.common-pages': {
         height: 'auto'
+      },
+
+      '.web-layout-content .loading-layer': {
+        position: 'absolute',
+        inset: 0
       }
     }
   };

@@ -7,9 +7,11 @@ import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '
 import { getBondedValidators, getEarningStatusByNominations, getParaCurrentInflation, InflationConfig, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _STAKING_CHAIN_GROUP, MANTA_MIN_DELEGATION, MANTA_VALIDATOR_POINTS_PER_BLOCK } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { BaseYieldPositionInfo, CollatorExtraInfo, EarningStatus, NativeYieldPoolInfo, PalletParachainStakingDelegationRequestsScheduledRequest, PalletParachainStakingDelegator, ParachainStakingCandidateMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
@@ -17,6 +19,51 @@ import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 import BaseParaNativeStakingPoolHandler from './base-para';
+
+interface PalletParachainStakingRoundInfo {
+  current: string,
+  first: string,
+  length: string
+}
+
+interface PalletParachainStakingSetOrderedSet {
+  owner: string,
+  amount: string
+}
+
+interface PalletParachainStakingInflationInflationInfo {
+  expect: InflationInfo,
+  annual: InflationInfo,
+  round: InflationInfo
+}
+
+interface InflationInfo {
+  min: string,
+  ideal: string,
+  max: string
+}
+
+function calculateMantaNominatorReturn (decimal: number, commission: number, totalActiveCollators: number, bnAnnualInflation: BigN, blocksPreviousRound: number, bnCollatorExpectedBlocksPerRound: BigN, bnCollatorTotalStaked: BigN, isCountCommission: boolean) {
+  const MIN_DELEGATION = new BigN(MANTA_MIN_DELEGATION as number);
+
+  const factor = new BigN(10).pow(decimal);
+  const annualInflation = bnAnnualInflation.dividedBy(factor);
+  const collatorTotalStaked = bnCollatorTotalStaked.dividedBy(factor);
+
+  const annualRewardsPerCollator = annualInflation.dividedBy(totalActiveCollators);
+
+  const adjustmentFactor = new BigN(blocksPreviousRound).dividedBy(bnCollatorExpectedBlocksPerRound);
+
+  const marginalReward = annualRewardsPerCollator.multipliedBy(MIN_DELEGATION).dividedBy((collatorTotalStaked.plus(MIN_DELEGATION)));
+
+  let bnApy = new BigN(100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+
+  if (isCountCommission) {
+    bnApy = new BigN((1 - commission) * 100).multipliedBy(adjustmentFactor).multipliedBy(marginalReward).dividedBy(MIN_DELEGATION);
+  }
+
+  return bnApy.toNumber();
+}
 
 export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingPoolHandler {
   /* Subscribe pool info */
@@ -302,72 +349,174 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
 
   async getPoolTargets (): Promise<ValidatorInfo[]> {
     const apiProps = await this.substrateApi.isReady;
-
     const allCollators: ValidatorInfo[] = [];
 
-    const [_allCollators, _collatorCommission] = await Promise.all([
-      apiProps.api.query.parachainStaking.candidateInfo.entries(),
-      apiProps.api.query.parachainStaking.collatorCommission()
-    ]);
+    if (_STAKING_CHAIN_GROUP.manta.includes(this.chain)) {
+      const DECIMAL = this.chainInfo.substrateInfo?.decimals as number;
+      const POINTS_PER_BLOCK = MANTA_VALIDATOR_POINTS_PER_BLOCK as number; // producing 1 block will get 20 points for validator
 
-    const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
-    const rawCollatorCommission = _collatorCommission.toHuman() as string;
-    const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
-
-    for (const collator of _allCollators) {
-      const _collatorAddress = collator[0].toHuman() as string[];
-      const collatorAddress = _collatorAddress[0];
-      const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
-
-      const bnTotalStake = new BN(collatorInfo.totalCounted);
-      const bnOwnStake = new BN(collatorInfo.bond);
-      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
-      const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
-
-      allCollators.push({
-        commission: 0,
-        expectedReturn: 0,
-        address: collatorAddress,
-        totalStake: bnTotalStake.toString(),
-        ownStake: bnOwnStake.toString(),
-        otherStake: bnOtherStake.toString(),
-        nominatorCount: collatorInfo.delegationCount,
-        blocked: false,
-        isVerified: false,
-        minBond: bnMinBond.toString(),
-        chain: this.chain,
-        isCrowded: parseInt(maxDelegationPerCollator) > 0
-      });
-    }
-
-    const extraInfoMap: Record<string, CollatorExtraInfo> = {};
-
-    await Promise.all(allCollators.map(async (collator) => {
-      const [_info, [identity, isReasonable]] = await Promise.all([
-        apiProps.api.query.parachainStaking.candidateInfo(collator.address),
-        parseIdentity(apiProps, collator.address)
+      const [_allCollators, _collatorCommission, _allCollatorsPool, _selectedCollators, _round, _totalIssuance, _inflationConfig] = await Promise.all([
+        apiProps.api.query.parachainStaking.candidateInfo.entries(),
+        apiProps.api.query.parachainStaking.collatorCommission(),
+        apiProps.api.query.parachainStaking.candidatePool(),
+        apiProps.api.query.parachainStaking.selectedCandidates(),
+        apiProps.api.query.parachainStaking.round(),
+        apiProps.api.query.balances.totalIssuance(),
+        apiProps.api.query.parachainStaking.inflationConfig()
       ]);
 
-      const rawInfo = _info.toHuman() as Record<string, any>;
+      // noted: Annual Inflation = Total Issuance * Annual Inflation Percent
+      const round = _round.toPrimitive() as unknown as PalletParachainStakingRoundInfo;
+      const totalIssuance = _totalIssuance.toString();
+      const inflationConfig = _inflationConfig.toHuman() as unknown as PalletParachainStakingInflationInflationInfo;
+      const annualInflationPercent = parseFloat(inflationConfig.annual.ideal.slice(0, -1)) / 100;
+      const bnAnnualInflation = new BigN(totalIssuance).multipliedBy(annualInflationPercent);
 
-      const active = rawInfo?.status === 'Active';
+      // noted: allCollatorsPool -> all candidate collators; selectedCollators -> candidate collators selected in current round
+      const allCollatorsPoolInfo = _allCollatorsPool.toPrimitive() as unknown as PalletParachainStakingSetOrderedSet[];
+      const allCollatorsPool = allCollatorsPoolInfo.map((collator) => collator.owner.toString());
+      const selectedCollators = _selectedCollators.toPrimitive() as string[];
+      const totalActiveCollators = selectedCollators.length;
 
-      extraInfoMap[collator.address] = {
-        identity,
-        isVerified: isReasonable,
-        active
-      } as CollatorExtraInfo;
-    }));
+      const bnCollatorExpectedBlocksPerRound = new BigN(round.length).dividedBy(allCollatorsPool.length);
 
-    for (const validator of allCollators) {
-      validator.blocked = !extraInfoMap[validator.address].active;
-      validator.identity = extraInfoMap[validator.address].identity;
-      validator.isVerified = extraInfoMap[validator.address].isVerified;
-      // @ts-ignore
-      validator.commission = collatorCommission;
+      const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
+      const rawCollatorCommission = _collatorCommission.toHuman() as string;
+      const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
+      const collatorCommissionPercent = collatorCommission / 100;
+
+      for (const collator of _allCollators) {
+        const _collatorAddress = collator[0].toHuman() as string[];
+        const collatorAddress = _collatorAddress[0];
+
+        if (allCollatorsPool.includes(collatorAddress)) {
+          const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+
+          const bnTotalStake = new BN(collatorInfo.totalCounted);
+          const bnOwnStake = new BN(collatorInfo.bond);
+          const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+          const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
+
+          allCollators.push({
+            commission: 0,
+            address: collatorAddress,
+            totalStake: bnTotalStake.toString(),
+            ownStake: bnOwnStake.toString(),
+            otherStake: bnOtherStake.toString(),
+            nominatorCount: collatorInfo.delegationCount,
+            blocked: false,
+            isVerified: false,
+            minBond: bnMinBond.toString(),
+            chain: this.chain,
+            isCrowded: parseInt(maxDelegationPerCollator) > 0
+          });
+        }
+      }
+
+      await Promise.all(allCollators.map(async (collator) => {
+        if (allCollatorsPool.includes(collator.address)) {
+          // noted: number of blocks = total points / points per block
+          const _collatorPoints = await apiProps.api.query.parachainStaking.awardedPts(parseInt(round.current) - 1, collator.address);
+          const collatorPoints = _collatorPoints.toPrimitive() as number;
+          const blocksPreviousRound = collatorPoints / POINTS_PER_BLOCK;
+
+          collator.expectedReturn = calculateMantaNominatorReturn(DECIMAL, collatorCommissionPercent, totalActiveCollators, bnAnnualInflation, blocksPreviousRound, bnCollatorExpectedBlocksPerRound, new BigN(collator.totalStake), false);
+        }
+      }));
+
+      const extraInfoMap: Record<string, CollatorExtraInfo> = {};
+
+      await Promise.all(allCollators.map(async (collator) => {
+        const [_info, [identity, isReasonable]] = await Promise.all([
+          apiProps.api.query.parachainStaking.candidateInfo(collator.address),
+          parseIdentity(apiProps, collator.address)
+        ]);
+
+        const rawInfo = _info.toHuman() as Record<string, any>;
+
+        const active = rawInfo?.status === 'Active';
+
+        extraInfoMap[collator.address] = {
+          identity,
+          isVerified: isReasonable,
+          active
+        } as CollatorExtraInfo;
+      }));
+
+      for (const validator of allCollators) {
+        validator.blocked = !extraInfoMap[validator.address].active;
+        validator.identity = extraInfoMap[validator.address].identity;
+        validator.isVerified = extraInfoMap[validator.address].isVerified;
+        // @ts-ignore
+        validator.commission = collatorCommission;
+      }
+
+      return allCollators;
+    } else {
+      const [_allCollators, _collatorCommission] = await Promise.all([
+        apiProps.api.query.parachainStaking.candidateInfo.entries(),
+        apiProps.api.query.parachainStaking.collatorCommission()
+      ]);
+
+      const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
+      const rawCollatorCommission = _collatorCommission.toHuman() as string;
+      const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
+
+      for (const collator of _allCollators) {
+        const _collatorAddress = collator[0].toHuman() as string[];
+        const collatorAddress = _collatorAddress[0];
+        const collatorInfo = collator[1].toPrimitive() as unknown as ParachainStakingCandidateMetadata;
+
+        const bnTotalStake = new BN(collatorInfo.totalCounted);
+        const bnOwnStake = new BN(collatorInfo.bond);
+        const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+        const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
+
+        allCollators.push({
+          commission: 0,
+          expectedReturn: 0,
+          address: collatorAddress,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: bnOtherStake.toString(),
+          nominatorCount: collatorInfo.delegationCount,
+          blocked: false,
+          isVerified: false,
+          minBond: bnMinBond.toString(),
+          chain: this.chain,
+          isCrowded: parseInt(maxDelegationPerCollator) > 0
+        });
+      }
+
+      const extraInfoMap: Record<string, CollatorExtraInfo> = {};
+
+      await Promise.all(allCollators.map(async (collator) => {
+        const [_info, [identity, isReasonable]] = await Promise.all([
+          apiProps.api.query.parachainStaking.candidateInfo(collator.address),
+          parseIdentity(apiProps, collator.address)
+        ]);
+
+        const rawInfo = _info.toHuman() as Record<string, any>;
+
+        const active = rawInfo?.status === 'Active';
+
+        extraInfoMap[collator.address] = {
+          identity,
+          isVerified: isReasonable,
+          active
+        } as CollatorExtraInfo;
+      }));
+
+      for (const validator of allCollators) {
+        validator.blocked = !extraInfoMap[validator.address].active;
+        validator.identity = extraInfoMap[validator.address].identity;
+        validator.isVerified = extraInfoMap[validator.address].isVerified;
+        // @ts-ignore
+        validator.commission = collatorCommission;
+      }
+
+      return allCollators;
     }
-
-    return allCollators;
   }
 
   /* Get pool targets */

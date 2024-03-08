@@ -1,7 +1,7 @@
-    2310	AnhMTV                        	Release version 1.1.41
-    2166	Nam Phạm                      	[Issue 2609] reuse previous logic
-    1948	S2kael                        	[Issue-2658] Update stable chain-list version
-     618	lw-cdm                        	Update earning withdraw logic
+    2316	AnhMTV                        	Release version 1.1.42
+    2169	Nam Phạm                      	[Issue 2698] fix eslint
+    1949	S2kael                        	[Issue-2698] Update stable chain-list version
+     619	lw-cdm                        	Fix issue related to undefined object
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
@@ -11,10 +11,10 @@
       82	Thibaut Sardan                	Add account filtering feature (#832)
       80	leewong                       	Update account filter for earn transaction
       63	Roman                         	fix ui issues
-      57	nguyentiendung                	[Issue-2647] Extension - Restructure Settings screen
+      62	nguyentiendung                	
+      53	bluezdot                      	fix eslint
       53	Dominhquangdev                	update Bridge code
       47	bluedot                       	update priceId for EWT on Energy Web X
-      34	bluezdot                      	[Issue-2658] Hotfix temporary disable transfer for NUUM token
       29	Automation Bot                	[CI Skip] Auto increase webapp build number
       27	Thiendekaco                   	update locate of file
       24	S2kael                        	

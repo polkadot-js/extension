@@ -242,7 +242,7 @@ export class ChainService {
   }
 
   public getAssetRefMap () {
-    return this.dataMap.assetRefMap; // todo: check if need to filter out swap pairs
+    return this.dataMap.assetRefMap;
   }
 
   public getChainStateMap () {

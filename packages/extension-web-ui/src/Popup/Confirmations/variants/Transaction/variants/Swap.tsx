@@ -2,16 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox, MetaInfo } from '@subwallet/extension-web-ui/components';
-import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import { BN_TEN } from '@subwallet/extension-web-ui/constants';
+import { SwapRoute, SwapTransactionBlock } from '@subwallet/extension-web-ui/components/Swap';
 import { useGetAccountByAddress, useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-web-ui/hooks';
-import { Icon, Logo, Number } from '@subwallet/react-ui';
-import BigN from 'bignumber.js';
+import { Number } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowRight } from 'phosphor-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -19,14 +16,6 @@ import styled from 'styled-components';
 import { BaseTransactionConfirmationProps } from './Base';
 
 type Props = BaseTransactionConfirmationProps;
-
-function getSymbol (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetSymbol(assetInfo) : '';
-}
-
-function getOriginChain (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetOriginChain(assetInfo) : '';
-}
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
@@ -42,11 +31,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[data.quote.pair.to] || undefined;
   }, [assetRegistryMap, data.quote.pair.to]);
-  const fromAssetInfo = useMemo(() => {
-    return assetRegistryMap[data.quote.pair.from] || undefined;
-  }, [assetRegistryMap, data.quote.pair.from]);
-
-  const destinationValue = new BigN(data.quote.fromAmount).div(BN_TEN.pow(transaction.estimateFee?.decimals || 0)).multipliedBy(data.quote.rate).multipliedBy(1 - data.slippage);
 
   const renderRateConfirmInfo = () => {
     return (
@@ -59,7 +43,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <span>&nbsp;~&nbsp;</span>
         <Number
           decimal={0}
-          suffix={getSymbol(toAssetInfo)}
+          suffix={_getAssetSymbol(toAssetInfo)}
           value={data.quote.rate}
         />
       </div>
@@ -85,47 +69,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className, 'swap-confirmation-container')}>
-      <div className={'__summary-quote'}>
-        <div className={'__summary-from'}>
-          <Logo
-            className='token-logo'
-            isShowSubLogo={true}
-            shape='circle'
-            size={24}
-            subNetwork={getOriginChain(fromAssetInfo)}
-            token={data.quote.pair.from.toLowerCase()}
-          />
-          <Number
-            className={'__amount-destination'}
-            decimal={transaction.estimateFee?.decimals || 0}
-            suffix={getSymbol(fromAssetInfo)}
-            value={data.quote.fromAmount}
-          />
-          <span className={'__quote-footer-label'}>Swap</span>
-        </div>
-        <Icon
-          className={'middle-icon'}
-          phosphorIcon={ArrowRight}
-          size={'md'}
-        />
-        <div className={'__summary-to'}>
-          <Logo
-            className='token-logo'
-            isShowSubLogo={true}
-            shape='circle'
-            size={24}
-            subNetwork={getOriginChain(toAssetInfo)}
-            token={data.quote.pair.to.toLowerCase()}
-          />
-          <Number
-            className={'__amount-destination'}
-            decimal={0}
-            suffix={getSymbol(toAssetInfo)}
-            value={destinationValue}
-          />
-          <span className={'__quote-footer-label'}>Min receive</span>
-        </div>
-      </div>
+      <SwapTransactionBlock
+        data={data}
+      />
       <MetaInfo
         className={CN(className)}
         hasBackgroundWrapper={false}

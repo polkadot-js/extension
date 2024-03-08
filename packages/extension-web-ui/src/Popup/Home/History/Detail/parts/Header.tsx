@@ -23,13 +23,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const isStaking = isTypeStaking(data.type);
-  const isSwap = ExtrinsicType.SWAP === data.type;
-
-  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const assetFrom = assetRegistry[data.additionalInfo?.quote.pair.from];
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  const assetTo = assetRegistry[data.additionalInfo?.quote.pair.to];
 
   const xcmInfo = useMemo((): TransactionAdditionalInfo[ExtrinsicType.TRANSFER_XCM] | undefined => {
     if (isTypeTransfer(data.type) && data.additionalInfo && data.type === ExtrinsicType.TRANSFER_XCM) {
@@ -38,9 +31,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return undefined;
   }, [data.additionalInfo, data.type]);
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-  const recipientAddress = data.to || data.additionalInfo?.recipient as string;
 
   if (xcmInfo) {
     return (
@@ -63,51 +53,28 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      {!isSwap && <MetaInfo.Chain
+      <MetaInfo.Chain
         chain={data.chain}
         label={t('Network')}
-      />}
+      />
 
       {
-        isStaking || !isSwap
+        isStaking
           ? (
-            <>
-              <MetaInfo.Account
-                address={data.from}
-                label={t('From account')}
-                name={data.fromName}
-                networkPrefix={chainInfoMap[data.chain]?.substrateInfo?.addressPrefix}
-              />
-            </>
+            <MetaInfo.Account
+              address={data.from}
+              label={t('From account')}
+              name={data.fromName}
+              networkPrefix={chainInfoMap[data.chain]?.substrateInfo?.addressPrefix}
+            />
           )
           : (
-            isSwap
-              ? (
-                <>
-                  <MetaInfo.Transfer
-                    destinationChain={{
-                      slug: assetTo.originChain,
-                      name: assetTo.name
-                    }}
-                    originChain={{
-                      slug: assetFrom.originChain,
-                      name: assetFrom.name
-                    }}
-                    recipientAddress={recipientAddress}
-                    recipientName={data.toName}
-                    senderAddress={data.from}
-                    senderName={data.fromName}
-                  />
-                </>)
-              : (
-                <MetaInfo.Transfer
-                  recipientAddress={recipientAddress}
-                  recipientName={data.toName}
-                  senderAddress={data.from}
-                  senderName={data.fromName}
-
-                />
-              )
+            <MetaInfo.Transfer
+              recipientAddress={data.to}
+              recipientName={data.toName}
+              senderAddress={data.from}
+              senderName={data.fromName}
+            />
           )
       }
     </>

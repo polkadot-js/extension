@@ -30,7 +30,6 @@ const Component: React.FC<Props> = (props: Props) => {
     <MetaInfo className={CN(className)}>
       <SwapTransactionBlock
         data={swapInfo}
-        decimal={data.fee?.decimals || 0}
       />
       <MetaInfo.Transfer
         destinationChain={{

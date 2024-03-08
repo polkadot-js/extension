@@ -769,7 +769,7 @@ const Component = () => {
   return (
     <>
       <>
-        <div className={CN('__transaction-form-area', { '-no-right-part': !showQuoteAreRef.current })}>
+        <div className={CN('__transaction-form-area', { '-init-animation': !showQuoteAreRef.current })}>
           <TransactionContent>
             <Form
               className={'form-container'}
@@ -909,170 +909,166 @@ const Component = () => {
           </TransactionFooter>
         </div>
 
-        {
-          showQuoteAreRef.current && (
-            <div className={'__transaction-swap-quote-info-area'}>
-              <div className={'__item-quote-header'}>
-                <div className={'__header-left-part'}>
-                  <BackgroundIcon
-                    backgroundColor='#004BFF'
-                    className={'__quote-icon-info'}
-                    iconColor='#fff'
-                    phosphorIcon={Info}
-                    weight={'fill'}
-                  />
-                  <div className={'__text'}>Swap quote</div>
-                </div>
-                <div className={'__header-right-part'}>
-                  <Button
-                    className={'__view-quote-button'}
-                    disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
-                    onClick={openAllQuotesModal}
-                    size='xs'
-                    type='ghost'
-                  >
-                    <span>{t('View quote')}</span>
-
-                    <Icon
-                      phosphorIcon={CaretRight}
-                      size={'sm'}
-                    />
-                  </Button>
-                </div>
-              </div>
-
-              {
-                !!currentQuote && !handleRequestLoading && !isFormInvalid && (
-                  <MetaInfo
-                    className={CN('__quote-info-block')}
-                    hasBackgroundWrapper
-                    labelColorScheme={'gray'}
-                    spaceSize={'sm'}
-                    valueColorScheme={'gray'}
-                  >
-                    <MetaInfo.Default
-                      className={'__quote-rate'}
-                      label={t('Quote rate')}
-                      valueColorSchema={'gray'}
-                    >
-                      {renderRateInfo()}
-                    </MetaInfo.Default>
-
-                    <MetaInfo.Default
-                      className={'__swap-provider'}
-                      label={t('Swap provider')}
-                    >
-                      <Logo
-                        className='__provider-logo'
-                        isShowSubLogo={false}
-                        network={currentQuote.provider.id.toLowerCase()}
-                        shape='squircle'
-                        size={24}
-                      />
-
-                      {currentQuote.provider.name}
-                    </MetaInfo.Default>
-
-                    <MetaInfo.Default
-                      className={'-d-column'}
-                      label={t('Swap route')}
-                    >
-                    </MetaInfo.Default>
-                    <SwapRoute swapRoute={currentQuote.route} />
-                    <div className={'__min-receivale'}>
-                      <MetaInfo.Number
-                        decimals={0}
-                        label={t('Min receivable')}
-                        suffix={_getAssetSymbol(toAssetInfo)}
-                        value={minReceivable}
-                      />
-                    </div>
-                  </MetaInfo>
-                )
-              }
-
-              {
-                (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
-              }
-
-              {
-                !handleRequestLoading && !isFormInvalid && (
-                  <div className={'__quote-reset-time'}>
-                    Quote reset in: {quoteCountdownTime}s
-                  </div>
-                )
-              }
-
-              {
-                !!currentQuote && !handleRequestLoading && !isFormInvalid && (
-                  <MetaInfo
-                    className={CN('__quote-info-block')}
-                    hasBackgroundWrapper
-                    labelColorScheme={'gray'}
-                    spaceSize={'xs'}
-                    valueColorScheme={'gray'}
-                  >
-                    <MetaInfo.Number
-                      className={'__total-fee-value'}
-                      decimals={0}
-                      label={t('Estimated fee')}
-                      onClickValue={onToggleFeeDetails}
-                      prefix={'$'}
-                      suffixNode={
-                        <Icon
-                          className={'__estimated-fee-button'}
-                          customSize={'20px'}
-                          phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
-                        />
-                      }
-                      value={getTotalConvertedBalance}
-                    />
-
-                    {
-                      isViewFeeDetails && (
-                        <div className={'__quote-fee-details-block'}>
-                          {feeItems.map((item) => (
-                            <MetaInfo.Number
-                              decimals={0}
-                              key={item.type}
-                              label={t(item.label)}
-                              prefix={item.prefix}
-                              suffix={item.suffix}
-                              value={item.value}
-                            />
-                          ))}
-                        </div>
-                      )
-                    }
-
-                    <div className={'__separator'}></div>
-                    <div className={'__fee-paid-wrapper'}>
-                      <div className={'__fee-paid-label'}>Fee paid in</div>
-                      <div
-                        className={'__fee-paid-token'}
-                        onClick={openChooseFeeToken}
-                      >
-                        <Logo
-                          className='token-logo'
-                          isShowSubLogo={false}
-                          shape='circle'
-                          size={24}
-                          token={currentQuote.pair.from.toLowerCase()}
-                        />
-                        <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
-                        <Icon
-                          className={'__edit-token'}
-                          customSize={'20px'}
-                          phosphorIcon={PencilSimpleLine}
-                        />
-                      </div>
-                    </div>
-                  </MetaInfo>
-                )
-              }
+        <div className={CN('__transaction-swap-quote-info-area', { '-init-animation': !showQuoteAreRef.current })}>
+          <div className={'__quote-header-wrapper'}>
+            <div className={'__header-left-part'}>
+              <BackgroundIcon
+                backgroundColor='#004BFF'
+                className={'__quote-icon-info'}
+                iconColor='#fff'
+                phosphorIcon={Info}
+                weight={'fill'}
+              />
+              <div className={'__text'}>Swap quote</div>
             </div>
-          )
-        }
+            <div className={'__header-right-part'}>
+              <Button
+                className={'__view-quote-button'}
+                disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
+                onClick={openAllQuotesModal}
+                size='xs'
+                type='ghost'
+              >
+                <span>{t('View quote')}</span>
+
+                <Icon
+                  phosphorIcon={CaretRight}
+                  size={'sm'}
+                />
+              </Button>
+            </div>
+          </div>
+
+          {
+            !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              <MetaInfo
+                className={CN('__quote-info-block')}
+                hasBackgroundWrapper
+                labelColorScheme={'gray'}
+                spaceSize={'sm'}
+                valueColorScheme={'gray'}
+              >
+                <MetaInfo.Default
+                  className={'__quote-rate'}
+                  label={t('Quote rate')}
+                  valueColorSchema={'gray'}
+                >
+                  {renderRateInfo()}
+                </MetaInfo.Default>
+
+                <MetaInfo.Default
+                  className={'__swap-provider'}
+                  label={t('Swap provider')}
+                >
+                  <Logo
+                    className='__provider-logo'
+                    isShowSubLogo={false}
+                    network={currentQuote.provider.id.toLowerCase()}
+                    shape='squircle'
+                    size={24}
+                  />
+
+                  {currentQuote.provider.name}
+                </MetaInfo.Default>
+
+                <MetaInfo.Default
+                  className={'-d-column'}
+                  label={t('Swap route')}
+                >
+                </MetaInfo.Default>
+                <SwapRoute swapRoute={currentQuote.route} />
+                <div className={'__min-receivale'}>
+                  <MetaInfo.Number
+                    decimals={0}
+                    label={t('Min receivable')}
+                    suffix={_getAssetSymbol(toAssetInfo)}
+                    value={minReceivable}
+                  />
+                </div>
+              </MetaInfo>
+            )
+          }
+
+          {
+            (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
+          }
+
+          {
+            !handleRequestLoading && !isFormInvalid && (
+              <div className={'__quote-reset-time'}>
+                    Quote reset in: {quoteCountdownTime}s
+              </div>
+            )
+          }
+
+          {
+            !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              <MetaInfo
+                className={CN('__quote-info-block')}
+                hasBackgroundWrapper
+                labelColorScheme={'gray'}
+                spaceSize={'xs'}
+                valueColorScheme={'gray'}
+              >
+                <MetaInfo.Number
+                  className={'__total-fee-value'}
+                  decimals={0}
+                  label={t('Estimated fee')}
+                  onClickValue={onToggleFeeDetails}
+                  prefix={'$'}
+                  suffixNode={
+                    <Icon
+                      className={'__estimated-fee-button'}
+                      customSize={'20px'}
+                      phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
+                    />
+                  }
+                  value={getTotalConvertedBalance}
+                />
+
+                {
+                  isViewFeeDetails && (
+                    <div className={'__quote-fee-details-block'}>
+                      {feeItems.map((item) => (
+                        <MetaInfo.Number
+                          decimals={0}
+                          key={item.type}
+                          label={t(item.label)}
+                          prefix={item.prefix}
+                          suffix={item.suffix}
+                          value={item.value}
+                        />
+                      ))}
+                    </div>
+                  )
+                }
+
+                <div className={'__separator'}></div>
+                <div className={'__fee-paid-wrapper'}>
+                  <div className={'__fee-paid-label'}>Fee paid in</div>
+                  <div
+                    className={'__fee-paid-token'}
+                    onClick={openChooseFeeToken}
+                  >
+                    <Logo
+                      className='token-logo'
+                      isShowSubLogo={false}
+                      shape='circle'
+                      size={24}
+                      token={currentQuote.pair.from.toLowerCase()}
+                    />
+                    <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
+                    <Icon
+                      className={'__edit-token'}
+                      customSize={'20px'}
+                      phosphorIcon={PencilSimpleLine}
+                    />
+                  </div>
+                </div>
+              </MetaInfo>
+            )
+          }
+        </div>
       </>
 
       <ChooseFeeTokenModal
@@ -1133,7 +1129,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     width: '100%',
     marginLeft: 'auto',
     marginRight: 'auto',
-    justifyContent: 'center',
     gap: token.size,
     '.__fee-paid-wrapper': {
       color: token.colorTextTertiary,
@@ -1163,9 +1158,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.ant-background-icon': {
       width: 24,
       height: 24
-    },
-    '.__transaction-form-area.-no-right-part': {
-      maxWidth: 383
     },
     '.__view-quote-button': {
       paddingLeft: 0,
@@ -1330,7 +1322,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       marginBottom: 12
     },
 
-    '.__item-quote-header': {
+    '.__quote-header-wrapper': {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
@@ -1396,14 +1388,26 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.__transaction-form-area': {
-        flex: '1',
-        overflowX: 'hidden'
+        overflowX: 'hidden',
+        flex: 1,
+        transition: 'transform 0.3s ease-in-out'
       },
 
       '.__transaction-swap-quote-info-area': {
-        flex: '1',
-        overflowX: 'hidden'
-      }
+        overflowX: 'hidden',
+        flex: 1,
+        transition: 'transform 0.3s ease-out, opacity 0.6s ease-out',
+        transitionDelay: '0.1s'
+      },
+      '.__transaction-swap-quote-info-area.-init-animation': {
+        transform: 'translateX(-10%)',
+        opacity: 0,
+        zIndex: 1
+      },
+      '.__transaction-form-area.-init-animation': {
+        transform: 'translateX(50%)',
+        zIndex: 2
+      },
     },
     '.__switch-side-container': {
       position: 'relative',

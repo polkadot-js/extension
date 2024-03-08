@@ -1407,7 +1407,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.__transaction-form-area.-init-animation': {
         transform: 'translateX(50%)',
         zIndex: 2
-      },
+      }
     },
     '.__switch-side-container': {
       position: 'relative',

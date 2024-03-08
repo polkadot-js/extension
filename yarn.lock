@@ -6376,7 +6376,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": ^0.2.43-beta.4
+    "@subwallet/chain-list": 0.2.43
     "@subwallet/extension-base": ^1.1.41-0
     "@subwallet/extension-chains": ^1.1.41-0
     "@subwallet/extension-dapp": ^1.1.41-0

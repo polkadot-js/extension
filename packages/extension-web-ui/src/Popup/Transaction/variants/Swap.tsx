@@ -358,7 +358,7 @@ const Component = () => {
       <div className={CN('__quote-empty-block')}>
         <div className='__quote-empty-icon-wrapper'>
           <div className={CN('__quote-empty-icon', {
-            '-error': isError
+            '-error': isError && !_loading
           })}
           >
             {
@@ -1238,7 +1238,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__quote-empty-block': {
       background: token.colorBgSecondary,
       borderRadius: token.borderRadiusLG,
-      paddingBottom: token.padding,
+      paddingBottom: token.paddingLG,
       paddingLeft: token.paddingLG,
       paddingRight: token.paddingLG,
       paddingTop: token.paddingXL,
@@ -1429,7 +1429,8 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.__transaction-swap-quote-info-area.-init-animation': {
         transform: 'translateX(-10%)',
         opacity: 0,
-        zIndex: 1
+        zIndex: 1,
+        pointerEvents: 'none'
       },
       '.__transaction-form-area.-init-animation': {
         transform: 'translateX(50%)',

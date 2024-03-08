@@ -1,74 +1,33 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {_ChainInfo} from '@subwallet/chain-list/types';
-import {
-  ExtrinsicStatus,
-  ExtrinsicType,
-  TransactionDirection,
-  TransactionHistoryItem
-} from '@subwallet/extension-base/background/KoniTypes';
-import {AccountJson} from '@subwallet/extension-base/background/types';
-import {YIELD_EXTRINSIC_TYPES} from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import {_isChainEvmCompatible} from '@subwallet/extension-base/services/chain-service/utils';
-import {quickFormatAddressToCompare} from '@subwallet/extension-base/utils';
-import {
-  AccountSelector,
-  BasicInputEvent,
-  ChainSelector,
-  FilterModal,
-  HistoryItem,
-  Layout,
-  PageWrapper
-} from '@subwallet/extension-web-ui/components';
-import {FilterTabItemType, FilterTabs} from '@subwallet/extension-web-ui/components/FilterTabs';
-import NoContent, {PAGE_TYPE} from '@subwallet/extension-web-ui/components/NoContent';
-import {HISTORY_DETAIL_MODAL} from '@subwallet/extension-web-ui/constants';
-import {DataContext} from '@subwallet/extension-web-ui/contexts/DataContext';
-import {ScreenContext} from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import {
-  useChainInfoWithState,
-  useFilterModal,
-  useHistorySelection,
-  useSelector,
-  useSetCurrentPage
-} from '@subwallet/extension-web-ui/hooks';
-import {cancelSubscription, subscribeTransactionHistory} from '@subwallet/extension-web-ui/messaging';
-import {
-  ChainItemType,
-  ThemeProps,
-  TransactionHistoryDisplayData,
-  TransactionHistoryDisplayItem
-} from '@subwallet/extension-web-ui/types';
-import {
-  customFormatDate,
-  findAccountByAddress,
-  findNetworkJsonByGenesisHash,
-  formatHistoryDate,
-  isTypeStaking,
-  isTypeTransfer
-} from '@subwallet/extension-web-ui/utils';
-import {Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader} from '@subwallet/react-ui';
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
+import { AccountSelector, BasicInputEvent, ChainSelector, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
+import { FilterTabItemType, FilterTabs } from '@subwallet/extension-web-ui/components/FilterTabs';
+import NoContent, { PAGE_TYPE } from '@subwallet/extension-web-ui/components/NoContent';
+import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-web-ui/constants';
+import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
+import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-web-ui/hooks';
+import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-web-ui/messaging';
+import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
+import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-web-ui/utils';
+import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {
-  Aperture,
-  ArrowDownLeft,
-  ArrowsLeftRight,
-  ArrowUpRight,
-  ClockCounterClockwise,
-  Database,
-  FadersHorizontal,
-  Rocket,
-  Spinner
-} from 'phosphor-react';
-import React, {useCallback, useContext, useEffect, useMemo, useState} from 'react';
-import {useTranslation} from 'react-i18next';
-import {useParams} from 'react-router-dom';
+import { Aperture, ArrowDownLeft, ArrowsLeftRight, ArrowUpRight, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import {isEthereumAddress} from '@polkadot/util-crypto';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
-import {HistoryDetailModal} from './Detail';
+import { HistoryDetailModal } from './Detail';
 
 type Props = ThemeProps
 

@@ -63,4 +63,3 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
     }
   }
 }
-// chrome.storage.local.get(function(result){console.log(result)})

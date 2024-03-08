@@ -21,7 +21,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   public readonly version;
   protected sendMessage: SendRequest;
   protected _connected = false;
-  private _isEnable = false;
 
   constructor (sendMessage: SendRequest, version: string) {
     super();
@@ -88,11 +87,11 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   request<T> ({ method, params }: RequestArguments): Promise<T> {
-    if (!this._isEnable) {
-      if (method === 'eth_accounts') {
-        return this.request<T>({ method: 'eth_requestAccounts' });
-      }
-    }
+    // if (!this._isEnable) {
+    //   if (method === 'eth_accounts') {
+    //     return this.request<T>({ method: 'eth_requestAccounts' });
+    //   }
+    // }
 
     // Subscribe events
     switch (method) {
@@ -102,7 +101,6 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
 
           this.sendMessage('pub(authorize.tabV2)', { origin, accountAuthType: 'evm' })
             .then(() => {
-              this._isEnable = true;
               // Return account list
               this.request<string[]>({ method: 'eth_accounts' })
                 .then((accounts) => {

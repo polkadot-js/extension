@@ -6,7 +6,7 @@ import { SwapTokenSelector } from '@subwallet/extension-web-ui/components/Field/
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { Number } from '@subwallet/react-ui';
+import { ActivityIndicator, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
@@ -20,10 +20,11 @@ type Props = ThemeProps & {
   toAsset?: _ChainAsset;
   tokenSelectorItems: TokenSelectorItemType[];
   swapValue: BigN;
+  loading?: boolean;
 }
 
 const Component = (props: Props) => {
-  const { className, label, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
+  const { className, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
   const priceMap = useSelector((state) => state.price.priceMap);
 
@@ -54,24 +55,26 @@ const Component = (props: Props) => {
         </div>
 
         <div className={'__amount-wrapper'}>
-          <div>
-            {
-              <Number
-                className={'__amount-destination'}
-                decimal={0}
-                value={swapValue}
-              />
-            }
-          </div>
-
           {
-            (
-              <Number
-                className={'__amount-convert'}
-                decimal={0}
-                prefix={'$'}
-                value={getConvertedBalance}
-              />
+            loading && (
+              <ActivityIndicator size={24} />
+            )
+          }
+          {
+            !loading && (
+              <>
+                <Number
+                  className={'__amount-destination'}
+                  decimal={0}
+                  value={swapValue}
+                />
+                <Number
+                  className={'__amount-convert'}
+                  decimal={0}
+                  prefix={'$'}
+                  value={getConvertedBalance}
+                />
+              </>
             )
           }
         </div>

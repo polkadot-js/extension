@@ -22,7 +22,7 @@ import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProc
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, PageIcon } from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -101,7 +101,7 @@ const Component = () => {
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
-  const showQuoteAreRef = useRef(false);
+  const showQuoteAreaRef = useRef(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
@@ -343,46 +343,44 @@ const Component = () => {
 
   const renderQuoteEmptyBlock = () => {
     const isError = !!swapError || isFormInvalid;
-
     let message = '';
+    const _loading = handleRequestLoading && !isFormInvalid;
 
     if (isFormInvalid) {
-      message = t('Please recheck form value');
+      message = t('Please recheck form values');
+    } else if (handleRequestLoading) {
+      message = t('Loading...');
     } else {
       message = swapError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
     }
 
     return (
-      <div className={CN('__quote-empty-block', {
-        '-error': !!swapError || isFormInvalid,
-        '-loading': handleRequestLoading
-      })}
-      >
-        {
-          handleRequestLoading && (
-            <div>
-              <ActivityIndicator size={32} />
-            </div>
-          )
-        }
-        {
-          !handleRequestLoading && (
-            <>
-              <PageIcon
-                color='var(--empty-quote-icon-color)'
-                iconProps={{
-                  weight: isError ? 'fill' : undefined,
-                  phosphorIcon: isError ? XCircle : ListBullets
-                }}
-              />
+      <div className={CN('__quote-empty-block')}>
+        <div className='__quote-empty-icon-wrapper'>
+          <div className={CN('__quote-empty-icon', {
+            '-error': isError
+          })}
+          >
+            {
+              _loading
+                ? (
+                  <ActivityIndicator size={32} />
+                )
+                : (
+                  <Icon
+                    customSize={'36px'}
+                    phosphorIcon={isError ? XCircle : ListBullets}
+                    weight={isError ? 'fill' : undefined}
+                  />
+                )
+            }
+          </div>
+        </div>
 
-              <div className={CN('__message-error', {
-                '-message': isError
-              })}
-              >{message}</div>
-            </>
-          )
-        }
+        <div className={CN('__quote-empty-message', {
+          '-loading': _loading
+        })}
+        >{message}</div>
       </div>
     );
   };
@@ -570,8 +568,8 @@ const Component = () => {
             return;
           }
 
-          showQuoteAreRef.current = true;
-
+          showQuoteAreaRef.current = true;
+          setIsFormInvalid(false);
           setHandleRequestLoading(true);
 
           const currentRequest: SwapRequest = {
@@ -606,15 +604,15 @@ const Component = () => {
               setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
               setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
               setSwapError(result.quote.error);
-              showQuoteAreRef.current = true;
+              showQuoteAreaRef.current = true;
               optimalQuoteRef.current = result.quote.optimalQuote;
+              setHandleRequestLoading(false);
             }
           }).catch((e) => {
             console.log('handleSwapRequest error', e);
-          }).finally(() => {
+
             if (sync) {
               setHandleRequestLoading(false);
-              setIsFormInvalid(false);
             }
           });
         }).catch((e) => {
@@ -769,7 +767,7 @@ const Component = () => {
   return (
     <>
       <>
-        <div className={CN('__transaction-form-area', { '-init-animation': !showQuoteAreRef.current })}>
+        <div className={CN('__transaction-form-area', { '-init-animation': !showQuoteAreaRef.current })}>
           <TransactionContent>
             <Form
               className={'form-container'}
@@ -837,6 +835,7 @@ const Component = () => {
                 </div>
 
                 <SwapToField
+                  loading={handleRequestLoading && showQuoteAreaRef.current}
                   onSelectToken={onSelectToToken}
                   swapValue={destinationSwapValue}
                   toAsset={toAssetInfo}
@@ -909,7 +908,7 @@ const Component = () => {
           </TransactionFooter>
         </div>
 
-        <div className={CN('__transaction-swap-quote-info-area', { '-init-animation': !showQuoteAreRef.current })}>
+        <div className={CN('__transaction-swap-quote-info-area', { '-init-animation': !showQuoteAreaRef.current })}>
           <div className={'__quote-header-wrapper'}>
             <div className={'__header-left-part'}>
               <BackgroundIcon
@@ -1239,37 +1238,65 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__quote-empty-block': {
       background: token.colorBgSecondary,
       borderRadius: token.borderRadiusLG,
-      padding: token.padding,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
+      paddingBottom: token.padding,
+      paddingLeft: token.paddingLG,
+      paddingRight: token.paddingLG,
+      paddingTop: token.paddingXL,
       textAlign: 'center',
       gap: token.size,
-      minHeight: 184,
-
-      '--empty-quote-icon-color': token['gray-6']
+      minHeight: 184
     },
 
-    '.__quote-empty-block.-loading': {
-      justifyContent: 'center'
+    '.__quote-empty-icon-wrapper': {
+      display: 'flex',
+      justifyContent: 'center',
+      marginBottom: token.margin
     },
 
-    '.__quote-empty-block.-error': {
-      '--empty-quote-icon-color': token.colorError
+    '.__quote-empty-icon': {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: 64,
+      height: 64,
+      position: 'relative',
+
+      '&:before': {
+        content: "''",
+        position: 'absolute',
+        inset: 0,
+        borderRadius: '100%',
+        backgroundColor: token['gray-4'],
+        opacity: 0.1,
+        zIndex: 0
+      },
+
+      '.anticon': {
+        position: 'relative',
+        zIndex: 1,
+        color: token.colorTextLight3
+      }
     },
 
-    '.__message-error': {
-      color: token.colorTextTertiary,
+    '.__quote-empty-icon.-error': {
+      '&:before': {
+        backgroundColor: token.colorError
+      },
+
+      '.anticon': {
+        color: token.colorError
+      }
+    },
+
+    '.__quote-empty-message': {
+      color: token.colorWhite,
       fontSize: token.fontSize,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeight
     },
-    '.__message-error.-message': {
-      color: token.colorError,
-      fontSize: token.fontSize,
-      fontWeight: token.bodyFontWeight,
-      lineHeight: token.lineHeight,
-      textAlign: 'center'
+
+    '.__quote-empty-message.-loading': {
+      color: token.colorTextLight4
     },
 
     '.__total-fee-value': {

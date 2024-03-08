@@ -23,6 +23,11 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
 
   const isStaking = isTypeStaking(data.type);
+  const isSwap = ExtrinsicType.SWAP === data.type;
+
+  const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const assetFrom = assetRegistry[data.additionalInfo.quote.pair.from];
+  const assetTo = assetRegistry[data.additionalInfo.quote.pair.to];
 
   const xcmInfo = useMemo((): TransactionAdditionalInfo[ExtrinsicType.TRANSFER_XCM] | undefined => {
     if (isTypeTransfer(data.type) && data.additionalInfo && data.type === ExtrinsicType.TRANSFER_XCM) {
@@ -53,28 +58,51 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <>
-      <MetaInfo.Chain
+      {!isSwap && <MetaInfo.Chain
         chain={data.chain}
         label={t('Network')}
-      />
+      />}
 
       {
-        isStaking
+        isStaking || !isSwap
           ? (
-            <MetaInfo.Account
-              address={data.from}
-              label={t('From account')}
-              name={data.fromName}
-              networkPrefix={chainInfoMap[data.chain]?.substrateInfo?.addressPrefix}
-            />
+            <>
+              <MetaInfo.Account
+                address={data.from}
+                label={t('From account')}
+                name={data.fromName}
+                networkPrefix={chainInfoMap[data.chain]?.substrateInfo?.addressPrefix}
+              />
+            </>
           )
           : (
-            <MetaInfo.Transfer
-              recipientAddress={data.to}
-              recipientName={data.toName}
-              senderAddress={data.from}
-              senderName={data.fromName}
-            />
+            isSwap
+              ? (
+                <>
+                  <MetaInfo.Transfer
+                    destinationChain={{
+                      slug: assetTo.originChain,
+                      name: assetTo.name
+                    }}
+                    originChain={{
+                      slug: assetFrom.originChain,
+                      name: assetFrom.name
+                    }}
+                    recipientAddress={data.to || data.additionalInfo.recipient}
+                    recipientName={data.toName}
+                    senderAddress={data.from}
+                    senderName={data.fromName}
+                  />
+                </>)
+              : (
+                <MetaInfo.Transfer
+                  recipientAddress={data.to || data.additionalInfo.recipient}
+                  recipientName={data.toName}
+                  senderAddress={data.from}
+                  senderName={data.fromName}
+
+                />
+              )
           )
       }
     </>

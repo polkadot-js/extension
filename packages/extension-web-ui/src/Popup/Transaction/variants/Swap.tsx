@@ -13,7 +13,7 @@ import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Sw
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
 import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -22,6 +22,7 @@ import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProc
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
+import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -76,12 +77,12 @@ const supportSlippageSelection = false;
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { defaultData, onDone, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { defaultData, onDone, persistData, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
 
-  const { isAllAccount } = useSelector((state) => state.accountState);
+  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
   const priceMap = useSelector((state) => state.price.priceMap);
@@ -255,8 +256,10 @@ const Component = () => {
   }, [form, fromTokenSlugValue, toTokenSlugValue]);
 
   const onFieldsChange: FormCallbacks<SwapParams>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
-    //
-  }, []);
+    const values = convertFieldToObject<SwapParams>(allFields);
+
+    persistData(values);
+  }, [persistData]);
 
   // todo: will optimize fee display logic later
   const getTotalConvertedBalance = useMemo(() => {
@@ -739,6 +742,25 @@ const Component = () => {
       }
     }
   }, [form, toTokenItems, toTokenSlugValue]);
+
+  const defaultFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
+
+  useEffect(() => {
+    const restoreFormDefault = () => {
+      persistData({
+        ...DEFAULT_SWAP_PARAMS,
+        from: defaultFromValue
+      });
+    };
+
+    window.addEventListener('beforeunload', restoreFormDefault);
+
+    return () => {
+      window.removeEventListener('beforeunload', restoreFormDefault);
+    };
+  }, [defaultFromValue, persistData]);
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {

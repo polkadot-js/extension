@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BaseMigrationJob from '@subwallet/extension-base/services/migration-service/Base';
+import {AssetSetting} from "@subwallet/extension-base/background/KoniTypes";
 
 export default class MigrateAssetSetting extends BaseMigrationJob {
   public override async run (): Promise<void> {
@@ -22,7 +23,7 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
         'pangolin-LOCAL-CKTON', //
         'zeta_test-NATIVE-aZETA' //
       ];
-      const newSlug = [
+      const newSlugs = [
         'ethereum-ERC20-FTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
         'moonbeam-ERC20-CGS-0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F',
         'astar-LOCAL-aSEED',
@@ -40,14 +41,27 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
       ];
       const assetSetting = await this.state.chainService.getAssetSettings();
 
-      for (const slug of oldSlugs) {
+      const migratedAssetSetting: Record<string, AssetSetting> = {};
+
+      for (let i = 0; i < oldSlugs.length; i++) {
+        const slug = oldSlugs[i];
+
+        console.log('old slug', slug);
 
         if (Object.keys(assetSetting).includes(slug)) {
           const isVisible = assetSetting[slug].visible;
+          const newSlug = newSlugs[i];
 
-          // this.state.chainService.setAssetSettings({ slug: { visible: isVisible } });
+          migratedAssetSetting[newSlug] = { visible: isVisible };
+
+          console.log('need upgrade', slug, newSlug, isVisible);
         }
       }
+
+      this.state.chainService.setAssetSettings({
+        ...assetSetting,
+        ...migratedAssetSetting
+      });
     } catch (e) {
       console.error(e);
     }

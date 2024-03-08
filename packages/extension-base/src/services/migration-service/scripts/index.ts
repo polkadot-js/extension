@@ -4,7 +4,7 @@
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
 
 import BaseMigrationJob from '../Base';
-import MigrateAssetSetting from './databases/MigrateAssetSetting';
+// import MigrateAssetSetting from './databases/MigrateAssetSetting';
 import MigrateEarningVersion from './databases/MigrateEarningVersion';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';

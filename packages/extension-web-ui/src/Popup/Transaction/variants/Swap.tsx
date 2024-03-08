@@ -499,7 +499,8 @@ const Component = () => {
           const validatePromise = validateSwapProcess({
             address: from,
             process: currentOptimalSwapPath,
-            selectedQuote: currentQuote
+            selectedQuote: currentQuote,
+            recipient
           });
 
           const _errors = await validatePromise;

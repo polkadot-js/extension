@@ -14,8 +14,8 @@ jest.setTimeout(3 * 60 * 60 * 1000);
 
 const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test'];
 
-describe('test chain asset', () => {
-  it('chain asset', async () => {
+describe('test chain', () => {
+  it('chain', async () => {
     const chainInfos = Object.values(ChainInfoMap).filter((info) =>
       info.chainStatus === _ChainStatus.ACTIVE
       // && !['acala_testnet'].includes(info.slug)

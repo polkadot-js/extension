@@ -14,7 +14,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
 import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -97,7 +97,7 @@ const Component: React.FC<Props> = (props: Props) => {
     {
       icon: LockLaminated,
       key: SecurityType.AUTO_LOCK,
-      title: t('Wallet auto-lock'),
+      title: t('Extension auto lock'),
       url: '',
       disabled: false
     },
@@ -109,14 +109,6 @@ const Component: React.FC<Props> = (props: Props) => {
       disabled: false
     }
   ], [noAccount, t]);
-
-  const websiteAccessItem = useMemo((): SecurityItem => ({
-    icon: GlobeHemisphereEast,
-    key: SecurityType.WEBSITE_ACCESS,
-    title: t('Manage website access'),
-    url: '/settings/dapp-access',
-    disabled: noAccount
-  }), [noAccount, t]);
 
   const [loadingCamera, setLoadingCamera] = useState(false);
   const [loadingChainPatrol, setLoadingChainPatrol] = useState(false);
@@ -222,7 +214,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <SettingItem
         className={CN(
-          'security-item',
+          'security-item', 'setting-item',
           `security-type-${item.key}`,
           {
             disabled: item.disabled
@@ -276,11 +268,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {items.map(onRenderItem)}
           </div>
           <div className='setting-config-container'>
-            <div className='label'>
-              {t('Website access')}
-            </div>
             <div className='items-container'>
-              {onRenderItem(websiteAccessItem)}
               <SettingItem
                 className={CN('security-item', `security-type-${SecurityType.CHAIN_PATROL_SERVICE}`)}
                 leftItemIcon={(
@@ -301,11 +289,6 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )}
               />
-            </div>
-          </div>
-          <div className='setting-config-container'>
-            <div className='label'>
-              {t('Camera access')}
             </div>
             <SettingItem
               className={CN('security-item', `security-type-${SecurityType.CAMERA_ACCESS}`)}
@@ -333,7 +316,7 @@ const Component: React.FC<Props> = (props: Props) => {
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
-          title={t('Wallet auto-lock')}
+          title={t('Auto lock')}
         >
           <div className='modal-body-container'>
             {
@@ -482,7 +465,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.security-item': {
       '.ant-web3-block-right-item': {
-        marginRight: token.sizeXXS,
+        marginRight: 0,
         color: token['gray-4']
       },
 
@@ -502,10 +485,10 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.setting-config-container': {
-      marginTop: token.margin,
+      marginTop: token.marginXS,
       display: 'flex',
       flexDirection: 'column',
-      gap: token.size,
+      gap: token.sizeXS,
 
       '.label': {
         fontWeight: token.fontWeightStrong,

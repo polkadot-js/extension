@@ -7,8 +7,8 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TokenApproveData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
-import { recalculateGasPrice } from '@subwallet/extension-base/utils/eth';
 import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
@@ -325,15 +325,16 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const approveEncodedCall = approveCall.encodeABI() as string;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const gasLimit = await approveCall.estimateGas({ from: address }) as number;
-    const _price = await evmApi.api.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, this.chain);
+    const priority = await calculateGasFeeParams(evmApi, this.chain);
 
     const transactionObject = {
       from: address,
       to: _getContractAddressOfToken(inputTokenInfo),
       data: approveEncodedCall,
-      gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gasLimit,
+      gasPrice: priority.gasPrice,
+      maxFeePerGas: priority.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
     } as TransactionConfig;
 
     const _data: TokenApproveData = {
@@ -365,15 +366,16 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const depositEncodedCall = depositCall.encodeABI() as string;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const gasLimit = await depositCall.estimateGas({ from: address }) as number;
-    const _price = await evmApi.api.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, this.chain);
+    const priority = await calculateGasFeeParams(evmApi, this.chain);
 
     const transactionObject = {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
       data: depositEncodedCall,
-      gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gasLimit,
+      gasPrice: priority.gasPrice,
+      maxFeePerGas: priority.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
     } as TransactionConfig;
 
     return {
@@ -408,15 +410,16 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const redeemEncodedCall = redeemCall.encodeABI() as string;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const gasLimit = await redeemCall.estimateGas({ from: address }) as number;
-    const _price = await evmApi.api.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, this.chain);
+    const priority = await calculateGasFeeParams(evmApi, this.chain);
 
     const transaction: TransactionConfig = {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
       data: redeemEncodedCall,
-      gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gasLimit,
+      gasPrice: priority.gasPrice,
+      maxFeePerGas: priority.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
     };
 
     return [ExtrinsicType.UNSTAKE_STDOT, transaction];
@@ -440,15 +443,16 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const withdrawEncodedCall = withdrawCall.encodeABI() as string;
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const gasLimit = await withdrawCall.estimateGas({ from: address }) as number;
-    const _price = await evmApi.api.eth.getGasPrice();
-    const gasPrice = recalculateGasPrice(_price, this.chain);
+    const priority = await calculateGasFeeParams(evmApi, this.chain);
 
     return {
       from: address,
       to: _getContractAddressOfToken(derivativeTokenInfo),
       data: withdrawEncodedCall,
-      gasPrice: gasPrice,
-      gas: gasLimit
+      gas: gasLimit,
+      gasPrice: priority.gasPrice,
+      maxFeePerGas: priority.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
     }; // TODO: check tx history parsing
   }
 

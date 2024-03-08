@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import BaseMigrationJob from '@subwallet/extension-base/services/migration-service/Base';
-import {AssetSetting} from "@subwallet/extension-base/background/KoniTypes";
 
 export default class MigrateAssetSetting extends BaseMigrationJob {
   public override async run (): Promise<void> {
@@ -46,15 +46,11 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
       for (let i = 0; i < oldSlugs.length; i++) {
         const slug = oldSlugs[i];
 
-        console.log('old slug', slug);
-
         if (Object.keys(assetSetting).includes(slug)) {
           const isVisible = assetSetting[slug].visible;
           const newSlug = newSlugs[i];
 
           migratedAssetSetting[newSlug] = { visible: isVisible };
-
-          console.log('need upgrade', slug, newSlug, isVisible);
         }
       }
 

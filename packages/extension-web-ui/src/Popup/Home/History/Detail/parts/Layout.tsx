@@ -37,15 +37,19 @@ const Component: React.FC<Props> = (props: Props) => {
           data={data}
         />
       )}
-      {!isSwap && <MetaInfo.DisplayType
-        label={t('Transaction type')}
-        typeName={t(TxTypeNameMap[data.type])}
-      />}
+      {!isSwap && (
+        <MetaInfo.DisplayType
+          label={t('Transaction type')}
+          typeName={t(TxTypeNameMap[data.type])}
+        />
+      )}
       <HistoryDetailHeader data={data} />
-      {isSwap && <MetaInfo.DisplayType
-        label={t('Transaction type')}
-        typeName={t(TxTypeNameMap[data.type])}
-      />}
+      {isSwap && (
+        <MetaInfo.DisplayType
+          label={t('Transaction type')}
+          typeName={t(TxTypeNameMap[data.type])}
+        />
+      )}
       <MetaInfo.Status
         className={CN('__transaction-status', { '-is-swap': isSwap })}
         label={t('Transaction status')}
@@ -65,8 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
             isAbleToShowFee(data) && (<HistoryDetailFee data={data} />)
           }
         </>
-      )
-      }
+      )}
       {
         isSwap && (
           <>

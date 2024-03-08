@@ -3,6 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
@@ -30,15 +31,17 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const { t } = useTranslation();
+  const swapInfo = data.additionalInfo as SwapTxData;
+
   const toAssetInfo = useMemo(() => {
-    return assetRegistryMap[data.additionalInfo.quote.pair.to] || undefined;
-  }, [assetRegistryMap, data.additionalInfo.quote.pair.to]);
+    return assetRegistryMap[swapInfo.quote.pair.to] || undefined;
+  }, [assetRegistryMap, swapInfo.quote.pair.to]);
 
   const fromAssetInfo = useMemo(() => {
-    return assetRegistryMap[data.additionalInfo.quote.pair.from] || undefined;
-  }, [assetRegistryMap, data.additionalInfo.quote.pair.from]);
+    return assetRegistryMap[swapInfo.quote.pair.from] || undefined;
+  }, [assetRegistryMap, swapInfo.quote.pair.from]);
 
-  const destinationValue = new BigN(data.additionalInfo.quote.fromAmount).div(BN_TEN.pow(data.fee?.decimals || 0)).multipliedBy(data.additionalInfo.quote.rate).multipliedBy(1 - data.additionalInfo.slippage);
+  const destinationValue = new BigN(swapInfo.quote.fromAmount).div(BN_TEN.pow(data.fee?.decimals || 0)).multipliedBy(swapInfo.quote.rate).multipliedBy(1 - swapInfo.slippage);
 
   return (
     <div className={CN(className, 'swap-confirmation-container')}>
@@ -50,13 +53,13 @@ const Component: React.FC<Props> = (props: Props) => {
             shape='circle'
             size={24}
             subNetwork={getOriginChain(fromAssetInfo)}
-            token={data.additionalInfo.quote.pair.from.toLowerCase()}
+            token={swapInfo.quote.pair.from.toLowerCase()}
           />
           <Number
             className={'__amount-destination'}
-            decimal={data.fee.decimals || 0}
+            decimal={data.fee?.decimals || 0}
             suffix={getSymbol(fromAssetInfo)}
-            value={data.additionalInfo.quote.fromAmount}
+            value={swapInfo.quote.fromAmount}
           />
           <span className={'__quote-footer-label'}>Swap</span>
         </div>
@@ -72,7 +75,7 @@ const Component: React.FC<Props> = (props: Props) => {
             shape='circle'
             size={24}
             subNetwork={getOriginChain(toAssetInfo)}
-            token={data.additionalInfo.quote.pair.to.toLowerCase()}
+            token={swapInfo.quote.pair.to.toLowerCase()}
           />
           <Number
             className={'__amount-destination'}

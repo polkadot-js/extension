@@ -26,8 +26,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const isSwap = ExtrinsicType.SWAP === data.type;
 
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const assetFrom = assetRegistry[data.additionalInfo.quote.pair.from];
-  const assetTo = assetRegistry[data.additionalInfo.quote.pair.to];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const assetFrom = assetRegistry[data.additionalInfo?.quote.pair.from];
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const assetTo = assetRegistry[data.additionalInfo?.quote.pair.to];
 
   const xcmInfo = useMemo((): TransactionAdditionalInfo[ExtrinsicType.TRANSFER_XCM] | undefined => {
     if (isTypeTransfer(data.type) && data.additionalInfo && data.type === ExtrinsicType.TRANSFER_XCM) {
@@ -36,6 +38,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
     return undefined;
   }, [data.additionalInfo, data.type]);
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+  const recipientAddress = data.to || data.additionalInfo?.recipient as string;
 
   if (xcmInfo) {
     return (
@@ -88,7 +93,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       slug: assetFrom.originChain,
                       name: assetFrom.name
                     }}
-                    recipientAddress={data.to || data.additionalInfo.recipient}
+                    recipientAddress={recipientAddress}
                     recipientName={data.toName}
                     senderAddress={data.from}
                     senderName={data.fromName}
@@ -96,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 </>)
               : (
                 <MetaInfo.Transfer
-                  recipientAddress={data.to || data.additionalInfo.recipient}
+                  recipientAddress={recipientAddress}
                   recipientName={data.toName}
                   senderAddress={data.from}
                   senderName={data.fromName}

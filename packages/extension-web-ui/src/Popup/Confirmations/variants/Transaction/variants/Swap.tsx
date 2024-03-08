@@ -144,10 +144,6 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
       flexDirection: 'column',
       flex: 1
     },
-    '.__swap-quote-expired': {
-      marginBottom: 20,
-      marginTop: -8
-    },
     '.__quote-footer-label': {
       color: token.colorTextTertiary,
       fontSize: 12,

@@ -1,12 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
-import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
+import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -16,22 +15,14 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
-  data: TransactionHistoryDisplayItem
-}
-
-function getSymbol (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetSymbol(assetInfo) : '';
-}
-
-function getOriginChain (assetInfo?: _ChainAsset) {
-  return assetInfo ? _getAssetOriginChain(assetInfo) : '';
+  data: SwapTxData
 }
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const { t } = useTranslation();
-  const swapInfo = data.additionalInfo as SwapTxData;
+  const swapInfo = data;
 
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[swapInfo.quote.pair.to] || undefined;
@@ -41,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return assetRegistryMap[swapInfo.quote.pair.from] || undefined;
   }, [assetRegistryMap, swapInfo.quote.pair.from]);
 
-  const destinationValue = new BigN(swapInfo.quote.fromAmount).div(BN_TEN.pow(data.fee?.decimals || 0)).multipliedBy(swapInfo.quote.rate).multipliedBy(1 - swapInfo.slippage);
+  const destinationValue = new BigN(swapInfo.quote.fromAmount).div(BN_TEN.pow(_getAssetDecimals(fromAssetInfo))).multipliedBy(swapInfo.quote.rate).multipliedBy(1 - swapInfo.slippage);
 
   return (
     <div className={CN(className, 'swap-confirmation-container')}>
@@ -52,13 +43,13 @@ const Component: React.FC<Props> = (props: Props) => {
             isShowSubLogo={true}
             shape='circle'
             size={24}
-            subNetwork={getOriginChain(fromAssetInfo)}
+            subNetwork={_getAssetOriginChain(fromAssetInfo)}
             token={swapInfo.quote.pair.from.toLowerCase()}
           />
           <Number
             className={'__amount-destination'}
-            decimal={data.fee?.decimals || 0}
-            suffix={getSymbol(fromAssetInfo)}
+            decimal={_getAssetDecimals(fromAssetInfo)}
+            suffix={_getAssetSymbol(fromAssetInfo)}
             value={swapInfo.quote.fromAmount}
           />
           <span className={'__quote-footer-label'}>Swap</span>
@@ -74,13 +65,13 @@ const Component: React.FC<Props> = (props: Props) => {
             isShowSubLogo={true}
             shape='circle'
             size={24}
-            subNetwork={getOriginChain(toAssetInfo)}
+            subNetwork={_getAssetOriginChain(toAssetInfo)}
             token={swapInfo.quote.pair.to.toLowerCase()}
           />
           <Number
             className={'__amount-destination'}
             decimal={0}
-            suffix={getSymbol(toAssetInfo)}
+            suffix={_getAssetSymbol(toAssetInfo)}
             value={destinationValue}
           />
           <span className={'__quote-footer-label'}>{t('Min receive')}</span>

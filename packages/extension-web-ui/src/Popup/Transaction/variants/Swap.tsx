@@ -12,7 +12,7 @@ import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField,
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
-import SwapRoute from '@subwallet/extension-web-ui/components/Swap/SwapRoute';
+import {SwapRoute} from '@subwallet/extension-web-ui/components/Swap';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';

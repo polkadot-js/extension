@@ -49,7 +49,7 @@ const Component: React.FC<Props> = (props: Props) => {
           children: t('Back to home')
         }}
         subHeaderLeft={<CloseIcon />}
-        title={t('Successful')}
+        title={t('Submitted')}
       >
         <div className='container'>
           <div className='page-icon'>
@@ -62,10 +62,10 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
           <div className='title'>
-            {t('All done!')}
+            {t('Transaction submitted!')}
           </div>
           <div className='description'>
-            {t('Your request has been sent. You can track its progress in History tab.')}
+            {t('Track transaction progress in the History tab or go back to home')}
           </div>
         </div>
       </Layout.WithSubHeaderOnly>

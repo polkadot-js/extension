@@ -207,7 +207,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   avail: ['kate', 'goldberg_testnet'],
   pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
   centrifuge: ['centrifuge'],
-  disable_transfer: ['invarch', 'continuum_network']
+  disable_transfer: ['invarch']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

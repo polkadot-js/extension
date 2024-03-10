@@ -66,7 +66,7 @@ export class ChainService {
     this.chainInfoMapSubject.next(this.dataMap.chainInfoMap);
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.xcmRefMapSubject.next(this.xcmRefMap);
 
     if (MODULE_SUPPORT.MANTA_ZK) {
       console.log('Init Manta ZK');
@@ -80,17 +80,16 @@ export class ChainService {
   }
 
   // Getter
-  public getXcmRefMap () {
-    return this.dataMap.assetRefMap;
-    // const result: Record<string, _AssetRef> = {};
-    //
-    // Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
-    //   if (assetRef.path === _AssetRefPath.XCM) {
-    //     result[key] = assetRef;
-    //   }
-    // });
-    //
-    // return result;
+  get xcmRefMap () {
+    const result: Record<string, _AssetRef> = {};
+
+    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+      if (assetRef.path === _AssetRefPath.XCM) {
+        result[key] = assetRef;
+      }
+    });
+
+    return result;
   }
 
   public getEvmApi (slug: string) {
@@ -343,7 +342,7 @@ export class ChainService {
     for (const asset of Object.values(this.getAssetRegistry())) {
       if (asset.originChain === destinationChainSlug) { // check
         const assetRefKey = _parseAssetRefKey(originTokenSlug, asset.slug);
-        const assetRef = this.getAssetRefMap()[assetRefKey];
+        const assetRef = this.xcmRefMap[assetRefKey];
 
         if (assetRef && assetRef.path === _AssetRefPath.XCM) { // there's only 1 corresponding token on 1 chain
           destinationTokenInfo = asset;
@@ -571,7 +570,7 @@ export class ChainService {
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
     this.assetRegistrySubject.next(this.getAssetRegistry());
-    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.xcmRefMapSubject.next(this.xcmRefMap);
 
     await this.initApis();
     await this.initAssetSettings();
@@ -646,7 +645,7 @@ export class ChainService {
     this.dataMap.assetRefMap = updatedAssetRefMap;
 
     // this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
-    this.xcmRefMapSubject.next(this.dataMap.assetRefMap);
+    this.xcmRefMapSubject.next(this.xcmRefMap);
     this.logger.log('Finished updating latest asset ref');
   }
 

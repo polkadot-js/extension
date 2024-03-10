@@ -4,6 +4,7 @@
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
 
 import BaseMigrationJob from '../Base';
+// import MigrateAssetSetting from './databases/MigrateAssetSetting';
 import MigrateEarningVersion from './databases/MigrateEarningVersion';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';
@@ -48,5 +49,6 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.26-01': MigratePolygonUSDCProvider,
   '1.1.28-01': MigrateEarningVersion,
   '1.1.41-01': DeleteChainStaking
+  // '1.1.41-02': MigrateAssetSetting
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

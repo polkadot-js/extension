@@ -74,7 +74,7 @@ const Component: React.FC<Props> = (props: Props) => {
             suffix={_getAssetSymbol(toAssetInfo)}
             value={destinationValue}
           />
-          <span className={'__quote-footer-label'}>{t('Min receive')}</span>
+          <span className={'__quote-footer-label'}>{t('Minimum received')}</span>
         </div>
       </div>
     </div>

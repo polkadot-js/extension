@@ -77,7 +77,7 @@ const supportSlippageSelection = false;
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { defaultData, onDone, persistData, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { defaultData, onDone, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
@@ -109,6 +109,9 @@ const Component = () => {
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
+
+  // mobile:
+  const [showQuoteDetailOnMobile, setShowQuoteDetailOnMobile] = useState<boolean>(false);
 
   // @ts-ignore
   const fromValue = useWatchTransaction('from', form, defaultData);
@@ -557,6 +560,74 @@ const Component = () => {
     }, 300);
   }, [currentOptimalSwapPath, currentQuote, currentSlippage, onError, onSuccess, processState.currentStep, processState.steps.length]);
 
+  const destinationSwapValue = useMemo(() => {
+    if (currentQuote) {
+      const decimals = _getAssetDecimals(fromAssetInfo);
+
+      return new BigN(currentQuote.fromAmount)
+        .div(BN_TEN.pow(decimals))
+        .multipliedBy(currentQuote.rate);
+    }
+
+    return BN_ZERO;
+  }, [currentQuote, fromAssetInfo]);
+
+  const minimumReceived = useMemo(() => {
+    return destinationSwapValue.multipliedBy(1 - currentSlippage);
+  }, [destinationSwapValue, currentSlippage]);
+
+  const onAfterConfirmTermModal = useCallback(() => {
+    return setConfirmedTerm('swap-term-confirmed');
+  }, [setConfirmedTerm]);
+
+  const accountSelectorFilter = useCallback((account: AccountJson) => {
+    return !account.isHardware && !isAccountAll(account.address);
+  }, []);
+
+  const onViewQuoteDetail = useCallback(() => {
+    setShowQuoteDetailOnMobile(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isWebUI) {
+      setBackProps((prev) => ({
+        ...prev,
+        onClick: showQuoteDetailOnMobile
+          ? () => {
+            setShowQuoteDetailOnMobile(false);
+          }
+          : null
+      }));
+    }
+  }, [isWebUI, setBackProps, showQuoteDetailOnMobile]);
+
+  useEffect(() => {
+    if (!isWebUI) {
+      setBackProps((prev) => ({
+        ...prev,
+        onClick: showQuoteDetailOnMobile
+          ? () => {
+            setShowQuoteDetailOnMobile(false);
+          }
+          : null
+      }));
+    }
+  }, [isWebUI, setBackProps, showQuoteDetailOnMobile]);
+
+  useEffect(() => {
+    if (isWebUI) {
+      setCustomScreenTitle(t('Swap'));
+    } else {
+      setCustomScreenTitle(showQuoteDetailOnMobile ? t('Swap quote detail') : t('Swap'));
+    }
+
+    return () => {
+      if (isWebUI) {
+        setCustomScreenTitle(undefined);
+      }
+    };
+  }, [isWebUI, setCustomScreenTitle, showQuoteDetailOnMobile, t]);
+
   useEffect(() => {
     form.setFieldValue('chain', _getAssetOriginChain(fromAssetInfo));
   }, [form, fromAssetInfo]);
@@ -703,13 +774,7 @@ const Component = () => {
     };
   }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
 
-  useEffect(() => {
-    setCustomScreenTitle(t('Swap'));
-
-    return () => {
-      setCustomScreenTitle(undefined);
-    };
-  }, [setCustomScreenTitle, t]);
+  // todo: support TOS later
 
   // useEffect(() => {
   //   if (!confirmedTerm) {
@@ -768,34 +833,14 @@ const Component = () => {
     };
   }, [defaultFromValue, persistData]);
 
-  const destinationSwapValue = useMemo(() => {
-    if (currentQuote) {
-      const decimals = _getAssetDecimals(fromAssetInfo);
-
-      return new BigN(currentQuote.fromAmount)
-        .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate);
-    }
-
-    return BN_ZERO;
-  }, [currentQuote, fromAssetInfo]);
-
-  const minReceivable = useMemo(() => {
-    return destinationSwapValue.multipliedBy(1 - currentSlippage);
-  }, [destinationSwapValue, currentSlippage]);
-
-  const onAfterConfirmTermModal = useCallback(() => {
-    return setConfirmedTerm('swap-term-confirmed');
-  }, [setConfirmedTerm]);
-
-  const accountSelectorFilter = useCallback((account: AccountJson) => {
-    return !account.isHardware && !isAccountAll(account.address);
-  }, []);
-
   return (
     <>
       <>
-        <div className={CN('__transaction-form-area', { '-init-animation': !showQuoteAreaRef.current })}>
+        <div className={CN('__transaction-form-area', {
+          '-init-animation': !showQuoteAreaRef.current,
+          hidden: showQuoteDetailOnMobile
+        })}
+        >
           <TransactionContent>
             <Form
               className={'form-container'}
@@ -896,32 +941,99 @@ const Component = () => {
               </Form.Item>)}
             </Form>
 
-            <div
-              className={'__slippage-info'}
-            >
-              <div
-                className={'__slippage-right-action'}
-                onClick={onOpenSlippageModal}
-              >
-                <span>Slippage:</span>
-              &nbsp;<span>{currentSlippage * 100}%</span>
+            {
+              (isWebUI || !showQuoteAreaRef.current) && (
+                <div
+                  className={'__slippage-action-wrapper'}
+                >
+                  <div
+                    className={'__slippage-action'}
+                    onClick={onOpenSlippageModal}
+                  >
+                    <span>Slippage:</span>
+                    &nbsp;<span>{currentSlippage * 100}%</span>
 
-                {
-                  supportSlippageSelection && (
-                    <div
-                      className={'__slippage-editor-button'}
+                    {
+                      supportSlippageSelection && (
+                        <div
+                          className={'__slippage-editor-button'}
+                        >
+                          <Icon
+                            className={'__slippage-editor-button-icon'}
+                            phosphorIcon={PencilSimpleLine}
+                            size='sm'
+                          />
+                        </div>
+                      )
+                    }
+                  </div>
+                </div>
+              )
+            }
+
+            {
+              showQuoteAreaRef.current && !isWebUI && !!currentQuote && !isFormInvalid && (
+                <>
+                  <MetaInfo
+                    labelColorScheme={'gray'}
+                    spaceSize={'sm'}
+                    valueColorScheme={'light'}
+                  >
+                    <MetaInfo.Default
+                      className={'__quote-rate'}
+                      label={t('Quote rate')}
+                      valueColorSchema={'gray'}
                     >
-                      <Icon
-                        className={'__slippage-editor-button-icon'}
-                        phosphorIcon={PencilSimpleLine}
-                        size='sm'
-                      />
-                    </div>
-                  )
-                }
-              </div>
+                      {
+                        handleRequestLoading
+                          ? (
+                            <ActivityIndicator />
+                          )
+                          : renderRateInfo()
+                      }
+                    </MetaInfo.Default>
 
-            </div>
+                    <MetaInfo.Default
+                      label={t('Swap route')}
+                    >
+                      {
+                        handleRequestLoading
+                          ? (
+                            <ActivityIndicator />
+                          )
+                          : (
+                            <Number
+                              decimal={0}
+                              prefix={'$'}
+                              value={getTotalConvertedBalance}
+                            />
+                          )
+                      }
+                    </MetaInfo.Default>
+                  </MetaInfo>
+
+                  <div className='__view-quote-detail-action-wrapper'>
+                    <div className={'__quote-reset-time'}>
+                      Quote reset in: {quoteCountdownTime}s
+                    </div>
+
+                    <Button
+                      className={'__view-quote-detail-button'}
+                      onClick={onViewQuoteDetail}
+                      size='xs'
+                      type='ghost'
+                    >
+                      <span>{t('View swap quote')}</span>
+
+                      <Icon
+                        phosphorIcon={CaretRight}
+                        size={'sm'}
+                      />
+                    </Button>
+                  </div>
+                </>
+              )
+            }
           </TransactionContent>
           <TransactionFooter>
             <Button
@@ -936,7 +1048,11 @@ const Component = () => {
           </TransactionFooter>
         </div>
 
-        <div className={CN('__transaction-swap-quote-info-area', { '-init-animation': !showQuoteAreaRef.current })}>
+        <div className={CN('__transaction-swap-quote-info-area', {
+          '-init-animation': !showQuoteAreaRef.current,
+          hidden: !isWebUI && !showQuoteDetailOnMobile
+        })}
+        >
           <div className={'__quote-header-wrapper'}>
             <div className={'__header-left-part'}>
               <BackgroundIcon
@@ -1004,12 +1120,12 @@ const Component = () => {
                 >
                 </MetaInfo.Default>
                 <SwapRoute swapRoute={currentQuote.route} />
-                <div className={'__min-receivale'}>
+                <div className={'__minimum-received'}>
                   <MetaInfo.Number
                     decimals={0}
-                    label={t('Min receivable')}
+                    label={t('Minimum received')}
                     suffix={_getAssetSymbol(toAssetInfo)}
-                    value={minReceivable}
+                    value={minimumReceived}
                   />
                 </div>
               </MetaInfo>
@@ -1128,6 +1244,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const dataContext = useContext(DataContext);
   const { setWebBaseClassName } = useContext(WebUIContext);
+  const { isWebUI } = useContext(ScreenContext);
 
   useEffect(() => {
     setWebBaseClassName(`${className || ''}-web-base-container`);
@@ -1139,7 +1256,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
   return (
     <PageWrapper
-      className={CN(className)}
+      className={CN(className, { '-desktop': isWebUI, '-mobile': !isWebUI })}
       resolve={dataContext.awaitStores(['swap', 'price'])}
     >
       <Component />
@@ -1149,14 +1266,6 @@ const Wrapper: React.FC<Props> = (props: Props) => {
 
 const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {
-    display: 'flex',
-    flexDirection: 'row',
-    paddingTop: 24,
-    maxWidth: 784,
-    width: '100%',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-    gap: token.size,
     '.__fee-paid-wrapper': {
       color: token.colorTextTertiary,
       display: 'flex',
@@ -1201,14 +1310,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWhite
     },
 
-    '.__slippage-info': {
+    '.__slippage-action-wrapper': {
       display: 'flex',
       justifyContent: 'flex-end',
       alignItems: 'center',
-      color: token.colorSuccess,
-      marginBottom: 24
+      color: token.colorSuccess
     },
-    '.__slippage-right-action': {
+    '.__slippage-action': {
       // cursor: 'pointer',
       alignItems: 'center',
       display: 'flex'
@@ -1395,19 +1503,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center'
     },
 
-    '.__transaction-form-area .transaction-footer': {
-      paddingTop: 0,
-      paddingBottom: 0,
-      paddingRight: 0,
-      paddingLeft: 0
-    },
-    '.__transaction-form-area .transaction-content': {
-      paddingRight: 0,
-      paddingLeft: 0
-    },
-    '.__transaction-form-area .ant-form-item ': {
+    '.__transaction-form-area .ant-form-item': {
       marginBottom: 12
     },
+
     '.__token-selector-wrapper .ant-select-modal-input-wrapper': {
       color: token.colorWhite,
       paddingLeft: 16
@@ -1418,20 +1517,35 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       minWidth: 160,
       maxWidth: 182
     },
-    '.__min-receivale': {
+    '.__minimum-received': {
       marginTop: 12
     },
-    '.__min-receivale .__label-col': {
+    '.__minimum-received .__label-col': {
       fontSize: 14,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeight,
       color: token.colorTextTertiary
     },
-    '.__min-receivale .__value': {
+    '.__minimum-received .__value': {
       fontSize: 14,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeight,
       color: token.colorWhite
+    },
+
+    '.__switch-side-container': {
+      position: 'relative',
+      '.__switch-button': {
+        position: 'absolute',
+        backgroundColor: token['gray-2'],
+        borderRadius: '50%',
+        alignItems: 'center',
+        bottom: -16,
+        marginLeft: -20,
+        left: '50%',
+        display: 'flex',
+        justifyContent: 'center'
+      }
     },
 
     // desktop
@@ -1440,12 +1554,33 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       // todo: use react solution, not CSS, to hide the back button
       '.title-group .ant-btn': {
         display: 'none'
-      },
+      }
+    },
+
+    '&.-desktop': {
+      display: 'flex',
+      flexDirection: 'row',
+      maxWidth: 784,
+      width: '100%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+      gap: token.size,
 
       '.__transaction-form-area': {
         overflowX: 'hidden',
         flex: 1,
         transition: 'transform 0.3s ease-in-out'
+      },
+
+      '.__transaction-form-area .transaction-footer': {
+        paddingTop: 0,
+        paddingBottom: 0,
+        paddingRight: 0,
+        paddingLeft: 0
+      },
+      '.__transaction-form-area .transaction-content': {
+        paddingRight: 0,
+        paddingLeft: 0
       },
 
       '.__transaction-swap-quote-info-area': {
@@ -1463,20 +1598,27 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.__transaction-form-area.-init-animation': {
         transform: 'translateX(50%)',
         zIndex: 2
+      },
+      '.__slippage-action-wrapper': {
+        marginBottom: 24
       }
     },
-    '.__switch-side-container': {
-      position: 'relative',
-      '.__switch-button': {
-        position: 'absolute',
-        backgroundColor: token['gray-2'],
-        borderRadius: '50%',
-        alignItems: 'center',
-        bottom: -16,
-        marginLeft: -20,
-        left: '50%',
+
+    // desktop
+
+    '&.-mobile': {
+      overflow: 'auto',
+      height: '100%',
+
+      '.__transaction-form-area': {
         display: 'flex',
-        justifyContent: 'center'
+        flexDirection: 'column',
+        height: '100%'
+      },
+
+      '.transaction-content': {
+        flexGrow: 0,
+        flexBasis: 'auto'
       }
     }
   };

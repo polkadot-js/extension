@@ -917,28 +917,30 @@ const Component = () => {
                 />
               </div>
 
-              {showRecipientForm && (<Form.Item
-                name={'recipient'}
-                rules={[
-                  {
-                    validator: recipientAddressValidator
-                  }
-                ]}
-                statusHelpAsTooltip={isWebUI}
-                validateTrigger='onBlur'
-              >
-                <AddressInput
-                  addressPrefix={destChainNetworkPrefix}
-                  allowDomain={true}
-                  chain={destChain}
-                  label={t('Recipient account')}
-                  networkGenesisHash={destChainGenesisHash}
-                  placeholder={t('Input your recipient account')}
-                  saveAddress={true}
-                  showAddressBook={true}
-                  showScanner={true}
-                />
-              </Form.Item>)}
+              {showRecipientForm && (
+                <Form.Item
+                  name={'recipient'}
+                  rules={[
+                    {
+                      validator: recipientAddressValidator
+                    }
+                  ]}
+                  statusHelpAsTooltip={isWebUI}
+                  validateTrigger='onBlur'
+                >
+                  <AddressInput
+                    addressPrefix={destChainNetworkPrefix}
+                    allowDomain={true}
+                    chain={destChain}
+                    label={t('Recipient account')}
+                    networkGenesisHash={destChainGenesisHash}
+                    placeholder={t('Input your recipient account')}
+                    saveAddress={true}
+                    showAddressBook={true}
+                    showScanner={true}
+                  />
+                </Form.Item>
+              )}
             </Form>
 
             {
@@ -972,65 +974,81 @@ const Component = () => {
             }
 
             {
-              showQuoteAreaRef.current && !isWebUI && !!currentQuote && !isFormInvalid && (
+              showQuoteAreaRef.current && !isWebUI && (
                 <>
-                  <MetaInfo
-                    labelColorScheme={'gray'}
-                    spaceSize={'sm'}
-                    valueColorScheme={'light'}
-                  >
-                    <MetaInfo.Default
-                      className={'__quote-rate'}
-                      label={t('Quote rate')}
-                      valueColorSchema={'gray'}
-                    >
-                      {
-                        handleRequestLoading
-                          ? (
-                            <ActivityIndicator />
-                          )
-                          : renderRateInfo()
-                      }
-                    </MetaInfo.Default>
+                  {
+                    !!currentQuote && !isFormInvalid && (
+                      <MetaInfo
+                        labelColorScheme={'gray'}
+                        spaceSize={'sm'}
+                        valueColorScheme={'light'}
+                      >
+                        <MetaInfo.Default
+                          className={'__quote-rate'}
+                          label={t('Quote rate')}
+                          valueColorSchema={'gray'}
+                        >
+                          {
+                            handleRequestLoading
+                              ? (
+                                <ActivityIndicator />
+                              )
+                              : renderRateInfo()
+                          }
+                        </MetaInfo.Default>
 
-                    <MetaInfo.Default
-                      label={t('Swap route')}
-                    >
-                      {
-                        handleRequestLoading
-                          ? (
-                            <ActivityIndicator />
-                          )
-                          : (
-                            <Number
-                              decimal={0}
-                              prefix={'$'}
-                              value={getTotalConvertedBalance}
-                            />
-                          )
-                      }
-                    </MetaInfo.Default>
-                  </MetaInfo>
+                        <MetaInfo.Default
+                          label={t('Swap route')}
+                        >
+                          {
+                            handleRequestLoading
+                              ? (
+                                <ActivityIndicator />
+                              )
+                              : (
+                                <Number
+                                  decimal={0}
+                                  prefix={'$'}
+                                  value={getTotalConvertedBalance}
+                                />
+                              )
+                          }
+                        </MetaInfo.Default>
+                      </MetaInfo>
+                    )
+                  }
 
-                  <div className='__view-quote-detail-action-wrapper'>
-                    <div className={'__quote-reset-time'}>
-                      Quote reset in: {quoteCountdownTime}s
-                    </div>
+                  {
+                    swapError && (
+                      <div className={'__error-message'}>
+                        {swapError.message}
+                      </div>
+                    )
+                  }
 
-                    <Button
-                      className={'__view-quote-detail-button'}
-                      onClick={onViewQuoteDetail}
-                      size='xs'
-                      type='ghost'
-                    >
-                      <span>{t('View swap quote')}</span>
+                  {
+                    !isFormInvalid && (
+                      <div className='__view-quote-detail-action-wrapper'>
+                        <div className={'__quote-reset-time'}>
+                          Quote reset in: {quoteCountdownTime}s
+                        </div>
 
-                      <Icon
-                        phosphorIcon={CaretRight}
-                        size={'sm'}
-                      />
-                    </Button>
-                  </div>
+                        <Button
+                          className={'__view-quote-detail-button'}
+                          onClick={onViewQuoteDetail}
+                          size='xs'
+                          type='ghost'
+                        >
+                          <span>{t('View swap quote')}</span>
+
+                          <Icon
+                            phosphorIcon={CaretRight}
+                            size={'sm'}
+                          />
+                        </Button>
+                      </div>
+                    )
+                  }
                 </>
               )
             }

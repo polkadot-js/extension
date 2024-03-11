@@ -41,8 +41,7 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
         'zeta_test-NATIVE-ZETA'
       ];
 
-      for (let i = 0; i < oldSlugs.length; i++) {
-        const oldSlug = oldSlugs[i];
+      await Promise.all(oldSlugs.map(async (oldSlug, i) => {
         const oldSlugSplit = oldSlug.split('-');
         const oldChainSlug = oldSlugSplit[0];
         const oldSymbolSlug = oldSlugSplit[2];
@@ -50,10 +49,9 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
         const newSlugSplit = newSlugs[i].split('-');
         const newSymbolSlug = newSlugSplit[2];
 
-        // const filterTransactions = await this.state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).and((tx) => {
-        //   return tx.amount?.symbol === oldSymbolSlug;
-        // }).toArray();
-        const filterTransactions = await this.state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).toArray();
+        const filterTransactions = await state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).and((tx) => {
+          return tx.amount?.symbol === oldSymbolSlug;
+        }).toArray();
 
         if (filterTransactions) {
           for (const transaction of filterTransactions) {
@@ -63,17 +61,8 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
           }
         }
 
-        // Delete
-        await state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).and((tx) => {
-          return tx.amount?.symbol === oldSymbolSlug;
-        }).delete();
-
-        // Put
         await state.dbService.stores.transaction.table.bulkPut(filterTransactions);
-
-        // await state.dbService.stores.transaction.table.bulkPut(filterTransactions);
-        // console.log('new filterTransactions', filterTransactions);
-      }
+      }));
     } catch (e) {
       this.logger.error(e);
     }

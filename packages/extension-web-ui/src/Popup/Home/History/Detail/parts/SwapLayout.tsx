@@ -74,9 +74,9 @@ const Component: React.FC<Props> = (props: Props) => {
         />
         <AlertBox
           className={'__swap-quote-warning'}
-          description={t('You can view detailed transaction progress on explorer')}
-          title={t('Warning!')}
-          type='warning'
+          description={t('You can view your swap process and details by clicking View on explorer')}
+          title={t('Helpful tip')}
+          type='info'
         />
       </>
 

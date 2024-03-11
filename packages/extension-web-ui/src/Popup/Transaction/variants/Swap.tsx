@@ -13,7 +13,7 @@ import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Sw
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
 import { SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -101,6 +101,7 @@ const Component = () => {
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
+  // @ts-ignore
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const showQuoteAreaRef = useRef(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
@@ -710,11 +711,11 @@ const Component = () => {
     };
   }, [setCustomScreenTitle, t]);
 
-  useEffect(() => {
-    if (!confirmedTerm) {
-      activeModal(SWAP_TERM_AND_SERVICE_MODAL);
-    }
-  }, [activeModal, confirmedTerm]);
+  // useEffect(() => {
+  //   if (!confirmedTerm) {
+  //     activeModal(SWAP_TERM_AND_SERVICE_MODAL);
+  //   }
+  // }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
     if (!fromTokenSlugValue && fromTokenItems.length > 0) {

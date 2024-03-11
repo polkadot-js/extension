@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useAccountBalance, useGetChainSlugsByCurrentAccount, useSelector, useTokenGroup } from '@subwallet/extension-web-ui/hooks';
 import { BalanceValueInfo, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
@@ -76,7 +77,14 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
           exists.poolSlugs.push(pool.slug);
-          exists.totalValueStaked = exists.totalValueStaked.plus(calculateTotalValueStaked(pool, assetRegistry, priceMap));
+
+          if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
+            if (pool.type === YieldPoolType.NATIVE_STAKING) {
+              exists.totalValueStaked = calculateTotalValueStaked(pool, assetRegistry, priceMap);
+            }
+          } else {
+            exists.totalValueStaked = exists.totalValueStaked.plus(calculateTotalValueStaked(pool, assetRegistry, priceMap));
+          }
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
 
@@ -113,7 +121,9 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             poolListLength: 1,
             poolSlugs: [pool.slug],
             description: pool.metadata.description,
-            totalValueStaked: calculateTotalValueStaked(pool, assetRegistry, priceMap),
+            totalValueStaked: (_STAKING_CHAIN_GROUP.relay.includes(chain) && pool.type !== YieldPoolType.NATIVE_STAKING)
+              ? BN_ZERO
+              : calculateTotalValueStaked(pool, assetRegistry, priceMap),
             minJoin: pool.statistic?.earningThreshold?.join
           };
         }

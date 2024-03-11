@@ -1174,5 +1174,22 @@
   "Bonded": "",
   "Dismiss": "",
   "Introducing Earning feature": "",
-  "SubWallet's <highlight>Staking</highlight> feature has been updated to become <highlight>Earning</highlight> feature. Now, you can earn yield with native staking, liquid staking, lending, and staking dApp on SubWallet.": ""
+  "SubWallet's <highlight>Staking</highlight> feature has been updated to become <highlight>Earning</highlight> feature. Now, you can earn yield with native staking, liquid staking, lending, and staking dApp on SubWallet.": "",
+  "Recipient should be a valid {{networkName}} address": "",
+  "Withdraw from account": "",
+  "Unknown error": "",
+  "Oops, an error occurred!": "",
+  "Something went wrong. Help us fix the problem by sending a report anonymously!": "",
+  "Send report": "",
+  "Automatic withdrawal": "",
+  "Notifications": "",
+  "Assets & addresses": "",
+  "Contact support": "",
+  "Terms of use": "",
+  "X (Twitter)": "",
+  "Extension auto lock": "",
+  "Auto lock": "",
+  "Submitted": "送信完了",
+  "Transaction submitted!": "トランザクションの送信完了！",
+  "Track transaction progress in the History tab or go back to home": "履歴タブでトランザクションの進行状況を追跡するか、\nホームに戻ってください。"
 }

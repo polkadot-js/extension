@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetSymbol, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldJoinData, ValidatorInfo, YieldPoolType, YieldStepType } from '@subwallet/extension-base/types';
@@ -172,7 +172,7 @@ const Component = () => {
         if (fee.slug !== '') {
           const asset = chainAsset[fee.slug];
           const feeDecimals = _getAssetDecimals(asset);
-          const _priceValue = asset.priceId ? priceMap[asset.priceId] : 0;
+          const _priceValue = asset.priceId ? (priceMap[asset.priceId] ?? 0) : 0;
           const feeNumb = _priceValue * (fee.amount ? parseFloat(fee.amount) / 10 ** feeDecimals : 0);
 
           _totalFee += feeNumb;
@@ -239,10 +239,22 @@ const Component = () => {
   }, [poolTargetValue, poolTargetsMap, poolType, slug]);
 
   const accountSelectorList = useMemo(() => {
-    return accounts.filter((a) => {
-      const isEvmChain = _isChainEvmCompatible(chainInfoMap[poolChain]);
+    const chainInfo = chainInfoMap[poolChain];
 
-      return !isAccountAll(a.address) && isEvmChain === isEthereumAddress(a.address);
+    if (!chainInfo) {
+      return [];
+    }
+
+    return accounts.filter((a) => {
+      if (isAccountAll(a.address)) {
+        return false;
+      }
+
+      if (a.originGenesisHash && _getSubstrateGenesisHash(chainInfo) !== a.originGenesisHash) {
+        return false;
+      }
+
+      return _isChainEvmCompatible(chainInfo) === isEthereumAddress(a.address);
     });
   }, [accounts, chainInfoMap, poolChain]);
 
@@ -579,7 +591,7 @@ const Component = () => {
       return ExtrinsicType.STAKING_BOND;
     }
 
-    if (YieldPoolType.LIQUID_STAKING) {
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
       if (chainValue === 'moonbeam') {
         return ExtrinsicType.MINT_STDOT;
       }
@@ -587,7 +599,7 @@ const Component = () => {
       return ExtrinsicType.MINT_LDOT;
     }
 
-    if (YieldPoolType.LENDING) {
+    if (poolType === YieldPoolType.LENDING) {
       return ExtrinsicType.MINT_LDOT;
     }
 

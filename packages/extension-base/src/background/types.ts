@@ -95,6 +95,7 @@ export interface AccountJson extends AbstractAddressJson {
 
 export interface AddressJson extends AbstractAddressJson {
   isRecent?: boolean;
+  recentChainSlugs?: string[];
 }
 
 // all Accounts and the address of the current Account

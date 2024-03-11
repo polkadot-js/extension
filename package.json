@@ -10,7 +10,7 @@
     "url": "https://github.com/Koniverse/Subwallet-V2.git"
   },
   "sideEffects": false,
-  "version": "1.1.38",
+  "version": "1.1.42",
   "workspaces": [
     "packages/*"
   ],
@@ -82,14 +82,16 @@
     "@ethereumjs/common": "^4.1.0",
     "@google/model-viewer": "3.1.1",
     "@ledgerhq/hw-app-eth": "6.33.4",
-    "@polkadot/api": "^10.9.1",
+    "@mangata-finance/type-definitions": "2.1.2",
+    "@polkadot/api": "^10.11.2",
     "@polkadot/api-base": "^10.11.2",
     "@polkadot/api-contract": "^10.11.2",
     "@polkadot/networks": "^12.6.2",
     "@polkadot/types": "^10.11.2",
+    "@polkadot/types-codec": "10.10.1",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
-    "@subwallet/chain-list": "0.2.41",
+    "@subwallet/chain-list": "0.2.43",
     "@subwallet/keyring": "^0.1.3",
     "@subwallet/ui-keyring": "^0.1.3",
     "babel-core": "^7.0.0-bridge.0",

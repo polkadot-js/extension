@@ -11,6 +11,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
@@ -21,8 +22,7 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { reformatAddress } from '@subwallet/extension-base/utils';
-import { anyNumberToBN, calculateGasFeeParams } from '@subwallet/extension-base/utils/eth';
+import { anyNumberToBN, reformatAddress } from '@subwallet/extension-base/utils';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { BN_ZERO } from '@subwallet/extension-base/utils/number';
@@ -404,6 +404,7 @@ export default class TransactionService {
     const transaction = this.getTransaction(id);
     const extrinsicType = transaction.extrinsicType;
 
+    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const formattedTransactionAddress = reformatAddress(transaction.address);
 
     const historyItem: TransactionHistoryItem = {
@@ -411,7 +412,7 @@ export default class TransactionService {
       chain: transaction.chain,
       direction: TransactionDirection.SEND,
       type: transaction.extrinsicType,
-      from: formattedTransactionAddress,
+      from: transaction.address,
       to: '',
       chainType: transaction.chainType,
       address: formattedTransactionAddress,
@@ -426,7 +427,6 @@ export default class TransactionService {
       startBlock: startBlock || 0
     };
 
-    const chainInfo = this.state.chainService.getChainInfoByKey(transaction.chain);
     const nativeAsset = _getChainNativeTokenBasicInfo(chainInfo);
     const baseNativeAmount = { value: '0', decimals: nativeAsset.decimals, symbol: nativeAsset.symbol };
 
@@ -896,7 +896,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 2
       };
     } else {
       txObject = {
@@ -906,7 +907,8 @@ export default class TransactionService {
         to: transaction.to !== undefined ? transaction.to : '',
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
-        chainId: _getEvmChainId(chainInfo)
+        chainId: _getEvmChainId(chainInfo),
+        type: 0
       };
     }
 

@@ -588,6 +588,30 @@ const Component = () => {
     setShowQuoteDetailOnMobile(true);
   }, []);
 
+  const renderSlippage = () => {
+    return (
+      <div className='__slippage-action-wrapper'>
+        <div
+          className='__slippage-action'
+          onClick={onOpenSlippageModal}
+        >
+          <span>Slippage:</span>
+                    &nbsp;<span>{currentSlippage * 100}%</span>
+
+          {supportSlippageSelection && (
+            <div className='__slippage-editor-button'>
+              <Icon
+                className='__slippage-editor-button-icon'
+                phosphorIcon={PencilSimpleLine}
+                size='sm'
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     if (!isWebUI) {
       setBackProps((prev) => ({
@@ -842,216 +866,192 @@ const Component = () => {
         })}
         >
           <TransactionContent>
-            <Form
-              className={'form-container'}
-              form={form}
-              initialValues={formDefault}
-              onFieldsChange={onFieldsChange}
-              onFinish={onSubmit}
-            >
-              <HiddenInput fields={hideFields} />
-
-              <Form.Item
-                name={'from'}
-                rules={[
-                  {
-                    validator: validateSwapFromAccount
-                  }
-                ]}
+            <>
+              <Form
+                className={'form-container'}
+                form={form}
+                initialValues={formDefault}
+                onFieldsChange={onFieldsChange}
+                onFinish={onSubmit}
               >
-                <AccountSelector
-                  disabled={!isAllAccount}
-                  filter={accountSelectorFilter}
-                  label={t('Swap from account')}
-                />
-              </Form.Item>
+                <HiddenInput fields={hideFields} />
 
-              <div className={'__balance-display-area'}>
-                <FreeBalance
-                  address={fromValue}
-                  chain={chainValue}
-                  hidden={!canShowAvailableBalance}
-                  isSubscribe={true}
-                  label={`${t('Available balance')}:`}
-                  tokenSlug={fromTokenSlugValue}
-                />
-              </div>
-
-              <div className={'__swap-field-area'}>
-                <SwapFromField
-                  amountValue={fromAmountValue}
-                  fromAsset={fromAssetInfo}
-                  label={t('From')}
-                  onChangeAmount={onChangeAmount}
-                  onSelectToken={onSelectFromToken}
-                  tokenSelectorItems={fromTokenItems}
-                  tokenSelectorValue={fromTokenSlugValue}
-                />
-
-                <div className='__switch-side-container'>
-                  <Button
-                    className={'__switch-button'}
-                    disabled={!isSwitchable}
-                    icon={(
-                      <Icon
-                        customSize={'20px'}
-                        phosphorIcon={ArrowsDownUp}
-                        weight='fill'
-                      />
-                    )}
-                    onClick={onSwitchSide}
-                    shape='circle'
-                    size='xs'
-                    type={'ghost'}
-                  >
-                  </Button>
-                </div>
-
-                <SwapToField
-                  loading={handleRequestLoading && showQuoteAreaRef.current}
-                  onSelectToken={onSelectToToken}
-                  swapValue={destinationSwapValue}
-                  toAsset={toAssetInfo}
-                  tokenSelectorItems={toTokenItems}
-                  tokenSelectorValue={toTokenSlugValue}
-                />
-              </div>
-
-              {showRecipientForm && (
                 <Form.Item
-                  name={'recipient'}
+                  name={'from'}
                   rules={[
                     {
-                      validator: recipientAddressValidator
+                      validator: validateSwapFromAccount
                     }
                   ]}
-                  statusHelpAsTooltip={isWebUI}
-                  validateTrigger='onBlur'
                 >
-                  <AddressInput
-                    addressPrefix={destChainNetworkPrefix}
-                    allowDomain={true}
-                    chain={destChain}
-                    label={t('Recipient account')}
-                    networkGenesisHash={destChainGenesisHash}
-                    placeholder={t('Input your recipient account')}
-                    saveAddress={true}
-                    showAddressBook={true}
-                    showScanner={true}
+                  <AccountSelector
+                    disabled={!isAllAccount}
+                    filter={accountSelectorFilter}
+                    label={t('Swap from account')}
                   />
                 </Form.Item>
-              )}
-            </Form>
 
-            {
-              (isWebUI || !showQuoteAreaRef.current) && (
-                <div
-                  className={'__slippage-action-wrapper'}
-                >
-                  <div
-                    className={'__slippage-action'}
-                    onClick={onOpenSlippageModal}
+                <div className={'__balance-display-area'}>
+                  <FreeBalance
+                    address={fromValue}
+                    chain={chainValue}
+                    hidden={!canShowAvailableBalance}
+                    isSubscribe={true}
+                    label={`${t('Available balance')}:`}
+                    tokenSlug={fromTokenSlugValue}
+                  />
+                </div>
+
+                <div className={'__swap-field-area'}>
+                  <SwapFromField
+                    amountValue={fromAmountValue}
+                    fromAsset={fromAssetInfo}
+                    label={t('From')}
+                    onChangeAmount={onChangeAmount}
+                    onSelectToken={onSelectFromToken}
+                    tokenSelectorItems={fromTokenItems}
+                    tokenSelectorValue={fromTokenSlugValue}
+                  />
+
+                  <div className='__switch-side-container'>
+                    <Button
+                      className={'__switch-button'}
+                      disabled={!isSwitchable}
+                      icon={(
+                        <Icon
+                          customSize={'20px'}
+                          phosphorIcon={ArrowsDownUp}
+                          weight='fill'
+                        />
+                      )}
+                      onClick={onSwitchSide}
+                      shape='circle'
+                      size='xs'
+                      type={'ghost'}
+                    >
+                    </Button>
+                  </div>
+
+                  <SwapToField
+                    loading={handleRequestLoading && showQuoteAreaRef.current}
+                    onSelectToken={onSelectToToken}
+                    swapValue={destinationSwapValue}
+                    toAsset={toAssetInfo}
+                    tokenSelectorItems={toTokenItems}
+                    tokenSelectorValue={toTokenSlugValue}
+                  />
+                </div>
+
+                {showRecipientForm && (
+                  <Form.Item
+                    name={'recipient'}
+                    rules={[
+                      {
+                        validator: recipientAddressValidator
+                      }
+                    ]}
+                    statusHelpAsTooltip={isWebUI}
+                    validateTrigger='onBlur'
                   >
-                    <span>Slippage:</span>
-                    &nbsp;<span>{currentSlippage * 100}%</span>
+                    <AddressInput
+                      addressPrefix={destChainNetworkPrefix}
+                      allowDomain={true}
+                      chain={destChain}
+                      label={t('Recipient account')}
+                      networkGenesisHash={destChainGenesisHash}
+                      placeholder={t('Input your recipient account')}
+                      saveAddress={true}
+                      showAddressBook={true}
+                      showScanner={true}
+                    />
+                  </Form.Item>
+                )}
+              </Form>
+              {
+                (isWebUI || !showQuoteAreaRef.current) && renderSlippage()
+              }
+
+              {
+                showQuoteAreaRef.current && !isWebUI && (
+                  <>
+                    {
+                      !!currentQuote && !isFormInvalid && (
+                        <MetaInfo
+                          labelColorScheme={'gray'}
+                          spaceSize={'sm'}
+                          valueColorScheme={'light'}
+                        >
+                          <MetaInfo.Default
+                            className={'__quote-rate'}
+                            label={t('Quote rate')}
+                            valueColorSchema={'gray'}
+                          >
+                            {
+                              handleRequestLoading
+                                ? (
+                                  <ActivityIndicator />
+                                )
+                                : renderRateInfo()
+                            }
+                          </MetaInfo.Default>
+
+                          <MetaInfo.Default
+                            className={'__swap-route'}
+                            label={t('Swap route')}
+                          >
+                            {
+                              handleRequestLoading
+                                ? (
+                                  <ActivityIndicator />
+                                )
+                                : (
+                                  <Number
+                                    decimal={0}
+                                    prefix={'$'}
+                                    value={getTotalConvertedBalance}
+                                  />
+                                )
+                            }
+                          </MetaInfo.Default>
+                        </MetaInfo>
+                      )
+                    }
 
                     {
-                      supportSlippageSelection && (
-                        <div
-                          className={'__slippage-editor-button'}
-                        >
-                          <Icon
-                            className={'__slippage-editor-button-icon'}
-                            phosphorIcon={PencilSimpleLine}
-                            size='sm'
-                          />
+                      swapError && (
+                        <div className={'__error-message'}>
+                          {swapError.message}
                         </div>
                       )
                     }
-                  </div>
-                </div>
-              )
-            }
 
-            {
-              showQuoteAreaRef.current && !isWebUI && (
-                <>
-                  {
-                    !!currentQuote && !isFormInvalid && (
-                      <MetaInfo
-                        labelColorScheme={'gray'}
-                        spaceSize={'sm'}
-                        valueColorScheme={'light'}
-                      >
-                        <MetaInfo.Default
-                          className={'__quote-rate'}
-                          label={t('Quote rate')}
-                          valueColorSchema={'gray'}
-                        >
-                          {
-                            handleRequestLoading
-                              ? (
-                                <ActivityIndicator />
-                              )
-                              : renderRateInfo()
-                          }
-                        </MetaInfo.Default>
-
-                        <MetaInfo.Default
-                          label={t('Swap route')}
-                        >
-                          {
-                            handleRequestLoading
-                              ? (
-                                <ActivityIndicator />
-                              )
-                              : (
-                                <Number
-                                  decimal={0}
-                                  prefix={'$'}
-                                  value={getTotalConvertedBalance}
-                                />
-                              )
-                          }
-                        </MetaInfo.Default>
-                      </MetaInfo>
-                    )
-                  }
-
-                  {
-                    swapError && (
-                      <div className={'__error-message'}>
-                        {swapError.message}
-                      </div>
-                    )
-                  }
-
-                  {
-                    !isFormInvalid && (
-                      <div className='__view-quote-detail-action-wrapper'>
-                        <div className={'__quote-reset-time'}>
+                    {
+                      !isFormInvalid && (
+                        <div className='__view-quote-detail-action-wrapper'>
+                          <div className={'__quote-reset-time'}>
                           Quote reset in: {quoteCountdownTime}s
+                          </div>
+
+                          <Button
+                            className={'__view-quote-detail-button'}
+                            onClick={onViewQuoteDetail}
+                            size='xs'
+                            type='ghost'
+                          >
+                            <span>{t('View swap quote')}</span>
+
+                            <Icon
+                              phosphorIcon={CaretRight}
+                              size={'sm'}
+                            />
+                          </Button>
                         </div>
-
-                        <Button
-                          className={'__view-quote-detail-button'}
-                          onClick={onViewQuoteDetail}
-                          size='xs'
-                          type='ghost'
-                        >
-                          <span>{t('View swap quote')}</span>
-
-                          <Icon
-                            phosphorIcon={CaretRight}
-                            size={'sm'}
-                          />
-                        </Button>
-                      </div>
-                    )
-                  }
-                </>
-              )
-            }
+                      )
+                    }
+                  </>
+                )
+              }
+            </>
           </TransactionContent>
           <TransactionFooter>
             <Button
@@ -1071,164 +1071,172 @@ const Component = () => {
           hidden: !isWebUI && !showQuoteDetailOnMobile
         })}
         >
-          <div className={'__quote-header-wrapper'}>
-            <div className={'__header-left-part'}>
-              <BackgroundIcon
-                backgroundColor='#004BFF'
-                className={'__quote-icon-info'}
-                iconColor='#fff'
-                phosphorIcon={Info}
-                weight={'fill'}
-              />
-              <div className={'__text'}>Swap quote</div>
-            </div>
-            <div className={'__header-right-part'}>
-              <Button
-                className={'__view-quote-button'}
-                disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
-                onClick={openAllQuotesModal}
-                size='xs'
-                type='ghost'
-              >
-                <span>{t('View quote')}</span>
-
-                <Icon
-                  phosphorIcon={CaretRight}
-                  size={'sm'}
+          <>
+            <div className={'__quote-header-wrapper'}>
+              <div className={'__header-left-part'}>
+                <BackgroundIcon
+                  backgroundColor='#004BFF'
+                  className={'__quote-icon-info'}
+                  iconColor='#fff'
+                  phosphorIcon={Info}
+                  weight={'fill'}
                 />
-              </Button>
-            </div>
-          </div>
-
-          {
-            !!currentQuote && !handleRequestLoading && !isFormInvalid && (
-              <MetaInfo
-                className={CN('__quote-info-block')}
-                hasBackgroundWrapper
-                labelColorScheme={'gray'}
-                spaceSize={'sm'}
-                valueColorScheme={'gray'}
-              >
-                <MetaInfo.Default
-                  className={'__quote-rate'}
-                  label={t('Quote rate')}
-                  valueColorSchema={'gray'}
-                >
-                  {renderRateInfo()}
-                </MetaInfo.Default>
-
-                <MetaInfo.Default
-                  className={'__swap-provider'}
-                  label={t('Swap provider')}
-                >
-                  <Logo
-                    className='__provider-logo'
-                    isShowSubLogo={false}
-                    network={currentQuote.provider.id.toLowerCase()}
-                    shape='squircle'
-                    size={24}
-                  />
-
-                  {currentQuote.provider.name}
-                </MetaInfo.Default>
-
-                <MetaInfo.Default
-                  className={'-d-column'}
-                  label={t('Swap route')}
-                >
-                </MetaInfo.Default>
-                <SwapRoute swapRoute={currentQuote.route} />
-                <div className={'__minimum-received'}>
-                  <MetaInfo.Number
-                    decimals={0}
-                    label={t('Minimum received')}
-                    suffix={_getAssetSymbol(toAssetInfo)}
-                    value={minimumReceived}
-                  />
-                </div>
-              </MetaInfo>
-            )
-          }
-
-          {
-            (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
-          }
-
-          {
-            !handleRequestLoading && !isFormInvalid && (
-              <div className={'__quote-reset-time'}>
-                    Quote reset in: {quoteCountdownTime}s
+                <div className={'__text'}>Swap quote</div>
               </div>
-            )
-          }
+              <div className={'__header-right-part'}>
+                <Button
+                  className={'__view-quote-button'}
+                  disabled={!quoteOptions.length || (handleRequestLoading || isFormInvalid)}
+                  onClick={openAllQuotesModal}
+                  size='xs'
+                  type='ghost'
+                >
+                  <span>{t('View quote')}</span>
 
-          {
-            !!currentQuote && !handleRequestLoading && !isFormInvalid && (
-              <MetaInfo
-                className={CN('__quote-info-block')}
-                hasBackgroundWrapper
-                labelColorScheme={'gray'}
-                spaceSize={'xs'}
-                valueColorScheme={'gray'}
-              >
-                <MetaInfo.Number
-                  className={'__total-fee-value'}
-                  decimals={0}
-                  label={t('Estimated fee')}
-                  onClickValue={onToggleFeeDetails}
-                  prefix={'$'}
-                  suffixNode={
-                    <Icon
-                      className={'__estimated-fee-button'}
-                      customSize={'20px'}
-                      phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
+                  <Icon
+                    phosphorIcon={CaretRight}
+                    size={'sm'}
+                  />
+                </Button>
+              </div>
+            </div>
+
+            {
+              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+                <MetaInfo
+                  className={CN('__quote-info-block')}
+                  hasBackgroundWrapper
+                  labelColorScheme={'gray'}
+                  spaceSize={'sm'}
+                  valueColorScheme={'gray'}
+                >
+                  <MetaInfo.Default
+                    className={'__quote-rate'}
+                    label={t('Quote rate')}
+                    valueColorSchema={'gray'}
+                  >
+                    {renderRateInfo()}
+                  </MetaInfo.Default>
+
+                  <MetaInfo.Default
+                    className={'__swap-provider'}
+                    label={t('Swap provider')}
+                  >
+                    <Logo
+                      className='__provider-logo'
+                      isShowSubLogo={false}
+                      network={currentQuote.provider.id.toLowerCase()}
+                      shape='squircle'
+                      size={24}
                     />
-                  }
-                  value={getTotalConvertedBalance}
-                />
 
+                    {currentQuote.provider.name}
+                  </MetaInfo.Default>
+
+                  <MetaInfo.Default
+                    className={'-d-column'}
+                    label={t('Swap route')}
+                  >
+                  </MetaInfo.Default>
+                  <SwapRoute swapRoute={currentQuote.route} />
+                  <div className={'__minimum-received'}>
+                    <MetaInfo.Number
+                      decimals={0}
+                      label={t('Minimum received')}
+                      suffix={_getAssetSymbol(toAssetInfo)}
+                      value={minimumReceived}
+                    />
+                  </div>
+                </MetaInfo>
+              )
+            }
+
+            {
+              (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
+            }
+            <div className={'__quote-and-slippage'}>
+              <>
                 {
-                  isViewFeeDetails && (
-                    <div className={'__quote-fee-details-block'}>
-                      {feeItems.map((item) => (
-                        <MetaInfo.Number
-                          decimals={0}
-                          key={item.type}
-                          label={t(item.label)}
-                          prefix={item.prefix}
-                          suffix={item.suffix}
-                          value={item.value}
-                        />
-                      ))}
+                  !handleRequestLoading && !isFormInvalid && (
+                    <div className={'__quote-reset-time'}>
+                    Quote reset in: {quoteCountdownTime}s
                     </div>
                   )
                 }
+                {
+                  !handleRequestLoading && !isWebUI && renderSlippage()
+                }
+              </>
+            </div>
 
-                <div className={'__separator'}></div>
-                <div className={'__fee-paid-wrapper'}>
-                  <div className={'__fee-paid-label'}>Fee paid in</div>
-                  <div
-                    className={'__fee-paid-token'}
-                    onClick={openChooseFeeToken}
-                  >
-                    <Logo
-                      className='token-logo'
-                      isShowSubLogo={false}
-                      shape='circle'
-                      size={24}
-                      token={currentQuote.pair.from.toLowerCase()}
-                    />
-                    <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
-                    <Icon
-                      className={'__edit-token'}
-                      customSize={'20px'}
-                      phosphorIcon={PencilSimpleLine}
-                    />
+            {
+              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+                <MetaInfo
+                  className={CN('__quote-fee-info-block')}
+                  hasBackgroundWrapper
+                  labelColorScheme={'gray'}
+                  spaceSize={'xs'}
+                  valueColorScheme={'gray'}
+                >
+                  <MetaInfo.Number
+                    className={'__total-fee-value'}
+                    decimals={0}
+                    label={t('Estimated fee')}
+                    onClickValue={onToggleFeeDetails}
+                    prefix={'$'}
+                    suffixNode={
+                      <Icon
+                        className={'__estimated-fee-button'}
+                        customSize={'20px'}
+                        phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
+                      />
+                    }
+                    value={getTotalConvertedBalance}
+                  />
+
+                  {
+                    isViewFeeDetails && (
+                      <div className={'__quote-fee-details-block'}>
+                        {feeItems.map((item) => (
+                          <MetaInfo.Number
+                            decimals={0}
+                            key={item.type}
+                            label={t(item.label)}
+                            prefix={item.prefix}
+                            suffix={item.suffix}
+                            value={item.value}
+                          />
+                        ))}
+                      </div>
+                    )
+                  }
+
+                  <div className={'__separator'}></div>
+                  <div className={'__fee-paid-wrapper'}>
+                    <div className={'__fee-paid-label'}>Fee paid in</div>
+                    <div
+                      className={'__fee-paid-token'}
+                      onClick={openChooseFeeToken}
+                    >
+                      <Logo
+                        className='token-logo'
+                        isShowSubLogo={false}
+                        shape='circle'
+                        size={24}
+                        token={currentQuote.pair.from.toLowerCase()}
+                      />
+                      <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
+                      <Icon
+                        className={'__edit-token'}
+                        customSize={'20px'}
+                        phosphorIcon={PencilSimpleLine}
+                      />
+                    </div>
                   </div>
-                </div>
-              </MetaInfo>
-            )
-          }
+                </MetaInfo>
+              )
+            }
+          </>
         </div>
       </>
 
@@ -1382,7 +1390,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWhite
     },
 
-    '.__quote-info-block': {
+    '.__quote-info-block, __quote-fee-info-block': {
       paddingLeft: 24,
       paddingRight: 24,
       paddingTop: 16,
@@ -1627,6 +1635,8 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '&.-mobile': {
       overflow: 'auto',
       height: '100%',
+      paddingLeft: 16,
+      paddingRight: 16,
 
       '.__transaction-form-area': {
         display: 'flex',
@@ -1637,6 +1647,49 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.transaction-content': {
         flexGrow: 0,
         flexBasis: 'auto'
+      },
+
+      '.__quote-reset-time': {
+        marginBottom: 0,
+        alignItems: 'center',
+        marginTop: 0,
+        paddingLeft: 0
+      },
+      '.transaction-footer': {
+        paddingTop: 16
+      },
+      '.__slippage-action-wrapper': {
+        fontSize: 14,
+        fontWeight: token.bodyFontWeight,
+        lineHeight: token.lineHeight
+      },
+      '.__view-quote-detail-action-wrapper': {
+        display: 'flex',
+        justifyContent: 'space-between'
+      },
+      '.__view-quote-detail-button': {
+        paddingRight: 0
+      },
+      '.__swap-route.__row': {
+        marginTop: 8
+      },
+      '.__quote-fee-info-block': {
+        marginTop: 16
+      },
+      '.__quote-info-block': {
+        marginBottom: 4
+      },
+      '.__error-message': {
+        color: token.colorError,
+        fontSize: token.fontSizeSM,
+        fontWeight: token.bodyFontWeight,
+        lineHeight: token.lineHeightSM,
+        marginTop: -token.marginXXS,
+        paddingBottom: token.padding
+      },
+      '.__quote-and-slippage': {
+        display: 'flex',
+        justifyContent: 'space-between'
       }
     }
   };

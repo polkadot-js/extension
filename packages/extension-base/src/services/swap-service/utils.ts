@@ -15,6 +15,7 @@ export const CHAIN_FLIP_MAINNET_EXPLORER = 'https://scan.chainflip.io';
 export const CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING: Record<string, Chain> = {
   polkadot: Chains.Polkadot,
   ethereum: Chains.Ethereum,
+
   ethereum_goerli: Chains.Ethereum,
   chainflip_dot: Chains.Polkadot
 };

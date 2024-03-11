@@ -187,7 +187,7 @@ const Component = () => {
     return Promise.resolve();
   }, [chainInfoMap, t, toAssetInfo]);
 
-  const showRecipientForm = useMemo(() => {
+  const showRecipientField = useMemo(() => {
     if (fromValue && toAssetInfo?.originChain &&
       chainInfoMap[toAssetInfo?.originChain]) {
       const isAddressEvm = isEthereumAddress(fromValue);
@@ -653,15 +653,21 @@ const Component = () => {
   }, [isWebUI, setCustomScreenTitle, showQuoteDetailOnMobile, t]);
 
   useEffect(() => {
-    form.setFieldValue('chain', _getAssetOriginChain(fromAssetInfo));
-  }, [form, fromAssetInfo]);
+    const chain = _getAssetOriginChain(fromAssetInfo);
+
+    form.setFieldValue('chain', chain);
+    persistData((prev) => ({
+      ...prev,
+      chain
+    }));
+  }, [form, fromAssetInfo, persistData]);
 
   useEffect(() => {
     let sync = true;
     let timeout: NodeJS.Timeout;
 
     // todo: simple validate before do this
-    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
+    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue && (!showRecipientField || recipientValue)) {
       timeout = setTimeout(() => {
         form.validateFields(['from', 'recipient']).then(() => {
           if (!sync) {
@@ -729,7 +735,7 @@ const Component = () => {
       sync = false;
       clearTimeout(timeout);
     };
-  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, swapPairs, toTokenSlugValue]);
+  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, swapPairs, toTokenSlugValue]);
 
   useEffect(() => {
     let timer: NodeJS.Timer;
@@ -942,7 +948,7 @@ const Component = () => {
                   />
                 </div>
 
-                {showRecipientForm && (
+                {showRecipientField && (
                   <Form.Item
                     name={'recipient'}
                     rules={[

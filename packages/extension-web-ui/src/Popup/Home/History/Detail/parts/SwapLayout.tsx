@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _getAssetName, _getAssetOriginChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox, MetaInfo } from '@subwallet/extension-web-ui/components';
 import SwapTransactionBlock from '@subwallet/extension-web-ui/components/Swap/SwapTransactionBlock';
@@ -21,7 +22,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
   const { t } = useTranslation();
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const swapInfo = data.additionalInfo as SwapTxData;
+  const swapInfo = data.additionalInfo as SwapTxData | undefined;
+
+  if (!swapInfo) {
+    return (
+      <></>
+    );
+  }
+
   const assetFrom = assetRegistry[swapInfo.quote.pair.from];
   const assetTo = assetRegistry[swapInfo.quote.pair.to];
   const recipientAddress = data.to || swapInfo.recipient as string;
@@ -33,12 +41,12 @@ const Component: React.FC<Props> = (props: Props) => {
       />
       <MetaInfo.Transfer
         destinationChain={{
-          slug: assetTo.originChain,
-          name: assetTo.name
+          slug: _getAssetOriginChain(assetTo),
+          name: _getAssetName(assetTo)
         }}
         originChain={{
-          slug: assetFrom.originChain,
-          name: assetFrom.name
+          slug: _getAssetOriginChain(assetFrom),
+          name: _getAssetName(assetFrom)
         }}
         recipientAddress={recipientAddress}
         recipientName={data.toName}

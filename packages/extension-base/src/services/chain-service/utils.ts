@@ -332,6 +332,10 @@ export function _getAssetPriceId (assetInfo?: _ChainAsset) {
   return assetInfo?.priceId || '';
 }
 
+export function _getAssetName (assetInfo?: _ChainAsset) {
+  return assetInfo?.name || '';
+}
+
 export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset?.priceId || '';
 }

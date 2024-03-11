@@ -165,6 +165,10 @@ const Component = (): React.ReactElement => {
     navigate('/settings/tokens/manage');
   }, [navigate]);
 
+  const onOpenSwap = useCallback(() => {
+    navigate('/transaction/swap');
+  }, [navigate]);
+
   const onOpenSendFund = useCallback(() => {
     if (currentAccount && currentAccount.isReadOnly) {
       notify({
@@ -383,6 +387,7 @@ const Component = (): React.ReactElement => {
             onOpenBuyTokens={onOpenBuyTokens}
             onOpenReceive={onOpenReceive}
             onOpenSendFund={onOpenSendFund}
+            onOpenSwap={onOpenSwap}
             totalChangePercent={totalBalanceInfo.change.percent}
             totalChangeValue={totalBalanceInfo.change.value}
             totalValue={totalBalanceInfo.convertedValue}

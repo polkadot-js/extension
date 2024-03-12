@@ -241,7 +241,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 
 export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
   arbitrum_one: ['*'],
-  okxTest: ['*']
+  okxTest: ['*'],
+  astarZkEvm: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

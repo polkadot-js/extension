@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.43
+Build date: Mar 11, 2024.
+
+Bugs fixed:
+- Fixed bug not updating blocked XCM channels
+
 ## 1.1.42
 Build date: Mar 08, 2024.
 

@@ -265,8 +265,7 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
-  // todo: will optimize fee display logic later
-  const getTotalConvertedBalance = useMemo(() => {
+  const estimatedFeeValue = useMemo(() => {
     let totalBalance = BN_ZERO;
 
     currentQuote?.feeInfo.feeComponent.forEach((feeItem) => {
@@ -1002,8 +1001,7 @@ const Component = () => {
                           </MetaInfo.Default>
 
                           <MetaInfo.Default
-                            className={'__swap-route'}
-                            label={t('Swap route')}
+                            label={t('Estimated fee')}
                           >
                             {
                               handleRequestLoading
@@ -1014,7 +1012,7 @@ const Component = () => {
                                   <Number
                                     decimal={0}
                                     prefix={'$'}
-                                    value={getTotalConvertedBalance}
+                                    value={estimatedFeeValue}
                                   />
                                 )
                             }
@@ -1197,7 +1195,7 @@ const Component = () => {
                         phosphorIcon={isViewFeeDetails ? CaretUp : CaretDown}
                       />
                     }
-                    value={getTotalConvertedBalance}
+                    value={estimatedFeeValue}
                   />
 
                   {
@@ -1247,7 +1245,7 @@ const Component = () => {
       </>
 
       <ChooseFeeTokenModal
-        estimatedFee={getTotalConvertedBalance}
+        estimatedFee={estimatedFeeValue}
         items={feeOptions}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
         onSelectItem={onSelectFeeOption}

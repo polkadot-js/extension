@@ -158,7 +158,7 @@ function Component (
           onClick={onOpenSwap}
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
-          tooltip={t('Buy token')}
+          tooltip={t('Swap')}
         />
         <div className={'__button-space'} />
         <Button

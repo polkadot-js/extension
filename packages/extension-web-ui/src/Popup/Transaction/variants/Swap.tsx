@@ -1641,8 +1641,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '&.-mobile': {
       overflow: 'auto',
       height: '100%',
-      paddingLeft: 16,
-      paddingRight: 16,
 
       '.__transaction-form-area': {
         display: 'flex',
@@ -1696,6 +1694,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       '.__quote-and-slippage': {
         display: 'flex',
         justifyContent: 'space-between'
+      },
+      '.__transaction-swap-quote-info-area': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding
       }
     }
   };

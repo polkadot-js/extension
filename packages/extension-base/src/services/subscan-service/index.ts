@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
+import { BASE_FETCH_ORDINAL_EVENT_DATA } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/constants';
 import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, RewardHistoryListResponse, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { SubscanEventBaseItemData, SubscanEventListResponse, SubscanExtrinsicParam, SubscanExtrinsicParamResponse } from '@subwallet/extension-base/types';
 import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -348,6 +350,39 @@ export class SubscanService {
       }
 
       const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
+
+      return jsonData.data;
+    });
+  }
+
+  public getAccountRemarkEvents (chain: string, address: string): Promise<SubscanEventBaseItemData[]> {
+    return this.addRequest<SubscanEventBaseItemData[]>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/events'), {
+        ...BASE_FETCH_ORDINAL_EVENT_DATA,
+        address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getAccountRemarkEvents', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanEventListResponse;
+
+      return jsonData.data.events;
+    });
+  }
+
+  public getExtrinsicParams (chain: string, extrinsicIndexes: string[]): Promise<SubscanExtrinsicParam[]> {
+    return this.addRequest<SubscanExtrinsicParam[]>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsic/params'), {
+        extrinsic_index: extrinsicIndexes
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getExtrinsicParams', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanExtrinsicParamResponse;
 
       return jsonData.data;
     });

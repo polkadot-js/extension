@@ -122,12 +122,18 @@ const Component: React.FC<Props> = (props: Props) => {
         >
         </MetaInfo.Default>
         <SwapRoute swapRoute={data.quote.route} />
+        <AlertBox
+          className={'__swap-arrival-time'}
+          description={t('Swapping via Chainflip can take up to 20 minutes. Make sure you review all information carefully before submitting.')}
+          title={t('Pay attention!')}
+          type='warning'
+        />
         {isShowAlert &&
           (
             <AlertBox
               className={'__swap-quote-expired'}
               description={t('The swap quote has expired.')}
-              title={t('Swap Quote Expired')}
+              title={t('Pay attention!')}
               type='warning'
             />)
         }
@@ -144,6 +150,9 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
     },
     '&.swap-confirmation-container': {
       marginTop: 10
+    },
+    '.__swap-arrival-time': {
+      marginBottom: 12
     },
     '.__summary-quote': {
       display: 'flex',

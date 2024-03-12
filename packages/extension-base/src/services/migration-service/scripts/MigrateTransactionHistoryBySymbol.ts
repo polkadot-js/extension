@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import BaseMigrationJob from '@subwallet/extension-base/services/migration-service/Base';
+import { ITransactionHistoryItem } from '@subwallet/extension-base/services/storage-service/databases';
 
 export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob {
   public override async run (): Promise<void> {
@@ -41,6 +42,8 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
         'zeta_test-NATIVE-ZETA'
       ];
 
+      const allTxs: ITransactionHistoryItem[] = [];
+
       await Promise.all(oldSlugs.map(async (oldSlug, i) => {
         const oldSlugSplit = oldSlug.split('-');
         const oldChainSlug = oldSlugSplit[0];
@@ -53,7 +56,7 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
           return tx.amount?.symbol === oldSymbolSlug;
         }).toArray();
 
-        if (filterTransactions) {
+        if (filterTransactions.length > 0) {
           for (const transaction of filterTransactions) {
             if (transaction.amount && transaction.amount.symbol === oldSymbolSlug) {
               transaction.amount.symbol = newSymbolSlug;
@@ -61,8 +64,10 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
           }
         }
 
-        await state.dbService.stores.transaction.table.bulkPut(filterTransactions);
+        allTxs.push(...filterTransactions);
       }));
+
+      await state.dbService.stores.transaction.table.bulkPut(allTxs);
     } catch (e) {
       this.logger.error(e);
     }

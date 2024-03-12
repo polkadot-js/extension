@@ -66,7 +66,7 @@ export class SubscanService {
     });
   }
 
-  public addRequest<T> (run: SubscanRequest<T>['run']) {
+  public addRequest<T> (run: SubscanRequest<T>['run'], ordinal: number) {
     const newId = this.getId();
 
     return new Promise<T>((resolve, reject) => {
@@ -74,6 +74,7 @@ export class SubscanService {
         id: newId,
         status: 'pending',
         retry: -1,
+        ordinal,
         run,
         resolve,
         reject
@@ -103,6 +104,7 @@ export class SubscanService {
       const requests = remainingRequests
         .filter((request) => request.status !== 'running')
         .sort((a, b) => a.id - b.id)
+        .sort((a, b) => a.ordinal - b.ordinal)
         .slice(0, this.callRate);
 
       // Start requests
@@ -151,7 +153,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<IMultiChainBalance[]>;
 
       return jsonData.data;
-    });
+    }, 1);
   }
 
   public getCrowdloanContributions (relayChain: string, address: string, page = 0): Promise<CrowdloanContributionsResponse> {
@@ -170,7 +172,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<CrowdloanContributionsResponse>;
 
       return jsonData.data;
-    });
+    }, 2);
   }
 
   public getExtrinsicsList (chain: string, address: string, page = 0, blockRange?: RequestBlockRange): Promise<ExtrinsicsListResponse> {
@@ -197,7 +199,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<ExtrinsicsListResponse>;
 
       return jsonData.data;
-    });
+    }, 0);
   }
 
   public async fetchAllPossibleExtrinsicItems (
@@ -273,7 +275,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<TransfersListResponse>;
 
       return jsonData.data;
-    });
+    }, 0);
   }
 
   public async fetchAllPossibleTransferItems (
@@ -352,7 +354,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
 
       return jsonData.data;
-    });
+    }, 2);
   }
 
   public getAccountRemarkEvents (chain: string, address: string): Promise<SubscanEventBaseItemData[]> {
@@ -369,7 +371,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanEventListResponse;
 
       return jsonData.data.events;
-    });
+    }, 3);
   }
 
   public getExtrinsicParams (chain: string, extrinsicIndexes: string[]): Promise<SubscanExtrinsicParam[]> {
@@ -385,6 +387,6 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanExtrinsicParamResponse;
 
       return jsonData.data;
-    });
+    }, 4);
   }
 }

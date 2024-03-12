@@ -4,6 +4,8 @@
 export interface SubscanRequest<T> {
   id: number,
   retry: number, // retry < 1 not start, retry === 0 start, retry > 0 number of retry
+  /** Serve smaller first  */
+  ordinal: number,
   status: 'pending' | 'running',
   run: () => Promise<any>;
   resolve: (value: any) => T;

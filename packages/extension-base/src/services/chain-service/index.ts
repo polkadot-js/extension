@@ -83,7 +83,7 @@ export class ChainService {
   get xcmRefMap () {
     const result: Record<string, _AssetRef> = {};
 
-    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+    Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
       if (assetRef.path === _AssetRefPath.XCM) {
         result[key] = assetRef;
       }
@@ -656,7 +656,6 @@ export class ChainService {
 
     this.dataMap.assetRefMap = updatedAssetRefMap;
 
-    // this.dbService.setAssetRef(this.dataMap.assetRefMap).catch(console.error);
     this.xcmRefMapSubject.next(this.xcmRefMap);
     this.logger.log('Finished updating latest asset ref');
   }

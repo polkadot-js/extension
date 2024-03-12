@@ -181,7 +181,7 @@ export class SubscanService {
     })();
 
     return this.addRequest<ExtrinsicsListResponse>(async () => {
-      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsics'), {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/extrinsics'), {
         page,
         row: QUERY_ROW,
         address,

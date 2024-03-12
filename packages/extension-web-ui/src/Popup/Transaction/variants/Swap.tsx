@@ -137,17 +137,23 @@ const Component = () => {
     return result;
   }, [swapPairs]);
 
-  const fromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
+  const rawFromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
     return getTokenSelectorItem(Object.keys(fromAndToTokenMap), assetRegistryMap);
   }, [assetRegistryMap, fromAndToTokenMap]);
+
+  const fromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
+    if (!fromValue) {
+      return rawFromTokenItems;
+    }
+
+    return rawFromTokenItems.filter((i) => {
+      return chainInfoMap[i.originChain] && isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[i.originChain]);
+    });
+  }, [chainInfoMap, fromValue, rawFromTokenItems]);
 
   const toTokenItems = useMemo<TokenSelectorItemType[]>(() => {
     return getTokenSelectorItem(fromAndToTokenMap[fromTokenSlugValue] || [], assetRegistryMap);
   }, [assetRegistryMap, fromAndToTokenMap, fromTokenSlugValue]);
-
-  const isSwitchable = useMemo(() => {
-    return fromAndToTokenMap[toTokenSlugValue];
-  }, [fromAndToTokenMap, toTokenSlugValue]);
 
   // todo: fill later
   const destChain = '';
@@ -165,6 +171,20 @@ const Component = () => {
   const feeAssetInfo = useMemo(() => {
     return (currentFeeOption ? assetRegistryMap[currentFeeOption] : undefined);
   }, [assetRegistryMap, currentFeeOption]);
+
+  const isSwitchable = useMemo(() => {
+    if (!fromAndToTokenMap[toTokenSlugValue]) {
+      return false;
+    }
+
+    if (!fromValue) {
+      return true;
+    }
+
+    const toChain = _getAssetOriginChain(toAssetInfo);
+
+    return chainInfoMap[toChain] && isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[toChain]);
+  }, [chainInfoMap, fromAndToTokenMap, fromValue, toAssetInfo, toTokenSlugValue]);
 
   const recipientAddressValidator = useCallback((rule: Rule, _recipientAddress: string): Promise<void> => {
     if (!_recipientAddress) {
@@ -390,23 +410,6 @@ const Component = () => {
       </div>
     );
   };
-
-  const validateSwapFromAccount = useCallback((rule: Rule, fromValue: string): Promise<void> => {
-    if (!fromValue) {
-      return Promise.reject(t('Swap from account is required'));
-    }
-
-    if (fromAssetInfo?.originChain && chainInfoMap[fromAssetInfo?.originChain]) {
-      const isAddressEvm = isEthereumAddress(fromValue);
-      const isEvmCompatible = _isChainEvmCompatible(chainInfoMap[fromAssetInfo?.originChain]);
-
-      if ((isAddressEvm !== isEvmCompatible)) {
-        return Promise.reject(t('Invalid swap from account'));
-      }
-    }
-
-    return Promise.resolve();
-  }, [chainInfoMap, fromAssetInfo?.originChain, t]);
 
   const onError = useCallback(
     (error: Error) => {
@@ -812,28 +815,16 @@ const Component = () => {
   // }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
-    if (!fromTokenSlugValue && fromTokenItems.length > 0) {
-      if (isAllAccount) {
+    if (fromTokenItems.length) {
+      if (!fromTokenSlugValue) {
         form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
       } else {
-        const isEvmAddress = isEthereumAddress(fromValue);
-        const compatibleToken = fromTokenItems.find((item) => {
-          const isEvmCompatibleItem = _isChainEvmCompatible(chainInfoMap[item.originChain]);
-
-          return isEvmAddress === isEvmCompatibleItem;
-        });
-
-        if (compatibleToken) {
-          form.setFieldValue('fromTokenSlug', compatibleToken.slug);
-        } else {
+        if (!fromTokenItems.some((i) => i.slug === fromTokenSlugValue)) {
           form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
-          form.validateFields(['from']).catch((e) => {
-            console.log('Error when validating', e);
-          });
         }
       }
     }
-  }, [chainInfoMap, form, fromAssetInfo?.originChain, fromTokenItems, fromTokenSlugValue, fromValue, isAllAccount]);
+  }, [form, fromTokenItems, fromTokenSlugValue, fromValue]);
 
   useEffect(() => {
     if (toTokenItems.length) {
@@ -883,11 +874,6 @@ const Component = () => {
 
                 <Form.Item
                   name={'from'}
-                  rules={[
-                    {
-                      validator: validateSwapFromAccount
-                    }
-                  ]}
                 >
                   <AccountSelector
                     disabled={!isAllAccount}

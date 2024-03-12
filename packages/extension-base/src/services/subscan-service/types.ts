@@ -61,9 +61,13 @@ export interface ExtrinsicItem {
   block_timestamp: number,
   extrinsic_index: string,
   call_module_function: string,
+  /** Need be called from another api */
   params: string,
+  /** Deprecated */
   account_id: string,
+  /** Deprecated */
   account_index: string,
+  /** Deprecated */
   signature: string,
   call_module: string,
   nonce: number,
@@ -71,6 +75,7 @@ export interface ExtrinsicItem {
   success: boolean,
   fee: string,
   fee_used: string,
+  /** Deprecated */
   from_hex: string,
   tip: string,
   finalized: boolean,

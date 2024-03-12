@@ -231,6 +231,21 @@ export class SubscanService {
       }
 
       cbAfterEachRequest?.(res.extrinsics);
+
+      const extrinsics = res.extrinsics;
+      const extrinsicIndexes = extrinsics.map((item) => item.extrinsic_index);
+      const extrinsicParams = await this.getExtrinsicParams(chain, extrinsicIndexes, 0);
+
+      for (const data of extrinsicParams) {
+        const { extrinsic_index: extrinsicIndex, params } = data;
+
+        const extrinsic = extrinsics.find((item) => item.extrinsic_index === extrinsicIndex);
+
+        if (extrinsic) {
+          extrinsic.params = JSON.stringify(params);
+        }
+      }
+
       res.extrinsics.forEach((item) => {
         resultMap[item.extrinsic_hash] = item;
       });
@@ -374,7 +389,7 @@ export class SubscanService {
     }, 3);
   }
 
-  public getExtrinsicParams (chain: string, extrinsicIndexes: string[]): Promise<SubscanExtrinsicParam[]> {
+  public getExtrinsicParams (chain: string, extrinsicIndexes: string[], ordinal = 3): Promise<SubscanExtrinsicParam[]> {
     return this.addRequest<SubscanExtrinsicParam[]>(async () => {
       const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsic/params'), {
         extrinsic_index: extrinsicIndexes
@@ -387,6 +402,6 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanExtrinsicParamResponse;
 
       return jsonData.data;
-    }, 4);
+    }, ordinal);
   }
 }

@@ -12,7 +12,7 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
 import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
@@ -31,13 +31,31 @@ const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
+  private isTestnet: boolean;
 
-  constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
+  constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     super(providerSlug, providerName, chainService, balanceService);
+    this.isTestnet = isTestnet;
 
     this.swapSdk = new SwapSDK({
-      network: 'perseverance'
+      network: isTestnet ? 'perseverance' : 'mainnet'
     });
+  }
+
+  get assetMapping () {
+    if (this.isTestnet) {
+      return CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING;
+    } else {
+      return CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING;
+    }
+  }
+
+  get chainMapping () {
+    if (this.isTestnet) {
+      return CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING;
+    } else {
+      return CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING;
+    }
   }
 
   protected async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
@@ -51,11 +69,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
       const bnAmount = new BigNumber(request.fromAmount);
 
-      const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[srcChain];
-      const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[destChain];
+      const srcChainId = this.chainMapping[srcChain];
+      const destChainId = this.chainMapping[destChain];
 
-      const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
-      const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+      const fromAssetId = this.assetMapping[fromAsset.slug];
+      const toAssetId = this.assetMapping[toAsset.slug];
 
       const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug);
 
@@ -174,11 +192,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       return getSwapEarlyValidationError(earlyValidation.error, metadata, fromAssetBalance);
     }
 
-    const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[fromAsset.originChain];
-    const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[toAsset.originChain];
+    const srcChainId = this.chainMapping[fromAsset.originChain];
+    const destChainId = this.chainMapping[toAsset.originChain];
 
-    const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
-    const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+    const fromAssetId = this.assetMapping[fromAsset.slug];
+    const toAssetId = this.assetMapping[toAsset.slug];
 
     try {
       const quoteResponse = await this.swapSdk.getQuote({
@@ -198,7 +216,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
           // eslint-disable-next-line no-fallthrough
           case ChainflipFeeType.EGRESS: {
-            const tokenSlug = Object.keys(CHAIN_FLIP_SUPPORTED_ASSET_MAPPING).find((assetSlug) => CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[assetSlug] === fee.asset) as string;
+            const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
 
             feeComponent.push({
               tokenSlug,
@@ -209,7 +227,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
           }
 
           case ChainflipFeeType.LIQUIDITY: {
-            const tokenSlug = Object.keys(CHAIN_FLIP_SUPPORTED_ASSET_MAPPING).find((assetSlug) => CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[assetSlug] === fee.asset) as string;
+            const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
 
             feeComponent.push({
               tokenSlug,
@@ -293,11 +311,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     const chainType = _isSubstrateChain(chainInfo) ? ChainType.SUBSTRATE : ChainType.EVM;
     const receiver = recipient ?? address;
 
-    const srcChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[fromAsset.originChain];
-    const destChainId = CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING[toAsset.originChain];
+    const srcChainId = this.chainMapping[fromAsset.originChain];
+    const destChainId = this.chainMapping[toAsset.originChain];
 
-    const fromAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[fromAsset.slug];
-    const toAssetId = CHAIN_FLIP_SUPPORTED_ASSET_MAPPING[toAsset.slug];
+    const fromAssetId = this.assetMapping[fromAsset.slug];
+    const toAssetId = this.assetMapping[toAsset.slug];
 
     const depositAddressResponse = await this.swapSdk.requestDepositAddress({
       srcChain: srcChainId,

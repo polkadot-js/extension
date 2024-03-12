@@ -12,7 +12,7 @@ import BigN from 'bignumber.js';
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
 export const CHAIN_FLIP_MAINNET_EXPLORER = 'https://scan.chainflip.io';
 
-export const CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING: Record<string, Chain> = {
+export const CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING: Record<string, Chain> = {
   polkadot: Chains.Polkadot,
   ethereum: Chains.Ethereum,
 
@@ -20,14 +20,29 @@ export const CHAIN_FLIP_SUPPORTED_CHAIN_MAPPING: Record<string, Chain> = {
   chainflip_dot: Chains.Polkadot
 };
 
-export const CHAIN_FLIP_SUPPORTED_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
+export const CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING: Record<string, Chain> = {
+  ethereum_goerli: Chains.Ethereum,
+  chainflip_dot: Chains.Polkadot
+};
+
+export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
+  'chainflip_dot-NATIVE-DOT': Assets.DOT,
+  'ethereum_goerli-NATIVE-ETH': Assets.ETH,
+  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
+
   'polkadot-NATIVE-DOT': Assets.DOT,
   'ethereum-NATIVE-ETH': Assets.ETH,
-  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC,
+  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+};
 
-  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
+export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
+  'chainflip_dot-NATIVE-DOT': Assets.DOT,
   'ethereum_goerli-NATIVE-ETH': Assets.ETH,
-  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC
+  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
+
+  'polkadot-NATIVE-DOT': Assets.DOT,
+  'ethereum-NATIVE-ETH': Assets.ETH,
+  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
 };
 
 export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in milliseconds

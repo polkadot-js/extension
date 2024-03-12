@@ -199,7 +199,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
   kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
-  crab: ['crab', 'pangolin'],
+  // crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet'],
   riochain: ['riochain'],
@@ -207,7 +207,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   avail: ['kate', 'goldberg_testnet'],
   pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
   centrifuge: ['centrifuge'],
-  disable_transfer: ['invarch']
+  disable_transfer: ['invarch', 'crab', 'pangolin']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {

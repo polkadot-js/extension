@@ -61,7 +61,7 @@ function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
 function renderModalTrigger (item: SelectionItemType) {
   return (
     <SettingItem
-      className={'__trigger-item'}
+      className={'__trigger-item setting-item'}
       key={item.key}
       leftItemIcon={
         <BackgroundIcon
@@ -250,7 +250,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                   key: 'browser-confirmation-type-trigger',
                   leftIcon: BellSimpleRinging,
                   leftIconBgColor: token['volcano-6'],
-                  title: t('Browser notification type')
+                  title: t('Notifications')
                 })}
                 disabled={loadingMap.browserConfirmationType}
                 id='browser-confirmation-type-select-modal'
@@ -262,7 +262,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 selected={_browserConfirmationType}
                 shape='round'
                 size='small'
-                title={t('Browser notification type')}
+                title={t('Notifications')}
               />
             )
           }

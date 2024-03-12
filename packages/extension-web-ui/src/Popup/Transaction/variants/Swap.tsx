@@ -3,7 +3,6 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
@@ -22,7 +21,7 @@ import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProc
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
-import { convertFieldToObject } from '@subwallet/extension-web-ui/utils';
+import { convertFieldToObject, findAccountByAddress } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -82,7 +81,7 @@ const Component = () => {
 
   const { activeModal } = useContext(ModalContext);
 
-  const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
   const priceMap = useSelector((state) => state.price.priceMap);
@@ -486,6 +485,18 @@ const Component = () => {
       return;
     }
 
+    const account = findAccountByAddress(accounts, values.from);
+
+    if (account?.isHardware) {
+      notify({
+        message: t('The account you are using is Ledger account, you cannot use this feature with it'),
+        type: 'error',
+        duration: 8
+      });
+
+      return;
+    }
+
     setSubmitLoading(true);
 
     const { from, recipient } = values;
@@ -560,7 +571,7 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [currentOptimalSwapPath, currentQuote, currentSlippage, onError, onSuccess, processState.currentStep, processState.steps.length]);
+  }, [accounts, currentOptimalSwapPath, currentQuote, currentSlippage, notify, onError, onSuccess, processState.currentStep, processState.steps.length, t]);
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
@@ -581,10 +592,6 @@ const Component = () => {
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');
   }, [setConfirmedTerm]);
-
-  const accountSelectorFilter = useCallback((account: AccountJson) => {
-    return !account.isHardware && !isAccountAll(account.address);
-  }, []);
 
   const onViewQuoteDetail = useCallback(() => {
     setShowQuoteDetailOnMobile(true);
@@ -877,7 +884,6 @@ const Component = () => {
                 >
                   <AccountSelector
                     disabled={!isAllAccount}
-                    filter={accountSelectorFilter}
                     label={t('Swap from account')}
                   />
                 </Form.Item>
@@ -1630,11 +1636,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
         display: 'flex',
         flexDirection: 'column',
         height: '100%'
-      },
-
-      '.transaction-content': {
-        flexGrow: 0,
-        flexBasis: 'auto'
       },
 
       '.__quote-reset-time': {

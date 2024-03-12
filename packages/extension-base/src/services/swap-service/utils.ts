@@ -26,7 +26,7 @@ export const CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING: Record<string, Chain> = {
 };
 
 export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
-  'chainflip_dot-NATIVE-DOT': Assets.DOT,
+  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
   'ethereum_goerli-NATIVE-ETH': Assets.ETH,
   'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
 
@@ -36,7 +36,7 @@ export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> =
 };
 
 export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
-  'chainflip_dot-NATIVE-DOT': Assets.DOT,
+  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
   'ethereum_goerli-NATIVE-ETH': Assets.ETH,
   'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
 

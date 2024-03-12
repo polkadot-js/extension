@@ -8,10 +8,18 @@ import fetch from 'cross-fetch';
 
 const QUERY_ROW = 100;
 
+interface SubscanError {
+  code: number;
+  message: string;
+}
+
 export class SubscanService {
-  private limitRate = 2; // limit per interval check
+  private callRate = 2; // limit per interval check
+  private limitRate = 2; // max rate per interval check
   private intervalCheck = 1000; // interval check in ms
   private maxRetry = 9; // interval check in ms
+  private rollbackRateTime = 30 * 1000; // rollback rate time in ms
+  private timeoutRollbackRate: NodeJS.Timeout | undefined = undefined;
   private requestMap: Record<number, SubscanRequest<any>> = {};
   private nextId = 0;
   private isRunning = false;
@@ -20,9 +28,20 @@ export class SubscanService {
   }
 
   constructor (private subscanChainMap: Record<string, string>, options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
+    this.callRate = options?.limitRate || this.callRate;
     this.limitRate = options?.limitRate || this.limitRate;
     this.intervalCheck = options?.intervalCheck || this.intervalCheck;
     this.maxRetry = options?.maxRetry || this.maxRetry;
+  }
+
+  private reduceLimitRate () {
+    clearTimeout(this.timeoutRollbackRate);
+
+    this.callRate = Math.ceil(this.limitRate / 2);
+
+    this.timeoutRollbackRate = setTimeout(() => {
+      this.callRate = this.limitRate;
+    }, this.rollbackRateTime);
   }
 
   private getApiUrl (chain: string, path: string) {
@@ -82,20 +101,28 @@ export class SubscanService {
       const requests = remainingRequests
         .filter((request) => request.status !== 'running')
         .sort((a, b) => a.id - b.id)
-        .slice(0, this.limitRate);
+        .slice(0, this.callRate);
 
       // Start requests
       requests.forEach((request) => {
         request.status = 'running';
         request.run().then((rs) => {
           request.resolve(rs);
-        }).catch((e) => {
-          if (request.retry < maxRetry) {
-            request.status = 'pending';
-            request.retry++;
+        }).catch((e: Error) => {
+          const error = JSON.parse(e.message) as SubscanError;
+
+          // Limit rate
+          if (error.code === 20008) {
+            if (request.retry < maxRetry) {
+              request.status = 'pending';
+              request.retry++;
+              this.reduceLimitRate();
+            } else {
+              // Reject request
+              request.reject(new SWError('MAX_RETRY', String(e)));
+            }
           } else {
-            // Reject request
-            request.reject(new SWError('MAX_RETRY', String(e)));
+            request.reject(new SWError('UNKNOWN', String(e)));
           }
         });
       });

@@ -22,7 +22,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
-  const [isShowAlert, setIsShowAlert] = useState<boolean>(false);
+  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
   const { t } = useTranslation();
   // @ts-ignore
   const data = transaction.data as SwapTxData;
@@ -75,7 +75,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (data.quote.aliveUntil) {
       timer = setInterval(() => {
         if (Date.now() > data.quote.aliveUntil) {
-          setIsShowAlert(true);
+          setShowQuoteExpired(true);
           clearInterval(timer);
         }
       }, 1000);
@@ -122,13 +122,13 @@ const Component: React.FC<Props> = (props: Props) => {
         >
         </MetaInfo.Default>
         <SwapRoute swapRoute={data.quote.route} />
-        <AlertBox
+        {!showQuoteExpired && <AlertBox
           className={'__swap-arrival-time'}
           description={t('Swapping via Chainflip can take up to 20 minutes. Make sure you review all information carefully before submitting.')}
           title={t('Pay attention!')}
           type='warning'
-        />
-        {isShowAlert &&
+        />}
+        {showQuoteExpired &&
           (
             <AlertBox
               className={'__swap-quote-expired'}

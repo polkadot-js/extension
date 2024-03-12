@@ -203,8 +203,21 @@ const Component = () => {
       }
     }
 
+    const account = findAccountByAddress(accounts, _recipientAddress);
+
+    if (account?.isHardware && toAssetInfo?.originChain) {
+      const destChainInfo = chainInfoMap[toAssetInfo.originChain];
+      const availableGen: string[] = account.availableGenesisHashes || [];
+
+      if (!isEthereumAddress(account.address) && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
+        const destChainName = destChainInfo?.name || 'Unknown';
+
+        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+      }
+    }
+
     return Promise.resolve();
-  }, [chainInfoMap, t, toAssetInfo]);
+  }, [accounts, chainInfoMap, t, toAssetInfo?.originChain]);
 
   const showRecipientField = useMemo(() => {
     if (fromValue && toAssetInfo?.originChain &&

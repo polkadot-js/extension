@@ -9,6 +9,7 @@ import { BN_TEN, BN_ZERO, HistoryStatusMap, TxTypeNameMap } from '@subwallet/ext
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
+import { findAccountByAddress } from '@subwallet/extension-web-ui/utils';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
@@ -25,6 +26,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
   const swapInfo = data.additionalInfo as SwapTxData | undefined;
+  const { accounts } = useSelector((state) => state.accountState);
 
   const estimatedFeeValue = useMemo(() => {
     let totalBalance = BN_ZERO;
@@ -52,6 +54,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const assetFrom = assetRegistryMap[swapInfo.quote.pair.from];
   const assetTo = assetRegistryMap[swapInfo.quote.pair.to];
   const recipientAddress = data.to || swapInfo.recipient as string;
+  const account = findAccountByAddress(accounts, recipientAddress);
 
   return (
     <MetaInfo className={CN(className)}>
@@ -68,7 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
           name: _getAssetName(assetFrom)
         }}
         recipientAddress={recipientAddress}
-        recipientName={data.toName}
+        recipientName={account?.name}
         senderAddress={data.from}
         senderName={data.fromName}
       />

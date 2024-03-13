@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line header/header
 import { BaseModal } from '@subwallet/extension-web-ui/components';
-import { SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   onOk: () => void
 }
 
-const modalId = SWAP_TERM_AND_SERVICE_MODAL;
+const modalId = SWAP_TERMS_OF_SERVICE_MODAL;
 
 const Component = ({ className, onOk }: Props) => {
   const { inactiveModal } = useContext(ModalContext);
@@ -31,8 +31,6 @@ const Component = ({ className, onOk }: Props) => {
   const onCheckedInput = useCallback((e: CheckboxChangeEvent) => {
     setIsChecked(e.target.checked);
   }, []);
-
-  console.log('scrollRef', scrollRef);
 
   const onConfirm = useCallback(() => {
     inactiveModal(modalId);
@@ -67,32 +65,32 @@ const Component = ({ className, onOk }: Props) => {
       width={ isWebUI ? 784 : undefined }
     >
       <div
-        className={'term-body'}
+        className={'__content-body'}
         onScroll={onScrollToAcceptButton}
         ref={scrollRef}
       >
-        <div className={'__term-label'}>You’re using the Chainflip swap provider, which is still in a pre-release version. Please read the following carefully:</div>
+        <div className={'__content-title'}>You’re using the Chainflip swap provider, which is still in a pre-release version. Please read the following carefully:</div>
         <div className={'__term-item'}>
-          <div className={'__term-item-description'}>Pre-release Version</div>
+          <div className={'__term-item-label'}>Pre-release Version</div>
           <div>This is brand new protocol and despite our
             extensive preparations, there may be issues, and you may lose money.
             Features and swap sizes are limited for that reason.</div>
         </div>
         <div className={'__term-item'}>
-          <div className={'__term-item-description'}>Testing Phase</div>
+          <div className={'__term-item-label'}>Testing Phase</div>
           <div>This is the real-world testing phase that provides a safer
           environment for liquidity providers and users. Your participation will help
             us improve, but please know that you do so at your own risk.</div>
         </div>
         <div className={'__term-item'}>
-          <div className={'__term-item-description'}>Swap Limits</div>
+          <div className={'__term-item-label'}>Swap Limits</div>
           <div>Swaps are capped at about $50,000 per deposit. Any
           amount exceeding these limits will be absorbed by the protocol and
             can not be refunded.</div>
         </div>
 
         {(!isScrollEnd || !scrollRef?.current) && <Button
-          className={'term-body-caret-button'}
+          className={'__caret-button'}
           icon={<Icon phosphorIcon={CaretDown} />}
           onClick={onScrollContent}
           schema={'secondary'}
@@ -100,18 +98,18 @@ const Component = ({ className, onOk }: Props) => {
           size={'xs'}
         />}
       </div>
-      <div className={'term-footer'}>
+      <div className={'__content-footer'}>
         <Checkbox
           checked={isChecked}
-          className={'term-footer-checkbox'}
+          className={'__content-footer-checkbox'}
           onChange={onCheckedInput}
         >
           {t('I understand and agree to the Terms of Use, which apply to my use of SubWallet and all of its feature')}
         </Checkbox>
-        <div className={'term-footer-button-group'}>
+        <div className={'__content-footer-button-group'}>
           <Button
             block={true}
-            className={'term-footer-button'}
+            className={'__content-footer-button'}
             disabled={!isChecked || !isScrollEnd}
             icon={ (
               <Icon
@@ -139,31 +137,33 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
       lineHeight: token.lineHeightSM,
       marginBottom: token.marginSM
     },
-    '.__term-item-description': {
+    '.__term-item-label': {
       fontSize: token.fontSize,
       fontWeight: token.fontWeightStrong,
       lineHeight: token.lineHeight,
       color: token.colorWhite
     },
-    '.term-body': {
+    '.__content-body': {
       maxHeight: 294,
       display: 'block',
       overflowY: 'scroll',
       scrollBehavior: 'smooth'
     },
-    '.term-body-caret-button': {
+    '.__caret-button': {
       position: 'absolute',
       top: '70%',
       right: '3%'
     },
-    '.term-footer-checkbox': {
+    '.__content-footer-checkbox': {
       alignItems: 'center',
       marginTop: token.marginSM,
       marginBottom: token.margin
     },
-    '.__term-label': {
+    '.__content-title': {
       color: token.colorWhite,
       marginBottom: token.margin
     }
   };
 });
+
+export default TeamsOfServiceModal;

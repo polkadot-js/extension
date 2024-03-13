@@ -4,3 +4,4 @@
 export { default as SlippageModal } from './SlippageModal';
 export { default as AddMoreBalance } from './AddMoreBalanceModal';
 export { default as SwapQuotesSelectorModal } from './SwapQuotesSelectorModal';
+export { default as SwapTeamsOfServiceModal } from './TeamsOfServiceModal';

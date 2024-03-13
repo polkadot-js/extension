@@ -230,8 +230,6 @@ export class SubscanService {
         maxCount = res.count;
       }
 
-      cbAfterEachRequest?.(res.extrinsics);
-
       const extrinsics = res.extrinsics;
       const extrinsicIndexes = extrinsics.map((item) => item.extrinsic_index);
       const extrinsicParams = await this.getExtrinsicParams(chain, extrinsicIndexes, 0);
@@ -246,11 +244,14 @@ export class SubscanService {
         }
       }
 
-      res.extrinsics.forEach((item) => {
-        resultMap[item.extrinsic_hash] = item;
-      });
+      // Call callback after each request, for parse data
+      cbAfterEachRequest?.(extrinsics);
 
-      currentCount += res.extrinsics.length;
+      for (const item of extrinsics) {
+        resultMap[item.extrinsic_hash] = item;
+      }
+
+      currentCount += extrinsics.length;
 
       if (page > limit.page || currentCount > limit.record) {
         return;

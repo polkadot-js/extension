@@ -154,18 +154,6 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
     '.__swap-arrival-time': {
       marginTop: 12
     },
-    '.__summary-quote': {
-      display: 'flex',
-      justifyContent: 'space-between',
-      backgroundColor: token.colorBgSecondary,
-      gap: 12,
-      paddingLeft: 12,
-      paddingRight: 12,
-      paddingTop: 16,
-      paddingBottom: 16,
-      borderRadius: 8,
-      marginBottom: 20
-    },
     '.__swap-quote-expired': {
       marginTop: 12
     },

@@ -17,7 +17,7 @@ import { getValidatorKey } from '@subwallet/extension-web-ui/utils/transaction/s
 import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
-import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
+import { CaretLeft, CheckCircle, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -77,6 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
+  const defaultValueRef = useRef({ _default: '_', selected: '_' });
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -133,9 +134,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const { changeValidators,
     onApplyChangeValidators,
+    onAutoSelectValidator,
     onCancelSelectValidator,
     onChangeSelectedValidator,
-    onInitValidators } = useSelectValidators(id, chain, maxCount, onChange, isSingleSelect);
+    onInitValidators } = useSelectValidators(items, id, chain, maxCount, onChange, isSingleSelect);
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
@@ -291,11 +293,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
     const selected = defaultValue || (isSingleSelect ? '' : _default);
 
+    if (defaultValueRef.current._default === _default && defaultValueRef.current.selected === selected) {
+      return;
+    }
+
     onInitValidators(_default, selected);
     onChange && onChange({ target: { value: selected } });
 
+    defaultValueRef.current = { _default, selected };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators, isSingleSelect]);
+  }, [nominations, onInitValidators, isSingleSelect, defaultValue]);
 
   useEffect(() => {
     if (!isActive) {
@@ -312,6 +319,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     }
   }, [isActive, onResetFilter]);
 
+  const onClickLightningBtn = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+    onAutoSelectValidator();
+  }, [onAutoSelectValidator]);
+
   return (
     <>
       <SelectValidatorInput
@@ -320,6 +332,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         label={t('Select') + ' ' + t(handleValidatorLabel)}
         loading={loading}
         onClick={onActiveValidatorSelector}
+        onClickLightningBtn={onClickLightningBtn}
         value={value || ''}
       />
       <BaseModal
@@ -331,19 +344,30 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         )}
         footer={(
-          <Button
-            block
-            disabled={!changeValidators.length}
-            icon={(
-              <Icon
-                phosphorIcon={CheckCircle}
-                weight={'fill'}
-              />
-            )}
-            onClick={onApplyChangeValidators}
-          >
-            {t(applyLabel, { number: changeValidators.length })}
-          </Button>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <Button
+              icon={(
+                <Icon
+                  phosphorIcon={Lightning}
+                />
+              )}
+              onClick={onAutoSelectValidator}
+              schema={'secondary'}
+            />
+            <Button
+              block
+              disabled={!changeValidators.length}
+              icon={(
+                <Icon
+                  phosphorIcon={CheckCircle}
+                  weight={'fill'}
+                />
+              )}
+              onClick={onApplyChangeValidators}
+            >
+              {t(applyLabel, { number: changeValidators.length })}
+            </Button>
+          </div>
         )}
         id={id}
         onCancel={onCancelSelectValidator}

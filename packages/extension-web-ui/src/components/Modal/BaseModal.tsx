@@ -67,7 +67,8 @@ export const BaseModal = styled(Component)<Props>(({ theme: { token } }: Props) 
       justifyContent: 'flex-end',
 
       '.ant-sw-modal-content': {
-        maxHeight: '95%'
+        maxHeight: '95%',
+        height: 'auto'
       }
     },
 

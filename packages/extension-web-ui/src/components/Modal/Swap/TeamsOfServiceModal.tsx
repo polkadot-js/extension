@@ -3,7 +3,7 @@
 
 // eslint-disable-next-line header/header
 import { BaseModal } from '@subwallet/extension-web-ui/components';
-import { SWAP_TERM_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -18,7 +18,7 @@ interface Props extends ThemeProps {
   onOk: () => void
 }
 
-const modalId = SWAP_TERM_OF_SERVICE_MODAL;
+const modalId = SWAP_TERMS_OF_SERVICE_MODAL;
 
 const Component = ({ className, onOk }: Props) => {
   const { inactiveModal } = useContext(ModalContext);
@@ -65,7 +65,7 @@ const Component = ({ className, onOk }: Props) => {
       width={ isWebUI ? 784 : undefined }
     >
       <div
-        className={'__content-container'}
+        className={'__content-body'}
         onScroll={onScrollToAcceptButton}
         ref={scrollRef}
       >
@@ -90,7 +90,7 @@ const Component = ({ className, onOk }: Props) => {
         </div>
 
         {(!isScrollEnd || !scrollRef?.current) && <Button
-          className={'__term-body-caret-button'}
+          className={'__caret-button'}
           icon={<Icon phosphorIcon={CaretDown} />}
           onClick={onScrollContent}
           schema={'secondary'}
@@ -98,18 +98,18 @@ const Component = ({ className, onOk }: Props) => {
           size={'xs'}
         />}
       </div>
-      <div className={'__term-footer'}>
+      <div className={'__content-footer'}>
         <Checkbox
           checked={isChecked}
-          className={'__term-footer-checkbox'}
+          className={'__content-footer-checkbox'}
           onChange={onCheckedInput}
         >
           {t('I understand and agree to the Terms of Use, which apply to my use of SubWallet and all of its feature')}
         </Checkbox>
-        <div className={'__term-footer-button-group'}>
+        <div className={'__content-footer-button-group'}>
           <Button
             block={true}
-            className={'__term-footer-button'}
+            className={'__content-footer-button'}
             disabled={!isChecked || !isScrollEnd}
             icon={ (
               <Icon
@@ -143,18 +143,18 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
       lineHeight: token.lineHeight,
       color: token.colorWhite
     },
-    '.__content-container': {
+    '.__content-body': {
       maxHeight: 294,
       display: 'block',
       overflowY: 'scroll',
       scrollBehavior: 'smooth'
     },
-    '.__term-body-caret-button': {
+    '.__caret-button': {
       position: 'absolute',
       top: '70%',
       right: '3%'
     },
-    '.__term-footer-checkbox': {
+    '.__content-footer-checkbox': {
       alignItems: 'center',
       marginTop: token.marginSM,
       marginBottom: token.margin
@@ -165,3 +165,5 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
     }
   };
 });
+
+export default TeamsOfServiceModal;

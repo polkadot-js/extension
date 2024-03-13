@@ -8,11 +8,11 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
+import { SwapTeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
-import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
 import { SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -844,7 +844,7 @@ const Component = () => {
 
   useEffect(() => {
     if (!confirmedTerm) {
-      activeModal(SWAP_TERM_OF_SERVICE_MODAL);
+      activeModal(SWAP_TERMS_OF_SERVICE_MODAL);
     }
   }, [activeModal, confirmedTerm]);
 
@@ -1299,7 +1299,7 @@ const Component = () => {
         optimalQuoteItem={optimalQuoteRef.current}
         selectedItem={currentQuote}
       />
-      <TeamsOfServiceModal onOk={onAfterConfirmTermModal} />
+      <SwapTeamsOfServiceModal onOk={onAfterConfirmTermModal} />
     </>
   );
 };

@@ -38,5 +38,5 @@ export const isPoolLeave = (txType: ExtrinsicType) =>
     ExtrinsicType.UNSTAKE_QDOT,
     ExtrinsicType.UNSTAKE_SDOT,
     ExtrinsicType.UNSTAKE_STDOT,
-    ExtrinsicType.UNSTAKE_VDOT,
+    ExtrinsicType.UNSTAKE_VDOT
   ].includes(txType);

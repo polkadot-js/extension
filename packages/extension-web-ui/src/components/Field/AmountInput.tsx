@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getOS } from '@subwallet/extension-base/utils';
+import { osName } from '@subwallet/extension-base/utils';
 import { useForwardInputRef } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
@@ -58,10 +58,10 @@ interface ControlData {
   [cmdFirefoxKey]: boolean;
 }
 
-const isMacOs = getOS() === 'Mac OS';
+const isMacOS = osName === 'macOS';
 
 const isControlKey = (keycode: number) => {
-  if (isMacOs) {
+  if (isMacOS) {
     return [cmdLeftKey, cmdRightKey, cmdFirefoxKey].includes(keycode);
   } else {
     return [ctrlKey].includes(keycode);

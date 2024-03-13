@@ -6,28 +6,21 @@ import { BasicTxErrorType, ExtrinsicType } from '@subwallet/extension-base/backg
 import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_EARNING_REWARD_HISTORY_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEnabled, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import BaseLiquidStakingPoolHandler from '@subwallet/extension-base/services/earning-service/handlers/liquid-staking/base';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { SWTransaction } from '@subwallet/extension-base/services/transaction-service/types';
 import { EarningRewardHistoryItem, EarningRewardItem, EarningRewardJson, HandleYieldStepData, HandleYieldStepParams, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestYieldLeave, RequestYieldWithdrawal, ResponseEarlyValidateYield, TransactionData, ValidateYieldProcessParams, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
+import { addLazy, categoryAddresses, createPromiseHandler, PromiseHandler, removeLazy } from '@subwallet/extension-base/utils';
+import { fetchStaticCache } from '@subwallet/extension-base/utils/fetchStaticCache';
 import { BehaviorSubject } from 'rxjs';
 
-import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
-
-const POOLS_DATA_URLS = 'https://sw-static-cache.pages.dev/earning/yield-pools.json';
+import { AcalaLiquidStakingPoolHandler, AmplitudeNativeStakingPoolHandler, AstarNativeStakingPoolHandler, BasePoolHandler, BifrostLiquidStakingPoolHandler, BifrostMantaLiquidStakingPoolHandler, InterlayLendingPoolHandler, NominationPoolHandler, ParallelLiquidStakingPoolHandler, ParaNativeStakingPoolHandler, RelayNativeStakingPoolHandler, StellaSwapLiquidStakingPoolHandler } from './handlers';
 
 const fetchPoolsData = async () => {
-  const res = await fetch(POOLS_DATA_URLS);
-
-  if (res.status !== 200) {
-    return {};
-  }
-
-  const fetchData = (await res.json()) as {data: Record<string, YieldPoolInfo>};
+  const fetchData = await fetchStaticCache<{data: Record<string, YieldPoolInfo>}>('earning/yield-pools.json', { data: {} });
 
   return fetchData.data;
 };
@@ -46,11 +39,16 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
+  private useOnlineCacheOnly = true;
 
   constructor (state: KoniState) {
     this.state = state;
     this.dbService = state.dbService;
     this.eventService = state.eventService;
+  }
+
+  public disableOnlineCacheOnly () {
+    this.useOnlineCacheOnly = false;
   }
 
   private async initHandlers () {
@@ -91,6 +89,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
       if (_STAKING_CHAIN_GROUP.liquidStaking.includes(chain)) {
         if (chain === 'bifrost_dot') {
           handlers.push(new BifrostLiquidStakingPoolHandler(this.state, chain));
+          handlers.push(new BifrostMantaLiquidStakingPoolHandler(this.state, chain));
         }
 
         if (chain === 'acala') {
@@ -162,26 +161,62 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.handleActions();
   }
 
+  private delayReloadTimeout: NodeJS.Timeout | undefined;
+
   handleActions () {
     this.eventService.onLazy((events, eventTypes) => {
+      let delayReload = false;
+
       (async () => {
         const removedAddresses: string[] = [];
+        const removeChains: string[] = [];
 
         events.forEach((event) => {
           if (event.type === 'account.remove') {
             removedAddresses.push(event.data[0] as string);
           }
+
+          if (event.type === 'chain.updateState') {
+            const chainState = this.state.getChainStateByKey(event.data[0] as string);
+
+            if (chainState && !_isChainEnabled(chainState)) {
+              removeChains.push(event.data[0] as string);
+            }
+          }
+
+          if (event.type === 'transaction.done') {
+            const transactionData = event.data[0] as SWTransaction;
+            const notRequireReloadTypes = [
+              ExtrinsicType.TRANSFER_BALANCE,
+              ExtrinsicType.TRANSFER_TOKEN,
+              ExtrinsicType.TRANSFER_XCM,
+              ExtrinsicType.SEND_NFT,
+              ExtrinsicType.CROWDLOAN
+            ];
+
+            if (notRequireReloadTypes.indexOf(transactionData.extrinsicType) === -1) {
+              delayReload = true;
+            }
+          }
         });
 
-        if (removedAddresses.length > 0) {
-          await this.removeYieldPositions(undefined, removedAddresses);
+        if (removeChains.length || removedAddresses.length) {
+          await this.removeYieldPositions(removeChains, removedAddresses);
         }
 
         // Account changed or chain changed (active or inactive)
         // Chain changed (active or inactive)
         // Todo: Optimize performance of chain active or inactive in the future
-        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState')) {
-          await this.reloadEarning();
+        if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.remove') || eventTypes.includes('chain.updateState') || delayReload) {
+          if (delayReload) {
+            this.delayReloadTimeout = setTimeout(() => {
+              this.reloadEarning().catch(console.error); // Timeout is removed inside reloadEarning > runUnsubscribePoolsPosition
+            }, 3000);
+          } else {
+            this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+            this.delayReloadTimeout = undefined;
+            await this.reloadEarning();
+          }
         }
       })().catch(console.error);
     });
@@ -293,11 +328,12 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   public async getYieldPool (slug: string): Promise<YieldPoolInfo | undefined> {
     await this.eventService.waitEarningReady;
+    const poolInfoMap = this.yieldPoolInfoSubject.getValue();
 
-    return this.yieldPoolInfoSubject.getValue()[slug];
+    return poolInfoMap[slug];
   }
 
-  public async subscribePoolsInfo (callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
+  public async subscribePoolsInfo (onlineData: Record<string, YieldPoolInfo>, callback: (rs: YieldPoolInfo) => void): Promise<VoidFunction> {
     let cancel = false;
 
     await this.eventService.waitChainReady;
@@ -305,15 +341,20 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const unsubList: Array<VoidFunction> = [];
 
     for (const handler of Object.values(this.handlers)) {
-      handler.subscribePoolInfo(callback)
-        .then((unsub) => {
-          if (!cancel) {
-            unsubList.push(unsub);
-          } else {
-            unsub();
-          }
-        })
-        .catch(console.error);
+      // Force subscribe onchain data
+      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING;
+
+      if (!this.useOnlineCacheOnly || forceSubscribe) {
+        handler.subscribePoolInfo(callback)
+          .then((unsub) => {
+            if (!cancel) {
+              unsubList.push(unsub);
+            } else {
+              unsub();
+            }
+          })
+          .catch(console.error);
+      }
     }
 
     return () => {
@@ -375,15 +416,13 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   private async fetchingPoolsInfoOnline () {
-    const onlineData = await Promise.race([fetchPoolsData(), new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({});
-      }, 1800);
-    })]) as Record<string, YieldPoolInfo>;
+    const onlineData = await fetchPoolsData();
 
     Object.values(onlineData).forEach((item) => {
       this.updateYieldPoolInfo(item);
     });
+
+    return onlineData;
   }
 
   private yieldPoolsInfoUnsub: VoidFunction | undefined;
@@ -393,14 +432,14 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribePoolsInfo();
 
     // Fetching online data
-    await this.fetchingPoolsInfoOnline();
+    const onlineData = await this.fetchingPoolsInfoOnline();
 
     const interval = setInterval(() => {
       this.fetchingPoolsInfoOnline().catch(console.error);
     }, CRON_REFRESH_CHAIN_STAKING_METADATA);
 
     // Fetching from chains
-    this.subscribePoolsInfo((data) => {
+    this.subscribePoolsInfo(onlineData, (data) => {
       data.lastUpdated = Date.now();
       this.updateYieldPoolInfo(data);
     }).then((rs) => {
@@ -517,13 +556,11 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   yieldPositionPersistQueue: YieldPositionInfo[] = [];
 
-  public resetYieldPositionQueue () {
-    this.yieldPositionPersistQueue = [];
-  }
-
-  public resetYieldPosition () {
+  public async resetYieldPosition () {
     this.yieldPositionSubject.next({});
     this.yieldPositionPersistQueue = [];
+    removeLazy('persistYieldPositionInfo');
+    await this.dbService.stores.yieldPosition.clear();
   }
 
   private _getYieldPositionKey (slug: string, address: string): string {
@@ -556,7 +593,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.runUnsubscribeStakingRewardInterval();
     this.runUnsubscribeEarningRewardHistoryInterval();
 
-    reset && this.resetYieldPosition();
+    reset && await this.resetYieldPosition();
 
     await this.runSubscribePoolsPosition();
     this.runSubscribeStakingRewardInterval();
@@ -580,22 +617,37 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   runUnsubscribePoolsPosition () {
     this.yieldPositionUnsub?.();
+    removeLazy('persistYieldPositionInfo');
     this.yieldPositionPersistQueue = [];
+
+    // Remove delay reload
+    this.delayReloadTimeout && clearTimeout(this.delayReloadTimeout);
+    this.delayReloadTimeout = undefined;
   }
 
   /* Pools' position methods */
 
   /* Get pools' reward */
 
+  earningsRewardQueue: EarningRewardItem[] = [];
+
   public updateEarningReward (stakingRewardData: EarningRewardItem): void {
-    const stakingRewardState = this.earningRewardSubject.getValue();
+    this.earningsRewardQueue.push(stakingRewardData);
 
-    stakingRewardState.ready = true;
-    const key = `${stakingRewardData.slug}---${stakingRewardData.address}`;
+    addLazy('updateEarningReward', () => {
+      const stakingRewardState = this.earningRewardSubject.getValue();
 
-    stakingRewardState.data[key] = stakingRewardData;
+      this.earningsRewardQueue.forEach((item) => {
+        const key = `${item.slug}---${item.address}`;
 
-    this.earningRewardSubject.next(stakingRewardState);
+        stakingRewardState.data[key] = item;
+      });
+      stakingRewardState.ready = true;
+
+      this.earningRewardSubject.next(stakingRewardState);
+
+      this.earningsRewardQueue = [];
+    });
   }
 
   public async getPoolReward (addresses: string[], callback: (result: EarningRewardItem) => void): Promise<VoidFunction> {
@@ -661,6 +713,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   runUnsubscribeStakingRewardInterval () {
+    removeLazy('updateEarningReward');
+    this.earningsRewardQueue = [];
     this.earningsRewardInterval && clearInterval(this.earningsRewardInterval);
   }
 
@@ -698,14 +752,23 @@ export default class EarningService implements StoppableServiceInterface, Persis
     };
   }
 
+  private earningRewardHistoryQueue: EarningRewardHistoryItem[] = [];
+
   public updateEarningRewardHistory (earningRewardHistory: EarningRewardHistoryItem): void {
-    const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
+    this.earningRewardHistoryQueue.push(earningRewardHistory);
 
-    const key = `${earningRewardHistory.slug}---${earningRewardHistory.address}---${earningRewardHistory.eventIndex}`;
+    addLazy('updateEarningRewardHistory', () => {
+      const earningRewardHistoryState = this.earningRewardHistorySubject.getValue();
 
-    earningRewardHistoryState[key] = earningRewardHistory;
+      this.earningRewardHistoryQueue.forEach((item) => {
+        const key = `${item.slug}---${item.address}---${item.eventIndex}`;
 
-    this.earningRewardHistorySubject.next(earningRewardHistoryState);
+        earningRewardHistoryState[key] = item;
+      });
+
+      this.earningRewardHistorySubject.next(earningRewardHistoryState);
+      this.earningRewardHistoryQueue = [];
+    }, 300, 1800);
   }
 
   public subscribeEarningRewardHistory (): BehaviorSubject<Record<string, EarningRewardHistoryItem>> {
@@ -738,6 +801,8 @@ export default class EarningService implements StoppableServiceInterface, Persis
   }
 
   runUnsubscribeEarningRewardHistoryInterval () {
+    removeLazy('updateEarningRewardHistory');
+    this.earningRewardHistoryQueue = [];
     this.earningsRewardHistoryInterval && clearInterval(this.earningsRewardHistoryInterval);
   }
 
@@ -752,15 +817,20 @@ export default class EarningService implements StoppableServiceInterface, Persis
    * @return {Promise<YieldPoolTarget[]>} List of pool's target
    * */
   public async getPoolTargets (slug: string): Promise<YieldPoolTarget[]> {
-    await this.eventService.waitChainReady;
+    let targets: YieldPoolTarget[] = [];
+
+    if (this.useOnlineCacheOnly) {
+      targets = await fetchStaticCache(`earning/targets/${slug}.json`, []);
+    }
 
     const handler = this.getPoolHandler(slug);
 
-    if (handler) {
-      return await handler.getPoolTargets();
-    } else {
-      return [];
+    if (!targets.length && handler) {
+      await this.eventService.waitChainReady;
+      targets = await handler.getPoolTargets();
     }
+
+    return targets;
   }
 
   /* Get pool's targets */
@@ -897,4 +967,9 @@ export default class EarningService implements StoppableServiceInterface, Persis
   /* Other */
 
   /* Handle actions */
+
+  // Clear wallet data
+  public async resetWallet () {
+    await this.resetYieldPosition();
+  }
 }

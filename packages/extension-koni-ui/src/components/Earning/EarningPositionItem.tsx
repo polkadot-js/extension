@@ -6,11 +6,13 @@ import { BN_TEN } from '@subwallet/extension-base/utils';
 import EarningTypeTag from '@subwallet/extension-koni-ui/components/Earning/EarningTypeTag';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isRelatedToAstar } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CaretRight } from 'phosphor-react';
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -20,6 +22,7 @@ type Props = ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
+  const { t } = useTranslation();
   const { className, isShowBalance,
     onClick,
     positionInfo } = props;
@@ -45,6 +48,8 @@ const Component: React.FC<Props> = (props: Props) => {
     return new BigN(balanceValue).div(BN_TEN.pow(asset.decimals || 0)).multipliedBy(price);
   }, [asset.decimals, balanceValue, price]);
 
+  const _isRelatedToAstar = isRelatedToAstar(slug);
+
   return (
     <div
       className={CN(className)}
@@ -62,14 +67,19 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='__item-lines-container'>
           <div className='__item-line-1'>
             <div className='__item-name'>{poolName}</div>
-            <div className='__item-balance-value'>
-              <Number
-                decimal={asset.decimals || 0}
-                hide={!isShowBalance}
-                suffix={asset.symbol}
-                value={balanceValue}
-              />
-            </div>
+
+            {
+              !_isRelatedToAstar && (
+                <div className='__item-balance-value'>
+                  <Number
+                    decimal={asset.decimals || 0}
+                    hide={!isShowBalance}
+                    suffix={asset.symbol}
+                    value={balanceValue}
+                  />
+                </div>
+              )
+            }
           </div>
           <div className='__item-line-2'>
             <div className='__item-tags-container'>
@@ -79,19 +89,32 @@ const Component: React.FC<Props> = (props: Props) => {
                 type={type}
               />
             </div>
-            <div className='__item-converted-balance-value'>
-              <Number
-                decimal={0}
-                hide={!isShowBalance}
-                prefix={'$'}
-                value={convertedBalanceValue}
-              />
-            </div>
+
+            {
+              !_isRelatedToAstar && (
+                <div className='__item-converted-balance-value'>
+                  <Number
+                    decimal={0}
+                    hide={!isShowBalance}
+                    prefix={'$'}
+                    value={convertedBalanceValue}
+                  />
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
 
       <div className={'__item-right-part'}>
+        {
+          _isRelatedToAstar && (
+            <div className={'__visit-dapp'}>
+              {t('View on dApp')}
+            </div>
+          )
+        }
+
         <Icon
           phosphorIcon={CaretRight}
           size='sm'
@@ -124,7 +147,8 @@ const EarningPositionItem = styled(Component)<Props>(({ theme: { token } }: Prop
     '.__item-right-part': {
       display: 'flex',
       alignItems: 'center',
-      paddingLeft: 10
+      paddingLeft: 10,
+      gap: 10
     },
 
     '.__item-logo': {
@@ -196,6 +220,12 @@ const EarningPositionItem = styled(Component)<Props>(({ theme: { token } }: Prop
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       minWidth: 70
+    },
+
+    '.__visit-dapp': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
     }
   });
 });

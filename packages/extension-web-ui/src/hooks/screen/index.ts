@@ -4,7 +4,5 @@
 export * from './common';
 export * from './confirmation';
 export * from './crowdloan';
-export * from './earning';
 export * from './home';
 export * from './nft';
-export * from './staking';

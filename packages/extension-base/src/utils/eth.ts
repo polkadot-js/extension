@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { GAS_PRICE_RATIO, NETWORK_MULTI_GAS_FEE } from '@subwallet/extension-base/constants';
 import BigN from 'bignumber.js';
 import BNEther from 'bn.js';
 import { ethers } from 'ethers';
@@ -91,10 +90,4 @@ export const signatureToHex = (sig: SignedTransaction): string => {
   const hexV = hexStripPrefix(numberToHex(v));
 
   return hexR + hexS + hexV;
-};
-
-export const recalculateGasPrice = (_price: string, chain: string) => {
-  const needMulti = NETWORK_MULTI_GAS_FEE.includes(chain) || NETWORK_MULTI_GAS_FEE.includes('*');
-
-  return needMulti ? new BigN(_price).multipliedBy(GAS_PRICE_RATIO).toFixed(0) : _price;
 };

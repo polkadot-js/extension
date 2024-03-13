@@ -513,7 +513,7 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   },
 
   '.__balance-reload-toggle': {
-    marginLeft: -token.sizeXS/2
+    marginLeft: -token.sizeXS / 2
   },
 
   '.__action-block': {

@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CrowdloanParaState, MobileOS, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CrowdloanParaState, NetworkJson } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountAuthType, AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { getRandomIpfsGateway, SUBWALLET_IPFS } from '@subwallet/extension-base/koni/api/nft/config';
-import { getOS } from '@subwallet/extension-base/utils/environment';
 import { t } from 'i18next';
 
 import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
@@ -21,8 +20,6 @@ export const isEmptyArray = (x: any) => !Array.isArray(x) || (Array.isArray(x) &
 export function isAccountAll (address?: string): boolean {
   return address === ALL_ACCOUNT_KEY;
 }
-
-export const isMobile = MobileOS.includes(getOS());
 
 export function reformatAddress (address: string, networkPrefix = 42, isEthereum = false): string {
   try {
@@ -357,7 +354,9 @@ export const stripUrl = (url: string): string => {
   return parts[2];
 };
 
-export const baseParseIPFSUrl = (input: string): string | undefined => {
+export const baseParseIPFSUrl = (input: string, customDomain?: string): string | undefined => {
+  const selectedDomain = customDomain || getRandomIpfsGateway();
+
   if (!input || input.length === 0) {
     return undefined;
   }
@@ -371,18 +370,18 @@ export const baseParseIPFSUrl = (input: string): string | undefined => {
   }
 
   if (input.startsWith('/ipfs/')) {
-    return getRandomIpfsGateway() + input.split('/ipfs/')[1];
+    return selectedDomain + input.split('/ipfs/')[1];
   }
 
   if (!input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // just the IPFS hash
-    return getRandomIpfsGateway() + input;
+    return selectedDomain + input;
   }
 
   if (input.includes('ipfs://') && !input.includes('ipfs://ipfs/')) { // starts with ipfs://
-    return getRandomIpfsGateway() + input.split('ipfs://')[1];
+    return selectedDomain + input.split('ipfs://')[1];
   }
 
-  return getRandomIpfsGateway() + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
+  return selectedDomain + input.split('ipfs://ipfs/')[1]; // starts with ipfs://ipfs/
 };
 
 export const swParseIPFSUrl = (input: string): string | undefined => {
@@ -424,6 +423,7 @@ export function wait (milliseconds: number) {
 export * from './account';
 export * from './array';
 export * from './environment';
+export * from './eth';
 export * from './number';
 export * from './lazy';
 export * from './promise';

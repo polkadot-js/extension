@@ -42,8 +42,11 @@ const packages = [
 const _additionalEnv = {
   TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
   COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
+  NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST),
   TRANSAK_TEST_MODE: JSON.stringify(false),
-  BANXA_TEST_MODE: JSON.stringify(false)
+  BANXA_TEST_MODE: JSON.stringify(false),
+  INFURA_API_KEY: JSON.stringify(process.env.INFURA_API_KEY),
+  INFURA_API_KEY_SECRET: JSON.stringify(process.env.INFURA_API_KEY_SECRET)
 };
 
 const additionalEnvDict = {

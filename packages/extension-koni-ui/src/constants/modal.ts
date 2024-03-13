@@ -38,3 +38,8 @@ export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phr
 
 export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
 export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';
+
+/* Announcement */
+export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
+export const EARNING_MIGRATION_MODAL = 'earning-migration-modal';
+/* Announcement */

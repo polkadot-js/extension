@@ -5,4 +5,3 @@ export { default as StakingNominationItem } from './StakingNominationItem';
 export { default as StakingPoolItem } from './StakingPoolItem';
 export { default as StakingUnstakeItem } from './StakingUnstakeItem';
 export { default as StakingValidatorItem } from './StakingValidatorItem';
-export { default as SwStakingItem } from './SwStakingItem';

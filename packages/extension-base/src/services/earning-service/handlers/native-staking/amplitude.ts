@@ -200,6 +200,8 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           const isClaimable = parseInt(unstakingBlock) - currentBlockNumber < 0;
           const remainingBlock = parseInt(unstakingBlock) - currentBlockNumber;
           const waitingTime = remainingBlock * blockDuration;
+          // const currentTimestampMs = Date.now();
+          // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
           unstakingBalance = unstakingAmount.toString();
 
@@ -208,6 +210,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             claimable: unstakingAmount.toString(),
             waitingTime,
+            // targetTimestampMs: targetTimestampMs,
             validatorAddress: undefined
           });
         }

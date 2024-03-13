@@ -278,7 +278,7 @@ const NewSeedPhrase = styled(Component)<Props>(({ theme: { extendToken, token } 
 
     '.__instruction-content-download': {
       cursor: 'pointer',
-      display : 'inline-flex',
+      display: 'inline-flex',
       gap: token.paddingSM - 6
     }
   };

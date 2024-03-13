@@ -7,12 +7,9 @@ module.exports = {
   ...base,
   ignorePatterns: [
     ...base.ignorePatterns,
-    "packages/extension-koni-ui/**/*",
-    "packages/extension-web-ui/**/*",
-    "packages/webapp/**/*",
     "i18next-scanner.config.js",
     "koni-*.mjs",
-    "test.ts"
+    "*.spec.ts"
   ],
   parserOptions: {
     ...base.parserOptions,

@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EarningStatus } from '@subwallet/extension-base/types';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
-import { NominationPoolsEarningStatusUi, StakingStatusType, StakingStatusUi } from '@subwallet/extension-koni-ui/constants/stakingStatusUi';
+import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwModal } from '@subwallet/react-ui';
@@ -20,8 +21,8 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
-  const earningStatus: StakingStatusType = useMemo(() => {
-    return isProfitable ? 'active' : 'inactive';
+  const earningStatus: EarningStatus = useMemo(() => {
+    return isProfitable ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
   }, [isProfitable]);
 
   return (
@@ -55,14 +56,14 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
 
         <MetaInfo.Status
           label={t('Earning status')}
-          statusIcon={StakingStatusUi[earningStatus].icon} // TODO: update icon
-          statusName={StakingStatusUi[earningStatus].name}
-          valueColorSchema={StakingStatusUi[earningStatus].schema}
+          statusIcon={EarningStatusUi[earningStatus].icon}
+          statusName={EarningStatusUi[earningStatus].name}
+          valueColorSchema={EarningStatusUi[earningStatus].schema}
         />
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Total bonded')}
+          label={t('Total staked')}
           suffix={symbol}
           value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}

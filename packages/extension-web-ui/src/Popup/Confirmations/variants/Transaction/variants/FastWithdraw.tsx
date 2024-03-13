@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestYieldFastWithdrawal } from '@subwallet/extension-base/background/KoniTypes';
-import { convertDerivativeToOriginToken, YIELD_POOL_MIN_AMOUNT_PERCENT } from '@subwallet/extension-base/koni/api/yield/helper/utils';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { convertDerivativeToOriginToken } from '@subwallet/extension-base/koni/api/yield/helper/utils';
+import { RequestYieldLeave, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { CommonTransactionInfo, MetaInfo, PageWrapper } from '@subwallet/extension-web-ui/components';
+import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -15,33 +16,35 @@ import { BaseTransactionConfirmationProps } from './Base';
 type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, transaction } = props;
-  const { estimateFee } = transaction;
-  const { amount, yieldPoolInfo } = transaction.data as RequestYieldFastWithdrawal;
-
+  const { transaction } = props;
   const { t } = useTranslation();
 
-  const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
+  const { estimateFee } = transaction;
+  const { amount, slug } = transaction.data as RequestYieldLeave;
 
-  const isInterlayPool = useMemo(() => {
-    return yieldPoolInfo.slug === 'DOT___interlay_lending';
-  }, [yieldPoolInfo.slug]);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const { minAmountPercentMap, poolInfoMap } = useSelector((state) => state.earning);
+  const yieldPoolInfo = poolInfoMap[slug] as SpecialYieldPoolInfo;
+
+  const isLendingPool = useMemo(() => {
+    return yieldPoolInfo.type === YieldPoolType.LENDING;
+  }, [yieldPoolInfo.type]);
 
   const assetInfo = useMemo(() => {
-    const tokenSlug = isInterlayPool ? yieldPoolInfo.inputAssets?.[0] : yieldPoolInfo.derivativeAssets?.[0];
+    const tokenSlug = isLendingPool ? yieldPoolInfo.metadata.inputAsset : yieldPoolInfo.metadata.derivativeAssets[0];
 
     return assetRegistry[tokenSlug || ''];
-  }, [assetRegistry, isInterlayPool, yieldPoolInfo.derivativeAssets, yieldPoolInfo.inputAssets]);
+  }, [assetRegistry, isLendingPool, yieldPoolInfo.metadata.derivativeAssets, yieldPoolInfo.metadata.inputAsset]);
 
   const receivedAssetInfo = useMemo(() => {
-    const tokenSlug = yieldPoolInfo.inputAssets?.[0];
+    const tokenSlug = yieldPoolInfo.metadata.inputAsset;
 
     return assetRegistry[tokenSlug || ''];
-  }, [assetRegistry, yieldPoolInfo.inputAssets]);
+  }, [assetRegistry, yieldPoolInfo.metadata.inputAsset]);
 
   const estimatedReceivables = useMemo(() => {
-    const derivativeTokenSlug = yieldPoolInfo.derivativeAssets?.[0] || '';
-    const originTokenSlug = yieldPoolInfo.inputAssets[0] || '';
+    const derivativeTokenSlug = yieldPoolInfo.metadata.derivativeAssets[0] || '';
+    const originTokenSlug = yieldPoolInfo.metadata.inputAsset;
 
     const derivativeTokenInfo = assetRegistry[derivativeTokenSlug];
     const originTokenInfo = assetRegistry[originTokenSlug];
@@ -49,8 +52,12 @@ const Component: React.FC<Props> = (props: Props) => {
     return convertDerivativeToOriginToken(amount, yieldPoolInfo, derivativeTokenInfo, originTokenInfo);
   }, [amount, assetRegistry, yieldPoolInfo]);
 
+  const percent = useMemo(() => {
+    return minAmountPercentMap[yieldPoolInfo.slug] || minAmountPercentMap.default;
+  }, [minAmountPercentMap, yieldPoolInfo.slug]);
+
   return (
-    <div className={CN(className)}>
+    <>
       <CommonTransactionInfo
         address={transaction.address}
         network={transaction.chain}
@@ -66,41 +73,55 @@ const Component: React.FC<Props> = (props: Props) => {
           value={amount}
         />
 
-        {
-          !isInterlayPool && <MetaInfo.Number
+        {!isLendingPool && (
+          <MetaInfo.Number
             decimals={receivedAssetInfo.decimals || 0}
             label={t('Estimated receivables')}
             suffix={receivedAssetInfo.symbol}
             value={estimatedReceivables}
           />
-        }
+        )}
 
-        {
-          !isInterlayPool && <MetaInfo.Number
+        {!isLendingPool && (
+          <MetaInfo.Number
             decimals={receivedAssetInfo.decimals || 0}
             label={t('Minimum receivables')}
             suffix={receivedAssetInfo.symbol}
-            value={Math.floor(estimatedReceivables * YIELD_POOL_MIN_AMOUNT_PERCENT[yieldPoolInfo.slug])}
+            value={Math.floor(parseInt(estimatedReceivables) * percent)}
           />
-        }
+        )}
 
-        {
-          estimateFee && (
-            <MetaInfo.Number
-              decimals={estimateFee.decimals}
-              label={t('Estimated fee')}
-              suffix={estimateFee.symbol}
-              value={estimateFee.value}
-            />
-          )
-        }
+        {!!estimateFee && (
+          <MetaInfo.Number
+            decimals={estimateFee.decimals}
+            label={t('Estimated fee')}
+            suffix={estimateFee.symbol}
+            value={estimateFee.value}
+          />
+        )}
       </MetaInfo>
-    </div>
+    </>
   );
 };
 
-const FastWithdrawTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {};
+const Wrapper = (props: Props) => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(props.className)}
+      hideLoading={true}
+      resolve={dataContext.awaitStores(['earning'])}
+    >
+      <Component {...props} />
+    </PageWrapper>
+  );
+};
+
+const FastWithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+  return {
+
+  };
 });
 
 export default FastWithdrawTransactionConfirmation;

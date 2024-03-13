@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { AccountType } from '@subwallet/extension-web-ui/types';
+import { isAccountAll } from '@subwallet/extension-web-ui/utils';
 import { findAccountByAddress } from '@subwallet/extension-web-ui/utils/account/account';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-web-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { useMemo } from 'react';
@@ -47,6 +48,10 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
     let accountType: AccountType = 'ALL';
 
     if (address) {
+      if (isAccountAll(address)) {
+        return 'ALL';
+      }
+
       if (isEthereumAddress(address)) {
         accountType = 'ETHEREUM';
       } else {

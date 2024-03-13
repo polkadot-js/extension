@@ -7,12 +7,10 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { isActionFromValidator } from '@subwallet/extension-base/services/earning-service/utils';
 import { RequestYieldLeave, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { AccountSelector, AlertBox, AmountInput, HiddenInput, NominationSelector } from '@subwallet/extension-koni-ui/components';
-import InstructionItem from '@subwallet/extension-koni-ui/components/Common/InstructionItem';
+import { AccountSelector, AlertBox, AmountInput, HiddenInput, InstructionItem, NominationSelector } from '@subwallet/extension-koni-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { BN_ZERO, UNSTAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
+import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { yieldSubmitLeavePool } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, getBannerButtonIcon, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
@@ -53,7 +51,7 @@ const validateFields: Array<keyof UnStakeParams> = ['value'];
 const Component: React.FC = () => {
   const { t } = useTranslation();
 
-  const { defaultData, persistData } = useTransactionContext<UnStakeParams>();
+  const { defaultData, persistData, setCustomScreenTitle } = useTransactionContext<UnStakeParams>();
   const { slug } = defaultData;
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
@@ -315,6 +313,36 @@ const Component: React.FC = () => {
     }
   }, [accountList, form, fromValue]);
 
+  useEffect(() => {
+    if (poolType === YieldPoolType.LENDING) {
+      setCustomScreenTitle(t('Withdraw'));
+    }
+
+    return () => {
+      setCustomScreenTitle(undefined);
+    };
+  }, [poolType, setCustomScreenTitle, t]);
+
+  const exType = useMemo(() => {
+    if (poolType === YieldPoolType.NOMINATION_POOL || poolType === YieldPoolType.NATIVE_STAKING) {
+      return ExtrinsicType.STAKING_UNBOND;
+    }
+
+    if (poolType === YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.UNSTAKE_STDOT;
+      }
+
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    if (poolType === YieldPoolType.LENDING) {
+      return ExtrinsicType.UNSTAKE_LDOT;
+    }
+
+    return ExtrinsicType.STAKING_UNBOND;
+  }, [poolType, chainValue]);
+
   return (
     <>
       <TransactionContent>
@@ -335,7 +363,7 @@ const Component: React.FC = () => {
               disabled={!isAllAccount}
               doFilter={false}
               externalAccounts={accountList}
-              label={t('Unstake from account')}
+              label={poolInfo.type === YieldPoolType.LENDING ? t('Withdraw from account') : t('Unstake from account')}
             />
           </Form.Item>
           <FreeBalance
@@ -390,54 +418,51 @@ const Component: React.FC = () => {
             </Checkbox>
           </Form.Item>
 
-          {!fastLeaveValue || !showFastLeave
-            ? (
-              poolInfo.type !== YieldPoolType.LENDING
-                ? (
-                  <>
-                    {!!UNSTAKE_ALERT_DATA.length && (
-                      <div className={'__instruction-items-container'}>
-                        {UNSTAKE_ALERT_DATA.map((_props, index) => {
-                          return (
-                            <InstructionItem
-                              className={'__instruction-item'}
-                              description={(
-                                <div dangerouslySetInnerHTML={{ __html: (_props.description)?.replace('{unBondedTime}', unBondedTime) }}></div>
-                              )}
-                              iconInstruction={
-                                <BackgroundIcon
-                                  backgroundColor={getAlphaColor(_props.iconColor, 0.1)}
-                                  iconColor={_props.iconColor}
-                                  phosphorIcon={getBannerButtonIcon(_props.icon)}
-                                  size='lg'
-                                  weight='fill'
-                                />
-                              }
-                              key={`${_props.icon}-${index}`}
-                              title={_props.title}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </>
-                )
-                : (
-                  <AlertBox
-                    description={t('You can withdraw your supplied funds immediately')}
-                    title={t('Withdraw')}
-                    type={'info'}
-                  />
-                )
-            )
-            : (
-              <AlertBox
-                description={t('With fast unstake, you will receive your funds immediately with a higher fee')}
-                title={t('Fast unstake')}
-                type={'info'}
-              />
-            )}
-
+          <div className={'__instruction-items-container'}>
+            {!fastLeaveValue || !showFastLeave
+              ? (
+                poolInfo.type !== YieldPoolType.LENDING
+                  ? (
+                    <>
+                      {!!UNSTAKE_ALERT_DATA.length && UNSTAKE_ALERT_DATA.map((_props, index) => {
+                        return (
+                          <InstructionItem
+                            className={'__instruction-item'}
+                            description={(
+                              <div dangerouslySetInnerHTML={{ __html: (_props.description)?.replace('{unBondedTime}', unBondedTime) }}></div>
+                            )}
+                            iconInstruction={
+                              <BackgroundIcon
+                                backgroundColor={getAlphaColor(_props.iconColor, 0.1)}
+                                iconColor={_props.iconColor}
+                                phosphorIcon={getBannerButtonIcon(_props.icon)}
+                                size='lg'
+                                weight='fill'
+                              />
+                            }
+                            key={`${_props.icon}-${index}`}
+                            title={_props.title}
+                          />
+                        );
+                      })}
+                    </>
+                  )
+                  : (
+                    <AlertBox
+                      description={t('You can withdraw your supplied funds immediately')}
+                      title={t('Withdraw')}
+                      type={'info'}
+                    />
+                  )
+              )
+              : (
+                <AlertBox
+                  description={t('With fast unstake, you will receive your funds immediately with a higher fee')}
+                  title={t('Fast unstake')}
+                  type={'info'}
+                />
+              )}
+          </div>
         </Form>
       </TransactionContent>
       <TransactionFooter>
@@ -451,9 +476,9 @@ const Component: React.FC = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, poolInfo.type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_LEAVE_POOL : ExtrinsicType.STAKING_UNBOND)}
+          onClick={onPreCheck(form.submit, exType)}
         >
-          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unbond')}
+          {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
         </Button>
       </TransactionFooter>
     </>
@@ -495,6 +520,15 @@ const Unbond = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
 
     '.__instruction-items-container, .__instruction-item + .__instruction-item': {
       marginTop: token.marginSM
+    },
+
+    '.ant-checkbox-wrapper': {
+      display: 'flex',
+      alignItems: 'center',
+
+      '.ant-checkbox': {
+        top: 0
+      }
     }
   };
 });

@@ -4,13 +4,13 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -71,14 +71,24 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake] = await Promise.all([
-        substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from epochDuration, blockTime, sessionsPerEra
+
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
+      const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
+
+      const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake, ..._eraReward] = await Promise.all([
+        substrateApi.api.query.staking.erasTotalStake.multi([parseInt(currentEra), parseInt(currentEra) - 1]),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
         substrateApi.api.query.staking.minNominatorBond(),
         substrateApi.api.query.staking.counterForNominators(),
-        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake()
+        substrateApi.api.query?.staking?.minimumActiveStake && substrateApi.api.query?.staking?.minimumActiveStake(),
+        substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
+      const [_totalEraStake, _lastTotalStaked] = _EraStakeInfo;
+      const validatorEraReward = getAvgValidatorEraReward(supportedDays, _eraReward[0]);
+      const lastTotalStaked = _lastTotalStaked.toString();
 
       const minActiveStake = _minimumActiveStake?.toString() || '0';
       const minNominatorBond = _minNominatorBond.toString();
@@ -95,7 +105,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const bnTotalIssuance = new BN(rawTotalIssuance);
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
-      const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
       const farmerCount = _counterForNominators.toPrimitive() as number;
@@ -149,11 +159,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   async parseNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, ledger: PalletStakingStakingLedger, currentEra: string, minStake: BN, _deriveSessionProgress: DeriveSessionProgress): Promise<Omit<YieldPositionInfo, keyof BaseYieldPositionInfo>> {
     const chain = chainInfo.slug;
 
-    const [_nominations, _bonded] = await Promise.all([
+    const [_nominations, _bonded, _activeEra] = await Promise.all([
       substrateApi.api.query?.staking?.nominators(address),
-      substrateApi.api.query?.staking?.bonded(address)
+      substrateApi.api.query?.staking?.bonded(address),
+      substrateApi.api.query?.staking?.activeEra()
     ]);
-
     const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
     const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
@@ -222,22 +232,21 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     ledger.unlocking.forEach((unlockingChunk) => {
-      // Calculate the remaining time for current era ending
-      const isClaimable = unlockingChunk.era - parseInt(currentEra) < 0;
-      const remainingEra = unlockingChunk.era - parseInt(currentEra);
-      const expectedBlockTime = _EXPECTED_BLOCK_TIME[chain];
-      const eraLength = _deriveSessionProgress.eraLength.toNumber();
-      const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
-      const remainingSlots = eraLength - eraProgress;
-      const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+      const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
+      const era = parseInt(activeEra.index);
+      const startTimestampMs = parseInt(activeEra.start);
+
+      const remainingEra = unlockingChunk.era - era;
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
-      const waitingTime = remainingEra * eraTime + remainingHours;
+      const remaningTimestampMs = remainingEra * eraTime * 60 * 60 * 1000;
+      const targetTimestampMs = startTimestampMs + remaningTimestampMs;
+      const isClaimable = targetTimestampMs - Date.now() <= 0;
 
       unstakingList.push({
         chain,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: unlockingChunk.value.toString(),
-        waitingTime: waitingTime
+        targetTimestampMs: targetTimestampMs
       } as UnstakingInfo);
     });
 
@@ -339,12 +348,30 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const allValidators: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
 
-    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards] = await Promise.all([
+    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
       chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
       chainApi.api.query.staking.minNominatorBond(),
-      chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data()
+      chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data(),
+      chainApi.api.query.staking.validators.entries()
     ]);
+
+    // filter blocked validators
+    const validators = _validators as any[];
+    const blockValidatorList: string[] = [];
+
+    for (const validator of validators) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const validatorAddress = validator[0].toHuman()[0] as string;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+      const isBlocked = validatorPrefs.blocked;
+
+      if (isBlocked) {
+        blockValidatorList.push(validatorAddress);
+      }
+    }
 
     const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
 
@@ -366,39 +393,42 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const rawValidatorStat = item[1].toHuman() as Record<string, any>;
 
       const validatorAddress = rawValidatorInfo[1] as string;
-      const rawTotalStake = rawValidatorStat.total as string;
-      const rawOwnStake = rawValidatorStat.own as string;
 
-      const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
-      const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
-      const otherStake = bnTotalStake.sub(bnOwnStake);
+      if (!blockValidatorList.includes(validatorAddress)) {
+        const rawTotalStake = rawValidatorStat.total as string;
+        const rawOwnStake = rawValidatorStat.own as string;
 
-      totalStakeMap[validatorAddress] = bnTotalStake;
+        const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
+        const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
+        const otherStake = bnTotalStake.sub(bnOwnStake);
 
-      let nominatorCount = 0;
+        totalStakeMap[validatorAddress] = bnTotalStake;
 
-      if ('others' in rawValidatorStat) {
-        const others = rawValidatorStat.others as Record<string, any>[];
+        let nominatorCount = 0;
 
-        nominatorCount = others.length;
+        if ('others' in rawValidatorStat) {
+          const others = rawValidatorStat.others as Record<string, any>[];
+
+          nominatorCount = others.length;
+        }
+
+        allValidators.push(validatorAddress);
+
+        validatorInfoList.push({
+          address: validatorAddress,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: otherStake.toString(),
+          nominatorCount,
+          // to be added later
+          commission: 0,
+          expectedReturn: 0,
+          blocked: false,
+          isVerified: false,
+          minBond,
+          isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
+        } as ValidatorInfo);
       }
-
-      allValidators.push(validatorAddress);
-
-      validatorInfoList.push({
-        address: validatorAddress,
-        totalStake: bnTotalStake.toString(),
-        ownStake: bnOwnStake.toString(),
-        otherStake: otherStake.toString(),
-        nominatorCount,
-        // to be added later
-        commission: 0,
-        expectedReturn: 0,
-        blocked: false,
-        isVerified: false,
-        minBond,
-        isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
-      } as ValidatorInfo);
     }
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};

@@ -1,25 +1,29 @@
-    1879	Nam Phạm                      	[Issue 2313] fix eslint
-    1848	AnhMTV                        	Release version 1.1.33
-    1520	S2kael                        	[Issue-2038] [Campaign] Handle case update and remove campaign
+    2318	AnhMTV                        	Release version 1.1.43
+    2170	Nam Phạm                      	[Issue 2717] change XCM ref map
+    1949	S2kael                        	[Issue-2698] Update stable chain-list version
+     619	lw-cdm                        	Fix issue related to undefined object
      465	Jaco                          	0.42.5 (#969)
-     305	lw-cdm                        	[Issue-2467] Support "Request a feature" feature
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      98	lw-cdm                        	
+      99	lw-cdm                        	
+      88	dominhquang                   	[Issue-2649] Add send crash log feature
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      69	dominhquang                   	Fix bug UI for Staking feature
-      55	leewong                       	#118: update balance logic for Kintsugi testnet
+      80	leewong                       	Update account filter for earn transaction
+      63	Roman                         	fix ui issues
+      62	nguyentiendung                	
+      53	bluezdot                      	fix eslint
       53	Dominhquangdev                	update Bridge code
-      29	bluedot                       	
+      47	bluedot                       	update priceId for EWT on Energy Web X
+      29	Automation Bot                	[CI Skip] Auto increase webapp build number
+      27	Thiendekaco                   	update locate of file
       24	S2kael                        	
-      21	nguyentiendung                	[Issue-2452] Show custom network on the token list when nominate
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
-       8	Thiendekaco                   	[Issue 2387] Update design of history state time-out
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
+       5	anhnhu                        	[issue-2231]: add condition branch_name webapp-dev auto increase run scripts change build number
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
@@ -27,13 +31,13 @@
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
        2	Axel Chalon                   	Add typings to messages (#130)
        2	Bartłomiej Rutkowski          	Allow account creation by derivation from existing one (#296)
-       2	bluezdot                      	remove log
        2	carumusan                     	Support ipfs and ipns urls (#667)
        2	ccris02                       	Adding Polish Language Option to the Extension (#761)
        2	joe petrowski                 	add plasm (#462)
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
+       2	Yash Mittal                   	Address comment
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
        1	Amit Chauhan                  	Fixed toast flicker effect when multiple show toast method called
        1	Andrei Eres                   	Add extension prefix (#891)

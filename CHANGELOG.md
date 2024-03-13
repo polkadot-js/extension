@@ -1,5 +1,133 @@
 # CHANGELOG
 
+## 1.1.43
+Build date: Mar 11, 2024.
+
+Bugs fixed:
+- Fixed bug not updating blocked XCM channels
+
+## 1.1.42
+Build date: Mar 08, 2024.
+
+Features & Update:
+- Update transaction result screen (#2659)
+- Update Manta staking APY formula (#2513)
+- Update chain-list (#2698)
+  - Inactive Kapex
+  - Add support for more tokens on HydraDX
+  - Add support for DENTNet
+  - Add support for Phyken network (testnet)
+  - Add support for Tangle Network
+  - Support transfer for NUUM
+
+Bugs fixed:
+- Disable auto enable wallet while request "eth_account"
+
+## 1.1.41
+Build date: Mar 02, 2024.
+
+Features & Update:
+- Restructure Settings screen (#2647)
+- Support Send crash log feature (#2649)
+- Optimize Earning Performance Round 2 (Caching most of data) (#2636)
+- Enable price-id online (#2664)
+- Improve EVM network fee (#2670)
+- Optimize performance by separate chain status and chain state (#2550)
+- Update chain-list
+   - Support NFT and Send token on Continuum network (#2585)
+   - Update priceId for Cypress on Moonbeam
+   - Support Rococo asset hub (#2604)
+   - Support X1 OKX Testnet
+   - Support Liberland Testnet and Liberland Mainnet
+   - Disable support staking for Ternoa Testnet.
+
+Bugs fixed:
+- Fixed bug showing withdrawal time on un-staking (#2581)
+- Fixed bug sending AVL on Avail Goldberg testnet (#2538)
+- Re-check case update data after performing actions (unstake, cancel unstake, withdraw) (#2682)
+
+## 1.1.40
+Build date: Feb 29, 2024.
+
+Features & Update:
+- Update pool default for VARA (#2678)
+
+## 1.1.39
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Adjust showing/validating address on Send fund (#2628)
+- Update IPFS domain for NFTs from Unique network (#2609)
+- Update filtering out blocked validators (#2632)
+- Re-check case send token on Acala-EVM with Ledger account (#2625)
+- Turn off popup remind claim rewards for dApp staking (#2622)
+- Update tab bar (#2631)
+- Update validation logic for Chainlist (#2617)
+
+Bugs fixed:
+- Fixed bug related to earning feature (#2598)
+- Fixed bug showing positions (#2612)
+- Fixed bug show incorrect token in case the wallet has only 1 account type (#2616)
+
+## 1.1.38
+Build date: Feb 17, 2024.
+
+Features & Update:
+- Update estimating EVM transaction fee for Energy Web Chain (#2606)
+- Update chain-list (#2570)
+  - Add support more tokens: PINK (Statemint), xcPINK (Moonbeam), INTR (HydraDX)
+  - Update explorer for Subspace Gemini 3g & 3h
+  - Update price_id for Energy Web X
+  - Update hasValue info for some tokens
+
+Bugs fixed:
+- Fixed some UI bug (#2509)
+
+## 1.1.37
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Add popup Introducing Earning feature (#2599)
+
+Bugs fixed:
+- Fixed bug Unable to connect with eip6763 dApp (#2590)
+
+
+## 1.1.36
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Update staking APY formula for relaychain (#2563)
+- Unique Network and Quartz NFTs support (#2580)
+- Migrate to earning feature (#2361, #2558, #2561)
+- Support vManta liquid staking on Bifrost (#2569)
+- Update position and options actions for Astar Staking DApp (#2594)
+- Update chain-list (#2586)
+- Remove explorer on Genshiro network
+- Update chain subspace gemini 3h
+- Check fee estimation on EVM networks (#2336)
+
+## 1.1.35
+Build date: Feb 02, 2024.
+
+Features & Update:
+- Set pool default for Aleph Zero (#2578)
+- Update disabled XCM channels online (#2463)
+
+## 1.1.34
+Build date: Feb 01, 2024.
+
+Features & Update:
+- Update unstaking request info for KREST, AMPE (#2544)
+- Add popup want to user claim reward when Astar update dApp staking v3 (#2545)
+- Change "Claim rewards" to "Check rewards" for dApp staking (#2497)
+- Update RPC online (#2463)
+
+Bugs fixed:
+- Fixed bug Show incorrect tokens on the balance screen in case an account with the type 'ed25519' is imported (#2518)
+- Fixed bug not showing GENS token from Genshiro (#2540)
+
+
 ## 1.1.33
 Build date: Jan 23, 2024.
 

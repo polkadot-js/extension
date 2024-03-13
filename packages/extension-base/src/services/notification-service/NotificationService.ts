@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Notification, NotificationButton, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
+import { isFirefox } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
 export default class NotificationService {
@@ -31,15 +32,20 @@ export default class NotificationService {
     const onClick = action?.click;
     const onButtonClick = action?.buttonClick;
 
-    chrome?.notifications?.create({
+    const options: chrome.notifications.NotificationOptions<true> = {
       type: 'basic',
       title,
       message,
       iconUrl: '/images/icon-128.png',
       priority: 2,
-      isClickable: !!link || !!onClick,
-      buttons
-    }, (notificationId: string) => {
+      isClickable: !!link || !!onClick
+    };
+
+    if (!isFirefox) {
+      options.buttons = buttons;
+    }
+
+    chrome?.notifications?.create(options, (notificationId: string) => {
       if (link || onClick) {
         chrome.notifications.onClicked.addListener((nId) => {
           if (nId === notificationId) {

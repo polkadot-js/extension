@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestBondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-web-ui/hooks';
+import CommonTransactionInfo from '@subwallet/extension-web-ui/components/Confirmation/CommonTransactionInfo';
+import MetaInfo from '@subwallet/extension-web-ui/components/MetaInfo/MetaInfo';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-web-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -31,12 +32,6 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
-        {/* <MetaInfo.Account */}
-        {/*   address={'5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL'} */}
-        {/*   label={t('Validator')} */}
-        {/*   networkPrefix={42} */}
-        {/* /> */}
-
         <MetaInfo.AccountGroup
           accounts={data.selectedValidators}
           content={t('{{number}} selected validators', { replace: { number: data.selectedValidators.length } })}

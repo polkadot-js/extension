@@ -11,8 +11,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/
 import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks/earning';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks/modal/useFilterModal';
+import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -51,7 +50,7 @@ interface FilterOption {
 const SORTING_MODAL_ID = 'pool-sorting-modal';
 const FILTER_MODAL_ID = 'pool-filter-modal';
 
-const defaultPoolMap = Object.assign({}, PREDEFINED_STAKING_POOL, { vara_network: 29 });
+const defaultPoolMap = Object.assign({}, PREDEFINED_STAKING_POOL);
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', defaultValue, disabled,
@@ -85,7 +84,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       },
       {
         desc: true,
-        label: t('Highest total bonded'),
+        label: t('Highest total staked'),
         value: SortKey.TOTAL_POOLED
       }
     ];

@@ -54,14 +54,14 @@ const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 
 
 export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   public slug: string;
-  protected readonly name: string;
-  protected readonly shortName: string;
+  protected name: string;
+  protected shortName: string;
   protected readonly altInputAsset: string = 'polkadot-NATIVE-DOT';
   protected readonly derivativeAssets: string[] = ['bifrost_dot-LOCAL-vDOT'];
   protected readonly inputAsset: string = 'bifrost_dot-LOCAL-DOT';
   protected readonly rewardAssets: string[] = ['bifrost_dot-LOCAL-DOT'];
   protected readonly feeAssets: string[] = ['bifrost_dot-NATIVE-BNC', 'bifrost_dot-LOCAL-DOT'];
-  public override readonly minAmountPercent = 0.99;
+  public override readonly minAmountPercent: number = 0.99;
   protected readonly availableMethod: YieldPoolMethodInfo = {
     join: true,
     defaultUnstake: true,
@@ -79,7 +79,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const chainInfo = this.chainInfo;
 
     this.slug = `DOT___liquid_staking___${chain}`;
-    this.name = `${chainInfo.name} Liquid Staking`;
+    this.name = `${chainInfo.name} Liquid Staking DOT`;
     this.shortName = chainInfo.name.replaceAll(' Relay Chain', '');
   }
 
@@ -135,6 +135,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
     const assetDecimals = 10 ** _getAssetDecimals(assetInfo);
     const rate = parseFloat(exchangeRate.data.slp_polkadot_ratio[0].ratio);
 
+    /** Special for bifrost, the rate is divined and unknown decimals to convert (asset decimal is 10 but the rate length is 18) */
     this.updateExchangeRate(rate);
 
     return {
@@ -155,6 +156,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         unstakingPeriod: 24 * 28,
         maxCandidatePerFarmer: 1,
         maxWithdrawalRequestPerFarmer: 1,
+        farmerCount: vDOTStats.holders,
         earningThreshold: {
           join: minimumMint,
           defaultUnstake: minimumRedeem,
@@ -202,7 +204,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
       const exchangeRate = new BigNumber(rate);
 
       const currentRelayEraObj = _currentRelayEra.toPrimitive() as Record<string, number>;
-      const currentRelayEra = currentRelayEraObj.Era;
+
+      const currentRelayEra = currentRelayEraObj.era;
 
       const unlockLedgerList: BifrostUnlockLedger[] = [];
 
@@ -276,6 +279,8 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
             const isClaimable = unlocking.era - currentRelayEra < 0;
             const remainingEra = unlocking.era - currentRelayEra;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[this.chain];
+            // const currentTimestampMs = Date.now();
+            // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
 
             unlockBalance = unlockBalance.add(new BN(unlocking.balance));
             unstakingList.push({
@@ -283,6 +288,7 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               claimable: unlocking.balance,
               waitingTime: waitingTime
+              // targetTimestampMs: targetTimestampMs
             } as UnstakingInfo);
           });
         }

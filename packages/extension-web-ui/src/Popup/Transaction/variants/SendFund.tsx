@@ -219,7 +219,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
   const { isWebUI } = useContext(ScreenContext);
@@ -238,7 +238,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const chain = useWatchTransaction('chain', form, defaultData);
   const asset = useWatchTransaction('asset', form, defaultData);
 
-  const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
+  const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
@@ -250,14 +250,14 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const [, update] = useState({});
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
-  const chainStatus = useMemo(() => chainStateMap[chain]?.connectionStatus, [chain, chainStateMap]);
+  const chainStatus = useMemo(() => chainStatusMap[chain]?.connectionStatus, [chain, chainStatusMap]);
 
   const handleTransferAll = useCallback((value: boolean) => {
     setForceUpdateMaxValue({});
     setIsTransferAll(value);
   }, []);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
+  const { onError, onSuccess } = useHandleSubmitTransaction(handleTransferAll);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -733,8 +733,6 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         className={CN(`${className} -transaction-footer`, {
           '__modal-footer': modalContent
         })}
-        errors={[]}
-        warnings={[]}
       >
         <Button
           disabled={!isBalanceReady}

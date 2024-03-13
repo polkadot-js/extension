@@ -5,7 +5,7 @@ import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet
 import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, AddressBookInfo, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, StakingJson, StakingRewardJson, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -151,11 +151,16 @@ export const updateChainInfoMap = (data: Record<string, _ChainInfo>) => {
 export const subscribeChainInfoMap = lazySubscribeMessage('pri(chainService.subscribeChainInfoMap)', null, updateChainInfoMap, updateChainInfoMap);
 
 export const updateChainStateMap = (data: Record<string, _ChainState>) => {
-  // TODO useTokenGroup
   store.dispatch({ type: 'chainStore/updateChainStateMap', payload: data });
 };
 
 export const subscribeChainStateMap = lazySubscribeMessage('pri(chainService.subscribeChainStateMap)', null, updateChainStateMap, updateChainStateMap);
+
+export const updateChainStatusMap = (data: Record<string, _ChainApiStatus>) => {
+  store.dispatch({ type: 'chainStore/updateChainStatusMap', payload: data });
+};
+
+export const subscribeChainStatusMap = lazySubscribeMessage('pri(chainService.subscribeChainStatusMap)', null, updateChainStatusMap, updateChainStatusMap);
 
 export const updateAssetRegistry = (data: Record<string, _ChainAsset>) => {
   // TODO useTokenGroup
@@ -319,7 +324,13 @@ export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.service
 /* Earning */
 
 export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+  addLazy(
+    'updateYieldPoolInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPoolInfo = lazySubscribeMessage(
@@ -330,7 +341,13 @@ export const subscribeYieldPoolInfo = lazySubscribeMessage(
 );
 
 export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+  addLazy(
+    'updateYieldPositionInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPositionInfo = lazySubscribeMessage(
@@ -341,7 +358,13 @@ export const subscribeYieldPositionInfo = lazySubscribeMessage(
 );
 
 export const updateYieldReward = (data: EarningRewardJson) => {
-  store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+  addLazy(
+    'updateYieldReward',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+    },
+    900
+  );
 };
 
 export const subscribeYieldReward = lazySubscribeMessage(

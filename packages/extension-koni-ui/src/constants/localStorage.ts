@@ -10,6 +10,7 @@ export const CURRENT_PAGE = 'page.current';
 
 export const TRANSFER_TRANSACTION = 'transaction.transfer';
 export const NFT_TRANSACTION = 'transaction.nft';
+
 export const STAKE_TRANSACTION = 'transaction.stake';
 export const EARN_TRANSACTION = 'transaction.earn';
 export const UN_STAKE_TRANSACTION = 'transaction.un-stake';
@@ -24,3 +25,6 @@ export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
 
 export const CONFIRM_GENERAL_TERM = 'general.term-and-condition';
 export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
+export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';
+
+export const EARNING_MIGRATION_ANNOUNCEMENT = 'announcement.earning-migration';

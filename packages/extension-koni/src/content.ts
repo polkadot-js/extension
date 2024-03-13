@@ -6,6 +6,7 @@ import type { Message } from '@subwallet/extension-base/types';
 import { TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@subwallet/extension-base/defaults';
 import { getId } from '@subwallet/extension-base/utils/getId';
+import { eip6963ProviderInfo } from '@subwallet/extension-inject';
 import { chrome } from '@subwallet/extension-inject/chrome';
 
 // connect to the extension
@@ -169,18 +170,42 @@ if (!window.injectedWeb3['${walletKey}']) {
 }
 
 window.SubWallet = new Proxy(new SubWalletPlaceholder(), {
-  get(obj, prop) {
-    if (prop === "provider") {
+  get(obj, key) {
+    if (key === "provider") {
       return undefined;
     }
 
-    if (obj.provider) {
-      return Reflect.get(obj.provider, prop);
-    } else {
-      return Reflect.get(obj, prop);
+    const target = obj.provider || obj;
+
+    if (key === 'then') {
+      return Promise.resolve(target);
     }
+
+    const proxyTarget = Reflect.get(target, key);
+
+    if (typeof proxyTarget?.bind === 'function') {
+      return proxyTarget.bind(target);
+    }
+
+    return proxyTarget;
   }
 });
+
+const announceProvider = () => {
+  const detail = Object.freeze({ info: {
+    uuid: '${eip6963ProviderInfo.uuid}',
+    name: '${eip6963ProviderInfo.name}',
+    icon: '${eip6963ProviderInfo.icon}',
+    rdns: '${eip6963ProviderInfo.rdns}'
+  }, provider: window.SubWallet });
+  const event = new CustomEvent('eip6963:announceProvider', { detail });
+
+  window.dispatchEvent(event);
+};
+
+window.addEventListener('eip6963:requestProvider', announceProvider);
+
+announceProvider();
 `;
 
 container.insertBefore(script, container.children[0]);

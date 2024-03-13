@@ -3,12 +3,12 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ChainType, ExtrinsicType, NominationInfo, StakingTxErrorType, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateChainStakedReturn, calculateInflation, getExistUnstakeErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateChainStakedReturnV2, calculateInflation, getAvgValidatorEraReward, getExistUnstakeErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { BaseYieldPositionInfo, EarningRewardHistoryItem, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningRewardHistoryItem, EarningRewardItem, EarningStatus, HandleYieldStepData, NominationPoolInfo, NominationYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingNominations, RequestStakePoolingBonding, StakeCancelWithdrawalParams, SubmitJoinNominationPool, SubmitYieldJoinData, TransactionData, UnstakingStatus, YieldPoolInfo, YieldPoolMethodInfo, YieldPoolType, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -106,13 +106,23 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const [_totalEraStake, _totalIssuance, _auctionCounter, _minPoolJoin] = await Promise.all([
-        substrateApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
+      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from epochDuration, blockTime, sessionsPerEra
+
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
+      const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
+
+      const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minPoolJoin, ..._eraReward] = await Promise.all([
+        substrateApi.api.query.staking.erasTotalStake.multi([parseInt(currentEra), parseInt(currentEra) - 1]),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
-        substrateApi.api.query?.nominationPools?.minJoinBond()
+        substrateApi.api.query?.nominationPools?.minJoinBond(),
+        substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
 
+      const [_totalEraStake, _lastTotalStaked] = _EraStakeInfo;
+      const validatorEraReward = getAvgValidatorEraReward(supportedDays, _eraReward[0]);
+      const lastTotalStaked = _lastTotalStaked.toString();
       const rawTotalEraStake = _totalEraStake.toString();
       const rawTotalIssuance = _totalIssuance.toString();
 
@@ -122,7 +132,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       const minPoolJoin = _minPoolJoin?.toString() || undefined;
-      const expectedReturn = calculateChainStakedReturn(inflation, bnTotalEraStake, bnTotalIssuance, chainInfo.slug);
+      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
 
@@ -180,9 +190,10 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
     const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolMemberInfo.poolId, poolsPalletId);
 
-    const [_nominations, _poolMetadata] = await Promise.all([
+    const [_nominations, _poolMetadata, _activeEra] = await Promise.all([
       substrateApi.api.query.staking.nominators(poolStashAccount),
-      substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId)
+      substrateApi.api.query.nominationPools.metadata(poolMemberInfo.poolId),
+      substrateApi.api.query.staking.activeEra()
     ]);
 
     const poolMetadata = _poolMetadata.toPrimitive() as unknown as string;
@@ -230,23 +241,22 @@ export default class NominationPoolHandler extends BasePoolHandler {
     let unstakingBalance = BN_ZERO;
 
     Object.entries(poolMemberInfo.unbondingEras).forEach(([unlockingEra, amount]) => {
-      // Calculate the remaining time for current era ending
-      const isClaimable = parseInt(unlockingEra) - parseInt(currentEra) < 0;
-      const remainingEra = parseInt(unlockingEra) - parseInt(currentEra);
-      const expectedBlockTime = _EXPECTED_BLOCK_TIME[this.chain];
-      const eraLength = _deriveSessionProgress.eraLength.toNumber();
-      const eraProgress = _deriveSessionProgress.eraProgress.toNumber();
-      const remainingSlots = eraLength - eraProgress;
-      const remainingHours = expectedBlockTime * remainingSlots / 60 / 60;
+      const activeEra = _activeEra.toPrimitive() as unknown as PalletStakingActiveEraInfo;
+      const era = parseInt(activeEra.index);
+      const startTimestampMs = parseInt(activeEra.start);
+
+      const remainingEra = parseInt(unlockingEra) - era;
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
-      const waitingTime = remainingEra * eraTime + remainingHours;
+      const remaningTimestampMs = remainingEra * eraTime * 60 * 60 * 1000;
+      const targetTimestampMs = startTimestampMs + remaningTimestampMs;
+      const isClaimable = targetTimestampMs - Date.now() <= 0;
 
       unstakingBalance = unstakingBalance.add(new BN(amount));
       unstakings.push({
         chain: chainInfo.slug,
         status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
         claimable: amount.toString(),
-        waitingTime: waitingTime
+        targetTimestampMs: targetTimestampMs
       } as UnstakingInfo);
     });
 

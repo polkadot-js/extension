@@ -12,7 +12,7 @@ import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Sw
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import { TeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap/TeamsOfServiceModal';
 import { SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_AND_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERM_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -844,7 +844,7 @@ const Component = () => {
 
   useEffect(() => {
     if (!confirmedTerm) {
-      activeModal(SWAP_TERM_AND_SERVICE_MODAL);
+      activeModal(SWAP_TERM_OF_SERVICE_MODAL);
     }
   }, [activeModal, confirmedTerm]);
 
@@ -1170,7 +1170,7 @@ const Component = () => {
                           placement={'topRight'}
                           title={'The least amount of token received based on slippage tolerance. Any amount less than this will make the transaction fail.'}
                         >
-                          <div className={'__minimum-left-block'}>
+                          <div className={'__minimum-received-label'}>
                             <div>{t('Minimum received')}</div>
                             <Icon
                               iconColor={token.colorTextTertiary}
@@ -1364,7 +1364,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       paddingRight: 0,
       color: token.colorTextTertiary
     },
-    '.__minimum-left-block': {
+    '.__minimum-received-label': {
       display: 'flex'
     },
     '.__view-quote-button > span+.anticon': {

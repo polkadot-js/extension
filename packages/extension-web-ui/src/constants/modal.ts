@@ -94,4 +94,4 @@ export const SWAP_SLIPPAGE_MODAL = 'swap-slippage-modal';
 export const SWAP_ALL_QUOTES_MODAL = 'swap-all-quotes-modal';
 export const SWAP_MORE_BALANCE_MODAL = 'swap-more-balance-modal';
 export const SWAP_CHOOSE_FEE_TOKEN_MODAL = 'swap-choose-fee-token-modal';
-export const SWAP_TERM_AND_SERVICE_MODAL = 'swap-term-and-service-modal';
+export const SWAP_TERM_OF_SERVICE_MODAL = 'swap-term-of-service-modal';

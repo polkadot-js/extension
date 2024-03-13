@@ -20,16 +20,17 @@ import { useSelector, useTransactionContext, useWatchTransaction } from '@subwal
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
+import { Theme } from '@subwallet/extension-web-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject, findAccountByAddress } from '@subwallet/extension-web-ui/utils';
-import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number } from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -108,6 +109,7 @@ const Component = () => {
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
+  const { token } = useTheme() as Theme;
 
   // mobile:
   const [showQuoteDetailOnMobile, setShowQuoteDetailOnMobile] = useState<boolean>(false);
@@ -612,25 +614,39 @@ const Component = () => {
 
   const renderSlippage = () => {
     return (
-      <div className='__slippage-action-wrapper'>
-        <div
-          className='__slippage-action'
-          onClick={onOpenSlippageModal}
-        >
-          <span>Slippage:</span>
+      <>
+        <div className='__slippage-action-wrapper'>
+          <div
+            className='__slippage-action'
+            onClick={onOpenSlippageModal}
+          >
+            <Tooltip
+              placement={'topRight'}
+              title={'Chainflip uses Just In Time AMM style to optimize swap quote without setting slippage'}
+            >
+              <div className={'__slippage-title-wrapper'}>Slippage
+                <Icon
+                  iconColor={token.colorSuccess}
+                  phosphorIcon={Info}
+                  size='sm'
+                  weight='fill'
+                />
+            :</div>
+            </Tooltip>
                     &nbsp;<span>{currentSlippage * 100}%</span>
 
-          {supportSlippageSelection && (
-            <div className='__slippage-editor-button'>
-              <Icon
-                className='__slippage-editor-button-icon'
-                phosphorIcon={PencilSimpleLine}
-                size='sm'
-              />
-            </div>
-          )}
+            {supportSlippageSelection && (
+              <div className='__slippage-editor-button'>
+                <Icon
+                  className='__slippage-editor-button-icon'
+                  phosphorIcon={PencilSimpleLine}
+                  size='sm'
+                />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </>
     );
   };
 
@@ -1149,7 +1165,22 @@ const Component = () => {
                   <div className={'__minimum-received'}>
                     <MetaInfo.Number
                       decimals={0}
-                      label={t('Minimum received')}
+                      label={
+                        <Tooltip
+                          placement={'topRight'}
+                          title={'The least amount of token received based on slippage tolerance. Any amount less than this will make the transaction fail.'}
+                        >
+                          <div className={'__minimum-left-block'}>
+                            <div>{t('Minimum received')}</div>
+                            <Icon
+                              iconColor={token.colorTextTertiary}
+                              phosphorIcon={Info}
+                              size='sm'
+                              weight='fill'
+                            />
+                          </div>
+                        </Tooltip>
+                      }
                       suffix={_getAssetSymbol(toAssetInfo)}
                       value={minimumReceived}
                     />
@@ -1333,7 +1364,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       paddingRight: 0,
       color: token.colorTextTertiary
     },
-
+    '.__minimum-left-block': {
+      display: 'flex'
+    },
     '.__view-quote-button > span+.anticon': {
       marginInlineStart: 0,
       width: 40
@@ -1564,6 +1597,10 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeight,
       color: token.colorWhite
+    },
+    '.__slippage-title-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__switch-side-container': {

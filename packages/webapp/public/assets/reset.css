@@ -405,6 +405,12 @@ textarea {
     border-color: #212845;
 }
 
+.ant-tooltip .ant-tooltip-inner {
+  text-align: center;
+  font-size: 12px;
+  line-height: 20px;
+}
+
 .account-info-container.-light {
     border-color: #eee;
 }

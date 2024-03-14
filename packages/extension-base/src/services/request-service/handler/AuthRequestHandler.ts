@@ -11,11 +11,10 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP, WEB_APP_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
-import { getDomainFromUrl, stripUrl } from '@subwallet/extension-base/utils';
+import { createPromiseHandler, getDomainFromUrl, PromiseHandler, stripUrl } from '@subwallet/extension-base/utils';
 import { getId } from '@subwallet/extension-base/utils/getId';
 import { BehaviorSubject } from 'rxjs';
 
-import { assert } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const AUTH_URLS_KEY = 'authUrls';
@@ -212,9 +211,10 @@ export default class AuthRequestHandler {
     };
   };
 
+  private authorizePromiseMap: Record<string, PromiseHandler<boolean>> = {};
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     let authList = await this.getAuthList();
-    const accountAuthType = request.accountAuthType || 'substrate';
+    let accountAuthType = request.accountAuthType || 'substrate';
 
     request.accountAuthType = accountAuthType;
 
@@ -222,12 +222,42 @@ export default class AuthRequestHandler {
       authList = {};
     }
 
+    const id = getId();
+    const promiseHandler = createPromiseHandler<boolean>();
+    const { promise, reject, resolve } = promiseHandler;
+
+    // Add promise to the map
+    this.authorizePromiseMap[id] = promiseHandler;
+    // Remove promise from the map after finish
+    promise.finally(() => {
+      delete this.authorizePromiseMap[id];
+    });
+
     const idStr = stripUrl(url);
     // Do not enqueue duplicate authorization requests.
-    const isDuplicate = Object.values(this.#authRequestsV2)
-      .some((_request) => _request.idStr === idStr && _request.accountAuthType === request.accountAuthType);
+    const mergeKeys: string[] = [];
 
-    assert(!isDuplicate, 'The source {{url}} has a pending authorization request'.replace('{{url}}', url));
+    Object.entries(this.#authRequestsV2)
+      .forEach(([key, _request]) => {
+        if (_request.idStr === idStr) {
+          if (_request.accountAuthType !== request.accountAuthType) {
+            request.accountAuthType = 'both';
+            accountAuthType = 'both';
+          }
+
+          mergeKeys.push(key);
+        }
+      });
+
+    // Resolve with current promise
+    if (mergeKeys.length > 0) {
+      mergeKeys.forEach((key) => {
+        delete this.#authRequestsV2[key];
+        const backupHandler = this.authorizePromiseMap[key];
+
+        promise.then(backupHandler.resolve).catch(backupHandler.reject);
+      });
+    }
 
     const existedAuth = authList[idStr];
     const existedAccountAuthType = existedAuth?.accountAuthType;
@@ -286,24 +316,22 @@ export default class AuthRequestHandler {
       }
     }
 
-    return new Promise((resolve, reject): void => {
-      const id = getId();
+    this.#authRequestsV2[id] = {
+      ...this.authCompleteV2(id, url, resolve, reject),
+      id,
+      idStr,
+      request,
+      url,
+      accountAuthType: accountAuthType
+    };
 
-      this.#authRequestsV2[id] = {
-        ...this.authCompleteV2(id, url, resolve, reject),
-        id,
-        idStr,
-        request,
-        url,
-        accountAuthType: accountAuthType
-      };
+    this.updateIconAuthV2();
 
-      this.updateIconAuthV2();
+    if (Object.keys(this.#authRequestsV2).length < 2) {
+      this.#requestService.popupOpen();
+    }
 
-      if (Object.keys(this.#authRequestsV2).length < 2) {
-        this.#requestService.popupOpen();
-      }
-    });
+    return promise;
   }
 
   public getAuthRequestV2 (id: string): AuthRequestV2 {

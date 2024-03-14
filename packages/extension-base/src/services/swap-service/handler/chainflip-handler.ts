@@ -231,13 +231,10 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       quoteResponse.quote.includedFees.forEach((fee) => {
         switch (fee.type) {
           case ChainflipFeeType.INGRESS:
-          case ChainflipFeeType.NETWORK:
 
           // eslint-disable-next-line no-fallthrough
           case ChainflipFeeType.EGRESS: {
             const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
-
-            console.log('tokenSlug', tokenSlug);
 
             feeComponent.push({
               tokenSlug,
@@ -247,10 +244,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
             break;
           }
 
+          case ChainflipFeeType.NETWORK:
+
+          // eslint-disable-next-line no-fallthrough
           case ChainflipFeeType.LIQUIDITY: {
             const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
-
-            console.log('tokenSlug', tokenSlug);
 
             feeComponent.push({
               tokenSlug,

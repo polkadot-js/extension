@@ -7,6 +7,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { ChainflipPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { formatNumber } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
@@ -68,17 +69,17 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
 export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, swapAllowed: AmountData): SwapError { // todo: support more providers
   switch (error) {
     case SwapErrorType.NOT_MEET_MIN_SWAP: {
-      const parsedMinSwapValue = (new BigN(metadata.minSwap.value)).shiftedBy(-metadata.minSwap.decimals);
-      const message = `Amount too low. Increase your amount above ${parsedMinSwapValue.toString()} ${metadata.minSwap.symbol} and try again`;
+      const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
+      const message = `Amount too low. Increase your amount above ${parsedMinSwapValue} ${metadata.minSwap.symbol} and try again`;
 
       return new SwapError(error, message);
     }
 
     case SwapErrorType.EXCEED_MAX_SWAP: {
       if (metadata.maxSwap) {
-        const parsedMaxSwapValue = (new BigN(metadata.maxSwap.value)).shiftedBy(-metadata.maxSwap.decimals);
+        const parsedMaxSwapValue = formatNumber(metadata.maxSwap.value, metadata.maxSwap.decimals);
 
-        return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue.toString()} ${metadata.maxSwap.symbol} and try again`);
+        return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue} ${metadata.maxSwap.symbol} and try again`);
       } else {
         return new SwapError(error, 'Amount too high. Lower your amount and try again');
       }
@@ -88,9 +89,9 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
       return new SwapError(error, 'This swap pair is not supported');
 
     case SwapErrorType.SWAP_EXCEED_BALANCE: {
-      const parsedSwapAllowed = (new BigN(swapAllowed.value)).shiftedBy(-swapAllowed.decimals);
+      const parsedSwapAllowed = formatNumber(swapAllowed.value, swapAllowed.decimals);
 
-      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${parsedSwapAllowed.toString()} ${swapAllowed.symbol} and try again`);
+      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${parsedSwapAllowed} ${swapAllowed.symbol} and try again`);
     }
 
     case SwapErrorType.UNKNOWN:

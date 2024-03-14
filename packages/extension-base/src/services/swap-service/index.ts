@@ -130,7 +130,6 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
       quoteError = preferredErrorResp?.error || defaultErrorResp?.error;
     } else {
       selectedQuote = availableQuotes[0];
-      console.log('selectedQuote', selectedQuote);
       aliveUntil = selectedQuote?.aliveUntil || (+Date.now() + SWAP_QUOTE_TIMEOUT_MAP.default);
     }
 
@@ -150,7 +149,7 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
 
           break;
         case SwapProviderId.CHAIN_FLIP_MAINNET:
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip Mainnet', this.chainService, this.state.balanceService, false);
+          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService, this.state.balanceService, false);
 
           break;
         default:

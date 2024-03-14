@@ -3,6 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
@@ -16,7 +17,7 @@ import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTE
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
@@ -27,7 +28,7 @@ import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalConte
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, CheckCircle, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
@@ -77,7 +78,7 @@ const supportSlippageSelection = false;
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { defaultData, onDone, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { closeAlert, defaultData, onDone, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal } = useContext(ModalContext);
@@ -121,6 +122,7 @@ const Component = () => {
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const recipientValue = useWatchTransaction('recipient', form, defaultData);
+  const { checkChainConnected } = useChainConnection();
 
   const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
@@ -496,6 +498,21 @@ const Component = () => {
   );
 
   const onSubmit: FormCallbacks<SwapParams>['onFinish'] = useCallback((values: SwapParams) => {
+    if (chainValue && !checkChainConnected(chainValue)) {
+      openAlert({
+        title: t('Pay attention!'),
+        type: NotificationType.ERROR,
+        content: t('Your selected network might have lost connection. Try updating it by either re-enabling it or changing network provider'),
+        okButton: {
+          text: t('I understand'),
+          onClick: closeAlert,
+          icon: CheckCircle
+        }
+      });
+
+      return;
+    }
+
     if (!currentQuote || !currentOptimalSwapPath) {
       return;
     }
@@ -586,7 +603,7 @@ const Component = () => {
           setSubmitLoading(false);
         });
     }, 300);
-  }, [accounts, currentOptimalSwapPath, currentQuote, currentSlippage, notify, onError, onSuccess, processState.currentStep, processState.steps.length, t]);
+  }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentSlippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
@@ -622,7 +639,7 @@ const Component = () => {
           >
             <Tooltip
               placement={'topRight'}
-              title={'Chainflip uses Just In Time AMM style to optimize swap quote without setting slippage'}
+              title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
             >
               <div className={'__slippage-title-wrapper'}>Slippage
                 <Icon

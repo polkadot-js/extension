@@ -23,12 +23,12 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
   const sender = port?.sender;
 
   if (!isExtension && !sender) {
-      throw new Error('Unable to extract message sender');
+    throw new Error('Unable to extract message sender');
   }
 
   const from = isExtension
     ? 'extension'
-    : sender?.url || sender?.tab?.url ||  '<unknown>';
+    : sender?.url || sender?.tab?.url || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

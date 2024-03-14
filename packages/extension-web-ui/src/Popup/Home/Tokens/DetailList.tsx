@@ -363,7 +363,7 @@ function Component (): React.ReactElement {
 
   const isShowBanner = useMemo(() => {
     return SHOW_BANNER_TOKEN_GROUPS.some((item) => {
-      return tokenGroupSlug && (item === tokenGroupSlug || tokenGroupMap[item].includes(tokenGroupSlug));
+      return tokenGroupSlug && (item === tokenGroupSlug || tokenGroupMap[item]?.includes(tokenGroupSlug));
     });
   }, [tokenGroupMap, tokenGroupSlug]);
 

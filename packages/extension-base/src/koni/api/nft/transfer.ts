@@ -59,7 +59,8 @@ export async function uniqueGetExtrinsic (substrateApi: _SubstrateApi, senderAdd
     const collectionInfo = (await substrateApi.api.rpc.unique.collectionById(collectionId)).toHuman() as CollectionInfo;
     const isTransfersEnabled = collectionInfo.limits.transfersEnabled;
 
-    if (isTransfersEnabled) {
+    // isTransfersEnabled equal to null mean that it's set as default (enable transfer)
+    if (isTransfersEnabled || isTransfersEnabled === null) {
       return substrateApi.api.tx.unique.transfer({ Substrate: recipientAddress }, collectionId, itemId, 1);
     } else {
       return null;

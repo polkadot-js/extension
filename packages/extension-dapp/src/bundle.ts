@@ -7,6 +7,9 @@ import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import { documentReadyPromise } from './util.js';
+import { injectedMetamaskSnap } from './snap/index.js';
+import { hasMetamask } from './snap/utils.js';
+import { DEFAULT_SNAP_NAME } from './snap/defaults.js';
 
 // expose utility functions
 export { packageInfo } from './packageInfo.js';
@@ -60,6 +63,7 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 
 /** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
+  hasMetamask && (win.injectedWeb3[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
   return Promise
     .all(
       Object

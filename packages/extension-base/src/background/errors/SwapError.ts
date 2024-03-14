@@ -7,15 +7,15 @@ import { detectTranslate } from '@subwallet/extension-base/utils';
 
 const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }> = {
   ERROR_FETCHING_QUOTE: {
-    message: detectTranslate('Cannot find a suitable quote for your request. Please try changing your swap amount'),
+    message: detectTranslate('No swap quote found. Adjust your amount or try again later'),
     code: undefined
   },
   NOT_MEET_MIN_SWAP: {
-    message: detectTranslate('Not enough min swap'),
+    message: detectTranslate('Amount too low. Increase your amount and try again'),
     code: undefined
   },
   EXCEED_MAX_SWAP: {
-    message: detectTranslate('Amount exceeds max swap'),
+    message: detectTranslate('Amount too high. Lower your amount and try again'),
     code: undefined
   },
   QUOTE_TIMEOUT: {
@@ -27,11 +27,11 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   UNKNOWN: {
-    message: detectTranslate('Unknown'),
+    message: detectTranslate('Undefined error. Check your Internet connection or contact support'),
     code: undefined
   },
   ASSET_NOT_SUPPORTED: {
-    message: detectTranslate('Asset not supported'),
+    message: detectTranslate('This swap pair is not supported'),
     code: undefined
   },
   INVALID_RECIPIENT: {
@@ -39,7 +39,7 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   SWAP_EXCEED_BALANCE: {
-    message: detectTranslate('Swap exceed balance'),
+    message: detectTranslate('You can’t swap all your balance. Lower your amount and try again'),
     code: undefined
   }
 };

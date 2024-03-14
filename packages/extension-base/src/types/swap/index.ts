@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
@@ -115,6 +116,7 @@ export interface ChainflipTxData extends SwapBaseTxData {
 export interface ChainflipPreValidationMetadata {
   minSwap: AmountData;
   maxSwap?: AmountData;
+  chain: _ChainInfo;
 }
 
 export interface QuoteAskResponse {

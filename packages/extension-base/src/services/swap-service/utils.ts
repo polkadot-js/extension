@@ -72,13 +72,11 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
 }
 
-export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, fromAssetBalance: AmountData): SwapError { // todo: support more providers
-  const parsedFromAssetBalance = (new BigN(fromAssetBalance.value)).div(10 ** fromAssetBalance.decimals);
-
+export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, swapAllowed: AmountData): SwapError { // todo: support more providers
   switch (error) {
     case SwapErrorType.NOT_MEET_MIN_SWAP: {
       const parsedMinSwapValue = (new BigN(metadata.minSwap.value)).div(10 ** metadata.minSwap.decimals);
-      const message = `You need to swap at least ${parsedMinSwapValue.toString()} ${metadata.minSwap.symbol}`;
+      const message = `Amount too low. Increase your amount above ${parsedMinSwapValue.toString()} ${metadata.minSwap.symbol} and try again`;
 
       return new SwapError(error, message);
     }
@@ -87,20 +85,20 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
       if (metadata.maxSwap) {
         const parsedMaxSwapValue = (new BigN(metadata.maxSwap.value)).div(10 ** parseInt(metadata.maxSwap.symbol));
 
-        return new SwapError(error, `You can only swap a maximum of ${parsedMaxSwapValue.toString()} ${metadata.maxSwap.symbol}`);
+        return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue.toString()} ${metadata.maxSwap.symbol} and try again`);
       } else {
-        return new SwapError(error, 'Your requested amount has exceeded the maximum swap limit, please try with a smaller amount');
+        return new SwapError(error, 'Amount too high. Lower your amount and try again');
       }
     }
 
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
     case SwapErrorType.SWAP_EXCEED_BALANCE:
-      return new SwapError(error, `You cannot swap more than your free balance of ${parsedFromAssetBalance.toString()} ${fromAssetBalance.symbol}`);
+      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${swapAllowed.value} ${swapAllowed.symbol} and try again`);
     case SwapErrorType.UNKNOWN:
-      return new SwapError(error, 'Unknown error. Please contact SubWallet support for help');
+      return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:
-      return new SwapError(error, 'Cannot find a suitable quote for your request. Please try again later or reloading the page');
+      return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
     default:
       return new SwapError(error);
   }

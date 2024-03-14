@@ -5,12 +5,12 @@ import { SwapSDK } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetSymbol, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
@@ -26,8 +26,8 @@ enum ChainflipFeeType {
   LIQUIDITY = 'LIQUIDITY'
 }
 
-// const INTERMEDIARY_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-const INTERMEDIARY_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
+const INTERMEDIARY_MAINNET_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+const INTERMEDIARY_TESTNET_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
@@ -58,6 +58,14 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
   }
 
+  get intermediaryAssetSlug () {
+    if (this.isTestnet) {
+      return INTERMEDIARY_TESTNET_ASSET_SLUG;
+    } else {
+      return INTERMEDIARY_MAINNET_ASSET_SLUG;
+    }
+  }
+
   protected async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
     try {
       // todo: risk of matching wrong chain, asset can lead to loss of funds
@@ -66,6 +74,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       const toAsset = this.chainService.getAssetBySlug(request.pair.to);
       const srcChain = fromAsset.originChain;
       const destChain = toAsset.originChain;
+
+      const srcChainInfo = this.chainService.getChainInfoByKey(srcChain);
 
       const bnAmount = new BigNumber(request.fromAmount);
 
@@ -158,7 +168,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
             value: srcAssetData.maximumSwapAmount,
             decimals: toAsset.decimals,
             symbol: toAsset.symbol
-          }
+          },
+          chain: srcChainInfo
         } as ChainflipPreValidationMetadata
       };
     } catch (e) {
@@ -169,8 +180,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
   }
 
   private parseSwapPath (fromAsset: _ChainAsset, toAsset: _ChainAsset) {
-    if (toAsset.slug !== INTERMEDIARY_ASSET_SLUG) { // Chainflip always use USDC as intermediary
-      return [fromAsset.slug, INTERMEDIARY_ASSET_SLUG, toAsset.slug]; // todo: generalize this
+    if (toAsset.slug !== this.intermediaryAssetSlug) { // Chainflip always use USDC as intermediary
+      return [fromAsset.slug, this.intermediaryAssetSlug, toAsset.slug]; // todo: generalize this
     }
 
     return [fromAsset.slug, toAsset.slug];
@@ -186,10 +197,17 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
     const earlyValidation = await this.validateSwapRequest(request);
     const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
+    const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
+    const bnSwapAllowed = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
+    const swapAllowed: AmountData = {
+      value: bnSwapAllowed.toString(),
+      decimals: _getAssetDecimals(fromAsset),
+      symbol: _getAssetSymbol(fromAsset)
+    };
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
-      return getSwapEarlyValidationError(earlyValidation.error, metadata, fromAssetBalance);
+      return getSwapEarlyValidationError(earlyValidation.error, metadata, swapAllowed);
     }
 
     const srcChainId = this.chainMapping[fromAsset.originChain];

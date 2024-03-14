@@ -1,7 +1,7 @@
      634	Jaco                          	2024 (#1302)
       90	Thibaut Sardan                	add search by address (#1198)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       6	Tarik Gul                     	Bump polkadot/api to 10.12.2 (#1323)
+       7	Tarik Gul                     	Bump polkadot/phishing (#1324)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        2	Axel Chalon                   	Add typings to messages (#130)

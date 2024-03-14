@@ -112,13 +112,16 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
       const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
 
-      const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minPoolJoin, ..._eraReward] = await Promise.all([
+      const [_maxPoolMember, _EraStakeInfo, _totalIssuance, _auctionCounter, _minPoolJoin, ..._eraReward] = await Promise.all([
+        substrateApi.api.query.nominationPools?.maxPoolMembersPerPool(),
         substrateApi.api.query.staking.erasTotalStake.multi([parseInt(currentEra), parseInt(currentEra) - 1]),
         substrateApi.api.query.balances.totalIssuance(),
         substrateApi.api.query.auctions?.auctionCounter(),
-        substrateApi.api.query?.nominationPools?.minJoinBond(),
+        substrateApi.api.query.nominationPools?.minJoinBond(),
         substrateApi.api.query.staking.erasValidatorReward.multi([...Array(supportedDays).keys()].map((i) => i + startEra))
       ]);
+
+      const maxPoolMembers = _maxPoolMember ? parseInt(_maxPoolMember.toString()) : undefined;
 
       const [_totalEraStake, _lastTotalStaked] = _EraStakeInfo;
       const validatorEraReward = getAvgValidatorEraReward(supportedDays, _eraReward[0]);
@@ -166,7 +169,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
           inflation: inflation
-        }
+        },
+        maxPoolMembers: maxPoolMembers || undefined
       };
 
       callback(data);
@@ -394,11 +398,12 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const poolsPalletId = substrateApi.api.consts.nominationPools.palletId.toString();
       const poolStashAccount = parsePoolStashAddress(substrateApi.api, 0, poolId, poolsPalletId);
 
-      const [_nominations, _bondedPool, _metadata, _minimumActiveStake] = await Promise.all([
+      const [_nominations, _bondedPool, _metadata, _minimumActiveStake, _maxPoolMembers] = await Promise.all([
         substrateApi.api.query.staking.nominators(poolStashAccount),
         substrateApi.api.query.nominationPools.bondedPools(poolId),
         substrateApi.api.query.nominationPools.metadata(poolId),
-        substrateApi.api.query.staking.minimumActiveStake()
+        substrateApi.api.query.staking.minimumActiveStake(),
+        substrateApi.api.query.nominationPools?.maxPoolMembersPerPool()
       ]);
 
       const minimumActiveStake = _minimumActiveStake.toPrimitive() as number;
@@ -413,6 +418,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const isPoolNominating = !!nominations && nominations.targets.length > 0;
       const isPoolEarningReward = bondedPool.points > minimumActiveStake;
 
+      const maxPoolMembers = _maxPoolMembers ? parseInt(_maxPoolMembers.toString()) : undefined;
+
       nominationPools.push({
         id: poolId,
         address: poolAddress,
@@ -421,7 +428,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
         roles: bondedPool.roles,
         memberCounter: bondedPool.memberCounter,
         state: bondedPool.state,
-        isProfitable: isPoolOpen && isPoolNominating && isPoolEarningReward
+        isProfitable: isPoolOpen && isPoolNominating && isPoolEarningReward,
+        isCrowded: maxPoolMembers ? bondedPool.memberCounter >= maxPoolMembers : false
       });
     }));
 

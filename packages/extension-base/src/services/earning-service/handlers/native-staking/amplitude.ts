@@ -97,6 +97,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       const unstakingDelay = substrateApi.api.consts.parachainStaking.stakeDuration.toString(); // in blocks
       const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
       const maxUnstakeRequests = substrateApi.api.consts.parachainStaking.maxUnstakeRequests.toPrimitive() as number;
+      const maxDelegatorsPerCollator = substrateApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
       const blockPerRound = parseFloat(_blockPerRound);
 
       const roundTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
@@ -133,7 +134,8 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           tvl: stakeInfo.delegators, // TODO recheck
           totalApy: undefined, // TODO recheck
           unstakingPeriod
-        }
+        },
+        maxPoolMembers: maxDelegatorsPerCollator ? parseInt(maxDelegatorsPerCollator) : undefined
       };
 
       callback(data);
@@ -346,7 +348,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
     if (_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
       const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
-      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
       const allCollators: ValidatorInfo[] = [];
 
       for (const _collator of _allCollators) {
@@ -367,7 +369,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           isVerified: false,
           minBond: '0',
           chain: this.chain,
-          isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+          isCrowded: maxDelegatorsPerCollator ? collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator) : false
         });
       }
 

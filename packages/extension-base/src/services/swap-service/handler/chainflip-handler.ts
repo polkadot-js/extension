@@ -196,6 +196,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
 
     const earlyValidation = await this.validateSwapRequest(request);
+
     const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
     const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
     const bnSwapAllowed = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
@@ -236,6 +237,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
           case ChainflipFeeType.EGRESS: {
             const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
 
+            console.log('tokenSlug', tokenSlug);
+
             feeComponent.push({
               tokenSlug,
               amount: fee.amount,
@@ -246,6 +249,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
           case ChainflipFeeType.LIQUIDITY: {
             const tokenSlug = Object.keys(this.assetMapping).find((assetSlug) => this.assetMapping[assetSlug] === fee.asset) as string;
+
+            console.log('tokenSlug', tokenSlug);
 
             feeComponent.push({
               tokenSlug,
@@ -263,7 +268,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         toAmount: quoteResponse.quote.egressAmount.toString(),
         rate: calculateSwapRate(request.fromAmount, quoteResponse.quote.egressAmount.toString(), fromAsset, toAsset),
         provider: this.providerInfo,
-        aliveUntil: +Date.now() + SWAP_QUOTE_TIMEOUT_MAP[this.slug],
+        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         minSwap: metadata.minSwap.value,
         maxSwap: metadata.maxSwap,
         feeInfo: {

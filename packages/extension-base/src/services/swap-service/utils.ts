@@ -26,10 +26,6 @@ export const CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING: Record<string, Chain> = {
 };
 
 export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
-  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
-  'ethereum_goerli-NATIVE-ETH': Assets.ETH,
-  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
-
   'polkadot-NATIVE-DOT': Assets.DOT,
   'ethereum-NATIVE-ETH': Assets.ETH,
   'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
@@ -38,16 +34,13 @@ export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> =
 export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
   'chainflip_dot-NATIVE-pDOT': Assets.DOT,
   'ethereum_goerli-NATIVE-ETH': Assets.ETH,
-  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC,
-
-  'polkadot-NATIVE-DOT': Assets.DOT,
-  'ethereum-NATIVE-ETH': Assets.ETH,
-  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC
 };
 
 export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in milliseconds
   default: 30000,
-  [SwapProviderId.CHAIN_FLIP]: 30000
+  [SwapProviderId.CHAIN_FLIP_TESTNET]: 30000,
+  [SwapProviderId.CHAIN_FLIP_MAINNET]: 30000
 };
 
 export const DEFAULT_SWAP_FIRST_STEP: SwapStepDetail = {
@@ -75,7 +68,7 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
 export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, swapAllowed: AmountData): SwapError { // todo: support more providers
   switch (error) {
     case SwapErrorType.NOT_MEET_MIN_SWAP: {
-      const parsedMinSwapValue = (new BigN(metadata.minSwap.value)).div(10 ** metadata.minSwap.decimals);
+      const parsedMinSwapValue = (new BigN(metadata.minSwap.value)).shiftedBy(-metadata.minSwap.decimals);
       const message = `Amount too low. Increase your amount above ${parsedMinSwapValue.toString()} ${metadata.minSwap.symbol} and try again`;
 
       return new SwapError(error, message);
@@ -83,7 +76,7 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
 
     case SwapErrorType.EXCEED_MAX_SWAP: {
       if (metadata.maxSwap) {
-        const parsedMaxSwapValue = (new BigN(metadata.maxSwap.value)).div(10 ** parseInt(metadata.maxSwap.symbol));
+        const parsedMaxSwapValue = (new BigN(metadata.maxSwap.value)).shiftedBy(-metadata.maxSwap.decimals);
 
         return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue.toString()} ${metadata.maxSwap.symbol} and try again`);
       } else {
@@ -93,8 +86,13 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
 
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
-    case SwapErrorType.SWAP_EXCEED_BALANCE:
-      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${swapAllowed.value} ${swapAllowed.symbol} and try again`);
+
+    case SwapErrorType.SWAP_EXCEED_BALANCE: {
+      const parsedSwapAllowed = (new BigN(swapAllowed.value)).shiftedBy(-swapAllowed.decimals);
+
+      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${parsedSwapAllowed.toString()} ${swapAllowed.symbol} and try again`);
+    }
+
     case SwapErrorType.UNKNOWN:
       return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:

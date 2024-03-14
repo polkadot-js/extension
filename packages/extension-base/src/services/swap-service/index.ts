@@ -12,33 +12,9 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
 import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapPair, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapErrorType, SwapPair, SwapProviderId, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
-
-// const MOCK_ASSET_REF: Record<string, _AssetRef> = {
-//   'chainflip_dot-NATIVE-pDOT___ethereum_goerli-NATIVE-GoerliETH': {
-//     path: _AssetRefPath.SWAP,
-//     srcChain: 'chainflip_dot',
-//     srcAsset: 'chainflip_dot-NATIVE-pDOT',
-//     destChain: 'ethereum_goerli',
-//     destAsset: 'ethereum_goerli-NATIVE-GoerliETH'
-//   },
-//   'ethereum_goerli-NATIVE-GoerliETH___chainflip_dot-NATIVE-pDOT': {
-//     path: _AssetRefPath.XCM,
-//     srcChain: 'ethereum_goerli',
-//     srcAsset: 'ethereum_goerli-NATIVE-GoerliETH',
-//     destChain: 'chainflip_dot',
-//     destAsset: 'chainflip_dot-NATIVE-pDOT'
-//   },
-//   'chainflip_dot-NATIVE-pDOT___ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': {
-//     path: _AssetRefPath.XCM,
-//     srcChain: 'chainflip_dot',
-//     srcAsset: 'chainflip_dot-NATIVE-pDOT',
-//     destChain: 'ethereum_goerli',
-//     destAsset: 'ethereum_goerli-ERC20-0x07865c6E87B9F70255377e024ace6630C1Eaa37F'
-//   }
-// };
 
 export class SwapService extends BaseServiceWithProcess implements StoppableServiceInterface {
   protected readonly state: KoniState;
@@ -140,10 +116,23 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
     // todo: more logic to select the best quote
 
     const availableQuotes = quoteAskResponses.filter((quote) => !quote.error).map((quote) => quote.quote as SwapQuote);
+    let quoteError: SwapError | undefined;
+    let selectedQuote: SwapQuote | undefined;
+    let aliveUntil = (+Date.now() + SWAP_QUOTE_TIMEOUT_MAP.default);
 
-    const selectedQuote = quoteAskResponses[0]?.quote;
-    const quoteError = quoteAskResponses[0]?.error as SwapError;
-    const aliveUntil = selectedQuote?.aliveUntil ?? (+Date.now() + SWAP_QUOTE_TIMEOUT_MAP.default);
+    if (availableQuotes.length === 0) {
+      const preferredErrorResp = quoteAskResponses.find((quote) => {
+        return !!quote.error && ![SwapErrorType.ERROR_FETCHING_QUOTE, SwapErrorType.UNKNOWN, SwapErrorType.ASSET_NOT_SUPPORTED].includes(quote.error.errorType); // todo
+      });
+
+      const defaultErrorResp = quoteAskResponses.find((quote) => !!quote.error);
+
+      quoteError = preferredErrorResp?.error || defaultErrorResp?.error;
+    } else {
+      selectedQuote = availableQuotes[0];
+      console.log('selectedQuote', selectedQuote);
+      aliveUntil = selectedQuote?.aliveUntil || (+Date.now() + SWAP_QUOTE_TIMEOUT_MAP.default);
+    }
 
     return {
       optimalQuote: selectedQuote,
@@ -156,8 +145,12 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   private initHandlers () {
     _SUPPORTED_SWAP_PROVIDERS.forEach((providerId) => {
       switch (providerId) {
-        case 'CHAIN_FLIP':
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService, this.state.balanceService);
+        case SwapProviderId.CHAIN_FLIP_TESTNET:
+          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip Testnet', this.chainService, this.state.balanceService);
+
+          break;
+        case SwapProviderId.CHAIN_FLIP_MAINNET:
+          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip Mainnet', this.chainService, this.state.balanceService, false);
 
           break;
         default:

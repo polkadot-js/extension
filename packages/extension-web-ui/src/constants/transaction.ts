@@ -104,7 +104,8 @@ export const DEFAULT_EARN_PARAMS: EarnParams = {
   slug: '',
   target: '',
   value: '',
-  redirectFromPreview: false
+  redirectFromPreview: false,
+  hasPreSelectTarget: false
 };
 
 export const DEFAULT_UN_STAKE_PARAMS: UnStakeParams = {

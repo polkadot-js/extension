@@ -14,10 +14,10 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
-import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetSelectedAccountTypes, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-web-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-web-ui/messaging/campaigns';
@@ -75,7 +75,7 @@ const Component = ({ className }: ComponentProps) => {
     openAlert, persistData,
     setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
-  const { redirectFromPreview, slug, target } = defaultData;
+  const { hasPreSelectTarget, redirectFromPreview, slug, target } = defaultData;
   const defaultTarget = useRef<string>(target);
   const autoCheckValidatorGetFromPreview = useRef<boolean>(true);
   const autoCheckCompoundRef = useRef<boolean>(true);
@@ -109,7 +109,8 @@ const Component = ({ className }: ComponentProps) => {
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
   const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
-  const [useParamValidator, setUseParamValidator] = useState<boolean>(redirectFromPreview);
+  const [useParamValidator, setUseParamValidator] = useState<boolean>(hasPreSelectTarget);
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
 
   const poolInfo = poolInfoMap[slug] as YieldPoolInfo | undefined;
   const poolType = poolInfo?.type || '';
@@ -725,12 +726,14 @@ const Component = ({ className }: ComponentProps) => {
 
   useEffect(() => {
     if (redirectFromPreview && !accountSelectorList.length && checkValidAccountLoading) {
+      const isChainEvm = chainInfoMap[poolChain] && _isChainEvmCompatible(chainInfoMap[poolChain]);
+
+      setSelectedAccountTypes([isChainEvm ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE]);
       navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfoMap[poolChain]?.name || '' } });
-      setCheckValidAccountLoading(false);
     } else {
       setCheckValidAccountLoading(false);
     }
-  }, [accountSelectorList.length, chainInfoMap, checkValidAccountLoading, navigate, poolChain, redirectFromPreview]);
+  }, [accountSelectorList, chainInfoMap, checkValidAccountLoading, navigate, poolChain, redirectFromPreview, setSelectedAccountTypes]);
 
   const checkUnrecommendedValidator = useCallback((onValid?: () => void) => {
     fetchPoolTarget({ slug }).then((rs) => {
@@ -785,7 +788,7 @@ const Component = ({ className }: ComponentProps) => {
   }, [compound]);
 
   useEffect(() => {
-    if (redirectFromPreview && !targetLoading) {
+    if (hasPreSelectTarget && !targetLoading) {
       if (compound) {
         if (autoCheckCompoundRef.current) {
           autoCheckCompoundRef.current = false;
@@ -869,7 +872,7 @@ const Component = ({ className }: ComponentProps) => {
         }
       }
     }
-  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, redirectFromPreview, t, targetLoading, chainValue]);
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue]);
 
   useEffect(() => {
     if (poolChain) {
@@ -955,11 +958,11 @@ const Component = ({ className }: ComponentProps) => {
 
   useEffect(() => {
     if (!fromValue && (isAllAccount || accountSelectorList.length === 1)) {
-      if ((redirectFromPreview && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
+      if ((hasPreSelectTarget && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
         form.setFieldValue('from', accountSelectorList[0].address);
       }
     }
-  }, [accountSelectorList, form, fromValue, isAllAccount, redirectFromPreview]);
+  }, [accountSelectorList, form, fromValue, isAllAccount, hasPreSelectTarget]);
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -1119,11 +1122,11 @@ const Component = ({ className }: ComponentProps) => {
   const amountInputRef = form.getFieldInstance('value');
 
   useEffect(() => {
-    if (redirectFromPreview) {
+    if (hasPreSelectTarget) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       amountInputRef?.focus?.();
     }
-  }, [amountInputRef, redirectFromPreview]);
+  }, [amountInputRef, hasPreSelectTarget]);
 
   const validatorDefaultValue = (() => {
     if (useParamValidator) {

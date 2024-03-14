@@ -288,7 +288,8 @@ function Component ({ className }: Props) {
           ...DEFAULT_EARN_PARAMS,
           slug: poolInfo.slug,
           chain: poolInfo.chain,
-          from: transactionFromValue
+          from: transactionFromValue,
+          redirectFromPreview: true
         });
 
         setSelectedPoolInfoSlug(poolInfo.slug);
@@ -404,6 +405,7 @@ function Component ({ className }: Props) {
               chain: poolInfo.chain,
               from: transactionFromValue,
               redirectFromPreview: true,
+              hasPreSelectTarget: true,
               target: targetParam
             };
 

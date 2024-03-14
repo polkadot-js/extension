@@ -36,6 +36,7 @@ export interface EarnParams extends TransactionFormBaseProps {
   target: string;
   value: string;
   redirectFromPreview: boolean;
+  hasPreSelectTarget: boolean;
 }
 
 export interface UnStakeParams extends TransactionFormBaseProps {

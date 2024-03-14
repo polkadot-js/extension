@@ -3,6 +3,7 @@
 
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AlertModal, LoadingScreen, PageWrapper } from '@subwallet/extension-web-ui/components';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { useAlert, useGroupYieldPosition, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import EarningOptions from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry/EarningOptions';
@@ -13,6 +14,7 @@ import { PlusCircle, XCircle } from 'phosphor-react';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 const alertModalId = 'earning-entry-alert-modal';
@@ -27,6 +29,7 @@ function Component () {
   const chainNameRef = useRef<string>(locationState?.chainName || '');
   const { t } = useTranslation();
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
+  const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const earningPositions = useGroupYieldPosition();
   const navigate = useNavigate();
 
@@ -45,13 +48,14 @@ function Component () {
           text: t('Create new'),
           onClick: () => {
             closeAlert();
+            setReturnStorage('/transaction/earn');
             navigate('/accounts/new-seed-phrase');
           },
           icon: PlusCircle
         }
       });
     }
-  }, [closeAlert, navigate, openAlert, t]);
+  }, [closeAlert, navigate, openAlert, setReturnStorage, t]);
 
   useEffect(() => {
     if (currentAccountRef.current !== currentAccount?.address) {

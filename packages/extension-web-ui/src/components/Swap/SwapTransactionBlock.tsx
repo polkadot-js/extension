@@ -99,8 +99,11 @@ const SwapTransactionBlock = styled(Component)<Props>(({ theme: { token } }: Pro
       marginBottom: 16
     },
     '.__summary-quote .-sub-logo': {
-      bottom: -4,
+      bottom: 0,
       right: 0
+    },
+    '.__summary-quote .ant-image': {
+      fontSize: 0
     },
     '.__summary-to, .__summary-from': {
       display: 'flex',

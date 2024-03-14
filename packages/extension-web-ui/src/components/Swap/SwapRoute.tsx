@@ -80,7 +80,11 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center'
     },
     '.__swap-route-container .-sub-logo': {
-      bottom: -4
+      bottom: 0,
+      right: 0
+    },
+    '.__swap-route-container .ant-image': {
+      fontSize: 0
     },
     '.__token-item.-is-first': {
       alignItems: 'flex-start',

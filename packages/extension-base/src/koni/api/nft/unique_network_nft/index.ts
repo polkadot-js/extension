@@ -39,7 +39,6 @@ export class UniqueNftApi extends BaseNftApi {
   }
 
   private handleProperties (nft: NftData) {
-    console.log('nft', nft);
     const propertiesMap: Record<string, any> = {};
     const attRecord = nft.attributes;
 

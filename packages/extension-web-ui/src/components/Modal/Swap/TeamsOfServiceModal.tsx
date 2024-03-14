@@ -38,7 +38,7 @@ const Component = ({ className, onOk }: Props) => {
   }, [inactiveModal, onOk]);
 
   const onScrollContent = useCallback(() => {
-    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 294) {
+    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 250) {
       setIsScrollEnd(true);
     }
 
@@ -50,53 +50,52 @@ const Component = ({ className, onOk }: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 300);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 230);
   }, []);
 
   return (
     <BaseModal
       center={true}
-      className={CN(className, {
-        '-desktop-term': isWebUI
-      })}
+      className={CN(className)}
       closable={false}
       id={modalId}
       title={t('Terms of service')}
-      width={ isWebUI ? 784 : undefined }
+      width={ isWebUI ? 736 : undefined }
     >
-      <div
-        className={'__content-body'}
-        onScroll={onScrollToAcceptButton}
-        ref={scrollRef}
-      >
-        <div className={'__content-title'}>You’re using the Chainflip swap provider, which is still in a pre-release version. Please read the following carefully:</div>
-        <div className={'__term-item'}>
-          <div className={'__term-item-label'}>Pre-release Version</div>
-          <div>This is brand new protocol and despite our
+      <div className={'__content-title'}>You’re using the Chainflip swap provider, which is still in a pre-release version. Please read the following carefully:</div>
+      <div className={'__content-wrappper'}>
+        <div
+          className={'__content-body'}
+          onScroll={onScrollToAcceptButton}
+          ref={scrollRef}
+        >
+          <div className={'__term-item'}>
+            <div className={'__term-item-label'}>Pre-release Version</div>
+            <div>This is brand new protocol and despite our
             extensive preparations, there may be issues, and you may lose money.
             Features and swap sizes are limited for that reason.</div>
-        </div>
-        <div className={'__term-item'}>
-          <div className={'__term-item-label'}>Testing Phase</div>
-          <div>This is the real-world testing phase that provides a safer
+          </div>
+          <div className={'__term-item'}>
+            <div className={'__term-item-label'}>Testing Phase</div>
+            <div>This is the real-world testing phase that provides a safer
           environment for liquidity providers and users. Your participation will help
             us improve, but please know that you do so at your own risk.</div>
-        </div>
-        <div className={'__term-item'}>
-          <div className={'__term-item-label'}>Swap Limits</div>
-          <div>Swaps are capped at about $50,000 per deposit. Any
+          </div>
+          <div className={'__term-item'}>
+            <div className={'__term-item-label'}>Swap Limits</div>
+            <div>Swaps are capped at about $50,000 per deposit. Any
           amount exceeding these limits will be absorbed by the protocol and
             can not be refunded.</div>
+          </div>
+          {(!isScrollEnd || !scrollRef?.current) && <Button
+            className={'__caret-button'}
+            icon={<Icon phosphorIcon={CaretDown} />}
+            onClick={onScrollContent}
+            schema={'secondary'}
+            shape={'circle'}
+            size={'xs'}
+          />}
         </div>
-
-        {(!isScrollEnd || !scrollRef?.current) && <Button
-          className={'__caret-button'}
-          icon={<Icon phosphorIcon={CaretDown} />}
-          onClick={onScrollContent}
-          schema={'secondary'}
-          shape={'circle'}
-          size={'xs'}
-        />}
       </div>
       <div className={'__content-footer'}>
         <Checkbox
@@ -121,6 +120,7 @@ const Component = ({ className, onOk }: Props) => {
           >
             {t('I understand')}
           </Button>
+          <div className={'__content-footer-label'}>Scroll to read all sections</div>
         </div>
 
       </div>
@@ -131,37 +131,82 @@ const Component = ({ className, onOk }: Props) => {
 export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     color: token.colorTextDescription,
+    '.ant-sw-modal-header': {
+      paddingBottom: 24
+    },
+    '.ant-sw-modal-body': {
+      paddingTop: 24,
+      paddingLeft: 24,
+      paddingRight: 24
+    },
+    '.ant-sw-modal-content': {
+      maxHeight: 'none'
+    },
     '.__term-item': {
       fontSize: token.fontSizeSM,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeightSM,
-      marginBottom: token.marginSM
+      color: token.colorTextTertiary
     },
     '.__term-item-label': {
       fontSize: token.fontSize,
       fontWeight: token.fontWeightStrong,
       lineHeight: token.lineHeight,
-      color: token.colorWhite
+      color: token.colorWhite,
+      marginBottom: token.marginXXS
     },
     '.__content-body': {
-      maxHeight: 294,
+      maxHeight: 230,
       display: 'block',
       overflowY: 'scroll',
-      scrollBehavior: 'smooth'
+      scrollBehavior: 'smooth',
+      backgroundColor: token.colorBgSecondary,
+      paddingLeft: 16,
+      paddingRight: 16
+    },
+    '.__content-wrappper': {
+      backgroundColor: token.colorBgSecondary,
+      paddingBottom: 32,
+      paddingTop: 16,
+      borderRadius: 8,
+      marginBottom: 20
+    },
+    '.__term-item + .__term-item': {
+      marginTop: 16
     },
     '.__caret-button': {
       position: 'absolute',
-      top: '70%',
-      right: '3%'
+      top: 414,
+      right: 30,
+      backgroundColor: token.geekblue
     },
     '.__content-footer-checkbox': {
       alignItems: 'center',
-      marginTop: token.marginSM,
-      marginBottom: token.margin
+      marginTop: token.marginXS
     },
     '.__content-title': {
-      color: token.colorWhite,
-      marginBottom: token.margin
+      color: token.colorTextLight2,
+      marginBottom: token.marginXS,
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight,
+      fontWeight: token.fontWeightStrong
+    },
+    '.__content-footer-button-group': {
+      marginTop: 24,
+      marginBottom: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      display: 'flex',
+      flexDirection: 'column'
+    },
+    '.__content-footer-button': {
+      maxWidth: 358
+    },
+    '.__content-footer-label': {
+      fontSize: token.fontSizeSM,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightSM,
+      marginTop: token.marginXS
     }
   };
 });

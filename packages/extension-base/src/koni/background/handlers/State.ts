@@ -32,7 +32,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -1833,6 +1833,21 @@ export default class KoniState {
     this.unsubscriptionMap[id] = unsubscribe;
   }
 
+  public get detectBalanceChainSlugMap () {
+    const result: Record<string, string> = {};
+    const chainInfoMap = this.getChainInfoMap();
+
+    for (const [key, chainInfo] of Object.entries(chainInfoMap)) {
+      const chainBalanceSlug = chainInfo.extraInfo?.chainBalanceSlug || '';
+
+      if (chainBalanceSlug) {
+        result[chainBalanceSlug] = key;
+      }
+    }
+
+    return result;
+  }
+
   public async autoEnableChains (addresses: string[]) {
     const assetMap = this.chainService.getAssetRegistry();
     const promiseList = addresses.map((address) => {
@@ -1849,29 +1864,36 @@ export default class KoniState {
     const currentAssetSettings = await this.chainService.getAssetSettings();
     const chainMap = this.chainService.getChainInfoMap();
     const balanceDataList = await Promise.all(promiseList);
+    const detectBalanceChainSlugMap = this.detectBalanceChainSlugMap;
 
-    balanceDataList.forEach((balanceData) => {
-      balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
-        const chain = SUBSCAN_BALANCE_CHAIN_MAP_REVERSE[network];
-        const chainInfo = chain ? chainMap[chain] : null;
-        const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
+    for (const balanceData of balanceDataList) {
+      if (balanceData) {
+        for (const balanceDatum of balanceData) {
+          const { balance, bonded, category, locked, network, symbol } = balanceDatum;
+          const chain = detectBalanceChainSlugMap[network];
+          const chainInfo = chain ? chainMap[chain] : null;
+          const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
+          const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
+          const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
 
-        // Cancel if chain is not supported or is testnet or balance is 0
-        if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {
-          return;
+          // Cancel if chain is not supported or is testnet
+          if (!chainInfo || chainInfo.isTestnet) {
+            continue;
+          }
+
+          // Cancel is balance is 0
+          if (balanceIsEmpty) {
+            continue;
+          }
+
+          if (existedKey && !currentAssetSettings[existedKey]?.visible) {
+            needEnableChains.push(chain);
+            needActiveTokens.push(existedKey);
+            currentAssetSettings[existedKey] = { visible: true };
+          }
         }
-
-        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
-
-        const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
-
-        if (existedKey && !currentAssetSettings[existedKey]?.visible) {
-          needEnableChains.push(chain);
-          needActiveTokens.push(existedKey);
-          currentAssetSettings[existedKey] = { visible: true };
-        }
-      });
-    });
+      }
+    }
 
     if (needActiveTokens.length) {
       await this.chainService.enableChains(needEnableChains);

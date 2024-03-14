@@ -473,10 +473,11 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
   const storedChainInfoList: IChain[] = [];
   const needUpdateChainApiList: _ChainInfo[] = [];
 
-  latestChainInfoList.forEach((latestChainInfo) => {
+  for (const latestChainInfo of latestChainInfoList) {
     const currentChainInfo = currentChainInfoMap[latestChainInfo.slug];
     const currentChainState = currentChainStateMap[latestChainInfo.slug];
     const currentChainProviderValue = currentChainInfo?.providers[currentChainState?.currentProvider];
+    let needUpdate = false;
 
     if (currentChainInfo && currentChainState) {
       const preservedProvider: Record<string, string> = {};
@@ -500,12 +501,21 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
         needUpdateChainApiList.push(currentChainInfo);
       }
 
+      needUpdate = true;
+    }
+
+    if (currentChainInfo) {
+      needUpdate = true;
+      currentChainInfo.extraInfo = latestChainInfo.extraInfo;
+    }
+
+    if (needUpdate) {
       storedChainInfoList.push({
         ...currentChainInfo,
         ...currentChainState
       });
     }
-  });
+  }
 
   return {
     storedChainInfoList,

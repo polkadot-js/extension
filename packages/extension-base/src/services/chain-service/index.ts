@@ -615,7 +615,7 @@ export class ChainService {
     clearInterval(this.refreshLatestChainDataTimeOut);
   }
 
-  handleLatestProviderData (latestChainInfo: _ChainInfo[]) {
+  handleLatestChainData (latestChainInfo: _ChainInfo[]) {
     try {
       if (latestChainInfo && latestChainInfo.length > 0) {
         const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
@@ -668,7 +668,7 @@ export class ChainService {
 
   handleLatestData () {
     this.fetchLatestChainData().then((latestChainInfo) => {
-      this.handleLatestProviderData(latestChainInfo);
+      this.handleLatestChainData(latestChainInfo);
     }).catch(console.error);
 
     this.fetchLatestBlockedAssetRef().then((latestAssetRef) => {

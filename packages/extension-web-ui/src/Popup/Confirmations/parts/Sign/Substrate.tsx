@@ -30,6 +30,7 @@ interface Props extends ThemeProps {
   id: string;
   request: RequestSign;
   extrinsicType?: ExtrinsicType;
+  txExpirationTime?: number;
 }
 
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
@@ -41,7 +42,7 @@ const handleSignature = async (id: string, { signature }: SigData) => await appr
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { account, className, extrinsicType, id, request } = props;
+  const { account, className, extrinsicType, id, request, txExpirationTime } = props;
 
   const { t } = useTranslation();
   const notify = useNotification();
@@ -209,6 +210,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
 
+    if (txExpirationTime) {
+      const currentTime = +Date.now();
+
+      if (currentTime >= txExpirationTime) {
+        notify({
+          message: t('Transaction expired'),
+          type: 'error'
+        });
+        onCancel();
+      }
+    }
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -226,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
+  }, [extrinsicType, txExpirationTime, signMode, notify, t, onCancel, onConfirmQr, onConfirmLedger, onConfirmInject, checkUnlock, onApprovePassword]);
 
   useEffect(() => {
     !!ledgerError && notify({

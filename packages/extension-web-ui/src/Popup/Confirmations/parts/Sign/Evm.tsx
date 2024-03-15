@@ -27,6 +27,7 @@ interface Props extends ThemeProps {
   type: EvmSignatureSupportType;
   payload: ConfirmationDefinitions[EvmSignatureSupportType][0];
   extrinsicType?: ExtrinsicType;
+  txExpirationTime?: number;
 }
 
 const handleConfirm = async (type: EvmSignatureSupportType, id: string, payload: string) => {
@@ -53,7 +54,7 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, extrinsicType, id, payload, type } = props;
+  const { className, extrinsicType, id, payload, txExpirationTime, type } = props;
   const { payload: { account, canSign, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
@@ -204,6 +205,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
 
+    if (txExpirationTime) {
+      const currentTime = +Date.now();
+
+      if (currentTime >= txExpirationTime) {
+        notify({
+          message: t('Transaction expired'),
+          type: 'error'
+        });
+        onCancel();
+      }
+    }
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -221,7 +234,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, onConfirmInject, extrinsicType, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [extrinsicType, txExpirationTime, signMode, notify, t, onCancel, onConfirmQr, onConfirmLedger, onConfirmInject, checkUnlock, onApprovePassword]);
 
   useEffect(() => {
     !!ledgerError && notify({

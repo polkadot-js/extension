@@ -18,10 +18,6 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     message: detectTranslate('Quote timeout'),
     code: undefined
   },
-  NO_AVAILABLE_PROVIDER: {
-    message: detectTranslate('No available provider'),
-    code: undefined
-  },
   UNKNOWN: {
     message: detectTranslate('Undefined error. Check your Internet connection or contact support'),
     code: undefined

@@ -392,7 +392,8 @@ function Component ({ className }: Props) {
 
   const onCloseInstructionModal = useCallback(() => setEarnStorage((prevState) => ({
     ...prevState,
-    hasPreSelectTarget: false
+    hasPreSelectTarget: false,
+    target: ''
   })), [setEarnStorage]);
 
   useEffect(() => {

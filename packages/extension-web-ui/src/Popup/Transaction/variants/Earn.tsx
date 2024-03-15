@@ -1130,7 +1130,7 @@ const Component = ({ className }: ComponentProps) => {
 
   const validatorDefaultValue = (() => {
     if (useParamValidator) {
-      return defaultTarget.current;
+      return defaultData.target === 'not-support' ? '' : defaultTarget.current;
     } else {
       if (defaultData.target === 'not-support' || !!compound) {
         return undefined;

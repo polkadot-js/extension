@@ -390,6 +390,11 @@ function Component ({ className }: Props) {
     [activeModal]
   );
 
+  const onCloseInstructionModal = useCallback(() => setEarnStorage((prevState) => ({
+    ...prevState,
+    hasPreSelectTarget: false
+  })), [setEarnStorage]);
+
   useEffect(() => {
     let isSync = true;
 
@@ -560,6 +565,7 @@ function Component ({ className }: Props) {
             bypassEarlyValidate={true}
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
+            onCancel={onCloseInstructionModal}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
             poolInfo={poolInfoMap[selectedPoolInfoSlug]}

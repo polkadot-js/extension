@@ -10,7 +10,7 @@ import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, Trophy, TwitterLogo, User } from 'phosphor-react';
+import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, TwitterLogo, User } from 'phosphor-react';
 import { IconWeight } from 'phosphor-react/src/lib';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -27,13 +27,6 @@ enum TagType {
   POINTS='points',
   LUCKY_DRAW='lucky_draw',
   MANUAL_SELECTION='manual_selection'
-}
-
-enum MissionPoolsStatusTag {
-  UPCOMING='upcoming',
-  LIVE='live',
-  ARCHIVED='archived',
-  CLAIMABLE='claimable'
 }
 
 type TagInfo = {
@@ -107,32 +100,25 @@ function Component (props: Props): React.ReactElement<Props> {
         slug: TagType.MANUAL_SELECTION,
         icon: SelectionBackground
       },
-      [MissionPoolsStatusTag.UPCOMING]: {
+      [MissionCategoryType.UPCOMING]: {
         theme: 'gray',
         name: t('Upcoming'),
-        slug: MissionPoolsStatusTag.UPCOMING,
+        slug: MissionCategoryType.UPCOMING,
         icon: MegaphoneSimple,
         iconWeight: 'fill'
       },
-      [MissionPoolsStatusTag.LIVE]: {
-        theme: 'green',
+      [MissionCategoryType.LIVE]: {
+        theme: 'success',
         name: t('Live'),
-        slug: MissionPoolsStatusTag.LIVE,
+        slug: MissionCategoryType.LIVE,
         icon: CheckCircle,
         iconWeight: 'fill'
       },
-      [MissionPoolsStatusTag.ARCHIVED]: {
+      [MissionCategoryType.ARCHIVED]: {
         theme: 'blue',
         name: t('Archived'),
-        slug: MissionPoolsStatusTag.ARCHIVED,
+        slug: MissionCategoryType.ARCHIVED,
         icon: Cube,
-        iconWeight: 'fill'
-      },
-      [MissionPoolsStatusTag.CLAIMABLE]: {
-        theme: 'lime',
-        name: t('Claimable'),
-        slug: MissionPoolsStatusTag.CLAIMABLE,
-        icon: Trophy,
         iconWeight: 'fill'
       }
     };
@@ -144,7 +130,7 @@ function Component (props: Props): React.ReactElement<Props> {
     }
 
     const tagSlug = data.tags[0];
-    const theme = tagMap[tagSlug]?.theme || 'gray'
+    const theme = tagMap[tagSlug]?.theme || 'gray';
     const name = tagMap[tagSlug]?.name || t(capitalize(tagSlug.replace('_', ' ')));
     const iconWeight = tagMap[tagSlug]?.iconWeight;
     const icon = tagMap[tagSlug]?.icon || MagicWand;
@@ -216,6 +202,11 @@ function Component (props: Props): React.ReactElement<Props> {
               <div className='__compact-item-name'>
                 {data.name || ''}
               </div>
+            </div>
+            <div className={'__compact-item-content-part-2'}>
+              <div className={'__compact-item-value-row'}>
+                <div className='__compact-item-date-time'>{timeline}</div>
+              </div>
               <div className={'__compact-item-value-row'}>
                 <div className='__compact-item-label'>{t('Rewards')}:</div>
                 <div className='__compact-item-value'>
@@ -223,12 +214,10 @@ function Component (props: Props): React.ReactElement<Props> {
                 </div>
               </div>
             </div>
-            <div className={'__compact-item-content-part-2'}>
+            <div className={'__separator'}></div>
+            <div className={'__compact-item-content-part-3'}>
               <div className={'__compact-item-tags'}>
                 {tagNode}
-              </div>
-              <div className={'__compact-item-value-row'}>
-                <div className='__compact-item-date-time'>{timeline}</div>
               </div>
             </div>
           </div>
@@ -350,7 +339,12 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       filter: 'blur(7.5px)',
       right: 0
     },
-
+    '.__separator': {
+      height: 2,
+      backgroundColor: 'rgba(33, 33, 33, 0.80)',
+      marginTop: token.marginXS,
+      marginBottom: token.marginXS
+    },
     '.__item-inner': {
       display: 'flex',
       flexDirection: 'column',
@@ -422,7 +416,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__item-tags': {
       display: 'flex',
-      gap: 12,
+      gap: token.sizeXS,
       minHeight: 22,
       marginBottom: token.margin
     },
@@ -454,6 +448,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '&.-compact-mode': {
       padding: token.sizeSM,
+      paddingTop: token.paddingXS,
+      paddingBottom: token.paddingXS,
 
       '.__compact-item-background': {
         height: '100%',
@@ -490,6 +486,15 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       '.__compact-item-content-part-2': {
         overflow: 'hidden'
       },
+      '.__compact-item-content-part-2 .__compact-item-value-row': {
+        color: token.colorTextTertiary,
+        fontSize: token.fontSize,
+        lineHeight: token.lineHeight,
+        fontWeight: token.fontWeightStrong
+      },
+      '.__compact-item-content-part-2 .__compact-item-date-time': {
+        color: token.colorTextTertiary
+      },
 
       '.__compact-item-name': {
         fontSize: token.fontSizeLG,
@@ -504,7 +509,9 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       },
 
       '.__compact-item-tags': {
-        minHeight: 22
+        minHeight: 22,
+        display: 'flex',
+        gap: token.sizeXXS
       },
 
       '.__compact-item-value-row': {

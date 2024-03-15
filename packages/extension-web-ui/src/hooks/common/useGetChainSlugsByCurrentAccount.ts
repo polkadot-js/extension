@@ -51,7 +51,7 @@ function getAccountType (type: KeypairType) {
   return undefined;
 }
 
-function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
+export function analysisAccounts (accounts: AccountJson[]): [boolean, boolean] {
   let substrateCounter = 0;
   let ethereumCounter = 0;
 

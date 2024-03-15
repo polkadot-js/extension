@@ -56,7 +56,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
         : {}
       )}
-      title={t('Successful')}
+      title={t('Submitted')}
     >
       <div className={CN(className, {
         '__web-ui': isWebUI
@@ -72,10 +72,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
         <div className='title'>
-          {t('All done!')}
+          {t('Transaction submitted!')}
         </div>
         <div className='description'>
-          {t('Your request has been sent. You can track its progress in History tab.')}
+          {t('Track transaction progress in the History tab or go back to home')}
         </div>
         <SocialGroup />
         {isWebUI && (

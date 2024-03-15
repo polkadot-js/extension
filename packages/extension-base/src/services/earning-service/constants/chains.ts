@@ -13,8 +13,14 @@ export const _STAKING_CHAIN_GROUP = {
   ternoa: ['ternoa'],
   liquidStaking: ['bifrost_dot', 'acala', 'parallel', 'moonbeam'],
   lending: ['interlay'],
-  krest_network: ['krest_network']
+  krest_network: ['krest_network'],
+  manta: ['manta_network']
 };
+
+export const MaxEraRewardPointsEras = 14;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const ST_LIQUID_TOKEN_ABI: Record<string, any> = require('./abis/st_liquid_token_abi.json');
+
+export const MANTA_VALIDATOR_POINTS_PER_BLOCK = 20;
+export const MANTA_MIN_DELEGATION = 500;

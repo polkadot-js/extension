@@ -10,7 +10,7 @@ import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/u
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { exportAccountPrivateKey, exportAccountsV2, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
+import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
@@ -189,14 +189,13 @@ const Component: React.FC<Props> = (props: Props) => {
         }
 
         if (exportTypes.includes(ExportType.JSON_FILE)) {
-          // TODO: Change, recent is test only
-          exportAccountsV2(password).then((res) => {
-            setJsonData(res.exportedJson as unknown as KeyringPair$Json);
+          exportAccount(address, password).then((res) => {
+            setJsonData(res.exportedJson);
             result.jsonFile = true;
             checkDone();
 
             if (exportSingle) {
-              onExportJson(res.exportedJson as unknown as KeyringPair$Json, address)();
+              onExportJson(res.exportedJson, address)();
             }
           }).catch((e: Error) => {
             reject(new Error(e.message));

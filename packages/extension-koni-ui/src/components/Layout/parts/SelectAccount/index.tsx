@@ -3,16 +3,16 @@
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
-import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DISCONNECT_EXTENSION_MODAL, EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, ButtonProps, Icon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { Export, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -22,6 +22,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountBriefInfo, AccountCardItem, AccountItemWithName } from '../../../Account';
 import { GeneralEmptyList } from '../../../EmptyList';
+import { AccountExportPasswordModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 
@@ -301,6 +302,22 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     inactiveModal(ConnectWebsiteId);
   }, [inactiveModal]);
 
+  const exportAllAccounts = useCallback(() => {
+    activeModal(EXPORT_ACCOUNTS_PASSWORD_MODAL);
+  }, [activeModal]);
+
+  const rightButton = useMemo((): ButtonProps => ({
+    icon: (
+      <Icon
+        phosphorIcon={Export}
+        weight='fill'
+      />
+    ),
+    onClick: exportAllAccounts,
+    size: 'xs',
+    type: 'ghost'
+  }), [exportAllAccounts]);
+
   return (
     <div className={CN(className, 'container')}>
       {isPopup && (
@@ -337,6 +354,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
+        rightIconProps={rightButton}
         searchFunction={searchAccountFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Account name')}
@@ -359,6 +377,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         id={simpleQrModalId}
         onBack={onQrModalBack}
       />
+
+      <AccountExportPasswordModal />
     </div>
   );
 }

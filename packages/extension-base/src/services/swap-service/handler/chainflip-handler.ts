@@ -15,6 +15,7 @@ import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
 import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -28,6 +29,12 @@ enum ChainflipFeeType {
 
 const INTERMEDIARY_MAINNET_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
 const INTERMEDIARY_TESTNET_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
+
+enum CHAINFLIP_QUOTE_ERROR {
+  InsufficientLiquidity = 'InsufficientLiquidity',
+  InsufficientEgress = 'is lower than minimum egress amount',
+  InsufficientIngress = 'amount is lower than estimated ingress fee',
+}
 
 export class ChainflipSwapHandler extends SwapBaseHandler {
   private swapSdk: SwapSDK;
@@ -289,16 +296,20 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         maxSwap: metadata.maxSwap,
         feeInfo: {
           feeComponent: feeComponent,
-          defaultFeeToken: fromAsset.slug, // todo
-          feeOptions: [fromAsset.slug] // todo
+          defaultFeeToken: fromAsset.slug,
+          feeOptions: [fromAsset.slug]
         },
         route: {
           path: this.parseSwapPath(fromAsset, toAsset)
         }
       } as SwapQuote;
     } catch (e) {
-      console.error('Error getting quote from Chainflip', e);
-      // todo: handle more error from chainflip
+      const error = e as AxiosError;
+      const errorObj = error?.response?.data as Record<string, string>;
+
+      if (errorObj.error.includes(CHAINFLIP_QUOTE_ERROR.InsufficientLiquidity)) {
+        return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
+      }
 
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }

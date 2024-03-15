@@ -31,11 +31,15 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   SWAP_EXCEED_ALLOWANCE: {
-    message: detectTranslate('You can’t swap all your balance. Lower your amount and try again'),
+    message: detectTranslate('You cannot swap all your balance. Lower your amount and try again'),
     code: undefined
   },
   SWAP_NOT_ENOUGH_BALANCE: {
     message: detectTranslate('You must deposit more funds to swap'),
+    code: undefined
+  },
+  NOT_ENOUGH_LIQUIDITY: {
+    message: detectTranslate('There is not enough liquidity to complete the swap. Lower your amount and try again'),
     code: undefined
   }
 };

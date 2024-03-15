@@ -21,6 +21,7 @@ import { useChainConnection, useSelector, useTransactionContext, useWatchTransac
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject, findAccountByAddress } from '@subwallet/extension-web-ui/utils';
@@ -87,7 +88,8 @@ const Component = () => {
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
   const priceMap = useSelector((state) => state.price.priceMap);
-  const { chainInfoMap } = useSelector((root) => root.chainStore);
+  const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
+  const hasInternalConfirmations = useSelector((state: RootState) => state.requestState.hasInternalConfirmations);
   const [form] = Form.useForm<SwapParams>();
   const formDefault = useMemo((): SwapParams => ({ ...defaultData }), [defaultData]);
 
@@ -110,6 +112,7 @@ const Component = () => {
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
+  const [refreshQuoteCounter, setRefreshQuoteCounter] = useState<number>(0);
   const { token } = useTheme() as Theme;
 
   // mobile:
@@ -383,6 +386,13 @@ const Component = () => {
     );
   };
 
+  const requestUserInteractToContinue = refreshQuoteCounter > 2;
+
+  const onConfirmStillThere = useCallback(() => {
+    setHandleRequestLoading(true);
+    setRefreshQuoteCounter(0);
+  }, []);
+
   const renderQuoteEmptyBlock = () => {
     const isError = !!swapError || isFormInvalid;
     let message = '';
@@ -392,6 +402,8 @@ const Component = () => {
       message = t('Please recheck form values');
     } else if (handleRequestLoading) {
       message = t('Loading...');
+    } else if (requestUserInteractToContinue) {
+      message = t('Are you still there?');
     } else {
       message = swapError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
     }
@@ -423,6 +435,13 @@ const Component = () => {
           '-loading': _loading
         })}
         >{message}</div>
+
+        {!isFormInvalid && !_loading && requestUserInteractToContinue && (
+          <Button
+            block={true}
+            onClick={onConfirmStillThere}
+          >Yes</Button>
+        )}
       </div>
     );
   };
@@ -750,6 +769,7 @@ const Component = () => {
           handleSwapRequest(currentRequest).then((result) => {
             if (sync) {
               setOptimalSwapPath(result.process);
+              setRefreshQuoteCounter((prev) => prev + 1);
 
               dispatchProcessState({
                 payload: {
@@ -820,44 +840,56 @@ const Component = () => {
   }, [quoteAliveUntil]);
 
   useEffect(() => {
-    let timer: NodeJS.Timer;
+    // eslint-disable-next-line prefer-const
+    let timer: NodeJS.Timer | undefined;
     let sync = true;
 
-    const updateQuote = () => {
-      if (currentQuoteRequest) {
-        if (sync) {
-          setHandleRequestLoading(true);
-        }
+    const updateQuoteHandler = () => {
+      if (quoteAliveUntil && quoteAliveUntil < Date.now()) {
+        clearInterval(timer);
 
-        getLatestSwapQuote(currentQuoteRequest).then((rs) => {
-          if (sync) {
-            setCurrentQuote(rs.optimalQuote);
-            setQuoteAliveUntil(rs.aliveUntil);
-          }
-        }).catch((e) => {
-          console.log('Error when getLatestSwapQuote', e);
-        }).finally(() => {
+        if (requestUserInteractToContinue) {
           if (sync) {
             setHandleRequestLoading(false);
           }
-        });
+
+          return;
+        } else {
+          if (sync) {
+            setRefreshQuoteCounter((prev) => prev + 1);
+          }
+        }
+
+        if (!requestUserInteractToContinue && currentQuoteRequest && !hasInternalConfirmations) {
+          if (sync) {
+            setHandleRequestLoading(true);
+          }
+
+          getLatestSwapQuote(currentQuoteRequest).then((rs) => {
+            if (sync) {
+              setCurrentQuote(rs.optimalQuote);
+              setQuoteAliveUntil(rs.aliveUntil);
+            }
+          }).catch((e) => {
+            console.log('Error when getLatestSwapQuote', e);
+          }).finally(() => {
+            if (sync) {
+              setHandleRequestLoading(false);
+            }
+          });
+        }
       }
     };
 
-    if (quoteAliveUntil) {
-      timer = setInterval(() => {
-        if (quoteAliveUntil < Date.now()) {
-          updateQuote();
-          clearInterval(timer);
-        }
-      }, 1000);
-    }
+    timer = setInterval(updateQuoteHandler, 1000);
+
+    updateQuoteHandler();
 
     return () => {
       sync = false;
       clearInterval(timer);
     };
-  }, [currentQuote, currentQuoteRequest, quoteAliveUntil]);
+  }, [currentQuoteRequest, hasInternalConfirmations, quoteAliveUntil, requestUserInteractToContinue]);
 
   useEffect(() => {
     if (!confirmedTerm) {
@@ -1142,7 +1174,7 @@ const Component = () => {
             </div>
 
             {
-              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              !requestUserInteractToContinue && !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                 <MetaInfo
                   className={CN('__quote-info-block')}
                   hasBackgroundWrapper
@@ -1207,12 +1239,12 @@ const Component = () => {
             }
 
             {
-              (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
+              (!currentQuote || handleRequestLoading || isFormInvalid || requestUserInteractToContinue) && renderQuoteEmptyBlock()
             }
             <div className={'__quote-and-slippage'}>
               <>
                 {
-                  !handleRequestLoading && !isFormInvalid && (
+                  !requestUserInteractToContinue && !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
                     <div className={'__quote-reset-time'}>
                     Quote reset in: {quoteCountdownTime}s
                     </div>
@@ -1225,7 +1257,7 @@ const Component = () => {
             </div>
 
             {
-              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              !requestUserInteractToContinue && !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                 <MetaInfo
                   className={CN('__quote-fee-info-block')}
                   hasBackgroundWrapper
@@ -1410,7 +1442,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'flex-end',
       paddingLeft: token.paddingXS,
       paddingRight: token.paddingXS,
-      marginBottom: token.margin,
       marginTop: token.marginXXS,
       fontSize: token.fontSize,
       fontWeight: token.bodyFontWeight,
@@ -1688,10 +1719,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       },
       '.__slippage-action-wrapper': {
         marginBottom: 24
+      },
+      '.__quote-fee-info-block': {
+        marginTop: token.margin
       }
     },
 
-    // desktop
+    // mobile
 
     '&.-mobile': {
       overflow: 'auto',

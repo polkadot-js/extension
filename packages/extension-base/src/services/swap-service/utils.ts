@@ -4,7 +4,6 @@
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { ChainflipPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
@@ -66,7 +65,7 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
 }
 
-export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata, swapAllowed: AmountData): SwapError { // todo: support more providers
+export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata): SwapError { // todo: support more providers
   switch (error) {
     case SwapErrorType.NOT_MEET_MIN_SWAP: {
       const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
@@ -75,7 +74,7 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
       return new SwapError(error, message);
     }
 
-    case SwapErrorType.EXCEED_MAX_SWAP: {
+    case SwapErrorType.SWAP_EXCEED_ALLOWANCE: {
       if (metadata.maxSwap) {
         const parsedMaxSwapValue = formatNumber(metadata.maxSwap.value, metadata.maxSwap.decimals);
 
@@ -88,10 +87,10 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
 
-    case SwapErrorType.SWAP_EXCEED_BALANCE: {
-      const parsedSwapAllowed = formatNumber(swapAllowed.value, swapAllowed.decimals);
+    case SwapErrorType.SWAP_NOT_ENOUGH_BALANCE: {
+      const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
 
-      return new SwapError(error, `You can’t swap all your balance. Lower your amount below ${parsedSwapAllowed} ${swapAllowed.symbol} and try again`);
+      return new SwapError(error, `Insufficient balance. You need more than ${parsedMinSwapValue} ${metadata.minSwap.symbol} to start swapping`);
     }
 
     case SwapErrorType.UNKNOWN:

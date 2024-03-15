@@ -5,12 +5,12 @@ import { SwapSDK } from '@chainflip/sdk/swap';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getAssetSymbol, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
@@ -76,24 +76,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
       const destChain = toAsset.originChain;
 
       const srcChainInfo = this.chainService.getChainInfoByKey(srcChain);
-
-      const bnAmount = new BigNumber(request.fromAmount);
-
       const srcChainId = this.chainMapping[srcChain];
       const destChainId = this.chainMapping[destChain];
 
       const fromAssetId = this.assetMapping[fromAsset.slug];
       const toAssetId = this.assetMapping[toAsset.slug];
-
-      const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug);
-
-      const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
-
-      if (bnAmount.gte(bnFromAssetBalance)) {
-        return {
-          error: SwapErrorType.SWAP_EXCEED_BALANCE
-        };
-      }
 
       if (!srcChainId || !destChainId || !fromAssetId || !toAssetId) {
         return {
@@ -101,11 +88,14 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         };
       }
 
-      const [supportedDestChains, srcAssets, destAssets] = await Promise.all([
+      const [supportedDestChains, srcAssets, destAssets, fromAssetBalance] = await Promise.all([
         this.swapSdk.getChains(srcChainId),
         this.swapSdk.getAssets(srcChainId),
-        this.swapSdk.getAssets(destChainId)
+        this.swapSdk.getAssets(destChainId),
+        this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug)
       ]);
+
+      console.log(supportedDestChains, srcAssets, destAssets, fromAssetBalance);
 
       const supportedDestChainId = supportedDestChains.find((c) => c.chain === destChainId);
       const srcAssetData = srcAssets.find((a) => a.asset === fromAssetId);
@@ -115,7 +105,56 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         return { error: SwapErrorType.ASSET_NOT_SUPPORTED };
       }
 
+      const bnAmount = new BigNumber(request.fromAmount);
+      const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
+      const bnMaxBalanceSwap = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
       const bnMinSwap = new BigNumber(srcAssetData.minimumSwapAmount);
+
+      let bnSwapMaxAllowance: BigNumber = bnMaxBalanceSwap;
+
+      if (srcAssetData.maximumSwapAmount) {
+        const bnMaxProtocolSwap = new BigNumber(srcAssetData.maximumSwapAmount);
+
+        bnSwapMaxAllowance = BigNumber.min(bnMaxProtocolSwap, bnMaxBalanceSwap);
+      }
+
+      if (bnMinSwap.gte(bnSwapMaxAllowance)) {
+        return {
+          error: SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
+          metadata: {
+            minSwap: {
+              value: srcAssetData.minimumSwapAmount,
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            maxSwap: {
+              value: bnSwapMaxAllowance.toString(),
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            chain: srcChainInfo
+          } as ChainflipPreValidationMetadata
+        };
+      }
+
+      if (bnAmount.gte(bnSwapMaxAllowance)) {
+        return {
+          error: SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+          metadata: {
+            minSwap: {
+              value: srcAssetData.minimumSwapAmount,
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            maxSwap: {
+              value: bnSwapMaxAllowance.toString(),
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            chain: srcChainInfo
+          } as ChainflipPreValidationMetadata
+        };
+      }
 
       if (bnAmount.lt(bnMinSwap)) {
         return {
@@ -128,33 +167,12 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
             },
             maxSwap: {
               value: srcAssetData.maximumSwapAmount,
-              decimals: toAsset.decimals,
-              symbol: toAsset.symbol
-            }
+              decimals: fromAsset.decimals,
+              symbol: fromAsset.symbol
+            },
+            chain: srcChainInfo
           } as ChainflipPreValidationMetadata
         };
-      }
-
-      if (srcAssetData.maximumSwapAmount) {
-        const bnMaxSwap = new BigNumber(srcAssetData.maximumSwapAmount);
-
-        if (bnAmount.gt(bnMaxSwap)) {
-          return {
-            error: SwapErrorType.EXCEED_MAX_SWAP,
-            metadata: {
-              minSwap: {
-                value: srcAssetData.minimumSwapAmount,
-                decimals: fromAsset.decimals,
-                symbol: fromAsset.symbol
-              },
-              maxSwap: {
-                value: srcAssetData.maximumSwapAmount,
-                decimals: toAsset.decimals,
-                symbol: toAsset.symbol
-              }
-            } as ChainflipPreValidationMetadata
-          };
-        }
       }
 
       return {
@@ -166,8 +184,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
           },
           maxSwap: {
             value: srcAssetData.maximumSwapAmount,
-            decimals: toAsset.decimals,
-            symbol: toAsset.symbol
+            decimals: fromAsset.decimals,
+            symbol: fromAsset.symbol
           },
           chain: srcChainInfo
         } as ChainflipPreValidationMetadata
@@ -197,18 +215,12 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
 
     const earlyValidation = await this.validateSwapRequest(request);
 
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
-    const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-    const bnSwapAllowed = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
-    const swapAllowed: AmountData = {
-      value: bnSwapAllowed.toString(),
-      decimals: _getAssetDecimals(fromAsset),
-      symbol: _getAssetSymbol(fromAsset)
-    };
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
+    console.log('metadata', metadata);
+
     if (earlyValidation.error) {
-      return getSwapEarlyValidationError(earlyValidation.error, metadata, swapAllowed);
+      return getSwapEarlyValidationError(earlyValidation.error, metadata);
     }
 
     const srcChainId = this.chainMapping[fromAsset.originChain];

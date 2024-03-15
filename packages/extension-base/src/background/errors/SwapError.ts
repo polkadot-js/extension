@@ -14,10 +14,6 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     message: detectTranslate('Amount too low. Increase your amount and try again'),
     code: undefined
   },
-  EXCEED_MAX_SWAP: {
-    message: detectTranslate('Amount too high. Lower your amount and try again'),
-    code: undefined
-  },
   QUOTE_TIMEOUT: {
     message: detectTranslate('Quote timeout'),
     code: undefined
@@ -38,8 +34,12 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     message: detectTranslate('Invalid recipient'),
     code: undefined
   },
-  SWAP_EXCEED_BALANCE: {
+  SWAP_EXCEED_ALLOWANCE: {
     message: detectTranslate('You can’t swap all your balance. Lower your amount and try again'),
+    code: undefined
+  },
+  SWAP_NOT_ENOUGH_BALANCE: {
+    message: detectTranslate('You must deposit more funds to swap'),
     code: undefined
   }
 };

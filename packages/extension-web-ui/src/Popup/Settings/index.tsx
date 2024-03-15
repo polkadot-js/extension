@@ -225,7 +225,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: ArrowSquareOut,
           title: t('Contact support'),
           onClick: () => {
-            window.open(`${SUPPORT_MAIL}?subject=[In-app Support]`, '_self');
+            window.open(`${SUPPORT_MAIL}?subject=[WebApp - In-app support]`, '_self');
           }
         },
         {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Number } from '@subwallet/react-ui';
+import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React from 'react';
@@ -21,14 +22,20 @@ export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   suffixNode?: React.ReactNode
   onClickValue?: VoidFunction;
   disableClickValue?: boolean;
+  metadata?: Record<string, number>;
+  customFormatter?: SwNumberProps['customFormatter'];
+  formatType?: SwNumberProps['formatType'];
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
   const { className,
+    customFormatter,
     decimalOpacity = 1,
     decimals = 0,
     disableClickValue,
+    formatType,
     label,
+    metadata,
     onClickValue,
     prefix,
     size = 30,
@@ -59,9 +66,12 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
           onClick={!disableClickValue ? onClickValue : undefined}
         >
           <Number
+            customFormatter={customFormatter}
             decimal={decimals}
             decimalOpacity={decimalOpacity}
+            formatType={formatType}
             intOpacity={1}
+            metadata={metadata}
             prefix={prefix}
             size={size}
             subFloatNumber={subFloatNumber}

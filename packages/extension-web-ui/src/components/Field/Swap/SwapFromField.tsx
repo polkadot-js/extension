@@ -3,6 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals, _getAssetPriceId } from '@subwallet/extension-base/services/chain-service/utils';
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AmountInput, BasicInputEvent } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -29,6 +30,7 @@ type Props = ThemeProps & {
 }
 
 // todo: support max later
+const metadataFrom = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
   const { amountValue, className, fromAsset, label,
@@ -94,9 +96,12 @@ const Component = (props: Props) => {
           {
             <Number
               className={'__amount-convert'}
+              customFormatter={swapCustomFormatter}
               decimal={0}
+              formatType={'custom'}
+              metadata={metadataFrom}
               prefix={'$'}
-              value={getConvertedInputValue}
+              value={getConvertedInputValue.toString()}
             />
           }
         </div>

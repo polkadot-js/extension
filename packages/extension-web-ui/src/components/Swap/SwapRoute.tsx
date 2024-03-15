@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
             key={index}
           >
             <Logo
-              className='token-logo'
+              className='__route-token-logo'
               isShowSubLogo={true}
               shape='circle'
               size={24}
@@ -79,11 +79,11 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'center',
       alignItems: 'center'
     },
-    '.__swap-route-container .-sub-logo': {
+    '.__route-token-logo .-sub-logo': {
       bottom: 0,
       right: 0
     },
-    '.__swap-route-container .ant-image': {
+    '.__route-token-logo .ant-image': {
       fontSize: 0
     },
     '.__token-item.-is-first': {

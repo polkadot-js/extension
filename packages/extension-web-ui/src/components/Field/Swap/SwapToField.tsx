@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { SwapTokenSelector } from '@subwallet/extension-web-ui/components/Field/Swap/parts';
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -22,6 +23,7 @@ type Props = ThemeProps & {
   swapValue: BigN;
   loading?: boolean;
 }
+const metadataTo = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
   const { className, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
@@ -65,14 +67,19 @@ const Component = (props: Props) => {
               <>
                 <Number
                   className={'__amount-destination'}
+                  customFormatter={swapCustomFormatter}
                   decimal={0}
-                  value={swapValue}
+                  formatType={'custom'}
+                  value={swapValue.toString()}
                 />
                 <Number
                   className={'__amount-convert'}
+                  customFormatter={swapCustomFormatter}
                   decimal={0}
+                  formatType={'custom'}
                   prefix={'$'}
-                  value={getConvertedBalance}
+                  value={getConvertedBalance.toString()}
+                  metadata={metadataTo}
                 />
               </>
             )

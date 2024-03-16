@@ -18,7 +18,7 @@ import { WasmNftApi } from '@subwallet/extension-base/koni/api/nft/wasm_nft';
 import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft, _isSupportOrdinal } from '@subwallet/extension-base/services/chain-service/utils';
-import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { categoryAddresses, targetIsWeb } from '@subwallet/extension-base/utils';
 
 import StatemintNftApi from './statemint_nft';
 
@@ -159,7 +159,7 @@ export class NftHandler {
             }
           }
 
-          if (_isSupportOrdinal(chain)) {
+          if (_isSupportOrdinal(chain) && targetIsWeb) {
             const subscanChain = chainInfo.extraInfo?.subscanSlug;
 
             if (subscanChain) {

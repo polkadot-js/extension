@@ -436,6 +436,10 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       }
     },
 
+    '.ant-sw-list.-display-row': {
+      paddingBottom: token.padding
+    },
+
     '.loading': {
       '.anticon': {
         animation: 'spinner-loading 1s infinite linear'

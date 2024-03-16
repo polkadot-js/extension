@@ -1848,62 +1848,9 @@ export default class KoniState {
     return result;
   }
 
-  public async autoEnableChains (addresses: string[]) {
-    const assetMap = this.chainService.getAssetRegistry();
-    const promiseList = addresses.map((address) => {
-      return this.subscanService.getMultiChainBalance(address)
-        .catch((e) => {
-          console.error(e);
-
-          return null;
-        });
-    });
-
-    const needEnableChains: string[] = [];
-    const needActiveTokens: string[] = [];
-    const currentAssetSettings = await this.chainService.getAssetSettings();
-    const chainMap = this.chainService.getChainInfoMap();
-    const balanceDataList = await Promise.all(promiseList);
-    const detectBalanceChainSlugMap = this.detectBalanceChainSlugMap;
-
-    for (const balanceData of balanceDataList) {
-      if (balanceData) {
-        for (const balanceDatum of balanceData) {
-          const { balance, bonded, category, locked, network, symbol } = balanceDatum;
-          const chain = detectBalanceChainSlugMap[network];
-          const chainInfo = chain ? chainMap[chain] : null;
-          const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
-          const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
-          const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
-
-          // Cancel if chain is not supported or is testnet
-          if (!chainInfo || chainInfo.isTestnet) {
-            continue;
-          }
-
-          // Cancel is balance is 0
-          if (balanceIsEmpty) {
-            continue;
-          }
-
-          if (existedKey && !currentAssetSettings[existedKey]?.visible) {
-            needEnableChains.push(chain);
-            needActiveTokens.push(existedKey);
-            currentAssetSettings[existedKey] = { visible: true };
-          }
-        }
-      }
-    }
-
-    if (needActiveTokens.length) {
-      await this.chainService.enableChains(needEnableChains);
-      this.chainService.setAssetSettings({ ...currentAssetSettings });
-    }
-  }
-
   public onAccountAdd () {
     this.eventService.on('account.add', (address) => {
-      this.autoEnableChains([address]).catch(this.logger.error);
+      this.balanceService.autoEnableChains([address]).catch(this.logger.error);
     });
   }
 

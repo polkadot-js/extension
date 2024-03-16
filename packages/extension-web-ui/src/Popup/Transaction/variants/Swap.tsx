@@ -12,7 +12,7 @@ import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField,
 import { SwapTeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
-import { SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
+import { QuoteResetTime, SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -98,7 +98,6 @@ const Component = () => {
   const [quoteOptions, setQuoteOptions] = useState<SwapQuote[]>([]);
   const [currentQuote, setCurrentQuote] = useState<SwapQuote | undefined>(undefined);
   const [quoteAliveUntil, setQuoteAliveUntil] = useState<number | undefined>(undefined);
-  const [quoteCountdownTime, setQuoteCountdownTime] = useState<number>(0);
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
@@ -851,33 +850,6 @@ const Component = () => {
   }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, swapPairs, toTokenSlugValue]);
 
   useEffect(() => {
-    let timer: NodeJS.Timer;
-
-    if (quoteAliveUntil) {
-      const updateQuoteCountdownTime = () => {
-        const dateNow = Date.now();
-
-        if (dateNow > quoteAliveUntil) {
-          setQuoteCountdownTime(0);
-          clearInterval(timer);
-        } else {
-          setQuoteCountdownTime(Math.round((quoteAliveUntil - dateNow) / 1000));
-        }
-      };
-
-      timer = setInterval(updateQuoteCountdownTime, 1000);
-
-      updateQuoteCountdownTime();
-    } else {
-      setQuoteCountdownTime(0);
-    }
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [quoteAliveUntil]);
-
-  useEffect(() => {
     // eslint-disable-next-line prefer-const
     let timer: NodeJS.Timer | undefined;
     let sync = true;
@@ -1122,7 +1094,10 @@ const Component = () => {
                                 )
                                 : (
                                   <Number
+                                    customFormatter={swapCustomFormatter}
                                     decimal={0}
+                                    formatType={'custom'}
+                                    metadata={numberMetadata}
                                     prefix={'$'}
                                     value={estimatedFeeValue}
                                   />
@@ -1145,7 +1120,9 @@ const Component = () => {
                       !isFormInvalid && (
                         <div className='__view-quote-detail-action-wrapper'>
                           <div className={'__quote-reset-time'}>
-                          Quote reset in: {quoteCountdownTime}s
+                            <QuoteResetTime
+                              quoteAliveUntilValue = {quoteAliveUntil}
+                            />
                           </div>
 
                           <Button
@@ -1292,9 +1269,9 @@ const Component = () => {
               <>
                 {
                   !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
-                    <div className={'__quote-reset-time'}>
-                    Quote reset in: {quoteCountdownTime}s
-                    </div>
+                    <QuoteResetTime
+                      quoteAliveUntilValue = {quoteAliveUntil}
+                    />
                   )
                 }
                 {

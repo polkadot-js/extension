@@ -1,6 +1,6 @@
-    2318	AnhMTV                        	Release version 1.1.43
+    2324	AnhMTV                        	
     2170	Nam Phạm                      	[Issue 2717] change XCM ref map
-    1949	S2kael                        	[Issue-2698] Update stable chain-list version
+    1959	S2kael                        	[Issue-2694] Update migrate script
      619	lw-cdm                        	Fix issue related to undefined object
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
@@ -10,9 +10,9 @@
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       80	leewong                       	Update account filter for earn transaction
+      66	bluezdot                      	[Issue-2694] Update chainlist 2024.03.11
+      64	nguyentiendung                	[Issue-2759_extension] Extension - Update email support
       63	Roman                         	fix ui issues
-      62	nguyentiendung                	
-      53	bluezdot                      	fix eslint
       53	Dominhquangdev                	update Bridge code
       47	bluedot                       	update priceId for EWT on Energy Web X
       29	Automation Bot                	[CI Skip] Auto increase webapp build number

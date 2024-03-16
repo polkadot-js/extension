@@ -183,6 +183,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         if (!isAnyAccountValid) {
           const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;
 
+          setEarnStorage(earnParams);
           setSelectedAccountTypes([accountType]);
           navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfo?.name } });
         } else {

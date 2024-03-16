@@ -79,6 +79,7 @@ const Component = ({ className }: ComponentProps) => {
   const defaultTarget = useRef<string>(target);
   const autoCheckValidatorGetFromPreview = useRef<boolean>(true);
   const autoCheckCompoundRef = useRef<boolean>(true);
+  const isReadyToShowAlertRef = useRef<boolean>(true);
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
@@ -122,6 +123,7 @@ const Component = ({ className }: ComponentProps) => {
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [screenLoading, setScreenLoading] = useState(true);
   const [checkValidAccountLoading, setCheckValidAccountLoading] = useState(true);
+  const [checkCompoundLoading, setCheckCompoundLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
   const [, setCanMint] = useState(false);
@@ -725,6 +727,35 @@ const Component = ({ className }: ComponentProps) => {
   }, [chainAsset, poolInfo]);
 
   useEffect(() => {
+    let timer: NodeJS.Timer;
+    let timeout: NodeJS.Timeout;
+
+    if (checkCompoundLoading && redirectFromPreview) {
+      const checkCompoundReady = () => {
+        if (compound) {
+          clearInterval(timer);
+          clearTimeout(timeout);
+          setCheckCompoundLoading(false);
+        }
+      };
+
+      timer = setInterval(checkCompoundReady, 500);
+
+      timeout = setTimeout(() => {
+        clearInterval(timer);
+        setCheckCompoundLoading(false);
+      }, 5000);
+    } else {
+      setTimeout(() => setCheckCompoundLoading(false), 350);
+    }
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [checkCompoundLoading, compound, redirectFromPreview]);
+
+  useEffect(() => {
     if (redirectFromPreview && !accountSelectorList.length && checkValidAccountLoading) {
       const isChainEvm = chainInfoMap[poolChain] && _isChainEvmCompatible(chainInfoMap[poolChain]);
 
@@ -751,24 +782,29 @@ const Component = ({ className }: ComponentProps) => {
       });
 
       if (!isValidatorSupported && defaultTarget.current) {
-        openAlert({
+        isReadyToShowAlertRef.current && openAlert({
           title: t('Unrecommended validator'),
           type: NotificationType.ERROR,
           content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
           cancelButton: {
             text: t('Dismiss'),
-            onClick: closeAlert,
+            onClick: () => {
+              isReadyToShowAlertRef.current = true;
+              closeAlert();
+            },
             icon: XCircle
           },
           okButton: {
             text: t('Select validators'),
             onClick: () => {
+              isReadyToShowAlertRef.current = true;
               closeAlert();
               activeModal('target');
             },
             icon: CheckCircle
           }
         });
+        isReadyToShowAlertRef.current = false;
       } else {
         onValid && onValid();
       }
@@ -788,37 +824,45 @@ const Component = ({ className }: ComponentProps) => {
   }, [compound]);
 
   useEffect(() => {
-    if (hasPreSelectTarget && !targetLoading) {
+    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading) {
       if (compound) {
         if (autoCheckCompoundRef.current) {
           autoCheckCompoundRef.current = false;
 
           if (isUnstakeAll) {
             if (poolType === YieldPoolType.NOMINATION_POOL) {
-              openAlert({
+              isReadyToShowAlertRef.current && openAlert({
                 title: t('Pay attention'),
                 content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
                 type: NotificationType.WARNING,
                 okButton: {
                   text: t('I understand'),
-                  onClick: closeAlert,
+                  onClick: () => {
+                    isReadyToShowAlertRef.current = true;
+                    closeAlert();
+                  },
                   icon: CheckCircle
                 }
               });
+              isReadyToShowAlertRef.current = false;
 
               return;
             } else if (poolType === YieldPoolType.NATIVE_STAKING) {
               if (_STAKING_CHAIN_GROUP.para.includes(chainValue)) {
-                openAlert({
+                isReadyToShowAlertRef.current && openAlert({
                   title: t('Pay attention'),
                   content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
                   type: NotificationType.WARNING,
                   okButton: {
                     text: t('I understand'),
-                    onClick: closeAlert,
+                    onClick: () => {
+                      isReadyToShowAlertRef.current = true;
+                      closeAlert();
+                    },
                     icon: CheckCircle
                   }
                 });
+                isReadyToShowAlertRef.current = false;
 
                 return;
               } else {
@@ -834,6 +878,8 @@ const Component = ({ className }: ComponentProps) => {
               : '';
 
           const onPressContinue = () => {
+            isReadyToShowAlertRef.current = true;
+
             if (poolType === YieldPoolType.NATIVE_STAKING) {
               checkUnrecommendedValidator(() => form.setFieldValue('target', defaultTarget.current));
             }
@@ -850,7 +896,7 @@ const Component = ({ className }: ComponentProps) => {
             closeAlert();
           };
 
-          openAlert({
+          isReadyToShowAlertRef.current && openAlert({
             title: t('Pay attention'),
             content: content,
             className: CN(className, 'earning-alert-modal'),
@@ -864,6 +910,7 @@ const Component = ({ className }: ComponentProps) => {
               onClick: onPressContinue
             }
           });
+          isReadyToShowAlertRef.current = false;
         }
       } else {
         if (autoCheckValidatorGetFromPreview.current) {
@@ -872,7 +919,7 @@ const Component = ({ className }: ComponentProps) => {
         }
       }
     }
-  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue]);
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading]);
 
   useEffect(() => {
     if (poolChain) {

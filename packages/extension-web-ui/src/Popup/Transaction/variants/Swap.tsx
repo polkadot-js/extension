@@ -32,6 +32,7 @@ import CN from 'classnames';
 import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, CheckCircle, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useIdleTimer } from 'react-idle-timer';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -73,7 +74,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
   return result;
 }
 
-// todo: change to to when it is ready
+// todo: change to true when it is ready
 const supportSlippageSelection = false;
 const numberMetadata = { maxNumberFormat: 8 };
 
@@ -113,8 +114,29 @@ const Component = () => {
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
-  const [refreshQuoteCounter, setRefreshQuoteCounter] = useState<number>(0);
+  const [requestUserInteractToContinue, setRequestUserInteractToContinue] = useState<boolean>(false);
+  const continueRefreshQuoteRef = useRef<boolean>(false);
   const { token } = useTheme() as Theme;
+
+  const onIdle = useCallback(() => {
+    !hasInternalConfirmations && setRequestUserInteractToContinue(true);
+  }, [hasInternalConfirmations]);
+
+  useIdleTimer({
+    onIdle,
+    timeout: 60000,
+    events: [
+      'keydown',
+      'mousedown',
+      'touchstart',
+      'MSPointerDown',
+      'visibilitychange'
+    ],
+    throttle: 0,
+    eventsThrottle: 0,
+    element: document,
+    startOnMount: true
+  });
 
   // mobile:
   const [showQuoteDetailOnMobile, setShowQuoteDetailOnMobile] = useState<boolean>(false);
@@ -390,11 +412,10 @@ const Component = () => {
     );
   };
 
-  const requestUserInteractToContinue = refreshQuoteCounter > 2;
-
   const onConfirmStillThere = useCallback(() => {
     setHandleRequestLoading(true);
-    setRefreshQuoteCounter(0);
+    setRequestUserInteractToContinue(false);
+    continueRefreshQuoteRef.current = true;
   }, []);
 
   const renderQuoteEmptyBlock = () => {
@@ -406,8 +427,6 @@ const Component = () => {
       message = t('Please recheck form values');
     } else if (handleRequestLoading) {
       message = t('Loading...');
-    } else if (requestUserInteractToContinue) {
-      message = t('Are you still there?');
     } else {
       message = swapError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
     }
@@ -439,13 +458,6 @@ const Component = () => {
           '-loading': _loading
         })}
         >{message}</div>
-
-        {!isFormInvalid && !_loading && requestUserInteractToContinue && (
-          <Button
-            block={true}
-            onClick={onConfirmStillThere}
-          >Yes</Button>
-        )}
       </div>
     );
   };
@@ -634,7 +646,7 @@ const Component = () => {
 
       return new BigN(currentQuote.fromAmount)
         .div(BN_TEN.pow(decimals))
-        .multipliedBy(0.78);
+        .multipliedBy(currentQuote.rate);
     }
 
     return BN_ZERO;
@@ -752,7 +764,6 @@ const Component = () => {
             return;
           }
 
-          showQuoteAreaRef.current = true;
           setIsFormInvalid(false);
           setHandleRequestLoading(true);
 
@@ -768,12 +779,10 @@ const Component = () => {
             recipient: recipientValue || undefined
           };
 
-          setCurrentQuoteRequest(currentRequest);
-
           handleSwapRequest(currentRequest).then((result) => {
             if (sync) {
+              setCurrentQuoteRequest(currentRequest);
               setOptimalSwapPath(result.process);
-              setRefreshQuoteCounter((prev) => prev + 1);
 
               dispatchProcessState({
                 payload: {
@@ -848,39 +857,45 @@ const Component = () => {
     let timer: NodeJS.Timer | undefined;
     let sync = true;
 
-    const updateQuoteHandler = () => {
-      if (quoteAliveUntil && quoteAliveUntil < Date.now()) {
-        clearInterval(timer);
+    const updateQuote = () => {
+      if (currentQuoteRequest) {
+        if (sync) {
+          setHandleRequestLoading(true);
+        }
 
-        if (requestUserInteractToContinue) {
+        getLatestSwapQuote(currentQuoteRequest).then((rs) => {
+          if (sync) {
+            setCurrentQuote(rs.optimalQuote);
+            setQuoteAliveUntil(rs.aliveUntil);
+          }
+        }).catch((e) => {
+          console.log('Error when getLatestSwapQuote', e);
+        }).finally(() => {
           if (sync) {
             setHandleRequestLoading(false);
           }
+        });
+      }
+    };
 
-          return;
-        } else {
-          if (sync) {
-            setRefreshQuoteCounter((prev) => prev + 1);
-          }
+    const updateQuoteHandler = () => {
+      if (!quoteAliveUntil) {
+        clearInterval(timer);
+
+        return;
+      }
+
+      if (quoteAliveUntil < Date.now()) {
+        clearInterval(timer);
+
+        if (!requestUserInteractToContinue && !hasInternalConfirmations) {
+          updateQuote();
         }
+      } else {
+        if (continueRefreshQuoteRef.current) {
+          continueRefreshQuoteRef.current = false;
 
-        if (!requestUserInteractToContinue && currentQuoteRequest && !hasInternalConfirmations) {
-          if (sync) {
-            setHandleRequestLoading(true);
-          }
-
-          getLatestSwapQuote(currentQuoteRequest).then((rs) => {
-            if (sync) {
-              setCurrentQuote(rs.optimalQuote);
-              setQuoteAliveUntil(rs.aliveUntil);
-            }
-          }).catch((e) => {
-            console.log('Error when getLatestSwapQuote', e);
-          }).finally(() => {
-            if (sync) {
-              setHandleRequestLoading(false);
-            }
-          });
+          updateQuote();
         }
       }
     };
@@ -945,7 +960,7 @@ const Component = () => {
       <>
         <div className={CN('__transaction-form-area', {
           '-init-animation': !showQuoteAreaRef.current,
-          hidden: showQuoteDetailOnMobile
+          hidden: requestUserInteractToContinue || showQuoteDetailOnMobile // todo: Update this logic on mobile screen
         })}
         >
           <TransactionContent>
@@ -1144,7 +1159,7 @@ const Component = () => {
 
         <div className={CN('__transaction-swap-quote-info-area', {
           '-init-animation': !showQuoteAreaRef.current,
-          hidden: !isWebUI && !showQuoteDetailOnMobile
+          hidden: requestUserInteractToContinue || (!isWebUI && !showQuoteDetailOnMobile) // todo: Update this logic on mobile screen
         })}
         >
           <>
@@ -1178,7 +1193,7 @@ const Component = () => {
             </div>
 
             {
-              !requestUserInteractToContinue && !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                 <MetaInfo
                   className={CN('__quote-info-block')}
                   hasBackgroundWrapper
@@ -1246,12 +1261,12 @@ const Component = () => {
             }
 
             {
-              (!currentQuote || handleRequestLoading || isFormInvalid || requestUserInteractToContinue) && renderQuoteEmptyBlock()
+              (!currentQuote || handleRequestLoading || isFormInvalid) && renderQuoteEmptyBlock()
             }
             <div className={'__quote-and-slippage'}>
               <>
                 {
-                  !requestUserInteractToContinue && !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
+                  !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
                     <div className={'__quote-reset-time'}>
                     Quote reset in: {quoteCountdownTime}s
                     </div>
@@ -1264,7 +1279,7 @@ const Component = () => {
             </div>
 
             {
-              !requestUserInteractToContinue && !!currentQuote && !handleRequestLoading && !isFormInvalid && (
+              !!currentQuote && !handleRequestLoading && !isFormInvalid && (
                 <MetaInfo
                   className={CN('__quote-fee-info-block')}
                   hasBackgroundWrapper
@@ -1301,10 +1316,10 @@ const Component = () => {
                             formatType={'custom'}
                             key={item.type}
                             label={t(item.label)}
+                            metadata={numberMetadata}
                             prefix={item.prefix}
                             suffix={item.suffix}
                             value={item.value}
-                            metadata={numberMetadata}
                           />
                         ))}
                       </div>
@@ -1338,6 +1353,21 @@ const Component = () => {
             }
           </>
         </div>
+
+        {
+          requestUserInteractToContinue && (
+            <div className={'__request-user-interact-container'}>
+              <div>
+              Are you still there ?
+              </div>
+
+              <Button
+                block={true}
+                onClick={onConfirmStillThere}
+              >Yes</Button>
+            </div>
+          )
+        }
       </>
 
       <ChooseFeeTokenModal
@@ -1736,6 +1766,18 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       },
       '.__quote-fee-info-block': {
         marginTop: token.margin
+      },
+
+      // todo: temporary CSS (need update)
+      '.__request-user-interact-container': {
+        alignSelf: 'flex-start',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 16,
+        textAlign: 'center',
+        height: 300,
+        justifyContent: 'center'
       }
     },
 

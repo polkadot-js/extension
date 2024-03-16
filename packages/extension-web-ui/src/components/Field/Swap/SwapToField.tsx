@@ -77,9 +77,9 @@ const Component = (props: Props) => {
                   customFormatter={swapCustomFormatter}
                   decimal={0}
                   formatType={'custom'}
+                  metadata={numberMetadata}
                   prefix={'$'}
                   value={getConvertedBalance}
-                  metadata={numberMetadata}
                 />
               </>
             )

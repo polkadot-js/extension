@@ -6456,6 +6456,7 @@ __metadata:
     react-dom: ^18.2.0
     react-dropzone: ^11.5.1
     react-i18next: ^11.15.3
+    react-idle-timer: ^5.7.2
     react-infinite-scroll-component: ^6.1.0
     react-is: ^17.0.2
     react-lazy-load-image-component: ^1.5.6
@@ -22296,6 +22297,16 @@ __metadata:
     react-native:
       optional: true
   checksum: 624c0a0313fac4e0d18560b83c99a8bd0a83abc02e5db8d01984e0643ac409d178668aa3a4720d01f7a0d9520d38598dcbff801d6f69a970bae67461de6cd852
+  languageName: node
+  linkType: hard
+
+"react-idle-timer@npm:^5.7.2":
+  version: 5.7.2
+  resolution: "react-idle-timer@npm:5.7.2"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 6faf3cfa87c9d65ae7a87078a2d82db5b821936a45565a98d69e7341e4b4acd5610b1f26cf1a6809b5551e4c30357f2ab5ce729c4c33751f66cb9ce6072dfb02
   languageName: node
   linkType: hard
 

@@ -7,7 +7,7 @@ import { NotificationType } from '@subwallet/extension-base/background/KoniTypes
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
-import { isAccountAll } from '@subwallet/extension-base/utils';
+import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
 import { SwapTeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
@@ -75,6 +75,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 
 // todo: change to to when it is ready
 const supportSlippageSelection = false;
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component = () => {
   const { t } = useTranslation();
@@ -378,7 +379,10 @@ const Component = () => {
         />
         <span>&nbsp;~&nbsp;</span>
         <Number
+          customFormatter={swapCustomFormatter}
           decimal={0}
+          formatType={'custom'}
+          metadata={numberMetadata}
           suffix={_getAssetSymbol(toAssetInfo)}
           value={currentQuote.rate}
         />
@@ -630,7 +634,7 @@ const Component = () => {
 
       return new BigN(currentQuote.fromAmount)
         .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate);
+        .multipliedBy(0.78);
     }
 
     return BN_ZERO;
@@ -1213,7 +1217,9 @@ const Component = () => {
                   <SwapRoute swapRoute={currentQuote.route} />
                   <div className={'__minimum-received'}>
                     <MetaInfo.Number
+                      customFormatter={swapCustomFormatter}
                       decimals={0}
+                      formatType={'custom'}
                       label={
                         <Tooltip
                           placement={'topRight'}
@@ -1230,6 +1236,7 @@ const Component = () => {
                           </div>
                         </Tooltip>
                       }
+                      metadata={numberMetadata}
                       suffix={_getAssetSymbol(toAssetInfo)}
                       value={minimumReceived}
                     />
@@ -1267,8 +1274,11 @@ const Component = () => {
                 >
                   <MetaInfo.Number
                     className={'__total-fee-value'}
+                    customFormatter={swapCustomFormatter}
                     decimals={0}
+                    formatType={'custom'}
                     label={t('Estimated fee')}
+                    metadata = {numberMetadata}
                     onClickValue={onToggleFeeDetails}
                     prefix={'$'}
                     suffixNode={
@@ -1286,12 +1296,15 @@ const Component = () => {
                       <div className={'__quote-fee-details-block'}>
                         {feeItems.map((item) => (
                           <MetaInfo.Number
+                            customFormatter={swapCustomFormatter}
                             decimals={0}
+                            formatType={'custom'}
                             key={item.type}
                             label={t(item.label)}
                             prefix={item.prefix}
                             suffix={item.suffix}
                             value={item.value}
+                            metadata={numberMetadata}
                           />
                         ))}
                       </div>
@@ -1414,7 +1427,8 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorTextTertiary
     },
     '.__minimum-received-label': {
-      display: 'flex'
+      display: 'flex',
+      cursor: 'pointer'
     },
     '.__view-quote-button > span+.anticon': {
       marginInlineStart: 0,
@@ -1432,7 +1446,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorSuccess
     },
     '.__slippage-action': {
-      // cursor: 'pointer',
+      cursor: 'pointer',
       alignItems: 'center',
       display: 'flex'
     },

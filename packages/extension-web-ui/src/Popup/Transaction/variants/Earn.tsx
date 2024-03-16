@@ -14,10 +14,10 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
-import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetSelectedAccountTypes, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-web-ui/messaging';
 import { unlockDotCheckCanMint } from '@subwallet/extension-web-ui/messaging/campaigns';
@@ -75,10 +75,11 @@ const Component = ({ className }: ComponentProps) => {
     openAlert, persistData,
     setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
-  const { redirectFromPreview, slug, target } = defaultData;
+  const { hasPreSelectTarget, redirectFromPreview, slug, target } = defaultData;
   const defaultTarget = useRef<string>(target);
   const autoCheckValidatorGetFromPreview = useRef<boolean>(true);
   const autoCheckCompoundRef = useRef<boolean>(true);
+  const isReadyToShowAlertRef = useRef<boolean>(true);
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
@@ -109,7 +110,8 @@ const Component = ({ className }: ComponentProps) => {
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
   const [isLoadingChainConnection, setIsLoadingChainConnection] = useState<boolean>(false);
-  const [useParamValidator, setUseParamValidator] = useState<boolean>(redirectFromPreview);
+  const [useParamValidator, setUseParamValidator] = useState<boolean>(hasPreSelectTarget);
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
 
   const poolInfo = poolInfoMap[slug] as YieldPoolInfo | undefined;
   const poolType = poolInfo?.type || '';
@@ -121,6 +123,7 @@ const Component = ({ className }: ComponentProps) => {
   const [stepLoading, setStepLoading] = useState<boolean>(true);
   const [screenLoading, setScreenLoading] = useState(true);
   const [checkValidAccountLoading, setCheckValidAccountLoading] = useState(true);
+  const [checkCompoundLoading, setCheckCompoundLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
   const [, setCanMint] = useState(false);
@@ -724,13 +727,44 @@ const Component = ({ className }: ComponentProps) => {
   }, [chainAsset, poolInfo]);
 
   useEffect(() => {
+    let timer: NodeJS.Timer;
+    let timeout: NodeJS.Timeout;
+
+    if (checkCompoundLoading && redirectFromPreview) {
+      const checkCompoundReady = () => {
+        if (compound) {
+          clearInterval(timer);
+          clearTimeout(timeout);
+          setCheckCompoundLoading(false);
+        }
+      };
+
+      timer = setInterval(checkCompoundReady, 500);
+
+      timeout = setTimeout(() => {
+        clearInterval(timer);
+        setCheckCompoundLoading(false);
+      }, 5000);
+    } else {
+      setTimeout(() => setCheckCompoundLoading(false), 350);
+    }
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
+  }, [checkCompoundLoading, compound, redirectFromPreview]);
+
+  useEffect(() => {
     if (redirectFromPreview && !accountSelectorList.length && checkValidAccountLoading) {
+      const isChainEvm = chainInfoMap[poolChain] && _isChainEvmCompatible(chainInfoMap[poolChain]);
+
+      setSelectedAccountTypes([isChainEvm ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE]);
       navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfoMap[poolChain]?.name || '' } });
-      setCheckValidAccountLoading(false);
     } else {
       setCheckValidAccountLoading(false);
     }
-  }, [accountSelectorList.length, chainInfoMap, checkValidAccountLoading, navigate, poolChain, redirectFromPreview]);
+  }, [accountSelectorList, chainInfoMap, checkValidAccountLoading, navigate, poolChain, redirectFromPreview, setSelectedAccountTypes]);
 
   const checkUnrecommendedValidator = useCallback((onValid?: () => void) => {
     fetchPoolTarget({ slug }).then((rs) => {
@@ -748,24 +782,29 @@ const Component = ({ className }: ComponentProps) => {
       });
 
       if (!isValidatorSupported && defaultTarget.current) {
-        openAlert({
+        isReadyToShowAlertRef.current && openAlert({
           title: t('Unrecommended validator'),
           type: NotificationType.ERROR,
           content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
           cancelButton: {
             text: t('Dismiss'),
-            onClick: closeAlert,
+            onClick: () => {
+              isReadyToShowAlertRef.current = true;
+              closeAlert();
+            },
             icon: XCircle
           },
           okButton: {
             text: t('Select validators'),
             onClick: () => {
+              isReadyToShowAlertRef.current = true;
               closeAlert();
               activeModal('target');
             },
             icon: CheckCircle
           }
         });
+        isReadyToShowAlertRef.current = false;
       } else {
         onValid && onValid();
       }
@@ -785,37 +824,45 @@ const Component = ({ className }: ComponentProps) => {
   }, [compound]);
 
   useEffect(() => {
-    if (redirectFromPreview && !targetLoading) {
+    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading) {
       if (compound) {
         if (autoCheckCompoundRef.current) {
           autoCheckCompoundRef.current = false;
 
           if (isUnstakeAll) {
             if (poolType === YieldPoolType.NOMINATION_POOL) {
-              openAlert({
+              isReadyToShowAlertRef.current && openAlert({
                 title: t('Pay attention'),
                 content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
                 type: NotificationType.WARNING,
                 okButton: {
                   text: t('I understand'),
-                  onClick: closeAlert,
+                  onClick: () => {
+                    isReadyToShowAlertRef.current = true;
+                    closeAlert();
+                  },
                   icon: CheckCircle
                 }
               });
+              isReadyToShowAlertRef.current = false;
 
               return;
             } else if (poolType === YieldPoolType.NATIVE_STAKING) {
               if (_STAKING_CHAIN_GROUP.para.includes(chainValue)) {
-                openAlert({
+                isReadyToShowAlertRef.current && openAlert({
                   title: t('Pay attention'),
                   content: t('This account is unstaking all stake and can\'t nominate validators. You can change your account on the Account tab or try again after withdrawing unstaked funds'),
                   type: NotificationType.WARNING,
                   okButton: {
                     text: t('I understand'),
-                    onClick: closeAlert,
+                    onClick: () => {
+                      isReadyToShowAlertRef.current = true;
+                      closeAlert();
+                    },
                     icon: CheckCircle
                   }
                 });
+                isReadyToShowAlertRef.current = false;
 
                 return;
               } else {
@@ -831,6 +878,8 @@ const Component = ({ className }: ComponentProps) => {
               : '';
 
           const onPressContinue = () => {
+            isReadyToShowAlertRef.current = true;
+
             if (poolType === YieldPoolType.NATIVE_STAKING) {
               checkUnrecommendedValidator(() => form.setFieldValue('target', defaultTarget.current));
             }
@@ -847,7 +896,7 @@ const Component = ({ className }: ComponentProps) => {
             closeAlert();
           };
 
-          openAlert({
+          isReadyToShowAlertRef.current && openAlert({
             title: t('Pay attention'),
             content: content,
             className: CN(className, 'earning-alert-modal'),
@@ -861,6 +910,7 @@ const Component = ({ className }: ComponentProps) => {
               onClick: onPressContinue
             }
           });
+          isReadyToShowAlertRef.current = false;
         }
       } else {
         if (autoCheckValidatorGetFromPreview.current) {
@@ -869,7 +919,7 @@ const Component = ({ className }: ComponentProps) => {
         }
       }
     }
-  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, redirectFromPreview, t, targetLoading, chainValue]);
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading]);
 
   useEffect(() => {
     if (poolChain) {
@@ -955,11 +1005,11 @@ const Component = ({ className }: ComponentProps) => {
 
   useEffect(() => {
     if (!fromValue && (isAllAccount || accountSelectorList.length === 1)) {
-      if ((redirectFromPreview && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
+      if ((hasPreSelectTarget && accountSelectorList.length >= 1) || accountSelectorList.length === 1) {
         form.setFieldValue('from', accountSelectorList[0].address);
       }
     }
-  }, [accountSelectorList, form, fromValue, isAllAccount, redirectFromPreview]);
+  }, [accountSelectorList, form, fromValue, isAllAccount, hasPreSelectTarget]);
 
   useEffect(() => {
     if (currentStep === 0) {
@@ -1119,15 +1169,15 @@ const Component = ({ className }: ComponentProps) => {
   const amountInputRef = form.getFieldInstance('value');
 
   useEffect(() => {
-    if (redirectFromPreview) {
+    if (hasPreSelectTarget) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       amountInputRef?.focus?.();
     }
-  }, [amountInputRef, redirectFromPreview]);
+  }, [amountInputRef, hasPreSelectTarget]);
 
   const validatorDefaultValue = (() => {
     if (useParamValidator) {
-      return defaultTarget.current;
+      return defaultData.target === 'not-support' ? '' : defaultTarget.current;
     } else {
       if (defaultData.target === 'not-support' || !!compound) {
         return undefined;

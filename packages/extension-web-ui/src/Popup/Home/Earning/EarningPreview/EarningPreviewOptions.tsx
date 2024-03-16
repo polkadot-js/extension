@@ -288,7 +288,8 @@ function Component ({ className }: Props) {
           ...DEFAULT_EARN_PARAMS,
           slug: poolInfo.slug,
           chain: poolInfo.chain,
-          from: transactionFromValue
+          from: transactionFromValue,
+          redirectFromPreview: true
         });
 
         setSelectedPoolInfoSlug(poolInfo.slug);
@@ -389,6 +390,12 @@ function Component ({ className }: Props) {
     [activeModal]
   );
 
+  const onCloseInstructionModal = useCallback(() => setEarnStorage((prevState) => ({
+    ...prevState,
+    hasPreSelectTarget: false,
+    target: ''
+  })), [setEarnStorage]);
+
   useEffect(() => {
     let isSync = true;
 
@@ -404,6 +411,7 @@ function Component ({ className }: Props) {
               chain: poolInfo.chain,
               from: transactionFromValue,
               redirectFromPreview: true,
+              hasPreSelectTarget: true,
               target: targetParam
             };
 
@@ -558,6 +566,7 @@ function Component ({ className }: Props) {
             bypassEarlyValidate={true}
             closeAlert={closeAlert}
             isShowStakeMoreButton={true}
+            onCancel={onCloseInstructionModal}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
             poolInfo={poolInfoMap[selectedPoolInfoSlug]}

@@ -1,26 +1,29 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetPriceId, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Icon, Logo } from '@subwallet/react-ui';
+import { Icon, Logo, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  slug: string;
-  haveToPay: string,
-  availableBalance: string,
+  slug: string,
+  amountToPay: string | number | BigN,
   selected?: boolean,
   onSelect?: (slug: string) => void,
 }
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, onSelect, selected, slug } = props;
+  const { amountToPay, className, onSelect, selected, slug } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
+  const priceMap = useSelector((state) => state.price.priceMap);
   const _onSelect = useCallback(() => {
     onSelect?.(slug);
   }, [onSelect, slug]);
@@ -28,6 +31,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const feeAssetInfo = useMemo(() => {
     return (slug ? assetRegistryMap[slug] : undefined);
   }, [assetRegistryMap, slug]);
+
+  const convertAmountToPay = useMemo(() => {
+    return new BigN(amountToPay).div(priceMap[_getAssetPriceId(feeAssetInfo) || ''] || 0);
+  }, [amountToPay, feeAssetInfo, priceMap]);
 
   return (
     <>
@@ -45,7 +52,15 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <div className={'__fee-info'}>
             <div className={'__line-1'}>
-              <span>{_getAssetSymbol(feeAssetInfo)}</span>
+              <Number
+                className={'__amount-fee-info'}
+                customFormatter={swapCustomFormatter}
+                decimal={0}
+                formatType={'custom'}
+                metadata={numberMetadata}
+                suffix={_getAssetSymbol(feeAssetInfo)}
+                value={convertAmountToPay}
+              />
             </div>
           </div>
         </div>

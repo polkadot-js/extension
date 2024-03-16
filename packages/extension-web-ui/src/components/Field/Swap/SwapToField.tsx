@@ -65,13 +65,7 @@ const Component = (props: Props) => {
           {
             !loading && (
               <>
-                <Number
-                  className={'__amount-destination'}
-                  customFormatter={swapCustomFormatter}
-                  decimal={0}
-                  formatType={'custom'}
-                  value={swapValue}
-                />
+                <div className={'__amount-destination'}>{swapCustomFormatter(swapValue.toString())}</div>
                 <Number
                   className={'__amount-convert'}
                   customFormatter={swapCustomFormatter}
@@ -125,10 +119,19 @@ const SwapToField = styled(Component)<Props>(({ theme: { token } }: Props) => {
       flexDirection: 'column',
       justifyContent: 'center',
       alignItems: 'flex-end',
-      paddingRight: 16
+      paddingRight: 16,
+      overflow: 'hidden'
     },
     '.__amount-destination': {
-      maxHeight: 24
+      maxHeight: 24,
+      maxWidth: 185,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      fontSize: token.fontSizeLG,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeightLG,
+      color: token.colorWhite
     },
     '.__amount-convert': {
       fontSize: token.fontSizeSM,

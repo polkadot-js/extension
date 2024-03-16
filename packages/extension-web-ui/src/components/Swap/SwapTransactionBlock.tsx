@@ -3,6 +3,7 @@
 
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -17,6 +18,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps{
   data: SwapTxData
 }
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
@@ -48,7 +50,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <Number
             className={'__amount-destination'}
+            customFormatter={swapCustomFormatter}
             decimal={_getAssetDecimals(fromAssetInfo)}
+            formatType={'custom'}
+            metadata={numberMetadata}
             suffix={_getAssetSymbol(fromAssetInfo)}
             value={swapInfo.quote.fromAmount}
           />
@@ -70,7 +75,10 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <Number
             className={'__amount-destination'}
+            customFormatter={swapCustomFormatter}
             decimal={0}
+            formatType={'custom'}
+            metadata={numberMetadata}
             suffix={_getAssetSymbol(toAssetInfo)}
             value={destinationValue}
           />

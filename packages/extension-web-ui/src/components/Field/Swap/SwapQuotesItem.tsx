@@ -3,6 +3,7 @@
 
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapQuote } from '@subwallet/extension-base/types/swap';
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { BN_TEN } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -19,6 +20,7 @@ type Props = ThemeProps & {
   selected?: boolean,
   onSelect?: (quote: SwapQuote) => void,
 }
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, isRecommend, onSelect, quote, selected } = props;
@@ -66,7 +68,10 @@ const Component: React.FC<Props> = (props: Props) => {
             <span className={'__est-receive-label'}>Est.receive</span>
             <Number
               className={'__est-receive-value'}
+              customFormatter={swapCustomFormatter}
               decimal={0}
+              formatType={'custom'}
+              metadata={numberMetadata}
               suffix={_getAssetSymbol(toAssetInfo)}
               value={destinationSwapValue}
             />

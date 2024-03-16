@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
 import ChooseFeeItem from '@subwallet/extension-web-ui/components/Field/Swap/ChooseFeeItem';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -17,6 +18,7 @@ type Props = ThemeProps & {
   onSelectItem: (slug: string) => void,
   selectedItem?: string,
 }
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, estimatedFee, items, modalId, onSelectItem, selectedItem } = props;
@@ -42,8 +44,11 @@ const Component: React.FC<Props> = (props: Props) => {
             <span className={'__title'}>Estimated  fee</span>
             <Number
               className={'__value'}
+              customFormatter={swapCustomFormatter}
               decimal={0}
               decimalOpacity={0.45}
+              formatType={'custom'}
+              metadata={numberMetadata}
               prefix={'$'}
               size={30}
               value={estimatedFee}
@@ -52,8 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           {items && items.map((item, index) => (
             <ChooseFeeItem
-              availableBalance={'100'}
-              haveToPay={'100'}
+              amountToPay={estimatedFee}
               key={index}
               onSelect={onSelectItem}
               selected={!!selectedItem}

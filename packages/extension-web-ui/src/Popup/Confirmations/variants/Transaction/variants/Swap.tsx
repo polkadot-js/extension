@@ -124,7 +124,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <SwapRoute swapRoute={data.quote.route} />
         {!showQuoteExpired && <AlertBox
           className={'__swap-arrival-time'}
-          description={t('Swapping via Chainflip can take up to 20 minutes. Make sure you review all information carefully before submitting.')}
+          description={t(`Swapping via Chainflip can take up to ${Math.ceil((data.quote.estimatedArrivalTime || 0) / 60)} minutes. Make sure you review all information carefully before submitting.`)}
           title={t('Pay attention!')}
           type='warning'
         />}

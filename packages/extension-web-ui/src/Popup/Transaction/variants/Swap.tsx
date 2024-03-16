@@ -564,80 +564,105 @@ const Component = () => {
       return;
     }
 
-    setSubmitLoading(true);
+    const transactionBlockProcess = () => {
+      setSubmitLoading(true);
 
-    const { from, recipient } = values;
+      const { from, recipient } = values;
 
-    const submitData = async (step: number): Promise<boolean> => {
-      dispatchProcessState({
-        type: SwapActionType.STEP_SUBMIT,
-        payload: null
-      });
+      const submitData = async (step: number): Promise<boolean> => {
+        dispatchProcessState({
+          type: SwapActionType.STEP_SUBMIT,
+          payload: null
+        });
 
-      const isFirstStep = step === 0;
-      const isLastStep = step === processState.steps.length - 1;
-      const needRollback = step === 1;
+        const isFirstStep = step === 0;
+        const isLastStep = step === processState.steps.length - 1;
+        const needRollback = step === 1;
 
-      try {
-        if (isFirstStep) {
-          const validatePromise = validateSwapProcess({
-            address: from,
-            process: currentOptimalSwapPath,
-            selectedQuote: currentQuote,
-            recipient
-          });
-
-          const _errors = await validatePromise;
-
-          if (_errors.length) {
-            onError(_errors[0]);
-
-            return false;
-          } else {
-            dispatchProcessState({
-              type: SwapActionType.STEP_COMPLETE,
-              payload: true
-            });
-            dispatchProcessState({
-              type: SwapActionType.STEP_SUBMIT,
-              payload: null
+        try {
+          if (isFirstStep) {
+            const validatePromise = validateSwapProcess({
+              address: from,
+              process: currentOptimalSwapPath,
+              selectedQuote: currentQuote,
+              recipient
             });
 
-            return await submitData(step + 1);
-          }
-        } else {
-          const submitPromise: Promise<SWTransactionResponse> = handleSwapStep({
-            process: currentOptimalSwapPath,
-            currentStep: step,
-            quote: currentQuote,
-            address: from,
-            slippage: currentSlippage,
-            recipient
-          });
+            const _errors = await validatePromise;
 
-          const rs = await submitPromise;
-          const success = onSuccess(isLastStep, needRollback)(rs);
+            if (_errors.length) {
+              onError(_errors[0]);
 
-          if (success) {
-            return await submitData(step + 1);
+              return false;
+            } else {
+              dispatchProcessState({
+                type: SwapActionType.STEP_COMPLETE,
+                payload: true
+              });
+              dispatchProcessState({
+                type: SwapActionType.STEP_SUBMIT,
+                payload: null
+              });
+
+              return await submitData(step + 1);
+            }
           } else {
-            return false;
+            const submitPromise: Promise<SWTransactionResponse> = handleSwapStep({
+              process: currentOptimalSwapPath,
+              currentStep: step,
+              quote: currentQuote,
+              address: from,
+              slippage: currentSlippage,
+              recipient
+            });
+
+            const rs = await submitPromise;
+            const success = onSuccess(isLastStep, needRollback)(rs);
+
+            if (success) {
+              return await submitData(step + 1);
+            } else {
+              return false;
+            }
           }
+        } catch (e) {
+          onError(e as Error);
+
+          return false;
         }
-      } catch (e) {
-        onError(e as Error);
+      };
 
-        return false;
-      }
+      setTimeout(() => {
+        submitData(processState.currentStep)
+          .catch(onError)
+          .finally(() => {
+            setSubmitLoading(false);
+          });
+      }, 300);
     };
 
-    setTimeout(() => {
-      submitData(processState.currentStep)
-        .catch(onError)
-        .finally(() => {
-          setSubmitLoading(false);
-        });
-    }, 300);
+    if (currentQuote.isLowLiquidity) {
+      openAlert({
+        title: t('Pay attention!'),
+        type: NotificationType.WARNING,
+        content: t('Your selected network might have lost connection. Try updating it by either re-enabling it or changing network provider'),
+        okButton: {
+          text: t('Continue'),
+          onClick: () => {
+            closeAlert();
+            transactionBlockProcess();
+          },
+          icon: CheckCircle
+        },
+        cancelButton: {
+          text: t('Cancel'),
+          schema: 'secondary',
+          onClick: closeAlert
+        }
+      });
+    } else {
+      transactionBlockProcess();
+    }
   }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentSlippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
 
   const destinationSwapValue = useMemo(() => {

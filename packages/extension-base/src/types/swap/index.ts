@@ -27,6 +27,8 @@ export interface SwapQuote {
 
   minSwap?: string; // min amount to start swapping
   maxSwap?: string; // set by the provider
+  estimatedArrivalTime?: number; // in seconds
+  isLowLiquidity?: boolean; // definition would be different for different providers
 
   feeInfo: SwapFeeInfo;
 }

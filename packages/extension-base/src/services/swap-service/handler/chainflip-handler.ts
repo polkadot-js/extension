@@ -204,8 +204,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         } as ChainflipPreValidationMetadata
       };
     } catch (e) {
-      console.log('Error validating swap request', e);
-
       return { error: SwapErrorType.UNKNOWN };
     }
   }
@@ -251,6 +249,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         amount: request.fromAmount
       });
 
+      console.log('quoteResponse', quoteResponse);
+
       const feeComponent: SwapFeeComponent[] = [];
 
       quoteResponse.quote.includedFees.forEach((fee) => {
@@ -294,6 +294,8 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         minSwap: metadata.minSwap.value,
         maxSwap: metadata.maxSwap,
+        estimatedArrivalTime: quoteResponse.quote.estimatedDurationSeconds, // in seconds
+        isLowLiquidity: quoteResponse.quote.lowLiquidityWarning,
         feeInfo: {
           feeComponent: feeComponent,
           defaultFeeToken: fromAsset.slug,

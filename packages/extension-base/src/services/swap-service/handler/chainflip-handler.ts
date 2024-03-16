@@ -11,7 +11,7 @@ import { getEVMTransactionObject } from '@subwallet/extension-base/koni/api/toke
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
+import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
 import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
@@ -36,17 +36,38 @@ enum CHAINFLIP_QUOTE_ERROR {
   InsufficientIngress = 'amount is lower than estimated ingress fee',
 }
 
-export class ChainflipSwapHandler extends SwapBaseHandler {
+export class ChainflipSwapHandler implements SwapBaseInterface {
   private swapSdk: SwapSDK;
-  private isTestnet: boolean;
+  private readonly isTestnet: boolean;
+  private swapBaseHandler: SwapBaseHandler;
 
   constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
-    super(providerSlug, providerName, chainService, balanceService);
+    this.swapBaseHandler = new SwapBaseHandler(providerSlug, providerName, chainService, balanceService);
     this.isTestnet = isTestnet;
 
     this.swapSdk = new SwapSDK({
       network: isTestnet ? 'perseverance' : 'mainnet'
     });
+  }
+
+  get chainService () {
+    return this.swapBaseHandler.chainService;
+  }
+
+  get balanceService () {
+    return this.swapBaseHandler.balanceService;
+  }
+
+  get providerInfo () {
+    return this.swapBaseHandler.providerInfo;
+  }
+
+  get name () {
+    return this.swapBaseHandler.name;
+  }
+
+  get slug () {
+    return this.swapBaseHandler.slug;
   }
 
   get assetMapping () {
@@ -73,7 +94,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     }
   }
 
-  protected async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
+  public async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
     try {
       // todo: risk of matching wrong chain, asset can lead to loss of funds
 
@@ -249,8 +270,6 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
         amount: request.fromAmount
       });
 
-      console.log('quoteResponse', quoteResponse);
-
       const feeComponent: SwapFeeComponent[] = [];
 
       quoteResponse.quote.includedFees.forEach((fee) => {
@@ -333,11 +352,11 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
           case SwapStepType.DEFAULT:
             return Promise.resolve([]);
           case SwapStepType.XCM:
-            return this.validateXcmStep(params);
+            return this.swapBaseHandler.validateXcmStep(params);
           case SwapStepType.TOKEN_APPROVAL:
-            return this.validateTokenApproveStep(params);
+            return this.swapBaseHandler.validateTokenApproveStep(params);
           default:
-            return this.validateJoinStep(params, isXcmOk);
+            return this.swapBaseHandler.validateJoinStep(params, isXcmOk);
         }
       };
 
@@ -353,7 +372,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     return [];
   }
 
-  protected async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+  public async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const { address, quote, recipient } = params;
 
     const pair = quote.pair;
@@ -422,7 +441,7 @@ export class ChainflipSwapHandler extends SwapBaseHandler {
     } as SwapSubmitStepData;
   }
 
-  public override async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+  public async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const { currentStep, process } = params;
     const type = process.steps[currentStep].type;
 

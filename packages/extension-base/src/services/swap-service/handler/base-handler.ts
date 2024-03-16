@@ -11,33 +11,46 @@ import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorT
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export abstract class SwapBaseHandler {
-  protected providerSlug: string;
-  protected providerName: string;
-  protected chainService: ChainService;
-  protected balanceService: BalanceService;
+// Implement composite design pattern to avoid complex inheritance
 
-  protected constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
+export interface SwapBaseInterface {
+  getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
+  generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
+
+  validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
+  validateSwapProcess(params: ValidateSwapProcessParams): Promise<TransactionError[]>;
+
+  handleSwapProcess(params: SwapSubmitParams): Promise<SwapSubmitStepData>;
+  handleSubmitStep(params: SwapSubmitParams): Promise<SwapSubmitStepData>
+}
+
+export class SwapBaseHandler {
+  private readonly providerSlug: string;
+  private readonly providerName: string;
+  public chainService: ChainService;
+  public balanceService: BalanceService;
+
+  public constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
     this.providerName = providerName;
     this.providerSlug = providerSlug;
     this.chainService = chainService;
     this.balanceService = balanceService;
   }
 
-  public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
-  public abstract generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
+  // public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
+  // public abstract generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
 
-  protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
-  public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
-  protected async validateXcmStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+  // protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
+  // public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
+  public async validateXcmStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     return Promise.resolve([]);
   }
 
-  protected async validateTokenApproveStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+  public async validateTokenApproveStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     return Promise.resolve([]);
   }
 
-  protected async validateJoinStep (params: ValidateSwapProcessParams, isXcmOk: boolean): Promise<TransactionError[]> {
+  public async validateJoinStep (params: ValidateSwapProcessParams, isXcmOk: boolean): Promise<TransactionError[]> {
     if (!params.selectedQuote) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -64,8 +77,8 @@ export abstract class SwapBaseHandler {
     return Promise.resolve([]);
   }
 
-  public abstract handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
-  protected abstract handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
+  // public abstract handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
+  // protected abstract handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
 
   get name (): string {
     return this.providerName;

@@ -23,7 +23,7 @@ type Props = ThemeProps & {
   swapValue: BigN;
   loading?: boolean;
 }
-const metadataTo = { maxNumberFormat: 2 };
+const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
   const { className, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
@@ -70,7 +70,7 @@ const Component = (props: Props) => {
                   customFormatter={swapCustomFormatter}
                   decimal={0}
                   formatType={'custom'}
-                  value={swapValue.toString()}
+                  value={swapValue}
                 />
                 <Number
                   className={'__amount-convert'}
@@ -78,8 +78,8 @@ const Component = (props: Props) => {
                   decimal={0}
                   formatType={'custom'}
                   prefix={'$'}
-                  value={getConvertedBalance.toString()}
-                  metadata={metadataTo}
+                  value={getConvertedBalance}
+                  metadata={numberMetadata}
                 />
               </>
             )

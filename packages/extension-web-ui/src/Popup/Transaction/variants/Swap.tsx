@@ -74,7 +74,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 
 // todo: change to to when it is ready
 const supportSlippageSelection = false;
-const metadataInfo = { maxNumberFormat: 8 };
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component = () => {
   const { t } = useTranslation();
@@ -379,9 +379,9 @@ const Component = () => {
           customFormatter={swapCustomFormatter}
           decimal={0}
           formatType={'custom'}
-          metadata={metadataInfo}
+          metadata={numberMetadata}
           suffix={_getAssetSymbol(toAssetInfo)}
-          value={currentQuote.rate.toString()}
+          value={currentQuote.rate}
         />
       </div>
     );
@@ -1204,9 +1204,9 @@ const Component = () => {
                           </div>
                         </Tooltip>
                       }
-                      metadata={metadataInfo}
+                      metadata={numberMetadata}
                       suffix={_getAssetSymbol(toAssetInfo)}
-                      value={minimumReceived.toString()}
+                      value={minimumReceived}
                     />
                   </div>
                 </MetaInfo>
@@ -1246,7 +1246,7 @@ const Component = () => {
                     decimals={0}
                     formatType={'custom'}
                     label={t('Estimated fee')}
-                    metadata = {metadataInfo}
+                    metadata = {numberMetadata}
                     onClickValue={onToggleFeeDetails}
                     prefix={'$'}
                     suffixNode={
@@ -1264,12 +1264,15 @@ const Component = () => {
                       <div className={'__quote-fee-details-block'}>
                         {feeItems.map((item) => (
                           <MetaInfo.Number
+                            customFormatter={swapCustomFormatter}
                             decimals={0}
+                            formatType={'custom'}
                             key={item.type}
                             label={t(item.label)}
                             prefix={item.prefix}
                             suffix={item.suffix}
                             value={item.value}
+                            metadata={numberMetadata}
                           />
                         ))}
                       </div>

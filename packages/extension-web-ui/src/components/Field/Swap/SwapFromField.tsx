@@ -30,7 +30,7 @@ type Props = ThemeProps & {
 }
 
 // todo: support max later
-const metadataFrom = { maxNumberFormat: 2 };
+const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
   const { amountValue, className, fromAsset, label,
@@ -99,9 +99,9 @@ const Component = (props: Props) => {
               customFormatter={swapCustomFormatter}
               decimal={0}
               formatType={'custom'}
-              metadata={metadataFrom}
+              metadata={numberMetadata}
               prefix={'$'}
-              value={getConvertedInputValue.toString()}
+              value={getConvertedInputValue}
             />
           }
         </div>

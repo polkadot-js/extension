@@ -702,6 +702,7 @@ const Component = () => {
             >
               <div className={'__slippage-title-wrapper'}>Slippage
                 <Icon
+                  customSize={'16px'}
                   iconColor={token.colorSuccess}
                   phosphorIcon={Info}
                   size='sm'
@@ -1245,6 +1246,7 @@ const Component = () => {
                           <div className={'__minimum-received-label'}>
                             <div>{t('Minimum received')}</div>
                             <Icon
+                              customSize={'16px'}
                               iconColor={token.colorTextTertiary}
                               phosphorIcon={Info}
                               size='sm'

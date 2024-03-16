@@ -5,8 +5,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { BaseServiceWithProcess } from '@subwallet/extension-base/services/base/service-with-process';
-import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
+import { ServiceStatus, ServiceWithProcessInterface, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseHandler } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
@@ -16,7 +15,7 @@ import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, Quot
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
-export class SwapService extends BaseServiceWithProcess implements StoppableServiceInterface {
+export class SwapService implements ServiceWithProcessInterface, StoppableServiceInterface {
   protected readonly state: KoniState;
   private eventService: EventService;
   private readonly chainService: ChainService;
@@ -28,7 +27,6 @@ export class SwapService extends BaseServiceWithProcess implements StoppableServ
   status: ServiceStatus = ServiceStatus.NOT_INITIALIZED;
 
   constructor (state: KoniState) {
-    super();
     this.state = state;
     this.eventService = state.eventService;
     this.chainService = state.chainService;

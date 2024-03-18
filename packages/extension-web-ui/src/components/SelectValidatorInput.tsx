@@ -7,7 +7,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { toShort } from '@subwallet/extension-web-ui/utils';
 import { ActivityIndicator, Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Book, Lightning } from 'phosphor-react';
+import { Book } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -22,11 +22,10 @@ type Props = ThemeProps & {
   disabled?: boolean;
   loading?: boolean;
   chain: string;
-  onClickLightningBtn: (e: React.MouseEvent) => void;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chain, className, disabled, label, loading, onClick, onClickLightningBtn, placeholder, value } = props;
+  const { chain, className, disabled, label, loading, onClick, placeholder, value } = props;
   const { t } = useTranslation();
 
   const addressList = useMemo(() => {
@@ -99,16 +98,6 @@ const Component: React.FC<Props> = (props: Props) => {
                       phosphorIcon={Book}
                       size={'sm'}
                     />}
-                    size={'xs'}
-                    type={'ghost'}
-                  />
-                  <Button
-                    disabled={disabled}
-                    icon={<Icon
-                      phosphorIcon={Lightning}
-                      size={'sm'}
-                    />}
-                    onClick={onClickLightningBtn}
                     size={'xs'}
                     type={'ghost'}
                   />

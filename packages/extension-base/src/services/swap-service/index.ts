@@ -245,7 +245,17 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     }
   }
 
-  public subscribeSwapPairs () {
-    return this.swapPairSubject;
+  public subscribeSwapPairs (callback: (pairs: SwapPair[]) => void) {
+    return this.chainService.subscribeSwapRefMap().subscribe((ref) => {
+      const latestData = Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
+        return {
+          slug,
+          from: assetRef.srcAsset,
+          to: assetRef.destAsset
+        } as SwapPair;
+      });
+
+      callback(latestData);
+    });
   }
 }

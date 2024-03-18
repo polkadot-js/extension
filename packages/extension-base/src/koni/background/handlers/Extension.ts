@@ -4284,7 +4284,7 @@ export default class KoniExtension {
       }
     };
 
-    const subscription = this.#koniState.swapService.subscribeSwapPairs().subscribe(callback);
+    const subscription = this.#koniState.swapService.subscribeSwapPairs(callback);
 
     this.createUnsubscriptionHandle(id, subscription.unsubscribe);
 

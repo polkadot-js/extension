@@ -107,7 +107,7 @@ const Component = () => {
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   // @ts-ignore
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
-  const showQuoteAreaRef = useRef(false);
+  const [showQuoteArea, setShowQuoteArea] = useState<boolean>(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
@@ -792,6 +792,7 @@ const Component = () => {
 
           setIsFormInvalid(false);
           setHandleRequestLoading(true);
+          setShowQuoteArea(true);
 
           const currentRequest: SwapRequest = {
             address: fromValue,
@@ -824,7 +825,6 @@ const Component = () => {
               setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
               setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
               setSwapError(result.quote.error);
-              showQuoteAreaRef.current = true;
               optimalQuoteRef.current = result.quote.optimalQuote;
               setHandleRequestLoading(false);
             }
@@ -916,11 +916,11 @@ const Component = () => {
   }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
-    if (requestUserInteractToContinue && confirmedTerm && !!currentQuote) {
+    if (requestUserInteractToContinue && showQuoteArea) {
       inactiveAll();
       activeModal(SWAP_IDLE_WARNING_MODAL);
     }
-  }, [activeModal, confirmedTerm, currentQuote, inactiveAll, requestUserInteractToContinue]);
+  }, [activeModal, inactiveAll, requestUserInteractToContinue, showQuoteArea]);
 
   useEffect(() => {
     if (fromTokenItems.length) {
@@ -965,7 +965,7 @@ const Component = () => {
     <>
       <>
         <div className={CN('__transaction-form-area', {
-          '-init-animation': !showQuoteAreaRef.current,
+          '-init-animation': !showQuoteArea,
           hidden: showQuoteDetailOnMobile // todo: Update this logic on mobile screen
         })}
         >
@@ -1031,7 +1031,7 @@ const Component = () => {
                   </div>
 
                   <SwapToField
-                    loading={handleRequestLoading && showQuoteAreaRef.current}
+                    loading={handleRequestLoading && showQuoteArea}
                     onSelectToken={onSelectToToken}
                     swapValue={destinationSwapValue}
                     toAsset={toAssetInfo}
@@ -1066,11 +1066,11 @@ const Component = () => {
                 )}
               </Form>
               {
-                (isWebUI || !showQuoteAreaRef.current) && renderSlippage()
+                (isWebUI || !showQuoteArea) && renderSlippage()
               }
 
               {
-                showQuoteAreaRef.current && !isWebUI && (
+                showQuoteArea && !isWebUI && (
                   <>
                     {
                       !!currentQuote && !isFormInvalid && (
@@ -1166,7 +1166,7 @@ const Component = () => {
         </div>
 
         <div className={CN('__transaction-swap-quote-info-area', {
-          '-init-animation': !showQuoteAreaRef.current,
+          '-init-animation': !showQuoteArea,
           hidden: (!isWebUI && !showQuoteDetailOnMobile) // todo: Update this logic on mobile screen
         })}
         >

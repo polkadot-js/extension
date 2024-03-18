@@ -11,7 +11,7 @@ import { Button, Checkbox, Icon, ModalContext } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import CN from 'classnames';
 import { CaretDown, CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -36,6 +36,14 @@ const Component = ({ className, onOk }: Props) => {
     inactiveModal(modalId);
     onOk();
   }, [inactiveModal, onOk]);
+
+  const isContentShort = scrollRef.current && scrollRef.current.scrollHeight < 250;
+
+  useEffect(() => {
+    if (scrollRef.current && isContentShort) {
+      setIsScrollEnd(true);
+    }
+  }, [isContentShort, isScrollEnd]);
 
   const onScrollContent = useCallback(() => {
     if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 250) {

@@ -89,6 +89,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.__token-item.-is-first': {
       alignItems: 'flex-start',
       '.__token-item-symbol': {
+        left: 0
       }
     },
     '.__token-item.-is-center': {

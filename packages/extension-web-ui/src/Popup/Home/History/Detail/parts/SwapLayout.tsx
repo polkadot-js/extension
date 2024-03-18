@@ -3,7 +3,6 @@
 
 import { _getAssetName, _getAssetOriginChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
-import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AlertBox, MetaInfo } from '@subwallet/extension-web-ui/components';
 import SwapTransactionBlock from '@subwallet/extension-web-ui/components/Swap/SwapTransactionBlock';
 import { BN_TEN, BN_ZERO, HistoryStatusMap, TxTypeNameMap } from '@subwallet/extension-web-ui/constants';
@@ -20,7 +19,6 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   data: TransactionHistoryDisplayItem;
 }
-const numberMetadata = { maxNumberFormat: 2 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
@@ -91,11 +89,8 @@ const Component: React.FC<Props> = (props: Props) => {
       <>
         <MetaInfo.Number
           className={'__estimate-transaction-fee'}
-          customFormatter={swapCustomFormatter}
           decimals={0}
-          formatType={'custom'}
           label={'Estimated transaction fee'}
-          metadata={numberMetadata}
           prefix={'$'}
           value={estimatedFeeValue}
         />

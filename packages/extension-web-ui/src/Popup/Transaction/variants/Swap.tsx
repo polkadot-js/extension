@@ -76,7 +76,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 
 // todo: change to true when it is ready
 const supportSlippageSelection = false;
-const numberMetadata = { maxNumberFormat: 2 };
+const numberMetadata = { maxNumberFormat: 8 };
 
 const Component = () => {
   const { t } = useTranslation();
@@ -1095,10 +1095,7 @@ const Component = () => {
                                 )
                                 : (
                                   <Number
-                                    customFormatter={swapCustomFormatter}
                                     decimal={0}
-                                    formatType={'custom'}
-                                    metadata={numberMetadata}
                                     prefix={'$'}
                                     value={estimatedFeeValue}
                                   />
@@ -1293,11 +1290,8 @@ const Component = () => {
                 >
                   <MetaInfo.Number
                     className={'__total-fee-value'}
-                    customFormatter={swapCustomFormatter}
                     decimals={0}
-                    formatType={'custom'}
                     label={t('Estimated fee')}
-                    metadata = {numberMetadata}
                     onClickValue={onToggleFeeDetails}
                     prefix={'$'}
                     suffixNode={
@@ -1315,12 +1309,9 @@ const Component = () => {
                       <div className={'__quote-fee-details-block'}>
                         {feeItems.map((item) => (
                           <MetaInfo.Number
-                            customFormatter={swapCustomFormatter}
                             decimals={0}
-                            formatType={'custom'}
                             key={item.type}
                             label={t(item.label)}
-                            metadata={numberMetadata}
                             prefix={item.prefix}
                             suffix={item.suffix}
                             value={item.value}

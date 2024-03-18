@@ -20,7 +20,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   data: TransactionHistoryDisplayItem;
 }
-const numberMetadata = { maxNumberFormat: 8 };
+const numberMetadata = { maxNumberFormat: 2 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;

@@ -76,7 +76,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 
 // todo: change to true when it is ready
 const supportSlippageSelection = false;
-const numberMetadata = { maxNumberFormat: 8 };
+const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = () => {
   const { t } = useTranslation();

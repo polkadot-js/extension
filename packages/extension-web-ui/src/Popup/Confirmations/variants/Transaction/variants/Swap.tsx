@@ -18,7 +18,7 @@ import styled from 'styled-components';
 import { BaseTransactionConfirmationProps } from './Base';
 
 type Props = BaseTransactionConfirmationProps;
-const numberMetadata = { maxNumberFormat: 8 };
+const numberMetadata = { maxNumberFormat: 2 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;

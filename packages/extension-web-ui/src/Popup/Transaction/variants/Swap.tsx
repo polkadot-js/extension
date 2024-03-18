@@ -644,7 +644,7 @@ const Component = () => {
       openAlert({
         title: t('Pay attention!'),
         type: NotificationType.WARNING,
-        content: t('Your selected network might have lost connection. Try updating it by either re-enabling it or changing network provider'),
+        content: t('Low liquidity'),
         okButton: {
           text: t('Continue'),
           onClick: () => {

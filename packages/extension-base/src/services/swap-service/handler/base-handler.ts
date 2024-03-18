@@ -11,17 +11,25 @@ import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorT
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-// Implement composite design pattern to avoid complex inheritance
-
 export interface SwapBaseInterface {
-  getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
-  generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
+  getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
+  generateOptimalProcess: (params: OptimalSwapPathParams) => Promise<OptimalSwapPath>;
 
-  validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
-  validateSwapProcess(params: ValidateSwapProcessParams): Promise<TransactionError[]>;
+  validateSwapRequest: (request: SwapRequest) => Promise<SwapEarlyValidation>;
+  validateSwapProcess: (params: ValidateSwapProcessParams) => Promise<TransactionError[]>;
 
-  handleSwapProcess(params: SwapSubmitParams): Promise<SwapSubmitStepData>;
-  handleSubmitStep(params: SwapSubmitParams): Promise<SwapSubmitStepData>
+  handleSwapProcess: (params: SwapSubmitParams) => Promise<SwapSubmitStepData>;
+  handleSubmitStep: (params: SwapSubmitParams) => Promise<SwapSubmitStepData>;
+
+  isReady: boolean;
+  init: () => Promise<void>;
+}
+
+export interface SwapBaseHandlerInitParams {
+  providerSlug: string,
+  providerName: string,
+  chainService: ChainService,
+  balanceService: BalanceService
 }
 
 export class SwapBaseHandler {
@@ -30,7 +38,7 @@ export class SwapBaseHandler {
   public chainService: ChainService;
   public balanceService: BalanceService;
 
-  public constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService) {
+  public constructor ({ balanceService, chainService, providerName, providerSlug }: SwapBaseHandlerInitParams) {
     this.providerName = providerName;
     this.providerSlug = providerSlug;
     this.chainService = chainService;

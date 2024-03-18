@@ -143,11 +143,21 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     _SUPPORTED_SWAP_PROVIDERS.forEach((providerId) => {
       switch (providerId) {
         case SwapProviderId.CHAIN_FLIP_TESTNET:
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip Testnet', this.chainService, this.state.balanceService);
+          this.handlers[providerId] = new ChainflipSwapHandler({
+            providerSlug: providerId,
+            providerName: 'Chainflip Testnet',
+            chainService: this.chainService,
+            balanceService: this.state.balanceService
+          });
 
           break;
         case SwapProviderId.CHAIN_FLIP_MAINNET:
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService, this.state.balanceService, false);
+          this.handlers[providerId] = new ChainflipSwapHandler({
+            providerSlug: providerId,
+            providerName: 'Chainflip',
+            chainService: this.chainService,
+            balanceService: this.state.balanceService
+          }, false);
 
           break;
         default:

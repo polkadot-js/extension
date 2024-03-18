@@ -93,7 +93,7 @@ export function useSelectValidators (validatorList: ValidatorDataType[], modalId
   const _onApplyChangeValidators = useCallback((_changeValidators: string[]) => {
     onChange && onChange({ target: { value: _changeValidators.join(',') } });
     setSelected(_changeValidators);
-    setTimeout(() => inactiveModal(modalId), 1000);
+    inactiveModal(modalId);
   }, [inactiveModal, modalId, onChange]);
 
   const onApplyChangeValidators = useCallback(() => {

@@ -95,7 +95,7 @@ export class ChainService {
   get swapRefMap () {
     const result: Record<string, _AssetRef> = {};
 
-    Object.entries(AssetRefMap).forEach(([key, assetRef]) => {
+    Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
       if (assetRef.path === _AssetRefPath.SWAP) {
         result[key] = assetRef;
       }

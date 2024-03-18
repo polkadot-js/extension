@@ -72,6 +72,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isMessage = isEvmMessage(payload);
 
   const [loading, setLoading] = useState(false);
+  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -250,6 +251,23 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [ledgerWarning, notify]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+
+    if (txExpirationTime) {
+      timer = setInterval(() => {
+        if (Date.now() >= txExpirationTime) {
+          setShowQuoteExpired(true);
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [txExpirationTime]);
+
   return (
     <div className={CN(className, 'confirmation-footer')}>
       <Button
@@ -266,7 +284,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {t('Cancel')}
       </Button>
       <Button
-        disabled={!canSign}
+        disabled={showQuoteExpired || !canSign}
         icon={(
           <Icon
             phosphorIcon={approveIcon}

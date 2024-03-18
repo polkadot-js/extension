@@ -141,8 +141,8 @@ const Component: React.FC<Props> = (props: Props) => {
             account={(item as SigningRequest).account}
             extrinsicType={transaction.extrinsicType}
             id={item.id}
-            txExpirationTime={txExpirationTime}
             request={(item as SigningRequest).request}
+            txExpirationTime={txExpirationTime}
           />
         )
       }
@@ -151,8 +151,8 @@ const Component: React.FC<Props> = (props: Props) => {
           <EvmSignArea
             extrinsicType={transaction.extrinsicType}
             id={item.id}
-            txExpirationTime={txExpirationTime}
             payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
+            txExpirationTime={txExpirationTime}
             type={type}
           />
         )

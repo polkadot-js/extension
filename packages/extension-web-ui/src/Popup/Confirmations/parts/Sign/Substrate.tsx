@@ -62,6 +62,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
   const isMessage = isSubstrateMessage(payload);
 
+  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
+
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case AccountSignMode.QR:
@@ -255,6 +257,23 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [ledgerWarning, notify]);
 
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+
+    if (txExpirationTime) {
+      timer = setInterval(() => {
+        if (Date.now() >= txExpirationTime) {
+          setShowQuoteExpired(true);
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [txExpirationTime]);
+
   return (
     <div className={CN(className, 'confirmation-footer')}>
       <Button
@@ -271,7 +290,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {t('Cancel')}
       </Button>
       <Button
-        disabled={isMessage && !modeCanSignMessage.includes(signMode)}
+        disabled={showQuoteExpired || (isMessage && !modeCanSignMessage.includes(signMode))}
         icon={(
           <Icon
             phosphorIcon={approveIcon}

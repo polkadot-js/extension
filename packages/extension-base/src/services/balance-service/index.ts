@@ -28,6 +28,8 @@ export class BalanceService implements StoppableServiceInterface {
   stopPromiseHandler: PromiseHandler<void> = createPromiseHandler();
   status: ServiceStatus = ServiceStatus.NOT_INITIALIZED;
 
+  private isReload = false;
+
   /**
    * @constructor
    * @param {KoniState} state - The state of extension.
@@ -118,14 +120,21 @@ export class BalanceService implements StoppableServiceInterface {
     const removedAddresses: string[] = [];
     let needReload = false;
 
+    let lazyTime = 2000;
+
     // Account changed or chain changed (active or inactive)
     if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('chain.updateState') || eventTypes.includes('asset.updateState')) {
       needReload = true;
+
+      if (eventTypes.includes('account.updateCurrent')) {
+        lazyTime = 1000;
+      }
     }
 
     events.forEach((event) => {
       if (event.type === 'account.remove') {
         removedAddresses.push(event.data[0] as string);
+        lazyTime = 1000;
       }
     });
 
@@ -135,7 +144,11 @@ export class BalanceService implements StoppableServiceInterface {
     }
 
     if (needReload) {
-      this.runSubscribeBalances().catch(console.error);
+      addLazy('reloadBalanceByEvents', () => {
+        if (!this.isReload) {
+          this.runSubscribeBalances().catch(console.error);
+        }
+      }, lazyTime, undefined, true);
     }
   }
 
@@ -337,10 +350,12 @@ export class BalanceService implements StoppableServiceInterface {
 
   /** Reload balance subscription */
   async reloadBalance () {
+    this.isReload = true;
     await this.handleResetBalance(true);
     await this.runSubscribeBalances();
 
     await waitTimeout(1800);
+    this.isReload = false;
   }
 
   /** Subscribe area */

@@ -23,13 +23,13 @@ export const CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING: Record<string, Chain> = {
   [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT]: Chains.Polkadot
 };
 
-export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
+export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = {
   [COMMON_ASSETS.DOT]: Assets.DOT,
   [COMMON_ASSETS.ETH]: Assets.ETH,
   [COMMON_ASSETS.USDC_ETHEREUM]: Assets.USDC
 };
 
-export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
+export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = {
   [COMMON_ASSETS.PDOT]: Assets.DOT,
   [COMMON_ASSETS.ETH_SEPOLIA]: Assets.ETH,
   [COMMON_ASSETS.USDC_SEPOLIA]: Assets.USDC

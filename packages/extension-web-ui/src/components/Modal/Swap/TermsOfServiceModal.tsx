@@ -136,7 +136,7 @@ const Component = ({ className, onOk }: Props) => {
   );
 };
 
-export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     color: token.colorTextDescription,
     '.ant-sw-modal-header': {
@@ -219,4 +219,4 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
   };
 });
 
-export default TeamsOfServiceModal;
+export default TermsOfServiceModal;

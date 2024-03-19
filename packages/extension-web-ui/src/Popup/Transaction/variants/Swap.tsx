@@ -9,11 +9,11 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
-import { SwapTeamsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
+import { SwapIdleWarningModal, TermsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
 import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
 import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
 import { QuoteResetTime, SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -84,7 +84,7 @@ const Component = () => {
   const { closeAlert, defaultData, onDone, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
   const { isWebUI } = useContext(ScreenContext);
 
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveAll, inactiveModal } = useContext(ModalContext);
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
@@ -107,7 +107,7 @@ const Component = () => {
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   // @ts-ignore
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
-  const showQuoteAreaRef = useRef(false);
+  const [showQuoteArea, setShowQuoteArea] = useState<boolean>(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
 
   const [isViewFeeDetails, setIsViewFeeDetails] = useState<boolean>(false);
@@ -118,8 +118,8 @@ const Component = () => {
   const { token } = useTheme() as Theme;
 
   const onIdle = useCallback(() => {
-    !hasInternalConfirmations && setRequestUserInteractToContinue(true);
-  }, [hasInternalConfirmations]);
+    !hasInternalConfirmations && !!confirmedTerm && setRequestUserInteractToContinue(true);
+  }, [confirmedTerm, hasInternalConfirmations]);
 
   useIdleTimer({
     onIdle,
@@ -412,10 +412,11 @@ const Component = () => {
   };
 
   const onConfirmStillThere = useCallback(() => {
+    inactiveModal(SWAP_IDLE_WARNING_MODAL);
     setHandleRequestLoading(true);
     setRequestUserInteractToContinue(false);
     continueRefreshQuoteRef.current = true;
-  }, []);
+  }, [inactiveModal]);
 
   const renderQuoteEmptyBlock = () => {
     const isError = !!swapError || isFormInvalid;
@@ -791,6 +792,7 @@ const Component = () => {
 
           setIsFormInvalid(false);
           setHandleRequestLoading(true);
+          setShowQuoteArea(true);
 
           const currentRequest: SwapRequest = {
             address: fromValue,
@@ -823,7 +825,6 @@ const Component = () => {
               setFeeOptions(result.quote.optimalQuote?.feeInfo?.feeOptions || []);
               setCurrentFeeOption(result.quote.optimalQuote?.feeInfo?.feeOptions?.[0]);
               setSwapError(result.quote.error);
-              showQuoteAreaRef.current = true;
               optimalQuoteRef.current = result.quote.optimalQuote;
               setHandleRequestLoading(false);
             }
@@ -915,6 +916,13 @@ const Component = () => {
   }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
+    if (requestUserInteractToContinue && showQuoteArea) {
+      inactiveAll();
+      activeModal(SWAP_IDLE_WARNING_MODAL);
+    }
+  }, [activeModal, inactiveAll, requestUserInteractToContinue, showQuoteArea]);
+
+  useEffect(() => {
     if (fromTokenItems.length) {
       if (!fromTokenSlugValue) {
         form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
@@ -957,8 +965,8 @@ const Component = () => {
     <>
       <>
         <div className={CN('__transaction-form-area', {
-          '-init-animation': !showQuoteAreaRef.current,
-          hidden: requestUserInteractToContinue || showQuoteDetailOnMobile // todo: Update this logic on mobile screen
+          '-init-animation': !showQuoteArea,
+          hidden: showQuoteDetailOnMobile // todo: Update this logic on mobile screen
         })}
         >
           <TransactionContent>
@@ -1023,7 +1031,7 @@ const Component = () => {
                   </div>
 
                   <SwapToField
-                    loading={handleRequestLoading && showQuoteAreaRef.current}
+                    loading={handleRequestLoading && showQuoteArea}
                     onSelectToken={onSelectToToken}
                     swapValue={destinationSwapValue}
                     toAsset={toAssetInfo}
@@ -1058,11 +1066,11 @@ const Component = () => {
                 )}
               </Form>
               {
-                (isWebUI || !showQuoteAreaRef.current) && renderSlippage()
+                (isWebUI || !showQuoteArea) && renderSlippage()
               }
 
               {
-                showQuoteAreaRef.current && !isWebUI && (
+                showQuoteArea && !isWebUI && (
                   <>
                     {
                       !!currentQuote && !isFormInvalid && (
@@ -1158,8 +1166,8 @@ const Component = () => {
         </div>
 
         <div className={CN('__transaction-swap-quote-info-area', {
-          '-init-animation': !showQuoteAreaRef.current,
-          hidden: requestUserInteractToContinue || (!isWebUI && !showQuoteDetailOnMobile) // todo: Update this logic on mobile screen
+          '-init-animation': !showQuoteArea,
+          hidden: (!isWebUI && !showQuoteDetailOnMobile) // todo: Update this logic on mobile screen
         })}
         >
           <>
@@ -1348,21 +1356,6 @@ const Component = () => {
             }
           </>
         </div>
-
-        {
-          requestUserInteractToContinue && (
-            <div className={'__request-user-interact-container'}>
-              <div>
-              Are you still there ?
-              </div>
-
-              <Button
-                block={true}
-                onClick={onConfirmStillThere}
-              >Yes</Button>
-            </div>
-          )
-        }
       </>
 
       <ChooseFeeTokenModal
@@ -1386,7 +1379,11 @@ const Component = () => {
         optimalQuoteItem={optimalQuoteRef.current}
         selectedItem={currentQuote}
       />
-      <SwapTeamsOfServiceModal onOk={onAfterConfirmTermModal} />
+      <TermsOfServiceModal onOk={onAfterConfirmTermModal} />
+      <SwapIdleWarningModal
+        modalId = {SWAP_IDLE_WARNING_MODAL}
+        onOk = {onConfirmStillThere}
+      />
     </>
   );
 };

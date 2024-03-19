@@ -3,7 +3,7 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, LoadingScreen, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
@@ -50,8 +50,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
-  const [firstStep, setFirstStep] = useState(true);
-
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
     name: !network.isEthereum ? network.networkName.replace(' network', '') : network.networkName,
     slug: network.slug
@@ -59,6 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
+  const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
   const [page, setPage] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
   const [isLoadMore, setIsLoadMore] = useState(false);
@@ -70,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
-  const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
@@ -93,43 +92,29 @@ const Component: React.FC<Props> = (props: Props) => {
           const start = page * LIMIT_PER_PAGE;
           const end = (page + 1) * LIMIT_PER_PAGE;
 
-          const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
-
-          setLedgerAccounts((prevState) => {
-            return [...prevState, ...rs];
-          });
-
-          for (let i = start; i < end; i++) {
-            try {
-              const { address } = await getAddress(i);
-
-              rs[i - start] = {
-                accountIndex: i,
-                name: `Ledger ${accountName} ${i + 1}`,
+          try {
+            const rs = (await getAllAddress(start, end)).map(({ address }, index) => {
+              return {
+                accountIndex: start + index,
+                name: `Ledger ${accountName} ${start + index + 1}`,
                 address: address
-              };
-            } catch (e) {
-              refresh();
-              setFirstStep(true);
-              break;
-            }
+              } as ImportLedgerItem;
+            });
+
+            setLedgerAccounts((prevState) => {
+              return [...prevState, ...rs];
+            });
+          } catch (e) {
+            refresh();
+            setPage(page - 1);
+            setFirstStep(true);
           }
-
-          setLedgerAccounts((prevState) => {
-            const result = [...prevState];
-
-            for (let i = start; i < end; i++) {
-              result[i] = rs[i - start];
-            }
-
-            return result;
-          });
         };
 
         handler().then().catch().finally(() => setIsLoadMore(false));
       }
     };
-  }, [getAddress, accountName, refresh]);
+  }, [getAllAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
@@ -155,18 +140,9 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const renderItem = useCallback((selectedAccounts: ImportLedgerItem[]): ((item: ImportLedgerItem | null, key: string) => React.ReactNode) => {
+  const renderItem = useCallback((selectedAccounts: ImportLedgerItem[]): ((item: ImportLedgerItem, key: string) => React.ReactNode) => {
     // eslint-disable-next-line react/display-name
-    return (item: ImportLedgerItem | null, key: string) => {
-      if (!item) {
-        return (
-          <AccountWithNameSkeleton
-            direction='vertical'
-            key={key}
-          />
-        );
-      }
-
+    return (item: ImportLedgerItem, key: string) => {
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
       const disabled = !!accounts.find((acc) => acc.address === originAddress);
@@ -179,7 +155,7 @@ const Component: React.FC<Props> = (props: Props) => {
           direction='vertical'
           genesisHash={selectedChain?.genesisHash}
           isSelected={selected || disabled}
-          key={item.address}
+          key={key}
           onClick={disabled ? undefined : onClickItem(selectedAccounts, item)}
           showUnselectIcon={true}
         />
@@ -222,7 +198,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setSelectedAccounts([]);
     setLedgerAccounts([]);
     setPage(0);
-  }, [ledger]);
+  }, [chain]);
 
   const isConnected = !isLocked && !isLoading && !!ledger;
 
@@ -233,7 +209,7 @@ const Component: React.FC<Props> = (props: Props) => {
         rightFooterButton={{
           children: t('Connect Ledger device'),
           icon: FooterIcon,
-          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+          disabled: !isConnected || (!firstStep && !(selectedAccounts.length > 0)),
           onClick: firstStep ? onNextStep : onSubmit,
           loading: isSubmitting
         }}
@@ -322,18 +298,20 @@ const Component: React.FC<Props> = (props: Props) => {
           }
           {
             !firstStep && (
-              <SwList.Section
-                className='list-container'
-                displayRow={true}
-                list={ledgerAccounts}
-                pagination={{
-                  hasMore: !isLoadMore,
-                  loadMore: onLoadMore(isLoadMore, page)
-                }}
-                renderItem={renderItem(selectedAccounts)}
-                renderOnScroll={false}
-                rowGap='var(--list-gap)'
-              />
+              ledgerAccounts.length > 0
+                ? <SwList.Section
+                  className='list-container'
+                  displayRow={true}
+                  list={ledgerAccounts}
+                  pagination={{
+                    hasMore: true,
+                    loadMore: onLoadMore(isLoadMore, page)
+                  }}
+                  renderItem={renderItem(selectedAccounts)}
+                  renderOnScroll={false}
+                  rowGap='var(--list-gap)'
+                />
+                : <LoadingScreen />
             )
           }
         </div>
@@ -425,6 +403,10 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
         paddingTop: token.paddingSM,
         paddingBottom: token.paddingSM
       }
+    },
+
+    '.ant-sw-list.-display-row': {
+      paddingBottom: token.padding
     },
 
     '.loading': {

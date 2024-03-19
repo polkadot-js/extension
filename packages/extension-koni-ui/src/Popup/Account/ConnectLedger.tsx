@@ -12,7 +12,7 @@ import { ChainItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -60,7 +60,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
   const [page, setPage] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
-  const [isLoadMore, setIsLoadMore] = useState(false);
+  const loadingFlag = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedChain = useMemo((): LedgerNetwork | undefined => {
@@ -82,59 +82,65 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain(value);
   }, []);
 
-  const onLoadMore = useCallback((loading: boolean, page: number): () => void => {
-    return () => {
-      if (!loading) {
-        setIsLoadMore(true);
-        setPage(page + 1);
+  const onLoadMore = useCallback(async () => {
+    if (loadingFlag.current) {
+      return;
+    }
 
-        const handler = async () => {
-          const start = page * LIMIT_PER_PAGE;
-          const end = (page + 1) * LIMIT_PER_PAGE;
+    loadingFlag.current = true;
 
-          const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
+    setPage((prev) => prev + 1);
 
-          setLedgerAccounts((prevState) => {
-            return [...prevState, ...rs];
-          });
+    const start = page * LIMIT_PER_PAGE;
+    const end = (page + 1) * LIMIT_PER_PAGE;
 
-          try {
-            (await getAllAddress(start, end)).forEach(({ address }, index) => {
-              rs[start + index] = {
-                accountIndex: start + index,
-                name: `Ledger ${accountName} ${start + index + 1}`,
-                address: address
-              };
-            });
-          } catch (e) {
-            refresh();
-            setPage(page - 1);
-            setFirstStep(true);
-          }
+    const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
 
-          setLedgerAccounts((prevState) => {
-            const result = [...prevState];
+    const maxRetry = 6;
 
-            for (let i = start; i < end; i++) {
-              result[i] = rs[i];
-            }
+    for (let j = 0; j < maxRetry; j++) {
+      try {
+        (await getAllAddress(start, end)).forEach(({ address }, index) => {
+          rs[start + index] = {
+            accountIndex: start + index,
+            name: `Ledger ${accountName} ${start + index + 1}`,
+            address: address
+          };
+        });
 
-            return result.filter((rs) => rs);
-          });
-        };
+        break;
+      } catch (e) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        console.error(e);
 
-        handler().then().catch().finally(() => setIsLoadMore(false));
+        if (j === maxRetry - 1) {
+          refresh();
+          setPage(page - 1);
+          setFirstStep(true);
+        }
       }
-    };
-  }, [getAllAddress, accountName, refresh]);
+    }
+
+    setLedgerAccounts((prevState) => {
+      const result = [...prevState];
+
+      for (let i = start; i < end; i++) {
+        result[i] = rs[i];
+      }
+
+      return result.filter((rs) => rs);
+    });
+
+    loadingFlag.current = false;
+  }, [page, getAllAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
 
     if (!page) {
-      onLoadMore(isLoadMore, page)();
+      onLoadMore().catch(console.error);
     }
-  }, [isLoadMore, onLoadMore, page]);
+  }, [onLoadMore, page]);
 
   const onClickItem = useCallback((selectedAccounts: ImportLedgerItem[], item: ImportLedgerItem): () => void => {
     return () => {
@@ -322,11 +328,9 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwList.Section
                 className='list-container'
                 displayRow={true}
-                list={ledgerAccounts}
-                pagination={{
-                  hasMore: !isLoadMore,
-                  loadMore: onLoadMore(isLoadMore, page)
-                }}
+                hasMoreItems={true}
+                list={ledgerAccounts.length ? ledgerAccounts : [null, null, null, null, null, null]}
+                loadMoreItems={onLoadMore}
                 renderItem={renderItem(selectedAccounts)}
                 renderOnScroll={false}
                 rowGap='var(--list-gap)'

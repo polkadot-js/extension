@@ -90,7 +90,7 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
     case SwapErrorType.SWAP_NOT_ENOUGH_BALANCE: {
       const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
 
-      return new SwapError(error, `Insufficient balance. You need more than ${parsedMinSwapValue} ${metadata.minSwap.symbol} to start swapping`);
+      return new SwapError(error, `Insufficient balance. You need more than ${parsedMinSwapValue} ${metadata.minSwap.symbol} to start swapping. Deposit ${metadata.minSwap.symbol} and try again.`);
     }
 
     case SwapErrorType.UNKNOWN:

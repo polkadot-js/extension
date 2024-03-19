@@ -755,6 +755,14 @@ const Component = () => {
   }, [isWebUI, setBackProps, showQuoteDetailOnMobile]);
 
   useEffect(() => {
+    if (recipientValue && toAssetInfo) {
+      form.validateFields(['recipient']).catch((e) => {
+        console.log('Error when validating', e);
+      });
+    }
+  }, [form, recipientValue, toAssetInfo]);
+
+  useEffect(() => {
     if (isWebUI) {
       setCustomScreenTitle(t('Swap'));
     } else {

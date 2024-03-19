@@ -123,7 +123,7 @@ const Component = () => {
 
   useIdleTimer({
     onIdle,
-    timeout: 60000,
+    timeout: 300000,
     events: [
       'keydown',
       'mousedown',

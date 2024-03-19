@@ -530,7 +530,7 @@ const Component = ({ className }: ComponentProps) => {
     };
 
     const maxCount = poolInfo?.statistic?.maxCandidatePerFarmer ?? 1;
-    const userSelectedPoolCount = poolTargetValue.split(',').length ?? 1;
+    const userSelectedPoolCount = poolTargetValue?.split(',').length ?? 1;
     const label = getValidatorLabel(chainValue);
 
     if (userSelectedPoolCount < maxCount && label === 'Validator') {

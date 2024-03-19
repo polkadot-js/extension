@@ -118,8 +118,8 @@ const Component = () => {
   const { token } = useTheme() as Theme;
 
   const onIdle = useCallback(() => {
-    !hasInternalConfirmations && !!confirmedTerm && setRequestUserInteractToContinue(true);
-  }, [confirmedTerm, hasInternalConfirmations]);
+    !hasInternalConfirmations && !!confirmedTerm && showQuoteArea && setRequestUserInteractToContinue(true);
+  }, [confirmedTerm, hasInternalConfirmations, showQuoteArea]);
 
   useIdleTimer({
     onIdle,
@@ -924,11 +924,11 @@ const Component = () => {
   }, [activeModal, confirmedTerm]);
 
   useEffect(() => {
-    if (requestUserInteractToContinue && showQuoteArea) {
+    if (requestUserInteractToContinue) {
       inactiveAll();
       activeModal(SWAP_IDLE_WARNING_MODAL);
     }
-  }, [activeModal, inactiveAll, requestUserInteractToContinue, showQuoteArea]);
+  }, [activeModal, inactiveAll, requestUserInteractToContinue]);
 
   useEffect(() => {
     if (fromTokenItems.length) {

@@ -11,9 +11,11 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, PalletNominationPoolsPoolMember, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
+import { combineLatest, Observable } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
 import { AccountInfo } from '@polkadot/types/interfaces';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 import { subscribeERC20Interval } from '../evm';
@@ -63,10 +65,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
     }
 
     if (_BALANCE_CHAIN_GROUP.supportBridged.includes(chain)) {
-      unsubBridgedToken = await subscribeBridgedBalance({
-        ...substrateParams,
-        includeNativeToken: true
-      });
+      unsubBridgedToken = await subscribeBridgedBalance(substrateParams);
     }
 
     if (_isChainEvmCompatible(chainInfo)) {
@@ -93,32 +92,43 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
 };
 
 // handler according to different logic
+// eslint-disable-next-line @typescript-eslint/require-await
 const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
   const chainNativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
-  // TODO: Need handle case error
-  const unsub = await substrateApi.query.system.account.multi(addresses, async (balances: AccountInfo[]) => {
+  const balanceSubscribe: Observable<Codec[]> = substrateApi.rx.query.system.account.multi(addresses);
+
+  let poolSubscribe: Observable<Codec[]>;
+
+  if ((_isSubstrateRelayChain(chainInfo) && substrateApi.query.nominationPools)) {
+    poolSubscribe = substrateApi.rx.query.nominationPools.poolMembers?.multi(addresses);
+  } else {
+    poolSubscribe = new Observable<Codec[]>((subscriber) => {
+      subscriber.next(addresses.map(() => ({
+        toPrimitive () {
+          return null;
+        }
+      } as Codec)));
+    });
+  }
+
+  const subscription = combineLatest({ balances: balanceSubscribe, pools: poolSubscribe }).subscribe(({ balances: _balances, pools: poolMemberDatas }) => {
+    const balances = _balances as AccountInfo[];
     const pooledStakingBalances: BN[] = [];
 
-    if (_isSubstrateRelayChain(chainInfo) && substrateApi.query.nominationPools) {
-      const poolMemberDatas = await substrateApi.query.nominationPools.poolMembers?.multi(addresses);
+    for (const _poolMemberData of poolMemberDatas) {
+      const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
-      if (poolMemberDatas) {
-        for (const _poolMemberData of poolMemberDatas) {
-          const poolMemberData = _poolMemberData.toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+      if (poolMemberData) {
+        let pooled = new BN(poolMemberData.points.toString());
 
-          if (poolMemberData) {
-            let pooled = new BN(poolMemberData.points.toString());
+        Object.entries(poolMemberData.unbondingEras).forEach(([, amount]) => {
+          pooled = pooled.add(new BN(amount));
+        });
 
-            Object.entries(poolMemberData.unbondingEras).forEach(([, amount]) => {
-              pooled = pooled.add(new BN(amount));
-            });
-
-            pooledStakingBalances.push(pooled);
-          } else {
-            pooledStakingBalances.push(BN_ZERO);
-          }
-        }
+        pooledStakingBalances.push(pooled);
+      } else {
+        pooledStakingBalances.push(BN_ZERO);
       }
     }
 
@@ -161,7 +171,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   });
 
   return () => {
-    unsub();
+    subscription.unsubscribe();
   };
 };
 

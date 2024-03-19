@@ -1885,7 +1885,6 @@ export default class KoniState {
     await this.walletConnectService.resetWallet(resetAll);
 
     await this.chainService.init();
-    await this.balanceService.init();
     this.afterChainServiceInit();
   }
 

@@ -14,7 +14,24 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import {
+  ArrowsOut,
+  ArrowSquareOut,
+  Book,
+  BookBookmark,
+  CaretRight,
+  ChatTeardropText,
+  Coin,
+  EnvelopeSimple,
+  FrameCorners,
+  Globe,
+  GlobeHemisphereEast,
+  Lock,
+  Parachute,
+  ShareNetwork,
+  ShieldCheck,
+  X
+} from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -137,12 +154,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           onClick: () => {
             navigate('/settings/security', { state: true });
           }
+        },
+        {
+          key: 'mission-pools',
+          leftIcon: Parachute,
+          leftIconBgColor: token['cyan-5'],
+          rightIcon: CaretRight,
+          title: t('Mission pools'),
+          onClick: () => {
+            navigate('/settings/mission-pools', { state: true });
+          }
         }
       ]
     },
     {
       key: 'website-access',
-      label: t('Website access'),
+      label: t('Website access 1'),
       items: [
         {
           key: 'manage-website-access',

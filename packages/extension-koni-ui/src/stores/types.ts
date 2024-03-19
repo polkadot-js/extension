@@ -9,6 +9,7 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -186,4 +187,8 @@ export interface EarningStore extends BaseReduxStore {
   rewardHistories: EarningRewardHistoryItem[];
   minAmountPercentMap: Record<string, number>;
   poolTargetsMap: Record<string, YieldPoolTarget[]>;
+}
+
+export interface MissionPoolStore extends BaseReduxStore {
+  missions: MissionInfo[];
 }

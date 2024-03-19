@@ -540,11 +540,11 @@ const Component = ({ className }: ComponentProps) => {
         okButton: {
           text: t('Continue'),
           onClick: () => {
+            closeAlert();
             submitData(currentStep)
               .catch(onError)
               .finally(() => {
                 setSubmitLoading(false);
-                closeAlert();
               });
           }
         },

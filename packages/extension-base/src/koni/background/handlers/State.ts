@@ -317,6 +317,7 @@ export default class KoniState {
     this.campaignService.init();
     this.eventService.emit('chain.ready', true);
 
+    await this.balanceService.init();
     await this.earningService.init();
 
     this.onReady();
@@ -1866,12 +1867,12 @@ export default class KoniState {
   }
 
   public async resetWallet (resetAll: boolean) {
-    this.earningService.resetYieldPosition();
-    await this.balanceService.handleResetBalance(true);
     await this.keyringService.resetWallet(resetAll);
+    await this.earningService.resetYieldPosition();
+    await this.balanceService.handleResetBalance(true);
     this.requestService.resetWallet();
     this.transactionService.resetWallet();
-    await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
+    // await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
     await this.earningService.resetWallet();
     await this.dbService.resetWallet(resetAll);
     this.accountRefStore.set('refList', []);
@@ -1884,6 +1885,7 @@ export default class KoniState {
     await this.walletConnectService.resetWallet(resetAll);
 
     await this.chainService.init();
+    await this.balanceService.init();
     this.afterChainServiceInit();
   }
 

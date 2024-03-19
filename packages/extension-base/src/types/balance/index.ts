@@ -1,8 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
+import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 
 export interface TokenBalanceRaw {
@@ -50,4 +53,20 @@ export type BalanceMap = Record<string, BalanceInfo>; // Key is address
 export interface BalanceJson {
   reset?: boolean,
   details: BalanceMap;
+}
+
+export interface SubscribeBasePalletBalance {
+  addresses: string[];
+  assetMap: Record<string, _ChainAsset>;
+  chainInfo: _ChainInfo;
+  callback: (rs: BalanceItem[]) => void;
+}
+
+export interface SubscribeSubstratePalletBalance extends SubscribeBasePalletBalance {
+  substrateApi: ApiPromise;
+  includeNativeToken?: boolean;
+}
+
+export interface SubscribeEvmPalletBalance extends SubscribeBasePalletBalance {
+  evmApi: _EvmApi;
 }

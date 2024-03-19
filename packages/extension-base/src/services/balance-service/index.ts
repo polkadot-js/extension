@@ -5,21 +5,15 @@ import { BalanceError } from '@subwallet/extension-base/background/errors/Balanc
 import { AmountData, BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { BalanceMapImpl } from '@subwallet/extension-base/services/balance-service/BalanceMapImpl';
-import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
-import { subscribeEVMBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/evm';
-import { subscribeSubstrateBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/substrate';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
-import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _PURE_EVM_CHAINS } from '@subwallet/extension-base/services/chain-service/constants';
-import { _getChainNativeTokenSlug, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
-import { EventService } from '@subwallet/extension-base/services/event-service';
+import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
-import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
-import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { BalanceItem, BalanceJson } from '@subwallet/extension-base/types';
-import { addLazy, categoryAddresses, createPromiseHandler, isAccountAll, PromiseHandler, waitTimeout } from '@subwallet/extension-base/utils';
+import { addLazy, createPromiseHandler, isAccountAll, PromiseHandler, waitTimeout } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
+
+import { BalanceMapImpl } from './BalanceMapImpl';
+import { subscribeBalance } from './helpers';
 
 /**
  * Balance service
@@ -27,11 +21,8 @@ import { t } from 'i18next';
 */
 export class BalanceService implements StoppableServiceInterface {
   private state: KoniState;
-  private eventService: EventService;
-  private keyringService: KeyringService;
-  private dbService: DatabaseService;
   private balanceMap: BalanceMapImpl;
-  private chainService: ChainService;
+  private balanceUpdateCache: BalanceItem[] = [];
 
   startPromiseHandler: PromiseHandler<void> = createPromiseHandler();
   stopPromiseHandler: PromiseHandler<void> = createPromiseHandler();
@@ -43,15 +34,14 @@ export class BalanceService implements StoppableServiceInterface {
    */
   constructor (state: KoniState) {
     this.state = state;
-    this.eventService = state.eventService;
-    this.keyringService = state.keyringService;
-    this.dbService = state.dbService;
-    this.chainService = state.chainService;
     this.balanceMap = new BalanceMapImpl();
   }
 
+  /** Init service */
   async init (): Promise<void> {
     this.status = ServiceStatus.INITIALIZING;
+    await this.state.eventService.waitChainReady;
+    await this.state.eventService.waitAccountReady;
 
     // Load data from db to balanceSubject
     await this.loadData();
@@ -62,15 +52,17 @@ export class BalanceService implements StoppableServiceInterface {
     await this.start();
 
     // Handle events
-    this.eventService.onLazy(this.handleEvents.bind(this));
+    this.state.eventService.onLazy(this.handleEvents.bind(this));
   }
 
+  /** Restore balance map */
   async loadData () {
-    const backupBalanceData = await this.dbService.getStoredBalance();
+    const backupBalanceData = await this.state.dbService.getStoredBalance();
 
     this.balanceMap.updateBalanceItems(backupBalanceData, true);
   }
 
+  /** Start service */
   async start (): Promise<void> {
     if (this.status === ServiceStatus.STOPPING) {
       await this.waitForStopped();
@@ -91,6 +83,7 @@ export class BalanceService implements StoppableServiceInterface {
     this.startPromiseHandler.resolve();
   }
 
+  /** Stop service */
   async stop (): Promise<void> {
     if (this.status === ServiceStatus.STARTING) {
       await this.waitForStarted();
@@ -108,37 +101,45 @@ export class BalanceService implements StoppableServiceInterface {
     this.stopPromiseHandler.resolve();
   }
 
+  /** Wait service start */
   waitForStarted (): Promise<void> {
     return this.startPromiseHandler.promise;
   }
 
+  /** Wait service stop */
   waitForStopped (): Promise<void> {
     return this.stopPromiseHandler.promise;
   }
 
+  /**
+   *  Handle when data change
+   *  */
   handleEvents (events: EventItem<EventType>[], eventTypes: EventType[]) {
-    (async () => {
-      const removedAddresses: string[] = [];
+    const removedAddresses: string[] = [];
+    let needReload = false;
 
-      // Account changed or chain changed (active or inactive)
-      if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('chain.updateState')) {
-        await this.runSubscribeBalances();
+    // Account changed or chain changed (active or inactive)
+    if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('chain.updateState') || eventTypes.includes('asset.updateState')) {
+      needReload = true;
+    }
+
+    events.forEach((event) => {
+      if (event.type === 'account.remove') {
+        removedAddresses.push(event.data[0] as string);
       }
+    });
 
-      events.forEach((event) => {
-        if (event.type === 'account.remove') {
-          removedAddresses.push(event.data[0] as string);
-        }
-      });
+    if (removedAddresses.length > 0) {
+      this.balanceMap.removeBalanceItems([...removedAddresses, ALL_ACCOUNT_KEY]); // Add all account key to recalculate all account balances
+      needReload = true;
+    }
 
-      if (removedAddresses.length > 0) {
-        this.balanceMap.removeBalanceItems([...removedAddresses, ALL_ACCOUNT_KEY]);
-        await this.runSubscribeBalances();
-      }
-    })().catch(console.error);
+    if (needReload) {
+      this.runSubscribeBalances().catch(console.error);
+    }
   }
 
-  /* Subscribe token free balance on chain */
+  /** Subscribe token free balance of a address on chain */
   public async subscribeTokenFreeBalance (address: string, chain: string, tokenSlug: string | undefined, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
     const chainState = this.state.chainService.getChainStateByKey(chain);
@@ -157,7 +158,14 @@ export class BalanceService implements StoppableServiceInterface {
     return new Promise((resolve, reject) => {
       let hasError = true;
 
-      const unsub = this.subscribeBalance([address], [chain], (rs) => {
+      const assetMap = this.state.chainService.getAssetRegistry();
+      const chainInfoMap = this.state.chainService.getChainInfoMap();
+      const evmApiMap = this.state.chainService.getEvmApiMap();
+      const substrateApiMap = this.state.chainService.getSubstrateApiMap();
+
+      const unsub = subscribeBalance([address], [chain], [tSlug], assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
+        const rs = result[0];
+
         if (rs.tokenSlug === tSlug) {
           hasError = false;
           const balance = {
@@ -202,59 +210,14 @@ export class BalanceService implements StoppableServiceInterface {
     return balance;
   }
 
-  public subscribeBalance (addresses: string[], chains: string[] | null, _callback: (rs: BalanceItem) => void) {
-    const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
-    const chainInfoMap = this.state.chainService.getChainInfoMap();
-    const chainStateMap = this.state.chainService.getChainStateMap();
-    const substrateApiMap = this.state.chainService.getSubstrateApiMap();
-    const evmApiMap = this.state.chainService.getEvmApiMap();
-
-    // Get data from chain or all chains
-    const chainList = chains || Object.keys(chainInfoMap);
-    // Filter active chain only
-    const useChainInfos = chainList.filter((c) => chainStateMap[c] && chainStateMap[c].active).map((c) => chainInfoMap[c]);
-
-    const callback = (items: BalanceItem[]) => {
-      if (items.length) {
-        _callback(groupBalance(items, 'GROUPED', items[0].tokenSlug));
-      }
-    };
-
-    // Looping over each chain
-    const unsubList = useChainInfos.map(async (chainInfo) => {
-      const chainSlug = chainInfo.slug;
-      const useAddresses = _isChainEvmCompatible(chainInfo) ? evmAddresses : substrateAddresses;
-
-      if (_isPureEvmChain(chainInfo)) {
-        const nativeTokenInfo = this.state.getNativeTokenInfo(chainSlug);
-
-        return subscribeEVMBalance(chainSlug, useAddresses, evmApiMap, callback, nativeTokenInfo);
-      }
-
-      if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
-        return undefined;
-      }
-
-      const networkAPI = await substrateApiMap[chainSlug].isReady;
-
-      return subscribeSubstrateBalance(useAddresses, chainInfo, chainSlug, networkAPI, evmApiMap, callback);
-    });
-
-    return () => {
-      unsubList.forEach((subProm) => {
-        subProm.then((unsub) => {
-          unsub && unsub();
-        }).catch(console.error);
-      });
-    };
-  }
-
+  /** Remove balance from the subject object by addresses */
   public removeBalanceByAddresses (addresses: string[]) {
     this.balanceMap.removeBalanceItems([...addresses, ALL_ACCOUNT_KEY]);
   }
 
+  /** Remove inactive asset from the balance map */
   public async removeInactiveChainBalances () {
-    const assetSettings = await this.chainService.getAssetSettings();
+    const assetSettings = await this.state.chainService.getAssetSettings();
 
     this.balanceMap.removeBalanceItemByFilter((item) => {
       return !assetSettings[item.tokenSlug];
@@ -267,22 +230,23 @@ export class BalanceService implements StoppableServiceInterface {
     return { details: this.balanceMap.map, reset } as BalanceJson;
   }
 
+  /** Get stored balance from db */
   public async getStoredBalance (address: string) {
-    return await this.dbService.stores.balance.getBalanceMapByAddresses(address);
+    return await this.state.dbService.stores.balance.getBalanceMapByAddresses(address);
   }
 
   public async handleResetBalance (forceRefresh?: boolean) {
     if (forceRefresh) {
       this.balanceMap.setData({});
-      await this.dbService.stores.balance.clear();
+      await this.state.dbService.stores.balance.clear();
     } else {
       await Promise.all([this.removeInactiveChainBalances()]);
     }
   }
 
-  private balanceUpdateCache: BalanceItem[] = [];
-
-  /** Note: items must be same tokenSlug */
+  /**
+   * Update value for balance map
+   * Note: items must be same tokenSlug */
   public setBalanceItem (items: BalanceItem[]) {
     if (items.length) {
       const nowTime = new Date().getTime();
@@ -294,7 +258,7 @@ export class BalanceService implements StoppableServiceInterface {
       }
 
       addLazy('updateBalanceStore', () => {
-        const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
+        const isAllAccount = isAccountAll(this.state.keyringService.currentAccount.address);
 
         this.balanceMap.updateBalanceItems(this.balanceUpdateCache, isAllAccount);
 
@@ -308,18 +272,27 @@ export class BalanceService implements StoppableServiceInterface {
     }
   }
 
+  /**
+   * Store balance map to db
+   * */
   private updateBalanceStore (items: BalanceItem[]) {
-    this.dbService.updateBulkBalanceStore(items).catch(console.warn);
+    this.state.dbService.updateBulkBalanceStore(items).catch(console.warn);
   }
 
+  /**
+   * Subscribe balance map with subject object
+   * */
   public subscribeBalanceMap () {
     return this.balanceMap.mapSubject;
   }
 
+  /** Subscribe area */
+
   private _unsubscribeBalance: VoidFunction | undefined;
 
+  /** Subscribe balance subscription */
   async runSubscribeBalances () {
-    await Promise.all([this.eventService.waitKeyringReady, this.eventService.waitChainReady]);
+    await Promise.all([this.state.eventService.waitKeyringReady, this.state.eventService.waitChainReady]);
     this.runUnsubscribeBalances();
 
     const addresses = this.state.getDecodedAddresses();
@@ -331,9 +304,21 @@ export class BalanceService implements StoppableServiceInterface {
     // Reset balance before subscribe
     await this.handleResetBalance();
 
+    const assetMap = this.state.chainService.getAssetRegistry();
+    const chainInfoMap = this.state.chainService.getChainInfoMap();
+    const evmApiMap = this.state.chainService.getEvmApiMap();
+    const substrateApiMap = this.state.chainService.getSubstrateApiMap();
+
     const activeChainSlugs = Object.keys(this.state.getActiveChainInfoMap());
-    const unsub = this.subscribeBalance(addresses, activeChainSlugs, (result) => {
-      this.setBalanceItem([result]);
+    const assetState = this.state.chainService.subscribeAssetSettings().value;
+    const assets: string[] = Object.values(assetMap)
+      .filter((asset) => {
+        return activeChainSlugs.includes(asset.originChain) && assetState[asset.slug]?.visible;
+      })
+      .map((asset) => asset.slug);
+
+    const unsub = subscribeBalance(addresses, activeChainSlugs, assets, assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
+      this.setBalanceItem(result);
     });
 
     const unsub2 = this.state.subscribeMantaPayBalance();
@@ -344,15 +329,19 @@ export class BalanceService implements StoppableServiceInterface {
     };
   }
 
+  /** Unsubscribe balance subscription */
   runUnsubscribeBalances () {
     this._unsubscribeBalance && this._unsubscribeBalance();
     this._unsubscribeBalance = undefined;
   }
 
+  /** Reload balance subscription */
   async reloadBalance () {
     await this.handleResetBalance(true);
     await this.runSubscribeBalances();
 
     await waitTimeout(1800);
   }
+
+  /** Subscribe area */
 }

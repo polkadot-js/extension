@@ -428,7 +428,7 @@ const Component = () => {
     } else if (handleRequestLoading) {
       message = t('Loading...');
     } else {
-      message = swapError ? swapError?.message : t('No routes available at this time. Please try a different pair.');
+      message = swapError ? swapError?.message : t('No swap quote found. Adjust your amount or try again later.');
     }
 
     return (
@@ -645,7 +645,7 @@ const Component = () => {
       openAlert({
         title: t('Pay attention!'),
         type: NotificationType.WARNING,
-        content: t('Low liquidity'),
+        content: t('Low liquidity. Swap is available but not recommended as swap rate is unfavorable'),
         okButton: {
           text: t('Continue'),
           onClick: () => {

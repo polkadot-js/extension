@@ -33,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [assetRegistryMap, slug]);
 
   const convertedAmountToPay = useMemo(() => {
-    if (!priceMap[_getAssetPriceId(feeAssetInfo)] || priceMap[_getAssetPriceId(feeAssetInfo)]) {
+    if (!priceMap[_getAssetPriceId(feeAssetInfo)] || !priceMap[_getAssetPriceId(feeAssetInfo)]) {
       return undefined;
     }
 

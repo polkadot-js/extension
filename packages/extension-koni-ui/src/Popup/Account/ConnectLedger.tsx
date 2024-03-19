@@ -3,7 +3,7 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { AccountItemWithName, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, LoadingScreen, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
@@ -92,23 +92,35 @@ const Component: React.FC<Props> = (props: Props) => {
           const start = page * LIMIT_PER_PAGE;
           const end = (page + 1) * LIMIT_PER_PAGE;
 
+          const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
+
+          setLedgerAccounts((prevState) => {
+            return [...prevState, ...rs];
+          });
+
           try {
-            const rs = (await getAllAddress(start, end)).map(({ address }, index) => {
-              return {
+            (await getAllAddress(start, end)).forEach(({ address }, index) => {
+              rs[start + index] = {
                 accountIndex: start + index,
                 name: `Ledger ${accountName} ${start + index + 1}`,
                 address: address
-              } as ImportLedgerItem;
-            });
-
-            setLedgerAccounts((prevState) => {
-              return [...prevState, ...rs];
+              };
             });
           } catch (e) {
             refresh();
             setPage(page - 1);
             setFirstStep(true);
           }
+
+          setLedgerAccounts((prevState) => {
+            const result = [...prevState];
+
+            for (let i = start; i < end; i++) {
+              result[i] = rs[i];
+            }
+
+            return result.filter((rs) => rs);
+          });
         };
 
         handler().then().catch().finally(() => setIsLoadMore(false));
@@ -140,9 +152,18 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const renderItem = useCallback((selectedAccounts: ImportLedgerItem[]): ((item: ImportLedgerItem, key: string) => React.ReactNode) => {
+  const renderItem = useCallback((selectedAccounts: ImportLedgerItem[]): ((item: ImportLedgerItem | null, key: string) => React.ReactNode) => {
     // eslint-disable-next-line react/display-name
-    return (item: ImportLedgerItem, key: string) => {
+    return (item: ImportLedgerItem | null, key: string) => {
+      if (!item) {
+        return (
+          <AccountWithNameSkeleton
+            direction='vertical'
+            key={key}
+          />
+        );
+      }
+
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
       const disabled = !!accounts.find((acc) => acc.address === originAddress);
@@ -298,20 +319,18 @@ const Component: React.FC<Props> = (props: Props) => {
           }
           {
             !firstStep && (
-              ledgerAccounts.length > 0
-                ? <SwList.Section
-                  className='list-container'
-                  displayRow={true}
-                  list={ledgerAccounts}
-                  pagination={{
-                    hasMore: true,
-                    loadMore: onLoadMore(isLoadMore, page)
-                  }}
-                  renderItem={renderItem(selectedAccounts)}
-                  renderOnScroll={false}
-                  rowGap='var(--list-gap)'
-                />
-                : <LoadingScreen />
+              <SwList.Section
+                className='list-container'
+                displayRow={true}
+                list={ledgerAccounts}
+                pagination={{
+                  hasMore: !isLoadMore,
+                  loadMore: onLoadMore(isLoadMore, page)
+                }}
+                renderItem={renderItem(selectedAccounts)}
+                renderOnScroll={false}
+                rowGap='var(--list-gap)'
+              />
             )
           }
         </div>

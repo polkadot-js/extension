@@ -145,7 +145,7 @@ export function useLedger (slug?: string, active = true): Result {
   }, [appName, t]);
 
   const getAllAddress = useCallback(async (start: number, end: number): Promise<LedgerAddress[]> => {
-    let ledger_ = getLedger();
+    const ledger_ = getLedger();
     const rs: LedgerAddress[] = [];
 
     if (!ledger_) {
@@ -155,20 +155,12 @@ export function useLedger (slug?: string, active = true): Result {
     }
 
     for (let i = start; i < end; i++) {
-      for (let a = 0; a < 9; a++) {
-        try {
-          ledger_ = getLedger();
-          const account = await ledger_?.getAddress(false, i, 0);
+      const account = await ledger_?.getAddress(false, i, 0);
 
-          if (account) {
-            rs[i - start] = account;
-          }
-
-          break;
-        } catch (e) {
-          console.error(e);
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-        }
+      if (account) {
+        rs[i - start] = account;
+      } else {
+        break;
       }
     }
 
@@ -258,21 +250,16 @@ export function useLedger (slug?: string, active = true): Result {
     setWarning(null);
     setError(null);
 
-    let isRendered = false;
-
     timeOutRef.current = setTimeout(() => {
       ledger_.getAddress(false, 0, 0)
         .then(() => {
           setIsLoading(false);
-          isRendered = true;
         })
         .catch((error: Error) => {
-          if (!isRendered) {
-            setIsLoading(false);
-            handleError(error, false);
-            setIsLocked(true);
-            console.error(error);
-          }
+          setIsLoading(false);
+          handleError(error, false);
+          setIsLocked(true);
+          console.error(error);
         });
     }, 300);
   }, [slug, ledgerChains, t, active, chainInfoMap, appName, handleError, getLedger]);

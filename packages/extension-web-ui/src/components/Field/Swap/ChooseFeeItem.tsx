@@ -32,8 +32,12 @@ const Component: React.FC<Props> = (props: Props) => {
     return (slug ? assetRegistryMap[slug] : undefined);
   }, [assetRegistryMap, slug]);
 
-  const convertAmountToPay = useMemo(() => {
-    return new BigN(amountToPay).div(priceMap[_getAssetPriceId(feeAssetInfo) || ''] || 0);
+  const convertedAmountToPay = useMemo(() => {
+    if (!priceMap[_getAssetPriceId(feeAssetInfo)] || priceMap[_getAssetPriceId(feeAssetInfo)]) {
+      return undefined;
+    }
+
+    return new BigN(amountToPay).div(priceMap[_getAssetPriceId(feeAssetInfo)] || 0);
   }, [amountToPay, feeAssetInfo, priceMap]);
 
   return (
@@ -52,15 +56,18 @@ const Component: React.FC<Props> = (props: Props) => {
           />
           <div className={'__fee-info'}>
             <div className={'__line-1'}>
-              <Number
-                className={'__amount-fee-info'}
-                customFormatter={swapCustomFormatter}
-                decimal={0}
-                formatType={'custom'}
-                metadata={numberMetadata}
-                suffix={_getAssetSymbol(feeAssetInfo)}
-                value={convertAmountToPay}
-              />
+              {convertedAmountToPay
+                ? (<Number
+                  className={'__amount-fee-info'}
+                  customFormatter={swapCustomFormatter}
+                  decimal={0}
+                  formatType={'custom'}
+                  metadata={numberMetadata}
+                  suffix={_getAssetSymbol(feeAssetInfo)}
+                  value={convertedAmountToPay}
+                />)
+                : <div className={'__fee-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
+              }
             </div>
           </div>
         </div>

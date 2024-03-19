@@ -37,7 +37,7 @@ const Component = ({ className, onOk }: Props) => {
     onOk();
   }, [inactiveModal, onOk]);
 
-  const isContentShort = scrollRef.current && scrollRef.current.scrollHeight < 250;
+  const isContentShort = scrollRef.current && scrollRef.current.scrollHeight < 230;
 
   useEffect(() => {
     if (scrollRef.current && isContentShort) {
@@ -46,7 +46,7 @@ const Component = ({ className, onOk }: Props) => {
   }, [isContentShort, isScrollEnd]);
 
   const onScrollContent = useCallback(() => {
-    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 250) {
+    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 230) {
       setIsScrollEnd(true);
     }
 
@@ -70,7 +70,7 @@ const Component = ({ className, onOk }: Props) => {
       title={t('Terms of service')}
       width={ isWebUI ? 736 : undefined }
     >
-      <div className={'__content-title'}>You’re using the Chainflip swap provider, which is still in a pre-release version. Please read the following carefully:</div>
+      <div className={'__content-title'}>You’re using third-party swap providers, which may contain inherent risks. Please read the following carefully</div>
       <div className={'__content-wrappper'}>
         <div
           className={'__content-body'}
@@ -78,22 +78,20 @@ const Component = ({ className, onOk }: Props) => {
           ref={scrollRef}
         >
           <div className={'__term-item'}>
-            <div className={'__term-item-label'}>Pre-release Version</div>
-            <div>This is brand new protocol and despite our
-            extensive preparations, there may be issues, and you may lose money.
-            Features and swap sizes are limited for that reason.</div>
+            The SubWallet Interface provides a web or mobile-based means of access to decentralized protocols
+              on various public blockchains. The SubWallet Interface is distinct from the protocols and is one,
+              but not the exclusive, means of accessing the protocols.
           </div>
           <div className={'__term-item'}>
-            <div className={'__term-item-label'}>Testing Phase</div>
-            <div>This is the real-world testing phase that provides a safer
-          environment for liquidity providers and users. Your participation will help
-            us improve, but please know that you do so at your own risk.</div>
+            SubWallet does not control or operate any protocols on any blockchain network. By using the
+              SubWallet Interface, you understand that you are not buying or selling digital assets from us and
+              that we do not operate any liquidity pools on the protocols or control trade execution on the protocols.
           </div>
           <div className={'__term-item'}>
-            <div className={'__term-item-label'}>Swap Limits</div>
-            <div>Swaps are capped at about $50,000 per deposit. Any
-          amount exceeding these limits will be absorbed by the protocol and
-            can not be refunded.</div>
+            Blockchain transactions require the payment of transaction fees to the appropriate network called
+              gas fees. Except as otherwise expressly set forth in the terms of another offer by SubWallet,
+              you will be solely responsible for paying the gas fees for any transaction that you initiate.
+              Double-check the gas fees before making any transaction as gas fees can fluctuate.
           </div>
           {(!isScrollEnd || !scrollRef?.current) && <Button
             className={'__caret-button'}
@@ -111,7 +109,7 @@ const Component = ({ className, onOk }: Props) => {
           className={'__content-footer-checkbox'}
           onChange={onCheckedInput}
         >
-          {t('I understand and agree to the Terms of Use, which apply to my use of SubWallet and all of its feature')}
+          {t('I understand the associated risk and will act under caution')}
         </Checkbox>
         <div className={'__content-footer-button-group'}>
           <Button
@@ -126,7 +124,7 @@ const Component = ({ className, onOk }: Props) => {
             )}
             onClick={onConfirm}
           >
-            {t('I understand')}
+            {t('Confirm and continue swapping')}
           </Button>
           <div className={'__content-footer-label'}>Scroll to read all sections</div>
         </div>
@@ -136,7 +134,7 @@ const Component = ({ className, onOk }: Props) => {
   );
 };
 
-export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     color: token.colorTextDescription,
     '.ant-sw-modal-header': {
@@ -155,13 +153,6 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeightSM,
       color: token.colorTextTertiary
-    },
-    '.__term-item-label': {
-      fontSize: token.fontSize,
-      fontWeight: token.fontWeightStrong,
-      lineHeight: token.lineHeight,
-      color: token.colorWhite,
-      marginBottom: token.marginXXS
     },
     '.__content-body': {
       maxHeight: 230,
@@ -219,4 +210,4 @@ export const TeamsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
   };
 });
 
-export default TeamsOfServiceModal;
+export default TermsOfServiceModal;

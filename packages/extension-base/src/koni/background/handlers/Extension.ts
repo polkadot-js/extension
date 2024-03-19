@@ -4329,6 +4329,8 @@ export default class KoniExtension {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { chainType, extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.swapService.handleSwapProcess(inputData);
 
+    console.log('extrinsic', extrinsic, chainType);
+
     return await this.#koniState.transactionService.handleTransaction({
       address,
       chain: txChain,

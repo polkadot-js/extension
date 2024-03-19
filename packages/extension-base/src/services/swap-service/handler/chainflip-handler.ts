@@ -270,6 +270,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         amount: request.fromAmount
       });
 
+      console.log('quoteResponse', quoteResponse);
+
       const feeComponent: SwapFeeComponent[] = [];
 
       quoteResponse.quote.includedFees.forEach((fee) => {
@@ -396,6 +398,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       destAddress: receiver,
       amount: quote.fromAmount
     });
+
+    console.log('depositAddressResponse', depositAddressResponse);
 
     const txData: ChainflipTxData = {
       address,

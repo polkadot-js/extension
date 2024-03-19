@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
+import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
@@ -13,28 +14,25 @@ export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainfli
 export const CHAIN_FLIP_MAINNET_EXPLORER = 'https://scan.chainflip.io';
 
 export const CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING: Record<string, Chain> = {
-  polkadot: Chains.Polkadot,
-  ethereum: Chains.Ethereum,
-
-  ethereum_goerli: Chains.Ethereum,
-  chainflip_dot: Chains.Polkadot
+  [COMMON_CHAIN_SLUGS.POLKADOT]: Chains.Polkadot,
+  [COMMON_CHAIN_SLUGS.ETHEREUM]: Chains.Ethereum
 };
 
 export const CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING: Record<string, Chain> = {
-  ethereum_goerli: Chains.Ethereum,
-  chainflip_dot: Chains.Polkadot
+  [COMMON_CHAIN_SLUGS.ETHEREUM_SEPOLIA]: Chains.Ethereum,
+  [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT]: Chains.Polkadot
 };
 
 export const CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
-  'polkadot-NATIVE-DOT': Assets.DOT,
-  'ethereum-NATIVE-ETH': Assets.ETH,
-  'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48': Assets.USDC
+  [COMMON_ASSETS.DOT]: Assets.DOT,
+  [COMMON_ASSETS.ETH]: Assets.ETH,
+  [COMMON_ASSETS.USDC_ETHEREUM]: Assets.USDC
 };
 
 export const CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING: Record<string, Asset> = { // TODO: should be done better
-  'chainflip_dot-NATIVE-pDOT': Assets.DOT,
-  'ethereum_goerli-NATIVE-ETH': Assets.ETH,
-  'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F': Assets.USDC
+  [COMMON_ASSETS.PDOT]: Assets.DOT,
+  [COMMON_ASSETS.ETH_SEPOLIA]: Assets.ETH,
+  [COMMON_ASSETS.USDC_SEPOLIA]: Assets.USDC
 };
 
 export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in milliseconds

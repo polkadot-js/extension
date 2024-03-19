@@ -327,7 +327,7 @@ export default class AuthRequestHandler {
 
     this.updateIconAuthV2();
 
-    if (Object.keys(this.#authRequestsV2).length < 2) {
+    if (Object.keys(this.#authRequestsV2).length < 2 && !(mergeKeys.length > 0 && mergeKeys[mergeKeys.length - 1] !== id)) {
       this.#requestService.popupOpen();
     }
 

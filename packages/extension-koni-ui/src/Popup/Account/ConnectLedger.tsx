@@ -50,8 +50,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
-  const [firstStep, setFirstStep] = useState(true);
-
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
     name: !network.isEthereum ? network.networkName.replace(' network', '') : network.networkName,
     slug: network.slug
@@ -59,6 +57,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
+  const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
   const [page, setPage] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
   const [isLoadMore, setIsLoadMore] = useState(false);
@@ -70,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
-  const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
@@ -99,37 +98,35 @@ const Component: React.FC<Props> = (props: Props) => {
             return [...prevState, ...rs];
           });
 
-          for (let i = start; i < end; i++) {
-            try {
-              const { address } = await getAddress(i);
-
-              rs[i - start] = {
-                accountIndex: i,
-                name: `Ledger ${accountName} ${i + 1}`,
+          try {
+            (await getAllAddress(start, end)).forEach(({ address }, index) => {
+              rs[start + index] = {
+                accountIndex: start + index,
+                name: `Ledger ${accountName} ${start + index + 1}`,
                 address: address
               };
-            } catch (e) {
-              refresh();
-              setFirstStep(true);
-              break;
-            }
+            });
+          } catch (e) {
+            refresh();
+            setPage(page - 1);
+            setFirstStep(true);
           }
 
           setLedgerAccounts((prevState) => {
             const result = [...prevState];
 
             for (let i = start; i < end; i++) {
-              result[i] = rs[i - start];
+              result[i] = rs[i];
             }
 
-            return result;
+            return result.filter((rs) => rs);
           });
         };
 
         handler().then().catch().finally(() => setIsLoadMore(false));
       }
     };
-  }, [getAddress, accountName, refresh]);
+  }, [getAllAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
@@ -179,7 +176,7 @@ const Component: React.FC<Props> = (props: Props) => {
           direction='vertical'
           genesisHash={selectedChain?.genesisHash}
           isSelected={selected || disabled}
-          key={item.address}
+          key={key}
           onClick={disabled ? undefined : onClickItem(selectedAccounts, item)}
           showUnselectIcon={true}
         />
@@ -222,7 +219,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setSelectedAccounts([]);
     setLedgerAccounts([]);
     setPage(0);
-  }, [ledger]);
+  }, [chain]);
 
   const isConnected = !isLocked && !isLoading && !!ledger;
 
@@ -233,7 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
         rightFooterButton={{
           children: t('Connect Ledger device'),
           icon: FooterIcon,
-          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+          disabled: !isConnected || (!firstStep && !(selectedAccounts.length > 0)),
           onClick: firstStep ? onNextStep : onSubmit,
           loading: isSubmitting
         }}
@@ -425,6 +422,10 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
         paddingTop: token.paddingSM,
         paddingBottom: token.paddingSM
       }
+    },
+
+    '.ant-sw-list.-display-row': {
+      paddingBottom: token.padding
     },
 
     '.loading': {

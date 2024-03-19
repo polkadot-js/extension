@@ -892,7 +892,7 @@ const Component = () => {
         return;
       }
 
-      if (quoteAliveUntil < Date.now() && !continueRefreshQuoteRef.current) {
+      if (quoteAliveUntil + 2000 < Date.now() && !continueRefreshQuoteRef.current) {
         clearInterval(timer);
 
         if (!requestUserInteractToContinue && !hasInternalConfirmations) {

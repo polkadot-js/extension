@@ -37,7 +37,7 @@ const Component = ({ className, onOk }: Props) => {
     onOk();
   }, [inactiveModal, onOk]);
 
-  const isContentShort = scrollRef.current && scrollRef.current.scrollHeight < 230;
+  const isContentShort = scrollRef.current && scrollRef.current.scrollHeight <= 232;
 
   useEffect(() => {
     if (scrollRef.current && isContentShort) {
@@ -46,7 +46,7 @@ const Component = ({ className, onOk }: Props) => {
   }, [isContentShort, isScrollEnd]);
 
   const onScrollContent = useCallback(() => {
-    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight < 230) {
+    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight <= 232) {
       setIsScrollEnd(true);
     }
 
@@ -58,7 +58,7 @@ const Component = ({ className, onOk }: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 230);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 232);
   }, []);
 
   return (
@@ -155,7 +155,7 @@ export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
       color: token.colorTextTertiary
     },
     '.__content-body': {
-      maxHeight: 230,
+      maxHeight: 232,
       display: 'block',
       overflowY: 'scroll',
       scrollBehavior: 'smooth',

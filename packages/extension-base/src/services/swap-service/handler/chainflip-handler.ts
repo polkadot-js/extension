@@ -19,6 +19,7 @@ import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import {COMMON_ASSETS} from "@subwallet/chain-list";
 
 enum ChainflipFeeType {
   INGRESS = 'INGRESS',
@@ -27,8 +28,8 @@ enum ChainflipFeeType {
   LIQUIDITY = 'LIQUIDITY'
 }
 
-const INTERMEDIARY_MAINNET_ASSET_SLUG = 'ethereum-ERC20-USDC-0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
-const INTERMEDIARY_TESTNET_ASSET_SLUG = 'ethereum_goerli-ERC20-USDC-0x07865c6E87B9F70255377e024ace6630C1Eaa37F';
+const INTERMEDIARY_MAINNET_ASSET_SLUG = COMMON_ASSETS.USDC_ETHEREUM;
+const INTERMEDIARY_TESTNET_ASSET_SLUG = COMMON_ASSETS.USDC_SEPOLIA;
 
 enum CHAINFLIP_QUOTE_ERROR {
   InsufficientLiquidity = 'InsufficientLiquidity',

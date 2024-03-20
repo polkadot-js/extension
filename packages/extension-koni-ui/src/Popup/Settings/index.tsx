@@ -27,7 +27,7 @@ type SettingItemType = {
   key: string,
   leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
-  rightIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
+  rightIcon: SwIconProps['phosphorIcon'],
   title: string,
   onClick?: () => void,
   isHidden?: boolean,
@@ -58,17 +58,14 @@ function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorI
   );
 }
 
-function generateRightIcon (icon: SwIconProps['phosphorIcon'], value?: number): React.ReactNode {
+function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode {
   return (
-    <>
-      <div className={'__live-value'}>{value}</div>
-      <Icon
-        className='__right-icon'
-        customSize={'20px'}
-        phosphorIcon={icon}
-        type='phosphor'
-      />
-    </>
+    <Icon
+      className='__right-icon'
+      customSize={'20px'}
+      phosphorIcon={icon}
+      type='phosphor'
+    />
   );
 }
 
@@ -85,7 +82,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
-  const liveMissionsCount: number = missions.filter((obj) => obj.status === 'live').length;
+  const liveMissionsCount: number = useMemo(() => {
+    return missions.filter((obj) => obj.status === 'live').length;
+  }, [missions]);
 
   const { isUILocked, lock, unlock } = useUILock();
 
@@ -369,7 +368,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                           name={item.title}
                           onPressItem={item.onClick}
-                          rightItem={(item.key === 'mission-pools' && !!liveMissionsCount) ? generateRightIcon(item.rightIcon, liveMissionsCount) : generateRightIcon(item.rightIcon)}
+                          rightItem={
+                            <>
+                              {(item.key === 'mission-pools' && !!liveMissionsCount) && (
+                                <div className={'__active-count'}>{liveMissionsCount}</div>
+                              )}
+                              {generateRightIcon(item.rightIcon)}
+                            </>
+                          }
                         />
                       ))}
                   </div>
@@ -436,7 +442,7 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
-      '.__live-value': {
+      '.__active-count': {
         borderRadius: '50%',
         color: token.colorWhite,
         fontSize: token.fontSizeSM,

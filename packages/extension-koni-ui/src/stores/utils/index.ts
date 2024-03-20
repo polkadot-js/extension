@@ -12,7 +12,7 @@ import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, Ea
 import { addLazy, canDerive, fetchStaticData } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
 

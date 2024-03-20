@@ -10,8 +10,7 @@ import { MissionDetailModal, PoolDetailModalId } from '@subwallet/extension-koni
 import MissionItem from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/MissionPoolItem';
 import { missionCategories, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
+import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, GlobeHemisphereWest } from 'phosphor-react';

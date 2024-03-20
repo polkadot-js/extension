@@ -424,7 +424,7 @@ const Component = () => {
     const _loading = handleRequestLoading && !isFormInvalid;
 
     if (isFormInvalid) {
-      message = t('Please recheck form values');
+      message = t('Invalid input. Re-enter information in the red field and try again');
     } else if (handleRequestLoading) {
       message = t('Loading...');
     } else {
@@ -669,13 +669,13 @@ const Component = () => {
     if (currentQuote) {
       const decimals = _getAssetDecimals(fromAssetInfo);
 
-      return new BigN(currentQuote.fromAmount)
+      return new BigN(fromAmountValue || 0)
         .div(BN_TEN.pow(decimals))
         .multipliedBy(currentQuote.rate);
     }
 
     return BN_ZERO;
-  }, [currentQuote, fromAssetInfo]);
+  }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
     return destinationSwapValue.multipliedBy(1 - currentSlippage);

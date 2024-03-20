@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Icon, Input} from '@subwallet/react-ui';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {DownloadSimple, MagnifyingGlass} from 'phosphor-react';
-import React, {ChangeEventHandler, useCallback, useMemo} from 'react';
+import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
+import React, { ChangeEventHandler, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
-import {ThemeProps} from "@subwallet/extension-koni-ui/types";
 
 type Props = ThemeProps & {
   placeholder: string
@@ -21,14 +21,14 @@ type Props = ThemeProps & {
 }
 
 const Component: React.FC<Props> = ({ actionBtnIcon,
-                                      className,
-                                      extraButton,
-                                      onClickActionBtn,
-                                      onSearch,
-                                      placeholder,
-                                      searchValue,
-                                      showActionBtn,
-                                      showExtraButton = false }) => {
+  className,
+  extraButton,
+  onClickActionBtn,
+  onSearch,
+  placeholder,
+  searchValue,
+  showActionBtn,
+  showExtraButton = false }) => {
   // CONTROLLED STATE
   // const [value, setValue] = useState<string>(searchValue)
 
@@ -45,11 +45,11 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
 
   // UNCONTROLLED STATE
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
-      const value = e?.target?.value;
+    const value = e?.target?.value;
 
-      onSearch(value);
-    },
-    [onSearch]
+    onSearch(value);
+  },
+  [onSearch]
   );
 
   const button = useMemo(() => extraButton || (

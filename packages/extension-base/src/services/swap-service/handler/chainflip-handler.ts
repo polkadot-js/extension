@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SwapSDK } from '@chainflip/sdk/swap';
+import { COMMON_ASSETS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
@@ -19,7 +20,6 @@ import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import {COMMON_ASSETS} from "@subwallet/chain-list";
 
 enum ChainflipFeeType {
   INGRESS = 'INGRESS',
@@ -231,7 +231,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
   }
 
   private parseSwapPath (fromAsset: _ChainAsset, toAsset: _ChainAsset) {
-    if (toAsset.slug !== this.intermediaryAssetSlug) { // Chainflip always use USDC as intermediary
+    if (toAsset.slug !== this.intermediaryAssetSlug && fromAsset.slug !== this.intermediaryAssetSlug) { // Chainflip always use USDC as intermediary
       return [fromAsset.slug, this.intermediaryAssetSlug, toAsset.slug]; // todo: generalize this
     }
 

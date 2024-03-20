@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.46.9 Mar 20, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+ - Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.12.4
+- Upgrade to `@polkadot/phishing` 0.22.4
+
+
 ## 0.46.8 Mar 13, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.

@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Button, Icon, Input } from '@subwallet/react-ui';
+import { Button, Icon, Input} from '@subwallet/react-ui';
 import CN from 'classnames';
-import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useMemo } from 'react';
+import {DownloadSimple, MagnifyingGlass} from 'phosphor-react';
+import React, {ChangeEventHandler, useCallback, useMemo} from 'react';
 import styled from 'styled-components';
 import {ThemeProps} from "@subwallet/extension-koni-ui/types";
 

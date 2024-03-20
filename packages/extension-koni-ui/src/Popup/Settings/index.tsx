@@ -4,34 +4,19 @@
 import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { EXTENSION_VERSION, SUPPORT_MAIL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {
-  ArrowsOut,
-  ArrowSquareOut,
-  Book,
-  BookBookmark,
-  CaretRight,
-  ChatTeardropText,
-  Coin,
-  EnvelopeSimple,
-  FrameCorners,
-  Globe,
-  GlobeHemisphereEast,
-  Lock,
-  Parachute,
-  ShareNetwork,
-  ShieldCheck,
-  X
-} from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, Parachute, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -42,7 +27,7 @@ type SettingItemType = {
   key: string,
   leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
-  rightIcon: SwIconProps['phosphorIcon'],
+  rightIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   title: string,
   onClick?: () => void,
   isHidden?: boolean,
@@ -73,14 +58,17 @@ function generateLeftIcon (backgroundColor: string, icon: SwIconProps['phosphorI
   );
 }
 
-function generateRightIcon (icon: SwIconProps['phosphorIcon']): React.ReactNode {
+function generateRightIcon (icon: SwIconProps['phosphorIcon'], value?: number): React.ReactNode {
   return (
-    <Icon
-      className='__right-icon'
-      customSize={'20px'}
-      phosphorIcon={icon}
-      type='phosphor'
-    />
+    <>
+      <div className={'__live-value'}>{value}</div>
+      <Icon
+        className='__right-icon'
+        customSize={'20px'}
+        phosphorIcon={icon}
+        type='phosphor'
+      />
+    </>
   );
 }
 
@@ -95,6 +83,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [locking, setLocking] = useState(false);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
+
+  const liveMissionsCount: number = missions.filter((obj) => obj.status === 'live').length;
 
   const { isUILocked, lock, unlock } = useUILock();
 
@@ -169,7 +160,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     },
     {
       key: 'website-access',
-      label: t('Website access 1'),
+      label: t('Website access'),
       items: [
         {
           key: 'manage-website-access',
@@ -378,7 +369,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                           name={item.title}
                           onPressItem={item.onClick}
-                          rightItem={generateRightIcon(item.rightIcon)}
+                          rightItem={(item.key === 'mission-pools' && !!liveMissionsCount) ? generateRightIcon(item.rightIcon, liveMissionsCount) : generateRightIcon(item.rightIcon)}
                         />
                       ))}
                   </div>
@@ -445,6 +436,19 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
+      '.__live-value': {
+        borderRadius: '50%',
+        color: token.colorWhite,
+        fontSize: token.fontSizeSM,
+        fontWeight: token.bodyFontWeight,
+        lineHeight: token.lineHeightSM,
+        paddingTop: 0,
+        paddingRight: token.paddingXS,
+        paddingLeft: token.paddingXS,
+        paddingBottom: 0,
+        backgroundColor: token.colorError,
+        marginRight: 14
+      },
 
       '.ant-sw-header-container': {
         paddingTop: token.padding,

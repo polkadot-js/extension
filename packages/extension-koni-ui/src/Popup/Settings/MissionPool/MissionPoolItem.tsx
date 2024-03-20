@@ -5,12 +5,12 @@ import { MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
-import { customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
+import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
+import { Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, TwitterLogo, User } from 'phosphor-react';
+import { CheckCircle, Coin, Cube, DiceSix, MagicWand, MegaphoneSimple, SelectionBackground, User } from 'phosphor-react';
 import { IconWeight } from 'phosphor-react/src/lib';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -51,21 +51,6 @@ function Component (props: Props): React.ReactElement<Props> {
 
     return `${start} - ${end}`;
   }, [data.end_time, data.start_time, t]);
-
-  const onClickGlobalIcon: ButtonProps['onClick'] = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    data.campaign_url && openInNewTab(data.campaign_url)();
-  }, [data.campaign_url]);
-
-  const onClickTwitterIcon: ButtonProps['onClick'] = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    data.twitter_url && openInNewTab(data.twitter_url)();
-  }, [data.twitter_url]);
-
-  const onClickJoinNow: ButtonProps['onClick'] = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    data.url && openInNewTab(data.url)();
-  }, [data.url]);
 
   const onClickContainer = useCallback(() => {
     onClick(data);
@@ -182,84 +167,41 @@ function Component (props: Props): React.ReactElement<Props> {
       className={CN(className)}
       onClick={onClickContainer}
     >
-      <div
-        className='__item-background'
-        style={{ backgroundImage: data.backdrop_image ? `url("${data.backdrop_image}")` : undefined }}
-      ></div>
 
       <div className={'__item-inner'}>
+        <div
+          className='__item-background'
+          style={{ backgroundImage: data.backdrop_image ? `url("${data.backdrop_image}")` : undefined }}
+        ></div>
         <div
           className='__item-logo'
         >
           <Image
-            height={'100%'}
+            height={40}
             shape={'squircle'}
             src={data.logo || logoMap.default as string}
-            width={'100%'}
+            width={40}
           />
         </div>
-        <div className='__item-name'>
-          {data.name || ''}
-        </div>
-        <div className={'__item-rewards __item-value-row'}>
-          <div className='__item-label'>{t('Rewards')}:</div>
-          <div className='__item-value'>
-            {data.reward}
+        <div className={'__right-block'}>
+          <div className='__item-name'>
+            {data.name || ''}
           </div>
-        </div>
-        <div className={'__item-description'}>
-          {data.description || ''}
-        </div>
-        <div className={'__item-timeline __item-value-row'}>
-          <div className='__item-label'>{t('Timeline')}:</div>
-          <div className='__item-value'>{timeline}</div>
-        </div>
-        <div className={'__item-tags'}>
-          {tagNode}
-        </div>
-        <div className={'__item-buttons'}>
-          <Button
-            className={'__item-icon-button'}
-            icon={(
-              <Icon
-                phosphorIcon={GlobeHemisphereWest}
-                size={'sm'}
-                weight={'fill'}
-              />
-            )}
-            onClick={onClickGlobalIcon}
-            size={'xs'}
-            type='ghost'
-          />
-          <Button
-            className={'__item-icon-button'}
-            icon={(
-              <Icon
-                phosphorIcon={TwitterLogo}
-                size={'sm'}
-                weight={'fill'}
-              />
-            )}
-            onClick={onClickTwitterIcon}
-            size={'xs'}
-            type='ghost'
-          />
-          <Button
-            className={'__item-join-now-button'}
-            disabled={data.status === MissionCategoryType.ARCHIVED}
-            icon={(
-              <Icon
-                phosphorIcon={PlusCircle}
-                size={'sm'}
-                weight={'fill'}
-              />
-            )}
-            onClick={onClickJoinNow}
-            shape={'circle'}
-            size={'xs'}
-          >
-            {t('Join now')}
-          </Button>
+          <div className={'__item-line-2'}>
+            <div className={'__item-timeline __item-value-row'}>
+              <div className='__item-value'>{timeline}</div>
+            </div>
+            <div className={'__item-rewards __item-value-row'}>
+              <div className='__item-label'>{t('Rewards')}:</div>
+              <div className='__item-value'>
+                {data.reward}
+              </div>
+            </div>
+          </div>
+          <div className='__separator'></div>
+          <div className={'__item-tags'}>
+            {tagNode}
+          </div>
         </div>
       </div>
     </div>
@@ -270,25 +212,49 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     backgroundColor: token.colorBgSecondary,
     borderRadius: token.borderRadiusLG,
-    position: 'relative',
     cursor: 'pointer',
+    position: 'relative',
 
-    '.ant-number .ant-typography': {
-      fontSize: 'inherit !important',
-      fontWeight: 'inherit !important',
-      color: 'inherit !important',
-      lineHeight: 'inherit'
+    padding: token.sizeSM,
+    paddingTop: token.paddingXS,
+    paddingBottom: token.paddingXS,
+    '.__item-inner': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: token.sizeSM
     },
-
-    '.__item-background': {
-      height: 70,
-      backgroundPosition: 'center',
-      backgroundSize: 'cover',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      filter: 'blur(7.5px)',
-      right: 0
+    '.__right-block': {
+      overflow: 'hidden',
+      flex: 1
+    },
+    '.__item-name': {
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite
+    },
+    '.__item-line-2': {
+      display: 'flex',
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      justifyContent: 'space-between',
+      color: token.colorTextTertiary,
+      fontWeight: token.bodyFontWeight,
+      overflow: 'hidden'
+    },
+    '.__item-timeline .__item-value': {
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
+    },
+    '.__item-rewards': {
+      display: 'flex',
+      flex: 1,
+      justifyContent: 'flex-end',
+      paddingLeft: token.paddingXS
     },
     '.__separator': {
       height: 2,
@@ -296,202 +262,26 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginTop: token.marginXS,
       marginBottom: token.marginXS
     },
-    '.__item-inner': {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      paddingTop: 40,
-      paddingBottom: token.paddingXL,
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-      position: 'relative',
-      zIndex: 5
-    },
-
-    '.__item-value-row': {
-      display: 'flex',
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
+    '.__item-rewards .__item-value': {
+      color: token.colorSuccess,
       fontWeight: token.headingFontWeight,
-      gap: token.sizeXXS
-    },
-
-    '.__item-label': {
-      color: token.colorTextLight4
-    },
-
-    '.__item-value': {
-      color: token.colorSuccess
-    },
-
-    '.__item-logo': {
-      width: 64,
-      height: 64,
-      marginBottom: token.margin
-    },
-
-    '.__item-name': {
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
-      color: token.colorTextLight1,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
-      'white-space': 'nowrap',
-      fontWeight: token.headingFontWeight,
-      marginBottom: token.marginXS,
-      minHeight: 28,
-      width: '100%',
-      textAlign: 'center'
+      whiteSpace: 'nowrap'
+    },
+    '.__item-timeline.__item-value-row': {
+      overflow: 'hidden'
     },
 
-    '.__item-rewards': {
-      marginBottom: token.marginXS
-    },
-
-    '.__item-description': {
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM,
-      color: token.colorTextLight3,
-      display: '-webkit-box',
-      '-webkit-line-clamp': '2',
-      '-webkit-box-orient': 'vertical',
-      overflow: 'hidden',
-      marginBottom: token.margin,
-      textAlign: 'center',
-      minHeight: 40
-    },
-
-    '.__item-timeline': {
-      marginBottom: token.margin
-    },
-
-    '.__item-tags': {
-      display: 'flex',
-      gap: token.sizeXS,
-      minHeight: 22,
-      marginBottom: token.margin
-    },
-
-    '.__item-tag': {
-      display: 'flex',
-      gap: token.sizeXXS,
-      marginRight: 0
-    },
-
-    '.__item-buttons': {
-      gap: token.size,
-      paddingTop: token.paddingLG,
-      display: 'flex'
-    },
-
-    '.__item-icon-button': {
-      borderRadius: '100%',
-      border: '2px solid',
-      borderColor: token.colorBgBorder
-    },
-
-    '.__item-join-now-button': {
-      '.anticon': {
-        height: 20,
-        width: 20
-      }
-    },
-
-    '&.-compact-mode': {
-      padding: token.sizeSM,
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingXS,
-
-      '.__compact-item-background': {
-        height: '100%',
-        width: 32,
-        backgroundPosition: 'left',
-        backgroundSize: 'cover',
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        filter: 'blur(4.5px)'
-      },
-
-      '.__compact-item-inner': {
-        display: 'flex',
-        alignItems: 'center',
-        gap: token.paddingSM
-      },
-
-      '.__compact-item-content': {
-        display: 'flex',
-        flex: 1,
-        flexDirection: 'column',
-        overflow: 'hidden'
-      },
-
-      '.__compact-item-content-part-1, .__compact-item-content-part-2': {
-        display: 'flex',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: token.size
-      },
-
-      '.__compact-item-content-part-2': {
-        overflow: 'hidden'
-      },
-      '.__compact-item-content-part-2 .__compact-item-value-row': {
-        color: token.colorTextTertiary,
-        fontSize: token.fontSize,
-        lineHeight: token.lineHeight,
-        fontWeight: token.fontWeightStrong
-      },
-      '.__compact-item-content-part-2 .__compact-item-date-time': {
-        color: token.colorTextTertiary
-      },
-
-      '.__compact-item-name': {
-        fontSize: token.fontSizeLG,
-        lineHeight: token.lineHeightLG,
-        color: token.colorTextLight1,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        'white-space': 'nowrap',
-        fontWeight: token.headingFontWeight,
-        flex: 1,
-        minWidth: 80
-      },
-
-      '.__compact-item-tags': {
-        minHeight: 22,
-        display: 'flex',
-        gap: token.sizeXXS
-      },
-
-      '.__compact-item-value-row': {
-        display: 'flex',
-        fontSize: token.fontSizeSM,
-        lineHeight: token.lineHeightSM,
-        fontWeight: token.bodyFontWeight,
-        gap: token.sizeXXS,
-        overflow: 'hidden'
-      },
-
-      '.__compact-item-label': {
-        color: token.colorTextLight4
-      },
-
-      '.__compact-item-date-time': {
-        color: token.colorTextLight4,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      },
-
-      '.__compact-item-value': {
-        color: token.colorSuccess,
-        fontWeight: token.headingFontWeight,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
-      }
+    '.__item-background': {
+      height: '100%',
+      width: 32,
+      backgroundPosition: 'left',
+      backgroundSize: 'cover',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      filter: 'blur(4.5px)'
     }
   };
 });

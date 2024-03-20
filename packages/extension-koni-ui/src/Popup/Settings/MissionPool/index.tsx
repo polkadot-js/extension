@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList/EmptyList';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import Search from '@subwallet/extension-koni-ui/components/Search';
@@ -17,7 +17,6 @@ import CN from 'classnames';
 import { FadersHorizontal, GlobeHemisphereWest } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -56,8 +55,6 @@ function computeStatus (item: MissionInfo): MissionCategoryType {
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
-  const location = useLocation();
-
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(MissionCategoryType.ALL);
   const [searchInput, setSearchInput] = useState<string>('');
@@ -74,8 +71,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       };
     });
   }, [missions]);
-
-  console.log('55555missions', missions);
 
   const filterOptions = useMemo(() => [
     ...missionCategories.map((c) => ({
@@ -138,8 +133,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return computedMission.filter(_filterFunction);
   }, [computedMission, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
-  console.log('55555-filteredItems', filteredItems);
-
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);
   }, []);
@@ -161,8 +154,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const renderItem = useCallback(
     (item: MissionInfo) => {
-      console.log('55555-item', item);
-
       return (
         <MissionItem
           className={'earning-option-item'}
@@ -186,30 +177,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [t]);
 
   return (
-    <div className={className}>
-      {/* <Layout.Base */}
-      {/*  className={CN(className)} */}
-      {/*  showSubHeader={true} */}
-      {/*  subHeaderBackground={'transparent'} */}
-      {/*  subHeaderCenter={false} */}
-      {/*  subHeaderPaddingVertical={true} */}
-      {/*  title={t<string>('Mission Pools')} */}
-      {/* > */}
+    <PageWrapper className={CN(className, 'mission-pools')}>
       <SwSubHeader
         background={'transparent'}
         center
+        className={'__header-area'}
         onBack={goBack}
         paddingVertical
         showBackButton
         title={t('Mission Pools')}
       />
       <div className={'__tool-area'}>
-        <FilterTabs
-          className={'filter-tabs-container'}
-          items={filterTabItems}
-          onSelect={onSelectFilterTab}
-          selectedItem={selectedFilterTab}
-        />
         <Search
           actionBtnIcon={(
             <Icon
@@ -217,26 +195,35 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               size='sm'
             />
           )}
+          className={'__search-item'}
           onClickActionBtn={onClickActionBtn}
           onSearch={handleSearch}
           placeholder={t('Campaign name...')}
           searchValue={searchInput}
           showActionBtn
         />
+        <FilterTabs
+          className={'filter-tabs-container'}
+          items={filterTabItems}
+          onSelect={onSelectFilterTab}
+          selectedItem={selectedFilterTab}
+        />
       </div>
-      <SwList
-        actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-        className={'__section-list-container'}
-        enableSearchInput
-        filterBy={filterFunction}
-        list={filteredItems}
-        renderItem={renderItem}
-        renderWhenEmpty={emptyList}
-        searchFunction={searchFunction}
-        searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Campaign name...')}
-        showActionBtn
-      />
+      <div className={'__content-wrapper'}>
+        <SwList
+          actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+          className={'__section-list-container'}
+          enableSearchInput
+          filterBy={filterFunction}
+          list={filteredItems}
+          renderItem={renderItem}
+          renderWhenEmpty={emptyList}
+          searchFunction={searchFunction}
+          searchMinCharactersCount={2}
+          searchPlaceholder={t<string>('Campaign name...')}
+          showActionBtn
+        />
+      </div>
       <FilterModal
         applyFilterButtonTitle={t('Apply filter')}
         id={FILTER_MODAL_ID}
@@ -250,13 +237,12 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <MissionDetailModal
         data={currentSelectItem}
       />
-      {/* </Layout.Base> */}
 
       <div
         className={'__scroll-container'}
       >
       </div>
-    </div>
+    </PageWrapper>
   );
 };
 
@@ -265,72 +251,37 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-
-    '.__scroll-container': {
-      flex: 1,
-      marginLeft: -44,
-      marginRight: -44,
-      paddingLeft: 44,
-      paddingRight: 44,
-      overflow: 'auto'
-    },
-
-    '.__feature-area': {
-      overflow: 'hidden'
-    },
-
-    '.__feature-area-inner': {
-      marginRight: -token.size
-    },
-
-    '.__tool-area': {
-      flexDirection: 'column',
+    '.__section-list-container': {
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      overflowX: 'auto',
       display: 'flex',
-      gap: token.size,
-      alignItems: 'flex-start',
-      backgroundColor: token.colorBgDefault,
-      flexWrap: 'wrap',
-      justifyContent: 'flex-end',
-      marginBottom: 20,
-
-      '.filter-tabs-container': {
-        flex: 1,
-        overflowX: 'auto'
-      },
-
-      '.search-container': {
-        display: 'block',
-        flex: 1,
-        maxWidth: 360
-      },
-
-      '.right-section': {
-        width: '100%',
-        justifyContent: 'flex-end'
-      },
-
-      '.right-section .search-input': {
-        width: '100%'
-      }
+      flexDirection: 'column',
+      gap: token.sizeXS
     },
-
-    '.__mission-list-container': {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))',
-      alignItems: 'stretch',
-      gap: token.size,
-      marginBottom: 40
+    '.filter-tabs-container': {
+      paddingLeft: token.padding,
+      paddingRight: token.padding
     },
-
-    '.__header-area': {
-      '.ant-sw-header-center-part': {
-        marginLeft: 0
-      },
-
-      '.ant-sw-sub-header-center-part-pl': {
-        textAlign: 'left',
-        paddingLeft: 0
-      }
+    '.__search-item': {
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingTop: token.padding
+    },
+    '.__tool-area': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS,
+      marginBottom: token.marginMD
+    },
+    '.__content-wrapper': {
+      marginBottom: token.margin,
+      overflowX: 'auto'
+    },
+    '.ant-sw-header-container-padding-vertical': {
+      marginTop: '8px !important',
+      marginBottom: '8px !important'
     }
 
   };

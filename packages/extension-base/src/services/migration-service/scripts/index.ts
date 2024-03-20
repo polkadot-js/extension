@@ -51,7 +51,7 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.28-01': MigrateEarningVersion,
   '1.1.41-01': DeleteChainStaking,
   '1.1.44-01': MigrateAssetSetting,
-  '1.1.44-02': MigrateTransactionHistoryBySymbol
+  '1.1.45-01': MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

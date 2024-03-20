@@ -23,7 +23,8 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
         'pangolin-LOCAL-CKTON': 'pangolin-LOCAL-PKTON',
         'zeta_test-NATIVE-aZETA': 'zeta_test-NATIVE-ZETA',
         'origintrail-NATIVE-OTP': 'origintrail-NATIVE-NEURO',
-        'moonbeam-LOCAL-xciBTC': 'moonbeam-LOCAL-xcIBTC'
+        'moonbeam-LOCAL-xciBTC': 'moonbeam-LOCAL-xcIBTC',
+        'tomochain-NATIVE-TOMO': 'tomochain-NATIVE-VIC'
       };
 
       const assetSetting = await this.state.chainService.getAssetSettings();

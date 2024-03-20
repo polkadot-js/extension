@@ -342,7 +342,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     for (const handler of Object.values(this.handlers)) {
       // Force subscribe onchain data
-      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING;
+      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING || !onlineData[handler.slug];
 
       if (!this.useOnlineCacheOnly || forceSubscribe) {
         handler.subscribePoolInfo(callback)

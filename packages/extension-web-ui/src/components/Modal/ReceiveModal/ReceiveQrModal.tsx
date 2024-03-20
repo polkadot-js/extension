@@ -11,7 +11,7 @@ import useNotification from '@subwallet/extension-web-ui/hooks/common/useNotific
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import useFetchChainInfo from '@subwallet/extension-web-ui/hooks/screen/common/useFetchChainInfo';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { getScanExplorerAddressInfoUrl, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import reformatAddress from '@subwallet/extension-web-ui/utils/account/reformatAddress';
 import { Button, Icon, Logo, ModalContext, SwQRCode } from '@subwallet/react-ui';
 import AccountItem from '@subwallet/react-ui/es/web3-block/account-item';
@@ -55,8 +55,8 @@ const Component: React.FC<Props> = ({ address, className, selectedNetwork }: Pro
   }, [address, chainInfo]);
 
   const scanExplorerAddressUrl = useMemo(() => {
-    return getExplorerLink(chainInfo, formattedAddress, 'account') || getScanExplorerAddressInfoUrl(selectedNetwork || '', formattedAddress);
-  }, [selectedNetwork, formattedAddress, chainInfo]);
+    return getExplorerLink(chainInfo, formattedAddress, 'account');
+  }, [formattedAddress, chainInfo]);
 
   const handleClickViewOnExplorer = useCallback(() => {
     try {

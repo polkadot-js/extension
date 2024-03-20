@@ -1,12 +1,17 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
+import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningPoolItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
-import { CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useFilterModal, useHandleChainConnection, usePreviewYieldPoolInfoByGroup, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useFilterModal, useHandleChainConnection, usePreviewYieldPoolInfoByGroup, useSelector, useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { analysisAccounts } from '@subwallet/extension-web-ui/hooks/common/useGetChainSlugsByCurrentAccount';
+import { saveCurrentAccountAddress } from '@subwallet/extension-web-ui/messaging';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningPoolsTable } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/EarningPoolsTable';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
@@ -20,6 +25,8 @@ import { useLocation, useNavigate, useOutletContext } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
+import { isEthereumAddress } from '@polkadot/util-crypto';
+
 type Props = ThemeProps;
 type ComponentProps = {
   poolGroup: string,
@@ -32,6 +39,18 @@ const alertModalId = 'earning-pools-alert-modal';
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 const FILTER_MODAL_ID = 'earning-pool-filter-modal';
+
+const getFilteredAccount = (chainInfo: _ChainInfo) => (account: AccountJson) => {
+  if (isAccountAll(account.address)) {
+    return false;
+  }
+
+  if (account.originGenesisHash && _getSubstrateGenesisHash(chainInfo) !== account.originGenesisHash) {
+    return false;
+  }
+
+  return _isChainEvmCompatible(chainInfo) === isEthereumAddress(account.address);
+};
 
 function Component ({ poolGroup, symbol }: ComponentProps) {
   const { t } = useTranslation();
@@ -48,6 +67,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
   const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
+  const accounts = useSelector((state) => state.accountState.accounts);
+  const [isContainOnlySubstrate] = analysisAccounts(accounts);
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
@@ -67,6 +89,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     { label: t('Parachain staking'), value: YieldPoolType.PARACHAIN_STAKING },
     { label: t('Single farming'), value: YieldPoolType.SINGLE_FARMING }
   ];
+
   const items: YieldPoolInfo[] = useMemo(() => {
     if (!pools.length) {
       return [];
@@ -127,13 +150,26 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     };
   }, [selectedFilters]);
 
+  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[], selectedChain: string) => {
+    const chainInfo = chainInfoMap[selectedChain];
+    let accountList: AccountJson[] = [];
+
+    if (!chainInfo) {
+      return false;
+    }
+
+    accountList = accounts.filter(getFilteredAccount(chainInfo));
+
+    return !!accountList.length;
+  }, [chainInfoMap]);
+
   const navigateToEarnTransaction = useCallback(
     (slug: string, chain: string) => {
       const earnParams: EarnParams = {
         ...DEFAULT_EARN_PARAMS,
         slug,
         chain,
-        from: ''
+        redirectFromPreview: true
       };
 
       if (isNoAccount) {
@@ -141,13 +177,38 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         setReturnStorage('/transaction/earn');
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        earnParams.from = currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+        const chainInfo = chainInfoMap[chain];
+        const isAnyAccountValid = checkIsAnyAccountValid(accounts, chain);
 
-        setEarnStorage(earnParams);
-        navigate('/transaction/earn');
+        if (!isAnyAccountValid) {
+          const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;
+
+          setEarnStorage(earnParams);
+          setSelectedAccountTypes([accountType]);
+          navigate('/home/earning', { state: { view: 'position', redirectFromPreview: true, chainName: chainInfo?.name } });
+        } else {
+          const _filteredAccounts = accounts.filter(getFilteredAccount(chainInfo));
+
+          if (_filteredAccounts.length === 1) {
+            earnParams.from = _filteredAccounts[0].address;
+            setEarnStorage(earnParams);
+            saveCurrentAccountAddress(_filteredAccounts[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
+          } else {
+            if (currentAccount && _filteredAccounts.some((acc) => acc.address === currentAccount.address)) {
+              earnParams.from = currentAccount.address;
+              setEarnStorage(earnParams);
+              navigate('/transaction/earn');
+
+              return;
+            }
+
+            setEarnStorage(earnParams);
+            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+          }
+        }
       }
     },
-    [currentAccount?.address, isNoAccount, navigate, setEarnStorage, setReturnStorage]
+    [accounts, chainInfoMap, checkIsAnyAccountValid, currentAccount, isContainOnlySubstrate, isNoAccount, navigate, setEarnStorage, setReturnStorage, setSelectedAccountTypes]
   );
 
   const onConnectChainSuccess = useCallback(() => {

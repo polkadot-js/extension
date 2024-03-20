@@ -2161,7 +2161,7 @@ export default class KoniExtension {
 
     const apiProps = this.#koniState.getSubstrateApi(networkKey);
     const extrinsic = !isPSP34
-      ? getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
+      ? await getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
       : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {});
 
     // this.addContact(recipientAddress);

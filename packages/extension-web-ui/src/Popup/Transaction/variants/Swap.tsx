@@ -798,6 +798,9 @@ const Component = () => {
             return;
           }
 
+          setCurrentQuoteRequest(undefined);
+          setQuoteAliveUntil(undefined);
+          setCurrentQuote(undefined);
           setIsFormInvalid(false);
           setHandleRequestLoading(true);
           setShowQuoteArea(true);
@@ -857,7 +860,7 @@ const Component = () => {
       sync = false;
       clearTimeout(timeout);
     };
-  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, swapPairs, toTokenSlugValue]);
+  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, toTokenSlugValue]);
 
   useEffect(() => {
     // eslint-disable-next-line prefer-const

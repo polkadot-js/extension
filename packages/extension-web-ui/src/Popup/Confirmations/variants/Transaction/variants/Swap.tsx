@@ -33,6 +33,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[data.quote.pair.to] || undefined;
   }, [assetRegistryMap, data.quote.pair.to]);
+  const fromAssetInfo = useMemo(() => {
+    return assetRegistryMap[data.quote.pair.from] || undefined;
+  }, [assetRegistryMap, data.quote.pair.from]);
 
   const estimatedFeeValue = useMemo(() => {
     let totalBalance = BN_ZERO;
@@ -53,10 +56,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const renderRateConfirmInfo = () => {
     return (
-      <div className={'__quote-estimate-swap-confirm-value'}>
+      <div className={'__quote-rate-wrapper'}>
         <Number
           decimal={0}
-          suffix={transaction.estimateFee?.symbol}
+          suffix={_getAssetSymbol(fromAssetInfo)}
           value={1}
         />
         <span>&nbsp;~&nbsp;</span>
@@ -87,12 +90,11 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [data.quote.aliveUntil]);
 
   return (
-    <div className={CN(className, 'swap-confirmation-container')}>
+    <div className={CN(className)}>
       <SwapTransactionBlock
         data={data}
       />
       <MetaInfo
-        className={CN(className)}
         hasBackgroundWrapper={false}
       >
         <MetaInfo.Account
@@ -145,11 +147,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__quote-estimate-swap-confirm-value': {
+    paddingTop: 10,
+    '.__quote-rate-wrapper': {
       display: 'flex'
-    },
-    '&.swap-confirmation-container': {
-      marginTop: 10
     },
     '.__swap-arrival-time': {
       marginTop: 12
@@ -202,7 +202,7 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
     '.__quote-rate-confirm.__quote-rate-confirm, .__estimate-transaction-fee.__estimate-transaction-fee, .-d-column.-d-column': {
       marginTop: 12
     },
-    '&.swap-confirmation-container .__swap-route-container': {
+    '.__swap-route-container': {
       marginBottom: 20
     },
     '.__quote-rate-confirm .__label': {

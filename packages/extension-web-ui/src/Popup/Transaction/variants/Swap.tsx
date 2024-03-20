@@ -1357,7 +1357,7 @@ const Component = () => {
                         isShowSubLogo={false}
                         shape='circle'
                         size={24}
-                        token={currentQuote.pair.from.toLowerCase()}
+                        token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
                       />
                       <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
                       <Icon

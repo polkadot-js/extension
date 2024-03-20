@@ -798,11 +798,12 @@ const Component = () => {
             return;
           }
 
+          setHandleRequestLoading(true);
           setCurrentQuoteRequest(undefined);
           setQuoteAliveUntil(undefined);
           setCurrentQuote(undefined);
+          setSwapError(undefined);
           setIsFormInvalid(false);
-          setHandleRequestLoading(true);
           setShowQuoteArea(true);
 
           const currentRequest: SwapRequest = {
@@ -891,6 +892,10 @@ const Component = () => {
     const updateQuoteHandler = () => {
       if (!quoteAliveUntil) {
         clearInterval(timer);
+
+        if (continueRefreshQuoteRef.current && sync) {
+          setHandleRequestLoading(false);
+        }
 
         return;
       }
@@ -1286,7 +1291,7 @@ const Component = () => {
             <div className={'__quote-and-slippage'}>
               <>
                 {
-                  !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
+                  !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && !!quoteAliveUntil && (
                     <QuoteResetTime
                       quoteAliveUntilValue = {quoteAliveUntil}
                     />

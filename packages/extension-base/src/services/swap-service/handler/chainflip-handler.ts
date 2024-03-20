@@ -245,6 +245,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const fromChain = this.chainService.getChainInfoByKey(fromAsset.originChain);
     const fromChainNativeTokenSlug = _getChainNativeTokenSlug(fromChain);
 
+    console.log('request', request);
+
     if (!fromAsset || !toAsset) {
       return new SwapError(SwapErrorType.UNKNOWN);
     }

@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
       90	Thibaut Sardan                	add search by address (#1198)
-       8	Tarik Gul                     	0.46.8 (#1325)
+       9	Tarik Gul                     	Bump polkadot/* libraries (#1329)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

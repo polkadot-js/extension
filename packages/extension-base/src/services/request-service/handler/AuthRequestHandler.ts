@@ -225,6 +225,15 @@ export default class AuthRequestHandler {
     const id = getId();
     const promiseHandler = createPromiseHandler<boolean>();
     const { promise, reject, resolve } = promiseHandler;
+    const idStr = stripUrl(url);
+
+    const isExistedAuthBothBefore = Object.entries(this.authorizeUrlSubject.value)
+      .find(([key, data]) =>
+        (key === idStr && data.accountAuthType === 'both'));
+
+    if (isExistedAuthBothBefore) {
+      return true;
+    }
 
     // Add promise to the map
     this.authorizePromiseMap[id] = promiseHandler;
@@ -233,7 +242,6 @@ export default class AuthRequestHandler {
       delete this.authorizePromiseMap[id];
     });
 
-    const idStr = stripUrl(url);
     // Do not enqueue duplicate authorization requests.
     const mergeKeys: string[] = [];
 

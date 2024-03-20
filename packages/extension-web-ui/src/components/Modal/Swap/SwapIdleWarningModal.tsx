@@ -5,7 +5,7 @@ import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, ModalContext, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, Info } from 'phosphor-react';
+import { Info } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -42,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 color='var(--page-icon-color)'
                 iconProps={{
                   weight: 'fill',
-                  phosphorIcon: CheckCircle
+                  phosphorIcon: Info
                 }}
               />
             </div>

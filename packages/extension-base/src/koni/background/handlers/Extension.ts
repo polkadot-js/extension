@@ -4301,8 +4301,8 @@ export default class KoniExtension {
     return this.#koniState.swapService.handleSwapRequest(request);
   }
 
-  private async getLatestSwapQuote (swapQuote: SwapRequest): Promise<SwapQuoteResponse> {
-    return this.#koniState.swapService.getLatestQuotes(swapQuote);
+  private async getLatestSwapQuote (swapRequest: SwapRequest): Promise<SwapQuoteResponse> {
+    return this.#koniState.swapService.getLatestQuotes(swapRequest);
   }
 
   private async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
@@ -4328,8 +4328,6 @@ export default class KoniExtension {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { chainType, extrinsic, extrinsicType, transferNativeAmount, txChain, txData } = await this.#koniState.swapService.handleSwapProcess(inputData);
-
-    console.log('extrinsic', extrinsic, chainType);
 
     return await this.#koniState.transactionService.handleTransaction({
       address,

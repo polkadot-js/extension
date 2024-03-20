@@ -331,7 +331,9 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       const error = e as AxiosError;
       const errorObj = error?.response?.data as Record<string, string>;
 
-      if (errorObj.error.includes(CHAINFLIP_QUOTE_ERROR.InsufficientLiquidity)) {
+      console.log('error', error);
+
+      if (errorObj && errorObj.message && errorObj.message.includes(CHAINFLIP_QUOTE_ERROR.InsufficientLiquidity)) {
         return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
       }
 

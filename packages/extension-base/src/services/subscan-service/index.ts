@@ -2,17 +2,27 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
+import { BASE_FETCH_ORDINAL_EVENT_DATA } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/constants';
 import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, RewardHistoryListResponse, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
+import { SubscanEventBaseItemData, SubscanEventListResponse, SubscanExtrinsicParam, SubscanExtrinsicParamResponse } from '@subwallet/extension-base/types';
 import { wait } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
 const QUERY_ROW = 100;
 
+interface SubscanError {
+  code: number;
+  message: string;
+}
+
 export class SubscanService {
-  private limitRate = 2; // limit per interval check
+  private callRate = 2; // limit per interval check
+  private limitRate = 2; // max rate per interval check
   private intervalCheck = 1000; // interval check in ms
   private maxRetry = 9; // interval check in ms
+  private rollbackRateTime = 30 * 1000; // rollback rate time in ms
+  private timeoutRollbackRate: NodeJS.Timeout | undefined = undefined;
   private requestMap: Record<number, SubscanRequest<any>> = {};
   private nextId = 0;
   private isRunning = false;
@@ -20,13 +30,21 @@ export class SubscanService {
     return this.nextId++;
   }
 
-  private subscanChainMap: Record<string, string>;
-
-  constructor (options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
-    this.subscanChainMap = SUBSCAN_API_CHAIN_MAP;
+  constructor (private subscanChainMap: Record<string, string>, options?: {limitRate?: number, intervalCheck?: number, maxRetry?: number}) {
+    this.callRate = options?.limitRate || this.callRate;
     this.limitRate = options?.limitRate || this.limitRate;
     this.intervalCheck = options?.intervalCheck || this.intervalCheck;
     this.maxRetry = options?.maxRetry || this.maxRetry;
+  }
+
+  private reduceLimitRate () {
+    clearTimeout(this.timeoutRollbackRate);
+
+    this.callRate = Math.ceil(this.limitRate / 2);
+
+    this.timeoutRollbackRate = setTimeout(() => {
+      this.callRate = this.limitRate;
+    }, this.rollbackRateTime);
   }
 
   private getApiUrl (chain: string, path: string) {
@@ -49,7 +67,7 @@ export class SubscanService {
     });
   }
 
-  public addRequest<T> (run: SubscanRequest<T>['run']) {
+  public addRequest<T> (run: SubscanRequest<T>['run'], ordinal: number) {
     const newId = this.getId();
 
     return new Promise<T>((resolve, reject) => {
@@ -57,6 +75,7 @@ export class SubscanService {
         id: newId,
         status: 'pending',
         retry: -1,
+        ordinal,
         run,
         resolve,
         reject
@@ -86,20 +105,29 @@ export class SubscanService {
       const requests = remainingRequests
         .filter((request) => request.status !== 'running')
         .sort((a, b) => a.id - b.id)
-        .slice(0, this.limitRate);
+        .sort((a, b) => a.ordinal - b.ordinal)
+        .slice(0, this.callRate);
 
       // Start requests
       requests.forEach((request) => {
         request.status = 'running';
         request.run().then((rs) => {
           request.resolve(rs);
-        }).catch((e) => {
-          if (request.retry < maxRetry) {
-            request.status = 'pending';
-            request.retry++;
+        }).catch((e: Error) => {
+          const error = JSON.parse(e.message) as SubscanError;
+
+          // Limit rate
+          if (error.code === 20008) {
+            if (request.retry < maxRetry) {
+              request.status = 'pending';
+              request.retry++;
+              this.reduceLimitRate();
+            } else {
+              // Reject request
+              request.reject(new SWError('MAX_RETRY', String(e)));
+            }
           } else {
-            // Reject request
-            request.reject(new SWError('MAX_RETRY', String(e)));
+            request.reject(new SWError('UNKNOWN', String(e)));
           }
         });
       });
@@ -126,7 +154,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<IMultiChainBalance[]>;
 
       return jsonData.data;
-    });
+    }, 1);
   }
 
   public getCrowdloanContributions (relayChain: string, address: string, page = 0): Promise<CrowdloanContributionsResponse> {
@@ -145,7 +173,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<CrowdloanContributionsResponse>;
 
       return jsonData.data;
-    });
+    }, 2);
   }
 
   public getExtrinsicsList (chain: string, address: string, page = 0, blockRange?: RequestBlockRange): Promise<ExtrinsicsListResponse> {
@@ -158,7 +186,7 @@ export class SubscanService {
     })();
 
     return this.addRequest<ExtrinsicsListResponse>(async () => {
-      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsics'), {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/extrinsics'), {
         page,
         row: QUERY_ROW,
         address,
@@ -172,7 +200,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<ExtrinsicsListResponse>;
 
       return jsonData.data;
-    });
+    }, 0);
   }
 
   public async fetchAllPossibleExtrinsicItems (
@@ -203,12 +231,28 @@ export class SubscanService {
         maxCount = res.count;
       }
 
-      cbAfterEachRequest?.(res.extrinsics);
-      res.extrinsics.forEach((item) => {
-        resultMap[item.extrinsic_hash] = item;
-      });
+      const extrinsics = res.extrinsics;
+      const extrinsicIndexes = extrinsics.map((item) => item.extrinsic_index);
+      const extrinsicParams = await this.getExtrinsicParams(chain, extrinsicIndexes, 0);
 
-      currentCount += res.extrinsics.length;
+      for (const data of extrinsicParams) {
+        const { extrinsic_index: extrinsicIndex, params } = data;
+
+        const extrinsic = extrinsics.find((item) => item.extrinsic_index === extrinsicIndex);
+
+        if (extrinsic) {
+          extrinsic.params = JSON.stringify(params);
+        }
+      }
+
+      // Call callback after each request, for parse data
+      cbAfterEachRequest?.(extrinsics);
+
+      for (const item of extrinsics) {
+        resultMap[item.extrinsic_hash] = item;
+      }
+
+      currentCount += extrinsics.length;
 
       if (page > limit.page || currentCount > limit.record) {
         return;
@@ -248,7 +292,7 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<TransfersListResponse>;
 
       return jsonData.data;
-    });
+    }, 0);
   }
 
   public async fetchAllPossibleTransferItems (
@@ -327,7 +371,40 @@ export class SubscanService {
       const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
 
       return jsonData.data;
-    });
+    }, 2);
+  }
+
+  public getAccountRemarkEvents (chain: string, address: string): Promise<SubscanEventBaseItemData[]> {
+    return this.addRequest<SubscanEventBaseItemData[]>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/v2/scan/events'), {
+        ...BASE_FETCH_ORDINAL_EVENT_DATA,
+        address
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getAccountRemarkEvents', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanEventListResponse;
+
+      return jsonData.data.events;
+    }, 3);
+  }
+
+  public getExtrinsicParams (chain: string, extrinsicIndexes: string[], ordinal = 3): Promise<SubscanExtrinsicParam[]> {
+    return this.addRequest<SubscanExtrinsicParam[]>(async () => {
+      const rs = await this.postRequest(this.getApiUrl(chain, 'api/scan/extrinsic/params'), {
+        extrinsic_index: extrinsicIndexes
+      });
+
+      if (rs.status !== 200) {
+        throw new SWError('SubscanService.getExtrinsicParams', await rs.text());
+      }
+
+      const jsonData = (await rs.json()) as SubscanExtrinsicParamResponse;
+
+      return jsonData.data;
+    }, ordinal);
   }
 
   // Singleton
@@ -335,7 +412,7 @@ export class SubscanService {
 
   public static getInstance () {
     if (!SubscanService._instance) {
-      SubscanService._instance = new SubscanService();
+      SubscanService._instance = new SubscanService(SUBSCAN_API_CHAIN_MAP);
     }
 
     return SubscanService._instance;

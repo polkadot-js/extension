@@ -3,10 +3,10 @@
 
 import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { ORDINAL_COLLECTION } from '@subwallet/extension-base/constants';
-import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
-import { fetchExtrinsicParams, fetchRemarkEvent } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/utils';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
 import { OrdinalRemarkData, SubscanBatchChild, SubscanBatchChildParam, SubscanEventBaseItemData, SubscanExtrinsicParam } from '@subwallet/extension-base/types';
+
+import { BaseNftApi, HandleNftParams } from '../nft';
 
 const parseParamData = (param: SubscanBatchChildParam, event: SubscanEventBaseItemData, chain: string, address: string): NftItem | undefined => {
   const ordinalData = JSON.parse(param.value) as OrdinalRemarkData;
@@ -59,15 +59,11 @@ export default class OrdinalNftApi extends BaseNftApi {
   }
 
   public async handleNft (address: string, handleNftParams: HandleNftParams) {
-    const events: SubscanEventBaseItemData[] = await this.subscanService.addRequest(async () => {
-      return await fetchRemarkEvent(this.subscanChain, address);
-    });
+    const events: SubscanEventBaseItemData[] = await this.subscanService.getAccountRemarkEvents(this.subscanChain, address);
 
     if (events && events.length) {
       const extrinsicIds = events.map((data) => data.extrinsic_index);
-      const extrinsicParams: SubscanExtrinsicParam[] = await this.subscanService.addRequest(async () => {
-        return await fetchExtrinsicParams(this.subscanChain, extrinsicIds);
-      });
+      const extrinsicParams: SubscanExtrinsicParam[] = await this.subscanService.getExtrinsicParams(this.subscanChain, extrinsicIds);
       const items: NftItem[] = [];
 
       for (const data of extrinsicParams) {

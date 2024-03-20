@@ -11,7 +11,7 @@ import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dots
 import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
@@ -242,6 +242,9 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
     const toAsset = this.chainService.getAssetBySlug(request.pair.to);
 
+    const fromChain = this.chainService.getChainInfoByKey(fromAsset.originChain);
+    const fromChainNativeTokenSlug = _getChainNativeTokenSlug(fromChain);
+
     if (!fromAsset || !toAsset) {
       return new SwapError(SwapErrorType.UNKNOWN);
     }
@@ -307,6 +310,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         }
       });
 
+      const defaultFeeToken = _isNativeToken(fromAsset) ? fromAsset.slug : fromChainNativeTokenSlug;
+
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
@@ -320,8 +325,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         isLowLiquidity: quoteResponse.quote.lowLiquidityWarning,
         feeInfo: {
           feeComponent: feeComponent,
-          defaultFeeToken: fromAsset.slug,
-          feeOptions: [fromAsset.slug]
+          defaultFeeToken,
+          feeOptions: [defaultFeeToken]
         },
         route: {
           path: this.parseSwapPath(fromAsset, toAsset)
@@ -330,8 +335,6 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     } catch (e) {
       const error = e as AxiosError;
       const errorObj = error?.response?.data as Record<string, string>;
-
-      console.log('error', error);
 
       if (errorObj && errorObj.message && errorObj.message.includes(CHAINFLIP_QUOTE_ERROR.InsufficientLiquidity)) {
         return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);

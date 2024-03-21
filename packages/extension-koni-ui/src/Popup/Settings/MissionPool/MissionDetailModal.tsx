@@ -27,15 +27,15 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
   const { inactiveModal } = useContext(ModalContext);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
-  const chainInfo = useMemo(() => {
-    if (data && data.chains && data.chains.length > 0) {
+  const modalTitle = useMemo(() => {
+    if (data && data.chains && data.chains.length === 1) {
       const chain = data.chains[0];
 
-      return chainInfoMap[chain];
+      return chainInfoMap[chain].name;
     } else {
-      return null;
+      return t('Mission details');
     }
-  }, [chainInfoMap, data]);
+  }, [chainInfoMap, data, t]);
 
   const timeline = useMemo<string>(() => {
     if (!data?.start_time && !data?.end_time) {
@@ -86,7 +86,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
       className={`${className}`}
       id={modalId}
       onCancel={onCancel}
-      title={t(`${chainInfo?.name}` || 'Mission details')}
+      title={modalTitle}
     >
       {
         data && (

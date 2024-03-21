@@ -74,7 +74,8 @@ export const BaseSelectModal = styled(Component)(({ theme: { token } }: ThemePro
       justifyContent: 'flex-end',
 
       '.ant-sw-modal-content': {
-        maxHeight: '95%'
+        maxHeight: '95%',
+        height: 'auto'
       }
     },
 

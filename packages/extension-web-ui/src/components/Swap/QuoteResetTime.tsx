@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import CN from 'classnames';
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 
@@ -10,7 +11,7 @@ type Props = ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { quoteAliveUntilValue } = props;
+  const { className, quoteAliveUntilValue } = props;
   const [quoteCountdownTime, setQuoteCountdownTime] = useState<number>(0);
 
   useEffect(() => {
@@ -41,14 +42,17 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [quoteAliveUntilValue, setQuoteCountdownTime]);
 
   return (
-    <div className={'__quote-reset-time'}>
-      Quote reset in: {quoteCountdownTime}s
+    <div className={CN(className, '__quote-reset-time')}>
+      Quote reset in: <span className={CN({ '__quote-reset-change-color': quoteCountdownTime <= 10 })}>&nbsp;{quoteCountdownTime}s</span>
     </div>
   );
 };
 
 const QuoteResetTime = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.__quote-reset-change-color': {
+      color: token.colorError
+    }
   };
 });
 

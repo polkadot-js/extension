@@ -123,7 +123,7 @@ const Component = () => {
 
   useIdleTimer({
     onIdle,
-    timeout: 60000,
+    timeout: 300000,
     events: [
       'keydown',
       'mousedown',
@@ -424,7 +424,7 @@ const Component = () => {
     const _loading = handleRequestLoading && !isFormInvalid;
 
     if (isFormInvalid) {
-      message = t('Please recheck form values');
+      message = t('Invalid input. Re-enter information in the red field and try again');
     } else if (handleRequestLoading) {
       message = t('Loading...');
     } else {
@@ -669,13 +669,13 @@ const Component = () => {
     if (currentQuote) {
       const decimals = _getAssetDecimals(fromAssetInfo);
 
-      return new BigN(currentQuote.fromAmount)
+      return new BigN(fromAmountValue || 0)
         .div(BN_TEN.pow(decimals))
         .multipliedBy(currentQuote.rate);
     }
 
     return BN_ZERO;
-  }, [currentQuote, fromAssetInfo]);
+  }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
     return destinationSwapValue.multipliedBy(1 - currentSlippage);
@@ -798,8 +798,12 @@ const Component = () => {
             return;
           }
 
-          setIsFormInvalid(false);
           setHandleRequestLoading(true);
+          setCurrentQuoteRequest(undefined);
+          setQuoteAliveUntil(undefined);
+          setCurrentQuote(undefined);
+          setSwapError(undefined);
+          setIsFormInvalid(false);
           setShowQuoteArea(true);
 
           const currentRequest: SwapRequest = {
@@ -857,7 +861,7 @@ const Component = () => {
       sync = false;
       clearTimeout(timeout);
     };
-  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, swapPairs, toTokenSlugValue]);
+  }, [currentSlippage, form, fromAmountValue, fromTokenSlugValue, fromValue, recipientValue, showRecipientField, toTokenSlugValue]);
 
   useEffect(() => {
     // eslint-disable-next-line prefer-const
@@ -889,10 +893,14 @@ const Component = () => {
       if (!quoteAliveUntil) {
         clearInterval(timer);
 
+        if (continueRefreshQuoteRef.current && sync) {
+          setHandleRequestLoading(false);
+        }
+
         return;
       }
 
-      if (quoteAliveUntil < Date.now() && !continueRefreshQuoteRef.current) {
+      if (quoteAliveUntil + 2000 < Date.now() && !continueRefreshQuoteRef.current) {
         clearInterval(timer);
 
         if (!requestUserInteractToContinue && !hasInternalConfirmations) {
@@ -1283,7 +1291,7 @@ const Component = () => {
             <div className={'__quote-and-slippage'}>
               <>
                 {
-                  !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && (
+                  !handleRequestLoading && !isFormInvalid && !hasInternalConfirmations && !!quoteAliveUntil && (
                     <QuoteResetTime
                       quoteAliveUntilValue = {quoteAliveUntil}
                     />
@@ -1349,7 +1357,7 @@ const Component = () => {
                         isShowSubLogo={false}
                         shape='circle'
                         size={24}
-                        token={currentQuote.pair.from.toLowerCase()}
+                        token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
                       />
                       <div className={'__fee-paid-token-symbol'}>{_getAssetSymbol(feeAssetInfo)}</div>
                       <Icon

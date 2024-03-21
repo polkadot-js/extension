@@ -120,7 +120,7 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
     if (availableQuotes.length === 0) {
       const preferredErrorResp = quoteAskResponses.find((quote) => {
-        return !!quote.error && ![SwapErrorType.ERROR_FETCHING_QUOTE, SwapErrorType.UNKNOWN, SwapErrorType.ASSET_NOT_SUPPORTED].includes(quote.error.errorType); // todo
+        return !!quote.error && ![SwapErrorType.UNKNOWN, SwapErrorType.ASSET_NOT_SUPPORTED].includes(quote.error.errorType);
       });
 
       const defaultErrorResp = quoteAskResponses.find((quote) => !!quote.error);

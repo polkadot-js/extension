@@ -142,8 +142,6 @@ const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResul
 
 const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-web-ui/Popup/MissionPool'));
 
-const Swap = new LazyLoader('Swap', () => import('@subwallet/extension-web-ui/Popup/Home/Swap'));
-
 /* 404 */
 
 const NotFoundContent = new LazyLoader('NotFoundContent', () => import('@subwallet/extension-web-ui/Popup/NotFound/Content'));
@@ -211,7 +209,6 @@ export const router = createBrowserRouter([
               EarningPositionDetail.generateRouterObject('position-detail')
             ]
           },
-          Swap.generateRouterObject('swap'),
           MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId'),

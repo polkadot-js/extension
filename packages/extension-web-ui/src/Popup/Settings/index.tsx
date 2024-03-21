@@ -3,7 +3,7 @@
 
 import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
 import SwLogosMap from '@subwallet/extension-web-ui/assets/subwallet';
-import { BaseModal, PageWrapper, WalletConnect } from '@subwallet/extension-web-ui/components';
+import { BaseModal, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { EXTENSION_VERSION, SUPPORT_MAIL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEB_BUILD_NUMBER, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-web-ui/constants/common';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -147,38 +147,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       ]
     },
     {
-      key: 'networks-&-tokens',
-      label: t('Website access'),
-      items: [
-        {
-          key: 'manage-website-access',
-          leftIcon: GlobeHemisphereEast,
-          leftIconBgColor: token['blue-7'],
-          rightIcon: CaretRight,
-          title: t('Manage website access'),
-          onClick: () => {
-            navigate('/settings/dapp-access');
-          }
-        },
-        {
-          key: 'wallet-connect',
-          leftIcon: (
-            <WalletConnect
-              height='1em'
-              width='1em'
-            />
-          ),
-          leftIconBgColor: token['geekblue-6'],
-          rightIcon: CaretRight,
-          title: t('WalletConnect'),
-          onClick: () => {
-            navigate('/wallet-connect/list');
-          },
-          isHidden: isWebUI
-        }
-      ]
-    },
-    {
       key: 'assets-&-addresses',
       label: t('Assets & addresses'),
       items: [
@@ -225,7 +193,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: ArrowSquareOut,
           title: t('Contact support'),
           onClick: () => {
-            window.open(`${SUPPORT_MAIL}?subject=[In-app Support]`, '_self');
+            window.open(`${SUPPORT_MAIL}?subject=[WebApp - In-app support]`, '_self');
           }
         },
         {
@@ -267,7 +235,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       ]
     }
-  ]), [activeModal, isPopup, isWebUI, navigate, t, token]);
+  ]), [activeModal, isPopup, navigate, t, token]);
 
   const aboutSubwalletType = useMemo<SettingItemType[]>(() => {
     return [

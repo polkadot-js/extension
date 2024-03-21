@@ -100,9 +100,9 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   ) {
     result.supportTransfer = false;
     result.supportTransferAll = false;
-  } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
+  // } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
+  //   result.supportTransfer = true;
+  //   result.supportTransferAll = true;
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -189,12 +189,12 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   ) {
     // transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
     /* empty */
-  } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
-    if (transferAll) {
-      transfer = api.tx.kton.transferAll(to, false);
-    } else if (value) {
-      transfer = api.tx.kton.transfer(to, new BN(value));
-    }
+  // } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
+  //   if (transferAll) {
+  //     transfer = api.tx.kton.transferAll(to, false);
+  //   } else if (value) {
+  //     transfer = api.tx.kton.transfer(to, new BN(value));
+  //   }
   } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {

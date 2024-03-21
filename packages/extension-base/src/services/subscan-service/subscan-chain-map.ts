@@ -131,7 +131,9 @@ export const SUBSCAN_BALANCE_CHAIN_MAP: Record<string, string> = {
   vara_network: 'vara',
   bifrost: 'bifrost',
   creditcoin: 'creditcoin',
-  joystream: 'joystream'
+  joystream: 'joystream',
+  manta_network: 'manta',
+  continuum_network: 'continuum'
 };
 
 export const SUBSCAN_BALANCE_CHAIN_MAP_REVERSE = Object.fromEntries(Object.entries(SUBSCAN_BALANCE_CHAIN_MAP).map(([k, v]) => [v, k]));

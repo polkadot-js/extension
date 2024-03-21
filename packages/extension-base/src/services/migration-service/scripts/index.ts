@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
+import MigrateTransactionHistoryBySymbol from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistoryBySymbol';
 
 import BaseMigrationJob from '../Base';
-// import MigrateAssetSetting from './databases/MigrateAssetSetting';
+import MigrateAssetSetting from './databases/MigrateAssetSetting';
 import MigrateEarningVersion from './databases/MigrateEarningVersion';
 import MigrateEthProvider from './providers/MigrateEthProvider';
 import MigratePioneerProvider from './providers/MigratePioneerProvider';
@@ -48,7 +49,9 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.24-01': MigrateProvidersV1M1P24,
   '1.1.26-01': MigratePolygonUSDCProvider,
   '1.1.28-01': MigrateEarningVersion,
-  '1.1.41-01': DeleteChainStaking
-  // '1.1.41-02': MigrateAssetSetting
+  '1.1.41-01': DeleteChainStaking,
+  '1.1.44-01': MigrateAssetSetting,
+  '1.1.45-01': MigrateTransactionHistoryBySymbol
+  // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

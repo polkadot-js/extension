@@ -25,7 +25,8 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
         'pangolin-LOCAL-CKTON': 'pangolin-LOCAL-PKTON',
         'zeta_test-NATIVE-aZETA': 'zeta_test-NATIVE-ZETA',
         'origintrail-NATIVE-OTP': 'origintrail-NATIVE-NEURO',
-        'moonbeam-LOCAL-xciBTC': 'moonbeam-LOCAL-xcIBTC'
+        'moonbeam-LOCAL-xciBTC': 'moonbeam-LOCAL-xcIBTC',
+        'tomochain-NATIVE-TOMO': 'tomochain-NATIVE-VIC'
       };
 
       const allTxs: ITransactionHistoryItem[] = [];
@@ -46,6 +47,10 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
           for (const transaction of filterTransactions) {
             if (transaction.amount && transaction.amount.symbol === oldSymbolSlug) {
               transaction.amount.symbol = newSymbolSlug;
+            }
+
+            if (transaction.fee && transaction.fee.symbol === oldSymbolSlug) {
+              transaction.fee.symbol = newSymbolSlug;
             }
           }
         }

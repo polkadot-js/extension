@@ -8,16 +8,12 @@ import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCo
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
-import { AccountSelector, AddressInput, HiddenInput, PageWrapper, SwapFromField, SwapToField } from '@subwallet/extension-web-ui/components';
-import { SwapIdleWarningModal, TermsOfServiceModal } from '@subwallet/extension-web-ui/components/Modal/Swap';
-import AddMoreBalanceModal from '@subwallet/extension-web-ui/components/Modal/Swap/AddMoreBalanceModal';
-import ChooseFeeTokenModal from '@subwallet/extension-web-ui/components/Modal/Swap/ChooseFeeTokenModal';
-import { QuoteResetTime, SwapRoute } from '@subwallet/extension-web-ui/components/Swap';
+import { AccountSelector, AddMoreBalanceModal, AddressInput, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useChainConnection, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useNotification, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
@@ -37,11 +33,6 @@ import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
-
-import MetaInfo from '../../../components/MetaInfo/MetaInfo';
-import SlippageModal from '../../../components/Modal/Swap/SlippageModal';
-import SwapQuotesSelectorModal from '../../../components/Modal/Swap/SwapQuotesSelectorModal';
-import useNotification from '../../../hooks/common/useNotification';
 
 type Props = ThemeProps;
 
@@ -742,19 +733,6 @@ const Component = () => {
   }, [isWebUI, setBackProps, showQuoteDetailOnMobile]);
 
   useEffect(() => {
-    if (!isWebUI) {
-      setBackProps((prev) => ({
-        ...prev,
-        onClick: showQuoteDetailOnMobile
-          ? () => {
-            setShowQuoteDetailOnMobile(false);
-          }
-          : null
-      }));
-    }
-  }, [isWebUI, setBackProps, showQuoteDetailOnMobile]);
-
-  useEffect(() => {
     if (recipientValue && toAssetInfo) {
       form.validateFields(['recipient']).catch((e) => {
         console.log('Error when validating', e);
@@ -1395,7 +1373,7 @@ const Component = () => {
         optimalQuoteItem={optimalQuoteRef.current}
         selectedItem={currentQuote}
       />
-      <TermsOfServiceModal onOk={onAfterConfirmTermModal} />
+      <SwapTermsOfServiceModal onOk={onAfterConfirmTermModal} />
       <SwapIdleWarningModal
         modalId = {SWAP_IDLE_WARNING_MODAL}
         onOk = {onConfirmStillThere}

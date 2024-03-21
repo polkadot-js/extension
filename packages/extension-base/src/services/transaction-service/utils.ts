@@ -29,6 +29,10 @@ function getBlockExplorerAccountRoute (explorerLink: string) {
     return 'account';
   }
 
+  if (explorerLink.includes('explorer.polimec.org')) {
+    return 'account';
+  }
+
   return 'address';
 }
 

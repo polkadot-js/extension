@@ -12,7 +12,7 @@ import { ChainItemType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -50,8 +50,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
-  const [firstStep, setFirstStep] = useState(true);
-
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
     name: !network.isEthereum ? network.networkName.replace(' network', '') : network.networkName,
     slug: network.slug
@@ -59,9 +57,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
+  const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
   const [page, setPage] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
-  const [isLoadMore, setIsLoadMore] = useState(false);
+  const loadingFlag = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedChain = useMemo((): LedgerNetwork | undefined => {
@@ -70,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
-  const { error, getAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
@@ -83,61 +82,65 @@ const Component: React.FC<Props> = (props: Props) => {
     setChain(value);
   }, []);
 
-  const onLoadMore = useCallback((loading: boolean, page: number): () => void => {
-    return () => {
-      if (!loading) {
-        setIsLoadMore(true);
-        setPage(page + 1);
+  const onLoadMore = useCallback(async () => {
+    if (loadingFlag.current) {
+      return;
+    }
 
-        const handler = async () => {
-          const start = page * LIMIT_PER_PAGE;
-          const end = (page + 1) * LIMIT_PER_PAGE;
+    loadingFlag.current = true;
 
-          const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
+    setPage((prev) => prev + 1);
 
-          setLedgerAccounts((prevState) => {
-            return [...prevState, ...rs];
-          });
+    const start = page * LIMIT_PER_PAGE;
+    const end = (page + 1) * LIMIT_PER_PAGE;
 
-          for (let i = start; i < end; i++) {
-            try {
-              const { address } = await getAddress(i);
+    const rs: Array<ImportLedgerItem | null> = new Array<ImportLedgerItem | null>(LIMIT_PER_PAGE).fill(null);
 
-              rs[i - start] = {
-                accountIndex: i,
-                name: `Ledger ${accountName} ${i + 1}`,
-                address: address
-              };
-            } catch (e) {
-              refresh();
-              setFirstStep(true);
-              break;
-            }
-          }
+    const maxRetry = 6;
 
-          setLedgerAccounts((prevState) => {
-            const result = [...prevState];
+    for (let j = 0; j < maxRetry; j++) {
+      try {
+        (await getAllAddress(start, end)).forEach(({ address }, index) => {
+          rs[start + index] = {
+            accountIndex: start + index,
+            name: `Ledger ${accountName} ${start + index + 1}`,
+            address: address
+          };
+        });
 
-            for (let i = start; i < end; i++) {
-              result[i] = rs[i - start];
-            }
+        break;
+      } catch (e) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        console.error(e);
 
-            return result;
-          });
-        };
-
-        handler().then().catch().finally(() => setIsLoadMore(false));
+        if (j === maxRetry - 1) {
+          refresh();
+          setPage(page - 1);
+          setFirstStep(true);
+        }
       }
-    };
-  }, [getAddress, accountName, refresh]);
+    }
+
+    setLedgerAccounts((prevState) => {
+      const result = [...prevState];
+
+      for (let i = start; i < end; i++) {
+        result[i] = rs[i];
+      }
+
+      return result.filter((rs) => rs);
+    });
+
+    loadingFlag.current = false;
+  }, [page, getAllAddress, accountName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
 
     if (!page) {
-      onLoadMore(isLoadMore, page)();
+      onLoadMore().catch(console.error);
     }
-  }, [isLoadMore, onLoadMore, page]);
+  }, [onLoadMore, page]);
 
   const onClickItem = useCallback((selectedAccounts: ImportLedgerItem[], item: ImportLedgerItem): () => void => {
     return () => {
@@ -169,7 +172,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
-      const disabled = !!accounts.find((acc) => acc.address === originAddress);
+
+      const disabled = !!accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
 
       return (
         <AccountItemWithName
@@ -179,7 +183,7 @@ const Component: React.FC<Props> = (props: Props) => {
           direction='vertical'
           genesisHash={selectedChain?.genesisHash}
           isSelected={selected || disabled}
-          key={item.address}
+          key={key}
           onClick={disabled ? undefined : onClickItem(selectedAccounts, item)}
           showUnselectIcon={true}
         />
@@ -222,7 +226,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setSelectedAccounts([]);
     setLedgerAccounts([]);
     setPage(0);
-  }, [ledger]);
+  }, [chain]);
 
   const isConnected = !isLocked && !isLoading && !!ledger;
 
@@ -234,7 +238,7 @@ const Component: React.FC<Props> = (props: Props) => {
         rightFooterButton={{
           children: t('Connect Ledger device'),
           icon: FooterIcon,
-          disabled: !isConnected || (!firstStep && !selectedAccounts.length),
+          disabled: !isConnected || (!firstStep && !(selectedAccounts.length > 0)),
           onClick: firstStep ? onNextStep : onSubmit,
           loading: isSubmitting
         }}
@@ -326,11 +330,9 @@ const Component: React.FC<Props> = (props: Props) => {
               <SwList.Section
                 className='list-container'
                 displayRow={true}
-                list={ledgerAccounts}
-                pagination={{
-                  hasMore: !isLoadMore,
-                  loadMore: onLoadMore(isLoadMore, page)
-                }}
+                hasMoreItems={true}
+                list={ledgerAccounts.length ? ledgerAccounts : [null, null, null, null, null, null]}
+                loadMoreItems={onLoadMore}
                 renderItem={renderItem(selectedAccounts)}
                 renderOnScroll={false}
                 rowGap='var(--list-gap)'

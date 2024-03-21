@@ -142,16 +142,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       if (srcAssetData.maximumSwapAmount) {
         const bnMaxProtocolSwap = new BigNumber(srcAssetData.maximumSwapAmount);
 
-        console.log('Max swap: ', bnMaxProtocolSwap.shiftedBy(-_getAssetDecimals(fromAsset)).toString());
-
         bnSwapMaxAllowance = BigNumber.min(bnMaxProtocolSwap, bnMaxBalanceSwap);
-      } else {
-        console.log('Max swap: null');
       }
-
-      console.log('Max balance swap: ', bnSwapMaxAllowance.shiftedBy(-_getAssetDecimals(fromAsset)).toString());
-      console.log('Min swap: ', bnMinSwap.shiftedBy(-_getAssetDecimals(fromAsset)).toString());
-      console.log('Max swap allow: ', bnSwapMaxAllowance.shiftedBy(-_getAssetDecimals(fromAsset)).toString());
 
       if (bnMinSwap.gte(bnSwapMaxAllowance)) {
         return {
@@ -245,15 +237,11 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const fromChain = this.chainService.getChainInfoByKey(fromAsset.originChain);
     const fromChainNativeTokenSlug = _getChainNativeTokenSlug(fromChain);
 
-    console.log('request', request);
-
     if (!fromAsset || !toAsset) {
       return new SwapError(SwapErrorType.UNKNOWN);
     }
 
     const earlyValidation = await this.validateSwapRequest(request);
-
-    console.log('Error: ', earlyValidation.error);
 
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
@@ -275,8 +263,6 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         destAsset: toAssetId,
         amount: request.fromAmount
       });
-
-      console.log('quoteResponse', quoteResponse);
 
       const feeComponent: SwapFeeComponent[] = [];
 
@@ -410,8 +396,6 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       destAddress: receiver,
       amount: quote.fromAmount
     });
-
-    console.log('depositAddressResponse', depositAddressResponse);
 
     const txData: ChainflipTxData = {
       address,

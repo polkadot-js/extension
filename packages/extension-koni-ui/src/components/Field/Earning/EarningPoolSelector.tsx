@@ -182,7 +182,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             placement={'top'}
             title={t('This pool has reached the maximum number of members/nominators. Select another to continue')}
           >
-            <div>
+            <div className={'__pool-item-opacity'}>
               <StakingPoolItem
                 {...item}
                 className={'pool-item'}
@@ -379,6 +379,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <EarningPoolDetailModal
         detailItem={viewDetailItem}
         onCancel={onCloseDetail}
+        slug={slug}
       />
     </>
   );
@@ -393,6 +394,9 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
 
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
+    },
+    '.__pool-item-opacity': {
+      marginBottom: token.marginXS
     },
 
     '&.pool-selector-input': {

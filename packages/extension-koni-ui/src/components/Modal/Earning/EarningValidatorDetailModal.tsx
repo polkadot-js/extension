@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -33,7 +34,13 @@ function Component (props: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { poolInfoMap } = useSelector((state) => state.earning);
   const maxPoolMembersValue = useMemo(() => {
-    return poolInfoMap[slug]?.maxPoolMembers;
+    const poolInfo = poolInfoMap[slug];
+
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING || poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
   }, [poolInfoMap, slug]);
 
   const { inactiveModal } = useContext(ModalContext);

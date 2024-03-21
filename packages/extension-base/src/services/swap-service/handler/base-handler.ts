@@ -21,8 +21,8 @@ export interface SwapBaseInterface {
   handleSwapProcess: (params: SwapSubmitParams) => Promise<SwapSubmitStepData>;
   handleSubmitStep: (params: SwapSubmitParams) => Promise<SwapSubmitStepData>;
 
-  isReady: boolean;
-  init: () => Promise<void>;
+  isReady?: boolean;
+  init?: () => Promise<void>;
 }
 
 export interface SwapBaseHandlerInitParams {

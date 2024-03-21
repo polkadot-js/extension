@@ -60,9 +60,16 @@ export enum SwapStepType {
 export enum SwapProviderId {
   CHAIN_FLIP_TESTNET = 'CHAIN_FLIP_TESTNET',
   CHAIN_FLIP_MAINNET = 'CHAIN_FLIP_MAINNET',
+  HYDRADX_MAINNET = 'HYDRADX_MAINNET',
+  HYDRADX_TESTNET = 'HYDRADX_TESTNET',
 }
 
-export const _SUPPORTED_SWAP_PROVIDERS: SwapProviderId[] = [SwapProviderId.CHAIN_FLIP_TESTNET, SwapProviderId.CHAIN_FLIP_MAINNET];
+export const _SUPPORTED_SWAP_PROVIDERS: SwapProviderId[] = [
+  SwapProviderId.CHAIN_FLIP_TESTNET,
+  SwapProviderId.CHAIN_FLIP_MAINNET,
+  SwapProviderId.HYDRADX_MAINNET,
+  SwapProviderId.HYDRADX_TESTNET
+];
 
 export interface SwapProvider {
   id: SwapProviderId;

@@ -13,7 +13,7 @@ import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/Filte
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
 import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, Tooltip, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -126,6 +126,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
       })
       .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {
+        if (a.isCrowded && !b.isCrowded) {
+          return 1;
+        } else if (!a.isCrowded && b.isCrowded) {
+          return -1;
+        }
+
         switch (sortSelection) {
           case SortKey.MEMBER:
             return a.memberCounter - b.memberCounter;
@@ -170,13 +176,30 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const renderItem = useCallback((item: NominationPoolDataType) => {
     return (
-      <StakingPoolItem
-        {...item}
-        className={'pool-item'}
-        onClickMoreBtn={onClickMore(item)}
-      />
+      item.isCrowded
+        ? (
+          <Tooltip
+            placement={'top'}
+            title={t('This pool has reached the maximum number of members/nominators. Select another to continue')}
+          >
+            <div>
+              <StakingPoolItem
+                {...item}
+                className={'pool-item'}
+                onClickMoreBtn={onClickMore(item)}
+              />
+            </div>
+          </Tooltip>
+        )
+        : (
+          <StakingPoolItem
+            {...item}
+            className={'pool-item'}
+            onClickMoreBtn={onClickMore(item)}
+          />
+        )
     );
-  }, [onClickMore]);
+  }, [onClickMore, t]);
 
   const renderEmpty = useCallback(() => {
     return (

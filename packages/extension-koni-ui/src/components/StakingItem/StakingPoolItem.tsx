@@ -17,13 +17,13 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, decimals, id, isProfitable, name, onClickMoreBtn, symbol } = props;
+  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, symbol } = props;
 
   const { t } = useTranslation();
 
   return (
     <Web3Block
-      className={className}
+      className={CN(className, { isCrowded: isCrowded })}
       leftItem={
         <SwAvatar
           identPrefix={42}
@@ -80,6 +80,12 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     padding: token.paddingSM,
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
+
+    '&.isCrowded': {
+      '.middle-item__name, .middle-item__commission, .middle-item__apy, .right-item__select-icon': {
+        opacity: 0.4
+      }
+    },
 
     '.ant-web3-block-middle-item': {
       paddingRight: token.paddingXXS

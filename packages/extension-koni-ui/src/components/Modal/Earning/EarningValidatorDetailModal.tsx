@@ -4,7 +4,7 @@
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
@@ -15,10 +15,11 @@ type Props = ThemeProps & {
   onCancel?: () => void;
   validatorItem: ValidatorDataType;
   chain: string;
+  slug: string;
 };
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { chain, className, onCancel, validatorItem } = props;
+  const { chain, className, onCancel, slug, validatorItem } = props;
   const { address: validatorAddress,
     commission,
     decimals,
@@ -30,6 +31,10 @@ function Component (props: Props): React.ReactElement<Props> {
     symbol,
     totalStake } = validatorItem;
   const { t } = useTranslation();
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const maxPoolMembersValue = useMemo(() => {
+    return poolInfoMap[slug]?.maxPoolMembers;
+  }, [poolInfoMap, slug]);
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -133,6 +138,14 @@ function Component (props: Props): React.ReactElement<Props> {
           value={commission}
           valueColorSchema={'even-odd'}
         />
+
+        {
+          maxPoolMembersValue && <MetaInfo.Number
+            label={t('Delegators')}
+            value={maxPoolMembersValue}
+            valueColorSchema={'even-odd'}
+          />
+        }
       </MetaInfo>
     </SwModal>
   );

@@ -26,6 +26,32 @@ interface Props {
   url: string;
 }
 
+interface AssetId { parents: number, interior: { 'X2': [{ PalletInstance: string }, { GeneralIndex: string }] } }
+
+function isAssetId (assetId: unknown): assetId is AssetId {
+  if (!assetId || typeof assetId !== 'object') {
+    return false;
+  }
+
+  return 'parents' in assetId && 'interior' in assetId &&
+    typeof assetId.interior === 'object' && assetId.interior !== null && 'X2' in assetId.interior &&
+    Array.isArray(assetId.interior.X2) && assetId.interior.X2.length === 2 &&
+    'PalletInstance' in assetId.interior.X2[0] &&
+    'GeneralIndex' in assetId.interior.X2[1];
+}
+
+function decodeAssetId (assetId: unknown) {
+  if (!isAssetId(assetId)) {
+    return null;
+  }
+
+  try {
+    return assetId.interior.X2[1].GeneralIndex;
+  } catch (_) {
+    return null;
+  }
+}
+
 function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
   return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
 }
@@ -106,7 +132,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunct
   });
 }
 
-function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
@@ -116,6 +142,9 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       : { args: null, method: null },
     [method, chain, specVersion]
   );
+
+  const humanReadablePayload = payload.toHuman() as Record<string, unknown>;
+  const assetId = decodeAssetId(humanReadablePayload['assetId']);
 
   return (
     <Table
@@ -136,18 +165,24 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       </tr>
       <tr>
         <td className='label'>{t('nonce')}</td>
-        <td className='data'>{formatNumber(nonce)}</td>
+        <td className='data'>{formatNumber(payload.nonce)}</td>
       </tr>
-      {!tip.isEmpty && (
+      {!payload.tip.isEmpty && (
         <tr>
           <td className='label'>{t('tip')}</td>
-          <td className='data'>{formatNumber(tip)}</td>
+          <td className='data'>{formatNumber(payload.tip)}</td>
+        </tr>
+      )}
+      {assetId && (
+        <tr>
+          <td className='label'>{t('assetId')}</td>
+          <td className='data'>{assetId}</td>
         </tr>
       )}
       {renderMethod(method, decoded, t)}
       <tr>
         <td className='label'>{t('lifetime')}</td>
-        <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>
+        <td className='data'>{mortalityAsString(payload.era, blockNumber, t)}</td>
       </tr>
     </Table>
   );

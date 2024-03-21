@@ -175,5 +175,6 @@
   "An error occurred": "",
   "Is your ledger locked?": "",
   "App \"{{network}}\" does not seem to be open": "",
-  "Ledger error: {{errorMessage}}": ""
+  "Ledger error: {{errorMessage}}": "",
+  "assetId": ""
 }

@@ -219,6 +219,15 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       maxWidth: '100%'
     },
 
+    '.__value.-clickable': {
+      cursor: 'pointer',
+      userSelect: 'none'
+    },
+
+    '.__value.-disabled': {
+      cursor: 'not-allowed'
+    },
+
     '.__status-item': {
       '&.-completed': {
         color: token.colorSuccess

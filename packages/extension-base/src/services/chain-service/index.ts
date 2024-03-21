@@ -52,6 +52,7 @@ export class ChainService {
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
+  private swapRefMapSubject = new Subject<Record<string, _AssetRef>>();
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -67,6 +68,7 @@ export class ChainService {
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.xcmRefMap);
+    this.swapRefMapSubject.next(this.swapRefMap);
 
     if (MODULE_SUPPORT.MANTA_ZK) {
       console.log('Init Manta ZK');
@@ -79,12 +81,28 @@ export class ChainService {
     this.logger = createLogger('chain-service');
   }
 
+  public subscribeSwapRefMap () {
+    return this.swapRefMapSubject;
+  }
+
   // Getter
   get xcmRefMap () {
     const result: Record<string, _AssetRef> = {};
 
     Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
       if (assetRef.path === _AssetRefPath.XCM) {
+        result[key] = assetRef;
+      }
+    });
+
+    return result;
+  }
+
+  get swapRefMap () {
+    const result: Record<string, _AssetRef> = {};
+
+    Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
+      if (assetRef.path === _AssetRefPath.SWAP) {
         result[key] = assetRef;
       }
     });
@@ -645,6 +663,7 @@ export class ChainService {
     this.dataMap.assetRefMap = updatedAssetRefMap;
 
     this.xcmRefMapSubject.next(this.xcmRefMap);
+    this.swapRefMapSubject.next(this.swapRefMap);
     this.logger.log('Finished updating latest asset ref');
   }
 

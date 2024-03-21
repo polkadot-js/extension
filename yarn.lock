@@ -62,6 +62,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@adraffy/ens-normalize@npm:1.10.1":
+  version: 1.10.1
+  resolution: "@adraffy/ens-normalize@npm:1.10.1"
+  checksum: 0836f394ea256972ec19a0b5e78cb7f5bcdfd48d8a32c7478afc94dd53ae44c04d1aa2303d7f3077b4f3ac2323b1f557ab9188e8059978748fdcd83e04a80dcc
+  languageName: node
+  linkType: hard
+
 "@adraffy/ens-normalize@npm:1.9.2":
   version: 1.9.2
   resolution: "@adraffy/ens-normalize@npm:1.9.2"
@@ -1827,6 +1834,18 @@ __metadata:
   peerDependencies:
     "@polkadot/api": ^10.7.3
   checksum: 6f1e9e63e5b05e07ea3ed46e0106b2e99441e1e86ab06f487a8be2f6bc6cf55283790048b58c7f4cb0fee599041b2daa504ac590ac8becb69b71017ca330a465
+  languageName: node
+  linkType: hard
+
+"@chainflip/sdk@npm:1.3.0-beta.1":
+  version: 1.3.0-beta.1
+  resolution: "@chainflip/sdk@npm:1.3.0-beta.1"
+  dependencies:
+    "@polkadot/util": ^12.6.2
+    "@polkadot/util-crypto": ^12.6.2
+    axios: ^1.6.7
+    ethers: ^6.11.1
+  checksum: 3c2524933676879ffb005c087eaf6e2d29a2a2faa35c9cfd03c7c91cda895dda1e1bf9823f411c4b36e59a7588bee10b3cca4775afe4125d8b199838a41c5c0f
   languageName: node
   linkType: hard
 
@@ -3758,6 +3777,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:1.2.0":
+  version: 1.2.0
+  resolution: "@noble/curves@npm:1.2.0"
+  dependencies:
+    "@noble/hashes": 1.3.2
+  checksum: bb798d7a66d8e43789e93bc3c2ddff91a1e19fdb79a99b86cd98f1e5eff0ee2024a2672902c2576ef3577b6f282f3b5c778bebd55761ddbb30e36bf275e83dd0
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:1.3.0, @noble/curves@npm:^1.3.0, @noble/curves@npm:~1.3.0":
   version: 1.3.0
   resolution: "@noble/curves@npm:1.3.0"
@@ -3771,6 +3799,13 @@ __metadata:
   version: 1.1.2
   resolution: "@noble/hashes@npm:1.1.2"
   checksum: 3c2a8cb7c2e053811032f242155d870c5eb98844d924d69702244d48804cb03b42d4a666c49c2b71164420d8229cb9a6f242b972d50d5bb2f1d673b98b041de2
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:1.3.2":
+  version: 1.3.2
+  resolution: "@noble/hashes@npm:1.3.2"
+  checksum: fe23536b436539d13f90e4b9be843cc63b1b17666a07634a2b1259dded6f490be3d050249e6af98076ea8f2ea0d56f578773c2197f2aa0eeaa5fba5bc18ba474
   languageName: node
   linkType: hard
 
@@ -6088,6 +6123,7 @@ __metadata:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
+    "@chainflip/sdk": 1.3.0-beta.1
     "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
@@ -6420,6 +6456,7 @@ __metadata:
     react-dom: ^18.2.0
     react-dropzone: ^11.5.1
     react-i18next: ^11.15.3
+    react-idle-timer: ^5.7.2
     react-infinite-scroll-component: ^6.1.0
     react-is: ^17.0.2
     react-lazy-load-image-component: ^1.5.6
@@ -9371,6 +9408,17 @@ __metadata:
     form-data: ^4.0.0
     proxy-from-env: ^1.1.0
   checksum: 7fb6a4313bae7f45e89d62c70a800913c303df653f19eafec88e56cea2e3821066b8409bc68be1930ecca80e861c52aa787659df0ffec6ad4d451c7816b9386b
+  languageName: node
+  linkType: hard
+
+"axios@npm:^1.6.7":
+  version: 1.6.8
+  resolution: "axios@npm:1.6.8"
+  dependencies:
+    follow-redirects: ^1.15.6
+    form-data: ^4.0.0
+    proxy-from-env: ^1.1.0
+  checksum: bf007fa4b207d102459300698620b3b0873503c6d47bf5a8f6e43c0c64c90035a4f698b55027ca1958f61ab43723df2781c38a99711848d232cad7accbcdfcdd
   languageName: node
   linkType: hard
 
@@ -13614,6 +13662,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"ethers@npm:^6.11.1":
+  version: 6.11.1
+  resolution: "ethers@npm:6.11.1"
+  dependencies:
+    "@adraffy/ens-normalize": 1.10.1
+    "@noble/curves": 1.2.0
+    "@noble/hashes": 1.3.2
+    "@types/node": 18.15.13
+    aes-js: 4.0.0-beta.5
+    tslib: 2.4.0
+    ws: 8.5.0
+  checksum: e8027c5071ad0370c61a1978f0602ab950d840c5923948f55e88b9808300e4e02e792bb793ea109ce7fa0e748f30a40a05f1202204a2b0402cdffbcb64a218e4
+  languageName: node
+  linkType: hard
+
 "ethers@npm:^6.4.2":
   version: 6.4.2
   resolution: "ethers@npm:6.4.2"
@@ -14258,6 +14321,16 @@ __metadata:
     debug:
       optional: true
   checksum: faa66059b66358ba65c234c2f2a37fcec029dc22775f35d9ad6abac56003268baf41e55f9ee645957b32c7d9f62baf1f0b906e68267276f54ec4b4c597c2b190
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.15.6":
+  version: 1.15.6
+  resolution: "follow-redirects@npm:1.15.6"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: a62c378dfc8c00f60b9c80cab158ba54e99ba0239a5dd7c81245e5a5b39d10f0c35e249c3379eae719ff0285fff88c365dd446fab19dee771f1d76252df1bbf5
   languageName: node
   linkType: hard
 
@@ -22224,6 +22297,16 @@ __metadata:
     react-native:
       optional: true
   checksum: 624c0a0313fac4e0d18560b83c99a8bd0a83abc02e5db8d01984e0643ac409d178668aa3a4720d01f7a0d9520d38598dcbff801d6f69a970bae67461de6cd852
+  languageName: node
+  linkType: hard
+
+"react-idle-timer@npm:^5.7.2":
+  version: 5.7.2
+  resolution: "react-idle-timer@npm:5.7.2"
+  peerDependencies:
+    react: ">=16"
+    react-dom: ">=16"
+  checksum: 6faf3cfa87c9d65ae7a87078a2d82db5b821936a45565a98d69e7341e4b4acd5610b1f26cf1a6809b5551e4c30357f2ab5ce729c4c33751f66cb9ce6072dfb02
   languageName: node
   linkType: hard
 

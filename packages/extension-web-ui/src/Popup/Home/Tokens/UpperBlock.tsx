@@ -5,7 +5,7 @@ import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { ArrowsClockwise, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -18,6 +18,7 @@ type Props = ThemeProps & {
   onOpenSendFund: () => void;
   onOpenBuyTokens: () => void;
   onOpenReceive: () => void;
+  onOpenSwap: () => void;
 };
 
 function Component (
@@ -27,6 +28,7 @@ function Component (
     onOpenBuyTokens,
     onOpenReceive,
     onOpenSendFund,
+    onOpenSwap,
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
@@ -143,6 +145,20 @@ function Component (
           shape='squircle'
           size={isShrink ? 'xs' : 'sm'}
           tooltip={t('Send tokens')}
+        />
+        <div className={'__button-space'} />
+        <Button
+          icon={
+            <Icon
+              phosphorIcon={ArrowsLeftRight}
+              size={isShrink ? 'sm' : 'md' }
+              weight={'duotone'}
+            />
+          }
+          onClick={onOpenSwap}
+          shape='squircle'
+          size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Swap')}
         />
         <div className={'__button-space'} />
         <Button

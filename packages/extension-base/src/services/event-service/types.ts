@@ -52,6 +52,9 @@ export interface EventRegistry {
 
   // Earning
   'earning.ready': [boolean];
+
+  // Swap
+  'swap.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

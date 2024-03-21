@@ -4,6 +4,7 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';
@@ -15,7 +16,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { EvmSignArea, SubstrateSignArea } from '../../parts/Sign';
-import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, DefaultWithdrawTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
+import { BaseTransactionConfirmation, BondTransactionConfirmation, CancelUnstakeTransactionConfirmation, ClaimRewardTransactionConfirmation, DefaultWithdrawTransactionConfirmation, FastWithdrawTransactionConfirmation, JoinPoolTransactionConfirmation, JoinYieldPoolConfirmation, LeavePoolTransactionConfirmation, SendNftTransactionConfirmation, SwapTransactionConfirmation, TokenApproveConfirmation, TransferBlock, UnbondTransactionConfirmation, WithdrawTransactionConfirmation } from './variants';
 
 interface Props extends ThemeProps {
   confirmation: ConfirmationQueueItem;
@@ -70,6 +71,8 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
       return DefaultWithdrawTransactionConfirmation;
     case ExtrinsicType.TOKEN_APPROVE:
       return TokenApproveConfirmation;
+    case ExtrinsicType.SWAP:
+      return SwapTransactionConfirmation;
     case ExtrinsicType.CROWDLOAN:
     case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
     case ExtrinsicType.STAKING_COMPOUNDING:
@@ -107,6 +110,18 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [closeAlert, openAlert]);
 
+  const txExpirationTime = useMemo((): number | undefined => {
+    // transaction might only be valid for a certain period of time
+    if (transaction.extrinsicType === ExtrinsicType.SWAP) {
+      const data = transaction.data as SwapTxData;
+
+      return data.quote.aliveUntil;
+    }
+    // todo: there might be more types of extrinsic
+
+    return undefined;
+  }, [transaction.data, transaction.extrinsicType]);
+
   return (
     <>
       <div className={CN(className, 'confirmation-content')}>
@@ -127,6 +142,7 @@ const Component: React.FC<Props> = (props: Props) => {
             extrinsicType={transaction.extrinsicType}
             id={item.id}
             request={(item as SigningRequest).request}
+            txExpirationTime={txExpirationTime}
           />
         )
       }
@@ -136,6 +152,7 @@ const Component: React.FC<Props> = (props: Props) => {
             extrinsicType={transaction.extrinsicType}
             id={item.id}
             payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
+            txExpirationTime={txExpirationTime}
             type={type}
           />
         )

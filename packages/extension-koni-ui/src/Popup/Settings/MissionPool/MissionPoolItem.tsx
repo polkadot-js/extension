@@ -186,15 +186,11 @@ function Component (props: Props): React.ReactElement<Props> {
           <div className='__item-name'>
             {data.name || ''}
           </div>
-          <div className={'__item-line-2'}>
-            <div className={'__item-timeline __item-value-row'}>
-              <div className='__item-value'>{timeline}</div>
-            </div>
-            <div className={'__item-rewards __item-value-row'}>
-              <div className='__item-label'>{t('Rewards')}:</div>
-              <div className='__item-value'>
-                {data.reward}
-              </div>
+          <div className={'__item-timeline'}>{timeline}</div>
+          <div className={'__item-rewards'}>
+            <div className='__item-label'>{t('Rewards')}:&nbsp;</div>
+            <div className='__item-value'>
+              {data.reward}
             </div>
           </div>
           <div className='__separator'></div>
@@ -235,25 +231,14 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       fontWeight: token.fontWeightStrong,
       color: token.colorWhite
     },
-    '.__item-line-2': {
-      display: 'flex',
+    '.__item-timeline, .__item-rewards': {
       fontSize: token.fontSizeSM,
       lineHeight: token.lineHeightSM,
-      justifyContent: 'space-between',
       color: token.colorTextTertiary,
-      fontWeight: token.bodyFontWeight,
-      overflow: 'hidden'
-    },
-    '.__item-timeline .__item-value': {
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis'
+      fontWeight: token.bodyFontWeight
     },
     '.__item-rewards': {
-      display: 'flex',
-      flex: 1,
-      justifyContent: 'flex-end',
-      paddingLeft: token.paddingXS
+      display: 'flex'
     },
     '.__separator': {
       height: 2,
@@ -267,9 +252,6 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap'
-    },
-    '.__item-timeline.__item-value-row': {
-      overflow: 'hidden'
     },
 
     '.__item-background': {

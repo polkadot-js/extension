@@ -4,12 +4,14 @@
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
 import { GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -24,6 +26,16 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
+  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
+  const chainInfo = useMemo(() => {
+    if (data && data.chains && data.chains.length > 0) {
+      const chain = data.chains[0];
+
+      return chainInfoMap[chain];
+    } else {
+      return null;
+    }
+  }, [chainInfoMap, data]);
 
   const timeline = useMemo<string>(() => {
     if (!data?.start_time && !data?.end_time) {
@@ -74,7 +86,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
       className={`${className}`}
       id={modalId}
       onCancel={onCancel}
-      title={t('Mission details')}
+      title={t(`${chainInfo?.name}` || 'Mission details')}
     >
       {
         data && (

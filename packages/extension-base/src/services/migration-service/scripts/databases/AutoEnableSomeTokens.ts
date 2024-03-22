@@ -9,20 +9,13 @@ export default class AutoEnableSomeTokens extends BaseMigrationJob {
     try {
       const slugs = ['statemint-NATIVE-DOT', 'statemint-LOCAL-DED', 'statemint-LOCAL-PINK', 'moonbeam-LOCAL-xcDOT', 'moonbeam-LOCAL-xcPINK'];
 
-      const assetSetting = await this.state.chainService.getAssetSettings();
-
       const migratedAssetSetting: Record<string, AssetSetting> = {};
 
       for (const slug of slugs) {
-        if (Object.keys(assetSetting).includes(slug)) {
-          migratedAssetSetting[slug] = { visible: true };
-        }
-      }
+        migratedAssetSetting[slug] = { visible: true };
 
-      this.state.chainService.setAssetSettings({
-        ...assetSetting,
-        ...migratedAssetSetting
-      });
+        await this.state.chainService.updateAssetSetting(slug, { visible: true }, true);
+      }
     } catch (e) {
       console.error(e);
     }

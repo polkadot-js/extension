@@ -9,9 +9,10 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { addLazy, canDerive } from '@subwallet/extension-base/utils';
+import { addLazy, canDerive, fetchStaticData } from '@subwallet/extension-base/utils';
 import { lazySendMessage, lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types';
 import { buildHierarchy } from '@subwallet/extension-koni-ui/utils/account/buildHierarchy';
 import { SessionTypes } from '@walletconnect/types';
 
@@ -39,6 +40,42 @@ export const updateAccountData = (data: AccountsWithCurrentAddress) => {
     master
   } as AccountsContext);
 };
+
+export const updateMissionPoolStore = (missions: MissionInfo[]) => {
+  store.dispatch({ type: 'missionPool/update',
+    payload: {
+      missions
+    } });
+};
+
+export const getMissionPoolData = (() => {
+  const handler: {
+    resolve?: (value: unknown[]) => void,
+    reject?: (reason?: any) => void
+  } = {};
+
+  const promise = new Promise<any[]>((resolve, reject) => {
+    handler.resolve = resolve;
+    handler.reject = reject;
+  });
+
+  const rs = {
+    promise,
+    start: () => {
+      fetchStaticData<MissionInfo[]>('airdrop-campaigns')
+        .then((data) => {
+          handler.resolve?.(data);
+        })
+        .catch(handler.reject);
+    }
+  };
+
+  rs.promise.then((data) => {
+    updateMissionPoolStore(data as MissionInfo[]);
+  }).catch(console.error);
+
+  return rs;
+})();
 
 export const updateCurrentAccountState = (currentAccountJson: AccountJson) => {
   store.dispatch({ type: 'accountState/updateCurrentAccount', payload: currentAccountJson });

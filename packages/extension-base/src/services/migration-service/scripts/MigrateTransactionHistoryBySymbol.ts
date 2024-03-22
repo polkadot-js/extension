@@ -9,47 +9,34 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
     const state = this.state;
 
     try {
-      const oldSlugs = [
-        'ethereum-ERC20-WFTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
-        'moonbeam-ERC20-CSG-0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F',
-        'astar-LOCAL-aUSD',
-        'astarEvm-ERC20-aUSD-0xfFFFFfFF00000000000000010000000000000001', //
-        'moonriver-LOCAL-xcaUSD', //
-        'moonriver-LOCAL-xckBTC',
-        'bifrost-LOCAL-aUSD',
-        'calamari-LOCAL-AUSD',
-        'shiden-LOCAL-aUSD',
-        'shidenEvm-ERC20-aUSD-0xfFFfFFfF00000000000000010000000000000000', //
-        'ethereum_goerli-NATIVE-GoerliETH',
-        'binance_test-NATIVE-BNB', //
-        'pangolin-LOCAL-CKTON', //
-        'zeta_test-NATIVE-aZETA' //
-      ];
-      const newSlugs = [
-        'ethereum-ERC20-FTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
-        'moonbeam-ERC20-CGS-0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F',
-        'astar-LOCAL-aSEED',
-        'astarEvm-ERC20-aSEED-0xfFFFFfFF00000000000000010000000000000001',
-        'moonriver-LOCAL-xcaSeed',
-        'moonriver-LOCAL-xcKBTC',
-        'bifrost-LOCAL-KUSD',
-        'calamari-LOCAL-AUSD',
-        'shiden-LOCAL-aSEED',
-        'shidenEvm-ERC20-aSEED-0xfFFfFFfF00000000000000010000000000000000',
-        'ethereum_goerli-NATIVE-ETH',
-        'binance_test-NATIVE-tBNB',
-        'pangolin-LOCAL-PKTON',
-        'zeta_test-NATIVE-ZETA'
-      ];
+      const changeSlugsMap: Record<string, string> = {
+        'ethereum-ERC20-WFTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870': 'ethereum-ERC20-FTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
+        'moonbeam-ERC20-CSG-0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F': 'moonbeam-ERC20-CGS-0x2Dfc76901bB2ac2A5fA5fc479590A490BBB10a5F',
+        'astar-LOCAL-aUSD': 'astar-LOCAL-aSEED',
+        'astarEvm-ERC20-aUSD-0xfFFFFfFF00000000000000010000000000000001': 'astarEvm-ERC20-aSEED-0xfFFFFfFF00000000000000010000000000000001',
+        'moonriver-LOCAL-xcaUSD': 'moonriver-LOCAL-xcaSeed',
+        'moonriver-LOCAL-xckBTC': 'moonriver-LOCAL-xcKBTC',
+        'bifrost-LOCAL-aUSD': 'bifrost-LOCAL-KUSD',
+        'calamari-LOCAL-aUSD': 'calamari-LOCAL-AUSD',
+        'shiden-LOCAL-aUSD': 'shiden-LOCAL-aSEED',
+        'shidenEvm-ERC20-aUSD-0xfFFfFFfF00000000000000010000000000000000': 'shidenEvm-ERC20-aSEED-0xfFFfFFfF00000000000000010000000000000000',
+        'ethereum_goerli-NATIVE-GoerliETH': 'ethereum_goerli-NATIVE-ETH',
+        'binance_test-NATIVE-BNB': 'binance_test-NATIVE-tBNB',
+        'pangolin-LOCAL-CKTON': 'pangolin-LOCAL-PKTON',
+        'zeta_test-NATIVE-aZETA': 'zeta_test-NATIVE-ZETA',
+        'origintrail-NATIVE-OTP': 'origintrail-NATIVE-NEURO',
+        'moonbeam-LOCAL-xciBTC': 'moonbeam-LOCAL-xcIBTC',
+        'tomochain-NATIVE-TOMO': 'tomochain-NATIVE-VIC'
+      };
 
       const allTxs: ITransactionHistoryItem[] = [];
 
-      await Promise.all(oldSlugs.map(async (oldSlug, i) => {
+      await Promise.all(Object.entries(changeSlugsMap).map(async ([oldSlug, newSlug], i) => {
         const oldSlugSplit = oldSlug.split('-');
         const oldChainSlug = oldSlugSplit[0];
         const oldSymbolSlug = oldSlugSplit[2];
 
-        const newSlugSplit = newSlugs[i].split('-');
+        const newSlugSplit = newSlug.split('-');
         const newSymbolSlug = newSlugSplit[2];
 
         const filterTransactions = await state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).and((tx) => {
@@ -60,6 +47,10 @@ export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob 
           for (const transaction of filterTransactions) {
             if (transaction.amount && transaction.amount.symbol === oldSymbolSlug) {
               transaction.amount.symbol = newSymbolSlug;
+            }
+
+            if (transaction.fee && transaction.fee.symbol === oldSymbolSlug) {
+              transaction.fee.symbol = newSymbolSlug;
             }
           }
         }

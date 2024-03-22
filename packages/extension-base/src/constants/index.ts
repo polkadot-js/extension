@@ -28,6 +28,7 @@ export const IGNORE_GET_SUBSTRATE_FEATURES_LIST: string[] = ['astarEvm', 'ethere
 export const IGNORE_QR_SIGNER: string[] = [];
 
 export const XCM_MIN_AMOUNT_RATIO = 1.2;
+export const XCM_FEE_RATIO = 1.2;
 
 export const GAS_PRICE_RATIO = 1 + (2 / 100);
 

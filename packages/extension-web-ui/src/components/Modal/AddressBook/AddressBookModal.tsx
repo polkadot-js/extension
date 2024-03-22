@@ -2,12 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AbstractAddressJson, AccountJson } from '@subwallet/extension-base/background/types';
-import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackIcon } from '@subwallet/extension-web-ui/components';
 import { BaseModal } from '@subwallet/extension-web-ui/components/Modal/BaseModal';
-import { useFilterModal, useFormatAddress, useSelector } from '@subwallet/extension-web-ui/hooks';
+import { useFilterModal, useFormatAddress, useGetChainInfoByGenesisHash, useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { funcSortByName, isAccountAll, reformatAddress, toShort } from '@subwallet/extension-web-ui/utils';
+import { funcSortByName, isAccountAll, reformatAddress } from '@subwallet/extension-web-ui/utils';
 import { Badge, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import CN from 'classnames';
@@ -78,6 +77,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const formatAddress = useFormatAddress(addressPrefix);
 
+  const chainInfo = useGetChainInfoByGenesisHash(networkGenesisHash);
+  const chain = chainInfo?.slug || '';
   const filterModal = useMemo(() => `${id}-filter-modal`, [id]);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(filterModal);
@@ -103,9 +104,13 @@ const Component: React.FC<Props> = (props: Props) => {
     const result: AccountItem[] = [];
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.RECENT)) && recent.forEach((acc) => {
-      const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
+      const chains = acc.recentChainSlugs || [];
 
-      result.push({ ...acc, address: address, group: AccountGroup.RECENT });
+      if (chains.includes(chain)) {
+        const address = isAddress(acc.address) ? reformatAddress(acc.address) : acc.address;
+
+        result.push({ ...acc, address: address, group: AccountGroup.RECENT });
+      }
     });
 
     (!selectedFilters.length || selectedFilters.includes(AccountGroup.CONTACT)) && contacts.forEach((acc) => {
@@ -125,7 +130,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return result
       .sort(funcSortByName)
       .sort((a, b) => getGroupPriority(b) - getGroupPriority(a));
-  }, [accounts, contacts, networkGenesisHash, recent, selectedFilters]);
+  }, [accounts, chain, contacts, networkGenesisHash, recent, selectedFilters]);
 
   const searchFunction = useCallback((item: AccountItem, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -144,22 +149,34 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [id, inactiveModal, onResetFilter]);
 
   const onSelectItem = useCallback((item: AccountItem) => {
+    const address = reformatAddress(item.address, addressPrefix);
+
     return () => {
       inactiveModal(id);
-      onSelect(item.address);
+      onSelect(address);
       onResetFilter();
     };
-  }, [id, inactiveModal, onResetFilter, onSelect]);
+  }, [addressPrefix, id, inactiveModal, onResetFilter, onSelect]);
 
   const renderItem = useCallback((item: AccountItem) => {
     const address = formatAddress(item);
-    const selected = value ? isSameAddress(address, value) : false;
+    const isRecent = item.group === AccountGroup.RECENT;
+    let selected: boolean;
+
+    if (isEthereumAddress(value)) {
+      selected = value.toLowerCase() === address.toLowerCase();
+    } else {
+      selected = value === address;
+    }
 
     return (
       <AccountItemWithName
-        accountName={item.name || toShort(item.address, 4, 4)}
+        accountName={item.name}
         address={address}
+        addressPreLength={isRecent ? 9 : 4}
+        addressSufLength={isRecent ? 9 : 4}
         avatarSize={24}
+        fallbackName={false}
         isSelected={selected}
         key={`${item.address}_${item.group}`}
         onClick={onSelectItem(item)}

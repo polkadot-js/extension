@@ -7,7 +7,7 @@ import BaseMigrationJob from '@subwallet/extension-base/services/migration-servi
 export default class AutoEnableSomeTokens extends BaseMigrationJob {
   public override async run (): Promise<void> {
     try {
-      const slugs = ['statemint-NATIVE-DOT', 'statemint-LOCAL-DED', 'statemint-LOCAL-PINK', 'moonbeam-LOCAL-xcDOT', 'moonbeam-LOCAL-xcPINK']
+      const slugs = ['statemint-NATIVE-DOT', 'statemint-LOCAL-DED', 'statemint-LOCAL-PINK', 'moonbeam-LOCAL-xcDOT', 'moonbeam-LOCAL-xcPINK'];
 
       const assetSetting = await this.state.chainService.getAssetSettings();
 

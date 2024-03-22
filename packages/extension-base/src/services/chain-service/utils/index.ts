@@ -512,3 +512,5 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     needUpdateChainApiList
   };
 }
+
+export * from './patch';

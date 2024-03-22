@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -52,6 +52,7 @@ export class ChainService {
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
+  private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -581,21 +582,23 @@ export class ChainService {
 
   async initAssetRefMap () {
     try {
-      const fetchPromise = this.fetchLatestBlockedAssetRef();
-      const timeout = new Promise((resolve) => {
+      const fetchPromise = this.fetchLatestAssetRef();
+      const timeout = new Promise<null>((resolve) => {
         const id = setTimeout(() => {
           clearTimeout(id);
           resolve(null);
         }, 1000);
       });
 
-      const disabledAssetRefs = await Promise.race([
+      const rs = await Promise.race([
         timeout,
         fetchPromise
-      ]) as string[] || null;
+      ]);
 
-      if (disabledAssetRefs) {
-        this.handleLatestBlockedAssetRef(disabledAssetRefs);
+      if (rs) {
+        const [disabledAssetRefs, latestAssetRefMap] = rs;
+
+        this.handleLatestAssetRef(disabledAssetRefs, latestAssetRefMap);
       } else {
         this.dataMap.assetRefMap = AssetRefMap;
       }
@@ -635,8 +638,14 @@ export class ChainService {
     }
   }
 
-  handleLatestBlockedAssetRef (latestBlockedAssetRefList: string[]) {
+  handleLatestAssetRef (latestBlockedAssetRefList: string[], latestAssetRefMap: Record<string, _AssetRef> | null) {
     const updatedAssetRefMap: Record<string, _AssetRef> = { ...AssetRefMap };
+
+    if (latestAssetRefMap) {
+      for (const [assetRefKey, assetRef] of Object.entries(latestAssetRefMap)) {
+        updatedAssetRefMap[assetRefKey] = assetRef;
+      }
+    }
 
     latestBlockedAssetRefList.forEach((blockedAssetRef) => {
       delete updatedAssetRefMap[blockedAssetRef];
@@ -666,13 +675,35 @@ export class ChainService {
     this.logger.log('Finished updating latest price IDs');
   }
 
+  handleLatestAssetData (latestAssetInfo: Record<string, _ChainAsset> | null, latestAssetLogoMap: Record<string, string> | null) {
+    try {
+      if (latestAssetInfo && Object.keys(latestAssetInfo).length > 0) {
+        this.dataMap.assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+
+        this.assetRegistrySubject.next(this.dataMap.assetRegistry);
+        this.eventService.emit('asset.updateState', '');
+      }
+
+      if (latestAssetLogoMap && Object.keys(latestAssetLogoMap).length > 0) {
+        const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+
+        this.assetLogoMapSubject.next(logoMap);
+      }
+    } catch (e) {
+      console.error('Error fetching latest asset data');
+    }
+  }
+
   handleLatestData () {
+    this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
+      this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+    }).catch(console.error);
     this.fetchLatestChainData().then((latestChainInfo) => {
       this.handleLatestProviderData(latestChainInfo);
     }).catch(console.error);
 
-    this.fetchLatestBlockedAssetRef().then((latestAssetRef) => {
-      this.handleLatestBlockedAssetRef(latestAssetRef);
+    this.fetchLatestAssetRef().then(([latestAssetRef, latestAssetRefMap]) => {
+      this.handleLatestAssetRef(latestAssetRef, latestAssetRefMap);
     }).catch(console.error);
 
     this.fetchLatestPriceIdsData().then((latestPriceIds) => {
@@ -895,13 +926,17 @@ export class ChainService {
     // }
   }
 
+  private async fetchLatestAssetData () {
+    return await Promise.all([fetchPatchData<Record<string, _ChainAsset>>('ChainAsset.json'), fetchPatchData<Record<string, string>>('AssetLogoMap.json')]);
+  }
+
   // @ts-ignore
   private async fetchLatestPriceIdsData () {
     return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
   }
 
-  private async fetchLatestBlockedAssetRef () {
-    return await fetchStaticData<string[]>('chain-assets/disabled-xcm-channels');
+  private async fetchLatestAssetRef () {
+    return await Promise.all([fetchStaticData<string[]>('chain-assets/disabled-xcm-channels'), fetchPatchData<Record<string, _AssetRef>>('AssetRef.json')]);
   }
 
   private async initChains () {
@@ -1733,8 +1768,12 @@ export class ChainService {
     return Promise.resolve(ChainLogoMap);
   }
 
-  public async getAssetLogoMap (): Promise<Record<string, string>> {
-    return Promise.resolve(AssetLogoMap);
+  public getAssetLogoMap (): Record<string, string> {
+    return this.assetLogoMapSubject.value;
+  }
+
+  public subscribeAssetLogoMap () {
+    return this.assetLogoMapSubject;
   }
 
   public resetWallet (resetAll: boolean) {

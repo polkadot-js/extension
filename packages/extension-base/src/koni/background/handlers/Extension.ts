@@ -3545,6 +3545,20 @@ export default class KoniExtension {
     };
   }
 
+  private subscribeAssetLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.assets.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeAssetLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getAssetLogoMap();
+  }
+
   // Phishing detect
 
   private async passPhishingPage ({ url }: RequestPassPhishingPage) {
@@ -4757,6 +4771,8 @@ export default class KoniExtension {
 
       case 'pri(settings.getLogoMaps)':
         return await this.getLogoMap();
+      case 'pri(settings.logo.assets.subscribe)':
+        return this.subscribeAssetLogoMap(id, port);
 
       /// Wallet Connect
       case 'pri(walletConnect.connect)':

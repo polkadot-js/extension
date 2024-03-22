@@ -3,6 +3,7 @@
 
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { StakingPoolItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
@@ -11,7 +12,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/
 import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetPoolTargetList, useSelector, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, Tooltip, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -74,6 +75,17 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+
+  const maxPoolMembersValue = useMemo(() => {
+    const poolInfo = poolInfoMap[slug];
+
+    if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
+  }, [poolInfoMap, slug]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -126,18 +138,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
       })
       .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {
-        if (a.isCrowded && !b.isCrowded) {
-          return 1;
-        } else if (!a.isCrowded && b.isCrowded) {
-          return -1;
-        }
-
         switch (sortSelection) {
           case SortKey.MEMBER:
             return a.memberCounter - b.memberCounter;
           case SortKey.TOTAL_POOLED:
             return new BigN(b.bondedAmount).minus(a.bondedAmount).toNumber();
+
           case SortKey.DEFAULT:
+            if (a.isCrowded && !b.isCrowded) {
+              return 1;
+            } else if (!a.isCrowded && b.isCrowded) {
+              return -1;
+            } else {
+              return 0;
+            }
+
           default:
             return 0;
         }
@@ -182,7 +197,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             placement={'top'}
             title={t('This pool has reached the maximum number of members/nominators. Select another to continue')}
           >
-            <div className={'__pool-item-opacity'}>
+            <div className={'__pool-item-wrapper'}>
               <StakingPoolItem
                 {...item}
                 className={'pool-item'}
@@ -378,8 +393,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <EarningPoolDetailModal
         detailItem={viewDetailItem}
+        maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}
-        slug={slug}
       />
     </>
   );
@@ -395,7 +410,7 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
     },
-    '.__pool-item-opacity': {
+    '.__pool-item-wrapper': {
       marginBottom: token.marginXS
     },
 

@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { YieldPoolType } from '@subwallet/extension-base/types';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
@@ -16,11 +15,11 @@ type Props = ThemeProps & {
   onCancel?: () => void;
   validatorItem: ValidatorDataType;
   chain: string;
-  slug: string;
+  maxPoolMembersValue?: number;
 };
 
 function Component (props: Props): React.ReactElement<Props> {
-  const { chain, className, onCancel, slug, validatorItem } = props;
+  const { chain, className, maxPoolMembersValue, onCancel, validatorItem } = props;
   const { address: validatorAddress,
     commission,
     decimals,
@@ -32,16 +31,6 @@ function Component (props: Props): React.ReactElement<Props> {
     symbol,
     totalStake } = validatorItem;
   const { t } = useTranslation();
-  const { poolInfoMap } = useSelector((state) => state.earning);
-  const maxPoolMembersValue = useMemo(() => {
-    const poolInfo = poolInfoMap[slug];
-
-    if (poolInfo.type === YieldPoolType.NATIVE_STAKING || poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-      return poolInfo.maxPoolMembers;
-    }
-
-    return undefined;
-  }, [poolInfoMap, slug]);
 
   const { inactiveModal } = useContext(ModalContext);
 

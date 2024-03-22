@@ -3,6 +3,7 @@
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
@@ -97,6 +98,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
 
+  const maxPoolMembersValue = useMemo(() => {
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
+  }, [poolInfo]);
+
   const sortingOptions: SortOption[] = useMemo(() => {
     const result: SortOption[] = [
       {
@@ -186,12 +195,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const resultList = useMemo((): ValidatorDataType[] => {
     return [...items].sort((a: ValidatorDataType, b: ValidatorDataType) => {
-      if (a.isCrowded && !b.isCrowded) {
-        return 1;
-      } else if (!a.isCrowded && b.isCrowded) {
-        return -1;
-      }
-
       switch (sortSelection) {
         case SortKey.COMMISSION:
           return a.commission - b.commission;
@@ -201,7 +204,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           return new BigN(a.minBond).minus(b.minBond).toNumber();
         case SortKey.NOMINATING:
           return sortValidator(a, b);
+
         case SortKey.DEFAULT:
+          if (a.isCrowded && !b.isCrowded) {
+            return 1;
+          } else if (!a.isCrowded && b.isCrowded) {
+            return -1;
+          } else {
+            return 0;
+          }
+
         default:
           return 0;
       }
@@ -228,8 +240,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     setSortSelection(value as SortKey);
   }, []);
 
-  const onClickItem = useCallback((value: string) => {
-    onChangeSelectedValidator(value);
+  const onClickItem = useCallback((item: ValidatorDataType) => {
+    if (!item.isCrowded) {
+      return () => {
+        onChangeSelectedValidator(getValidatorKey(item.address, item.identity));
+      };
+    }
+
+    return undefined;
   }, [onChangeSelectedValidator]);
 
   const onClickMore = useCallback((item: ValidatorDataType) => {
@@ -267,14 +285,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           placement={'top'}
           title={t(`This ${handleValidatorLabel} has reached the maximum number of members/nominators. Select another to continue`)}
         >
-          <div className={'__pool-item-opacity'}>
+          <div className={'__pool-item-wrapper'}>
             <StakingValidatorItem
               apy={item?.expectedReturn?.toString() || '0'}
               className={'pool-item'}
               isNominated={nominated}
               isSelected={selected}
               key={key}
-              onClick={onClickItem}
+              onClick={onClickItem(item)}
               onClickMoreBtn={onClickMore(item)}
               validatorInfo={item}
             />
@@ -287,7 +305,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           isNominated={nominated}
           isSelected={selected}
           key={key}
-          onClick={onClickItem}
+          onClick={onClickItem(item)}
           onClickMoreBtn={onClickMore(item)}
           validatorInfo={item}
         />
@@ -421,8 +439,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       {viewDetailItem && (
         <EarningValidatorDetailModal
           chain={chain}
+          maxPoolMembersValue={maxPoolMembersValue}
           validatorItem={viewDetailItem}
-          slug={slug}
         />
       )}
     </>
@@ -435,7 +453,7 @@ const EarningValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: 
       paddingTop: token.paddingXS,
       paddingBottom: token.paddingLG
     },
-    '.__pool-item-opacity': {
+    '.__pool-item-wrapper': {
       marginBottom: token.marginXS
     },
 

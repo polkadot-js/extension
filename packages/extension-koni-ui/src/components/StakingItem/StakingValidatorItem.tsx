@@ -32,16 +32,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const _onSelect = useCallback(() => {
-    if (!validatorInfo.isCrowded) {
-      onClick && onClick(getValidatorKey(validatorInfo.address, validatorInfo.identity));
-    }
+    onClick && onClick(getValidatorKey(validatorInfo.address, validatorInfo.identity));
   },
-  [onClick, validatorInfo.address, validatorInfo.identity, validatorInfo.isCrowded]
+  [onClick, validatorInfo.address, validatorInfo.identity]
   );
 
   return (
     <div
-      className={CN(className, { disabled: disabled, isCrowded: validatorInfo.isCrowded })}
+      className={CN(className, { disabled: disabled, 'is-crowded': validatorInfo.isCrowded })}
       onClick={disabled ? undefined : _onSelect}
     >
       <Web3Block
@@ -128,8 +126,8 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
         background: token.colorBgSecondary
       }
     },
-    '&.isCrowded': {
-      '.middle-item__name, .middle-item__commission, .middle-item__apy, .right-item__select-icon': {
+    '&.is-crowded': {
+      '.ant-web3-block-left-item, .ant-web3-block-middle-item, .right-item__select-icon': {
         opacity: 0.4
       }
     },

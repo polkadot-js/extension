@@ -11,6 +11,7 @@ import MissionItem from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool
 import { missionCategories, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { computeStatus } from '@subwallet/extension-koni-ui/utils';
 import { Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, GlobeHemisphereWest } from 'phosphor-react';
@@ -21,36 +22,6 @@ import styled from 'styled-components';
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'mission-filter-modal';
-
-function computeStatus (item: MissionInfo): MissionCategoryType {
-  const now = Date.now();
-
-  try {
-    if (item.start_time) {
-      const startTime = new Date(item.start_time).getTime();
-
-      if (now < startTime) {
-        return MissionCategoryType.UPCOMING;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  try {
-    if (item.end_time) {
-      const endTime = new Date(item.end_time).getTime();
-
-      if (now > endTime) {
-        return MissionCategoryType.ARCHIVED;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return MissionCategoryType.LIVE;
-}
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();

@@ -4,14 +4,12 @@
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
-import { GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
+import { CaretLeft, GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
-import { useSelector } from 'react-redux';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -26,17 +24,6 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const logoMap = useContext<Theme>(ThemeContext as Context<Theme>).logoMap;
-  const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
-  const modalTitle = useMemo(() => {
-    if (data && data.chains && data.chains.length === 1) {
-      const chain = data.chains[0];
-
-      return chainInfoMap[chain].name;
-    } else {
-      return t('Mission details');
-    }
-  }, [chainInfoMap, data, t]);
-
   const timeline = useMemo<string>(() => {
     if (!data?.start_time && !data?.end_time) {
       return t('TBD');
@@ -67,6 +54,13 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
     inactiveModal(modalId);
   }, [inactiveModal]);
 
+  const modalCloseButton = <Icon
+    customSize={'24px'}
+    phosphorIcon={CaretLeft}
+    type='phosphor'
+    weight={'light'}
+  />;
+
   const status = useMemo(() => {
     if (
       data?.status && missionCategoryMap[data?.status]
@@ -84,9 +78,10 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
   return (
     <SwModal
       className={`${className}`}
+      closeIcon={modalCloseButton}
       id={modalId}
       onCancel={onCancel}
-      title={modalTitle}
+      title={t(data?.name || 'Mission details')}
     >
       {
         data && (
@@ -232,6 +227,11 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
 
 export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '.ant-sw-modal-content': {
+      paddingBottom: 0,
+      maxHeight: 600,
+      borderRadius: 0
+    },
     '.__modal-background': {
       height: 70,
       backgroundPosition: 'center',

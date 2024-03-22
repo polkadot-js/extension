@@ -13,7 +13,7 @@ import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDef
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { computeStatus, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, Parachute, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
@@ -82,8 +82,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
-  const liveMissionsCount: number = useMemo(() => {
-    return missions.filter((obj) => obj.status === 'live').length;
+  const liveMissionsCount = useMemo(() => {
+    return missions.filter((item) => computeStatus(item) === 'live').length;
   }, [missions]);
 
   const { isUILocked, lock, unlock } = useUILock();

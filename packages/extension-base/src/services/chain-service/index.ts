@@ -821,6 +821,7 @@ export class ChainService {
 
     this.lockChainInfoMap = true;
     chainStateMap[chainSlug].active = false;
+    chainStateMap[chainSlug].manualTurnOff = true;
     // Set disconnect state for inactive chain
     this.updateChainConnectionStatus(chainSlug, _ChainConnectionStatus.DISCONNECTED);
     this.destroyApiForChain(chainInfo);

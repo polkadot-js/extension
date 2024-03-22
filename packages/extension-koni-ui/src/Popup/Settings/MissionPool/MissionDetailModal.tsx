@@ -132,6 +132,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 )
               }
               <MetaInfo.Default
+                className={'__status-pool'}
                 label={t('Status')}
                 valueColorSchema={data.status === MissionCategoryType.ARCHIVED ? 'warning' : 'success'}
               >
@@ -145,6 +146,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 {data.description}
               </MetaInfo.Default>
               <MetaInfo.Default
+                className={'__total-token-supply'}
                 label={t('Total token supply')}
                 valueColorSchema={'gray'}
               >
@@ -232,8 +234,17 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       maxHeight: 600,
       borderRadius: 0
     },
+    '.ant-sw-modal-header': {
+      borderBottom: 0
+    },
+    '.__total-token-supply .__value': {
+      fontWeight: token.fontWeightStrong
+    },
+    '.__status-pool .__value': {
+      fontWeight: token.fontWeightStrong
+    },
     '.__modal-background': {
-      height: 70,
+      height: 65,
       backgroundPosition: 'center',
       backgroundSize: 'cover',
       filter: 'blur(7.5px)'
@@ -306,7 +317,7 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       marginRight: -token.margin,
       marginLeft: -token.margin,
       marginBottom: -token.margin,
-      backgroundColor: token.colorBgDefault,
+      backgroundColor: token.colorBgLayout,
       position: 'sticky',
       bottom: -token.size,
       zIndex: 10

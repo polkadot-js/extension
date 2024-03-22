@@ -250,6 +250,8 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       overflowX: 'auto'
     },
     '.ant-sw-header-container-padding-vertical': {
+      paddingTop: 0,
+      paddingBottom: 0,
       marginTop: '8px !important',
       marginBottom: '8px !important'
     }

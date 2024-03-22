@@ -15,7 +15,7 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
+import { getAccountType, isAccountAll, openInNewTab, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import classNames from 'classnames';
@@ -282,6 +282,10 @@ function Component (): React.ReactElement {
   [buyInfos, navigate]
   );
 
+  const onOpenSwap = useCallback(() => {
+    openInNewTab('https://web.subwallet.app/transaction/swap')();
+  }, []);
+
   useEffect(() => {
     if (currentTokenInfo) {
       activeModal(TokenDetailModalId);
@@ -329,6 +333,7 @@ function Component (): React.ReactElement {
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}
           onOpenSendFund={onOpenSendFund}
+          onOpenSwap={onOpenSwap}
           symbol={symbol}
         />
       </div>

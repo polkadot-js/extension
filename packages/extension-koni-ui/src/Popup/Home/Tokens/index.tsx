@@ -17,7 +17,7 @@ import { UpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/Upper
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, openInNewTab, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, SwAlert } from '@subwallet/react-ui';
 import classNames from 'classnames';
 import { Coins, FadersHorizontal } from 'phosphor-react';
@@ -164,6 +164,10 @@ const Component = (): React.ReactElement => {
   [navigate]
   );
 
+  const onOpenSwap = useCallback(() => {
+    openInNewTab('https://web.subwallet.app/transaction/swap')();
+  }, []);
+
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
 
@@ -203,6 +207,7 @@ const Component = (): React.ReactElement => {
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}
           onOpenSendFund={onOpenSendFund}
+          onOpenSwap={onOpenSwap}
           totalChangePercent={totalBalanceInfo.change.percent}
           totalChangeValue={totalBalanceInfo.change.value}
           totalValue={totalBalanceInfo.convertedValue}

@@ -172,7 +172,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
-      const disabled = !!accounts.find((acc) => acc.address === originAddress);
+
+      const disabled = !!accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
 
       return (
         <AccountItemWithName

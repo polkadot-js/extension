@@ -1,13 +1,14 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
 
 import '@polkadot/extension-mocks/chrome';
 
 import type { ReactWrapper } from 'enzyme';
 import type { AccountJson } from '@polkadot/extension-base/background/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
+import type { HexString } from '@polkadot/util/types';
 import type { Props as AddressComponentProps } from './Address.js';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
@@ -48,7 +49,7 @@ interface AccountTestJson extends AccountJson {
 interface AccountTestGenesisJson extends AccountTestJson {
   expectedEncodedAddress: string;
   expectedNetworkLabel: string;
-  genesisHash: string;
+  genesisHash: HexString;
 }
 
 const externalAccount = { address: '5EeaoDj4VDk8V6yQngKBaCD5MpJUCHrhYjVhBjgMHXoYon1s', expectedIconTheme: 'polkadot', isExternal: true, name: 'External Account', type: 'sr25519' } as AccountJson;
@@ -341,7 +342,7 @@ describe('Address', () => {
     });
 
     it('shows the parent account and suri', () => {
-      const expectedParentNameSuri = getParentNameSuri(childAccount.parentName as string, childAccount.suri);
+      const expectedParentNameSuri = getParentNameSuri(childAccount.parentName, childAccount.suri);
 
       expect(wrapper.find('.parentName').text()).toEqual(expectedParentNameSuri);
     });

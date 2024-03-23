@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
@@ -6,7 +6,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
 
 import { ActionBar, ActionContext, Button, ButtonArea, Checkbox, Link } from '../../../components/index.js';
-import useTranslation from '../../../hooks/useTranslation.js';
+import { useTranslation } from '../../../hooks/index.js';
 import { approveSignPassword, cancelSignRequest, isSignLocked } from '../../../messaging.js';
 import { styled } from '../../../styled.js';
 import Unlock from '../Unlock.js';
@@ -21,7 +21,7 @@ interface Props {
   signId: string;
 }
 
-function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): JSX.Element {
+function SignArea ({ buttonText, className, error, isExternal, isFirst, setError, signId }: Props): React.ReactElement {
   const [savePass, setSavePass] = useState(false);
   const [isLocked, setIsLocked] = useState<boolean | null>(null);
   const [password, setPassword] = useState('');
@@ -31,7 +31,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
   useEffect(() => {
     setIsLocked(null);
-    let timeout: NodeJS.Timeout;
+    let timeout: ReturnType<typeof setTimeout>;
 
     !isExternal && isSignLocked(signId)
       .then(({ isLocked, remainingTime }) => {
@@ -81,11 +81,11 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
     <Checkbox
       checked={savePass}
       label={ isLocked
-        ? t<string>(
+        ? t(
           'Remember my password for the next {{expiration}} minutes',
           { replace: { expiration: PASSWORD_EXPIRY_MIN } }
         )
-        : t<string>(
+        : t(
           'Extend the period without password by {{expiration}} minutes',
           { replace: { expiration: PASSWORD_EXPIRY_MIN } }
         )
@@ -123,14 +123,14 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
           isDanger
           onClick={_onCancel}
         >
-          {t<string>('Cancel')}
+          {t('Cancel')}
         </Link>
       </ActionBar>
     </ButtonArea>
   );
 }
 
-export default styled(SignArea)`
+export default styled(SignArea)<Props>`
   flex-direction: column;
   padding: 6px 24px;
 

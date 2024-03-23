@@ -1,19 +1,21 @@
-// Copyright 2019-2023 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2024 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+/* global chrome */
 
 import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
+import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { getId } from '@polkadot/extension-base/utils/getId';
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
 import { knownGenesis } from '@polkadot/networks/defaults';
 import settings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores/index.js';
+import { getId } from '../../utils/getId.js';
 import { withErrorLog } from './helpers.js';
 
 interface Resolver<T> {
@@ -28,19 +30,7 @@ interface AuthRequest extends Resolver<AuthResponse> {
   url: string;
 }
 
-export type AuthUrls = Record<string, AuthUrlInfo>;
-
 export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlInfo['authorizedAccounts']][]
-
-export interface AuthUrlInfo {
-  count: number;
-  id: string;
-  // this is from pre-0.44.1
-  isAllowed?: boolean;
-  origin: string;
-  url: string;
-  authorizedAccounts: string[];
-}
 
 interface MetaRequest extends Resolver<boolean> {
   id: string;
@@ -490,7 +480,7 @@ export default class State {
     }, {} as ResponseRpcListProviders));
   }
 
-  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  public rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     const provider = this.#injectedProviders.get(port);
 
     assert(provider, 'Cannot call pub(rpc.subscribe) before provider is set');

@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
@@ -129,11 +129,11 @@ export default function Popup (): React.ReactElement {
   }
 
   const Root = isWelcomeDone
-    ? authRequests && authRequests.length
+    ? authRequests?.length
       ? wrapWithErrorBoundary(<Authorize />, 'authorize')
-      : metaRequests && metaRequests.length
+      : metaRequests?.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
-        : signRequests && signRequests.length
+        : signRequests?.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
           : wrapWithErrorBoundary(<Accounts />, 'accounts')
     : wrapWithErrorBoundary(<Welcome />, 'welcome');

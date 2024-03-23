@@ -1,5 +1,133 @@
 # CHANGELOG
 
+## 0.46.9 Mar 20, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+ - Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.12.4
+- Upgrade to `@polkadot/phishing` 0.22.4
+
+
+## 0.46.8 Mar 13, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.12.2
+- Upgrade to `@polkadot/phishing` 0.22.3
+
+
+## 0.46.7 Feb 28, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.11.2
+- Upgrade to `@polkadot/ui` 3.6.5
+- Upgrade to `@polkadot/phishing` 0.22.2
+
+
+## 0.46.6 Nov 18, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/util` 12.6.1
+- Upgrade to `@polkadot/api` 10.11.1
+
+
+## 0.46.5 Jun 12, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Adjust object index access for stricter tsconfig settings
+- Upgrade to `@polkadot/api` 10.9.1
+- Upgrade to `@polkadot/util` 12.3.2
+
+
+## 0.46.4 Jun 5, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.8.1
+- Upgrade to `@polkadot/util` 12.2.2
+
+
+## 0.46.3 May 13, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Add `module` to `package.json` export map (ESM-only)
+- Upgrade to `@polkadot/api` 10.6.1
+- Upgrade to `@polkadot/util` 12.1.1
+
+
+## 0.46.2 Apr 30, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Adjust compilation output for `__internal__` class fields
+- Upgrade to `@polkadot/api` 10.5.1
+- Upgrade to `@polkadot/util` 12.1.1
+
+
+## 0.46.1 Apr 22, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.4.1
+- Upgrade to `@polkadot/util` 12.0.1
+
+
+## 0.45.5 Apr 1, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Upgrade to `@polkadot/api` 10.2.2
+- Upgrade to `@polkadot/util` 11.1.3
+
+
+## 0.45.4 Mar 25, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Updated to `@polkadot/api` 10.2.1
+- Updated to `@polkadot/util` 11.1.2
+
+
+## 0.45.3 Mar 19, 2023
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Updated to `@polkadot/api` 10.1.4
+- Updated to `@polkadot/util` 11.1.1
+
+
 ## 0.45.2 Mar 11, 2023
 
 - **Important** Not published to the stores, aligns with latest released packages.
@@ -9,6 +137,7 @@ Changes:
 - Use consistent `.js` imports in source files (TS moduleResolution)
 - Updated to `@polkadot/api` 10.1.1
 - Updated to `@polkadot/util` 11.0.2
+
 
 ## 0.45.1 Mar 5, 2023
 

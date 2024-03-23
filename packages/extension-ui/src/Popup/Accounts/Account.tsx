@@ -1,16 +1,15 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson } from '@polkadot/extension-base/background/types';
+import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { canDerive } from '@polkadot/extension-base/utils';
-import { ThemeProps } from '@polkadot/extension-ui/types';
 
 import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components/index.js';
-import useGenesisHashOptions from '../../hooks/useGenesisHashOptions.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
 import { editAccount, tieAccount } from '../../messaging.js';
 import { Name } from '../../partials/index.js';
 import { styled } from '../../styled.js';
@@ -50,8 +49,8 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   }, [address, selectedAccounts, setSelectedAccounts]);
 
   const _onChangeGenesis = useCallback(
-    (genesisHash?: string | null): void => {
-      tieAccount(address, genesisHash || null)
+    (genesisHash?: HexString | null): void => {
+      tieAccount(address, genesisHash ?? null)
         .catch(console.error);
     },
     [address]
@@ -79,14 +78,14 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         className='menuItem'
         onClick={_toggleEdit}
       >
-        {t<string>('Rename')}
+        {t('Rename')}
       </Link>
       {!isExternal && canDerive(type) && (
         <Link
           className='menuItem'
           to={`/account/derive/${address}/locked`}
         >
-          {t<string>('Derive New Account')}
+          {t('Derive New Account')}
         </Link>
       )}
       <MenuDivider />
@@ -96,7 +95,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
           isDanger
           to={`/account/export/${address}`}
         >
-          {t<string>('Export Account')}
+          {t('Export Account')}
         </Link>
       )}
       <Link
@@ -104,7 +103,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         isDanger
         to={`/account/forget/${address}`}
       >
-        {t<string>('Forget Account')}
+        {t('Forget Account')}
       </Link>
       {!isHardware && (
         <>
@@ -161,7 +160,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   );
 }
 
-export default styled(Account)(({ theme }: ThemeProps) => `
+export default styled(Account)<Props>`
   .address {
     margin-bottom: 8px;
   }
@@ -174,7 +173,7 @@ export default styled(Account)(({ theme }: ThemeProps) => `
     width: 350px;
 
     .danger {
-      background-color: ${theme.bodyColor};
+      background-color: var(--bodyColor);
       margin-top: -13px;
       width: 330px;
     }
@@ -202,4 +201,4 @@ export default styled(Account)(({ theme }: ThemeProps) => `
       margin: 0;
     }
   }
-`);
+`;

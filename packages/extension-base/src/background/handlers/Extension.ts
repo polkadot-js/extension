@@ -1,5 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+/* global chrome */
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
@@ -7,6 +9,8 @@ import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/ty
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
+import type { AuthorizedAccountsDiff } from './State.js';
+import type State from './State.js';
 
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
@@ -17,7 +21,6 @@ import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
 import { withErrorLog } from './helpers.js';
-import State, { AuthorizedAccountsDiff } from './State.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
 type CachedUnlocks = Record<string, number>;
@@ -84,7 +87,7 @@ export default class Extension {
       }
 
       pair.decodePkcs8(oldPass);
-    } catch (error) {
+    } catch {
       throw new Error('oldPass is invalid');
     }
 
@@ -178,7 +181,7 @@ export default class Extension {
       keyring.backupAccount(keyring.getPair(address), password);
 
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -482,13 +485,13 @@ export default class Extension {
 
     try {
       parentPair.decodePkcs8(password);
-    } catch (e) {
+    } catch {
       throw new Error('invalid password');
     }
 
     try {
       return parentPair.derive(suri, metadata);
-    } catch (err) {
+    } catch {
       throw new Error(`"${suri}" is not a valid derivation path`);
     }
   }

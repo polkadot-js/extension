@@ -1,6 +1,14 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useTranslation } from 'react-i18next';
+import { useTranslation as useTranslationBase } from 'react-i18next';
 
-export default useTranslation;
+export type TFunction = (key: string, options?: { replace: Record<string, string | number> }) => string;
+
+interface UseTranslation {
+  t: TFunction
+}
+
+export default function useTranslation (): UseTranslation {
+  return useTranslationBase();
+}

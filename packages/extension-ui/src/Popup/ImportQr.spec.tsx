@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
 
 import '@polkadot/extension-mocks/chrome';
 
@@ -61,8 +61,7 @@ const typeName = async (wrapper: ReactWrapper, value: string) => {
 
 // jest.mock('@polkadot/react-qr', () => {
 //   return {
-//     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-//     QrScanAddress: ({ onScan }: QrScanAddressProps): null => {
+//     QrScanAddress: (_: QrScanAddressProps): null => {
 //       return null;
 //     }
 //   };

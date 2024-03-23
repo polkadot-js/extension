@@ -1,5 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+/* global chrome */
 
 import type { MessageTypes, TransportRequestMessage } from '../types.js';
 
@@ -10,18 +12,23 @@ import Extension from './Extension.js';
 import State from './State.js';
 import Tabs from './Tabs.js';
 
+export { withErrorLog } from './helpers.js';
+
 const state = new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 
 export default function handler<TMessageType extends MessageTypes> ({ id, message, request }: TransportRequestMessage<TMessageType>, port?: chrome.runtime.Port, extensionPortName = PORT_EXTENSION): void {
   const isExtension = !port || port?.name === extensionPortName;
+  const sender = port?.sender;
 
-  const sender = port?.sender as chrome.runtime.MessageSender;
+  if (!isExtension && !sender) {
+    throw new Error('Unable to extract message sender');
+  }
 
   const from = isExtension
     ? 'extension'
-    : (sender.tab && sender.tab.url) || sender.url || '<unknown>';
+    : sender?.url || sender?.tab?.url || '<unknown>';
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);
@@ -31,7 +38,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
     : tabs.handle(id, message, request, from, port);
 
   promise
-    .then((response): void => {
+    .then((response: unknown): void => {
       console.log(`[out] ${source}`); // :: ${JSON.stringify(response)}`);
 
       // between the start and the end of the promise, the user may have closed

@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2024 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // Since we inject into pages, we skip this
-// import './detectPackage';
+// import './packageDetect.js';
 
 export * from './bundle.js';

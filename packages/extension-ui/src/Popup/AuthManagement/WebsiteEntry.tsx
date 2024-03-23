@@ -1,18 +1,16 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
+import type { AuthUrlInfo } from '@polkadot/extension-base/background/types';
 
 import React, { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 
-import { AuthUrlInfo } from '@polkadot/extension-base/background/handlers/State';
-import { useTranslation } from '@polkadot/extension-ui/components/translate';
-
 import RemoveAuth from '../../components/RemoveAuth.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   info: AuthUrlInfo;
   removeAuth: (url: string) => void;
@@ -37,21 +35,21 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
         className='connectedAccounts'
         to={`/url/manage/${url}`}
       >{
-          authorizedAccounts && authorizedAccounts.length
-            ? t<string>('{{total}} accounts', {
+          authorizedAccounts?.length
+            ? t('{{total}} accounts', {
               replace: {
                 total: authorizedAccounts.length
               }
             })
             : isAllowed
-              ? t<string>('all accounts')
-              : t<string>('no accounts')
+              ? t('all accounts')
+              : t('no accounts')
         }</Link>
     </div>
   );
 }
 
-export default styled(WebsiteEntry)(({ theme }: Props) => `
+export default styled(WebsiteEntry)<Props>`
   display: flex;
   align-items: center;
   margin-top: .2rem;
@@ -62,11 +60,11 @@ export default styled(WebsiteEntry)(({ theme }: Props) => `
 
   .connectedAccounts{
     margin-left: .5rem;
-    background-color: ${theme.primaryColor};
+    background-color: var(--primaryColor);
     color: white;
     cursor: pointer;
     padding: 0 0.5rem;
     border-radius: 4px;
     text-decoration: none;
   }
-`);
+`;

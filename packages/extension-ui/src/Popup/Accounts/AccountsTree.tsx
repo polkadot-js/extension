@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
@@ -44,7 +44,7 @@ function AccountsTree ({ className, parentName, showHidden = true, suri, withChe
   );
 }
 
-export default styled(AccountsTree)`
+export default styled(AccountsTree)<Props>`
   .accountWichCheckbox {
     display: flex;
     align-items: center;

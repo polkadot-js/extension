@@ -1,18 +1,18 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Chain } from '@polkadot/extension-chains/types';
 import type { Call, ExtrinsicEra, ExtrinsicPayload } from '@polkadot/types/interfaces';
 import type { AnyJson, SignerPayloadJSON } from '@polkadot/types/types';
+import type { BN } from '@polkadot/util';
+import type { TFunction } from '../../hooks/useTranslation.js';
 
-import { TFunction } from 'i18next';
 import React, { useMemo, useRef } from 'react';
 
-import { BN, bnToBn, formatNumber } from '@polkadot/util';
+import { bnToBn, formatNumber } from '@polkadot/util';
 
 import { Table } from '../../components/index.js';
-import useMetadata from '../../hooks/useMetadata.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useMetadata, useTranslation } from '../../hooks/index.js';
 
 interface Decoded {
   args: AnyJson | null;
@@ -55,7 +55,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
   if (!args || !method) {
     return (
       <tr>
-        <td className='label'>{t<string>('method data')}</td>
+        <td className='label'>{t('method data')}</td>
         <td className='data'>{data}</td>
       </tr>
     );
@@ -64,7 +64,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
   return (
     <>
       <tr>
-        <td className='label'>{t<string>('method')}</td>
+        <td className='label'>{t('method')}</td>
         <td className='data'>
           <details>
             <summary>{method.section}.{method.method}{
@@ -78,7 +78,7 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
       </tr>
       {method.meta && (
         <tr>
-          <td className='label'>{t<string>('info')}</td>
+          <td className='label'>{t('info')}</td>
           <td className='data'>
             <details>
               <summary>{method.meta.docs.map((d) => d.toString().trim()).join(' ')}</summary>
@@ -92,13 +92,13 @@ function renderMethod (data: string, { args, method }: Decoded, t: TFunction): R
 
 function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunction): string {
   if (era.isImmortalEra) {
-    return t<string>('immortal');
+    return t('immortal');
   }
 
   const blockNumber = bnToBn(hexBlockNumber);
   const mortal = era.asMortalEra;
 
-  return t<string>('mortal, valid from {{birth}} to {{death}}', {
+  return t('mortal, valid from {{birth}} to {{death}}', {
     replace: {
       birth: formatNumber(mortal.birth(blockNumber)),
       death: formatNumber(mortal.death(blockNumber))
@@ -123,30 +123,30 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       isFull
     >
       <tr>
-        <td className='label'>{t<string>('from')}</td>
+        <td className='label'>{t('from')}</td>
         <td className='data'>{url}</td>
       </tr>
       <tr>
-        <td className='label'>{chain ? t<string>('chain') : t<string>('genesis')}</td>
+        <td className='label'>{chain ? t('chain') : t('genesis')}</td>
         <td className='data'>{chain ? chain.name : genesisHash}</td>
       </tr>
       <tr>
-        <td className='label'>{t<string>('version')}</td>
+        <td className='label'>{t('version')}</td>
         <td className='data'>{specVersion.toNumber()}</td>
       </tr>
       <tr>
-        <td className='label'>{t<string>('nonce')}</td>
+        <td className='label'>{t('nonce')}</td>
         <td className='data'>{formatNumber(nonce)}</td>
       </tr>
       {!tip.isEmpty && (
         <tr>
-          <td className='label'>{t<string>('tip')}</td>
+          <td className='label'>{t('tip')}</td>
           <td className='data'>{formatNumber(tip)}</td>
         </tr>
       )}
       {renderMethod(method, decoded, t)}
       <tr>
-        <td className='label'>{t<string>('lifetime')}</td>
+        <td className='label'>{t('lifetime')}</td>
         <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>
       </tr>
     </Table>

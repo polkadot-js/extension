@@ -1,21 +1,19 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   src: string;
 }
 
-const Svg = ({ className }: Props) => <span className={className} />;
+const Svg = ({ className }: Props) => <span className={`Comp--Svg ${className}`} />;
 
-export default styled(Svg)(({ src, theme }: Props) => `
-  background: ${theme.textColor};
+export default styled(Svg)<Props>(({ src }) => `
+  background: var(--textColor);
   display: inline-block;
   mask: url(${src});
   mask-size: cover;

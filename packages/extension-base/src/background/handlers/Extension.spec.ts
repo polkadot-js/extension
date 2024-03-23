@@ -1,11 +1,13 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
+
+/* global chrome */
 
 import '@polkadot/extension-mocks/chrome';
 
-import type { ResponseSigning } from '@polkadot/extension-base/background/types';
+import type { AuthUrls, ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
@@ -18,7 +20,7 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores/index.js';
 import Extension from './Extension.js';
-import State, { AuthUrls } from './State.js';
+import State from './State.js';
 import Tabs from './Tabs.js';
 
 describe('Extension', () => {
@@ -220,8 +222,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -268,8 +272,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', ethPayload, { version: ethPayload.version }).sign(ethPair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860871.5', 'pub(extrinsic.sign)', ethPayload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -332,8 +338,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -390,8 +398,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 
@@ -459,8 +469,10 @@ describe('Extension', () => {
       const signatureExpected = registry
         .createType('ExtrinsicPayload', payload, { version: payload.version }).sign(pair);
 
+      // eslint-disable-next-line jest/valid-expect-in-promise
       tabs.handle('1615191860771.5', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
         .then((result) => {
+          // eslint-disable-next-line jest/no-conditional-expect
           expect((result as ResponseSigning)?.signature).toEqual(signatureExpected.signature);
         }).catch((err) => console.log(err));
 

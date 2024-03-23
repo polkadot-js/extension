@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "outDir": "./build",
+    "rootDir": "./src",
+    "emitDeclarationOnly": false,
+    "noEmit": true
+  },
+  "include": [
+    "**/*.spec.ts"
+  ],
+  "references": [
+    { "path": "../extension-base/tsconfig.build.json" },
+    { "path": "../extension-inject/tsconfig.build.json" },
+    { "path": "../extension-mocks/tsconfig.build.json" }
+  ]
+}

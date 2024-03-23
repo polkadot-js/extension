@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 import { Link as RouterLink } from 'react-router-dom';
@@ -53,21 +51,21 @@ function Link ({ children, className = '', isDisabled, onClick, title, to }: Pro
     );
 }
 
-export default styled(Link)(({ isDanger, theme }: Props & ThemeProps) => `
+export default styled(Link)<Props>(({ isDanger }) => `
   align-items: center;
-  color: ${isDanger ? theme.textColorDanger : theme.textColor};
+  color: var(${isDanger ? '--textColorDanger' : '--textColor'});
   display: flex;
   opacity: 0.85;
   text-decoration: none;
   vertical-align: middle;
 
   &:hover {
-    color: ${isDanger ? theme.textColorDanger : theme.textColor};
+    color: var(${isDanger ? '--textColorDanger' : '--textColor'});
     opacity: 1.0;
   }
 
   &:visited {
-    color: ${isDanger ? theme.textColorDanger : theme.textColor};
+    color: var(${isDanger ? '--textColorDanger' : '--textColor'});
   }
 
   &.isDisabled {

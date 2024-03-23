@@ -6,8 +6,11 @@
   },
   "include": [
     "packages/**/src/**/*",
-    "packages/**/*.js",
-    "packages/**/*.cjs"
+    "packages/**/webpack.*.cjs",
+    ".prettierrc.cjs",
+    "eslint.config.js",
+    "i18next-scanner.config.cjs",
+    "rollup.config.js"
   ],
   "exclude": [
     "**/node_modules/**/*"

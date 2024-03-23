@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SignerPayloadJSON } from '@polkadot/types/types';
@@ -6,7 +6,7 @@ import type { SignerPayloadJSON } from '@polkadot/types/types';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { Loading, SigningReqContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { Header } from '../../partials/index.js';
 import Request from './Request/index.js';
 import TransactionIndex from './TransactionIndex.js';
@@ -47,7 +47,7 @@ export default function Signing (): React.ReactElement {
   return request
     ? (
       <>
-        <Header text={isTransaction ? t<string>('Transaction') : t<string>('Sign message')}>
+        <Header text={isTransaction ? t('Transaction') : t('Sign message')}>
           {requests.length > 1 && (
             <TransactionIndex
               index={requestIndex}
@@ -59,7 +59,7 @@ export default function Signing (): React.ReactElement {
         </Header>
         <Request
           account={request.account}
-          buttonText={isTransaction ? t<string>('Sign the transaction') : t<string>('Sign the message')}
+          buttonText={isTransaction ? t('Sign the transaction') : t('Sign the message')}
           isFirst={requestIndex === 0}
           request={request.request}
           signId={request.id}

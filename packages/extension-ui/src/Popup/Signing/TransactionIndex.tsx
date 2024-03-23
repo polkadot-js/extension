@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -59,7 +57,7 @@ function TransactionIndex ({ className, index, onNextClick, onPreviousClick, tot
   );
 }
 
-export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
+export default styled(TransactionIndex)<Props>`
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -68,10 +66,10 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
 
   .arrowLeft, .arrowRight {
     display: inline-block;
-    color: ${theme.iconNeutralColor};
+    color: var(--iconNeutralColor);
 
     &.active {
-      color: ${theme.primaryColor};
+      color: var(--primaryColor);
       cursor: pointer;
     }
   }
@@ -81,15 +79,15 @@ export default styled(TransactionIndex)(({ theme }: ThemeProps) => `
   }
 
   .currentStep {
-    color: ${theme.primaryColor};
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
+    color: var(--primaryColor);
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
     margin-left: 10px;
   }
 
   .totalSteps {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.textColor};
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
+    color: var(--textColor);
   }
-`);
+`;

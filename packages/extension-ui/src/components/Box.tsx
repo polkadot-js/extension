@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
@@ -22,20 +20,20 @@ function Box ({ banner, children, className }: Props): React.ReactElement<Props>
   );
 }
 
-export default styled(Box)(({ theme }: ThemeProps) => `
-  background: ${theme.readonlyInputBackground};
-  border: 1px solid ${theme.inputBorderColor};
-  border-radius: ${theme.borderRadius};
-  color: ${theme.subTextColor};
-  font-family: ${theme.fontFamily};
-  font-size: ${theme.fontSize};
+export default styled(Box)<Props>`
+  background: var(--readonlyInputBackground);
+  border: 1px solid var(--inputBorderColor);
+  border-radius: var(--borderRadius);
+  color: var(--subTextColor);
+  font-family: var(--fontFamily);
+  font-size: var(--fontSize);
   margin: 0.75rem 24px;
-  padding: ${theme.boxPadding};
+  padding: var(--boxPadding);
   position: relative;
 
   .banner {
     background: darkorange;
-    border-radius: 0 ${theme.borderRadius} 0 ${theme.borderRadius};
+    border-radius: 0 var(--borderRadius) 0 var(--borderRadius);
     color: white;
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
@@ -43,4 +41,4 @@ export default styled(Box)(({ theme }: ThemeProps) => `
     right: 0;
     top: 0;
   }
-`);
+`;

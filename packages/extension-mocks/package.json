@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "Definitions for all known chains as exposed by the extension.",
+  "engines": {
+    "node": ">=18"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-mocks#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension-mocks",
   "repository": {
     "directory": "packages/extension-mocks",
@@ -14,10 +15,10 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.46.9",
   "main": "index.js",
   "dependencies": {
     "sinon-chrome": "^3.0.1",
-    "tslib": "^2.5.0"
+    "tslib": "^2.6.2"
   }
 }

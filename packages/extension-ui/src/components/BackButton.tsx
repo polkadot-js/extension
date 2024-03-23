@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -30,18 +28,18 @@ function BackButton ({ className, onClick }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(BackButton)(({ theme }: ThemeProps) => `
-  background: ${theme.backButtonBackground};
+export default styled(BackButton)<Props>`
+  background: var(--backButtonBackground);
   margin-right: 11px;
   width: 42px;
 
   .arrowLeft {
-    color: ${theme.backButtonTextColor};
+    color: var(--backButtonTextColor);
     display: block;
     margin: auto;
   }
 
   &:not(:disabled):hover {
-    background: ${theme.backButtonBackgroundHover};
+    background: var(--backButtonBackgroundHover);
   }
-`);
+`;

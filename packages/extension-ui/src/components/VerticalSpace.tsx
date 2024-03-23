@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
@@ -13,6 +13,6 @@ function VerticalSpace ({ className }: Props): React.ReactElement<Props> {
   return <div className={className} />;
 }
 
-export default styled(VerticalSpace)`
+export default styled(VerticalSpace)<Props>`
   height: 100%;
 `;

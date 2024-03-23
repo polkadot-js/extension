@@ -1,5 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+/* global chrome */
 
 import type { Subscription } from 'rxjs';
 import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
@@ -8,18 +10,19 @@ import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { MessageTypes, RequestAccountList, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '../types.js';
+import type { AuthResponse } from './State.js';
+import type State from './State.js';
 
-import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
-import { canDerive } from '@polkadot/extension-base/utils';
 import { checkIfDenied } from '@polkadot/phishing';
 import keyring from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isNumber } from '@polkadot/util';
 
+import { PHISHING_PAGE_REDIRECT } from '../../defaults.js';
+import { canDerive } from '../../utils/index.js';
 import RequestBytesSign from '../RequestBytesSign.js';
 import RequestExtrinsicSign from '../RequestExtrinsicSign.js';
 import { withErrorLog } from './helpers.js';
-import State, { AuthResponse } from './State.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
 interface AccountSub {
@@ -133,8 +136,7 @@ export default class Tabs {
     return this.#state.injectMetadata(url, request);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private metadataList (url: string): InjectedMetadataKnown[] {
+  private metadataList (_url: string): InjectedMetadataKnown[] {
     return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
       genesisHash,
       specVersion
@@ -145,7 +147,7 @@ export default class Tabs {
     return this.#state.rpcListProviders();
   }
 
-  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse> {
+  private rpcSend (request: RequestRpcSend, port: chrome.runtime.Port): Promise<JsonRpcResponse<unknown>> {
     return this.#state.rpcSend(request, port);
   }
 

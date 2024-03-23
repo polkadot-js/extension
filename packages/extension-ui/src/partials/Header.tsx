@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import { faArrowLeft, faCog, faPlusCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -11,14 +9,13 @@ import logo from '../assets/pjs.svg';
 import { ActionContext } from '../components/index.js';
 import InputFilter from '../components/InputFilter.js';
 import Link from '../components/Link.js';
-import useOutsideClick from '../hooks/useOutsideClick.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useOutsideClick, useTranslation } from '../hooks/index.js';
 import { getConnectedTabsUrl } from '../messaging.js';
 import { styled } from '../styled.js';
 import MenuAdd from './MenuAdd.js';
 import MenuSettings from './MenuSettings.js';
 
-interface Props extends ThemeProps {
+interface Props {
   children?: React.ReactNode;
   className?: string;
   onFilter?: (filter: string) => void;
@@ -134,7 +131,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               <InputFilter
                 className='inputFilter'
                 onChange={_onChangeFilter}
-                placeholder={t<string>('Search by name or network...')}
+                placeholder={t('Search by name or network...')}
                 value={filter}
                 withReset
               />
@@ -188,7 +185,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   );
 }
 
-export default React.memo(styled(Header)(({ theme }: Props) => `
+export default React.memo(styled(Header)<Props>`
   max-width: 100%;
   box-sizing: border-box;
   font-weight: normal;
@@ -204,15 +201,15 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     display: flex;
     justify-content: space-between;
     width: 100%;
-    border-bottom: 1px solid ${theme.inputBorderColor};
+    border-bottom: 1px solid var(--inputBorderColor);
     min-height: 70px;
 
     .branding {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: ${theme.labelColor};
-      font-family: ${theme.fontFamily};
+      color: var(--labelColor);
+      font-family: var(--fontFamily);
       text-align: center;
       margin-left: 24px;
 
@@ -223,8 +220,8 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
       }
 
       .logoText {
-        color: ${theme.textColor};
-        font-family: ${theme.fontFamily};
+        color: var(--textColor);
+        font-family: var(--fontFamily);
         font-size: 20px;
         line-height: 27px;
       }
@@ -242,14 +239,14 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
     }
 
     .connectedAccounts {
-      border: 1px solid ${theme.inputBorderColor};
+      border: 1px solid var(--inputBorderColor);
       border-radius: 4px;
       padding: 0 0.5rem;
 
       .greenDot {
         margin-right: 0.3rem;
         font-size: 1.5rem;
-        color: ${theme.connectedDotColor};
+        color: var(--connectedDotColor);
         padding-bottom: 0.2rem;
       }
     }
@@ -292,15 +289,15 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   }
 
   .plusIcon, .cogIcon, .searchIcon {
-    color: ${theme.iconNeutralColor};
+    color: var(--iconNeutralColor);
 
     &.selected {
-      color: ${theme.primaryColor};
+      color: var(--primaryColor);
     }
   }
 
   .arrowLeftIcon {
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     margin-right: 1rem;
     cursor: pointer;
   }
@@ -308,4 +305,4 @@ export default React.memo(styled(Header)(({ theme }: Props) => `
   &.smallMargin {
     margin-bottom: 15px;
   }
-`));
+`);

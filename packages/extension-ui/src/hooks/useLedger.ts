@@ -1,10 +1,11 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import type { Network } from '@polkadot/networks/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import { Network } from '@polkadot/networks/types';
 import uiSettings from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -55,7 +56,7 @@ function retrieveLedger (genesis: string): Ledger {
   return ledger;
 }
 
-export function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);
@@ -106,16 +107,16 @@ export function useLedger (genesis?: string | null, accountIndex = 0, addressOff
         const { network } = getNetwork(genesis) || { network: 'unknown network' };
 
         const warningMessage = e.message.includes('Code: 26628')
-          ? t<string>('Is your ledger locked?')
+          ? t('Is your ledger locked?')
           : null;
 
         const errorMessage = e.message.includes('App does not seem to be open')
-          ? t<string>('App "{{network}}" does not seem to be open', { replace: { network } })
+          ? t('App "{{network}}" does not seem to be open', { replace: { network } })
           : e.message;
 
         setIsLocked(true);
         setWarning(warningMessage);
-        setError(t<string>(
+        setError(t(
           'Ledger error: {{errorMessage}}',
           { replace: { errorMessage } }
         ));

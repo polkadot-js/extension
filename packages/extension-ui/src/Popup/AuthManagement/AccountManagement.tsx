@@ -1,18 +1,16 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useParams } from 'react-router';
 
 import { AccountContext, ActionContext, Button } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { getAuthList, updateAuthorization } from '../../messaging.js';
 import { AccountSelection, Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -48,7 +46,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
       <Header
         showBackArrow
         smallMargin={true}
-        text={t<string>('Accounts connected to {{url}}', { replace: { url } })}
+        text={t('Accounts connected to {{url}}', { replace: { url } })}
       />
       <div className={className}>
         <AccountSelection
@@ -62,7 +60,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
           className='acceptButton'
           onClick={_onApprove}
         >
-          {t<string>('Connect {{total}} account(s)', { replace: {
+          {t('Connect {{total}} account(s)', { replace: {
             total: selectedAccounts.length
           } })}
         </Button>
@@ -71,7 +69,7 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(AccountManagement)`
+export default styled(AccountManagement)<Props>`
   .accountSelection{
     .accountList{
       height: 390px;

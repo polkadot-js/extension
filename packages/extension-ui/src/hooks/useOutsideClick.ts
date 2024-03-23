@@ -1,7 +1,9 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RefObject, useCallback, useEffect } from 'react';
+import type { RefObject } from 'react';
+
+import { useCallback, useEffect } from 'react';
 
 export default function useOutsideClick (refs: RefObject<HTMLDivElement>[], callback: () => void): void {
   const handleClick = useCallback((e: MouseEvent): void => {

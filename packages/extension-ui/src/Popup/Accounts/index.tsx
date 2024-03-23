@@ -1,21 +1,20 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../../types.js';
+import type { AccountWithChildren } from '@polkadot/extension-base/background/types';
 
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import { AccountWithChildren } from '@polkadot/extension-base/background/types';
 import getNetworkMap from '@polkadot/extension-ui/util/getNetworkMap';
 
 import { AccountContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { Header } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import AccountsTree from './AccountsTree.js';
 import AddAccount from './AddAccount.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -54,7 +53,7 @@ function Accounts ({ className }: Props): React.ReactElement {
               showConnectedAccounts
               showSearch
               showSettings
-              text={t<string>('Accounts')}
+              text={t('Accounts')}
             />
             <div className={className}>
               {filteredAccount.map((json, index): React.ReactNode => (
@@ -71,7 +70,7 @@ function Accounts ({ className }: Props): React.ReactElement {
   );
 }
 
-export default styled(Accounts)`
+export default styled(Accounts)<Props>`
   height: calc(100vh - 2px);
   overflow-y: scroll;
   margin-top: -25px;

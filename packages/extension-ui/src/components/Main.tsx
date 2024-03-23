@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
@@ -20,22 +18,22 @@ function Main ({ children, className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Main)(({ theme }: ThemeProps) => `
+export default styled(Main)<Props>`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 2px);
-  background: ${theme.background};
-  color: ${theme.textColor};
-  font-size: ${theme.fontSize};
-  line-height: ${theme.lineHeight};
-  border: 1px solid ${theme.inputBorderColor};
+  background: var(--background);
+  color: var(--textColor);
+  font-size: var(--fontSize);
+  line-height: var(--lineHeight);
+  border: 1px solid var(--inputBorderColor);
 
   * {
-    font-family: ${theme.fontFamily};
+    font-family: var(--fontFamily);
   }
 
   > * {
     padding-left: 24px;
     padding-right: 24px;
   }
-`);
+`;

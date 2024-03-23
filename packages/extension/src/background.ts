@@ -1,14 +1,15 @@
-// Copyright 2019-2023 @polkadot/extension authors & contributors
+// Copyright 2019-2024 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // Runs in the extension background, handling all keyring access
+
+/* global chrome */
 
 import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
-import handlers from '@polkadot/extension-base/background/handlers';
-import { withErrorLog } from '@polkadot/extension-base/background/handlers/helpers';
+import { handlers, withErrorLog } from '@polkadot/extension-base/background';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import keyring from '@polkadot/ui-keyring';

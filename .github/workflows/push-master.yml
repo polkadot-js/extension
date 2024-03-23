@@ -27,5 +27,5 @@ jobs:
         GH_RELEASE_FILES: master-build.zip,master-src.zip
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
-        yarn install --immutable | grep -v 'YN0013'
+        yarn install --immutable
         yarn ${{ matrix.step }}

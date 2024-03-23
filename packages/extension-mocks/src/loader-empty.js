@@ -1,11 +1,18 @@
-// Copyright 2019-2023 @polkadot/extension-mocks authors & contributors
+// Copyright 2019-2024 @polkadot/extension-mocks authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
-// Adjusts the resolver to point to empty files for .svg
+/**
+ * Adjusts the resolver to point to empty files for .svg
+ *
+ * @param {*} specifier
+ * @param {*} context
+ * @param {*} nextResolve
+ * @returns {*}
+ */
 export function resolve (specifier, context, nextResolve) {
   if (/\.(png|svg)$/.test(specifier)) {
     return {

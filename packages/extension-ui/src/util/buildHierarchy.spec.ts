@@ -1,7 +1,9 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
+
+/* eslint-disable jest/expect-expect */
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
@@ -10,7 +12,7 @@ import { buildHierarchy } from './buildHierarchy.js';
 const genesisExample = {
   KUSAMA: '0xb0a8d493285c2df73290dfb7e61f870f17b41801197a149ca93654499ea3dafe',
   POLKADOT: '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3'
-};
+} as const;
 
 const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[]): void => {
   expect(buildHierarchy(accounts)).toEqual(expected);

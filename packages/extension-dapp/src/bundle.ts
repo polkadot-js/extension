@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-dapp authors & contributors
+// Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
@@ -170,7 +170,7 @@ export async function web3Accounts ({ accountType, extensions, genesisHash, ss58
         const list = await accounts.get();
 
         return mapAccounts(source, filterAccounts(list, genesisHash, accountType), ss58Format);
-      } catch (error) {
+      } catch {
         // cannot handle this one
         return [];
       }

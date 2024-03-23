@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-base authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { InjectedProvider, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
@@ -50,7 +50,7 @@ export default class PostMessageProvider implements InjectedProvider {
   }
 
   public get isClonable (): boolean {
-    return true;
+    return !!true;
   }
 
   /**
@@ -83,7 +83,7 @@ export default class PostMessageProvider implements InjectedProvider {
    */
   public get hasSubscriptions (): boolean {
     // FIXME This should see if the extension's state's provider has subscriptions
-    return true;
+    return !!true;
   }
 
   /**

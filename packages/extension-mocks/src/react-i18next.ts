@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-mocks authors & contributors
+// Copyright 2019-2024 @polkadot/extension-mocks authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import type React from 'react';
 
 interface useTranslationReturnObj {
   i18n: { changeLanguage: () => Promise<unknown>; };

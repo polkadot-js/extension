@@ -1,26 +1,24 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import { css } from 'styled-components';
 
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   withError?: boolean;
 }
 
-const TextInput = css(({ theme, withError }: Props) => `
-  background: ${theme.inputBackground};
-  border-radius: ${theme.borderRadius};
-  border: 1px solid ${theme.inputBorderColor};
-  border-color: ${withError ? theme.errorBorderColor : theme.inputBorderColor};
+const TextInput = css<Props>(({ withError }) => `
+  background: var(--inputBackground);
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--inputBorderColor);
+  border-color: var(${withError ? '--errorBorderColor' : '--inputBorderColor'});
   box-sizing: border-box;
-  color: ${withError ? theme.errorColor : theme.textColor};
+  color: var(${withError ? '--errorColor' : '--textColor'});
   display: block;
-  font-family: ${theme.fontFamily};
-  font-size: ${theme.fontSize};
+  font-family: var(--fontFamily);
+  font-size: var(--fontSize);
   height: 40px;
   outline: none;
   padding: 0.5rem 0.75rem;
@@ -28,7 +26,7 @@ const TextInput = css(({ theme, withError }: Props) => `
   width: 100%;
 
   &:read-only {
-    background: ${theme.readonlyInputBackground};
+    background: var(--readonlyInputBackground);
     box-shadow: none;
     outline: none;
   }

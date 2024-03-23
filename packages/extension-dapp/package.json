@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "Provides an interfaces around the injected globals for ease of access by dapp developers.",
+  "engines": {
+    "node": ">=18"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-dapp#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension-dapp",
   "repository": {
     "directory": "packages/extension-dapp",
@@ -13,17 +14,17 @@
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": [
-    "./detectPackage.js",
-    "./detectPackage.cjs"
+    "./packageDetect.js",
+    "./packageDetect.cjs"
   ],
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.46.9",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/extension-inject": "^0.45.3-1-x",
-    "@polkadot/util": "^11.0.2",
-    "@polkadot/util-crypto": "^11.0.2",
-    "tslib": "^2.5.0"
+    "@polkadot/extension-inject": "0.46.9",
+    "@polkadot/util": "^12.6.2",
+    "@polkadot/util-crypto": "^12.6.2",
+    "tslib": "^2.6.2"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

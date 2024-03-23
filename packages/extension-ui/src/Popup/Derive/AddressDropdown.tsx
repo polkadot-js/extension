@@ -1,13 +1,11 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import React, { useCallback, useRef, useState } from 'react';
 
 import arrow from '../../assets/arrow-down.svg';
 import { Address } from '../../components/index.js';
-import useOutsideClick from '../../hooks/useOutsideClick.js';
+import { useOutsideClick } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -59,7 +57,7 @@ function AddressDropdown ({ allAddresses, className, onSelect, selectedAddress, 
   );
 }
 
-export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
+export default styled(AddressDropdown)<Props>`
   margin-bottom: 16px;
   cursor: pointer;
 
@@ -72,10 +70,10 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     width: 30px;
     height: 30px;
     background: url(${arrow}) center no-repeat;
-    background-color: ${theme.inputBackground};
+    background-color: var(--inputBackground);
     pointer-events: none;
     border-radius: 4px;
-    border: 1px solid ${theme.boxBorderColor};
+    border: 1px solid var(--boxBorderColor);
   }
 
   .address .copyIcon {
@@ -87,11 +85,11 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
     visibility: hidden;
     width: 510px;
     z-index: 100;
-    background: ${theme.bodyColor};
+    background: var(--bodyColor);
     max-height: 0;
     overflow: auto;
     padding: 5px;
-    border: 1px solid ${theme.boxBorderColor};
+    border: 1px solid var(--boxBorderColor);
     box-sizing: border-box;
     border-radius: 4px;
     margin-top: -8px;
@@ -105,4 +103,4 @@ export default styled(AddressDropdown)(({ theme }: ThemeProps) => `
       cursor: pointer;
     }
   }
-`);
+`;

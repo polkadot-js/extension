@@ -1,17 +1,15 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 import { Trans } from 'react-i18next';
 import { useParams } from 'react-router';
 
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
 }
 
@@ -26,10 +24,10 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
 
   return (
     <>
-      <Header text={t<string>('Phishing detected')} />
+      <Header text={t('Phishing detected')} />
       <div className={className}>
         <p>
-          {t<string>('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
+          {t('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
         </p>
         <p className='websiteAddress'>
           {decodedWebsite}
@@ -44,14 +42,14 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(PhishingDetected)(({ theme }: Props) => `
+export default styled(PhishingDetected)<Props>`
   p {
-    color: ${theme.subTextColor};
+    color: var(--subTextColor);
     margin-bottom: 1rem;
     margin-top: 0;
 
     a {
-      color: ${theme.subTextColor};
+      color: var(--subTextColor);
     }
 
     &.websiteAddress {
@@ -59,4 +57,4 @@ export default styled(PhishingDetected)(({ theme }: Props) => `
       text-align: center;
     }
   }
-`);
+`;

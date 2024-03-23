@@ -1,57 +1,57 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
+  "engines": {
+    "node": ">=18.14"
+  },
   "homepage": "https://github.com/polkadot-js/extension#readme",
   "license": "Apache-2.0",
-  "packageManager": "yarn@3.2.0",
+  "packageManager": "yarn@4.1.0",
   "private": true,
   "repository": {
     "type": "git",
     "url": "https://github.com/polkadot-js/extension.git"
   },
   "sideEffects": false,
-  "version": "0.45.3-1-x",
+  "type": "module",
+  "version": "0.46.9",
   "versions": {
-    "git": "0.45.3-1-x",
-    "npm": "0.45.2"
+    "git": "0.46.9",
+    "npm": "0.46.9"
   },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
-    "build:before": "yarn build:i18n && yarn build:ui",
-    "build:i18n": "i18next-scanner --config i18next-scanner.config.js",
+    "build:before": "yarn build:i18n",
+    "build:i18n": "i18next-scanner --config i18next-scanner.config.cjs",
     "build:release": "polkadot-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
-    "build:ui": "cd packages/extension && NODE_ENV=production yarn polkadot-exec-webpack --config webpack.extension.cjs --mode production",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js LICENSE package.json README.md tsconfig.json yarn.lock",
     "clean": "polkadot-dev-clean-build",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
-    "start": "yarn watch",
     "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --loader ./packages/extension-mocks/src/loader-empty.js --env browser ^:.spec.tsx",
-    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser",
-    "watch": "cd packages/extension && yarn polkadot-exec-webpack --config webpack.watch.cjs --mode development --watch"
+    "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
-    "@babel/core": "^7.21.0",
-    "@polkadot/dev": "^0.71.6",
-    "@types/node": "^18.15.0",
-    "i18next-scanner": "^4.1.1",
+    "@polkadot/dev": "^0.78.3",
+    "@types/node": "^20.10.5",
+    "i18next-scanner": "^4.4.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.1.2",
-    "@polkadot/keyring": "^11.0.2",
-    "@polkadot/networks": "^11.0.2",
-    "@polkadot/types": "^10.1.2",
-    "@polkadot/util": "^11.0.2",
-    "@polkadot/util-crypto": "^11.0.2",
-    "@polkadot/x-fetch": "^11.0.2",
+    "@polkadot/api": "^10.12.4",
+    "@polkadot/keyring": "^12.6.2",
+    "@polkadot/networks": "^12.6.2",
+    "@polkadot/types": "^10.12.4",
+    "@polkadot/util": "^12.6.2",
+    "@polkadot/util-crypto": "^12.6.2",
+    "@polkadot/x-fetch": "^12.6.2",
     "safe-buffer": "^5.2.1",
-    "typescript": "^4.9.5"
+    "typescript": "^5.3.3"
   }
 }

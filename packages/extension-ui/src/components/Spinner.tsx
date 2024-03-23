@@ -1,14 +1,12 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
 import spinnerSrc from '../assets/spinner.png';
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   size?: 'normal';
 }
@@ -22,7 +20,7 @@ function Spinner ({ className = '', size = 'normal' }: Props): React.ReactElemen
   );
 }
 
-export default React.memo(styled(Spinner)`
+export default React.memo(styled(Spinner)<Props>`
   bottom: 0rem;
   height: 3rem;
   left: 50%;

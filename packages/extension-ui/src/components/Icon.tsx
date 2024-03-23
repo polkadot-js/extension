@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React from 'react';
@@ -22,7 +22,7 @@ function Icon ({ className = '', icon, onClick }: Props): React.ReactElement<Pro
   );
 }
 
-export default styled(Icon)(({ onClick }: Props) => `
+export default styled(Icon)<Props>(({ onClick }) => `
   background: white;
   border-radius: 50%;
   box-sizing: border-box;

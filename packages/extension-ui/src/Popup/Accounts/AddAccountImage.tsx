@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // We _could_ reformat, but just keep it as-is, since this is actually
@@ -7,13 +7,11 @@
 /* eslint-disable react/jsx-sort-props */
 /* eslint-disable react/jsx-max-props-per-line */
 
-import type { ThemeProps } from '../../types.js';
-
 import React from 'react';
 
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   onClick: () => void;
 }
@@ -85,17 +83,17 @@ function AddAccountImage ({ className, onClick }: Props): React.ReactElement<Pro
   );
 }
 
-export default React.memo(styled(AddAccountImage)(({ theme }: Props) => `
+export default React.memo(styled(AddAccountImage)<Props>`
   circle, path {
     cursor: pointer;
   }
 
   path {
-    fill: ${theme.textColor};
+    fill: var(--textColor);
   }
 
   & > g > circle {
-    stroke: ${theme.inputBorderColor};
-    fill: ${theme.addAccountImageBackground};
+    stroke: var(--inputBorderColor);
+    fill: var(--addAccountImageBackground);
   }
-`));
+`);

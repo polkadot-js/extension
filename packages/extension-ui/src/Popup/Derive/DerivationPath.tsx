@@ -1,17 +1,15 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import { faLock, faLockOpen } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { Button, InputWithLabel } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps{
+interface Props {
   className?: string;
   defaultPath: string;
   isError: boolean;
@@ -47,13 +45,13 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
             isError={isError || !path}
             label={
               isDisabled
-                ? t<string>('Derivation Path (unlock to edit)')
-                : t<string>('Derivation Path')
+                ? t('Derivation Path (unlock to edit)')
+                : t('Derivation Path')
             }
             onChange={_onChange}
             placeholder={withSoftPath
-              ? t<string>('//hard/soft')
-              : t<string>('//hard')
+              ? t('//hard/soft')
+              : t('//hard')
             }
             value={path}
           />
@@ -72,7 +70,7 @@ function DerivationPath ({ className, defaultPath, isError, onChange, withSoftPa
   );
 }
 
-export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
+export default React.memo(styled(DerivationPath)<Props>`
   > .container {
     display: flex;
     flex-direction: row;
@@ -99,7 +97,7 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
   }
 
   .lockIcon {
-    color: ${theme.iconNeutralColor}
+    color: var(--iconNeutralColor)
   }
 
   .pathInput {
@@ -109,4 +107,4 @@ export default React.memo(styled(DerivationPath)(({ theme }: Props) => `
       opacity: 50%;
     }
   }
-`));
+`);

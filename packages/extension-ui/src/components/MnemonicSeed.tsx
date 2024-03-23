@@ -1,15 +1,16 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
+import type { MouseEventHandler } from 'react';
 
 import { faCopy } from '@fortawesome/free-regular-svg-icons';
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
+import CopyToClipboard from 'react-copy-to-clipboard';
 
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { styled } from '../styled.js';
 import ActionText from './ActionText.js';
-import TextAreaWithLabel from './TextAreaWithLabel.js';
+import BoxWithLabel from './BoxWithLabel.js';
 
 interface Props {
   seed: string;
@@ -22,26 +23,27 @@ function MnemonicSeed ({ className, onCopy, seed }: Props): React.ReactElement<P
 
   return (
     <div className={className}>
-      <TextAreaWithLabel
+      <BoxWithLabel
         className='mnemonicDisplay'
-        isReadOnly
-        label={t<string>('Generated 12-word mnemonic seed:')}
+        label={t('Generated 12-word mnemonic seed:')}
         value={seed}
       />
       <div className='buttonsRow'>
-        <ActionText
-          className='copyBtn'
-          data-seed-action='copy'
-          icon={faCopy}
-          onClick={onCopy}
-          text={t<string>('Copy to clipboard')}
-        />
+        <CopyToClipboard text={seed}>
+          <ActionText
+            className='copyBtn'
+            data-seed-action='copy'
+            icon={faCopy}
+            onClick={onCopy}
+            text={t('Copy to clipboard')}
+          />
+        </CopyToClipboard>
       </div>
     </div>
   );
 }
 
-export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
+export default styled(MnemonicSeed)<Props>`
   margin-bottom: 21px;
 
   .buttonsRow {
@@ -54,14 +56,14 @@ export default styled(MnemonicSeed)(({ theme }: ThemeProps) => `
   }
 
   .mnemonicDisplay {
-    textarea {
-      color: ${theme.primaryColor};
-      font-size: ${theme.fontSize};
+    .seedBox {
+      color: var(--primaryColor);
+      font-size: var(--fontSize);
       height: unset;
       letter-spacing: -0.01em;
-      line-height: ${theme.lineHeight};
+      line-height: var(--lineHeight);
       margin-bottom: 10px;
       padding: 14px;
     }
   }
-`);
+`;

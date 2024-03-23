@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
 
 import '@polkadot/extension-mocks/chrome';
 
@@ -11,9 +11,8 @@ import type { AccountJson, AuthorizeRequest } from '@polkadot/extension-base/bac
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
 
-import { AccountContext, AuthorizeReqContext, themes, Warning } from '../../components/index.js';
+import { AccountContext, AuthorizeReqContext, Warning } from '../../components/index.js';
 import { Header } from '../../partials/index.js';
 import { buildHierarchy } from '../../util/buildHierarchy.js';
 import Account from '../Accounts/Account.js';
@@ -56,9 +55,7 @@ describe('Authorize', () => {
           hierarchy: accounts ? buildHierarchy(accounts) : []
         }}
       >
-        <ThemeProvider theme={themes.dark}>
-          <Authorize />
-        </ThemeProvider>
+        <Authorize />
       </AccountContext.Provider>
     </AuthorizeReqContext.Provider>);
 

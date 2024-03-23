@@ -1,5 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import type { HexString } from '@polkadot/util/types';
 
 import { useEffect, useMemo, useState } from 'react';
 
@@ -9,12 +11,12 @@ import useTranslation from './useTranslation.js';
 
 interface Option {
   text: string;
-  value: string;
+  value: HexString;
 }
 
 const RELAY_CHAIN = 'Relay Chain';
 
-export default function (): Option[] {
+export default function useGenesisHashOptions (): Option[] {
   const { t } = useTranslation();
   const [metadataChains, setMetadatachains] = useState<Option[]>([]);
 
@@ -28,8 +30,8 @@ export default function (): Option[] {
 
   const hashes = useMemo(() => [
     {
-      text: t<string>('Allow use on any chain'),
-      value: ''
+      text: t('Allow use on any chain'),
+      value: '' as HexString
     },
     // put the relay chains at the top
     ...chains.filter(({ chain }) => chain.includes(RELAY_CHAIN))
@@ -45,12 +47,12 @@ export default function (): Option[] {
       .filter(({ text }) => !text.includes(RELAY_CHAIN))
       .concat(
       // get any chain present in the metadata and not already part of chains
-        ...metadataChains.filter(
-          ({ value }) => {
-            return !chains.find(
-              ({ genesisHash }) => genesisHash === value);
-          }
-        ))
+        ...metadataChains.filter(({ value }) =>
+          !chains.find(({ genesisHash }) =>
+            genesisHash === value
+          )
+        )
+      )
       .sort((a, b) => a.text.localeCompare(b.text))
   ], [metadataChains, t]);
 

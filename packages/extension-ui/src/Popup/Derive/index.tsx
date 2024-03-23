@@ -1,11 +1,11 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useParams } from 'react-router';
 
 import { AccountContext, AccountNamePasswordCreation, ActionContext, Address } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { deriveAccount } from '../../messaging.js';
 import { HeaderWithSteps } from '../../partials/index.js';
 import SelectParent from './SelectParent.js';
@@ -69,7 +69,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
     <>
       <HeaderWithSteps
         step={account ? 2 : 1}
-        text={t<string>('Add new account')}
+        text={t('Add new account')}
       />
       {!account && (
         <SelectParent
@@ -89,7 +89,7 @@ function Derive ({ isLocked }: Props): React.ReactElement<Props> {
             />
           </div>
           <AccountNamePasswordCreation
-            buttonLabel={t<string>('Create derived account')}
+            buttonLabel={t('Create derived account')}
             isBusy={isBusy}
             onBackClick={_onBackClick}
             onCreate={_onCreate}

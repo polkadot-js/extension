@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import { t } from 'i18next';
 import React, { useCallback } from 'react';
@@ -11,7 +9,7 @@ import { Button, Warning } from '../../components/index.js';
 import { deleteAuthRequest } from '../../messaging.js';
 import { styled } from '../../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   authId: string;
   className?: string;
 }
@@ -31,13 +29,13 @@ function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
         className='acceptButton'
         onClick={_onClick}
       >
-        {t<string>('Understood')}
+        {t('Understood')}
       </Button>
     </div>
   );
 }
 
-export default styled(NoAccount)`
+export default styled(NoAccount)<Props>`
   .acceptButton {
     width: 90%;
     margin: 25px auto 0;

@@ -1,8 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { IconTheme } from '@polkadot/react-identicon/types';
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
@@ -34,7 +33,7 @@ function Identicon ({ className, iconTheme, onCopy, prefix, value }: Props): Rea
   );
 }
 
-export default styled(Identicon)(({ theme }: ThemeProps) => `
+export default styled(Identicon)<Props>`
   background: rgba(192, 192, 292, 0.25);
   border-radius: 50%;
   display: flex;
@@ -42,7 +41,7 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
 
   .container:before {
     box-shadow: none;
-    background: ${theme.identiconBackground};
+    background: var(--identiconBackground);
   }
 
   svg {
@@ -50,4 +49,4 @@ export default styled(Identicon)(({ theme }: ThemeProps) => `
       display: none;
     }
   }
-`);
+`;

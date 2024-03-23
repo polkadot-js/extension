@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,7 +7,7 @@ import React from 'react';
 
 import { styled } from '../styled.js';
 
-interface Props{
+interface Props {
   className?: string
   onRemove: () => void
 }
@@ -25,12 +23,12 @@ function RemoveAuth ({ className, onRemove }: Props): React.ReactElement {
   );
 }
 
-export default styled(RemoveAuth)(({ theme }: ThemeProps) => `
+export default styled(RemoveAuth)<Props>`
   cursor: pointer;
-  color: ${theme.labelColor};
+  color: var(--labelColor);
   margin-right: 1rem;
 
   &.selected {
-    color: ${theme.primaryColor};
+    color: var(--primaryColor);
   }
-`);
+`;

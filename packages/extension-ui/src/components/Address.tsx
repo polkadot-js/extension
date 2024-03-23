@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
@@ -6,7 +6,6 @@ import type { Chain } from '@polkadot/extension-chains/types';
 import type { IconTheme } from '@polkadot/react-identicon/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { ThemeProps } from '../types.js';
 
 import { faUsb } from '@fortawesome/free-brands-svg-icons';
 import { faCopy, faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
@@ -18,10 +17,7 @@ import CopyToClipboard from 'react-copy-to-clipboard';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
-import useMetadata from '../hooks/useMetadata.js';
-import useOutsideClick from '../hooks/useOutsideClick.js';
-import useToast from '../hooks/useToast.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useMetadata, useOutsideClick, useToast, useTranslation } from '../hooks/index.js';
 import { showAccount } from '../messaging.js';
 import { styled } from '../styled.js';
 import { DEFAULT_TYPE } from '../util/defaultType.js';
@@ -157,7 +153,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 
   const _onCopy = useCallback(
-    () => show(t<string>('Copied')),
+    () => show(t('Copied')),
     [show, t]
   );
 
@@ -170,7 +166,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
 
   const Name = () => {
     const accountName = name || account?.name;
-    const displayName = accountName || t<string>('<unknown>');
+    const displayName = accountName || t('<unknown>');
 
     return (
       <>
@@ -181,14 +177,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 className='hardwareIcon'
                 icon={faUsb}
                 rotation={270}
-                title={t<string>('hardware wallet account')}
+                title={t('hardware wallet account')}
               />
             )
             : (
               <FontAwesomeIcon
                 className='externalIcon'
                 icon={faQrcode}
-                title={t<string>('external account')}
+                title={t('external account')}
               />
             )
         )}
@@ -258,7 +254,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               className='fullAddress'
               data-field='address'
             >
-              {formatted || address || t<string>('<unknown>')}
+              {formatted || address || t('<unknown>')}
             </div>
             <CopyToClipboard text={(formatted && formatted) || ''}>
               <FontAwesomeIcon
@@ -266,7 +262,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={faCopy}
                 onClick={_onCopy}
                 size='sm'
-                title={t<string>('copy address')}
+                title={t('copy address')}
               />
             </CopyToClipboard>
             {(actions || showVisibilityAction) && (
@@ -275,7 +271,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
                 icon={isHidden ? faEyeSlash : faEye}
                 onClick={_toggleVisibility}
                 size='sm'
-                title={t<string>('account visibility')}
+                title={t('account visibility')}
               />
             )}
           </div>
@@ -308,9 +304,9 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
   );
 }
 
-export default styled(Address)(({ theme }: ThemeProps) => `
-  background: ${theme.boxBackground};
-  border: 1px solid ${theme.boxBorderColor};
+export default styled(Address)<Props>`
+  background: var(--boxBackground);
+  border: 1px solid var(--boxBorderColor);
   box-sizing: border-box;
   border-radius: 4px;
   margin-bottom: 8px;
@@ -323,7 +319,7 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     top: 0;
 
     &.chain {
-      background: ${theme.primaryColor};
+      background: var(--primaryColor);
       border-radius: 0 0 0 10px;
       color: white;
       padding: 0.1rem 0.5rem 0.1rem 0.75rem;
@@ -341,9 +337,9 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       width: 14px;
       height: 14px;
       margin-right: 10px;
-      color: ${theme.accountDotsIconColor};
+      color: var(--accountDotsIconColor);
       &:hover {
-        color: ${theme.labelColor};
+        color: var(--labelColor);
         cursor: pointer;
       }
     }
@@ -355,16 +351,16 @@ export default styled(Address)(({ theme }: ThemeProps) => `
     }
 
     .hiddenIcon {
-      color: ${theme.errorColor};
+      color: var(--errorColor);
       &:hover {
-        color: ${theme.accountDotsIconColor};
+        color: var(--accountDotsIconColor);
       }
     }
   }
 
   .externalIcon, .hardwareIcon {
     margin-right: 0.3rem;
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     width: 0.875em;
   }
 
@@ -412,8 +408,8 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   }
 
   .parentName {
-    color: ${theme.labelColor};
-    font-size: ${theme.inputLabelFontSize};
+    color: var(--labelColor);
+    font-size: var(--inputLabelFontSize);
     line-height: 14px;
     overflow: hidden;
     padding: 0.25rem 0 0 0.8rem;
@@ -425,23 +421,23 @@ export default styled(Address)(({ theme }: ThemeProps) => `
   .fullAddress {
     overflow: hidden;
     text-overflow: ellipsis;
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     font-size: 12px;
     line-height: 16px;
   }
 
   .detailsIcon {
-    background: ${theme.accountDotsIconColor};
+    background: var(--accountDotsIconColor);
     width: 3px;
     height: 19px;
 
     &.active {
-      background: ${theme.primaryColor};
+      background: var(--primaryColor);
     }
   }
 
   .deriveIcon {
-    color: ${theme.labelColor};
+    color: var(--labelColor);
     position: absolute;
     top: 5px;
     width: 9px;
@@ -474,12 +470,12 @@ export default styled(Address)(({ theme }: ThemeProps) => `
       top: 25%;
       bottom: 25%;
       width: 1px;
-      background: ${theme.boxBorderColor};
+      background: var(--boxBorderColor);
     }
 
     &:hover {
       cursor: pointer;
-      background: ${theme.readonlyInputBackground};
+      background: var(--readonlyInputBackground);
     }
   }
-`);
+`;

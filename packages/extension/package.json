@@ -1,11 +1,12 @@
 {
   "author": "Jaco Greeff <jacogr@gmail.com>",
   "bugs": "https://github.com/polkadot-js/extension/issues",
-  "contributors": [],
   "description": "A sample signer extension for the @polkadot/api",
+  "engines": {
+    "node": ">=18"
+  },
   "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension#readme",
   "license": "Apache-2.0",
-  "maintainers": [],
   "name": "@polkadot/extension",
   "repository": {
     "directory": "packages/extension",
@@ -14,15 +15,16 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.45.3-1-x",
+  "version": "0.46.9",
   "dependencies": {
-    "@polkadot/extension-base": "^0.45.3-1-x",
-    "@polkadot/extension-inject": "^0.45.3-1-x",
-    "@polkadot/extension-ui": "^0.45.3-1-x",
-    "tslib": "^2.5.0"
+    "@polkadot/api": "^10.12.4",
+    "@polkadot/extension-base": "0.46.9",
+    "@polkadot/extension-inject": "0.46.9",
+    "@polkadot/extension-ui": "0.46.9",
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.71.6",
+    "@polkadot/dev": "^0.78.3",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",
@@ -33,8 +35,12 @@
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
     "stream-browserify": "^3.0.0",
-    "ts-loader": "^9.4.2",
+    "ts-loader": "^9.5.1",
     "url-loader": "^4.1.1",
     "webpack-extension-manifest-plugin": "^0.8.0"
+  },
+  "peerDependencies": {
+    "typescript": "*",
+    "webpack": "*"
   }
 }

@@ -1,10 +1,10 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback } from 'react';
 
 import { InputWithLabel, Warning } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 
 interface Props {
   className?: string;
@@ -33,7 +33,7 @@ function Unlock ({ className, error, isBusy, onSign, password, setError, setPass
         disabled={isBusy}
         isError={!password || !!error}
         isFocused
-        label={t<string>('Password for this account')}
+        label={t('Password for this account')}
         onChange={_onChangePassword}
         onEnter={onSign}
         type='password'

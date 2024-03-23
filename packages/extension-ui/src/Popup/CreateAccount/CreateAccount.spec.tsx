@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
 
 import '@polkadot/extension-mocks/chrome';
 
@@ -11,9 +11,8 @@ import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ThemeProvider } from 'styled-components';
 
-import { ActionContext, ActionText, Button, themes } from '../../components/index.js';
+import { ActionContext, ActionText, Button } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import { Header } from '../../partials/index.js';
 import { flushAllPromises } from '../../testHelpers.js';
@@ -44,9 +43,7 @@ describe('Create Account', () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   const mountComponent = (): ReactWrapper => mount(
     <ActionContext.Provider value={onActionStub}>
-      <ThemeProvider theme={themes.dark}>
-        <CreateAccount />
-      </ThemeProvider>
+      <CreateAccount />
     </ActionContext.Provider>
   );
 
@@ -72,8 +69,8 @@ describe('Create Account', () => {
   });
 
   describe('Phase 1', () => {
-    it('shows seed phrase in textarea', () => {
-      expect(wrapper.find('textarea').text()).toBe(exampleAccount.seed);
+    it('shows seed phrase in a span inside a div', () => {
+      expect(wrapper.find('.seedBox span').text()).toBe(exampleAccount.seed);
     });
 
     it('next step button is disabled when checkbox is not checked', () => {

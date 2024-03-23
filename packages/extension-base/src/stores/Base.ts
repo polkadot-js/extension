@@ -1,5 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-base authors & contributors
+// Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+/* global chrome */
 
 type StoreValue = Record<string, unknown>;
 
@@ -33,7 +35,7 @@ export default abstract class BaseStore <T> {
       const entries = Object.entries(result);
       const map: Record<string, T> = {};
 
-      for (let i = 0; i < entries.length; i++) {
+      for (let i = 0, count = entries.length; i < count; i++) {
         const [key, value] = entries[i];
 
         if (key.startsWith(this.#prefix)) {
@@ -45,30 +47,30 @@ export default abstract class BaseStore <T> {
     });
   }
 
-  public get (_key: string, update: (value: T) => void): void {
-    const key = `${this.#prefix}${_key}`;
+  public get (key: string, update: (value: T) => void): void {
+    const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.get([key], (result: StoreValue): void => {
+    chrome.storage.local.get([prefixedKey], (result: StoreValue): void => {
       lastError('get');
 
-      update(result[key] as T);
+      update(result[prefixedKey] as T);
     });
   }
 
-  public remove (_key: string, update?: () => void): void {
-    const key = `${this.#prefix}${_key}`;
+  public remove (key: string, update?: () => void): void {
+    const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.remove(key, (): void => {
+    chrome.storage.local.remove(prefixedKey, (): void => {
       lastError('remove');
 
       update && update();
     });
   }
 
-  public set (_key: string, value: T, update?: () => void): void {
-    const key = `${this.#prefix}${_key}`;
+  public set (key: string, value: T, update?: () => void): void {
+    const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.set({ [key]: value }, (): void => {
+    chrome.storage.local.set({ [prefixedKey]: value }, (): void => {
       lastError('set');
 
       update && update();

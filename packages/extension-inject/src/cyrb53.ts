@@ -1,4 +1,4 @@
-// Copyright 2019-2023 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2024 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // cyrb53 (c) 2018 bryc (github.com/bryc)
@@ -10,7 +10,7 @@
 // As shared in https://stackoverflow.com/a/52171480
 //
 // Small changes made to the code as linked above:
-// . - Seed value is required (set  as Date.now() in usage, could change)
+//   - Seed value is required (set as Date.now() in usage, could change)
 //   - Return value is a hex string (as per comment in SO answer)
 //   - TS typings added
 //   - Non-intrusive coding-style variable declaration changes
@@ -18,7 +18,7 @@ export function cyrb53 (input: string, seed = Date.now()): string {
   let h1 = 0xdeadbeef ^ seed;
   let h2 = 0x41c6ce57 ^ seed;
 
-  for (let i = 0; i < input.length; i++) {
+  for (let i = 0, count = input.length; i < count; i++) {
     const ch = input.charCodeAt(i);
 
     h1 = Math.imul(h1 ^ ch, 2654435761);

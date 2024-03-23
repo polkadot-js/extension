@@ -1,29 +1,15 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useCallback, useState } from 'react';
 
 import { ButtonArea, Checkbox, MnemonicSeed, NextStepButton, VerticalSpace, Warning } from '../../components/index.js';
-import useToast from '../../hooks/useToast.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useToast, useTranslation } from '../../hooks/index.js';
 
 interface Props {
   onNextStep: () => void;
   seed: string;
 }
-
-const onCopy = (): void => {
-  const mnemonicSeedTextElement = document.querySelector('textarea');
-
-  if (!mnemonicSeedTextElement) {
-    return;
-  }
-
-  mnemonicSeedTextElement.select();
-
-  // eslint-disable-next-line deprecation/deprecation
-  document.execCommand('copy');
-};
 
 function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -31,8 +17,7 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
   const { show } = useToast();
 
   const _onCopy = useCallback((): void => {
-    onCopy();
-    show(t<string>('Copied'));
+    show(t('Copied'));
   }, [show, t]);
 
   return (
@@ -42,12 +27,12 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
         seed={seed}
       />
       <Warning>
-        {t<string>("Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.")}
+        {t("Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.")}
       </Warning>
       <VerticalSpace />
       <Checkbox
         checked={isMnemonicSaved}
-        label={t<string>('I have saved my mnemonic seed safely.')}
+        label={t('I have saved my mnemonic seed safely.')}
         onChange={setIsMnemonicSaved}
       />
       <ButtonArea>
@@ -55,7 +40,7 @@ function Mnemonic ({ onNextStep, seed }: Props): React.ReactElement<Props> {
           isDisabled={!isMnemonicSaved}
           onClick={onNextStep}
         >
-          {t<string>('Next step')}
+          {t('Next step')}
         </NextStepButton>
       </ButtonArea>
     </>

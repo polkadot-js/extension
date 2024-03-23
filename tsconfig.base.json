@@ -3,13 +3,14 @@
 	"compilerOptions": {
 		"composite": true,
     /* FIXME Dropzone is problematic with nodenext resolution */
+    "module": "ESNext",
     "moduleResolution": "node",
 		"paths": {
       "@polkadot/extension": ["extension/src/index.ts"],
       "@polkadot/extension/*": ["extension/src/*.ts"],
       "@polkadot/extension-base": ["extension-base/src/index.ts"],
-      "@polkadot/extension-base/background/handlers": ["extension-base/src/background/handlers/index.ts"],
-      "@polkadot/extension-base/packageInfo": ["extension-base/src/packageInfo.ts"],
+      "@polkadot/extension-base/background": ["extension-base/src/background/index.ts"],
+      "@polkadot/extension-base/background/types": ["extension-base/src/background/types.ts"],
       "@polkadot/extension-base/page": ["extension-base/src/page/index.ts"],
       "@polkadot/extension-base/stores": ["extension-base/src/stores/index.ts"],
       "@polkadot/extension-base/utils": ["extension-base/src/utils/index.ts"],
@@ -24,7 +25,6 @@
       "@polkadot/extension-mocks/*": ["extension-mocks/src/*.ts"],
       "@polkadot/extension-ui": ["extension-ui/src/index.ts"],
       "@polkadot/extension-ui/*": ["extension-ui/src/*.ts"]
-    },
-    "skipLibCheck": true
+    }
 	}
  }

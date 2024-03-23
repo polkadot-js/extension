@@ -1,13 +1,11 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React from 'react';
 
 import { styled } from '../styled.js';
 
-interface Props extends ThemeProps {
+interface Props {
   children: React.ReactNode;
   className?: string;
   noBorder?: boolean;
@@ -25,7 +23,7 @@ function MenuItem ({ children, className = '', title }: Props): React.ReactEleme
   );
 }
 
-export default styled(MenuItem)(({ theme }: ThemeProps) => `
+export default styled(MenuItem)<Props>`
   min-width: 13rem;
   padding: 0 16px;
   max-width: 100%;
@@ -33,15 +31,15 @@ export default styled(MenuItem)(({ theme }: ThemeProps) => `
   > .itemTitle {
     margin: 0;
     width: 100%;
-    font-size: ${theme.inputLabelFontSize};
+    font-size: var(--inputLabelFontSize);
     line-height: 14px;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: ${theme.textColor};
+    color: var(--textColor);
     opacity: 0.65;
   }
 
   &+&.isTitled {
     margin-top: 16px;
   }
-`);
+`;

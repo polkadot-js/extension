@@ -1,7 +1,5 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../types.js';
 
 import React, { useCallback, useContext } from 'react';
 
@@ -9,7 +7,7 @@ import { ActionContext, ActionText } from '../components/index.js';
 import { styled } from '../styled.js';
 import Header from './Header.js';
 
-interface Props extends ThemeProps {
+interface Props {
   className?: string;
   step: number;
   text: string;
@@ -41,11 +39,11 @@ function HeaderWithSteps ({ className, step, text }: Props): React.ReactElement<
   );
 }
 
-export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
+export default React.memo(styled(HeaderWithSteps)<Props>`
   .current {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.primaryColor};
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
+    color: var(--primaryColor);
   }
 
   .steps {
@@ -59,8 +57,8 @@ export default React.memo(styled(HeaderWithSteps)(({ theme }: Props) => `
   }
 
   .total {
-    font-size: ${theme.labelFontSize};
-    line-height: ${theme.labelLineHeight};
-    color: ${theme.textColor};
+    font-size: var(--labelFontSize);
+    line-height: var(--labelLineHeight);
+    color: var(--textColor);
   }
-`));
+`);

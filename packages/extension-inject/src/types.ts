@@ -1,9 +1,10 @@
-// Copyright 2019-2023 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2024 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { Signer as InjectedSigner } from '@polkadot/api/types';
 import type { ProviderInterface } from '@polkadot/rpc-provider/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
+import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
 // eslint-disable-next-line no-undef
@@ -52,7 +53,7 @@ export interface ProviderMeta {
 
 export interface MetadataDefBase {
   chain: string;
-  genesisHash: string;
+  genesisHash: HexString;
   icon: string;
   ss58Format: number;
   chainType?: 'substrate' | 'ethereum'

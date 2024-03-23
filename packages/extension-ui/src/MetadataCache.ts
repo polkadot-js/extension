@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef } from '@polkadot/extension-inject/types';
 
 const metadataGets = new Map<string, Promise<MetadataDef | null>>();
 

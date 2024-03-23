@@ -1,21 +1,21 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ThemeProps } from '../types.js';
+import type { RouteComponentProps } from 'react-router';
 
 import fileSaver from 'file-saver';
 import React, { useCallback, useContext, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { withRouter } from 'react-router';
 
 import { ActionBar, ActionContext, ActionText, Address, Button, InputWithLabel, Warning } from '../components/index.js';
-import useTranslation from '../hooks/useTranslation.js';
+import { useTranslation } from '../hooks/index.js';
 import { exportAccount } from '../messaging.js';
 import { Header } from '../partials/index.js';
 import { styled } from '../styled.js';
 
 const MIN_LENGTH = 6;
 
-interface Props extends RouteComponentProps<{address: string}>, ThemeProps {
+interface Props extends RouteComponentProps<{address: string}> {
   className?: string;
 }
 
@@ -64,19 +64,19 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
     <>
       <Header
         showBackArrow
-        text={t<string>('Export account')}
+        text={t('Export account')}
       />
       <div className={className}>
         <Address address={address}>
           <Warning className='movedWarning'>
-            {t<string>("You are exporting your account. Keep it safe and don't share it with anyone.")}
+            {t("You are exporting your account. Keep it safe and don't share it with anyone.")}
           </Warning>
           <div className='actionArea'>
             <InputWithLabel
               data-export-password
               disabled={isBusy}
               isError={pass.length < MIN_LENGTH || !!error}
-              label={t<string>('password for this account')}
+              label={t('password for this account')}
               onChange={onPassChange}
               type='password'
             />
@@ -96,13 +96,13 @@ function Export ({ className, match: { params: { address } } }: Props): React.Re
               isDisabled={pass.length === 0 || !!error}
               onClick={_onExportButtonClick}
             >
-              {t<string>('I want to export this account')}
+              {t('I want to export this account')}
             </Button>
             <ActionBar className='withMarginTop'>
               <ActionText
                 className='center'
                 onClick={_goHome}
-                text={t<string>('Cancel')}
+                text={t('Cancel')}
               />
             </ActionBar>
           </div>

@@ -1,10 +1,10 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useContext } from 'react';
 
 import { Loading, MetadataReqContext } from '../../components/index.js';
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { Header } from '../../partials/index.js';
 import Request from './Request.js';
 
@@ -14,7 +14,7 @@ export default function Metadata (): React.ReactElement {
 
   return (
     <>
-      <Header text={t<string>('Metadata')} />
+      <Header text={t('Metadata')} />
       {requests[0]
         ? (
           <Request

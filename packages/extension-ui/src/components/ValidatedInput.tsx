@@ -1,10 +1,12 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
+
+import type { ResultType, Validator } from '../util/validators.js';
 
 import React, { useEffect, useState } from 'react';
 
-import useIsMounted from '../hooks/useIsMounted.js';
-import { Result, Validator } from '../util/validators.js';
+import { useIsMounted } from '../hooks/index.js';
+import { Result } from '../util/validators.js';
 import Warning from './Warning.js';
 
 interface BasicProps {
@@ -23,7 +25,7 @@ type Props<T extends BasicProps> = T & {
 
 function ValidatedInput<T extends Record<string, unknown>> ({ className, component: Input, defaultValue, onValidatedChange, validator, ...props }: Props<T>): React.ReactElement<Props<T>> {
   const [value, setValue] = useState(defaultValue || '');
-  const [validationResult, setValidationResult] = useState<Result<string>>(Result.ok(''));
+  const [validationResult, setValidationResult] = useState<ResultType<string>>(Result.ok(''));
   const isMounted = useIsMounted();
 
   useEffect(() => {

@@ -1,7 +1,7 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev/node/test/node" />
+/// <reference types="@polkadot/dev-test/globals" />
 
 import '@polkadot/extension-mocks/chrome';
 
@@ -57,6 +57,7 @@ const typeDerivationPath = async (wrapper: ReactWrapper, value: string) => {
 };
 
 // FIXME hanging
+// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('ImportSeed', () => {
   let wrapper: ReactWrapper;
   const onActionStub = jest.fn();

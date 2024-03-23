@@ -1,13 +1,11 @@
-// Copyright 2019-2023 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
-import type { ThemeProps } from '../../types.js';
 
 import React, { useMemo } from 'react';
 
 import { isAscii, u8aToString, u8aUnwrapBytes } from '@polkadot/util';
 
-import useTranslation from '../../hooks/useTranslation.js';
+import { useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -30,11 +28,11 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
     <table className={className}>
       <tbody>
         <tr>
-          <td className='label'>{t<string>('from')}</td>
+          <td className='label'>{t('from')}</td>
           <td className='data'>{url}</td>
         </tr>
         <tr>
-          <td className='label'>{t<string>('bytes')}</td>
+          <td className='label'>{t('bytes')}</td>
           <td className='data pre'><div>{text}</div></td>
         </tr>
       </tbody>
@@ -42,7 +40,7 @@ function Bytes ({ bytes, className, url }: Props): React.ReactElement<Props> {
   );
 }
 
-export default styled(Bytes)(({ theme }: ThemeProps) => `
+export default styled(Bytes)<Props>`
   border: 0;
   display: block;
   font-size: 0.75rem;
@@ -68,10 +66,10 @@ export default styled(Bytes)(({ theme }: ThemeProps) => `
         white-space: pre;
         overflow: auto;
         max-height: calc(100vh - 480px);
-        min-height: ${theme.boxLineHeight};
-        border: 1px solid ${theme.boxBorderColor};
-        background: ${theme.boxBackground};
-        line-height: ${theme.boxLineHeight};
+        min-height: var(--boxLineHeight);
+        border: 1px solid var(--boxBorderColor);
+        background: var(--boxBackground);
+        line-height: var(--boxLineHeight);
       }
     }
   }
@@ -83,4 +81,4 @@ export default styled(Bytes)(({ theme }: ThemeProps) => `
     vertical-align: middle;
     white-space: nowrap;
   }
-`);
+`;

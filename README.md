@@ -18,11 +18,10 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 
 Steps to build the extension and view your changes in a browser:
 
-1. Install supported Node.js version `nvm install`
-2. Install dependencies `yarn install`
-3. Temporarily rename the extension "name" attribute in packages/extension/build/manifest.json from "polkadot{.js} extension" to "polkadot{.js} extension (development only)" incase you already have a production version installed in your browser
-4. Build via `yarn build` or `yarn watch`
-5. Install the extension
+1. Install supported Node.js version. Optionally via `nvm install`
+2. Install dependencies via `yarn`
+3. Build via `yarn build` or `yarn watch`
+4. Install the extension
   - Chrome:
     - go to `chrome://extensions/`
     - ensure you have the Development flag set
@@ -35,11 +34,7 @@ Steps to build the extension and view your changes in a browser:
     - if developing, after making changes - reload the extension
     - edit the extension settings to "Run in Private Windows" if necessary
     - click the puzzle icon, then click the gear icon next to the "polkadot{.js} extension (development only)" extension and choose "Pin to Toolbar"
-6. When visiting `https://polkadot.js.org/apps/` it will inject the extension
-
-Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
-
-7. Rename the extension "name" attribute in packages/extension/build/manifest.json back to "polkadot{.js} extension" before building and pushing any changes to https://github.com/polkadot-js/extension.
+5. When visiting `https://polkadot.js.org/apps/` it will inject the extension
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
 

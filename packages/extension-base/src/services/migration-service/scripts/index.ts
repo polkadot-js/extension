@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import AutoEnableSomeTokens from '@subwallet/extension-base/services/migration-service/scripts/databases/AutoEnableSomeTokens';
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
 import MigrateTransactionHistoryBySymbol from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistoryBySymbol';
 
@@ -51,7 +52,8 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.28-01': MigrateEarningVersion,
   '1.1.41-01': DeleteChainStaking,
   '1.1.44-01': MigrateAssetSetting,
-  '1.1.44-02': MigrateTransactionHistoryBySymbol
+  '1.1.45-01': MigrateTransactionHistoryBySymbol,
+  '1.1.46-01': AutoEnableSomeTokens
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

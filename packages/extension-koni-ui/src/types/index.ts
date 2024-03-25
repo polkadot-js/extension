@@ -129,3 +129,4 @@ export * from './staking';
 export * from './transaction';
 export * from './walletConnect';
 export * from './earning';
+export * from './missionPool';

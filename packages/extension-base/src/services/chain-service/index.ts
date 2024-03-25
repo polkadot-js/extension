@@ -1783,14 +1783,16 @@ export class ChainService {
     const chainInfoMap = this.getChainInfoMap();
 
     Object.values(chainInfoMap).forEach((i) => {
-      if (!i.extraInfo?.subscanSlug) {
+      const subscanSlug = i.slug === 'goldberg_testnet' ? 'avail-testnet' : i.extraInfo?.subscanSlug; // Hotfix for Goldberg testnet
+
+      if (!subscanSlug) {
         return;
       }
 
       if (!reverse) {
-        result[i.slug] = i.extraInfo?.subscanSlug;
+        result[i.slug] = subscanSlug;
       } else {
-        result[i.extraInfo?.subscanSlug] = i.slug;
+        result[subscanSlug] = i.slug;
       }
     });
 

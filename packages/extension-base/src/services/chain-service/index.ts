@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetAutoEnable, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -676,29 +676,58 @@ export class ChainService {
     this.logger.log('Finished updating latest price IDs');
   }
 
-  handleLatestAssetData (latestAssetInfo: Record<string, _ChainAsset> | null, latestAssetLogoMap: Record<string, string> | null) {
+  async handleLatestAssetData (latestAssetInfo: Record<string, _ChainAsset> | null, latestAssetLogoMap: Record<string, string> | null) {
     try {
       if (latestAssetInfo && Object.keys(latestAssetInfo).length > 0) {
-        this.dataMap.assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+        const oldAssetRegistry = this.dataMap.assetRegistry;
+        const newAssetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
 
-        this.assetRegistrySubject.next(this.dataMap.assetRegistry);
-        this.eventService.emit('asset.updateState', '');
+        if (JSON.stringify(oldAssetRegistry) !== JSON.stringify(newAssetRegistry)) {
+          this.dataMap.assetRegistry = newAssetRegistry;
+          this.assetRegistrySubject.next(newAssetRegistry);
+          this.eventService.emit('asset.updateState', '');
+        }
       }
 
       if (latestAssetLogoMap && Object.keys(latestAssetLogoMap).length > 0) {
-        const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+        const oldLogoMap = this.assetLogoMapSubject.value;
+        const newLogoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
 
-        this.assetLogoMapSubject.next(logoMap);
+        if (JSON.stringify(oldLogoMap) !== JSON.stringify(newLogoMap)) {
+          this.assetLogoMapSubject.next(newLogoMap);
+        }
+      }
+
+      const autoEnableTokens = Object.values(this.dataMap.assetRegistry).filter((asset) => _isAssetAutoEnable(asset));
+
+      const assetSettings = this.assetSettingSubject.value;
+      const chainStateMap = this.getChainStateMap();
+
+      for (const asset of autoEnableTokens) {
+        const { originChain, slug: assetSlug } = asset;
+        const assetState = assetSettings[assetSlug];
+        const chainState = chainStateMap[originChain];
+
+        if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
+          // @ts-ignore
+          // TODO: Merge issue detect balance to define manualTurnOff props
+          if (!chainState || !chainState.manualTurnOff) {
+            await this.updateAssetSetting(assetSlug, { visible: true });
+          }
+        }
       }
     } catch (e) {
       console.error('Error fetching latest asset data');
     }
+
+    this.logger.log('Finished updating latest asset');
   }
 
   handleLatestData () {
     this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
-      this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+      return this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
     }).catch(console.error);
+
     this.fetchLatestChainData().then((latestChainInfo) => {
       this.handleLatestProviderData(latestChainInfo);
     }).catch(console.error);

@@ -387,19 +387,17 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
 const ComponentGate = () => {
   const locationState = useLocation().state as EarningPoolsParam;
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!locationState?.poolGroup || !locationState?.symbol) {
+      navigate('/home/earning');
+    }
+  }, [locationState?.poolGroup, locationState?.symbol, navigate]);
 
   if (!locationState?.poolGroup || !locationState?.symbol) {
-    // todo: will handle this with useEffect
     return (
-      <div style={{
-        display: 'flex',
-        height: '100%',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }}
-      >
-        Missing param
-      </div>
+      <></>
     );
   }
 

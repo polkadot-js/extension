@@ -1,6 +1,6 @@
-    2325	AnhMTV                        	Release version 1.1.44
-    2170	Nam Phạm                      	[Issue 2717] change XCM ref map
-    1959	S2kael                        	[Issue-2694] Update migrate script
+    2339	AnhMTV                        	Release version 1.1.46
+    2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
+    1963	S2kael                        	[Issue-2786] Update xcm fee
      619	lw-cdm                        	Fix issue related to undefined object
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
@@ -10,13 +10,13 @@
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       80	leewong                       	Update account filter for earn transaction
-      66	bluezdot                      	[Issue-2694] Update chainlist 2024.03.11
-      64	nguyentiendung                	[Issue-2759_extension] Extension - Update email support
+      76	bluezdot                      	[Issue-2786] fix eslint
+      74	nguyentiendung                	[Issue-2710] Remove divider, change background footer, handle tabFilter
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
-      47	bluedot                       	update priceId for EWT on Energy Web X
+      48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
+      34	Thiendekaco                   	[Issue 2785] Extension - Support connect Ledger device for Asset Hub
       29	Automation Bot                	[CI Skip] Auto increase webapp build number
-      27	Thiendekaco                   	update locate of file
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

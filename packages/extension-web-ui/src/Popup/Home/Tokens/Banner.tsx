@@ -18,7 +18,7 @@ const Component: React.FC<Props> = ({ className, content, title }: Props) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const goEarning = useCallback(() => {
-    navigate('/home/earning/overview');
+    navigate('/home/earning');
   }, [navigate]);
 
   return (

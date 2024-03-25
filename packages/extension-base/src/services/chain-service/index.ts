@@ -53,6 +53,7 @@ export class ChainService {
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
   private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
+  private chainLogoMapSubject = new BehaviorSubject<Record<string, string>>(ChainLogoMap);
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -1764,16 +1765,20 @@ export class ChainService {
     return this.assetSettingSubject;
   }
 
-  public async getChainLogoMap (): Promise<Record<string, string>> {
-    return Promise.resolve(ChainLogoMap);
-  }
-
   public getAssetLogoMap (): Record<string, string> {
     return this.assetLogoMapSubject.value;
   }
 
   public subscribeAssetLogoMap () {
     return this.assetLogoMapSubject;
+  }
+
+  public getChainLogoMap (): Record<string, string> {
+    return this.chainLogoMapSubject.value;
+  }
+
+  public subscribeChainLogoMap () {
+    return this.chainLogoMapSubject;
   }
 
   public resetWallet (resetAll: boolean) {

@@ -1,6 +1,6 @@
-    2342	AnhMTV                        	Release version 1.1.47
+    2345	AnhMTV                        	
     2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
-    1963	S2kael                        	[Issue-2786] Update xcm fee
+    1964	S2kael                        	[Issue-2795] Fix crash app on Transfer screen when max transfer is too high
      619	lw-cdm                        	Fix issue related to undefined object
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	

@@ -53,6 +53,7 @@ export class LazyLoader {
 const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwallet/extension-web-ui/Popup/PhishingDetected'));
 const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-web-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-web-ui/Popup/CreateDone'));
+const RedirectHandler = new LazyLoader('RedirectHandler', () => import('@subwallet/extension-web-ui/Popup/RedirectHandler'));
 const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-web-ui/Popup/BuyTokens'));
 
 const Tokens = new LazyLoader('Tokens', () => import('@subwallet/extension-web-ui/Popup/Home/Tokens'));
@@ -176,6 +177,7 @@ export const router = createBrowserRouter([
       Welcome.generateRouterObject('/welcome', true),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
+      RedirectHandler.generateRouterObject('/redirect-handler/:feature'),
       {
         ...Home.generateRouterObject('/home'),
         children: [

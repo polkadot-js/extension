@@ -941,6 +941,12 @@ const Component = () => {
   }, [currentAccount?.address]);
 
   useEffect(() => {
+    if (defaultData.from !== defaultFromValue && !isAllAccount) {
+      form.setFieldValue('from', defaultFromValue);
+    }
+  }, [defaultData, defaultFromValue, form, fromValue, isAllAccount]);
+
+  useEffect(() => {
     const restoreFormDefault = () => {
       persistData({
         ...DEFAULT_SWAP_PARAMS,

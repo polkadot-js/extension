@@ -54,6 +54,8 @@ export class ChainService {
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
   private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
   private chainLogoMapSubject = new BehaviorSubject<Record<string, string>>(ChainLogoMap);
+  private assetMapPatch: string = JSON.stringify({});
+  private assetLogoPatch: string = JSON.stringify({});
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -577,6 +579,7 @@ export class ChainService {
     await this.initApis();
     await this.initAssetSettings();
     await this.initAssetRefMap();
+    await this.autoEnableTokens();
 
     this.checkLatestData();
   }
@@ -676,45 +679,38 @@ export class ChainService {
     this.logger.log('Finished updating latest price IDs');
   }
 
-  async handleLatestAssetData (latestAssetInfo: Record<string, _ChainAsset> | null, latestAssetLogoMap: Record<string, string> | null) {
+  handleLatestAssetData (_latestAssetInfo: Record<string, _ChainAsset> | null, _latestAssetLogoMap: Record<string, string> | null) {
     try {
-      if (latestAssetInfo && Object.keys(latestAssetInfo).length > 0) {
-        const oldAssetRegistry = this.dataMap.assetRegistry;
-        const newAssetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+      let needUpdate = false;
 
-        if (JSON.stringify(oldAssetRegistry) !== JSON.stringify(newAssetRegistry)) {
-          this.dataMap.assetRegistry = newAssetRegistry;
-          this.assetRegistrySubject.next(newAssetRegistry);
-          this.eventService.emit('asset.updateState', '');
-        }
+      const latestAssetInfo = _latestAssetInfo || {};
+      const latestAssetLogoMap = _latestAssetLogoMap || {};
+
+      const latestAssetPatch = JSON.stringify(latestAssetInfo);
+      const latestAssetLogoPatch = JSON.stringify(latestAssetLogoMap);
+
+      if (this.assetMapPatch !== latestAssetPatch) {
+        needUpdate = true;
+
+        const assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+
+        this.assetMapPatch = latestAssetPatch;
+        this.dataMap.assetRegistry = assetRegistry;
+        this.assetRegistrySubject.next(assetRegistry);
       }
 
-      if (latestAssetLogoMap && Object.keys(latestAssetLogoMap).length > 0) {
-        const oldLogoMap = this.assetLogoMapSubject.value;
-        const newLogoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+      if (this.assetLogoPatch !== latestAssetLogoPatch) {
+        const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
 
-        if (JSON.stringify(oldLogoMap) !== JSON.stringify(newLogoMap)) {
-          this.assetLogoMapSubject.next(newLogoMap);
-        }
+        this.assetLogoMapSubject.next(logoMap);
       }
 
-      const autoEnableTokens = Object.values(this.dataMap.assetRegistry).filter((asset) => _isAssetAutoEnable(asset));
-
-      const assetSettings = this.assetSettingSubject.value;
-      const chainStateMap = this.getChainStateMap();
-
-      for (const asset of autoEnableTokens) {
-        const { originChain, slug: assetSlug } = asset;
-        const assetState = assetSettings[assetSlug];
-        const chainState = chainStateMap[originChain];
-
-        if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
-          // @ts-ignore
-          // TODO: Merge issue detect balance to define manualTurnOff props
-          if (!chainState || !chainState.manualTurnOff) {
-            await this.updateAssetSetting(assetSlug, { visible: true });
-          }
-        }
+      if (needUpdate) {
+        this.autoEnableTokens()
+          .then(() => {
+            this.eventService.emit('asset.updateState', '');
+          })
+          .catch(console.error);
       }
     } catch (e) {
       console.error('Error fetching latest asset data');
@@ -723,9 +719,30 @@ export class ChainService {
     this.logger.log('Finished updating latest asset');
   }
 
+  async autoEnableTokens () {
+    const autoEnableTokens = Object.values(this.dataMap.assetRegistry).filter((asset) => _isAssetAutoEnable(asset));
+
+    const assetSettings = this.assetSettingSubject.value;
+    const chainStateMap = this.getChainStateMap();
+
+    for (const asset of autoEnableTokens) {
+      const { originChain, slug: assetSlug } = asset;
+      const assetState = assetSettings[assetSlug];
+      const chainState = chainStateMap[originChain];
+
+      if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
+        // @ts-ignore
+        // TODO: Merge issue detect balance to define manualTurnOff props
+        if (!chainState || !chainState.manualTurnOff) {
+          await this.updateAssetSetting(assetSlug, { visible: true });
+        }
+      }
+    }
+  }
+
   handleLatestData () {
     this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
-      return this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+      this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
     }).catch(console.error);
 
     this.fetchLatestChainData().then((latestChainInfo) => {

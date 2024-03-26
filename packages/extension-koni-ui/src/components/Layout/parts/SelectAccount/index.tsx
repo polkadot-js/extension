@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -50,6 +51,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
 const simpleQrModalId = 'simple-qr-modal-id';
+const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -303,7 +305,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [inactiveModal]);
 
   const exportAllAccounts = useCallback(() => {
-    activeModal(EXPORT_ACCOUNTS_PASSWORD_MODAL);
+    activeModal(multiExportAccountModalId);
   }, [activeModal]);
 
   const rightButton = useMemo((): ButtonProps => ({
@@ -379,6 +381,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       />
 
       <AccountExportPasswordModal />
+      <ExportAllSelector
+        items={accounts}
+        showAllAccount={showAllAccount}
+      />
     </div>
   );
 }

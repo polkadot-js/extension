@@ -2,24 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
-import { HiddenInput } from '@subwallet/extension-koni-ui/components';
-import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
-import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
-import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
+import { AccountSelector, AddressInput, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useIsMantaPayEnabled, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, formatBalance, isAccountAll, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
+import { findAccountByAddress, findNetworkJsonByGenesisHash, formatBalance, isAccountAll, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -211,6 +204,7 @@ const filterAccountFunc = (
 
 const hiddenFields: Array<keyof TransferParams> = ['chain'];
 const validateFields: Array<keyof TransferParams> = ['value', 'to'];
+const alertModalId = 'confirmation-alert-modal';
 
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   useSetCurrentPage('/transaction/send-fund');
@@ -235,6 +229,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const asset = useWatchTransaction('asset', form, defaultData);
 
   const assetInfo = useFetchChainAssetInfo(asset);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
@@ -545,6 +540,36 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [maxTransfer]);
 
+  const onPreSubmit = useCallback(() => {
+    if (_isNativeToken(assetInfo)) {
+      const minAmount = _getTokenMinAmount(assetInfo);
+      const bnMinAmount = new BN(minAmount);
+
+      if (bnMinAmount.gt(BN_ZERO) && isTransferAll && chain === destChain) {
+        openAlert({
+          type: NotificationType.WARNING,
+          content: t('Transferring all will remove all assets on this network. Are you sure?'),
+          title: t('Pay attention!'),
+          okButton: {
+            text: t('Transfer'),
+            onClick: () => {
+              closeAlert();
+              form.submit();
+            }
+          },
+          cancelButton: {
+            text: t('Cancel'),
+            onClick: closeAlert
+          }
+        });
+
+        return;
+      }
+    }
+
+    form.submit();
+  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
+
   // TODO: Need to review
   // Auto fill logic
   useEffect(() => {
@@ -743,6 +768,14 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
+        {
+          !!alertProps && (
+            <AlertModal
+              modalId={alertModalId}
+              {...alertProps}
+            />
+          )
+        }
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}
@@ -756,7 +789,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           )}
           loading={loading}
-          onClick={checkAction(form.submit, extrinsicType)}
+          onClick={checkAction(onPreSubmit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}

@@ -1,11 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AssetSetting } from '@subwallet/extension-base/background/KoniTypes';
 import BaseMigrationJob from '@subwallet/extension-base/services/migration-service/Base';
+import { ITransactionHistoryItem } from '@subwallet/extension-base/services/storage-service/databases';
 
-export default class MigrateAssetSetting extends BaseMigrationJob {
+export default class MigrateTransactionHistoryBySymbol extends BaseMigrationJob {
   public override async run (): Promise<void> {
+    const state = this.state;
+
     try {
       const changeSlugsMap: Record<string, string> = {
         'ethereum-ERC20-WFTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870': 'ethereum-ERC20-FTM-0x4E15361FD6b4BB609Fa63C81A2be19d873717870',
@@ -27,24 +29,38 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
         'tomochain-NATIVE-TOMO': 'tomochain-NATIVE-VIC'
       };
 
-      const assetSetting = await this.state.chainService.getAssetSettings();
+      const allTxs: ITransactionHistoryItem[] = [];
 
-      const migratedAssetSetting: Record<string, AssetSetting> = {};
+      await Promise.all(Object.entries(changeSlugsMap).map(async ([oldSlug, newSlug], i) => {
+        const oldSlugSplit = oldSlug.split('-');
+        const oldChainSlug = oldSlugSplit[0];
+        const oldSymbolSlug = oldSlugSplit[2];
 
-      for (const [oldSlug, newSlug] of Object.entries(changeSlugsMap)) {
-        if (Object.keys(assetSetting).includes(oldSlug)) {
-          const isVisible = assetSetting[oldSlug].visible;
+        const newSlugSplit = newSlug.split('-');
+        const newSymbolSlug = newSlugSplit[2];
 
-          migratedAssetSetting[newSlug] = { visible: isVisible };
+        const filterTransactions = await state.dbService.stores.transaction.table.where({ chain: oldChainSlug }).and((tx) => {
+          return tx.amount?.symbol === oldSymbolSlug;
+        }).toArray();
+
+        if (filterTransactions.length > 0) {
+          for (const transaction of filterTransactions) {
+            if (transaction.amount && transaction.amount.symbol === oldSymbolSlug) {
+              transaction.amount.symbol = newSymbolSlug;
+            }
+
+            if (transaction.fee && transaction.fee.symbol === oldSymbolSlug) {
+              transaction.fee.symbol = newSymbolSlug;
+            }
+          }
         }
-      }
 
-      this.state.chainService.setAssetSettings({
-        ...assetSetting,
-        ...migratedAssetSetting
-      });
+        allTxs.push(...filterTransactions);
+      }));
+
+      await state.dbService.stores.transaction.table.bulkPut(allTxs);
     } catch (e) {
-      console.error(e);
+      this.logger.error(e);
     }
   }
 }

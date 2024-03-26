@@ -578,37 +578,14 @@ export class ChainService {
 
     await this.initApis();
     await this.initAssetSettings();
-    await this.initAssetRefMap();
+    this.initAssetRefMap();
     await this.autoEnableTokens();
 
     this.checkLatestData();
   }
 
-  async initAssetRefMap () {
-    try {
-      const fetchPromise = this.fetchLatestAssetRef();
-      const timeout = new Promise<null>((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve(null);
-        }, 1000);
-      });
-
-      const rs = await Promise.race([
-        timeout,
-        fetchPromise
-      ]);
-
-      if (rs) {
-        const [disabledAssetRefs, latestAssetRefMap] = rs;
-
-        this.handleLatestAssetRef(disabledAssetRefs, latestAssetRefMap);
-      } else {
-        this.dataMap.assetRefMap = AssetRefMap;
-      }
-    } catch (e) {
-      this.dataMap.assetRefMap = AssetRefMap;
-    }
+  initAssetRefMap () {
+    this.dataMap.assetRefMap = AssetRefMap;
   }
 
   checkLatestData () {
@@ -743,7 +720,11 @@ export class ChainService {
 
   handleLatestData () {
     this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
-      this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+      this.eventService.waitAssetReady
+        .then(() => {
+          this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+        })
+        .catch(console.error);
     }).catch(console.error);
 
     this.fetchLatestChainData().then((latestChainInfo) => {

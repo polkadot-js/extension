@@ -92,9 +92,10 @@ function Component ({ className, request }: Props) {
         });
       })
       .finally(() => {
+        navigate('/wallet-connect/list');
         setLoading(false);
       });
-  }, [namespaceAccounts, notification, request]);
+  }, [namespaceAccounts, navigate, notification, request]);
 
   const onAddAccount = useCallback(() => {
     setSelectedAccountTypes(convertKeyTypes(missingType));

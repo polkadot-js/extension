@@ -3,10 +3,10 @@
 
 import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, ModalContext, PageIcon } from '@subwallet/react-ui';
+import { Button, Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Info } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -18,11 +18,6 @@ type Props = ThemeProps & {
 const Component: React.FC<Props> = (props: Props) => {
   const { className, modalId, onOk } = props;
   const { t } = useTranslation();
-  const { inactiveModal } = useContext(ModalContext);
-
-  const onCancel = useCallback(() => {
-    inactiveModal(modalId);
-  }, [inactiveModal, modalId]);
 
   return (
     <>
@@ -32,7 +27,6 @@ const Component: React.FC<Props> = (props: Props) => {
         closable={false}
         destroyOnClose={true}
         id={modalId}
-        onCancel={onCancel}
         title={'Are you still there?'}
       >
         <div className={'__content-wrapper'}>

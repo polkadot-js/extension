@@ -71,7 +71,7 @@ const Component = ({ className, onOk }: Props) => {
       width={ isWebUI ? 736 : undefined }
     >
       <div className={'__content-title'}>You’re using third-party swap providers, which may contain inherent risks. Please read the following carefully</div>
-      <div className={'__content-wrappper'}>
+      <div className={'__content-wrapper'}>
         <div
           className={'__content-body'}
           onScroll={onScrollToAcceptButton}
@@ -93,15 +93,15 @@ const Component = ({ className, onOk }: Props) => {
               you will be solely responsible for paying the gas fees for any transaction that you initiate.
               Double-check the gas fees before making any transaction as gas fees can fluctuate.
           </div>
-          {(!isScrollEnd || !scrollRef?.current) && <Button
-            className={'__caret-button'}
-            icon={<Icon phosphorIcon={CaretDown} />}
-            onClick={onScrollContent}
-            schema={'secondary'}
-            shape={'circle'}
-            size={'xs'}
-          />}
         </div>
+        {(!isScrollEnd || !scrollRef?.current) && <Button
+          className={'__caret-button'}
+          icon={<Icon phosphorIcon={CaretDown} />}
+          onClick={onScrollContent}
+          schema={'secondary'}
+          shape={'circle'}
+          size={'xs'}
+        />}
       </div>
       <div className={'__content-footer'}>
         <Checkbox
@@ -134,7 +134,7 @@ const Component = ({ className, onOk }: Props) => {
   );
 };
 
-export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const SwapTermsOfServiceModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     color: token.colorTextDescription,
     '.ant-sw-modal-header': {
@@ -163,7 +163,8 @@ export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
       paddingLeft: 16,
       paddingRight: 16
     },
-    '.__content-wrappper': {
+    '.__content-wrapper': {
+      position: 'relative',
       backgroundColor: token.colorBgSecondary,
       paddingBottom: 32,
       paddingTop: 16,
@@ -175,8 +176,8 @@ export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
     },
     '.__caret-button': {
       position: 'absolute',
-      top: 414,
-      right: 30,
+      right: 16,
+      bottom: -20,
       backgroundColor: token.geekblue
     },
     '.__content-footer-checkbox': {
@@ -210,4 +211,4 @@ export const TermsOfServiceModal = styled(Component)<Props>(({ theme: { token } 
   };
 });
 
-export default TermsOfServiceModal;
+export default SwapTermsOfServiceModal;

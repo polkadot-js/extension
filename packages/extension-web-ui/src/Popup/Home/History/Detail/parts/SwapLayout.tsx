@@ -3,8 +3,7 @@
 
 import { _getAssetName, _getAssetOriginChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapTxData } from '@subwallet/extension-base/types/swap';
-import { AlertBox, MetaInfo } from '@subwallet/extension-web-ui/components';
-import SwapTransactionBlock from '@subwallet/extension-web-ui/components/Swap/SwapTransactionBlock';
+import { AlertBox, MetaInfo, SwapTransactionBlock } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, HistoryStatusMap, TxTypeNameMap } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';

@@ -169,6 +169,9 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const redirectTarget = useMemo(() => {
     const pathName = location.pathname;
+
+    const redirectHandlePage = pathName.startsWith('/redirect-handler');
+
     const redirectObj: RedirectProps = { redirect: null, modal: null };
 
     if (pathName === '/wc') {
@@ -192,14 +195,14 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       redirectObj.redirect = DEFAULT_ROUTER_PATH;
     } else if (!hasMasterPassword) {
       if (isNoAccount) {
-        if (!allowPreventWelcomeUrls.includes(pathName)) {
+        if (!allowPreventWelcomeUrls.includes(pathName) && !redirectHandlePage) {
           redirectObj.redirect = welcomeUrl;
         }
       } else if (pathName !== createDoneUrl) {
         redirectObj.redirect = createPasswordUrl;
       }
     } else if (isNoAccount) {
-      if (!allowPreventWelcomeUrls.includes(pathName)) {
+      if (!allowPreventWelcomeUrls.includes(pathName) && !redirectHandlePage) {
         redirectObj.redirect = welcomeUrl;
       }
     } else if (hasConfirmations) {

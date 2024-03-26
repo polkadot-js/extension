@@ -1837,15 +1837,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/sdk@npm:1.3.0-beta.1":
-  version: 1.3.0-beta.1
-  resolution: "@chainflip/sdk@npm:1.3.0-beta.1"
+"@chainflip/sdk@npm:^1.3.0-beta.1":
+  version: 1.3.0-beta.3
+  resolution: "@chainflip/sdk@npm:1.3.0-beta.3"
   dependencies:
     "@polkadot/util": ^12.6.2
     "@polkadot/util-crypto": ^12.6.2
     axios: ^1.6.7
     ethers: ^6.11.1
-  checksum: 3c2524933676879ffb005c087eaf6e2d29a2a2faa35c9cfd03c7c91cda895dda1e1bf9823f411c4b36e59a7588bee10b3cca4775afe4125d8b199838a41c5c0f
+  checksum: a32782ef3e520db63093bcad1323f103569b3ad9d379ad586c2fcc7ea7f83f8de7076567281b761bd2731ddb2391fdf6734fbfc6e94e0071091516a046e7b630
   languageName: node
   linkType: hard
 
@@ -2547,9 +2547,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@galacticcouncil/sdk@npm:1.1.12":
-  version: 1.1.12
-  resolution: "@galacticcouncil/sdk@npm:1.1.12"
+"@galacticcouncil/sdk@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "@galacticcouncil/sdk@npm:1.2.1"
   dependencies:
     "@galacticcouncil/math-lbp": ^0.2.1
     "@galacticcouncil/math-omnipool": ^0.2.0
@@ -2574,7 +2574,7 @@ __metadata:
     "@polkadot/types-known": ^10.9.1
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-  checksum: 79fe6d7eb5b4935cd091f4ab2847ff8cc1e4baaf70ce38c95a47b50a5e864054c23ff7244bf0efe6e07a4608c57df7fae961eccc8759676da9aad6450cf21699
+  checksum: e14949e4c1f7b1deec374812d684602f0e2136113da26d79b7a2c8b38b0b68125dbd06231e51926b459dc7279533bb3224bfca53dd6aa69d505b1a5d86e0f605
   languageName: node
   linkType: hard
 
@@ -6182,12 +6182,12 @@ __metadata:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@chainflip/sdk": 1.3.0-beta.1
+    "@chainflip/sdk": ^1.3.0-beta.1
     "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
     "@ethersproject/abi": ^5.7.0
-    "@galacticcouncil/sdk": 1.1.12
+    "@galacticcouncil/sdk": ^1.2.1
     "@json-rpc-tools/utils": ^1.7.6
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13

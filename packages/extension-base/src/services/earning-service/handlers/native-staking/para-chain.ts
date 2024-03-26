@@ -408,7 +408,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
             isVerified: false,
             minBond: bnMinBond.toString(),
             chain: this.chain,
-            isCrowded: parseInt(maxDelegationPerCollator) > 0
+            isCrowded: collatorInfo.delegationCount ? collatorInfo.delegationCount >= parseInt(maxDelegationPerCollator): false
           });
         }
       }
@@ -484,7 +484,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           isVerified: false,
           minBond: bnMinBond.toString(),
           chain: this.chain,
-          isCrowded: parseInt(maxDelegationPerCollator) > 0
+          isCrowded: collatorInfo.delegationCount ? collatorInfo.delegationCount >= parseInt(maxDelegationPerCollator): false
         });
       }
 

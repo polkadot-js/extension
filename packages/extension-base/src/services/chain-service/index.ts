@@ -702,6 +702,7 @@ export class ChainService {
       if (this.assetLogoPatch !== latestAssetLogoPatch) {
         const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
 
+        this.assetLogoPatch = latestAssetLogoPatch;
         this.assetLogoMapSubject.next(logoMap);
       }
 

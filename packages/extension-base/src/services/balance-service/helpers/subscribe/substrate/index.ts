@@ -326,24 +326,21 @@ async function subscribeAssetsAccountPallet (addresses: string[], chain: string,
       // Get Token Balance
       return await api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
         const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-          // @ts-ignore
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-          const bdata = balance?.toHuman();
+          const bdata = balance?.toPrimitive();
 
           let frozen = BN_ZERO;
           let total = BN_ZERO;
 
           if (bdata) {
             // @ts-ignore
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
             const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
 
             // @ts-ignore
-            if (bdata?.isFrozen) {
+            if (bdata?.isFrozen || ['Blocked', 'Frozen'].includes(bdata?.status as string)) { // Status 'Frozen' and 'Blocked' are for frozen balance
               frozen = addressBalance;
-            } else {
-              total = addressBalance;
             }
+
+            total = addressBalance;
           }
 
           const free = total.sub(frozen);

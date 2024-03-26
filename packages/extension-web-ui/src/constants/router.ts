@@ -3,3 +3,4 @@
 
 export const DEFAULT_ROUTER_PATH = '/';
 export const WELCOME_PATH = '/welcome';
+export const SWAP_PATH = '/transaction/swap';

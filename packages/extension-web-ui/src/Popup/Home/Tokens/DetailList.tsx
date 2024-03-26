@@ -17,7 +17,7 @@ import Banner from '@subwallet/extension-web-ui/Popup/Home/Tokens/Banner';
 import { DetailModal } from '@subwallet/extension-web-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-web-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-web-ui/stores';
-import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { BuyTokenInfo, EarningPoolsParam, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-web-ui/types/balance';
 import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-web-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
@@ -367,6 +367,21 @@ function Component (): React.ReactElement {
     });
   }, [tokenGroupMap, tokenGroupSlug]);
 
+  const onClickEarnNow = useCallback(() => {
+    if (!tokenGroupSlug || !symbol) {
+      return;
+    }
+
+    const poolGroup = SHOW_BANNER_TOKEN_GROUPS.find((i) => i === tokenGroupSlug || tokenGroupMap[i]?.includes(tokenGroupSlug));
+
+    if (poolGroup) {
+      navigate('/home/earning/pools', { state: {
+        poolGroup,
+        symbol
+      } as EarningPoolsParam });
+    }
+  }, [navigate, symbol, tokenGroupMap, tokenGroupSlug]);
+
   return (
     <div
       className={CN('token-detail-container', {
@@ -487,6 +502,7 @@ function Component (): React.ReactElement {
         <Banner
           className={'__banner-area'}
           content={t('There are multiple ways to earn with your {{symbol}}, such as native staking, liquid staking, or lending. Check out Earning for curated options with competitive APY to earn yield on your DOT.', { replace: { symbol: symbol } })}
+          onClickEarnNow={onClickEarnNow}
           title={t('Earn yield on your {{symbol}}', { replace: { symbol: symbol } })}
         />
       }

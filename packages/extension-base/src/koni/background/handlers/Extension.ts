@@ -1519,9 +1519,13 @@ export default class KoniExtension {
     }
   }
 
-  private async batchExportV2 ({ password }: RequestAccountBatchExportV2): Promise<ResponseAccountBatchExportV2> {
+  private async batchExportV2 ({ addresses, password }: RequestAccountBatchExportV2): Promise<ResponseAccountBatchExportV2> {
+    if (addresses && !addresses.length) {
+      throw new Error(t('No accounts found to export'));
+    }
+
     return {
-      exportedJson: await keyring.backupAccounts(password)
+      exportedJson: await keyring.backupAccounts(password, addresses)
     };
   }
 

@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.48
+Build date: Mar 25, 2024.
+
+Bugs fixed:
+- Fix send fund error (#2795)
+
 ## 1.1.47
 Build date: Mar 23, 2024.
 

@@ -178,8 +178,6 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
     this.initHandlers();
 
-    console.log(this.handlers);
-
     await this.start();
   }
 

@@ -793,6 +793,7 @@ export interface ResponseAccountExportPrivateKey {
 
 export interface RequestAccountBatchExportV2 {
   password: string;
+  addresses?: string[];
 }
 
 export interface ResponseAccountBatchExportV2 {

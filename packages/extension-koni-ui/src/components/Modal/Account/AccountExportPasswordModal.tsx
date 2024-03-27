@@ -70,7 +70,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit: FormCallbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
     setLoading(true);
     setTimeout(() => {
-      exportAccountsV2(values[FormFieldName.PASSWORD])
+      exportAccountsV2({
+        password: values[FormFieldName.PASSWORD]
+      })
         .then((data) => {
           closeModal();
           inactiveModal(SELECT_ACCOUNT_MODAL);

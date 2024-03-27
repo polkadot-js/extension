@@ -1191,5 +1191,9 @@
   "Auto lock": "",
   "Submitted": "Отправлено",
   "Transaction submitted!": "Транзакция отправлена!",
-  "Track transaction progress in the History tab or go back to home": "Отслеживайте прогресс транзакции во вкладке История или вернитесь на главную страницу"
+  "Track transaction progress in the History tab or go back to home": "Отслеживайте прогресс транзакции во вкладке История или вернитесь на главную страницу",
+  "Mission pools": "",
+  "Upcoming": "",
+  "Live": "",
+  "Archived": ""
 }

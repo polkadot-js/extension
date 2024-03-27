@@ -1,5 +1,61 @@
 # CHANGELOG
 
+## 1.1.48
+Build date: Mar 25, 2024.
+
+Bugs fixed:
+- Fix send fund error (#2795)
+
+## 1.1.47
+Build date: Mar 23, 2024.
+
+Features & Update:
+- Add support XCM for PINK token (#2786)
+  - Default enable DOT, DED, PINK on Asset Hub and xcPINK on Moonbeam
+
+## 1.1.46
+Build date: Mar 22, 2024.
+
+Features & Update:
+- Merge dApp request from both of interface into one interface (#2722)
+- Support connect Ledger device for Asset Hub (#2785)
+- Support Mission Pool for Extension (#2781)
+
+## 1.1.45
+Build date: Mar 20, 2024.
+
+Features & Update:
+- Update explorer URL for Avail testnet (#2767)
+- Update chain-list 0.2.45 (#2771)
+  - Update symbol, Network name for OriginTrail and Tomochain
+  - Update symbol on history details screen when changing
+  - Update provider, price-id and block explorer for Polimec
+  - Support in-app staking for Polimec
+  - Update Astar and Astar EVM chain logo
+  - Update ASTR token logo on all chain
+  - Add support for DED token
+
+Bugs fixed:
+- Fixed bug connect a Ledger device (#2608)
+
+## 1.1.44
+Build date: Mar 16, 2024.
+
+Features & Update:
+- Update Subscan service (#2731)
+- Add subject email in case select contact support feature (#2729)
+- Update email support (#2759)
+- Update Chain-list (#2694)
+  - Update chain data and Chain assets
+  - Support CreditCoin EVM testnet
+  - Support Astar zkEVM
+  - Update block explorer for Continuum
+  - Support transferring Unique NFTs
+  - Discontinued support transfer local token for Crab Parachain and Pangolin
+
+Bugs fixed:
+- Fixed bug error page on NFT details screen (#2748)
+
 ## 1.1.43
 Build date: Mar 11, 2024.
 

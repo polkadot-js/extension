@@ -14,7 +14,9 @@ import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-type Props = ThemeProps
+type Props = ThemeProps & {
+  addresses?: string[]
+}
 
 const passwordInputId = 'export-password';
 
@@ -37,7 +39,7 @@ const onExportJson = (jsonData: KeyringPairs$Json): (() => void) => {
   };
 };
 
-function Component ({ className = '' }: Props): React.ReactElement<Props> {
+function Component ({ addresses, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -71,7 +73,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     setLoading(true);
     setTimeout(() => {
       exportAccountsV2({
-        password: values[FormFieldName.PASSWORD]
+        password: values[FormFieldName.PASSWORD],
+        addresses: addresses
       })
         .then((data) => {
           closeModal();
@@ -86,7 +89,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           setLoading(false);
         });
     }, 500);
-  }, [closeModal, inactiveModal, navigate, onError]);
+  }, [addresses, closeModal, inactiveModal, navigate, onError]);
 
   useFocusById(passwordInputId);
 

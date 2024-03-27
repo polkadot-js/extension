@@ -4,7 +4,7 @@
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
-import { DISCONNECT_EXTENSION_MODAL, EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -23,7 +23,6 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountBriefInfo, AccountCardItem, AccountItemWithName } from '../../../Account';
 import { GeneralEmptyList } from '../../../EmptyList';
-import { AccountExportPasswordModal } from '../../../Modal';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 
@@ -380,10 +379,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onBack={onQrModalBack}
       />
 
-      <AccountExportPasswordModal />
       <ExportAllSelector
         items={accounts}
-        showAllAccount={showAllAccount}
       />
     </div>
   );

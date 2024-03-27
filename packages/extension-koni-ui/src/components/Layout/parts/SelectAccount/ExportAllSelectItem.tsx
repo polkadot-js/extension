@@ -1,27 +1,40 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks';
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { getValidatorKey } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Icon, Web3Block } from '@subwallet/react-ui';
+import { AccountSignMode, PhosphorIcon } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, Logo } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { CheckCircle } from 'phosphor-react';
-import React, { Context, useCallback, useContext } from 'react';
+import { CheckCircle, Eye, PuzzlePiece, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
+import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
 import { KeypairType } from '@polkadot/util-crypto/types';
 
+import useGetAccountSignModeByAddress from '../../../../hooks/account/useGetAccountSignModeByAddress';
+
+interface AbstractIcon {
+  type: 'icon' | 'node',
+  value: PhosphorIcon | React.ReactNode
+}
+
+interface SwIconProps extends AbstractIcon {
+  type: 'icon',
+  value: PhosphorIcon
+}
+
+interface NodeIconProps extends AbstractIcon {
+  type: 'node',
+  value: React.ReactNode
+}
+type IconProps = SwIconProps | NodeIconProps;
 export interface _AccountCardItem {
   className?: string;
-  onPressMoreButton?: () => void;
-  source?: string;
   isSelected?: boolean;
-  onClickQrButton?: (address: string) => void;
   accountName?: string;
   address?: string;
   genesisHash?: string | null;
@@ -44,63 +57,121 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
     type: givenType } = props;
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
-  const { address: formattedAddress, prefix } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
-
-  const notify = useNotification();
-  const { t } = useTranslation();
+  const { address: formattedAddress } = useAccountAvatarInfo(address ?? '', preventPrefix, genesisHash, givenType);
 
   const avatarTheme = useAccountAvatarTheme(address || '');
 
   const truncatedAddress = formattedAddress ? `${formattedAddress.substring(0, 9)}...${formattedAddress.slice(-9)}` : '';
   const _onSelect = useCallback(() => {
-    onClick && onClick(getValidatorKey(address));
+    onClick && onClick(address || '');
   },
   [address, onClick]
   );
+  const signMode = useGetAccountSignModeByAddress(address);
+  const isMantaPayEnabled = useIsMantaPayEnabled(address);
+  const iconProps: IconProps | undefined = useMemo((): IconProps | undefined => {
+    switch (signMode) {
+      case AccountSignMode.LEDGER:
+        return {
+          type: 'icon',
+          value: Swatches
+        };
+      case AccountSignMode.QR:
+        return {
+          type: 'icon',
+          value: QrCode
+        };
+      case AccountSignMode.READ_ONLY:
+        return {
+          type: 'icon',
+          value: Eye
+        };
+      case AccountSignMode.INJECTED:
+        // if (source === 'SubWallet') {
+        //   return {
+        //     type: 'node',
+        //     value: (
+        //       <Image
+        //         className='logo-image'
+        //         height='var(--height)'
+        //         shape='square'
+        //         src={'/images/subwallet/gradient-logo.png'}
+        //       />
+        //     )
+        //   };
+        // }
+
+        return {
+          type: 'icon',
+          value: PuzzlePiece
+        };
+    }
+
+    if (isMantaPayEnabled) {
+      return {
+        type: 'icon',
+        value: ShieldCheck
+      };
+    }
+
+    return undefined;
+  }, [isMantaPayEnabled, signMode]);
 
   return (
     <>
       <div
-        className={CN(props.className)}
+        className={CN(props.className, { '-selected': isSelected })}
         onClick={disabled ? undefined : _onSelect}
       >
-        <Web3Block
-          className={'export-all-account-item'}
-          leftItem={
-            <SwAvatar
-              isShowSubIcon={true}
-              size={40}
-              subIcon={<BackgroundIcon
-                backgroundColor={token.colorSuccess}
-                phosphorIcon={CheckCircle}
-                size={'xs'}
-                weight={'fill'}
-              />}
-              theme={avatarTheme}
-              value={formattedAddress || ''}
-            />
-          }
-          middleItem={
-            <>
-              <div className={'middle-item__name-wrapper'}>
-                <div className='__item-name'>{accountName}</div>
-                <div className='__item-address'>{truncatedAddress}</div>
-              </div>
-            </>
-          }
+        <div className='__item-left-part'>
+          <SwAvatar
+            isShowSubIcon={true}
+            size={40}
+            subIcon={ (
+              <Logo
+                network={avatarTheme}
+                shape={'circle'}
+                size={16}
+              />
+            )}
+            theme={avatarTheme}
+            value={formattedAddress || ''}
+          />
+        </div>
+        <div className='__item-center-part'>
+          <div className={'middle-item__name-wrapper'}>
+            <div className='__item-name'>{accountName}</div>
+            <div className='__item-address'>{truncatedAddress}</div>
+          </div>
+        </div>
 
-          rightItem={
-            <>
-              {(showUnSelectedIcon || isSelected) && <Icon
-                className={'right-item__select-icon'}
-                iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
-                phosphorIcon={CheckCircle}
-                size={'sm'}
-                weight={'fill'}
-              />}
-            </>
-          }
-        />
+        <div className={'__item-right-part'}>
+          {iconProps && (
+            <Button
+              icon={
+                iconProps.type === 'icon'
+                  ? (
+                    <Icon
+                      phosphorIcon={iconProps.value}
+                      size='sm'
+                    />
+                  )
+                  : iconProps.value
+              }
+              size='xs'
+              type='ghost'
+            />
+          )}
+          {(showUnSelectedIcon || isSelected) && (
+            <Icon
+              className={'__select-icon'}
+              iconColor={isSelected ? token.colorSuccess : token.colorTextLight4}
+              phosphorIcon={CheckCircle}
+              size={'sm'}
+              weight={'fill'}
+            />
+          )}
+        </div>
       </div>
     </>
   );
@@ -113,18 +184,14 @@ const ExportAllSelectItem = styled(Component)<_AccountCardItem>(({ theme }) => {
     height: 68,
     background: token.colorBgSecondary,
     padding: token.paddingSM,
-    paddingRight: token.paddingXXS,
     borderRadius: token.borderRadiusLG,
     alignItems: 'center',
     display: 'flex',
-    flexDirection: 'row',
     cursor: 'pointer',
     transition: `background ${token.motionDurationMid} ease-in-out`,
-    flex: 1,
-
-    '.export-all-account-item': {
-      display: 'flex',
-      flex: 1
+    marginTop: token.marginXS,
+    '&.-selected': {
+      backgroundColor: token.colorBgInput
     },
     '.__item-left-part': {
       paddingRight: token.paddingXS
@@ -156,7 +223,16 @@ const ExportAllSelectItem = styled(Component)<_AccountCardItem>(({ theme }) => {
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center',
-      position: 'relative'
+      justifyContent: 'center'
+    },
+    '.__select-icon.__select-icon': {
+      minWidth: 40,
+      display: 'flex',
+      justifyContent: 'center',
+      marginRight: -8
+    },
+    '&:hover': {
+      background: token.colorBgInput
     }
   };
 });

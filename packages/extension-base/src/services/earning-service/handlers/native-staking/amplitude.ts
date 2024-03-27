@@ -39,9 +39,14 @@ interface InflationConfig {
 interface CollatorInfo {
   id: string,
   stake: string,
-  delegators: any[],
+  delegators: AmplitudeDelegateInfo[],
   total: string,
   status: string | Record<string, string>
+}
+
+interface AmplitudeDelegateInfo {
+  owner: string,
+  amount: string
 }
 
 interface CollatorStakeInfo {
@@ -348,6 +353,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
     if (_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
       const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
+      const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
       const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
       const allCollators: ValidatorInfo[] = [];
 
@@ -358,6 +364,19 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         const bnOwnStake = new BN(collatorInfo.stake);
         const bnOtherStake = bnTotalStake.sub(bnOwnStake);
 
+        const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
+
+        let minDelegate = new BN(minDelegatorStake);
+
+        if (isFullDelegatorsSet) {
+          const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
+          const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
+
+          const minDelegateInSet = sortedAmounts[0];
+
+          minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
+        }
+
         allCollators.push({
           address: collatorInfo.id,
           totalStake: bnTotalStake.toString(),
@@ -367,9 +386,9 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           commission: 0,
           blocked: false,
           isVerified: false,
-          minBond: '0',
+          minBond: minDelegate.toString(),
           chain: this.chain,
-          isCrowded: maxDelegatorsPerCollator ? collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator) : false
+          isCrowded: isFullDelegatorsSet
         });
       }
 
@@ -380,6 +399,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         chainApi.api.query.parachainStaking.inflationConfig()
       ]);
 
+      const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
       const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
       const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
       const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
@@ -394,6 +414,19 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         const bnOwnStake = new BN(collatorInfo.stake);
         const bnOtherStake = bnTotalStake.sub(bnOwnStake);
 
+        const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
+
+        let minDelegate = new BN(minDelegatorStake);
+
+        if (isFullDelegatorsSet) {
+          const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
+          const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
+
+          const minDelegateInSet = sortedAmounts[0];
+
+          minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
+        }
+
         allCollators.push({
           address: collatorInfo.id,
           totalStake: bnTotalStake.toString(),
@@ -404,9 +437,9 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           expectedReturn: delegatorReturn,
           blocked: false,
           isVerified: false,
-          minBond: '0',
+          minBond: minDelegate.toString(),
           chain: this.chain,
-          isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+          isCrowded: isFullDelegatorsSet
         });
       }
 

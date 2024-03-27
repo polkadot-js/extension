@@ -153,7 +153,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`nft_container ${className}`}
-      resolve={dataContext.awaitStores(['nft'])}
+      resolve={dataContext.awaitStores(['nft', 'balance'])}
     >
       <Layout.Base
         showSubHeader={true}

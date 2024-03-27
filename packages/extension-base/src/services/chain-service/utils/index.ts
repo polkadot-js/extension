@@ -394,6 +394,10 @@ export function _isAssetFungibleToken (chainAsset: _ChainAsset): boolean {
   return ![_AssetType.ERC721, _AssetType.PSP34, _AssetType.UNKNOWN].includes(chainAsset.assetType);
 }
 
+export const _isAssetAutoEnable = (chainAsset: _ChainAsset): boolean => {
+  return chainAsset.metadata ? !!chainAsset.metadata.autoEnable : false;
+};
+
 export function _getCrowdloanUrlFromChain (chainInfo: _ChainInfo): string {
   return chainInfo?.substrateInfo?.crowdloanUrl || '';
 }
@@ -512,3 +516,5 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     needUpdateChainApiList
   };
 }
+
+export * from './patch';

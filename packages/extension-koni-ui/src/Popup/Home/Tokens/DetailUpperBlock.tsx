@@ -11,6 +11,7 @@ import { ArrowsLeftRight, CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSim
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
+import CN from "classnames";
 
 type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
@@ -117,8 +118,9 @@ function Component (
             size={isShrink ? 'xs' : 'sm'}
             tooltip={t('Swap')}
           />
-          <div className={'__button-space'} />
+          <div className={CN('__button-space', {hidden: isShrink})} />
           <Button
+            className={CN({ hidden: isShrink })}
             disabled={!isSupportBuyTokens}
             icon={(
               <Icon

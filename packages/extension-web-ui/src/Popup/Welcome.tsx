@@ -237,7 +237,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   useEffect(() => {
     if (!isNoAccount) {
-      navigate(returnPath);
+      navigate(returnPath, { state: { from: returnPath } });
       setReturnStorage(DEFAULT_ROUTER_PATH);
     }
   }, [isNoAccount, navigate, returnPath, setReturnStorage]);

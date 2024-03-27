@@ -31,7 +31,7 @@ import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Divider } from 'semantic-ui-react';
 import styled, { useTheme } from 'styled-components';
 
@@ -62,6 +62,10 @@ const earningTypeLabelMap = {
   [YieldPoolType.SINGLE_FARMING]: 'single farming'
 };
 
+type LocationStateRW = {
+  from?: string
+}
+
 const Component = ({ className }: ComponentProps) => {
   const { t } = useTranslation();
   const notify = useNotification();
@@ -69,6 +73,7 @@ const Component = ({ className }: ComponentProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
+  const stateLocation = useLocation().state as LocationStateRW;
   const navigate = useNavigate();
 
   const { closeAlert, defaultData, goBack, onDone,
@@ -88,6 +93,7 @@ const Component = ({ className }: ComponentProps) => {
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const [form] = Form.useForm<EarnParams>();
+  const [isFromStakingRW, setIsFromStakingRW] = useState(false);
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
 
   const fromValue = useWatchTransaction('from', form, defaultData);
@@ -942,6 +948,17 @@ const Component = ({ className }: ComponentProps) => {
     }
   }, [altChain, poolChain, checkChainConnected, turnOnChain]);
 
+  useEffect(() => {
+    console.log(stateLocation);
+
+    if (stateLocation?.from && stateLocation.from === '/transaction/earn') {
+      setIsFromStakingRW(true);
+      activeModal(instructionModalId);
+    } else {
+      setIsFromStakingRW(false);
+    }
+  }, [activeModal, stateLocation]);
+
   const { altChainName, poolChainName } = useMemo(() => ({
     poolChainName: poolChain ? chainInfoMap[poolChain]?.name : '',
     altChainName: altChain ? chainInfoMap[altChain]?.name : ''
@@ -1377,7 +1394,7 @@ const Component = ({ className }: ComponentProps) => {
       }
 
       {
-        !isWebUI && (
+        (!isWebUI || isFromStakingRW) && (
           <EarningInstructionModal
             address={currentAccount?.address}
             assetRegistry={chainAsset}

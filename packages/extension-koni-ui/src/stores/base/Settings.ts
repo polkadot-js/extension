@@ -98,10 +98,32 @@ const settingsSlice = createSlice({
         browserConfirmationType: action.payload
       };
     },
-    updateLogoMaps (state, action: PayloadAction<AppSettings['logoMaps']>) {
+    updateChainLogoMaps (state, action: PayloadAction<Record<string, string>>) {
+      const chainLogoMap = action.payload;
+
       return {
         ...state,
-        logoMaps: action.payload
+        logoMaps: {
+          chainLogoMap: {
+            ...state.logoMaps.chainLogoMap,
+            ...chainLogoMap
+          },
+          assetLogoMap: state.logoMaps.assetLogoMap
+        }
+      };
+    },
+    updateAssetLogoMaps (state, action: PayloadAction<Record<string, string>>) {
+      const assetLogoMap = action.payload;
+
+      return {
+        ...state,
+        logoMaps: {
+          chainLogoMap: state.logoMaps.chainLogoMap,
+          assetLogoMap: {
+            ...state.logoMaps.assetLogoMap,
+            ...assetLogoMap
+          }
+        }
       };
     }
   }

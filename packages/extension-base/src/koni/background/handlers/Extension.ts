@@ -2039,7 +2039,7 @@ export default class KoniExtension {
           if (!destinationTokenInfo) {
             estimatedFee = '0';
           } else {
-            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_FEE_RATIO));
+            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_MIN_AMOUNT_RATIO));
             const desChainInfo = chainInfoMap[destChain];
             const orgChainInfo = chainInfoMap[networkKey];
             const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(desChainInfo) && !_isChainEvmCompatible(orgChainInfo)
@@ -2106,11 +2106,11 @@ export default class KoniExtension {
         console.warn('Unable to estimate fee', e);
       }
 
-      maxTransferable = maxTransferable.minus(new BigN(estimatedFee));
+      maxTransferable = maxTransferable.minus(new BigN(estimatedFee).multipliedBy(isXcmTransfer ? XCM_FEE_RATIO : 1));
 
       return {
         ...freeBalance,
-        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed() || '0') : '0'
+        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed(0) || '0') : '0'
       } as AmountData;
     }
   }
@@ -3555,6 +3555,34 @@ export default class KoniExtension {
     };
   }
 
+  private subscribeAssetLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.assets.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeAssetLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getAssetLogoMap();
+  }
+
+  private subscribeChainLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.chains.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeChainLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getChainLogoMap();
+  }
+
   // Phishing detect
 
   private async passPhishingPage ({ url }: RequestPassPhishingPage) {
@@ -4769,6 +4797,10 @@ export default class KoniExtension {
 
       case 'pri(settings.getLogoMaps)':
         return await this.getLogoMap();
+      case 'pri(settings.logo.assets.subscribe)':
+        return this.subscribeAssetLogoMap(id, port);
+      case 'pri(settings.logo.chains.subscribe)':
+        return this.subscribeChainLogoMap(id, port);
 
       /// Wallet Connect
       case 'pri(walletConnect.connect)':

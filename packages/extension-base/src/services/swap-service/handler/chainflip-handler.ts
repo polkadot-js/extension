@@ -13,13 +13,30 @@ import { BalanceService } from '@subwallet/extension-base/services/balance-servi
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, getChainflipEarlyValidationError, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
-import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import {
+  ChainflipPreValidationMetadata,
+  ChainflipTxData,
+  OptimalSwapPath,
+  OptimalSwapPathParams,
+  SwapEarlyValidation,
+  SwapErrorType,
+  SwapFeeComponent, SwapFeeInfo,
+  SwapFeeType,
+  SwapProviderId,
+  SwapQuote,
+  SwapRequest,
+  SwapStepType,
+  SwapSubmitParams,
+  SwapSubmitStepData,
+  ValidateSwapProcessParams
+} from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import {BaseStepDetail} from "@subwallet/extension-base/types/service-base";
 
 enum ChainflipFeeType {
   INGRESS = 'INGRESS',
@@ -188,7 +205,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         };
       }
 
-      if (bnAmount.lt(bnMinSwap)) {
+      if (bnAmount.lt(bnMinSwap)) { // might miss case when minSwap is 0
         return {
           error: SwapErrorType.NOT_MEET_MIN_SWAP,
           metadata: {
@@ -251,7 +268,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
-      return getSwapEarlyValidationError(earlyValidation.error, metadata);
+      return getChainflipEarlyValidationError(earlyValidation.error, metadata);
     }
 
     const srcChainId = this.chainMapping[fromAsset.originChain];
@@ -466,32 +483,22 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     }
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
-    const result: OptimalSwapPath = {
-      totalFee: [MOCK_SWAP_FEE],
-      steps: [DEFAULT_SWAP_FIRST_STEP]
-    };
-
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
     if (params.selectedQuote) {
-      result.totalFee.push(params.selectedQuote.feeInfo);
-      result.steps.push({
-        id: result.steps.length,
+      const submitStep = {
         name: 'Swap',
         type: SwapStepType.SWAP
-      });
-    } else { // todo: improve this
-      result.totalFee.push({
-        feeComponent: [],
-        feeOptions: [params.request.pair.from],
-        defaultFeeToken: params.request.pair.from
-      });
-      result.steps.push({
-        id: result.steps.length,
-        name: 'Swap',
-        type: SwapStepType.SWAP
-      });
+      };
+
+      return Promise.resolve([submitStep, params.selectedQuote.feeInfo]);
     }
 
-    return Promise.resolve(result);
+    return Promise.resolve(undefined);
+  }
+
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+    return this.swapBaseHandler.generateOptimalProcess(params, [
+      this.getSubmitStep
+    ]);
   }
 }

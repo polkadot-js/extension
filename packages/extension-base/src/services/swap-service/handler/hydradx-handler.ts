@@ -1,16 +1,46 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
-import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
-import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import {COMMON_CHAIN_SLUGS} from '@subwallet/chain-list';
+import {SwapError} from '@subwallet/extension-base/background/errors/SwapError';
+import {TransactionError} from '@subwallet/extension-base/background/errors/TransactionError';
+import {BalanceService} from '@subwallet/extension-base/services/balance-service';
+import {ChainService} from '@subwallet/extension-base/services/chain-service';
+import {
+  _getAssetDecimals,
+  _getChainNativeTokenSlug,
+  _getTokenMinAmount,
+  _getTokenOnChainAssetId,
+  _isNativeToken
+} from '@subwallet/extension-base/services/chain-service/utils';
+import {SwapBaseHandler, SwapBaseInterface} from '@subwallet/extension-base/services/swap-service/handler/base-handler';
+import {
+  calculateSwapRate, DEFAULT_SWAP_FIRST_STEP,
+  getEarlyHydradxValidationError, MOCK_SWAP_FEE,
+  SWAP_QUOTE_TIMEOUT_MAP
+} from '@subwallet/extension-base/services/swap-service/utils';
+import {
+  HydradxPreValidationMetadata,
+  OptimalSwapPath,
+  OptimalSwapPathParams,
+  SwapEarlyValidation,
+  SwapErrorType, SwapFeeInfo,
+  SwapProviderId,
+  SwapQuote,
+  SwapRequest, SwapStepDetail, SwapStepType,
+  SwapSubmitParams,
+  SwapSubmitStepData,
+  ValidateSwapProcessParams
+} from '@subwallet/extension-base/types/swap';
+import BigNumber from "bignumber.js";
+import {AmountData} from "@subwallet/extension-base/background/KoniTypes";
+import {BaseStepDetail} from "@subwallet/extension-base/types/service-base";
+
+interface TradeRouter {
+  // todo: mock for hydradx sdk
+}
+
+
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -37,9 +67,9 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     const substrateApi = this.chainService.getSubstrateApi(this.chain);
-    const poolService = new PoolService(substrateApi.api);
+    // const poolService = new PoolService(substrateApi.api);
 
-    this.tradeRouter = new TradeRouter(poolService);
+    this.tradeRouter = {} as TradeRouter;
 
     this.isReady = true;
   }
@@ -72,27 +102,35 @@ export class HydradxHandler implements SwapBaseInterface {
     return this.swapBaseHandler.slug;
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+  async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
     return Promise.resolve(undefined);
+  }
+
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+    if (params.selectedQuote) {
+      const submitStep = {
+        name: 'Swap',
+        type: SwapStepType.SWAP
+      };
+
+      return Promise.resolve([submitStep, params.selectedQuote.feeInfo]);
+    }
+
+    return Promise.resolve(undefined);
+  }
+
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+    return this.swapBaseHandler.generateOptimalProcess(params, [
+      this.getXcmStep,
+      this.getSubmitStep
+    ]);
   }
 
   async getSwapQuote (request: SwapRequest): Promise<SwapQuote | SwapError> {
     const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
     const toAsset = this.chainService.getAssetBySlug(request.pair.to);
-
-    const fromAssetId = _getTokenOnChainAssetId(fromAsset);
-    const toAssetId = _getTokenOnChainAssetId(toAsset);
-
     const fromChain = this.chainService.getChainInfoByKey(fromAsset.originChain);
     const fromChainNativeTokenSlug = _getChainNativeTokenSlug(fromChain);
-
-    if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
-      return new SwapError(SwapErrorType.ASSET_NOT_SUPPORTED);
-    }
-
-    if (!fromAssetId || !toAssetId) {
-      return new SwapError(SwapErrorType.UNKNOWN);
-    }
 
     if (!this.isReady || !this.tradeRouter) {
       return new SwapError(SwapErrorType.UNKNOWN);
@@ -101,31 +139,33 @@ export class HydradxHandler implements SwapBaseInterface {
     const earlyValidation = await this.validateSwapRequest(request);
 
     if (earlyValidation.error) {
-      return new SwapError(SwapErrorType.UNKNOWN); // todo: parse messages
+      const metadata = earlyValidation.metadata as HydradxPreValidationMetadata;
+
+      return getEarlyHydradxValidationError(earlyValidation.error, metadata);
     }
 
     try {
-      const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, request.fromAmount);
-
-      console.log('quoteResponse hdx', quoteResponse);
+      // const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, request.fromAmount);
+      //
+      // console.log('quoteResponse hdx', quoteResponse);
 
       const defaultFeeToken = _isNativeToken(fromAsset) ? fromAsset.slug : fromChainNativeTokenSlug;
+
+      const toAmount = '100000000000';
 
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
-        toAmount: '0',
-        rate: 1,
+        toAmount: toAmount,
+        rate: calculateSwapRate(request.fromAmount, toAmount, fromAsset, toAsset),
         provider: this.providerInfo,
-        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
-        minSwap: '0',
-        maxSwap: '0',
-        feeInfo: {
+        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default), // todo: ask HydraDX team
+        feeInfo: { // todo: parse fee options
           feeComponent: [],
           defaultFeeToken,
           feeOptions: [defaultFeeToken]
         },
-        route: {
+        route: { // todo: parse swap path
           path: []
         }
       } as SwapQuote;
@@ -148,7 +188,58 @@ export class HydradxHandler implements SwapBaseInterface {
     return Promise.resolve([]);
   }
 
-  validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
-    return Promise.resolve(undefined);
+  public async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {
+    const fromAsset = this.chainService.getAssetBySlug(request.pair.from);
+    const toAsset = this.chainService.getAssetBySlug(request.pair.to);
+
+    const fromAssetId = _getTokenOnChainAssetId(fromAsset);
+    const toAssetId = _getTokenOnChainAssetId(toAsset);
+
+    if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
+      return {
+        error: SwapErrorType.ASSET_NOT_SUPPORTED
+      };
+    }
+
+    if (!fromAssetId || !toAssetId) {
+      return {
+        error: SwapErrorType.UNKNOWN
+      };
+    }
+
+    try {
+      const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
+
+      const bnAmount = new BigNumber(request.fromAmount);
+      const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
+      const bnMaxBalanceSwap = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
+
+      if (bnAmount.lte(0)) {
+        return {
+          error: SwapErrorType.AMOUNT_CANNOT_BE_ZERO
+        };
+      }
+
+      if (bnAmount.gte(bnMaxBalanceSwap)) {
+        return {
+          error: SwapErrorType.SWAP_EXCEED_ALLOWANCE
+        }
+      }
+
+      return {
+        metadata: {
+          chain: this.chainService.getChainInfoByKey(this.chain),
+          maxSwap: {
+            value: bnMaxBalanceSwap.toString(),
+            decimals: _getAssetDecimals(fromAsset),
+            symbol: fromAsset.symbol
+          } as AmountData
+        } as HydradxPreValidationMetadata
+      };
+    } catch (e) {
+      return {
+        error: SwapErrorType.UNKNOWN
+      };
+    }
   }
 }

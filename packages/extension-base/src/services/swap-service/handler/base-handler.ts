@@ -7,13 +7,32 @@ import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import {
+  GenSwapStepFunc,
+  OptimalSwapPath,
+  OptimalSwapPathParams,
+  SwapEarlyValidation,
+  SwapErrorType, SwapFeeInfo,
+  SwapProvider,
+  SwapProviderId,
+  SwapQuote,
+  SwapRequest,
+  SwapSubmitParams,
+  SwapSubmitStepData,
+  ValidateSwapProcessParams
+} from '@subwallet/extension-base/types/swap';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import {DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE} from "@subwallet/extension-base/services/swap-service/utils";
+import {BaseStepDetail} from "@subwallet/extension-base/types/service-base";
 
 export interface SwapBaseInterface {
   getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
   generateOptimalProcess: (params: OptimalSwapPathParams) => Promise<OptimalSwapPath>;
+
+  getTokenApproveStep?: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
+  getXcmStep?: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
+  getSubmitStep: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
 
   validateSwapRequest: (request: SwapRequest) => Promise<SwapEarlyValidation>;
   validateSwapProcess: (params: ValidateSwapProcessParams) => Promise<TransactionError[]>;
@@ -46,7 +65,30 @@ export class SwapBaseHandler {
   }
 
   // public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
-  // public abstract generateOptimalProcess(params: OptimalSwapPathParams): Promise<OptimalSwapPath>;
+  public async generateOptimalProcess(params: OptimalSwapPathParams, genStepFuncList: GenSwapStepFunc[]): Promise<OptimalSwapPath> {
+    const result: OptimalSwapPath = {
+      totalFee: [MOCK_SWAP_FEE],
+      steps: [DEFAULT_SWAP_FIRST_STEP]
+    };
+
+    try {
+      for (const genStepFunc of genStepFuncList) {
+        const step = await genStepFunc.bind(this, params)();
+
+        if (step) {
+          result.steps.push({
+            id: result.steps.length,
+            ...step[0]
+          });
+          result.totalFee.push(step[1]);
+        }
+      }
+
+      return result;
+    } catch (e) {
+      return result;
+    }
+  }
 
   // protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
   // public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { TransactionData } from '@subwallet/extension-base/types';
+import {TransactionData} from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 
 // core
@@ -48,6 +48,7 @@ export enum SwapErrorType {
   SWAP_EXCEED_ALLOWANCE = 'SWAP_EXCEED_ALLOWANCE',
   SWAP_NOT_ENOUGH_BALANCE = 'SWAP_NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_LIQUIDITY = 'NOT_ENOUGH_LIQUIDITY',
+  AMOUNT_CANNOT_BE_ZERO = 'AMOUNT_CANNOT_BE_ZERO',
 }
 
 export enum SwapStepType {
@@ -123,9 +124,16 @@ export interface ChainflipTxData extends SwapBaseTxData {
 }
 
 // parameters & responses
+export type GenSwapStepFunc = (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
+
 export interface ChainflipPreValidationMetadata {
   minSwap: AmountData;
   maxSwap?: AmountData;
+  chain: _ChainInfo;
+}
+
+export interface HydradxPreValidationMetadata {
+  maxSwap: AmountData;
   chain: _ChainInfo;
 }
 
@@ -179,7 +187,7 @@ export interface OptimalSwapPathParams {
 
 export interface SwapEarlyValidation {
   error?: SwapErrorType;
-  metadata?: unknown;
+  metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata;
 }
 
 export interface ValidateSwapProcessParams {

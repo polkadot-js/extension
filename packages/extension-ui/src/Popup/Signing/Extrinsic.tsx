@@ -26,32 +26,6 @@ interface Props {
   url: string;
 }
 
-interface AssetId { parents: number, interior: { 'X2': [{ PalletInstance: string }, { GeneralIndex: string }] } }
-
-function isAssetId (assetId: unknown): assetId is AssetId {
-  if (!assetId || typeof assetId !== 'object') {
-    return false;
-  }
-
-  return 'parents' in assetId && 'interior' in assetId &&
-    typeof assetId.interior === 'object' && assetId.interior !== null && 'X2' in assetId.interior &&
-    Array.isArray(assetId.interior.X2) && assetId.interior.X2.length === 2 &&
-    'PalletInstance' in assetId.interior.X2[0] &&
-    'GeneralIndex' in assetId.interior.X2[1];
-}
-
-function decodeAssetId (assetId: unknown) {
-  if (!isAssetId(assetId)) {
-    return null;
-  }
-
-  try {
-    return assetId.interior.X2[1].GeneralIndex;
-  } catch (_) {
-    return null;
-  }
-}
-
 function displayDecodeVersion (message: string, chain: Chain, specVersion: BN): string {
   return `${message}: chain=${chain.name}, specVersion=${chain.specVersion.toString()} (request specVersion=${specVersion.toString()})`;
 }
@@ -144,7 +118,7 @@ function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, m
   );
 
   const humanReadablePayload = payload.toHuman() as Record<string, unknown>;
-  const assetId = decodeAssetId(humanReadablePayload['assetId']);
+  const assetId = humanReadablePayload['assetId'];
 
   return (
     <Table
@@ -176,7 +150,12 @@ function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, m
       {assetId && (
         <tr>
           <td className='label'>{t('assetId')}</td>
-          <td className='data'>{assetId}</td>
+          <td className='data'>
+            <details>
+              <summary>{'{...}'}</summary>
+              <pre>{JSON.stringify(assetId, null, 2)}</pre>
+            </details>
+          </td>
         </tr>
       )}
       {renderMethod(method, decoded, t)}

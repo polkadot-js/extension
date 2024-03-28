@@ -106,7 +106,7 @@ function mortalityAsString (era: ExtrinsicEra, hexBlockNumber: string, t: TFunct
   });
 }
 
-function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
+function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, method, specVersion: hexSpec }, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
@@ -116,6 +116,9 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       : { args: null, method: null },
     [method, chain, specVersion]
   );
+
+  const humanReadablePayload = payload.toHuman() as Record<string, unknown>;
+  const assetId = humanReadablePayload['assetId'];
 
   return (
     <Table
@@ -136,18 +139,29 @@ function Extrinsic ({ className, payload: { era, nonce, tip }, request: { blockN
       </tr>
       <tr>
         <td className='label'>{t('nonce')}</td>
-        <td className='data'>{formatNumber(nonce)}</td>
+        <td className='data'>{formatNumber(payload.nonce)}</td>
       </tr>
-      {!tip.isEmpty && (
+      {!payload.tip.isEmpty && (
         <tr>
           <td className='label'>{t('tip')}</td>
-          <td className='data'>{formatNumber(tip)}</td>
+          <td className='data'>{formatNumber(payload.tip)}</td>
+        </tr>
+      )}
+      {assetId && (
+        <tr>
+          <td className='label'>{t('assetId')}</td>
+          <td className='data'>
+            <details>
+              <summary>{'{...}'}</summary>
+              <pre>{JSON.stringify(assetId, null, 2)}</pre>
+            </details>
+          </td>
         </tr>
       )}
       {renderMethod(method, decoded, t)}
       <tr>
         <td className='label'>{t('lifetime')}</td>
-        <td className='data'>{mortalityAsString(era, blockNumber, t)}</td>
+        <td className='data'>{mortalityAsString(payload.era, blockNumber, t)}</td>
       </tr>
     </Table>
   );

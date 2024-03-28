@@ -165,7 +165,7 @@ const Component = (): React.ReactElement => {
   );
 
   const onOpenSwap = useCallback(() => {
-    openInNewTab('https://www.subwallet.app/redirect-handler/swap')();
+    openInNewTab('https://web.subwallet.app/redirect-handler/swap')();
   }, []);
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {

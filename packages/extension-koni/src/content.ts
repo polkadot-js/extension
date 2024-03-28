@@ -9,12 +9,78 @@ import { getId } from '@subwallet/extension-base/utils/getId';
 import { eip6963ProviderInfo } from '@subwallet/extension-inject';
 import { chrome } from '@subwallet/extension-inject/chrome';
 
-// connect to the extension
-const port = chrome.runtime.connect({ name: PORT_CONTENT });
+let port: chrome.runtime.Port;
+
+onConnectPort();
+
+function onConnectPort () {
+  if (!chrome.runtime) {
+    console.error('The connection to the SubWallet port will be disconnected. Please reload your Dapp to reconnect the wallet.');
+
+    return;
+  }
+
+  // connect to the extension
+  port = chrome.runtime.connect({ name: PORT_CONTENT });
+
+  // send any messages from the extension back to the page
+  port.onMessage.addListener((data: {id: string, response: any}): void => {
+    const { id, resolve } = handleRedirectPhishing;
+
+    if (data?.id === id) {
+      resolve && resolve(Boolean(data.response));
+    } else {
+      window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
+    }
+  });
+
+  port.onDisconnect.addListener(onDisconnectPort);
+}
+
+function onDisconnectPort () {
+  const err = checkForLastError();
+
+  port.onDisconnect.removeListener(
+    onDisconnectPort
+  );
+
+  if (err) {
+    console.warn(`${err.message}, Reconnecting to the port.`);
+    setTimeout(onConnectPort, 1000);
+  } else {
+    console.error('The connection to the SubWallet port will be disconnected. Please reload your Dapp to reconnect the wallet.');
+  }
+}
+
+function checkForLastError () {
+  const { lastError } = chrome.runtime;
+
+  if (!lastError) {
+    return undefined;
+  }
+
+  // repair incomplete error object (eg chromium v77)
+  return new Error(lastError.message);
+}
 
 // redirect users if this page is considered as phishing, otherwise return false
 const handleRedirectPhishing: { id: string, resolve?: (value: (boolean | PromiseLike<boolean>)) => void, reject?: (e: Error) => void } = {
   id: 'redirect-phishing-' + getId()
+};
+
+const onMessage = ({ data, source }: Message): void => {
+  // only allow messages from our window, by the inject
+  if (source !== window || data.origin !== MESSAGE_ORIGIN_PAGE) {
+    return;
+  }
+
+  if (!port) {
+    console.error('The connection to the SubWallet port will be disconnected. Please reload your Dapp to reconnect the wallet.');
+
+    return;
+  }
+
+  port.postMessage(data);
 };
 
 const redirectIfPhishingProm = new Promise<boolean>((resolve, reject) => {
@@ -31,26 +97,8 @@ const redirectIfPhishingProm = new Promise<boolean>((resolve, reject) => {
   port.postMessage(transportRequestMessage);
 });
 
-// send any messages from the extension back to the page
-port.onMessage.addListener((data: {id: string, response: any}): void => {
-  const { id, resolve } = handleRedirectPhishing;
-
-  if (data?.id === id) {
-    resolve && resolve(Boolean(data.response));
-  } else {
-    window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
-  }
-});
-
 // all messages from the page, pass them to the extension
-window.addEventListener('message', ({ data, source }: Message): void => {
-  // only allow messages from our window, by the inject
-  if (source !== window || data.origin !== MESSAGE_ORIGIN_PAGE) {
-    return;
-  }
-
-  port.postMessage(data);
-});
+window.addEventListener('message', onMessage);
 
 // inject our data injector
 const container = document.head || document.documentElement;

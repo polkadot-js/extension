@@ -6,7 +6,7 @@ import { NotificationType } from '@subwallet/extension-base/background/KoniTypes
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningOptionDesktopItem, EarningOptionItem, EarningValidatorDetailRWModal, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
 import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE, VALIDATOR_DETAIL_RW_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -100,7 +100,7 @@ function Component ({ className }: Props) {
 
   const data = usePreviewYieldGroupInfo(poolInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
-  const [validator, setValidator] = useState<ValidatorInfo>();
+  const [validator, setValidator] = useState<YieldPoolTarget>();
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { accounts, currentAccount } = useSelector((state) => state.accountState);
   const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
@@ -175,7 +175,7 @@ function Component ({ className }: Props) {
   }, [chainInfoMap, selectedChain]);
 
   const navigateToEarnTransaction = useCallback(
-    () => {
+    (slug: string, chain: string) => {
       if (isNoAccount) {
         setReturnStorage(earnPath);
         navigate(DEFAULT_ROUTER_PATH);
@@ -194,9 +194,11 @@ function Component ({ className }: Props) {
           if (accountList.length === 1) {
             setEarnStorage((prevState) => ({
               ...prevState,
+              slug: slug || prevState.slug,
+              chain: chain || prevState.chain,
               from: accountList[0].address
             }));
-            saveCurrentAccountAddress(accountList[0]).then(() => navigate(earnPath)).catch(() => console.error());
+            saveCurrentAccountAddress(accountList[0]).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           } else {
             if (currentAccount && accountList.some((acc) => acc.address === currentAccount.address)) {
               navigate(earnPath, { state: { from: earnPath } });
@@ -204,6 +206,11 @@ function Component ({ className }: Props) {
               return;
             }
 
+            setEarnStorage((prevState) => ({
+              ...prevState,
+              slug: slug || prevState.slug,
+              chain: chain || prevState.chain
+            }));
             saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           }
         }
@@ -213,8 +220,8 @@ function Component ({ className }: Props) {
   );
 
   const onConnectChainSuccess = useCallback(() => {
-    activeModal(validatorModalId);
-  }, [activeModal]);
+    selectedPoolInfoSlug && navigateToEarnTransaction(selectedPoolInfoSlug, selectedChain);
+  }, [navigateToEarnTransaction, selectedChain, selectedPoolInfoSlug]);
 
   const { alertProps,
     checkChainConnected,
@@ -276,7 +283,8 @@ function Component ({ className }: Props) {
       if (item.poolListLength > 1) {
         navigate('/earning-preview/pools', { state: {
           poolGroup: item.group,
-          symbol: item.symbol
+          symbol: item.symbol,
+          from: earnPath
         } as EarningPoolsParam });
       } else if (item.poolListLength === 1) {
         const poolInfo = poolInfoMap[item.poolSlugs[0]];
@@ -316,7 +324,7 @@ function Component ({ className }: Props) {
           return;
         }
 
-        navigateToEarnTransaction();
+        navigateToEarnTransaction(poolInfo.slug, poolInfo.chain);
       }
     };
   }, [checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, poolInfoMap, setEarnStorage, t, transactionFromValue]);
@@ -439,7 +447,7 @@ function Component ({ className }: Props) {
                 }
 
                 setIsAlertWarningValidator(false);
-                setValidator(isValidatorSupported as ValidatorInfo);
+                setValidator(isValidatorSupported);
               }
             }
 

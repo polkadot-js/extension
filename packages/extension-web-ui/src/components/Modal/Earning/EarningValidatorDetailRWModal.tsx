@@ -4,7 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils';
 import { Avatar, BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { VALIDATOR_DETAIL_RW_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -22,7 +22,7 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   onCancel?: VoidFunction;
   onStakeMore?: (slug: string, chain: string) => void;
-  validatorItem: ValidatorInfo;
+  validatorItem: YieldPoolTarget;
   openAlert: (alertProps: AlertDialogProps) => void;
   closeAlert: VoidFunction;
   poolInfo: YieldPoolInfo | undefined;
@@ -44,11 +44,11 @@ function Component (props: Props): React.ReactElement<Props> {
     validatorItem } = props;
   const { address: validatorAddress,
     commission,
-
-    identity: validatorName = '',
+    identity,
     minBond: minStake,
+    name,
     nominatorCount,
-    totalStake } = validatorItem;
+    totalStake } = validatorItem as ValidatorInfo & NominationPoolInfo;
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
   const checkRef = useRef<number>(Date.now());
@@ -268,7 +268,7 @@ function Component (props: Props): React.ReactElement<Props> {
       >
         <Avatar
           className={'__validator-avatar'}
-          size={56}
+          size={64}
           value={validatorAddress}
         />
         <div className={'__meta-info-group-item'}>
@@ -276,7 +276,7 @@ function Component (props: Props): React.ReactElement<Props> {
             {t('Validator')}
           </div>
           <div className={'__validator-name'}>
-            {validatorName || toShort(validatorAddress)}
+            {name || identity || toShort(validatorAddress)}
           </div>
           {
             !!apy &&
@@ -296,52 +296,52 @@ function Component (props: Props): React.ReactElement<Props> {
 
         <div className={'__meta-info-group-item'}>
 
-          <div className={'__meta-info-item'}>
+          {!!commission && <div className={'__meta-info-item'}>
             <div className={'__meta-info-label'}>
               {t('Commission:')}
             </div>
             <NumberComponent
               decimal={0}
-              size={14}
+              size={16}
               suffix={'%'}
               value={commission}
             />
-          </div>
+          </div>}
 
-          <div className={'__meta-info-item'}>
+          {totalStake && <div className={'__meta-info-item'}>
             <div className={'__meta-info-label'}>
               {t('Total stake:')}
             </div>
             <NumberComponent
               decimal={asset?.decimals || 0}
-              size={14}
+              size={16}
               suffix={asset?.symbol}
               value={totalStake}
             />
-          </div>
+          </div>}
 
-          <div className={'__meta-info-item'}>
+          {!!nominatorCount && <div className={'__meta-info-item'}>
             <div className={'__meta-info-label'}>
               {t('Nominator count:')}
             </div>
             <NumberComponent
               decimal={0}
-              size={14}
+              size={16}
               value={nominatorCount}
             />
-          </div>
+          </div>}
 
-          <div className={'__meta-info-item'}>
+          {!!minStake && <div className={'__meta-info-item'}>
             <div className={'__meta-info-label'}>
               {t('Minimum active stake:')}
             </div>
             <NumberComponent
               decimal={asset?.decimals || 0}
-              size={14}
+              size={16}
               suffix={asset?.symbol}
               value={minStake}
             />
-          </div>
+          </div>}
         </div>
       </MetaInfo>
     </BaseModal>
@@ -351,7 +351,8 @@ function Component (props: Props): React.ReactElement<Props> {
 const EarningValidatorDetailRWModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.ant-sw-modal-content': {
-      padding: token.paddingLG
+      padding: token.paddingLG,
+      maxHeight: 'fit-content'
     },
 
     '.ant-sw-modal-header': {
@@ -366,14 +367,16 @@ const EarningValidatorDetailRWModal = styled(Component)<Props>(({ theme: { token
 
     '.ant-sw-header-center-part .ant-sw-sub-header-title': {
       '.ant-typography ': {
-        whiteSpace: 'normal'
+        whiteSpace: 'normal',
+        lineHeight: token.lineHeightHeading3,
+        fontSize: token.fontSizeHeading3
       }
     },
     '.ant-sw-modal-body': {
       padding: `0 ${token.padding}px`,
 
       '.-has-background-wrapper': {
-        padding: `${token.paddingLG}px 0`,
+        padding: `${token.paddingXL}px 0`,
         display: 'flex',
         flexDirection: 'column',
         gap: token.paddingXS,
@@ -396,17 +399,23 @@ const EarningValidatorDetailRWModal = styled(Component)<Props>(({ theme: { token
 
     '.__meta-info-label': {
       color: token.colorTextLight2,
-      fontSize: token.fontSizeHeading6,
+      fontSize: token.fontSizeHeading5,
       fontStyle: 'normal',
-      fontWeight: 600,
-      lineHeight: token.lineHeightHeading6
+      fontWeight: 500,
+      lineHeight: token.lineHeightHeading5
     },
 
     '.__meta-info-item.-apy-item': {
       '.__meta-info-label, .__apy-value': {
         color: token.colorSuccess,
-        fontSize: token.fontSizeXL,
-        lineHeight: token.lineHeightHeading4
+        fontSize: token.fontSizeHeading3,
+        fontWeight: 600,
+        lineHeight: token.lineHeightHeading3,
+
+        '.ant-typography': {
+          fontWeight: '600 !important',
+          lineHeight: token.lineHeightHeading3
+        }
       }
     },
 
@@ -417,19 +426,24 @@ const EarningValidatorDetailRWModal = styled(Component)<Props>(({ theme: { token
 
     '.__validator-name': {
       color: token.colorTextLight1,
-      fontSize: token.fontSizeHeading4,
+      fontSize: token.fontSizeHeading3,
       fontStyle: 'normal',
+      textAlign: 'center',
       fontWeight: 600,
-      lineHeight: token.lineHeightHeading4
+      lineHeight: token.lineHeightHeading3
     },
 
     '.__validator-label': {
       color: token.colorTextLight4,
-      fontSize: token.fontSizeSM,
+      fontSize: token.fontSizeHeading6,
       fontStyle: 'normal',
       fontWeight: 500,
       textAlign: 'center',
-      lineHeight: token.lineHeightHeading4
+      lineHeight: token.lineHeightHeading6
+    },
+
+    '.ant-number': {
+      fontSize: token.fontSizeLG
     },
 
     '&.-isMobile': {

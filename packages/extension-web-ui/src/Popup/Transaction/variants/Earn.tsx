@@ -69,7 +69,7 @@ type LocationStateRW = {
 const Component = ({ className }: ComponentProps) => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
@@ -720,7 +720,15 @@ const Component = ({ className }: ComponentProps) => {
     if (!isClickInfoButtonRef.current) {
       goBack();
     }
+
+    setIsFromStakingRW(false);
   }, [goBack]);
+
+  const onStakeMore = useCallback((slug: string, chain: string) => {
+    inactiveModal(instructionModalId);
+
+    setIsFromStakingRW(false);
+  }, [inactiveModal]);
 
   const altChain = useMemo(() => {
     if (poolInfo && (isLiquidPool(poolInfo) || isLendingPool(poolInfo))) {
@@ -830,7 +838,7 @@ const Component = ({ className }: ComponentProps) => {
   }, [compound]);
 
   useEffect(() => {
-    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading) {
+    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading && !isFromStakingRW) {
       if (compound) {
         if (autoCheckCompoundRef.current) {
           autoCheckCompoundRef.current = false;
@@ -925,7 +933,7 @@ const Component = ({ className }: ComponentProps) => {
         }
       }
     }
-  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading]);
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading, isFromStakingRW]);
 
   useEffect(() => {
     if (poolChain) {
@@ -949,8 +957,6 @@ const Component = ({ className }: ComponentProps) => {
   }, [altChain, poolChain, checkChainConnected, turnOnChain]);
 
   useEffect(() => {
-    console.log(stateLocation);
-
     if (stateLocation?.from && stateLocation.from === '/transaction/earn') {
       setIsFromStakingRW(true);
       activeModal(instructionModalId);
@@ -1401,6 +1407,7 @@ const Component = ({ className }: ComponentProps) => {
             closeAlert={closeAlert}
             isShowStakeMoreButton={!isClickInfoButtonRef.current}
             onCancel={onCancelInstructionModal}
+            onStakeMore={onStakeMore}
             openAlert={openAlert}
             poolInfo={poolInfo}
           />

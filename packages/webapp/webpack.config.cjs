@@ -162,7 +162,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         ...alias,
         'react/jsx-runtime': require.resolve('react/jsx-runtime')
       }),
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx'],
       fallback: {
         crypto: require.resolve('crypto-browserify'),
         path: require.resolve('path-browserify'),
@@ -185,9 +185,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
 };
 
 module.exports = createConfig({
-  fallback: './src/fallback.ts',
-  webapp: './src/webRunner.ts',
-  main: './src/index.tsx'
+  webapp: ['./src/fallback.ts', './src/webRunner.ts'],
+  main: './src/index.tsx',
 }, {
   'manta-extension-sdk': './manta-extension-sdk-empty.ts'
 }, true);

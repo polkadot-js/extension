@@ -106,6 +106,8 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
       selectedQuote: swapQuoteResponse.optimalQuote
     });
 
+    console.log('optimalProcess', optimalProcess);
+
     return {
       process: optimalProcess,
       quote: swapQuoteResponse
@@ -113,6 +115,7 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   }
 
   public async getLatestQuotes (request: SwapRequest): Promise<SwapQuoteResponse> {
+    request.pair.metadata = this.getSwapPairMetadata(request.pair.slug); // todo: improve this
     const quoteAskResponses = await this.askProvidersForQuote(request);
 
     // todo: handle error to return back to UI
@@ -233,9 +236,14 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
       return {
         slug,
         from: assetRef.srcAsset,
-        to: assetRef.destAsset
+        to: assetRef.destAsset,
+        metadata: assetRef.metadata
       } as SwapPair;
     });
+  }
+
+  private getSwapPairMetadata (slug: string): Record<string, any> | undefined {
+    return this.getSwapPairs().find((pair) => pair.slug === slug)?.metadata;
   }
 
   public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
@@ -260,12 +268,13 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   }
 
   public subscribeSwapPairs (callback: (pairs: SwapPair[]) => void) {
-    return this.chainService.subscribeSwapRefMap().subscribe((ref) => {
-      const latestData = Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
+    return this.chainService.subscribeSwapRefMap().subscribe((refMap) => {
+      const latestData = Object.entries(refMap).map(([slug, assetRef]) => {
         return {
           slug,
           from: assetRef.srcAsset,
-          to: assetRef.destAsset
+          to: assetRef.destAsset,
+          metadata: assetRef.metadata
         } as SwapPair;
       });
 

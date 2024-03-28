@@ -5,12 +5,17 @@ import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { AmountData } from '@subwallet/extension-base/background/KoniTypes';
+import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenMinAmount, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { RuntimeDispatchInfo, YieldStepType } from '@subwallet/extension-base/types';
+import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import { HydradxPreValidationMetadata, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import BigNumber from 'bignumber.js';
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -75,7 +80,63 @@ export class HydradxHandler implements SwapBaseInterface {
   }
 
   async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
-    return Promise.resolve(undefined);
+    const bnAmount = new BigNumber(params.request.fromAmount);
+    const fromAsset = this.chainService.getAssetBySlug(params.request.pair.from);
+
+    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
+
+    const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+
+    if (!bnFromAssetBalance.gte(bnAmount)) { // if not enough balance
+      const alternativeAssetSlug = getSwapAlternativeAsset(params.request.pair);
+
+      if (alternativeAssetSlug) {
+        const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+        const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+        const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
+
+        if (bnAlternativeAssetBalance.gt(0)) {
+          const alternativeChainInfo = this.chainService.getChainInfoByKey(alternativeAsset.originChain);
+          const step: BaseStepDetail = {
+            metadata: {
+              sendingValue: bnAmount.toString(),
+              originTokenInfo: alternativeAsset,
+              destinationTokenInfo: fromAsset
+            },
+            name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
+            type: YieldStepType.XCM
+          };
+
+          const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
+
+          const xcmTransfer = await createXcmExtrinsic({
+            originTokenInfo: alternativeAsset,
+            destinationTokenInfo: fromAsset,
+            sendingValue: bnAmount.toString(),
+            recipient: params.request.address,
+            chainInfoMap: this.chainService.getChainInfoMap(),
+            substrateApi: xcmOriginSubstrateApi
+          });
+
+          const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
+          const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+          const fee: SwapFeeInfo = {
+            feeComponent: [{
+              feeType: SwapFeeType.NETWORK_FEE,
+              amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
+              tokenSlug: _getChainNativeTokenSlug(alternativeChainInfo)
+            }],
+            defaultFeeToken: _getChainNativeTokenSlug(alternativeChainInfo),
+            feeOptions: [_getChainNativeTokenSlug(alternativeChainInfo)]
+          };
+
+          return [step, fee];
+        }
+      }
+    }
+
+    return undefined;
   }
 
   async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
@@ -195,7 +256,7 @@ export class HydradxHandler implements SwapBaseInterface {
       if (bnAmount.gte(bnMaxBalanceSwap)) {
         return {
           error: SwapErrorType.SWAP_EXCEED_ALLOWANCE
-        }
+        };
       }
 
       return {

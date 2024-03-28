@@ -6,15 +6,7 @@ import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import {
-  ChainflipPreValidationMetadata,
-  HydradxPreValidationMetadata,
-  SwapErrorType,
-  SwapFeeInfo,
-  SwapProviderId,
-  SwapStepDetail,
-  SwapStepType
-} from '@subwallet/extension-base/types/swap';
+import { ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapPair, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
@@ -60,6 +52,10 @@ export const MOCK_SWAP_FEE: SwapFeeInfo = {
   defaultFeeToken: '',
   feeOptions: []
 };
+
+export function getSwapAlternativeAsset (swapPair: SwapPair): string | undefined {
+  return swapPair?.metadata?.alternativeAsset as string;
+}
 
 export function calculateSwapRate (fromAmount: string, toAmount: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {
   const bnFromAmount = new BigN(fromAmount);

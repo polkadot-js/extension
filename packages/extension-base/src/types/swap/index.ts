@@ -14,6 +14,7 @@ export interface SwapPair {
   slug: string;
   from: string;
   to: string;
+  metadata?: Record<string, any>;
 }
 
 export interface SwapQuote {

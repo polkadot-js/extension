@@ -2029,7 +2029,7 @@ export default class KoniExtension {
           if (!destinationTokenInfo) {
             estimatedFee = '0';
           } else {
-            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_FEE_RATIO));
+            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_MIN_AMOUNT_RATIO));
             const desChainInfo = chainInfoMap[destChain];
             const orgChainInfo = chainInfoMap[networkKey];
             const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(desChainInfo) && !_isChainEvmCompatible(orgChainInfo)
@@ -2096,11 +2096,11 @@ export default class KoniExtension {
         console.warn('Unable to estimate fee', e);
       }
 
-      maxTransferable = maxTransferable.minus(new BigN(estimatedFee));
+      maxTransferable = maxTransferable.minus(new BigN(estimatedFee).multipliedBy(isXcmTransfer ? XCM_FEE_RATIO : 1));
 
       return {
         ...freeBalance,
-        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed() || '0') : '0'
+        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed(0) || '0') : '0'
       } as AmountData;
     }
   }

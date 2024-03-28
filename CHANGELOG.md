@@ -1,18 +1,42 @@
 # CHANGELOG
 
+## 1.1.49
+Build date: Mar 25, 2024.
+
+Features & Update:
+- Improve UI for Mission Pools (#2796)
+
+Bugs fixed:
+- Check transfer logic that can potentially affect ED (#2798)
+- Handle case slow getting max transferable cause wrong amount when submit max transfer (#2793)
+- Fixed bug when performing XCM transfer on Kusama (#2814)
+- Fixed bug Error parsing token balance for frozen asset on Asset Hub (#2799)
+
+## 1.1.48
+Build date: Mar 25, 2024.
+
+Bugs fixed:
+- Fix send fund error (#2795)
+
+## 1.1.47
+Build date: Mar 23, 2024.
+
+Features & Update:
+- Add support XCM for PINK token (#2786)
+  - Default enable DOT, DED, PINK on Asset Hub and xcPINK on Moonbeam
+
 ## 1.1.46
 Build date: Mar 22, 2024.
 
+Features & Update:
 - Merge dApp request from both of interface into one interface (#2722)
 - Support connect Ledger device for Asset Hub (#2785)
 - Support Mission Pool for Extension (#2781)
-- Add support XCM for PINK token (#2786)
-  - Default enable DOT, DED, PINK on Asset Hub and xcPINK on Moonbeam
 
 ## 1.1.45
 Build date: Mar 20, 2024.
 
-- Features & Update:
+Features & Update:
 - Update explorer URL for Avail testnet (#2767)
 - Update chain-list 0.2.45 (#2771)
   - Update symbol, Network name for OriginTrail and Tomochain

@@ -7,7 +7,7 @@ import { PageWrapper } from '@subwallet/extension-web-ui/components';
 import { CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-web-ui/constants';
 import { DEFAULT_CROWDLOAN_UNLOCK_TIME } from '@subwallet/extension-web-ui/constants/event';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
-import { updateLogoMaps } from '@subwallet/extension-web-ui/stores/utils';
+import { updateChainLogoMaps } from '@subwallet/extension-web-ui/stores/utils';
 import { CrowdloanFundInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
 import CN from 'classnames';
 import React, { useContext, useEffect, useState } from 'react';
@@ -80,10 +80,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       setCrowdloanUnlockTime(nearestTime || 0);
 
-      updateLogoMaps({
-        chainLogoMap: getLogoMap(chainInfoItems),
-        assetLogoMap: {}
-      });
+      updateChainLogoMaps(getLogoMap(chainInfoItems));
     }).catch((e) => {
       console.log('fetch error', e);
     });

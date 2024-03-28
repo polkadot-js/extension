@@ -2321,6 +2321,8 @@ export interface KoniRequestSignatures {
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
+  'pri(settings.logo.assets.subscribe)': [null, Record<string, string>, Record<string, string>];
+  'pri(settings.logo.chains.subscribe)': [null, Record<string, string>, Record<string, string>];
 
   /* Earning */
 

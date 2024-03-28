@@ -18,19 +18,23 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 
 Steps to build the extension and view your changes in a browser:
 
-1. Build via `yarn build`
-2. Install the extension
+1. Install supported Node.js version. Optionally via `nvm install`
+2. Install dependencies via `yarn`
+3. Build via `yarn build` or `yarn watch`
+4. Install the extension
   - Chrome:
     - go to `chrome://extensions/`
     - ensure you have the Development flag set
     - "Load unpacked" and point to `packages/extension/build`
     - if developing, after making changes - refresh the extension
   - Firefox:
-    - go to `about:debugging#addons`
-    - check "Enable add-on debugging"
-    - click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
+    - go to "This Firefox" at `about:debugging#addons`
+    - check "Enable add-on debugging" (if available)
+    - go to "Temporary Extensions" and click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
     - if developing, after making changes - reload the extension
-3. When visiting `https://polkadot.js.org/apps/` it will inject the extension
+    - edit the extension settings to "Run in Private Windows" if necessary
+    - click the puzzle icon, then click the gear icon next to the "polkadot{.js} extension (development only)" extension and choose "Pin to Toolbar"
+5. When visiting `https://polkadot.js.org/apps/` it will inject the extension
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
 

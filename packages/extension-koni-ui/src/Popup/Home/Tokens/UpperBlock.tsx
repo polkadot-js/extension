@@ -5,7 +5,8 @@ import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks'
 import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
-import { ArrowsClockwise, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import CN from 'classnames';
+import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
@@ -18,6 +19,7 @@ type Props = ThemeProps & {
   onOpenSendFund: () => void;
   onOpenBuyTokens: () => void;
   onOpenReceive: () => void;
+  onOpenSwap: () => void;
 };
 
 function Component (
@@ -27,6 +29,7 @@ function Component (
     onOpenBuyTokens,
     onOpenReceive,
     onOpenSendFund,
+    onOpenSwap,
     totalChangePercent,
     totalChangeValue,
     totalValue }: Props): React.ReactElement<Props> {
@@ -146,6 +149,21 @@ function Component (
         />
         <div className={'__button-space'} />
         <Button
+          icon={(
+            <Icon
+              phosphorIcon={ArrowsLeftRight}
+              size={isShrink ? 'sm' : 'md'}
+              weight={'duotone'}
+            />
+          )}
+          onClick={onOpenSwap}
+          shape='squircle'
+          size={isShrink ? 'xs' : 'sm'}
+          tooltip={t('Swap')}
+        />
+        <div className={CN('__button-space', { hidden: isShrink })} />
+        <Button
+          className={CN({ hidden: isShrink })}
           icon={
             <Icon
               phosphorIcon={ShoppingCartSimple}

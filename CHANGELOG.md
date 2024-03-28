@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.50
+Build date: Mar 28, 2024.
+
+Features & Update:
+Nội dung release:
+- Integrate asset online (#2790)
+- Add Swap button (#2784)
+- Update chain-list (#2805)
+  - Add support for RMRK token for Astar EVM
+  - Add support for Creditcoin cc3 testnet
+
+Bugs fixed:
+- Fixed bug Do not show balance in case standing on History list to search token (#2791)
+
 ## 1.1.49
 Build date: Mar 25, 2024.
 

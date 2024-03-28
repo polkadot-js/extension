@@ -26,7 +26,8 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { u8aToString } from '@polkadot/util';
+import { hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { ethereumEncode, keccakAsU8a, secp256k1Expand } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -134,8 +135,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
           if (isKeyringPairs$Json(json)) {
             const accounts: ResponseJsonGetAccountInfo[] = json.accounts.map((account) => {
+              let address = account.address;
+
+              if (isHex(account.address) && hexToU8a(account.address).length !== 20) {
+                address = ethereumEncode(keccakAsU8a(secp256k1Expand(hexToU8a(account.address))));
+              }
+
               return {
-                address: account.address,
+                address: address,
                 genesisHash: account.meta.genesisHash,
                 name: account.meta.name
               } as ResponseJsonGetAccountInfo;
@@ -148,6 +155,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           } else {
             jsonGetAccountInfo(json)
               .then((accountInfo) => {
+                let address = accountInfo.address;
+
+                if (isHex(accountInfo.address) && hexToU8a(accountInfo.address).length !== 20) {
+                  address = u8aToHex(keccakAsU8a(secp256k1Expand(hexToU8a(accountInfo.address))));
+                }
+
+                accountInfo.address = address;
                 setRequirePassword(true);
                 setAccountsInfo([accountInfo]);
                 setFileValidateState({});
@@ -234,10 +248,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <AccountCard
         accountName={account.name}
         address={account.address}
-        addressPreLength={4}
-        addressSufLength={5}
+        addressPreLength={9}
+        addressSufLength={9}
         avatarIdentPrefix={42}
-        avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
         key={account.address}
       />

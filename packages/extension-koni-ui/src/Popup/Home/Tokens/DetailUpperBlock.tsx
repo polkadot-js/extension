@@ -7,11 +7,11 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
+import CN from 'classnames';
 import { ArrowsLeftRight, CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import CN from "classnames";
 
 type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
@@ -118,7 +118,7 @@ function Component (
             size={isShrink ? 'xs' : 'sm'}
             tooltip={t('Swap')}
           />
-          <div className={CN('__button-space', {hidden: isShrink})} />
+          <div className={CN('__button-space', { hidden: isShrink })} />
           <Button
             className={CN({ hidden: isShrink })}
             disabled={!isSupportBuyTokens}

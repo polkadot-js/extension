@@ -1,21 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import {useSelector, useTranslation} from '@subwallet/extension-koni-ui/hooks';
-import {reloadCron, saveShowBalance} from '@subwallet/extension-koni-ui/messaging';
-import {ThemeProps} from '@subwallet/extension-koni-ui/types';
-import {Button, Icon, Number, SwNumberProps, Tag} from '@subwallet/react-ui';
+import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import CN from 'classnames';
-import {
-    ArrowsClockwise,
-    ArrowsLeftRight,
-    CopySimple,
-    Eye,
-    EyeSlash,
-    PaperPlaneTilt,
-    ShoppingCartSimple
-} from 'phosphor-react';
-import React, {useCallback, useState} from 'react';
+import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -169,7 +161,7 @@ function Component (
           size={isShrink ? 'xs' : 'sm'}
           tooltip={t('Swap')}
         />
-        <div className={CN('__button-space', {hidden: isShrink})} />
+        <div className={CN('__button-space', { hidden: isShrink })} />
         <Button
           className={CN({ hidden: isShrink })}
           icon={

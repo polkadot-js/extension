@@ -1,46 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import {COMMON_CHAIN_SLUGS} from '@subwallet/chain-list';
-import {SwapError} from '@subwallet/extension-base/background/errors/SwapError';
-import {TransactionError} from '@subwallet/extension-base/background/errors/TransactionError';
-import {BalanceService} from '@subwallet/extension-base/services/balance-service';
-import {ChainService} from '@subwallet/extension-base/services/chain-service';
-import {
-  _getAssetDecimals,
-  _getChainNativeTokenSlug,
-  _getTokenMinAmount,
-  _getTokenOnChainAssetId,
-  _isNativeToken
-} from '@subwallet/extension-base/services/chain-service/utils';
-import {SwapBaseHandler, SwapBaseInterface} from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import {
-  calculateSwapRate, DEFAULT_SWAP_FIRST_STEP,
-  getEarlyHydradxValidationError, MOCK_SWAP_FEE,
-  SWAP_QUOTE_TIMEOUT_MAP
-} from '@subwallet/extension-base/services/swap-service/utils';
-import {
-  HydradxPreValidationMetadata,
-  OptimalSwapPath,
-  OptimalSwapPathParams,
-  SwapEarlyValidation,
-  SwapErrorType, SwapFeeInfo,
-  SwapProviderId,
-  SwapQuote,
-  SwapRequest, SwapStepDetail, SwapStepType,
-  SwapSubmitParams,
-  SwapSubmitStepData,
-  ValidateSwapProcessParams
-} from '@subwallet/extension-base/types/swap';
-import BigNumber from "bignumber.js";
-import {AmountData} from "@subwallet/extension-base/background/KoniTypes";
-import {BaseStepDetail} from "@subwallet/extension-base/types/service-base";
-
-interface TradeRouter {
-  // todo: mock for hydradx sdk
-}
-
-
+import { PoolService, TradeRouter } from '@galacticcouncil/sdk';
+import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
+import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
+import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { ChainService } from '@subwallet/extension-base/services/chain-service';
+import { _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
+import { SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -67,9 +37,11 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     const substrateApi = this.chainService.getSubstrateApi(this.chain);
-    // const poolService = new PoolService(substrateApi.api);
 
-    this.tradeRouter = {} as TradeRouter;
+    await substrateApi.api.isReady;
+    const poolService = new PoolService(substrateApi.api);
+
+    this.tradeRouter = new TradeRouter(poolService);
 
     this.isReady = true;
   }

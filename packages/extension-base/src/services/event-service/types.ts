@@ -24,14 +24,15 @@ export interface EventRegistry {
   /** Remove a account  */
   'account.remove': [string]; // address
   /** Inject account done  */
-  'inject.ready': [boolean]; // address
+  'inject.ready': [boolean];
   /* Keyring */
 
   'chain.ready': [boolean]; // chain is ready and migration done
   'chain.add': [string]; // chain slug
   'chain.updateState': [string]; // chain slug
 
-  'asset.ready': [boolean];
+  'asset.ready': [boolean]; // Init asset ready
+  'asset.online.ready': [boolean]; // Update latest asset done
   'asset.updateState': [string]; // token slug
 
   'transaction.done': [SWTransaction];

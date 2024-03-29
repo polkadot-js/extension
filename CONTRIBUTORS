@@ -1,17 +1,17 @@
-    2351	AnhMTV                        	Release version 1.1.49
+    2357	AnhMTV                        	
     2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
-    1967	S2kael                        	[Issue-2814] Fix crash when get max transfer for xcm
-     619	lw-cdm                        	Fix issue related to undefined object
+    1980	S2kael                        	[Issue-2824] Handle case online data is null
+     620	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       99	lw-cdm                        	
       88	dominhquang                   	[Issue-2649] Add send crash log feature
       83	Hieu Dao                      	Update README.md
+      82	nguyentiendung                	[Issue-2784] Update url for redirect swap extension
       82	Thibaut Sardan                	Add account filtering feature (#832)
       80	leewong                       	Update account filter for earn transaction
-      76	bluezdot                      	[Issue-2786] fix eslint
-      76	nguyentiendung                	[Issue-2793] Handle case slow getting max transferable cause wrong amount when submit max transfer
+      77	bluezdot                      	[Issue-2805] Update chainlist
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR

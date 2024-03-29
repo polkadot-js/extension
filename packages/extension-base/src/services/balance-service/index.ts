@@ -2,15 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import { AmountData, BalanceErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BalanceErrorType, DetectBalanceCache } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
+import DetectAccountBalanceStore from '@subwallet/extension-base/stores/DetectAccountBalance';
 import { BalanceItem, BalanceJson } from '@subwallet/extension-base/types';
 import { addLazy, createPromiseHandler, isAccountAll, PromiseHandler, waitTimeout } from '@subwallet/extension-base/utils';
+import keyring from '@subwallet/ui-keyring';
 import { t } from 'i18next';
+import { BehaviorSubject } from 'rxjs';
+
+import { noop } from '@polkadot/util';
 
 import { BalanceMapImpl } from './BalanceMapImpl';
 import { subscribeBalance } from './helpers';
@@ -30,6 +35,12 @@ export class BalanceService implements StoppableServiceInterface {
 
   private isReload = false;
 
+  private readonly detectAccountBalanceStore = new DetectAccountBalanceStore();
+  private readonly balanceDetectSubject: BehaviorSubject<DetectBalanceCache> = new BehaviorSubject<DetectBalanceCache>({});
+  private readonly intervalTime = 3 * 60 * 1000;
+  private readonly cacheTime = 15 * 60 * 1000;
+  private readonly startHandler: PromiseHandler<void>;
+
   /**
    * @constructor
    * @param {KoniState} state - The state of extension.
@@ -37,6 +48,18 @@ export class BalanceService implements StoppableServiceInterface {
   constructor (state: KoniState) {
     this.state = state;
     this.balanceMap = new BalanceMapImpl();
+
+    this.startHandler = createPromiseHandler<void>();
+
+    const updateBalanceDetectCache = (value: DetectBalanceCache) => {
+      this.startHandler.resolve();
+      this.balanceDetectSubject.next(value || {});
+    };
+
+    this.getBalanceDetectCache(updateBalanceDetectCache);
+    this.detectAccountBalanceStore.getSubject().subscribe({ next: updateBalanceDetectCache });
+
+    this.startDetectBalance().catch(console.error);
   }
 
   /** Init service */
@@ -150,6 +173,50 @@ export class BalanceService implements StoppableServiceInterface {
         }
       }, lazyTime, undefined, true);
     }
+  }
+
+  async startDetectBalance () {
+    const scanBalance = () => {
+      const addresses = keyring.getPairs().map((account) => account.address);
+      const cache = this.balanceDetectSubject.value;
+      const now = Date.now();
+      const needDetectAddresses: string[] = [];
+
+      for (const address of addresses) {
+        if (!cache[address] || now - cache[address] > this.cacheTime) {
+          needDetectAddresses.push(address);
+        }
+      }
+
+      if (needDetectAddresses.length) {
+        this.autoEnableChains(needDetectAddresses).finally(noop);
+      }
+    };
+
+    await this.state.eventService.waitAccountReady;
+    await this.state.eventService.waitChainReady;
+    await this.startHandler.promise;
+
+    scanBalance();
+    setInterval(scanBalance, this.intervalTime);
+  }
+
+  public getBalanceDetectCache (update: (value: DetectBalanceCache) => void): void {
+    this.detectAccountBalanceStore.get('DetectBalanceCache', (value) => {
+      update(value);
+    });
+  }
+
+  public setBalanceDetectCache (addresses: string[]): void {
+    this.detectAccountBalanceStore.get('DetectBalanceCache', (value) => {
+      const rs = { ...value };
+
+      for (const address of addresses) {
+        rs[address] = Date.now();
+      }
+
+      this.detectAccountBalanceStore.set('DetectBalanceCache', rs);
+    });
   }
 
   /** Subscribe token free balance of a address on chain */
@@ -359,4 +426,66 @@ export class BalanceService implements StoppableServiceInterface {
   }
 
   /** Subscribe area */
+
+  public async autoEnableChains (addresses: string[]) {
+    this.setBalanceDetectCache(addresses);
+    const assetMap = this.state.chainService.getAssetRegistry();
+    const promiseList = addresses.map((address) => {
+      return this.state.subscanService.getMultiChainBalance(address)
+        .catch((e) => {
+          console.error(e);
+
+          return null;
+        });
+    });
+
+    const needEnableChains: string[] = [];
+    const needActiveTokens: string[] = [];
+    const balanceDataList = await Promise.all(promiseList);
+    const currentAssetSettings = await this.state.chainService.getAssetSettings();
+    const chainInfoMap = this.state.chainService.getChainInfoMap();
+    const detectBalanceChainSlugMap = this.state.chainService.detectBalanceChainSlugMap;
+
+    for (const balanceData of balanceDataList) {
+      if (balanceData) {
+        for (const balanceDatum of balanceData) {
+          const { balance, bonded, category, locked, network, symbol } = balanceDatum;
+          const chain = detectBalanceChainSlugMap[network];
+          const chainInfo = chain ? chainInfoMap[chain] : null;
+          const chainState = this.state.chainService.getChainStateByKey(chain);
+          const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
+          const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
+          const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
+
+          // Cancel if chain is not supported or is testnet
+          if (!chainInfo || chainInfo.isTestnet) {
+            continue;
+          }
+
+          // Cancel is balance is 0
+          if (balanceIsEmpty) {
+            continue;
+          }
+
+          // Cancel is chain is turned off by user
+          if (chainState && chainState.manualTurnOff) {
+            continue;
+          }
+
+          // const a = this.state.chainService.getChainStateByKey(chain);
+
+          if (existedKey && !currentAssetSettings[existedKey]?.visible) {
+            needEnableChains.push(chain);
+            needActiveTokens.push(existedKey);
+            currentAssetSettings[existedKey] = { visible: true };
+          }
+        }
+      }
+    }
+
+    if (needActiveTokens.length) {
+      await this.state.chainService.enableChains(needEnableChains);
+      this.state.chainService.setAssetSettings({ ...currentAssetSettings });
+    }
+  }
 }

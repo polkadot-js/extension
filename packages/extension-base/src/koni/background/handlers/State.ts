@@ -31,7 +31,7 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -1759,55 +1759,24 @@ export default class KoniState {
     this.unsubscriptionMap[id] = unsubscribe;
   }
 
-  public async autoEnableChains (addresses: string[]) {
-    const assetMap = this.chainService.getAssetRegistry();
-    const promiseList = addresses.map((address) => {
-      return this.subscanService.getMultiChainBalance(address)
-        .catch((e) => {
-          console.error(e);
+  public get detectBalanceChainSlugMap () {
+    const result: Record<string, string> = {};
+    const chainInfoMap = this.getChainInfoMap();
 
-          return null;
-        });
-    });
+    for (const [key, chainInfo] of Object.entries(chainInfoMap)) {
+      const chainBalanceSlug = chainInfo.extraInfo?.chainBalanceSlug || '';
 
-    const needEnableChains: string[] = [];
-    const needActiveTokens: string[] = [];
-    const currentAssetSettings = await this.chainService.getAssetSettings();
-    const chainMap = this.chainService.getChainInfoMap();
-    const balanceDataList = await Promise.all(promiseList);
-
-    balanceDataList.forEach((balanceData) => {
-      balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
-        const chain = SUBSCAN_BALANCE_CHAIN_MAP_REVERSE[network];
-        const chainInfo = chain ? chainMap[chain] : null;
-        const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
-
-        // Cancel if chain is not supported or is testnet or balance is 0
-        if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {
-          return;
-        }
-
-        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
-
-        const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
-
-        if (existedKey && !currentAssetSettings[existedKey]?.visible) {
-          needEnableChains.push(chain);
-          needActiveTokens.push(existedKey);
-          currentAssetSettings[existedKey] = { visible: true };
-        }
-      });
-    });
-
-    if (needActiveTokens.length) {
-      await this.chainService.enableChains(needEnableChains);
-      this.chainService.setAssetSettings({ ...currentAssetSettings });
+      if (chainBalanceSlug) {
+        result[chainBalanceSlug] = key;
+      }
     }
+
+    return result;
   }
 
   public onAccountAdd () {
     this.eventService.on('account.add', (address) => {
-      this.autoEnableChains([address]).catch(this.logger.error);
+      this.balanceService.autoEnableChains([address]).catch(this.logger.error);
     });
   }
 

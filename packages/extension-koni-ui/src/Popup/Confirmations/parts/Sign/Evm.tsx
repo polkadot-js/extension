@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByChainId, useLedger, useNotification } from '@subwallet/extension-koni-ui/hooks';
@@ -224,10 +225,17 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [checkUnlock, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
-    !!ledgerError && notify({
-      message: ledgerError,
-      type: 'error'
-    });
+    if (!!ledgerError && ledgerError === ledgerIncompatible) {
+      notify({
+        message: ledgerError,
+        type: 'info'
+      });
+    } else {
+      notify({
+        message: ledgerError,
+        type: 'error'
+      });
+    }
   }, [ledgerError, notify]);
 
   useEffect(() => {

@@ -3,6 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
+import { ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequestPayload, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
@@ -229,10 +230,17 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [checkUnlock, extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
-    !!ledgerError && notify({
-      message: ledgerError,
-      type: 'error'
-    });
+    if (!!ledgerError && ledgerError === ledgerIncompatible) {
+      notify({
+        message: ledgerError,
+        type: 'info'
+      });
+    } else {
+      notify({
+        message: ledgerError,
+        type: 'error'
+      });
+    }
   }, [ledgerError, notify]);
 
   useEffect(() => {

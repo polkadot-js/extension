@@ -18,7 +18,9 @@ export function useSelectAccount (getAllAddress: string[], modalId: string, onCh
       const isAll = isAccountAll(changeVal);
 
       if (!changeAccounts.includes(changeVal)) {
-        if (isAll) {
+        if (!changeVal) {
+          result = [];
+        } else if (isAll) {
           result = getAllAddress;
         } else if (isSingleSelect) {
           result = [changeVal];

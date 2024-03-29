@@ -49,7 +49,7 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
 const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], chainInfoMap: Record<string, _ChainInfo>): Ledger => {
   const { isLedgerCapable } = baseState;
 
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+  assert(isLedgerCapable, 'Incompatible browser. Use a Chrominum based browser like Chrome and Brave and try again.');
 
   const chainInfo = chainInfoMap[slug];
   const isEthereumNetwork = _isChainEvmCompatible(chainInfo);

@@ -124,6 +124,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           address={ALL_ACCOUNT_KEY}
           className='all-account-selection'
           isSelected={selected}
+          key={ALL_ACCOUNT_KEY}
           onClick={onAccountSelect(ALL_ACCOUNT_KEY)}
           showUnselectIcon
         />
@@ -155,8 +156,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   useEffect(() => {
     if (!isActive) {
       onResetFilter();
+      onChangeSelectedAccounts('');
     }
-  }, [isActive, onResetFilter]);
+  }, [isActive, onChangeSelectedAccounts, onResetFilter]);
 
   const exportAllAccounts = useCallback(() => {
     activeModal(EXPORT_ACCOUNTS_PASSWORD_MODAL);

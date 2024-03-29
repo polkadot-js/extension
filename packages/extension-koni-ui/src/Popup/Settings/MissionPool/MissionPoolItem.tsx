@@ -209,10 +209,10 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     borderRadius: token.borderRadiusLG,
     cursor: 'pointer',
     position: 'relative',
-
     padding: token.sizeSM,
     paddingTop: token.paddingXS,
     paddingBottom: token.paddingXS,
+    overflow: 'hidden',
     '.__item-inner': {
       display: 'flex',
       alignItems: 'center',
@@ -261,8 +261,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       backgroundSize: 'cover',
       position: 'absolute',
       top: 0,
-      left: 0,
-      filter: 'blur(4.5px)'
+      left: 4,
+      filter: 'blur(8px)'
     }
   };
 });

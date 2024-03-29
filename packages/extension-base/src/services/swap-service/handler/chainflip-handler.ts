@@ -15,28 +15,12 @@ import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, getChainflipEarlyValidationError, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
-import {
-  ChainflipPreValidationMetadata,
-  ChainflipTxData,
-  OptimalSwapPath,
-  OptimalSwapPathParams,
-  SwapEarlyValidation,
-  SwapErrorType,
-  SwapFeeComponent, SwapFeeInfo,
-  SwapFeeType,
-  SwapProviderId,
-  SwapQuote,
-  SwapRequest,
-  SwapStepType,
-  SwapSubmitParams,
-  SwapSubmitStepData,
-  ValidateSwapProcessParams
-} from '@subwallet/extension-base/types/swap';
+import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import {BaseStepDetail} from "@subwallet/extension-base/types/service-base";
 
 enum ChainflipFeeType {
   INGRESS = 'INGRESS',
@@ -373,8 +357,6 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         switch (step.type) {
           case SwapStepType.DEFAULT:
             return Promise.resolve([]);
-          case SwapStepType.XCM:
-            return this.swapBaseHandler.validateXcmStep(params);
           case SwapStepType.TOKEN_APPROVAL:
             return this.swapBaseHandler.validateTokenApproveStep(params);
           default:
@@ -419,7 +401,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       amount: quote.fromAmount
     });
 
-    const txData: ChainflipTxData = {
+    const txData: ChainflipSwapTxData = {
       address,
       provider: this.providerInfo,
       quote: params.quote,

@@ -30,6 +30,7 @@ export interface SwapQuote {
   maxSwap?: string; // set by the provider
   estimatedArrivalTime?: number; // in seconds
   isLowLiquidity?: boolean; // definition would be different for different providers
+  metadata?: any;
 
   feeInfo: SwapFeeInfo;
 }
@@ -55,6 +56,7 @@ export enum SwapErrorType {
 export enum SwapStepType {
   DEFAULT = 'DEFAULT',
   TOKEN_APPROVAL = 'TOKEN_APPROVAL',
+  SET_FEE_TOKEN = 'SET_FEE_TOKEN',
   SWAP = 'SWAP',
   XCM = 'XCM'
 }
@@ -95,7 +97,7 @@ export interface SwapFeeComponent {
 
 export interface SwapFeeInfo {
   feeComponent: SwapFeeComponent[];
-  defaultFeeToken: string;
+  defaultFeeToken: string; // token to pay transaction fee with
   feeOptions: string[]; // list of tokenSlug, always include defaultFeeToken
 }
 
@@ -108,7 +110,7 @@ export interface OptimalSwapPath { // path means the steps to complete the swap,
   steps: SwapStepDetail[];
 }
 
-export type SwapTxData = ChainflipTxData; // todo: will be more
+export type SwapTxData = ChainflipSwapTxData | HydradxSwapTxData; // todo: will be more
 
 export interface SwapBaseTxData {
   provider: SwapProvider;
@@ -118,10 +120,14 @@ export interface SwapBaseTxData {
   recipient?: string;
 }
 
-export interface ChainflipTxData extends SwapBaseTxData {
+export interface ChainflipSwapTxData extends SwapBaseTxData {
   depositChannelId: string;
   depositAddress: string;
   estimatedDepositChannelExpiryTime?: number;
+}
+
+export interface HydradxSwapTxData extends SwapBaseTxData {
+  txHex: string;
 }
 
 // parameters & responses

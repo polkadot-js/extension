@@ -17,8 +17,6 @@ export interface SwapBaseInterface {
   getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
   generateOptimalProcess: (params: OptimalSwapPathParams) => Promise<OptimalSwapPath>;
 
-  getTokenApproveStep?: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
-  getXcmStep?: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
   getSubmitStep: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
 
   validateSwapRequest: (request: SwapRequest) => Promise<SwapEarlyValidation>;

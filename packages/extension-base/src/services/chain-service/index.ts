@@ -656,39 +656,35 @@ export class ChainService {
     this.logger.log('Finished updating latest price IDs');
   }
 
-  handleLatestAssetData (_latestAssetInfo: Record<string, _ChainAsset> | null, _latestAssetLogoMap: Record<string, string> | null) {
+  handleLatestAssetData (latestAssetInfo: Record<string, _ChainAsset> | null, latestAssetLogoMap: Record<string, string> | null) {
     try {
-      let needUpdate = false;
+      if (latestAssetInfo) {
+        const latestAssetPatch = JSON.stringify(latestAssetInfo);
 
-      const latestAssetInfo = _latestAssetInfo || {};
-      const latestAssetLogoMap = _latestAssetLogoMap || {};
+        if (this.assetMapPatch !== latestAssetPatch) {
+          const assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
 
-      const latestAssetPatch = JSON.stringify(latestAssetInfo);
-      const latestAssetLogoPatch = JSON.stringify(latestAssetLogoMap);
+          this.assetMapPatch = latestAssetPatch;
+          this.dataMap.assetRegistry = assetRegistry;
+          this.assetRegistrySubject.next(assetRegistry);
 
-      if (this.assetMapPatch !== latestAssetPatch) {
-        needUpdate = true;
-
-        const assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
-
-        this.assetMapPatch = latestAssetPatch;
-        this.dataMap.assetRegistry = assetRegistry;
-        this.assetRegistrySubject.next(assetRegistry);
+          this.autoEnableTokens()
+            .then(() => {
+              this.eventService.emit('asset.updateState', '');
+            })
+            .catch(console.error);
+        }
       }
 
-      if (this.assetLogoPatch !== latestAssetLogoPatch) {
-        const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+      if (latestAssetLogoMap) {
+        const latestAssetLogoPatch = JSON.stringify(latestAssetLogoMap);
 
-        this.assetLogoPatch = latestAssetLogoPatch;
-        this.assetLogoMapSubject.next(logoMap);
-      }
+        if (this.assetLogoPatch !== latestAssetLogoPatch) {
+          const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
 
-      if (needUpdate) {
-        this.autoEnableTokens()
-          .then(() => {
-            this.eventService.emit('asset.updateState', '');
-          })
-          .catch(console.error);
+          this.assetLogoPatch = latestAssetLogoPatch;
+          this.assetLogoMapSubject.next(logoMap);
+        }
       }
     } catch (e) {
       console.error('Error fetching latest asset data');

@@ -710,8 +710,6 @@ export class ChainService {
       const chainState = chainStateMap[originChain];
 
       if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
-        // @ts-ignore
-        // TODO: Merge issue detect balance to define manualTurnOff props
         if (!chainState || !chainState.manualTurnOff) {
           await this.updateAssetSetting(assetSlug, { visible: true });
         }

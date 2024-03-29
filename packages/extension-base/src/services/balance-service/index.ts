@@ -39,7 +39,6 @@ export class BalanceService implements StoppableServiceInterface {
   private readonly balanceDetectSubject: BehaviorSubject<DetectBalanceCache> = new BehaviorSubject<DetectBalanceCache>({});
   private readonly intervalTime = 3 * 60 * 1000;
   private readonly cacheTime = 15 * 60 * 1000;
-  private readonly startHandler: PromiseHandler<void>;
 
   /**
    * @constructor
@@ -48,18 +47,6 @@ export class BalanceService implements StoppableServiceInterface {
   constructor (state: KoniState) {
     this.state = state;
     this.balanceMap = new BalanceMapImpl();
-
-    this.startHandler = createPromiseHandler<void>();
-
-    const updateBalanceDetectCache = (value: DetectBalanceCache) => {
-      this.startHandler.resolve();
-      this.balanceDetectSubject.next(value || {});
-    };
-
-    this.getBalanceDetectCache(updateBalanceDetectCache);
-    this.detectAccountBalanceStore.getSubject().subscribe({ next: updateBalanceDetectCache });
-
-    this.startDetectBalance().catch(console.error);
   }
 
   /** Init service */
@@ -99,6 +86,8 @@ export class BalanceService implements StoppableServiceInterface {
 
     this.status = ServiceStatus.STARTING;
 
+    await this.startScanBalance();
+
     // Run subscribe balance
     await this.runSubscribeBalances();
 
@@ -119,6 +108,7 @@ export class BalanceService implements StoppableServiceInterface {
     }
 
     this.runUnsubscribeBalances();
+    this.stopScanBalance();
 
     // Update status
     this.startPromiseHandler = createPromiseHandler();
@@ -173,32 +163,6 @@ export class BalanceService implements StoppableServiceInterface {
         }
       }, lazyTime, undefined, true);
     }
-  }
-
-  async startDetectBalance () {
-    const scanBalance = () => {
-      const addresses = keyring.getPairs().map((account) => account.address);
-      const cache = this.balanceDetectSubject.value;
-      const now = Date.now();
-      const needDetectAddresses: string[] = [];
-
-      for (const address of addresses) {
-        if (!cache[address] || now - cache[address] > this.cacheTime) {
-          needDetectAddresses.push(address);
-        }
-      }
-
-      if (needDetectAddresses.length) {
-        this.autoEnableChains(needDetectAddresses).finally(noop);
-      }
-    };
-
-    await this.state.eventService.waitAccountReady;
-    await this.state.eventService.waitChainReady;
-    await this.startHandler.promise;
-
-    scanBalance();
-    setInterval(scanBalance, this.intervalTime);
   }
 
   public getBalanceDetectCache (update: (value: DetectBalanceCache) => void): void {
@@ -487,5 +451,55 @@ export class BalanceService implements StoppableServiceInterface {
       await this.state.chainService.enableChains(needEnableChains);
       this.state.chainService.setAssetSettings({ ...currentAssetSettings });
     }
+  }
+
+  private _intervalScan: NodeJS.Timer | undefined;
+  private _unsubscribeBalanceDetectCache: VoidFunction | undefined;
+  private startBalanceDetectCache: PromiseHandler<void> | undefined;
+
+  private async startScanBalance () {
+    await Promise.all([this.state.eventService.waitAccountReady, this.state.eventService.waitChainReady]);
+    this.stopScanBalance();
+    this.startBalanceDetectCache = createPromiseHandler<void>();
+
+    const updateBalanceDetectCache = (value: DetectBalanceCache) => {
+      this.startBalanceDetectCache?.resolve();
+      this.balanceDetectSubject.next(value || {});
+    };
+
+    this.getBalanceDetectCache(updateBalanceDetectCache);
+    const subscription = this.detectAccountBalanceStore.getSubject().subscribe({ next: updateBalanceDetectCache });
+
+    this._unsubscribeBalanceDetectCache = subscription.unsubscribe;
+
+    const scanBalance = () => {
+      const addresses = keyring.getPairs().map((account) => account.address);
+      const cache = this.balanceDetectSubject.value;
+      const now = Date.now();
+      const needDetectAddresses: string[] = [];
+
+      for (const address of addresses) {
+        if (!cache[address] || now - cache[address] > this.cacheTime) {
+          needDetectAddresses.push(address);
+        }
+      }
+
+      if (needDetectAddresses.length) {
+        this.autoEnableChains(needDetectAddresses).finally(noop);
+      }
+    };
+
+    await this.startBalanceDetectCache?.promise;
+
+    scanBalance();
+    this._intervalScan = setInterval(scanBalance, this.intervalTime);
+  }
+
+  private stopScanBalance () {
+    this._intervalScan && clearInterval(this._intervalScan);
+    this._unsubscribeBalanceDetectCache && this._unsubscribeBalanceDetectCache();
+    this._intervalScan = undefined;
+    this._unsubscribeBalanceDetectCache = undefined;
+    this.startBalanceDetectCache = undefined;
   }
 }

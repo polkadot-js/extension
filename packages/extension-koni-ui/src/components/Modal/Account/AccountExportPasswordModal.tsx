@@ -9,7 +9,7 @@ import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
 import { saveAs } from 'file-saver';
-import { CheckCircle, XCircle } from 'phosphor-react';
+import { CaretLeft, CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -100,6 +100,12 @@ function Component ({ addresses, className = '' }: Props): React.ReactElement<Pr
       onCancel={closeModal}
       title={t('Confirmation')}
       zIndex={9999}
+      closeIcon={(
+        <Icon
+          phosphorIcon={CaretLeft}
+          size='md'
+        />
+      )}
     >
       <div className='body-container'>
         <Form

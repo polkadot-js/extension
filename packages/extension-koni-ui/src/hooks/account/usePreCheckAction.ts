@@ -75,7 +75,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         if (mode === AccountSignMode.LEDGER) {
           if (!isLedgerCapable) {
             notify({
-              message: t('Incompatible browser. Use Chrome or Brave and try again.'),
+              message: t('Incompatible browser. Use a Chrominum based browser like Chrome and Brave and try again.'),
               type: 'info',
               duration: 8
             });

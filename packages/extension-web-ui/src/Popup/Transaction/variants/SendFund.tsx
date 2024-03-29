@@ -242,7 +242,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
   const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
-  const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts, contacts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
@@ -331,7 +331,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
     const isOnChain = chain === destChain;
 
-    const account = findAccountByAddress(accounts, _recipientAddress);
+    const account = findAccountByAddress(accounts, _recipientAddress) || findAccountByAddress(contacts, _recipientAddress);
 
     if (!isEthereumAddress(_recipientAddress) && !account) {
       const destChainInfo = chainInfoMap[destChain];
@@ -381,7 +381,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }
 
     return Promise.resolve();
-  }, [accounts, chainInfoMap, form, t]);
+  }, [accounts, chainInfoMap, contacts, form, t]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {

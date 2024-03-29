@@ -686,6 +686,17 @@ export class ChainService {
           this.assetLogoMapSubject.next(logoMap);
         }
       }
+
+      if (latestAssetLogoMap) {
+        const latestAssetLogoPatch = JSON.stringify(latestAssetLogoMap);
+
+        if (this.assetLogoPatch !== latestAssetLogoPatch) {
+          const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+
+          this.assetLogoPatch = latestAssetLogoPatch;
+          this.assetLogoMapSubject.next(logoMap);
+        }
+      }
     } catch (e) {
       console.error('Error fetching latest asset data');
     }

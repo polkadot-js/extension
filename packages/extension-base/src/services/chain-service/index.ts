@@ -694,6 +694,8 @@ export class ChainService {
       console.error('Error fetching latest asset data');
     }
 
+    this.eventService.emit('asset.online.ready', true);
+
     this.logger.log('Finished updating latest asset');
   }
 

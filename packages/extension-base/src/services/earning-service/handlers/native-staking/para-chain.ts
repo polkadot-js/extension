@@ -219,7 +219,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       if (delegationScheduledRequests) {
         for (const scheduledRequest of delegationScheduledRequests) {
           if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-            const isClaimable = scheduledRequest.whenExecutable - currentRound < 0;
+            const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
             const remainingEra = scheduledRequest.whenExecutable - currentRound;
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
             const claimable = Object.values(scheduledRequest.action)[0];

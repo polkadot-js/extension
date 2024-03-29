@@ -14,7 +14,7 @@ import { findContactByAddress, toShort } from '@subwallet/extension-web-ui/utils
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Book, Scan } from 'phosphor-react';
-import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEventHandler, ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 import { decodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
@@ -48,6 +48,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     className = '', disabled, fitNetwork, id, label, networkGenesisHash, onBlur, onChange,
     onFocus, placeholder, prefix, readOnly, saveAddress, showAddressBook, showDisplayOverlay = true, showLabel = true,
     showPlainAddressOnly, showScanner, status, statusHelp, value } = props;
+  const valueRef = useRef<string | undefined>(value);
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
 
@@ -96,6 +97,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     const val = value.trim();
 
     onChange && onChange({ target: { value: val } });
+    valueRef.current = val;
     !skipClearDomainName && setDomainName(undefined);
 
     if (isAddress(val) && saveAddress) {
@@ -185,7 +187,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
 
   useEffect(() => {
-    if (value) {
+    if (value && value !== valueRef.current) {
       const account = findContactByAddress(_contacts, value);
 
       if (account) {
@@ -209,12 +211,6 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       }
     }
   }, [_contacts, addressPrefix, inputRef, networkGenesisHash, parseAndChangeValue, value]);
-
-  useEffect(() => {
-    if (isAddress(value)) {
-      parseAndChangeValue(value);
-    }
-  }, [value, parseAndChangeValue]);
 
   // todo: Will work with "Manage address book" feature later
   return (

@@ -1528,11 +1528,13 @@ export default class KoniExtension {
       return {
         exportedJson: await keyring.backupAccounts(password, addresses)
       };
-    } catch(e: Error) {
-      if(e.message === 'Invalid master password') {
-        throw new Error(t('Wrong password'))
+    } catch (e) {
+      const error = e as Error;
+
+      if (error.message === 'Invalid master password') {
+        throw new Error(t('Wrong password'));
       } else {
-        throw e;
+        throw error;
       }
     }
   }

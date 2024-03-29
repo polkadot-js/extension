@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetAutoEnable, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -53,6 +53,10 @@ export class ChainService {
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
   private swapRefMapSubject = new Subject<Record<string, _AssetRef>>();
+  private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
+  private chainLogoMapSubject = new BehaviorSubject<Record<string, string>>(ChainLogoMap);
+  private assetMapPatch: string = JSON.stringify({});
+  private assetLogoPatch: string = JSON.stringify({});
 
   // Todo: Update to new store indexed DB
   private store: AssetSettingStore = new AssetSettingStore();
@@ -592,34 +596,14 @@ export class ChainService {
 
     await this.initApis();
     await this.initAssetSettings();
-    await this.initAssetRefMap();
+    this.initAssetRefMap();
+    await this.autoEnableTokens();
 
     this.checkLatestData();
   }
 
-  async initAssetRefMap () {
-    try {
-      const fetchPromise = this.fetchLatestBlockedAssetRef();
-      const timeout = new Promise((resolve) => {
-        const id = setTimeout(() => {
-          clearTimeout(id);
-          resolve(null);
-        }, 1000);
-      });
-
-      const disabledAssetRefs = await Promise.race([
-        timeout,
-        fetchPromise
-      ]) as string[] || null;
-
-      if (disabledAssetRefs) {
-        this.handleLatestBlockedAssetRef(disabledAssetRefs);
-      } else {
-        this.dataMap.assetRefMap = AssetRefMap;
-      }
-    } catch (e) {
-      this.dataMap.assetRefMap = AssetRefMap;
-    }
+  initAssetRefMap () {
+    this.dataMap.assetRefMap = AssetRefMap;
   }
 
   checkLatestData () {
@@ -653,8 +637,14 @@ export class ChainService {
     }
   }
 
-  handleLatestBlockedAssetRef (latestBlockedAssetRefList: string[]) {
+  handleLatestAssetRef (latestBlockedAssetRefList: string[], latestAssetRefMap: Record<string, _AssetRef> | null) {
     const updatedAssetRefMap: Record<string, _AssetRef> = { ...AssetRefMap };
+
+    if (latestAssetRefMap) {
+      for (const [assetRefKey, assetRef] of Object.entries(latestAssetRefMap)) {
+        updatedAssetRefMap[assetRefKey] = assetRef;
+      }
+    }
 
     latestBlockedAssetRefList.forEach((blockedAssetRef) => {
       delete updatedAssetRefMap[blockedAssetRef];
@@ -685,13 +675,83 @@ export class ChainService {
     this.logger.log('Finished updating latest price IDs');
   }
 
+  handleLatestAssetData (_latestAssetInfo: Record<string, _ChainAsset> | null, _latestAssetLogoMap: Record<string, string> | null) {
+    try {
+      let needUpdate = false;
+
+      const latestAssetInfo = _latestAssetInfo || {};
+      const latestAssetLogoMap = _latestAssetLogoMap || {};
+
+      const latestAssetPatch = JSON.stringify(latestAssetInfo);
+      const latestAssetLogoPatch = JSON.stringify(latestAssetLogoMap);
+
+      if (this.assetMapPatch !== latestAssetPatch) {
+        needUpdate = true;
+
+        const assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+
+        this.assetMapPatch = latestAssetPatch;
+        this.dataMap.assetRegistry = assetRegistry;
+        this.assetRegistrySubject.next(assetRegistry);
+      }
+
+      if (this.assetLogoPatch !== latestAssetLogoPatch) {
+        const logoMap = { ...AssetLogoMap, ...latestAssetLogoMap };
+
+        this.assetLogoPatch = latestAssetLogoPatch;
+        this.assetLogoMapSubject.next(logoMap);
+      }
+
+      if (needUpdate) {
+        this.autoEnableTokens()
+          .then(() => {
+            this.eventService.emit('asset.updateState', '');
+          })
+          .catch(console.error);
+      }
+    } catch (e) {
+      console.error('Error fetching latest asset data');
+    }
+
+    this.logger.log('Finished updating latest asset');
+  }
+
+  async autoEnableTokens () {
+    const autoEnableTokens = Object.values(this.dataMap.assetRegistry).filter((asset) => _isAssetAutoEnable(asset));
+
+    const assetSettings = this.assetSettingSubject.value;
+    const chainStateMap = this.getChainStateMap();
+
+    for (const asset of autoEnableTokens) {
+      const { originChain, slug: assetSlug } = asset;
+      const assetState = assetSettings[assetSlug];
+      const chainState = chainStateMap[originChain];
+
+      if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
+        // @ts-ignore
+        // TODO: Merge issue detect balance to define manualTurnOff props
+        if (!chainState || !chainState.manualTurnOff) {
+          await this.updateAssetSetting(assetSlug, { visible: true });
+        }
+      }
+    }
+  }
+
   handleLatestData () {
+    this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
+      this.eventService.waitAssetReady
+        .then(() => {
+          this.handleLatestAssetData(latestAssetInfo, latestAssetLogoMap);
+        })
+        .catch(console.error);
+    }).catch(console.error);
+
     this.fetchLatestChainData().then((latestChainInfo) => {
       this.handleLatestProviderData(latestChainInfo);
     }).catch(console.error);
 
-    this.fetchLatestBlockedAssetRef().then((latestAssetRef) => {
-      this.handleLatestBlockedAssetRef(latestAssetRef);
+    this.fetchLatestAssetRef().then(([latestAssetRef, latestAssetRefMap]) => {
+      this.handleLatestAssetRef(latestAssetRef, latestAssetRefMap);
     }).catch(console.error);
 
     this.fetchLatestPriceIdsData().then((latestPriceIds) => {
@@ -914,13 +974,17 @@ export class ChainService {
     // }
   }
 
+  private async fetchLatestAssetData () {
+    return await Promise.all([fetchPatchData<Record<string, _ChainAsset>>('ChainAsset.json'), fetchPatchData<Record<string, string>>('AssetLogoMap.json')]);
+  }
+
   // @ts-ignore
   private async fetchLatestPriceIdsData () {
     return await fetchStaticData<Record<string, string | null>>('chain-assets/price-map');
   }
 
-  private async fetchLatestBlockedAssetRef () {
-    return await fetchStaticData<string[]>('chain-assets/disabled-xcm-channels');
+  private async fetchLatestAssetRef () {
+    return await Promise.all([fetchStaticData<string[]>('chain-assets/disabled-xcm-channels'), fetchPatchData<Record<string, _AssetRef>>('AssetRef.json')]);
   }
 
   private async initChains () {
@@ -1748,12 +1812,20 @@ export class ChainService {
     return this.assetSettingSubject;
   }
 
-  public async getChainLogoMap (): Promise<Record<string, string>> {
-    return Promise.resolve(ChainLogoMap);
+  public getAssetLogoMap (): Record<string, string> {
+    return this.assetLogoMapSubject.value;
   }
 
-  public async getAssetLogoMap (): Promise<Record<string, string>> {
-    return Promise.resolve(AssetLogoMap);
+  public subscribeAssetLogoMap () {
+    return this.assetLogoMapSubject;
+  }
+
+  public getChainLogoMap (): Record<string, string> {
+    return this.chainLogoMapSubject.value;
+  }
+
+  public subscribeChainLogoMap () {
+    return this.chainLogoMapSubject;
   }
 
   public resetWallet (resetAll: boolean) {

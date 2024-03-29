@@ -253,8 +253,6 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     '.__modal-separator': {
       height: 2,
       marginBottom: token.marginLG,
-      marginLeft: -token.margin,
-      marginRight: -token.margin,
       backgroundColor: 'rgba(33, 33, 33, 0.80)'
     },
 
@@ -310,14 +308,14 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     },
 
     '.__modal-footer': {
-      marginTop: token.paddingLG,
-      paddingBottom: token.padding,
+      paddingBottom: token.paddingLG,
       paddingLeft: token.padding,
       paddingRight: token.padding,
       marginRight: -token.margin,
       marginLeft: -token.margin,
       marginBottom: -token.margin,
       backgroundColor: token.colorBgLayout,
+      paddingTop: token.paddingMD,
       position: 'sticky',
       bottom: -token.size,
       zIndex: 10

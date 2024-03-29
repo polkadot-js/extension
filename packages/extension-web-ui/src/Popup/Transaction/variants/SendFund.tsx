@@ -333,7 +333,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
     const account = findAccountByAddress(accounts, _recipientAddress);
 
-    if (!isEthereumAddress(_recipientAddress)) {
+    if (!isEthereumAddress(_recipientAddress) && !account) {
       const destChainInfo = chainInfoMap[destChain];
       const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
       const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);

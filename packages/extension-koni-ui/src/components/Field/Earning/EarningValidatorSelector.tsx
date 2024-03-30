@@ -3,7 +3,7 @@
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { detectTranslate } from '@subwallet/extension-base/utils';
+import { detectTranslate, reformatAddress } from '@subwallet/extension-base/utils';
 import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
@@ -274,9 +274,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const searchFunction = useCallback((item: ValidatorDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const originAddress = reformatAddress(item.address, 42);
 
     return (
-      item.address.toLowerCase().includes(searchTextLowerCase) ||
+      originAddress.toLowerCase().includes(searchTextLowerCase) ||
       (item.identity
         ? item.identity.toLowerCase().includes(searchTextLowerCase)
         : false)

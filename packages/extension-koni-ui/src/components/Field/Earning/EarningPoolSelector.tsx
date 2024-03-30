@@ -3,6 +3,7 @@
 
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { reformatAddress } from '@subwallet/extension-base/utils';
 import { StakingPoolItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
@@ -151,9 +152,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const searchFunction = useCallback((item: NominationPoolDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
+    const originAddress = reformatAddress(item.address, 42);
 
     return (
-      item.address.toLowerCase().includes(searchTextLowerCase) ||
+      originAddress.toLowerCase().includes(searchTextLowerCase) ||
       (item.name
         ? item.name.toLowerCase().includes(searchTextLowerCase)
         : false)

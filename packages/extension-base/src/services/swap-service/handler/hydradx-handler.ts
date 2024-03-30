@@ -6,7 +6,7 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -314,6 +314,7 @@ export class HydradxHandler implements SwapBaseInterface {
   }
 
   validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+    // TODO: validate xcm amount
     return Promise.resolve([]);
   }
 
@@ -337,11 +338,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     try {
-      const fromAssetBalance = await this.balanceService.getTokenFreeBalance(request.address, fromAsset.originChain, fromAsset.slug);
-
       const bnAmount = new BigNumber(request.fromAmount);
-      const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-      const bnMaxBalanceSwap = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
 
       if (bnAmount.lte(0)) {
         return {
@@ -349,20 +346,9 @@ export class HydradxHandler implements SwapBaseInterface {
         };
       }
 
-      if (bnAmount.gte(bnMaxBalanceSwap)) {
-        return {
-          error: SwapErrorType.SWAP_EXCEED_ALLOWANCE
-        };
-      }
-
       return {
         metadata: {
-          chain: this.chainService.getChainInfoByKey(this.chain),
-          maxSwap: {
-            value: bnMaxBalanceSwap.toString(),
-            decimals: _getAssetDecimals(fromAsset),
-            symbol: fromAsset.symbol
-          } as AmountData
+          chain: this.chainService.getChainInfoByKey(this.chain)
         } as HydradxPreValidationMetadata
       };
     } catch (e) {

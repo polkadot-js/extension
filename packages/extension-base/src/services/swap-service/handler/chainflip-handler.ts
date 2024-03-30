@@ -123,11 +123,10 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         };
       }
 
-      const [supportedDestChains, srcAssets, destAssets, fromAssetBalance] = await Promise.all([
+      const [supportedDestChains, srcAssets, destAssets] = await Promise.all([
         this.swapSdk.getChains(srcChainId),
         this.swapSdk.getAssets(srcChainId),
-        this.swapSdk.getAssets(destChainId),
-        this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug)
+        this.swapSdk.getAssets(destChainId)
       ]);
 
       const supportedDestChainId = supportedDestChains.find((c) => c.chain === destChainId);
@@ -139,54 +138,33 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       }
 
       const bnAmount = new BigNumber(request.fromAmount);
-      const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-      const bnMaxBalanceSwap = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
       const bnMinSwap = new BigNumber(srcAssetData.minimumSwapAmount);
-
-      let bnSwapMaxAllowance: BigNumber = bnMaxBalanceSwap;
 
       if (srcAssetData.maximumSwapAmount) {
         const bnMaxProtocolSwap = new BigNumber(srcAssetData.maximumSwapAmount);
 
-        bnSwapMaxAllowance = BigNumber.min(bnMaxProtocolSwap, bnMaxBalanceSwap);
-      }
+        if (bnMinSwap.gte(bnMaxProtocolSwap)) {
+          return { error: SwapErrorType.UNKNOWN };
+        }
 
-      if (bnMinSwap.gte(bnSwapMaxAllowance)) {
-        return {
-          error: SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
-          metadata: {
-            minSwap: {
-              value: srcAssetData.minimumSwapAmount,
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            maxSwap: {
-              value: bnSwapMaxAllowance.toString(),
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            chain: srcChainInfo
-          } as ChainflipPreValidationMetadata
-        };
-      }
-
-      if (bnAmount.gte(bnSwapMaxAllowance)) {
-        return {
-          error: SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-          metadata: {
-            minSwap: {
-              value: srcAssetData.minimumSwapAmount,
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            maxSwap: {
-              value: bnSwapMaxAllowance.toString(),
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            chain: srcChainInfo
-          } as ChainflipPreValidationMetadata
-        };
+        if (bnAmount.gte(bnMaxProtocolSwap)) {
+          return {
+            error: SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+            metadata: {
+              minSwap: {
+                value: srcAssetData.minimumSwapAmount,
+                decimals: _getAssetDecimals(fromAsset),
+                symbol: fromAsset.symbol
+              },
+              maxSwap: {
+                value: bnMaxProtocolSwap.toString(),
+                decimals: _getAssetDecimals(fromAsset),
+                symbol: fromAsset.symbol
+              },
+              chain: srcChainInfo
+            } as ChainflipPreValidationMetadata
+          };
+        }
       }
 
       if (bnAmount.lt(bnMinSwap)) { // might miss case when minSwap is 0
@@ -314,7 +292,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         provider: this.providerInfo,
         aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         minSwap: metadata.minSwap.value,
-        maxSwap: metadata.maxSwap,
+        maxSwap: metadata.maxSwap?.value,
         estimatedArrivalTime: quoteResponse.quote.estimatedDurationSeconds, // in seconds
         isLowLiquidity: quoteResponse.quote.lowLiquidityWarning,
         feeInfo: {

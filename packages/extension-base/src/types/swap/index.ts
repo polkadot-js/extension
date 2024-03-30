@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import {TransactionData} from '@subwallet/extension-base/types';
+import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 
 // core

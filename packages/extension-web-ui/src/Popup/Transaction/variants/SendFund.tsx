@@ -242,7 +242,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
   const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
-  const { accounts, contacts, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
@@ -329,11 +329,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       return Promise.resolve();
     }
 
-    const isOnChain = chain === destChain;
-
-    const account = findAccountByAddress(accounts, _recipientAddress) || findAccountByAddress(contacts, _recipientAddress);
-
-    if (!isEthereumAddress(_recipientAddress) && !account) {
+    if (!isEthereumAddress(_recipientAddress)) {
       const destChainInfo = chainInfoMap[destChain];
       const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
       const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
@@ -342,6 +338,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: destChainInfo.name } }));
       }
     }
+
+    const isOnChain = chain === destChain;
 
     if (isOnChain) {
       if (isSameAddress(from, _recipientAddress)) {
@@ -369,6 +367,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       }
     }
 
+    const account = findAccountByAddress(accounts, _recipientAddress);
+
     if (account?.isHardware) {
       const destChainInfo = chainInfoMap[destChain];
       const availableGen: string[] = account.availableGenesisHashes || [];
@@ -381,7 +381,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }
 
     return Promise.resolve();
-  }, [accounts, chainInfoMap, contacts, form, t]);
+  }, [accounts, chainInfoMap, form, t]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {

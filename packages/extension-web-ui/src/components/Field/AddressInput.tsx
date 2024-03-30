@@ -48,7 +48,8 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     className = '', disabled, fitNetwork, id, label, networkGenesisHash, onBlur, onChange,
     onFocus, placeholder, prefix, readOnly, saveAddress, showAddressBook, showDisplayOverlay = true, showLabel = true,
     showPlainAddressOnly, showScanner, status, statusHelp, value } = props;
-  const valueRef = useRef<string | undefined>(value);
+  const valueRef = useRef<string | undefined>(undefined);
+  const chainRef = useRef<string | undefined>(undefined);
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
 
@@ -97,7 +98,6 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
     const val = value.trim();
 
     onChange && onChange({ target: { value: val } });
-    valueRef.current = val;
     !skipClearDomainName && setDomainName(undefined);
 
     if (isAddress(val) && saveAddress) {
@@ -187,8 +187,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [allowDomain, chain, inputRef, parseAndChangeValue, value]);
 
   useEffect(() => {
-    if (value && value !== valueRef.current) {
+    if (value && (value !== valueRef.current || chain !== chainRef.current)) {
       const account = findContactByAddress(_contacts, value);
+
+      chainRef.current = chain;
 
       if (account) {
         if (!isEthereumAddress(account.address) && !!account.isHardware) {
@@ -201,16 +203,18 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
 
         const address = reformatAddress(account.address, addressPrefix);
 
+        valueRef.current = value.trim();
         parseAndChangeValue(address);
         inputRef?.current?.focus();
         inputRef?.current?.blur();
       } else {
         if (isAddress(value)) {
+          valueRef.current = value.trim();
           parseAndChangeValue(value);
         }
       }
     }
-  }, [_contacts, addressPrefix, inputRef, networkGenesisHash, parseAndChangeValue, value]);
+  }, [_contacts, addressPrefix, chain, inputRef, networkGenesisHash, parseAndChangeValue, value]);
 
   // todo: Will work with "Manage address book" feature later
   return (

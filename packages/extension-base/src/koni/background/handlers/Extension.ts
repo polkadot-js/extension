@@ -3418,12 +3418,12 @@ export default class KoniExtension {
 
   private async subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Promise<Record<string, _ChainAsset>> {
     const cb = createSubscription<'pri(chainService.subscribeAssetRegistry)'>(id, port);
-    let ready = false;
+
+    await this.#koniState.eventService.waitAssetOnlineReady;
+
     const assetRegistrySubscription = this.#koniState.subscribeAssetRegistry().subscribe({
       next: (rs) => {
-        if (ready) {
-          cb(rs);
-        }
+        cb(rs);
       }
     });
 
@@ -3432,9 +3432,6 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
-
-    await this.#koniState.eventService.waitAssetReady;
-    ready = true;
 
     return this.#koniState.getAssetRegistry();
   }
@@ -3544,6 +3541,34 @@ export default class KoniExtension {
       chainLogoMap,
       assetLogoMap
     };
+  }
+
+  private subscribeAssetLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.assets.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeAssetLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getAssetLogoMap();
+  }
+
+  private subscribeChainLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.chains.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeChainLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getChainLogoMap();
   }
 
   // Phishing detect
@@ -4830,6 +4855,10 @@ export default class KoniExtension {
 
       case 'pri(settings.getLogoMaps)':
         return await this.getLogoMap();
+      case 'pri(settings.logo.assets.subscribe)':
+        return this.subscribeAssetLogoMap(id, port);
+      case 'pri(settings.logo.chains.subscribe)':
+        return this.subscribeChainLogoMap(id, port);
 
       /// Wallet Connect
       case 'pri(walletConnect.connect)':

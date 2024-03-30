@@ -13,7 +13,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenMinAmount, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
+import { RuntimeDispatchInfo, YieldStepType } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
@@ -313,9 +313,41 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
-  validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+  public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     // TODO: validate xcm amount
-    return Promise.resolve([]);
+    const amount = params.selectedQuote.fromAmount;
+    const bnAmount = new BigNumber(amount);
+
+    if (bnAmount.lte(0)) {
+      return [new TransactionError(BasicTxErrorType.INVALID_PARAMS, 'Amount must be greater than 0')];
+    }
+
+    let isXcmOk = false;
+
+    for (const [index, step] of params.process.steps.entries()) {
+      const getErrors = async (): Promise<TransactionError[]> => {
+        switch (step.type) {
+          case SwapStepType.DEFAULT:
+            return Promise.resolve([]);
+          case SwapStepType.XCM:
+            return this.swapBaseHandler.validateXcmStep(params, index);
+          case SwapStepType.SET_FEE_TOKEN:
+            return this.swapBaseHandler.validateSetFeeTokenStep(params, index);
+          default:
+            return this.swapBaseHandler.validateSwapStep(params, isXcmOk);
+        }
+      };
+
+      const errors = await getErrors();
+
+      if (errors.length) {
+        return errors;
+      } else if (step.type === YieldStepType.XCM) {
+        isXcmOk = true;
+      }
+    }
+
+    return [];
   }
 
   public async validateSwapRequest (request: SwapRequest): Promise<SwapEarlyValidation> {

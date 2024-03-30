@@ -7,11 +7,12 @@ import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
+import { DEFAULT_SWAP_FIRST_STEP, getSwapAlternativeAsset, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigNumber from 'bignumber.js';
+import { t } from 'i18next';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -79,11 +80,72 @@ export class SwapBaseHandler {
 
   // protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
   // public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
-  public async validateXcmStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+  public async validateXcmStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
+    const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
+    const swapPair = params.selectedQuote.pair;
+
+    const alternativeAssetSlug = getSwapAlternativeAsset(swapPair);
+
+    if (!alternativeAssetSlug) {
+      return [new TransactionError(BasicTxErrorType.INTERNAL_ERROR)];
+    }
+
+    const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+    const fromAsset = this.chainService.getAssetBySlug(swapPair.from);
+
+    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug);
+    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug);
+
+    const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
+    const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+
+    const missingAmount = bnAmount.minus(bnFromAssetBalance);
+    const xcmFeeComponent = params.process.totalFee[stepIndex].feeComponent[0]; // todo: can do better than indexing
+    const xcmFee = new BigNumber(xcmFeeComponent.amount || '0');
+    const xcmAmount = missingAmount.plus(xcmFee);
+
+    const altInputTokenMinAmount = new BigNumber(alternativeAsset.minAmount || '0');
+
+    if (!bnAlternativeAssetBalance.minus(xcmAmount).gte(altInputTokenMinAmount)) {
+      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(xcmFee).minus(altInputTokenMinAmount);
+      const maxValue = formatNumber(maxBn.toString(), fromAsset.decimals || 0);
+
+      const altInputTokenInfo = this.chainService.getAssetBySlug(alternativeAssetSlug);
+      const symbol = altInputTokenInfo.symbol;
+
+      const alternativeChain = this.chainService.getChainInfoByKey(altInputTokenInfo.originChain);
+      const chain = this.chainService.getChainInfoByKey(fromAsset.originChain);
+
+      const inputNetworkName = chain.name;
+      const altNetworkName = alternativeChain.name;
+
+      const currentValue = formatNumber(bnFromAssetBalance.toString(), fromAsset.decimals || 0);
+      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee).minus(altInputTokenMinAmount);
+      const maxXCMValue = formatNumber(bnMaxXCM.toString(), fromAsset.decimals || 0);
+
+      return [new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, t(
+        'You can only enter a maximum of {{maxValue}} {{symbol}}, which is {{currentValue}} {{symbol}} ({{inputNetworkName}}) and {{maxXCMValue}} {{symbol}} ({{altNetworkName}}). Lower your amount and try again.',
+        {
+          replace: {
+            symbol,
+            maxValue,
+            inputNetworkName,
+            altNetworkName,
+            currentValue,
+            maxXCMValue
+          }
+        }
+      ))];
+    }
+
+    return [];
+  }
+
+  public async validateTokenApproveStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
     return Promise.resolve([]);
   }
 
-  public async validateTokenApproveStep (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
+  public async validateSetFeeTokenStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
     return Promise.resolve([]);
   }
 

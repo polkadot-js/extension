@@ -222,7 +222,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
       const toAmount = quoteResponse.amountOut;
 
-      const minReceive = toAmount.times(1 - request.slippage); // todo: multiply with slippage
+      const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
       const txHex = quoteResponse.toTx(minReceive).hex;
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
@@ -326,35 +326,35 @@ export class HydradxHandler implements SwapBaseInterface {
     const toAssetId = _getTokenOnChainAssetId(toAsset);
 
     if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
-      return {
+      return Promise.resolve({
         error: SwapErrorType.ASSET_NOT_SUPPORTED
-      };
+      });
     }
 
     if (!fromAssetId || !toAssetId) {
-      return {
+      return Promise.resolve({
         error: SwapErrorType.UNKNOWN
-      };
+      });
     }
 
     try {
       const bnAmount = new BigNumber(request.fromAmount);
 
       if (bnAmount.lte(0)) {
-        return {
+        return Promise.resolve({
           error: SwapErrorType.AMOUNT_CANNOT_BE_ZERO
-        };
+        });
       }
 
-      return {
+      return Promise.resolve({
         metadata: {
           chain: this.chainService.getChainInfoByKey(this.chain)
         } as HydradxPreValidationMetadata
-      };
+      });
     } catch (e) {
-      return {
+      return Promise.resolve({
         error: SwapErrorType.UNKNOWN
-      };
+      });
     }
   }
 }

@@ -6,11 +6,7 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import {
-  _getAssetDecimals,
-  _getTokenMinAmount,
-  _isChainEvmCompatible
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';

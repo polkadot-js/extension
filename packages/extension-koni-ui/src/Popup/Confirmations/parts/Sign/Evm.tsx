@@ -225,16 +225,18 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [checkUnlock, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
 
   useEffect(() => {
-    if (!!ledgerError && ledgerError === ledgerIncompatible) {
-      notify({
-        message: ledgerError,
-        type: 'info'
-      });
-    } else {
-      notify({
-        message: ledgerError,
-        type: 'error'
-      });
+    if (ledgerError) {
+      if (ledgerError === ledgerIncompatible) {
+        notify({
+          message: ledgerError,
+          type: 'info'
+        });
+      } else {
+        notify({
+          message: ledgerError,
+          type: 'error'
+        });
+      }
     }
   }, [ledgerError, notify]);
 

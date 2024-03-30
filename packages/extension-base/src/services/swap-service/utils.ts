@@ -88,13 +88,6 @@ export function getChainflipEarlyValidationError (error: SwapErrorType, metadata
 
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
-
-    case SwapErrorType.SWAP_NOT_ENOUGH_BALANCE: {
-      const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
-
-      return new SwapError(error, `Insufficient balance. You need more than ${parsedMinSwapValue} ${metadata.minSwap.symbol} to start swapping. Deposit ${metadata.minSwap.symbol} and try again.`);
-    }
-
     case SwapErrorType.UNKNOWN:
       return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:
@@ -110,19 +103,8 @@ export function getEarlyHydradxValidationError (error: SwapErrorType, metadata: 
       return new SwapError(error, 'Amount too low. Increase your amount above 0 and try again');
     }
 
-    case SwapErrorType.SWAP_EXCEED_ALLOWANCE: {
-      if (metadata.maxSwap) {
-        const parsedMaxSwapValue = formatNumber(metadata.maxSwap.value, metadata.maxSwap.decimals);
-
-        return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue} ${metadata.maxSwap.symbol} and try again`);
-      } else {
-        return new SwapError(error, 'Amount too high. Lower your amount and try again');
-      }
-    }
-
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
-
     case SwapErrorType.UNKNOWN:
       return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:

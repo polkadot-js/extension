@@ -338,7 +338,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
           case SwapStepType.TOKEN_APPROVAL:
             return this.swapBaseHandler.validateTokenApproveStep(params);
           default:
-            return this.swapBaseHandler.validateJoinStep(params, isXcmOk);
+            return this.swapBaseHandler.validateSwapStep(params, isXcmOk);
         }
       };
 

@@ -6,10 +6,16 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getAssetDecimals,
+  _getTokenMinAmount,
+  _isChainEvmCompatible
+} from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { formatNumber } from '@subwallet/extension-base/utils';
+import BigNumber from 'bignumber.js';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -85,7 +91,7 @@ export class SwapBaseHandler {
     return Promise.resolve([]);
   }
 
-  public async validateJoinStep (params: ValidateSwapProcessParams, isXcmOk: boolean): Promise<TransactionError[]> {
+  public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean): Promise<TransactionError[]> {
     if (!params.selectedQuote) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -95,6 +101,33 @@ export class SwapBaseHandler {
 
     if (selectedQuote.aliveUntil <= currentTimestamp) {
       return Promise.resolve([new TransactionError(SwapErrorType.QUOTE_TIMEOUT)]);
+    }
+
+    const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
+    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
+
+    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug);
+    const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+
+    if (params.selectedQuote.minSwap) {
+      const minProtocolSwap = new BigNumber(params.selectedQuote.minSwap);
+
+      if (bnFromAssetBalance.lte(minProtocolSwap)) {
+        const parsedMinSwapValue = formatNumber(minProtocolSwap, _getAssetDecimals(fromAsset));
+
+        return Promise.resolve([new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
+          `Insufficient balance. You need more than ${parsedMinSwapValue} ${fromAsset.symbol} to start swapping. Deposit ${fromAsset.symbol} and try again.`)]); // todo: min swap or amount?
+      }
+    }
+
+    const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
+    const bnMaxBalanceSwap = bnFromAssetBalance.minus(bnSrcAssetMinAmount);
+
+    if (bnAmount.gte(bnMaxBalanceSwap)) {
+      const parsedMaxBalanceSwap = formatNumber(bnMaxBalanceSwap, _getAssetDecimals(fromAsset));
+
+      return Promise.resolve([new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+        `Amount too high. Lower your amount below ${parsedMaxBalanceSwap} ${fromAsset.symbol} and try again`)]);
     }
 
     if (params.recipient) {

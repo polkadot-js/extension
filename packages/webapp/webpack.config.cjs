@@ -181,6 +181,23 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
     }
   };
 
+  result.optimization = {
+    splitChunks: {
+      chunks: 'all',
+      maxSize: 2000000,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        },
+        default: {
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    }
+  };
+
   return result;
 };
 

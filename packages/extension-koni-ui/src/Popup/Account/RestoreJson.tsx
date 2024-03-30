@@ -345,7 +345,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   <div className='input-label'>
                     {t('Please enter the password you have used when creating your Polkadot.{js} account')}
                   </div>
-                  <Input
+                  <Input.Password
                     id={`${formName}_${passwordField}`}
                     onChange={onChangePassword}
                     placeholder={t('Password')}

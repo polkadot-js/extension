@@ -178,14 +178,14 @@ export class HydradxHandler implements SwapBaseInterface {
     const path: string[] = [];
 
     swapList.forEach((swap) => {
-      const swapAssetIn = swapAssetIdMap[swap.assetIn].slug;
-      const swapAssetOut = swapAssetIdMap[swap.assetOut].slug;
+      const swapAssetIn = swapAssetIdMap[swap.assetIn]?.slug;
+      const swapAssetOut = swapAssetIdMap[swap.assetOut]?.slug;
 
-      if (!path.includes(swapAssetIn)) {
+      if (swapAssetIn && !path.includes(swapAssetIn)) {
         path.push(swapAssetIn);
       }
 
-      if (!path.includes(swapAssetOut)) {
+      if (swapAssetOut && !path.includes(swapAssetOut)) {
         path.push(swapAssetOut);
       }
     });

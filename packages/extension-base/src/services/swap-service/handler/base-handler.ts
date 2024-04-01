@@ -78,8 +78,6 @@ export class SwapBaseHandler {
     }
   }
 
-  // protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
-  // public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
   public async validateXcmStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
     const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
     const swapPair = params.selectedQuote.pair;

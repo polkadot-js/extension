@@ -37,3 +37,4 @@ export * from './WalletConnect';
 export * from './Crowdloan';
 export * from './Common';
 export * from './Table';
+export * from './NetworkTag';

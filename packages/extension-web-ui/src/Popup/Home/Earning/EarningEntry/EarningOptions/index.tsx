@@ -10,7 +10,7 @@ import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContex
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-web-ui/hooks';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
-import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { EarningEntryView, EarningPoolsParam, NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -53,11 +53,6 @@ const alertModalId = 'earning-options-alert-modal';
 
 const FILTER_MODAL_ID = 'earning-options-filter-modal';
 
-enum FilterOptionType {
-  MAIN_NETWORK = 'MAIN_NETWORK',
-  TEST_NETWORK = 'TEST_NETWORK',
-}
-
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 function Component ({ className, earningPositions, setEntryView }: Props) {
@@ -80,7 +75,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const { activeModal } = useContext(ModalContext);
 
@@ -100,8 +95,8 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   }, [data]);
 
   const filterOptions = useMemo(() => [
-    { label: t('Mainnet'), value: FilterOptionType.MAIN_NETWORK },
-    { label: t('Testnet'), value: FilterOptionType.TEST_NETWORK }
+    { label: t('Mainnet'), value: NetworkType.MAIN_NETWORK },
+    { label: t('Testnet'), value: NetworkType.TEST_NETWORK }
   ], [t]);
 
   const filterFunction = useMemo<(item: YieldGroupInfo) => boolean>(() => {
@@ -115,11 +110,11 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       }
 
       if (selectedFilters.length === 1) {
-        if (selectedFilters.includes(FilterOptionType.MAIN_NETWORK)) {
+        if (selectedFilters.includes(NetworkType.MAIN_NETWORK)) {
           return !item.isTestnet;
         }
 
-        if (selectedFilters.includes(FilterOptionType.TEST_NETWORK)) {
+        if (selectedFilters.includes(NetworkType.TEST_NETWORK)) {
           return item.isTestnet;
         }
       }

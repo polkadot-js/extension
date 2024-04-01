@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import { PlusCircle } from 'phosphor-react';
 import React from 'react';
@@ -21,7 +22,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
 
-  const { balance, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const { balance, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
   return (
     <div
@@ -61,6 +62,12 @@ const Component: React.FC<Props> = (props: Props) => {
               </div>
             )
           }
+          <div>
+            <NetworkTag
+              type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              className={'__item-tag'}
+            />
+          </div>
         </div>
 
         <div className={'__item-apy'}>
@@ -128,6 +135,13 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       flexDirection: 'column',
       gap: token.padding,
       alignItems: 'center'
+    },
+    '.__item-tag': {
+      marginRight: 0,
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      minWidth: 70
     },
 
     '.__item-info-wrapper': {

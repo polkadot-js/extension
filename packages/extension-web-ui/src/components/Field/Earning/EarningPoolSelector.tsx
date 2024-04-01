@@ -126,6 +126,15 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
       })
       .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {
+        const isSubwalletA = a.name && a.name.includes('SubWallet');
+        const isSubwalletB = b.name && b.name.includes('SubWallet');
+
+        if (isSubwalletA && !isSubwalletB) {
+          return -1;
+        } else if (!isSubwalletA && isSubwalletB) {
+          return 1;
+        }
+
         switch (sortSelection) {
           case SortKey.MEMBER:
             return a.memberCounter - b.memberCounter;
@@ -189,10 +198,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [chain, items.length, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
+    const isCheckRecommend = item.name?.includes('SubWallet') || false;
+
     return (
       <div className={'__selected-item'}>
         <div className={'__selected-item-name common-text'}>
-          {item.name || `Pool #${item.id}`}
+          {isCheckRecommend
+            ? (
+              <>
+                {item.name}
+                <div className={'__title-suffix'}>&nbsp;(Recommend)</div>
+              </>
+            )
+            : (
+              item.name || `Pool #${item.id}`
+            )}
         </div>
       </div>
     );
@@ -385,6 +405,16 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
         paddingTop: 0,
         paddingBottom: token.paddingXXS
       }
+    },
+    '.__title-suffix': {
+      fontSize: token.fontSizeSM,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextTertiary
+    },
+    '.__selected-item-name.common-text': {
+      display: 'flex',
+      alignItems: 'baseline'
     },
 
     '.ant-select-modal-input-wrapper': {

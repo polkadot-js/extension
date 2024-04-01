@@ -6,12 +6,13 @@ import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, PageIcon } from '@subwallet/react-ui';
+import { Button, Icon, PageIcon, SwHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { House, Robot, Share } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import { useLocation, useRouteError } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+
 import useNotification from '../hooks/common/useNotification';
 
 type Props = ThemeProps;
@@ -40,6 +41,11 @@ function Component ({ className = '' }: Props) {
 
   return (
     <PageWrapper className={CN('main-page-container', className)}>
+      <SwHeader
+        className={'error-fallback-header'}
+      >
+        {t('Unknown error')}
+      </SwHeader>
       <div className={'__body-area'}>
         <PageIcon
           color={token.colorError}

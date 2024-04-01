@@ -44,6 +44,7 @@ function Component ({ className = '' }: Props) {
 
   return (
     <PageWrapper className={CN('main-page-container', className)}>
+      <div className={'__header-area'}>{t('Unknown error')}</div>
       <div className={CN('container', {
         '__web-ui': isWebUI
       })}
@@ -101,11 +102,19 @@ function Component ({ className = '' }: Props) {
 const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
   return ({
     backgroundColor: token.colorBgDefault,
-    paddingLeft: token.padding,
-    paddingRight: token.padding,
     display: 'flex',
     flexDirection: 'column',
-    position: 'relative',
+    '.__header-area': {
+      height: 180,
+      background: 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 16.47%, rgba(217, 217, 217, 0.00) 94.17%)',
+      display: 'flex',
+      width: '100%',
+      justifyContent: 'center',
+      fontSize: token.fontSizeHeading2,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeightHeading2,
+      paddingTop: 30
+    },
 
     '.container': {
       display: 'flex',
@@ -124,16 +133,6 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
           minWidth: '50%'
         }
       }
-    },
-    '&:before': {
-      content: '""',
-      backgroundImage: extendToken.tokensScreenDangerBackgroundColor,
-      height: 180,
-      position: 'absolute',
-      display: 'block',
-      top: 0,
-      left: 0,
-      right: 0
     },
 
     '.__body-area': {
@@ -157,7 +156,9 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
     '.__content': {
       color: token.colorTextLight3,
       fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG
+      lineHeight: token.lineHeightLG,
+      paddingLeft: token.padding,
+      paddingRight: token.padding
     },
 
     '.__footer-area': {
@@ -165,7 +166,9 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
       paddingTop: token.padding,
       paddingBottom: token.paddingXL,
       flexDirection: 'column',
-      gap: token.paddingSM
+      gap: token.paddingSM,
+      paddingRight: token.padding,
+      paddingLeft: token.padding
     }
   });
 });

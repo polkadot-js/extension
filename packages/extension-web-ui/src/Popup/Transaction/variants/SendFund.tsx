@@ -256,6 +256,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
+  const [isFetchingMaxValue, setIsFetchingMaxValue] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
   const chainStatus = useMemo(() => chainStatusMap[chain]?.connectionStatus, [chain, chainStatusMap]);
@@ -583,6 +584,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   useEffect(() => {
     let cancel = false;
 
+    setIsFetchingMaxValue(false);
+
     if (from && asset) {
       getMaxTransfer({
         address: from,
@@ -592,10 +595,16 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         destChain
       })
         .then((balance) => {
-          !cancel && setMaxTransfer(balance.value);
+          if (!cancel) {
+            setMaxTransfer(balance.value);
+            setIsFetchingMaxValue(true);
+          }
         })
         .catch(() => {
-          !cancel && setMaxTransfer('0');
+          if (!cancel) {
+            setMaxTransfer('0');
+            setIsFetchingMaxValue(true);
+          }
         })
         .finally(() => {
           if (!cancel) {
@@ -743,7 +752,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         })}
       >
         <Button
-          disabled={!isBalanceReady}
+          disabled={!isBalanceReady || (isTransferAll ? !isFetchingMaxValue : false)}
           icon={(
             <Icon
               phosphorIcon={PaperPlaneTilt}

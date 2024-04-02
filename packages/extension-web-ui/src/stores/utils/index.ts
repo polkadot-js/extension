@@ -126,13 +126,17 @@ export const updateUiSettings = (data: UiSettings) => {
 export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);
 
 export const updateChainLogoMaps = (data: Record<string, string>) => {
-  store.dispatch({ type: 'settings/updateChainLogoMaps', payload: data });
+  addLazy('updateChainLogoMaps', () => {
+    store.dispatch({ type: 'settings/updateChainLogoMaps', payload: data });
+  }, 100, 300, false);
 };
 
 export const subscribeChainLogoMaps = lazySubscribeMessage('pri(settings.logo.chains.subscribe)', null, updateChainLogoMaps, updateChainLogoMaps);
 
 export const updateAssetLogoMaps = (data: Record<string, string>) => {
-  store.dispatch({ type: 'settings/updateAssetLogoMaps', payload: data });
+  addLazy('updateAssetLogoMaps', () => {
+    store.dispatch({ type: 'settings/updateAssetLogoMaps', payload: data });
+  }, 100, 300, false);
 };
 
 export const subscribeAssetLogoMaps = lazySubscribeMessage('pri(settings.logo.assets.subscribe)', null, updateAssetLogoMaps, updateAssetLogoMaps);

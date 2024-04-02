@@ -445,6 +445,8 @@ export type RequestChangeLanguage = { language: LanguageType };
 
 export type RequestChangeShowBalance = { enable: boolean };
 
+export type DetectBalanceCache = Record<string, number>;
+
 export interface RandomTestRequest {
   start: number;
   end: number;

@@ -20,7 +20,7 @@ const useCompleteCreateAccount = () => {
     if (isNoAccount) {
       navigate('/create-done');
     } else {
-      navigate(returnPath);
+      navigate(returnPath, { state: { from: returnPath } });
       setReturnStorage(DEFAULT_ROUTER_PATH);
     }
   }, [isNoAccount, navigate, returnPath, setReturnStorage]);

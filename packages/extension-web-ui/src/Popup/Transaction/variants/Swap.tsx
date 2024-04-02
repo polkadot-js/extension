@@ -44,6 +44,16 @@ interface FeeItem {
   suffix?: string
 }
 
+enum SlippageValueType {
+  INPUT_TYPE = 'input_value',
+  SELECT_TYPE = 'select_value'
+}
+
+interface SlippageType {
+  slippage: number,
+  type?: SlippageValueType
+}
+
 const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug', 'chain'];
 
 function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<string, _ChainAsset>): TokenSelectorItemType[] {
@@ -92,7 +102,7 @@ const Component = () => {
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
-  const [currentSlippage, setCurrentSlippage] = useState<number>(0);
+  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0 });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
@@ -275,6 +285,10 @@ const Component = () => {
     activeModal(SWAP_CHOOSE_FEE_TOKEN_MODAL);
   }, [activeModal]);
 
+  const openSlippageModal = useCallback(() => {
+    activeModal(SWAP_SLIPPAGE_MODAL);
+  }, [activeModal]);
+
   const onSelectQuote = useCallback((quote: SwapQuote) => {
     setCurrentQuote(quote);
     setFeeOptions(quote.feeInfo.feeOptions);
@@ -284,7 +298,8 @@ const Component = () => {
   const onSelectFeeOption = useCallback((slug: string) => {
     setCurrentFeeOption(slug);
   }, []);
-  const onSelectSlippage = useCallback((slippage: number) => {
+  const onSelectSlippage = useCallback((slippage: SlippageType) => {
+    console.log('slippage', slippage);
     setCurrentSlippage(slippage);
   }, []);
 
@@ -603,7 +618,7 @@ const Component = () => {
               currentStep: step,
               quote: currentQuote,
               address: from,
-              slippage: currentSlippage,
+              slippage: currentSlippage.slippage,
               recipient
             });
 
@@ -669,7 +684,7 @@ const Component = () => {
   }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
-    return destinationSwapValue.multipliedBy(1 - currentSlippage);
+    return destinationSwapValue.multipliedBy(1 - currentSlippage.slippage);
   }, [destinationSwapValue, currentSlippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {
@@ -692,7 +707,10 @@ const Component = () => {
               placement={'topRight'}
               title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
             >
-              <div className={'__slippage-title-wrapper'}>Slippage
+              <div
+                className={'__slippage-title-wrapper'}
+                onClick={openSlippageModal}
+              >Slippage
                 <Icon
                   customSize={'16px'}
                   iconColor={token.colorSuccess}
@@ -702,7 +720,7 @@ const Component = () => {
                 />
             :</div>
             </Tooltip>
-                    &nbsp;<span>{currentSlippage * 100}%</span>
+                    &nbsp;<span>{currentSlippage.slippage * 100}%</span>
 
             {supportSlippageSelection && (
               <div className='__slippage-editor-button'>
@@ -792,7 +810,7 @@ const Component = () => {
               to: toTokenSlugValue
             },
             fromAmount: fromAmountValue,
-            slippage: currentSlippage,
+            slippage: currentSlippage.slippage,
             recipient: recipientValue || undefined
           };
 
@@ -1227,6 +1245,7 @@ const Component = () => {
                       network={currentQuote.provider.id.toLowerCase()}
                       shape='squircle'
                       size={24}
+                      token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
                     />
 
                     {currentQuote.provider.name}
@@ -1368,7 +1387,9 @@ const Component = () => {
       <SlippageModal
         modalId={SWAP_SLIPPAGE_MODAL}
         onApplySlippage={onSelectSlippage}
+        slippageValue={currentSlippage}
       />
+
       <AddMoreBalanceModal
         modalId={SWAP_MORE_BALANCE_MODAL}
       />

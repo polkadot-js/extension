@@ -2,28 +2,51 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AlertBox, BaseModal } from '@subwallet/extension-web-ui/components';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Input, ModalContext } from '@subwallet/react-ui';
+import { FormCallbacks, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { Button, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
+
+enum SlippageValueType {
+  INPUT_TYPE = 'input_value',
+  SELECT_TYPE = 'select_value'
+}
+
+interface SlippageType {
+  slippage: number,
+  type?: SlippageValueType
+}
 
 type Props = ThemeProps & {
   modalId: string,
-  onApplySlippage?: (slippage: number) => void
+  onApplySlippage?: (slippage: SlippageType) => void,
+  slippageValue: SlippageType
 }
 const SLIPPAGE_TOLERANCE: Record<string, number> = {
-  option_1: 0.005,
-  option_2: 0.01,
-  option_3: 0.02
+  option_1: 0.001,
+  option_2: 0.005,
+  option_3: 0.01,
+  option_4: 0.03
 };
 
+interface FormProps {
+  slippage: string;
+}
+
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, modalId, onApplySlippage } = props;
-  const [selectedSlippage, setSelectedSlippage] = useState<string>('option_3');
+  const { className, modalId, onApplySlippage, slippageValue } = props;
+  const [selectedSlippage, setSelectedSlippage] = useState<string | undefined>();
+  const firstRenderRef = useRef(false);
 
   const { inactiveModal } = useContext(ModalContext);
+
+  const [form] = Form.useForm<FormProps>();
+
+  const formDefault = useMemo((): FormProps => ({
+    slippage: '0'
+  }), []);
 
   const onCancel = useCallback(() => {
     inactiveModal(modalId);
@@ -35,10 +58,60 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    if (selectedSlippage) {
+      form.setFieldValue('slippage', undefined);
+    }
+  }, [form, selectedSlippage]);
+
+  useEffect(() => {
+    if (!firstRenderRef.current) {
+      if (slippageValue.type === SlippageValueType.SELECT_TYPE) {
+        for (const [key, val] of Object.entries(SLIPPAGE_TOLERANCE)) {
+          if (val === slippageValue.slippage) {
+            setSelectedSlippage(key);
+            break;
+          }
+        }
+      } else {
+        form.setFieldValue('slippage', slippageValue.slippage);
+      }
+
+      firstRenderRef.current = true;
+    }
+  }, [form, slippageValue]);
+
   const handleApplySlippage = useCallback(() => {
     inactiveModal(modalId);
-    onApplySlippage?.(SLIPPAGE_TOLERANCE[selectedSlippage]);
-  }, [inactiveModal, modalId, onApplySlippage, selectedSlippage]);
+    const slippageValueForm = form.getFieldValue('slippage');
+
+    console.log('slippageValueForm', slippageValueForm);
+    console.log('selectedSlippage', selectedSlippage);
+
+    if (selectedSlippage) {
+      const slippageObject: SlippageType = {
+        slippage: SLIPPAGE_TOLERANCE[selectedSlippage],
+        type: SlippageValueType.SELECT_TYPE
+      };
+
+      onApplySlippage?.(slippageObject);
+    } else if (slippageValueForm) {
+      const slippageObject: SlippageType = {
+        slippage: Number(slippageValueForm) / 100,
+        type: SlippageValueType.INPUT_TYPE
+      };
+
+      onApplySlippage?.(slippageObject);
+    }
+  }, [form, inactiveModal, modalId, onApplySlippage, selectedSlippage]);
+
+  const onValuesChange: FormCallbacks<FormProps>['onValuesChange'] = useCallback((changes: Partial<FormProps>, values: FormProps) => {
+    const { slippage } = values;
+
+    setSelectedSlippage(undefined);
+
+    console.log('slippage_on_modal', slippage);
+  }, []);
 
   return (
     <>
@@ -102,9 +175,23 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div>Or custom slippage</div>
           <div className={'__slippage-form'}>
-            <Input
-              placeholder={'0.1 - 2'}
-            />
+            {/* <Input */}
+            {/*  placeholder={'0.1 - 2'} */}
+            {/* /> */}
+            <Form
+              form={form}
+              initialValues={formDefault}
+              onValuesChange={onValuesChange}
+            >
+              <Form.Item
+                name={'slippage'}
+              >
+                <Input
+                  min={0}
+                  placeholder={'0.1 - 2'}
+                />
+              </Form.Item>
+            </Form>
             <span>%</span>
           </div>
         </div>

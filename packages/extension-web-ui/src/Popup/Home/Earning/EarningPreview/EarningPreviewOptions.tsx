@@ -161,8 +161,8 @@ function Component ({ className }: Props) {
     };
   }, [filterOptions.length, selectedFilters]);
 
-  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[]) => {
-    const chainInfo = chainInfoMap[selectedChain];
+  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[], chain = '') => {
+    const chainInfo = chainInfoMap[selectedChain || chain];
     let accountList: AccountJson[] = [];
 
     if (!chainInfo) {
@@ -180,8 +180,9 @@ function Component ({ className }: Props) {
         setReturnStorage(earnPath);
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        const chainInfo = chainInfoMap[selectedChain];
-        const isAnyAccountValid = checkIsAnyAccountValid(accounts);
+        const chainInfo = chainInfoMap[selectedChain || chain];
+
+        const isAnyAccountValid = checkIsAnyAccountValid(accounts, chain);
 
         if (!isAnyAccountValid) {
           const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;

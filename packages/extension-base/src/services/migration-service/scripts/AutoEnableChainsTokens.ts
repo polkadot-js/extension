@@ -8,6 +8,6 @@ export default class AutoEnableChainsTokens extends BaseMigrationJob {
   public override async run (): Promise<void> {
     const accounts = keyring.getAccounts();
 
-    await this.state.autoEnableChains(accounts.map(({ address }) => address));
+    await this.state.balanceService.autoEnableChains(accounts.map(({ address }) => address));
   }
 }

@@ -41,7 +41,6 @@ const Component: React.FC<Props> = (props: Props) => {
     return networkTagTypes[type];
   }, [networkTagTypes, type]);
 
-
   return (
     <Tag
       bgType={'default'}

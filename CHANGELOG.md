@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
 ## 1.1.50
 Build date: Mar 28, 2024.
 

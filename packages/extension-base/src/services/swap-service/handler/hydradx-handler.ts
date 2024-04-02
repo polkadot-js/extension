@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { PoolService, Swap, TradeRouter } from '@galacticcouncil/sdk';
+import { PoolError, PoolService, Swap, TradeRouter } from '@galacticcouncil/sdk';
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
@@ -17,6 +17,8 @@ import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
+
+const HYDRADX_LOW_LIQUIDITY_THRESHOLD = 0.15;
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -165,6 +167,15 @@ export class HydradxHandler implements SwapBaseInterface {
     ]);
   }
 
+  private getSwapPathErrors (swapList: Swap[]): PoolError[] {
+    return swapList.reduce((prev, current) => {
+      return [
+        ...prev,
+        ...current.errors
+      ];
+    }, [] as PoolError[]);
+  }
+
   private parseSwapPath (swapList: Swap[]): SwapRoute {
     const swapAssets = this.chainService.getAssetByChainAndType(this.chain, [_AssetType.NATIVE, _AssetType.LOCAL]);
 
@@ -220,10 +231,14 @@ export class HydradxHandler implements SwapBaseInterface {
       const parsedFromAmount = new BigNumber(request.fromAmount).shiftedBy(-1 * _getAssetDecimals(fromAsset)).toString();
       const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, parsedFromAmount);
 
+      console.log('quoteResponse', quoteResponse);
+
       const toAmount = quoteResponse.amountOut;
 
       const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
       const txHex = quoteResponse.toTx(minReceive).hex;
+
+      console.log('txHex', txHex);
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
       const extrinsic = substrateApi.api.tx(txHex);
@@ -242,6 +257,26 @@ export class HydradxHandler implements SwapBaseInterface {
       };
 
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
+      const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
+
+      console.log('swapPathErrors', swapPathErrors);
+
+      if (swapPathErrors.length > 0) {
+        const defaultError = swapPathErrors[0]; // might parse more errors
+
+        switch (defaultError) {
+          case PoolError.InsufficientTradingAmount:
+            return new SwapError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE);
+          case PoolError.TradeNotAllowed:
+            return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
+          case PoolError.MaxInRatioExceeded:
+            return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
+          case PoolError.UnknownError:
+            return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
+          case PoolError.MaxOutRatioExceeded:
+            return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
+        }
+      }
 
       // todo: check price impact, if price impact > 0.15% -> low liquidity
 
@@ -257,6 +292,7 @@ export class HydradxHandler implements SwapBaseInterface {
           defaultFeeToken: fromChainNativeTokenSlug,
           feeOptions: [fromChainNativeTokenSlug] // todo: parse fee options
         },
+        isLowLiquidity: Math.abs(quoteResponse.priceImpactPct) >= HYDRADX_LOW_LIQUIDITY_THRESHOLD,
         route: swapRoute,
         metadata: txHex
       } as SwapQuote;

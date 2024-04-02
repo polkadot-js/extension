@@ -11,10 +11,10 @@ import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dots
 import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, getChainflipEarlyValidationError, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
+import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
@@ -336,7 +336,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
           case SwapStepType.DEFAULT:
             return Promise.resolve([]);
           case SwapStepType.TOKEN_APPROVAL:
-            return this.swapBaseHandler.validateTokenApproveStep(params);
+            return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
           default:
             return this.swapBaseHandler.validateSwapStep(params, isXcmOk);
         }
@@ -346,7 +346,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === YieldStepType.XCM) {
+      } else if (step.type === SwapStepType.XCM) {
         isXcmOk = true;
       }
     }

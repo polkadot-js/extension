@@ -6,14 +6,14 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenMinAmount, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { RuntimeDispatchInfo, YieldStepType } from '@subwallet/extension-base/types';
+import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
@@ -267,6 +267,55 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
+  public async handleXcmStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+    const pair = params.quote.pair;
+    const alternativeAssetSlug = getSwapAlternativeAsset(pair) as string;
+
+    const originAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+    const destinationAsset = this.chainService.getAssetBySlug(pair.from);
+
+    const substrateApi = this.chainService.getSubstrateApi(originAsset.originChain);
+
+    const chainApi = await substrateApi.isReady;
+
+    const destinationAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
+    const xcmFee = params.process.totalFee[params.currentStep];
+
+    const bnAmount = new BigNumber(params.quote.fromAmount);
+    const bnDestinationAssetBalance = new BigNumber(destinationAssetBalance.value);
+    const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount);
+
+    const bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance).plus(bnXcmFee);
+
+    const xcmTransfer = await createXcmExtrinsic({
+      originTokenInfo: originAsset,
+      destinationTokenInfo: destinationAsset,
+      sendingValue: bnTotalAmount.toString(),
+      recipient: params.address,
+      chainInfoMap: this.chainService.getChainInfoMap(),
+      substrateApi: chainApi
+    });
+
+    const xcmData: RequestCrossChainTransfer = {
+      originNetworkKey: originAsset.originChain,
+      destinationNetworkKey: destinationAsset.originChain,
+      from: params.address,
+      to: params.address,
+      value: bnTotalAmount.toString(),
+      tokenSlug: originAsset.slug,
+      showExtraWarning: true
+    };
+
+    return {
+      txChain: originAsset.originChain,
+      extrinsic: xcmTransfer,
+      transferNativeAmount: _isNativeToken(originAsset) ? bnTotalAmount.toString() : '0',
+      extrinsicType: ExtrinsicType.TRANSFER_XCM,
+      chainType: ChainType.SUBSTRATE,
+      txData: xcmData
+    } as SwapSubmitStepData;
+  }
+
   public async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const txHex = params.quote.metadata as string;
     const fromAsset = this.chainService.getAssetBySlug(params.quote.pair.from);
@@ -303,7 +352,7 @@ export class HydradxHandler implements SwapBaseInterface {
       case SwapStepType.DEFAULT:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case SwapStepType.XCM:
-        return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+        return this.handleXcmStep(params);
       case SwapStepType.SET_FEE_TOKEN:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case SwapStepType.SWAP:
@@ -342,7 +391,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === YieldStepType.XCM) {
+      } else if (step.type === SwapStepType.XCM) {
         isXcmOk = true;
       }
     }

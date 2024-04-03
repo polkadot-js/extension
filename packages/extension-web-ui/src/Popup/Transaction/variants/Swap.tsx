@@ -283,10 +283,6 @@ const Component = () => {
     activeModal(SWAP_CHOOSE_FEE_TOKEN_MODAL);
   }, [activeModal]);
 
-  const openSlippageModal = useCallback(() => {
-    activeModal(SWAP_SLIPPAGE_MODAL);
-  }, [activeModal]);
-
   const onSelectQuote = useCallback((quote: SwapQuote) => {
     setCurrentQuote(quote);
     setFeeOptions(quote.feeInfo.feeOptions);
@@ -297,7 +293,6 @@ const Component = () => {
     setCurrentFeeOption(slug);
   }, []);
   const onSelectSlippage = useCallback((slippage: SlippageType) => {
-    console.log('slippage', slippage);
     setCurrentSlippage(slippage);
   }, []);
 
@@ -619,10 +614,9 @@ const Component = () => {
 
                 if (latestSwapQuote.optimalQuote) {
                   latestOptimalQuote = latestSwapQuote.optimalQuote;
+                  setCurrentQuote(latestSwapQuote.optimalQuote);
+                  setQuoteAliveUntil(latestSwapQuote.aliveUntil);
                 }
-
-                setCurrentQuote(latestSwapQuote.optimalQuote);
-                setQuoteAliveUntil(latestSwapQuote.aliveUntil);
               }
             }
 
@@ -1276,7 +1270,6 @@ const Component = () => {
                       network={currentQuote.provider.id.toLowerCase()}
                       shape='squircle'
                       size={24}
-                      // token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
                     />
 
                     {currentQuote.provider.name}
@@ -1420,7 +1413,6 @@ const Component = () => {
         onApplySlippage={onSelectSlippage}
         slippageValue={currentSlippage}
       />
-
       <AddMoreBalanceModal
         modalId={SWAP_MORE_BALANCE_MODAL}
       />

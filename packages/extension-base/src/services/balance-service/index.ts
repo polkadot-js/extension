@@ -136,7 +136,7 @@ export class BalanceService implements StoppableServiceInterface {
     let lazyTime = 2000;
 
     // Account changed or chain changed (active or inactive)
-    if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('chain.updateState') || eventTypes.includes('asset.updateState')) {
+    if (eventTypes.includes('account.updateCurrent') || eventTypes.includes('account.add') || eventTypes.includes('chain.updateState') || eventTypes.includes('asset.updateState')) {
       needReload = true;
 
       if (eventTypes.includes('account.updateCurrent')) {

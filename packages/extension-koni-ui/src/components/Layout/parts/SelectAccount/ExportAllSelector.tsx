@@ -180,6 +180,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     }
   }, [changeAccounts]);
 
+  const isDiableExport = useMemo(() => {
+    if (changeAccounts.length > 0) {
+      return false;
+    }
+
+    return true;
+  }, [changeAccounts]);
+
   return (
     <>
       <SwModal
@@ -193,7 +201,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         footer={(
           <Button
             block
-            disabled={false}
+            disabled={isDiableExport}
             icon={(
               <Icon
                 phosphorIcon={Export}
@@ -252,7 +260,9 @@ const ExportAllSelector = styled(forwardRef(Component))<Props>(({ theme: { token
     '.ant-sw-modal-footer': {
       margin: 0,
       marginTop: token.marginXS,
-      borderTop: 0
+      borderTop: 0,
+      paddingLeft: 0,
+      paddingRight: 0
     },
     '.ant-sw-list-search-input': {
       paddingBottom: token.paddingXS,

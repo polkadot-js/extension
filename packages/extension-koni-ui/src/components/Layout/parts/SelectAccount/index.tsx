@@ -316,8 +316,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     ),
     onClick: exportAllAccounts,
     size: 'xs',
-    type: 'ghost'
-  }), [exportAllAccounts]);
+    type: 'ghost',
+    tooltip: t('Export account'),
+    tooltipPlacement: 'top'
+  }), [exportAllAccounts, t]);
 
   return (
     <div className={CN(className, 'container')}>

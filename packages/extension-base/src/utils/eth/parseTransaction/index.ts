@@ -114,7 +114,7 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
 };
 
 export const isContractAddress = async (address: string, evmApi: _EvmApi): Promise<boolean> => {
-  if (!evmApi) {
+  if (!evmApi || !address) {
     return false;
   } else {
     const code = await evmApi.api.eth.getCode(address);

@@ -121,6 +121,10 @@ export class SwapBaseHandler {
       const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee).minus(altInputTokenMinAmount);
       const maxXCMValue = formatNumber(bnMaxXCM.toString(), fromAsset.decimals || 0);
 
+      if (maxBn.lte(0) || bnFromAssetBalance.lte(0) || bnMaxXCM.lte(0)) {
+        return [new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, t(`Insufficient balance. Deposit ${fromAsset.symbol} and try again.`))];
+      }
+
       return [new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, t(
         'You can only enter a maximum of {{maxValue}} {{symbol}}, which is {{currentValue}} {{symbol}} ({{inputNetworkName}}) and {{maxXCMValue}} {{symbol}} ({{altNetworkName}}). Lower your amount and try again.',
         {

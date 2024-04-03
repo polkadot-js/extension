@@ -92,7 +92,7 @@ const Component = () => {
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
-  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0, isCustomType: true });
+  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0.01, isCustomType: true });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);

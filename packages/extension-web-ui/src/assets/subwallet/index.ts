@@ -27,7 +27,9 @@ const SwLogosMap: Record<string, string> = {
   moonwell: DefaultLogosMap.moonwell,
   stellaswap: DefaultLogosMap.stellaswap,
   chain_flip_mainnet: DefaultLogosMap.chain_flip,
-  chain_flip_testnet: DefaultLogosMap.chain_flip
+  chain_flip_testnet: DefaultLogosMap.chain_flip,
+  hydradx_mainnet: DefaultLogosMap.hydradx,
+  hydradx_testnet: DefaultLogosMap.hydradx
 };
 
 export default SwLogosMap;

@@ -203,3 +203,8 @@ export interface ValidateSwapProcessParams {
   selectedQuote: SwapQuote;
   recipient?: string;
 }
+
+export interface SlippageType {
+  slippage: number,
+  isCustomType: boolean
+}

@@ -263,8 +263,6 @@ export class HydradxHandler implements SwapBaseInterface {
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
       const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
 
-      console.log('swapPathErrors', swapPathErrors);
-
       if (swapPathErrors.length > 0) {
         const defaultError = swapPathErrors[0]; // might parse more errors
 
@@ -299,8 +297,6 @@ export class HydradxHandler implements SwapBaseInterface {
         metadata: txHex
       } as SwapQuote;
     } catch (e) {
-      console.error('getSwapQuote error from HydraDX', e);
-
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }
   }

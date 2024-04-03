@@ -75,9 +75,10 @@ function Component ({ className, request }: Props) {
   const onCancel = useCallback(() => {
     setLoading(true);
     handleCancel(request).finally(() => {
+      navigate('/wallet-connect/list');
       setLoading(false);
     });
-  }, [request]);
+  }, [navigate, request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
@@ -99,6 +100,7 @@ function Component ({ className, request }: Props) {
 
   const onAddAccount = useCallback(() => {
     setSelectedAccountTypes(convertKeyTypes(missingType));
+    setLoading(true);
     navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
   }, [setSelectedAccountTypes, missingType, navigate]);
 

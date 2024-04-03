@@ -18,7 +18,15 @@ import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+
 const HYDRADX_LOW_LIQUIDITY_THRESHOLD = 0.15;
+
+const HYDRADX_SUBWALLET_REFERRAL_CODE = 'WALLET';
+const HYDRADX_SUBWALLET_REFERRAL_ACCOUNT = '7PCsCpkgsHdNaZhv79wCCQ5z97uxVbSeSCtDMUa1eZHKXy4a';
+
+const HYDRADX_TESTNET_SUBWALLET_REFERRAL_CODE = 'ASSETHUB';
+const HYDRADX_TESTNET_SUBWALLET_REFERRAL_ACCOUNT = '7LCt6dFqtxzdKVB2648jWW9d85doiFfLSbZJDNAMVJNxh5rJ';
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -231,14 +239,10 @@ export class HydradxHandler implements SwapBaseInterface {
       const parsedFromAmount = new BigNumber(request.fromAmount).shiftedBy(-1 * _getAssetDecimals(fromAsset)).toString();
       const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, parsedFromAmount);
 
-      console.log('quoteResponse', quoteResponse);
-
       const toAmount = quoteResponse.amountOut;
 
       const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
       const txHex = quoteResponse.toTx(minReceive).hex;
-
-      console.log('txHex', txHex);
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
       const extrinsic = substrateApi.api.tx(txHex);
@@ -278,8 +282,6 @@ export class HydradxHandler implements SwapBaseInterface {
         }
       }
 
-      // todo: check price impact, if price impact > 0.15% -> low liquidity
-
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
@@ -297,7 +299,7 @@ export class HydradxHandler implements SwapBaseInterface {
         metadata: txHex
       } as SwapQuote;
     } catch (e) {
-      console.error('getSwapQuote error', e);
+      console.error('getSwapQuote error from HydraDX', e);
 
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }
@@ -368,7 +370,19 @@ export class HydradxHandler implements SwapBaseInterface {
       txHex
     };
 
-    const extrinsic = chainApi.api.tx(txHex);
+    let extrinsic: SubmittableExtrinsic<'promise'>;
+
+    const _referral = await chainApi.api.query.referrals.linkedAccounts(params.address);
+    const referral = _referral?.toString();
+
+    if (!referral || (referral && referral !== this.referralAccount)) {
+      extrinsic = chainApi.api.tx.utility.batchAll([
+        chainApi.api.tx.referrals.linkCode(this.referralCode),
+        chainApi.api.tx(txHex)
+      ]);
+    } else {
+      extrinsic = chainApi.api.tx(txHex);
+    }
 
     return {
       txChain: fromAsset.originChain,
@@ -473,5 +487,21 @@ export class HydradxHandler implements SwapBaseInterface {
         error: SwapErrorType.UNKNOWN
       });
     }
+  }
+
+  get referralCode () {
+    if (this.isTestnet) {
+      return HYDRADX_TESTNET_SUBWALLET_REFERRAL_CODE;
+    }
+
+    return HYDRADX_SUBWALLET_REFERRAL_CODE;
+  }
+
+  get referralAccount () {
+    if (this.isTestnet) {
+      return HYDRADX_TESTNET_SUBWALLET_REFERRAL_ACCOUNT;
+    }
+
+    return HYDRADX_SUBWALLET_REFERRAL_ACCOUNT;
   }
 }

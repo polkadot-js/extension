@@ -375,7 +375,7 @@ export class HydradxHandler implements SwapBaseInterface {
     const _referral = await chainApi.api.query.referrals.linkedAccounts(params.address);
     const referral = _referral?.toString();
 
-    if (!referral || (referral && referral !== this.referralAccount)) {
+    if (!referral || referral === '') {
       extrinsic = chainApi.api.tx.utility.batchAll([
         chainApi.api.tx.referrals.linkCode(this.referralCode),
         chainApi.api.tx(txHex)

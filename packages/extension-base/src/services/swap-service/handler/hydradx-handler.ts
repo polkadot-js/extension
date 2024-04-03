@@ -196,7 +196,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const path: string[] = [];
 
-    swapList.forEach((swap) => {
+    swapList.reverse().forEach((swap) => { // swap returned are in reverse order [lastSwap,..., firstSwap]
       const swapAssetIn = swapAssetIdMap[swap.assetIn]?.slug;
       const swapAssetOut = swapAssetIdMap[swap.assetOut]?.slug;
 

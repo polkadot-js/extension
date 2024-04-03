@@ -201,7 +201,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
       setSelectedPoolGroup(item);
 
-      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo, index?: number) => {
+      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo) => {
         if (!poolInfo) {
           // will not happen
 
@@ -226,10 +226,8 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
           return;
         }
 
-        if (index) {
-          navigateToEarnTransaction(item.poolSlugs[index], item.chain);
-        } else if (positionSlugs.includes(item.poolSlugs[0])) {
-          navigateToEarnTransaction(item.poolSlugs[0], item.chain);
+        if (positionSlugs.includes(poolInfo.slug)) {
+          navigateToEarnTransaction(poolInfo.slug, item.chain);
         } else {
           activeModal(instructionModalId);
         }
@@ -267,11 +265,11 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         }
 
         if (isHiddenPool && item.poolListLength === 2) {
-          const index = item.poolSlugs.findIndex((item) => item.includes('nomination_pool'));
+          const index = item.poolSlugs.findIndex((item) => item.includes(YieldPoolType.NOMINATION_POOL.toLowerCase()));
 
           const poolInfo = poolInfoMap[item.poolSlugs[index]];
 
-          processPoolOptions(poolInfo, item, index);
+          processPoolOptions(poolInfo, item);
         } else {
           navigate('/home/earning/pools', {
             state: {

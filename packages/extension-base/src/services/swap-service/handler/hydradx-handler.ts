@@ -1,22 +1,24 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { PoolService, Swap, TradeRouter } from '@galacticcouncil/sdk';
+import { PoolError, PoolService, Swap, TradeRouter } from '@galacticcouncil/sdk';
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenMinAmount, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { RuntimeDispatchInfo, YieldStepType } from '@subwallet/extension-base/types';
+import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
+
+const HYDRADX_LOW_LIQUIDITY_THRESHOLD = 0.15;
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -165,6 +167,15 @@ export class HydradxHandler implements SwapBaseInterface {
     ]);
   }
 
+  private getSwapPathErrors (swapList: Swap[]): PoolError[] {
+    return swapList.reduce((prev, current) => {
+      return [
+        ...prev,
+        ...current.errors
+      ];
+    }, [] as PoolError[]);
+  }
+
   private parseSwapPath (swapList: Swap[]): SwapRoute {
     const swapAssets = this.chainService.getAssetByChainAndType(this.chain, [_AssetType.NATIVE, _AssetType.LOCAL]);
 
@@ -220,10 +231,14 @@ export class HydradxHandler implements SwapBaseInterface {
       const parsedFromAmount = new BigNumber(request.fromAmount).shiftedBy(-1 * _getAssetDecimals(fromAsset)).toString();
       const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, parsedFromAmount);
 
+      console.log('quoteResponse', quoteResponse);
+
       const toAmount = quoteResponse.amountOut;
 
       const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
       const txHex = quoteResponse.toTx(minReceive).hex;
+
+      console.log('txHex', txHex);
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
       const extrinsic = substrateApi.api.tx(txHex);
@@ -242,6 +257,26 @@ export class HydradxHandler implements SwapBaseInterface {
       };
 
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
+      const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
+
+      console.log('swapPathErrors', swapPathErrors);
+
+      if (swapPathErrors.length > 0) {
+        const defaultError = swapPathErrors[0]; // might parse more errors
+
+        switch (defaultError) {
+          case PoolError.InsufficientTradingAmount:
+            return new SwapError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE);
+          case PoolError.TradeNotAllowed:
+            return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
+          case PoolError.MaxInRatioExceeded:
+            return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
+          case PoolError.UnknownError:
+            return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
+          case PoolError.MaxOutRatioExceeded:
+            return new SwapError(SwapErrorType.NOT_ENOUGH_LIQUIDITY);
+        }
+      }
 
       // todo: check price impact, if price impact > 0.15% -> low liquidity
 
@@ -257,6 +292,7 @@ export class HydradxHandler implements SwapBaseInterface {
           defaultFeeToken: fromChainNativeTokenSlug,
           feeOptions: [fromChainNativeTokenSlug] // todo: parse fee options
         },
+        isLowLiquidity: Math.abs(quoteResponse.priceImpactPct) >= HYDRADX_LOW_LIQUIDITY_THRESHOLD,
         route: swapRoute,
         metadata: txHex
       } as SwapQuote;
@@ -265,6 +301,55 @@ export class HydradxHandler implements SwapBaseInterface {
 
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }
+  }
+
+  public async handleXcmStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
+    const pair = params.quote.pair;
+    const alternativeAssetSlug = getSwapAlternativeAsset(pair) as string;
+
+    const originAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+    const destinationAsset = this.chainService.getAssetBySlug(pair.from);
+
+    const substrateApi = this.chainService.getSubstrateApi(originAsset.originChain);
+
+    const chainApi = await substrateApi.isReady;
+
+    const destinationAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
+    const xcmFee = params.process.totalFee[params.currentStep];
+
+    const bnAmount = new BigNumber(params.quote.fromAmount);
+    const bnDestinationAssetBalance = new BigNumber(destinationAssetBalance.value);
+    const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount);
+
+    const bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance).plus(bnXcmFee);
+
+    const xcmTransfer = await createXcmExtrinsic({
+      originTokenInfo: originAsset,
+      destinationTokenInfo: destinationAsset,
+      sendingValue: bnTotalAmount.toString(),
+      recipient: params.address,
+      chainInfoMap: this.chainService.getChainInfoMap(),
+      substrateApi: chainApi
+    });
+
+    const xcmData: RequestCrossChainTransfer = {
+      originNetworkKey: originAsset.originChain,
+      destinationNetworkKey: destinationAsset.originChain,
+      from: params.address,
+      to: params.address,
+      value: bnTotalAmount.toString(),
+      tokenSlug: originAsset.slug,
+      showExtraWarning: true
+    };
+
+    return {
+      txChain: originAsset.originChain,
+      extrinsic: xcmTransfer,
+      transferNativeAmount: _isNativeToken(originAsset) ? bnTotalAmount.toString() : '0',
+      extrinsicType: ExtrinsicType.TRANSFER_XCM,
+      chainType: ChainType.SUBSTRATE,
+      txData: xcmData
+    } as SwapSubmitStepData;
   }
 
   public async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
@@ -303,7 +388,7 @@ export class HydradxHandler implements SwapBaseInterface {
       case SwapStepType.DEFAULT:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case SwapStepType.XCM:
-        return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
+        return this.handleXcmStep(params);
       case SwapStepType.SET_FEE_TOKEN:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case SwapStepType.SWAP:
@@ -342,7 +427,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === YieldStepType.XCM) {
+      } else if (step.type === SwapStepType.XCM) {
         isXcmOk = true;
       }
     }

@@ -78,8 +78,6 @@ export class SwapBaseHandler {
     }
   }
 
-  // protected abstract validateSwapRequest(request: SwapRequest): Promise<SwapEarlyValidation>;
-  // public abstract validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]>;
   public async validateXcmStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
     const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
     const swapPair = params.selectedQuote.pair;
@@ -170,7 +168,7 @@ export class SwapBaseHandler {
     if (params.selectedQuote.minSwap) {
       const minProtocolSwap = new BigNumber(params.selectedQuote.minSwap);
 
-      if (bnFromAssetBalance.lte(minProtocolSwap)) {
+      if (!isXcmOk && bnFromAssetBalance.lte(minProtocolSwap)) {
         const parsedMinSwapValue = formatNumber(minProtocolSwap, _getAssetDecimals(fromAsset));
 
         return Promise.resolve([new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
@@ -181,7 +179,7 @@ export class SwapBaseHandler {
     const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
     const bnMaxBalanceSwap = bnFromAssetBalance.minus(bnSrcAssetMinAmount);
 
-    if (bnAmount.gte(bnMaxBalanceSwap)) {
+    if (!isXcmOk && bnAmount.gte(bnMaxBalanceSwap)) {
       const parsedMaxBalanceSwap = formatNumber(bnMaxBalanceSwap, _getAssetDecimals(fromAsset));
 
       return Promise.resolve([new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
@@ -202,9 +200,6 @@ export class SwapBaseHandler {
 
     return Promise.resolve([]);
   }
-
-  // public abstract handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
-  // protected abstract handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData>;
 
   get name (): string {
     return this.providerName;

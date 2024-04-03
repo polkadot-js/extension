@@ -28,9 +28,10 @@ export enum _ChainConnectionStatus {
 }
 
 export interface _ChainState {
-  slug: string,
-  active: boolean,
-  currentProvider: string
+  slug: string;
+  active: boolean;
+  currentProvider: string;
+  manualTurnOff: boolean;
 }
 
 export interface _ChainApiStatus {

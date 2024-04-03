@@ -241,7 +241,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
       const toAmount = quoteResponse.amountOut;
 
-      const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
+      const minReceive = toAmount.times(1 - request.slippage).integerValue();
       const txHex = quoteResponse.toTx(minReceive).hex;
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
@@ -259,6 +259,8 @@ export class HydradxHandler implements SwapBaseInterface {
         amount: quoteResponse.tradeFee.toString(),
         feeType: SwapFeeType.PLATFORM_FEE
       };
+
+      console.log('swap path', quoteResponse.swaps.reverse());
 
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
       const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
@@ -286,7 +288,7 @@ export class HydradxHandler implements SwapBaseInterface {
         toAmount: toAmount.toString(),
         rate: calculateSwapRate(request.fromAmount, toAmount.toString(), fromAsset, toAsset),
         provider: this.providerInfo,
-        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default), // todo: ask HydraDX team
+        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         feeInfo: {
           feeComponent: [networkFee, tradeFee],
           defaultFeeToken: fromChainNativeTokenSlug,

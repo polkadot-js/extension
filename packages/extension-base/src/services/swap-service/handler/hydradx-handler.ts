@@ -98,56 +98,64 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
-    if (!bnFromAssetBalance.gte(bnAmount)) { // if not enough balance
-      const alternativeAssetSlug = getSwapAlternativeAsset(params.request.pair);
-
-      if (alternativeAssetSlug) {
-        const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
-        const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
-        const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
-
-        if (bnAlternativeAssetBalance.gt(0)) {
-          const alternativeChainInfo = this.chainService.getChainInfoByKey(alternativeAsset.originChain);
-          const step: BaseStepDetail = {
-            metadata: {
-              sendingValue: bnAmount.toString(),
-              originTokenInfo: alternativeAsset,
-              destinationTokenInfo: fromAsset
-            },
-            name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
-            type: SwapStepType.XCM
-          };
-
-          const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
-
-          const xcmTransfer = await createXcmExtrinsic({
-            originTokenInfo: alternativeAsset,
-            destinationTokenInfo: fromAsset,
-            sendingValue: bnAmount.toString(),
-            recipient: params.request.address,
-            chainInfoMap: this.chainService.getChainInfoMap(),
-            substrateApi: xcmOriginSubstrateApi
-          });
-
-          const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
-          const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-          const fee: SwapFeeInfo = {
-            feeComponent: [{
-              feeType: SwapFeeType.NETWORK_FEE,
-              amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
-              tokenSlug: _getChainNativeTokenSlug(alternativeChainInfo)
-            }],
-            defaultFeeToken: _getChainNativeTokenSlug(alternativeChainInfo),
-            feeOptions: [_getChainNativeTokenSlug(alternativeChainInfo)]
-          };
-
-          return [step, fee];
-        }
-      }
+    if (bnFromAssetBalance.gte(bnAmount)) {
+      return undefined; // enough balance, no need to xcm
     }
 
-    return undefined;
+    const alternativeAssetSlug = getSwapAlternativeAsset(params.request.pair);
+
+    if (!alternativeAssetSlug) {
+      return undefined;
+    }
+
+    const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+    const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
+
+    if (bnAlternativeAssetBalance.lte(0)) {
+      return undefined;
+    }
+
+    try {
+      const alternativeChainInfo = this.chainService.getChainInfoByKey(alternativeAsset.originChain);
+      const step: BaseStepDetail = {
+        metadata: {
+          sendingValue: bnAmount.toString(),
+          originTokenInfo: alternativeAsset,
+          destinationTokenInfo: fromAsset
+        },
+        name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
+        type: SwapStepType.XCM
+      };
+
+      const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
+
+      const xcmTransfer = await createXcmExtrinsic({
+        originTokenInfo: alternativeAsset,
+        destinationTokenInfo: fromAsset,
+        sendingValue: bnAmount.toString(),
+        recipient: params.request.address,
+        chainInfoMap: this.chainService.getChainInfoMap(),
+        substrateApi: xcmOriginSubstrateApi
+      });
+
+      const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
+      const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      const fee: SwapFeeInfo = {
+        feeComponent: [{
+          feeType: SwapFeeType.NETWORK_FEE,
+          amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
+          tokenSlug: _getChainNativeTokenSlug(alternativeChainInfo)
+        }],
+        defaultFeeToken: _getChainNativeTokenSlug(alternativeChainInfo),
+        feeOptions: [_getChainNativeTokenSlug(alternativeChainInfo)]
+      };
+
+      return [step, fee];
+    } catch (e) {
+      return undefined;
+    }
   }
 
   async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
@@ -411,7 +419,6 @@ export class HydradxHandler implements SwapBaseInterface {
   }
 
   public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
-    // TODO: validate xcm amount
     const amount = params.selectedQuote.fromAmount;
     const bnAmount = new BigNumber(amount);
 

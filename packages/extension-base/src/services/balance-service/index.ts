@@ -348,6 +348,7 @@ export class BalanceService implements StoppableServiceInterface {
     // Reset balance before subscribe
     await this.handleResetBalance();
 
+    let cancel = false;
     const assetMap = this.state.chainService.getAssetRegistry();
     const chainInfoMap = this.state.chainService.getChainInfoMap();
     const evmApiMap = this.state.chainService.getEvmApiMap();
@@ -362,12 +363,13 @@ export class BalanceService implements StoppableServiceInterface {
       .map((asset) => asset.slug);
 
     const unsub = subscribeBalance(addresses, activeChainSlugs, assets, assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
-      this.setBalanceItem(result);
+      !cancel && this.setBalanceItem(result);
     });
 
     const unsub2 = this.state.subscribeMantaPayBalance();
 
     this._unsubscribeBalance = () => {
+      cancel = true;
       unsub && unsub();
       unsub2 && unsub2();
     };

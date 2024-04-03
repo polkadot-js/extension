@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { state } from '@subwallet/extension-base/koni/background/handlers';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
-import { categoryAddresses } from '@subwallet/extension-base/utils';
+import { categoryAddresses, filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
 import keyring from '@subwallet/ui-keyring';
 
 import { subscribeEVMBalance } from './evm';
@@ -43,6 +42,7 @@ export const getAccountJsonByAddress = (address: string): AccountJson | null => 
   }
 };
 
+/** Filter addresses to subscribe by chain info */
 const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], string[]] => {
   const isEvmChain = _isChainEvmCompatible(chainInfo);
   const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
@@ -78,41 +78,56 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
   }
 };
 
-// main subscription
-export function subscribeBalance (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
+// interface SubscribeBlanceOptions {
+//   addresses: string[];
+//   chains: string[];
+//   tokens: string[];
+//   chainInfoMap: Record<string, _ChainInfo>;
+//   substrateApiMap: Record<string, _SubstrateApi>;
+//   evmApiMap: Record<string, _EvmApi>;
+//   callback: (rs: BalanceItem[]) => void;
+// }
+
+// main subscription, use for multiple chains, multiple addresses and multiple tokens
+export function subscribeBalance (addresses: string[], chains: string[], tokens: string[], _chainAssetMap: Record<string, _ChainAsset>, _chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
+  // Filter chain and token
+  const chainAssetMap: Record<string, _ChainAsset> = Object.fromEntries(Object.entries(_chainAssetMap).filter(([token]) => tokens.includes(token)));
+  const chainInfoMap: Record<string, _ChainInfo> = Object.fromEntries(Object.entries(_chainInfoMap).filter(([chain]) => chains.includes(chain)));
+
   // Looping over each chain
-  const unsubList = Object.entries(chainInfoMap).map(async ([chainSlug, chainInfo]) => {
+  const unsubList = Object.values(chainInfoMap).map(async (chainInfo) => {
+    const chainSlug = chainInfo.slug;
     const [useAddresses, notSupportAddresses] = filterAddress(addresses, chainInfo);
 
     if (notSupportAddresses.length) {
-      const tokens = state.chainService.getAssetByChainAndType(chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL]);
-      const assetSetting = await state.chainService.getAssetSettings();
-      const filtered = Object.values(tokens).filter(({ slug }) => {
-        return assetSetting[slug]?.visible;
-      });
+      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL]);
 
       const now = new Date().getTime();
 
-      notSupportAddresses.forEach((address) => {
-        const items: BalanceItem[] = filtered.map((token): BalanceItem => {
-          return {
-            address,
-            tokenSlug: token.slug,
-            free: '0',
-            locked: '0',
-            state: APIItemState.NOT_SUPPORT,
-            timestamp: now
-          };
-        });
+      Object.values(tokens).forEach((token) => {
+        const items: BalanceItem[] = notSupportAddresses.map((address): BalanceItem => ({
+          address,
+          tokenSlug: token.slug,
+          free: '0',
+          locked: '0',
+          state: APIItemState.NOT_SUPPORT,
+          timestamp: now
+        }));
 
         callback(items);
       });
     }
 
-    if (_isPureEvmChain(chainInfo)) {
-      const nativeTokenInfo = state.getNativeTokenInfo(chainSlug);
+    const evmApi = evmApiMap[chainSlug];
 
-      return subscribeEVMBalance(chainSlug, useAddresses, evmApiMap, callback, nativeTokenInfo);
+    if (_isPureEvmChain(chainInfo)) {
+      return subscribeEVMBalance({
+        addresses: useAddresses,
+        assetMap: chainAssetMap,
+        callback,
+        chainInfo,
+        evmApi
+      });
     }
 
     // if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
@@ -132,9 +147,9 @@ export function subscribeBalance (addresses: string[], chainInfoMap: Record<stri
     //   return undefined;
     // }
 
-    const networkAPI = await substrateApiMap[chainSlug].isReady;
+    const substrateApi = await substrateApiMap[chainSlug].isReady;
 
-    return subscribeSubstrateBalance(useAddresses, chainInfo, chainSlug, networkAPI, evmApiMap, callback);
+    return subscribeSubstrateBalance(useAddresses, chainInfo, chainAssetMap, substrateApi, evmApi, callback);
   });
 
   return () => {

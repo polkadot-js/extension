@@ -1160,13 +1160,13 @@ export default class KoniExtension {
   }
 
   private async getBalance (reset?: boolean) {
-    return this.#koniState.getBalance(reset);
+    return this.#koniState.balanceService.getBalance(reset);
   }
 
   private async subscribeBalance (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
 
-    const balanceSubscription = this.#koniState.subscribeBalance().subscribe({
+    const balanceSubscription = this.#koniState.balanceService.subscribeBalanceMap().subscribe({
       next: (rs) => {
         const data = { details: rs } as BalanceJson;
 
@@ -1712,18 +1712,19 @@ export default class KoniExtension {
       if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
         chainType = ChainType.EVM;
         const txVal: string = transferAll ? freeBalance.value : (value || '0');
+        const evmApi = evmApiMap[networkKey];
 
         // Estimate with EVM API
         if (_isTokenEvmSmartContract(tokenInfo) || _isLocalToken(tokenInfo)) {
           [
             transaction,
             transferAmount.value
-          ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+          ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApi);
         } else {
           [
             transaction,
             transferAmount.value
-          ] = await getEVMTransactionObject(chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+          ] = await getEVMTransactionObject(chainInfo, from, to, txVal, !!transferAll, evmApi);
         }
       } else if (_isMantaZkAsset(tokenInfo)) { // TODO
         transaction = undefined;
@@ -2029,7 +2030,7 @@ export default class KoniExtension {
           if (!destinationTokenInfo) {
             estimatedFee = '0';
           } else {
-            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_FEE_RATIO));
+            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_MIN_AMOUNT_RATIO));
             const desChainInfo = chainInfoMap[destChain];
             const orgChainInfo = chainInfoMap[networkKey];
             const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(desChainInfo) && !_isChainEvmCompatible(orgChainInfo)
@@ -2096,11 +2097,11 @@ export default class KoniExtension {
         console.warn('Unable to estimate fee', e);
       }
 
-      maxTransferable = maxTransferable.minus(new BigN(estimatedFee));
+      maxTransferable = maxTransferable.minus(new BigN(estimatedFee).multipliedBy(isXcmTransfer ? XCM_FEE_RATIO : 1));
 
       return {
         ...freeBalance,
-        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed() || '0') : '0'
+        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed(0) || '0') : '0'
       } as AmountData;
     }
   }
@@ -3417,12 +3418,12 @@ export default class KoniExtension {
 
   private async subscribeAssetRegistry (id: string, port: chrome.runtime.Port): Promise<Record<string, _ChainAsset>> {
     const cb = createSubscription<'pri(chainService.subscribeAssetRegistry)'>(id, port);
-    let ready = false;
+
+    await this.#koniState.eventService.waitAssetOnlineReady;
+
     const assetRegistrySubscription = this.#koniState.subscribeAssetRegistry().subscribe({
       next: (rs) => {
-        if (ready) {
-          cb(rs);
-        }
+        cb(rs);
       }
     });
 
@@ -3431,9 +3432,6 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
-
-    await this.#koniState.eventService.waitAssetReady;
-    ready = true;
 
     return this.#koniState.getAssetRegistry();
   }
@@ -3543,6 +3541,34 @@ export default class KoniExtension {
       chainLogoMap,
       assetLogoMap
     };
+  }
+
+  private subscribeAssetLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.assets.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeAssetLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getAssetLogoMap();
+  }
+
+  private subscribeChainLogoMap (id: string, port: chrome.runtime.Port) {
+    const cb = createSubscription<'pri(settings.logo.chains.subscribe)'>(id, port);
+    const subscription = this.#koniState.chainService.subscribeChainLogoMap().subscribe((rs) => {
+      cb(rs);
+    });
+
+    port.onDisconnect.addListener((): void => {
+      subscription.unsubscribe();
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.getChainLogoMap();
   }
 
   // Phishing detect
@@ -4757,6 +4783,10 @@ export default class KoniExtension {
 
       case 'pri(settings.getLogoMaps)':
         return await this.getLogoMap();
+      case 'pri(settings.logo.assets.subscribe)':
+        return this.subscribeAssetLogoMap(id, port);
+      case 'pri(settings.logo.chains.subscribe)':
+        return this.subscribeChainLogoMap(id, port);
 
       /// Wallet Connect
       case 'pri(walletConnect.connect)':

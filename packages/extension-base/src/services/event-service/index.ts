@@ -20,11 +20,15 @@ export class EventService extends EventEmitter<EventRegistry> {
 
   public readonly waitCryptoReady: Promise<boolean>;
   public readonly waitDatabaseReady: Promise<boolean>;
+
   public readonly waitKeyringReady: Promise<boolean>;
   public readonly waitAccountReady: Promise<boolean>;
   public readonly waitInjectReady: Promise<boolean>;
+
   public readonly waitChainReady: Promise<boolean>;
   public readonly waitAssetReady: Promise<boolean>;
+  public readonly waitAssetOnlineReady: Promise<boolean>;
+
   public readonly waitMigrateReady: Promise<boolean>;
   public readonly waitCampaignReady: Promise<boolean>;
   public readonly waitBuyTokenReady: Promise<boolean>;
@@ -40,8 +44,11 @@ export class EventService extends EventEmitter<EventRegistry> {
     this.waitAccountReady = this.generateWaitPromise('account.ready');
     // TODO: Need to merge logic on web-runner file
     this.waitInjectReady = TARGET_ENV === 'webapp' ? this.generateWaitPromise('inject.ready') : Promise.resolve(true);
+
     this.waitChainReady = this.generateWaitPromise('chain.ready');
     this.waitAssetReady = this.generateWaitPromise('asset.ready');
+    this.waitAssetOnlineReady = this.generateWaitPromise('asset.online.ready');
+
     this.waitMigrateReady = this.generateWaitPromise('migration.done');
     this.waitCampaignReady = this.generateWaitPromise('campaign.ready');
     this.waitBuyTokenReady = this.generateWaitPromise('buy.tokens.ready');

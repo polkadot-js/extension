@@ -201,7 +201,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
       setSelectedPoolGroup(item);
 
-      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo) => {
+      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo, index?: number) => {
         if (!poolInfo) {
           // will not happen
 
@@ -226,7 +226,9 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
           return;
         }
 
-        if (positionSlugs.includes(item.poolSlugs[0])) {
+        if (index) {
+          navigateToEarnTransaction(item.poolSlugs[index], item.chain);
+        } else if (positionSlugs.includes(item.poolSlugs[0])) {
           navigateToEarnTransaction(item.poolSlugs[0], item.chain);
         } else {
           activeModal(instructionModalId);
@@ -269,7 +271,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
           const poolInfo = poolInfoMap[item.poolSlugs[index]];
 
-          processPoolOptions(poolInfo, item);
+          processPoolOptions(poolInfo, item, index);
         } else {
           navigate('/home/earning/pools', {
             state: {

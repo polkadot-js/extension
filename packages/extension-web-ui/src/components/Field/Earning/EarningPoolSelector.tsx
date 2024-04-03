@@ -15,7 +15,7 @@ import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@s
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
+import { Book, CaretLeft, FadersHorizontal, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -234,17 +234,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     inactiveModal(EarningPoolDetailModalId);
   }, [inactiveModal]);
 
-  const onClickLightningButton = useCallback((e: SyntheticEvent) => {
-    e.stopPropagation();
-    const poolId = defaultSelectPool;
-
-    if (poolId !== undefined) {
-      onChange?.({ target: { value: `${poolId}` } });
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug]);
-
   useEffect(() => {
     const defaultSelectedPool = defaultValue || nominationPoolValueList[0] || `${defaultSelectPool || ''}`;
 
@@ -335,22 +324,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 size='xs'
                 type='ghost'
               />
-              {
-                !!defaultSelectPool && (
-                  <Button
-                    disabled={isDisabled}
-                    icon={(
-                      <Icon
-                        phosphorIcon={Lightning}
-                        size='sm'
-                      />
-                    )}
-                    onClick={onClickLightningButton}
-                    size='xs'
-                    type='ghost'
-                  />
-                )
-              }
             </div>
           )}
         title={label || placeholder || t('Select pool')}

@@ -66,7 +66,7 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 }
 
 // todo: change to true when it is ready
-const supportSlippageSelection = false;
+
 const numberMetadata = { maxNumberFormat: 8 };
 
 const Component = () => {
@@ -261,11 +261,20 @@ const Component = () => {
     form.setFieldValue('toTokenSlug', tokenSlug);
   }, [form]);
 
+  const supportSlippageSelection = useMemo(() => {
+
+    if (currentQuote?.provider.name === 'Chainflip') {
+      return true;
+    }
+
+    return false;
+  }, [currentQuote?.provider.name, currentSlippage]);
+
   const onOpenSlippageModal = useCallback(() => {
-    if (supportSlippageSelection) {
+    if (!supportSlippageSelection) {
       activeModal(SWAP_SLIPPAGE_MODAL);
     }
-  }, [activeModal]);
+  }, [activeModal, supportSlippageSelection]);
 
   const openAllQuotesModal = useCallback(() => {
     activeModal(SWAP_ALL_QUOTES_MODAL);
@@ -712,7 +721,7 @@ const Component = () => {
             </Tooltip>
                     &nbsp;<span>{currentSlippage.slippage * 100}%</span>
 
-            {supportSlippageSelection && (
+            {!supportSlippageSelection && (
               <div className='__slippage-editor-button'>
                 <Icon
                   className='__slippage-editor-button-icon'
@@ -747,6 +756,12 @@ const Component = () => {
       });
     }
   }, [form, recipientValue, toAssetInfo]);
+
+  useEffect(() => {
+    if (currentQuote?.provider.name === 'Chainflip' && currentSlippage.slippage !== 0) {
+      setCurrentSlippage({ slippage: 0, isCustomType: true });
+    }
+  }, [currentQuote?.provider.name, currentSlippage.slippage]);
 
   useEffect(() => {
     if (isWebUI) {

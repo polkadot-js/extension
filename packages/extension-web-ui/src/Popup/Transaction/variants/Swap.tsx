@@ -6,7 +6,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddMoreBalanceModal, AddressInput, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -262,13 +262,12 @@ const Component = () => {
   }, [form]);
 
   const supportSlippageSelection = useMemo(() => {
-
-    if (currentQuote?.provider.name === 'Chainflip') {
+    if (currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_TESTNET || currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_MAINNET) {
       return true;
     }
 
     return false;
-  }, [currentQuote?.provider.name, currentSlippage]);
+  }, [currentQuote?.provider.id]);
 
   const onOpenSlippageModal = useCallback(() => {
     if (!supportSlippageSelection) {
@@ -612,10 +611,25 @@ const Component = () => {
               return await submitData(step + 1);
             }
           } else {
+            let latestOptimalQuote = currentQuote;
+
+            if (currentOptimalSwapPath.steps.length > 2) {
+              if (currentQuoteRequest) {
+                const latestSwapQuote = await getLatestSwapQuote(currentQuoteRequest);
+
+                if (latestSwapQuote.optimalQuote) {
+                  latestOptimalQuote = latestSwapQuote.optimalQuote;
+                }
+
+                setCurrentQuote(latestSwapQuote.optimalQuote);
+                setQuoteAliveUntil(latestSwapQuote.aliveUntil);
+              }
+            }
+
             const submitPromise: Promise<SWTransactionResponse> = handleSwapStep({
               process: currentOptimalSwapPath,
               currentStep: step,
-              quote: currentQuote,
+              quote: latestOptimalQuote,
               address: from,
               slippage: currentSlippage.slippage,
               recipient
@@ -668,7 +682,7 @@ const Component = () => {
     } else {
       transactionBlockProcess();
     }
-  }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentSlippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
+  }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
@@ -702,23 +716,35 @@ const Component = () => {
             className='__slippage-action'
             onClick={onOpenSlippageModal}
           >
-            <Tooltip
-              placement={'topRight'}
-              title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
-            >
-              <div
-                className={'__slippage-title-wrapper'}
-                onClick={openSlippageModal}
-              >Slippage
-                <Icon
-                  customSize={'16px'}
-                  iconColor={token.colorSuccess}
-                  phosphorIcon={Info}
-                  size='sm'
-                  weight='fill'
-                />
-            :</div>
-            </Tooltip>
+            {supportSlippageSelection
+              ? (
+                <Tooltip
+                  placement={'topRight'}
+                  title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
+                >
+                  <div className={'__slippage-title-wrapper'}>Slippage
+                    <Icon
+                      customSize={'16px'}
+                      iconColor={token.colorSuccess}
+                      phosphorIcon={Info}
+                      size='sm'
+                      weight='fill'
+                    />
+                :
+                  </div>
+                </Tooltip>)
+              : (
+                <div className={'__slippage-title-wrapper'}>Slippage
+                  <Icon
+                    customSize={'16px'}
+                    iconColor={token.colorSuccess}
+                    phosphorIcon={Info}
+                    size='sm'
+                    weight='fill'
+                  />
+                    :
+                </div>
+              )}
                     &nbsp;<span>{currentSlippage.slippage * 100}%</span>
 
             {!supportSlippageSelection && (
@@ -758,10 +784,10 @@ const Component = () => {
   }, [form, recipientValue, toAssetInfo]);
 
   useEffect(() => {
-    if (currentQuote?.provider.name === 'Chainflip' && currentSlippage.slippage !== 0) {
+    if ((currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_MAINNET || currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_TESTNET) && currentSlippage.slippage !== 0) {
       setCurrentSlippage({ slippage: 0, isCustomType: true });
     }
-  }, [currentQuote?.provider.name, currentSlippage.slippage]);
+  }, [currentQuote?.provider.id, currentSlippage.slippage]);
 
   useEffect(() => {
     if (isWebUI) {

@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { EarningInstructionModal, EarningOptionDesktopItem, EarningOptionItem, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
-import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
+import { NominationPoolInfo, ValidatorInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType } from '@subwallet/extension-base/types';
+import { EarningOptionDesktopItem, EarningOptionItem, EarningValidatorDetailRWModal, EmptyList, FilterModal, Layout, LoadingScreen } from '@subwallet/extension-web-ui/components';
+import { ASTAR_PORTAL_URL, CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE, VALIDATOR_DETAIL_RW_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldGroupInfo, useSelector, useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { analysisAccounts } from '@subwallet/extension-web-ui/hooks/common/useGetChainSlugsByCurrentAccount';
@@ -18,7 +19,7 @@ import { EarningPoolsParam, EarnParams, ThemeProps, YieldGroupInfo } from '@subw
 import { getValidatorKey, isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { FadersHorizontal, Vault } from 'phosphor-react';
+import { FadersHorizontal, Vault, XCircle } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useOutletContext, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -79,13 +80,15 @@ enum FilterOptionType {
   TEST_NETWORK = 'TEST_NETWORK',
 }
 
-const instructionModalId = EARNING_INSTRUCTION_MODAL;
+const validatorModalId = VALIDATOR_DETAIL_RW_MODAL;
+const earnPath = '/transaction/earn';
 
 function Component ({ className }: Props) {
   const [searchParams] = useSearchParams();
   const [chainParam] = useState(searchParams.get('chain') || '');
   const [earningTypeParam] = useState<YieldPoolType | undefined>(searchParams.get('type') as YieldPoolType || undefined);
   const [targetParam] = useState(searchParams.get('target') || '');
+  const [isAlertWarningValidator, setIsAlertWarningValidator] = useState(false);
 
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
@@ -97,6 +100,7 @@ function Component ({ className }: Props) {
 
   const data = usePreviewYieldGroupInfo(poolInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
+  const [validator, setValidator] = useState<YieldPoolTarget>();
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { accounts, currentAccount } = useSelector((state) => state.accountState);
   const isNoAccount = useSelector((state) => state.accountState.isNoAccount);
@@ -157,8 +161,8 @@ function Component ({ className }: Props) {
     };
   }, [filterOptions.length, selectedFilters]);
 
-  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[]) => {
-    const chainInfo = chainInfoMap[selectedChain];
+  const checkIsAnyAccountValid = useCallback((accounts: AccountJson[], chain = '') => {
+    const chainInfo = chainInfoMap[selectedChain || chain];
     let accountList: AccountJson[] = [];
 
     if (!chainInfo) {
@@ -171,13 +175,14 @@ function Component ({ className }: Props) {
   }, [chainInfoMap, selectedChain]);
 
   const navigateToEarnTransaction = useCallback(
-    () => {
+    (slug: string, chain: string) => {
       if (isNoAccount) {
-        setReturnStorage('/transaction/earn');
+        setReturnStorage(earnPath);
         navigate(DEFAULT_ROUTER_PATH);
       } else {
-        const chainInfo = chainInfoMap[selectedChain];
-        const isAnyAccountValid = checkIsAnyAccountValid(accounts);
+        const chainInfo = chainInfoMap[selectedChain || chain];
+
+        const isAnyAccountValid = checkIsAnyAccountValid(accounts, chain);
 
         if (!isAnyAccountValid) {
           const accountType = isContainOnlySubstrate ? EVM_ACCOUNT_TYPE : SUBSTRATE_ACCOUNT_TYPE;
@@ -190,17 +195,24 @@ function Component ({ className }: Props) {
           if (accountList.length === 1) {
             setEarnStorage((prevState) => ({
               ...prevState,
+              slug: slug || prevState.slug,
+              chain: chain || prevState.chain,
               from: accountList[0].address
             }));
-            saveCurrentAccountAddress(accountList[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
+            saveCurrentAccountAddress(accountList[0]).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           } else {
             if (currentAccount && accountList.some((acc) => acc.address === currentAccount.address)) {
-              navigate('/transaction/earn');
+              navigate(earnPath, { state: { from: earnPath } });
 
               return;
             }
 
-            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+            setEarnStorage((prevState) => ({
+              ...prevState,
+              slug: slug || prevState.slug,
+              chain: chain || prevState.chain
+            }));
+            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           }
         }
       }
@@ -209,8 +221,8 @@ function Component ({ className }: Props) {
   );
 
   const onConnectChainSuccess = useCallback(() => {
-    activeModal(instructionModalId);
-  }, [activeModal]);
+    selectedPoolInfoSlug && navigateToEarnTransaction(selectedPoolInfoSlug, selectedChain);
+  }, [navigateToEarnTransaction, selectedChain, selectedPoolInfoSlug]);
 
   const { alertProps,
     checkChainConnected,
@@ -272,7 +284,8 @@ function Component ({ className }: Props) {
       if (item.poolListLength > 1) {
         navigate('/earning-preview/pools', { state: {
           poolGroup: item.group,
-          symbol: item.symbol
+          symbol: item.symbol,
+          from: earnPath
         } as EarningPoolsParam });
       } else if (item.poolListLength === 1) {
         const poolInfo = poolInfoMap[item.poolSlugs[0]];
@@ -312,10 +325,10 @@ function Component ({ className }: Props) {
           return;
         }
 
-        activeModal(instructionModalId);
+        navigateToEarnTransaction(poolInfo.slug, poolInfo.chain);
       }
     };
-  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, onConnectChain, openAlert, poolInfoMap, setEarnStorage, t, transactionFromValue]);
+  }, [checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, poolInfoMap, setEarnStorage, t, transactionFromValue]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {
@@ -428,10 +441,14 @@ function Component ({ className }: Props) {
 
               if (!isValidatorSupported) {
                 defaultEarnParams.target = 'not-support';
+                setIsAlertWarningValidator(true);
               } else {
                 if (earningTypeParam === YieldPoolType.NATIVE_STAKING) {
                   defaultEarnParams.target = getValidatorKey(isValidatorSupported.address, (isValidatorSupported as ValidatorInfo).identity);
                 }
+
+                setIsAlertWarningValidator(false);
+                setValidator(isValidatorSupported);
               }
             }
 
@@ -440,10 +457,9 @@ function Component ({ className }: Props) {
             //
             //   defaultEarnParams.target = validators.length ? validators.map((v) => `${v.address}___${v.identity || ''}`).join(',') : '';
             // }
-
             setSelectedPoolInfoSlug(poolInfo.slug);
             setEarnStorage(defaultEarnParams);
-            activeModal(instructionModalId);
+            activeModal(validatorModalId);
             setInitLoading(false);
             isAutoOpenInstructionViaParamsRef.current = false;
           }
@@ -471,7 +487,23 @@ function Component ({ className }: Props) {
     return () => {
       isSync = false;
     };
-  }, [activeModal, chainParam, earningTypeParam, poolInfoMap, setEarnStorage, targetParam, transactionFromValue]);
+  }, [activeModal, chainParam, earningTypeParam, poolInfoMap, setEarnStorage, t, targetParam, transactionFromValue]);
+
+  useEffect(() => {
+    isAlertWarningValidator && openAlert({
+      title: t('Unrecommended validator'),
+      type: NotificationType.ERROR,
+      content: t('Your chosen validator is not recommended by SubWallet as staking with this validator won’t accrue any rewards. Select another validator and try again.'),
+      okButton: {
+        text: t('Dismiss'),
+        onClick: () => {
+          setIsAlertWarningValidator(false);
+          closeAlert();
+        },
+        icon: XCircle
+      }
+    });
+  }, [closeAlert, openAlert, t, isAlertWarningValidator]);
 
   return (
     <ChainConnectionWrapper
@@ -560,16 +592,16 @@ function Component ({ className }: Props) {
       </Layout.Base>
 
       {
-        selectedPoolInfoSlug && (
-          <EarningInstructionModal
+        selectedPoolInfoSlug && validator && (
+          <EarningValidatorDetailRWModal
             assetRegistry={assetRegistry}
             bypassEarlyValidate={true}
             closeAlert={closeAlert}
-            isShowStakeMoreButton={true}
             onCancel={onCloseInstructionModal}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
             poolInfo={poolInfoMap[selectedPoolInfoSlug]}
+            validatorItem={validator}
           />
         )
       }

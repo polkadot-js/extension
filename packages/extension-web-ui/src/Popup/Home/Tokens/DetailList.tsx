@@ -368,11 +368,19 @@ function Component (): React.ReactElement {
   }, [tokenGroupMap, tokenGroupSlug]);
 
   const onClickEarnNow = useCallback(() => {
-    navigate('/home/earning/pools', { state: {
-      poolGroup: tokenGroupSlug,
-      symbol
-    } as EarningPoolsParam });
-  }, [navigate, symbol, tokenGroupSlug]);
+    if (!tokenGroupSlug || !symbol) {
+      return;
+    }
+
+    const poolGroup = SHOW_BANNER_TOKEN_GROUPS.find((i) => i === tokenGroupSlug || tokenGroupMap[i]?.includes(tokenGroupSlug));
+
+    if (poolGroup) {
+      navigate('/home/earning/pools', { state: {
+        poolGroup,
+        symbol
+      } as EarningPoolsParam });
+    }
+  }, [navigate, symbol, tokenGroupMap, tokenGroupSlug]);
 
   return (
     <div

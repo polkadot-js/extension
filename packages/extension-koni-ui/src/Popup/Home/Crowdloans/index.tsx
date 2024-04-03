@@ -137,7 +137,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       className={CN(`crowdloans ${className}`, {
         '-has-banner': !!banners.length
       })}
-      resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore'])}
+      resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore', 'balance'])}
     >
       <Layout.Base
         showSubHeader={true}

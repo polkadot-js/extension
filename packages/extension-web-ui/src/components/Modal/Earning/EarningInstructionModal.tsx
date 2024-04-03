@@ -583,6 +583,7 @@ const Component: React.FC<Props> = (props: Props) => {
       footer={footerNode}
       fullSizeOnMobile={true}
       id={modalId}
+      maskClosable={false}
       onCancel={closeModal}
       title={title}
       width={isWebUI ? 642 : undefined}

@@ -1,5 +1,43 @@
 # CHANGELOG
 
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
+## 1.1.50
+Build date: Mar 28, 2024.
+
+Features & Update:
+Nội dung release:
+- Integrate asset online (#2790)
+- Add Swap button (#2784)
+- Update chain-list (#2805)
+  - Add support for RMRK token for Astar EVM
+  - Add support for Creditcoin cc3 testnet
+
+Bugs fixed:
+- Fixed bug Do not show balance in case standing on History list to search token (#2791)
+
+## 1.1.49
+Build date: Mar 25, 2024.
+
+Features & Update:
+- Improve UI for Mission Pools (#2796)
+
+Bugs fixed:
+- Check transfer logic that can potentially affect ED (#2798)
+- Handle case slow getting max transferable cause wrong amount when submit max transfer (#2793)
+- Fixed bug when performing XCM transfer on Kusama (#2814)
+- Fixed bug Error parsing token balance for frozen asset on Asset Hub (#2799)
+
+## 1.1.48
+Build date: Mar 25, 2024.
+
+Bugs fixed:
+- Fix send fund error (#2795)
+
 ## 1.1.47
 Build date: Mar 23, 2024.
 

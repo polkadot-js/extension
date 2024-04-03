@@ -6,7 +6,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddMoreBalanceModal, AddressInput, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -42,16 +42,6 @@ interface FeeItem {
   label: string,
   prefix?: string,
   suffix?: string
-}
-
-enum SlippageValueType {
-  INPUT_TYPE = 'input_value',
-  SELECT_TYPE = 'select_value'
-}
-
-interface SlippageType {
-  slippage: number,
-  type?: SlippageValueType
 }
 
 const hideFields: Array<keyof SwapParams> = ['fromAmount', 'fromTokenSlug', 'toTokenSlug', 'chain'];
@@ -102,7 +92,7 @@ const Component = () => {
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
-  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0 });
+  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0, isCustomType: true });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
@@ -1245,7 +1235,7 @@ const Component = () => {
                       network={currentQuote.provider.id.toLowerCase()}
                       shape='squircle'
                       size={24}
-                      token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
+                      // token={feeAssetInfo && feeAssetInfo.slug.toLowerCase()}
                     />
 
                     {currentQuote.provider.name}

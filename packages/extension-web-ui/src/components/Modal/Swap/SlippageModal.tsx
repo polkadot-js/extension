@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SlippageType } from '@subwallet/extension-base/types/swap';
 import { AlertBox, BaseModal } from '@subwallet/extension-web-ui/components';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
@@ -8,16 +9,6 @@ import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
-
-enum SlippageValueType {
-  INPUT_TYPE = 'input_value',
-  SELECT_TYPE = 'select_value'
-}
-
-interface SlippageType {
-  slippage: number,
-  type?: SlippageValueType
-}
 
 type Props = ThemeProps & {
   modalId: string,
@@ -40,7 +31,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const [selectedSlippage, setSelectedSlippage] = useState<string | undefined>();
   const firstRenderRef = useRef(false);
 
-  const { inactiveModal } = useContext(ModalContext);
+  const { checkActive, inactiveModal } = useContext(ModalContext);
+  const isActive = checkActive(modalId);
 
   const [form] = Form.useForm<FormProps>();
 
@@ -66,39 +58,44 @@ const Component: React.FC<Props> = (props: Props) => {
 
   useEffect(() => {
     if (!firstRenderRef.current) {
-      if (slippageValue.type === SlippageValueType.SELECT_TYPE) {
+      if (slippageValue.isCustomType) {
         for (const [key, val] of Object.entries(SLIPPAGE_TOLERANCE)) {
           if (val === slippageValue.slippage) {
             setSelectedSlippage(key);
+            firstRenderRef.current = true;
             break;
           }
         }
-      } else {
-        form.setFieldValue('slippage', slippageValue.slippage);
-      }
 
-      firstRenderRef.current = true;
+        !firstRenderRef.current && setSelectedSlippage(undefined);
+        form.setFieldValue('slippage', undefined);
+      } else {
+        form.setFieldValue('slippage', slippageValue.slippage * 100);
+      }
     }
-  }, [form, slippageValue]);
+  }, [form, isActive, slippageValue.isCustomType, slippageValue.slippage]);
+
+  useEffect(() => {
+    if (!isActive) {
+      firstRenderRef.current = false;
+    }
+  }, [isActive]);
 
   const handleApplySlippage = useCallback(() => {
     inactiveModal(modalId);
-    const slippageValueForm = form.getFieldValue('slippage');
-
-    console.log('slippageValueForm', slippageValueForm);
-    console.log('selectedSlippage', selectedSlippage);
+    const slippageValueForm = form.getFieldValue('slippage') as string;
 
     if (selectedSlippage) {
       const slippageObject: SlippageType = {
         slippage: SLIPPAGE_TOLERANCE[selectedSlippage],
-        type: SlippageValueType.SELECT_TYPE
+        isCustomType: true
       };
 
       onApplySlippage?.(slippageObject);
     } else if (slippageValueForm) {
       const slippageObject: SlippageType = {
         slippage: Number(slippageValueForm) / 100,
-        type: SlippageValueType.INPUT_TYPE
+        isCustomType: false
       };
 
       onApplySlippage?.(slippageObject);
@@ -106,11 +103,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, inactiveModal, modalId, onApplySlippage, selectedSlippage]);
 
   const onValuesChange: FormCallbacks<FormProps>['onValuesChange'] = useCallback((changes: Partial<FormProps>, values: FormProps) => {
-    const { slippage } = values;
-
     setSelectedSlippage(undefined);
-
-    console.log('slippage_on_modal', slippage);
   }, []);
 
   return (
@@ -175,9 +168,6 @@ const Component: React.FC<Props> = (props: Props) => {
           </div>
           <div>Or custom slippage</div>
           <div className={'__slippage-form'}>
-            {/* <Input */}
-            {/*  placeholder={'0.1 - 2'} */}
-            {/* /> */}
             <Form
               form={form}
               initialValues={formDefault}

@@ -268,8 +268,6 @@ export class HydradxHandler implements SwapBaseInterface {
         feeType: SwapFeeType.PLATFORM_FEE
       };
 
-      console.log('swap path', quoteResponse.swaps.reverse());
-
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
       const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
 

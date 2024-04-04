@@ -441,7 +441,7 @@ export class HydradxHandler implements SwapBaseInterface {
           case SwapStepType.SET_FEE_TOKEN:
             return this.swapBaseHandler.validateSetFeeTokenStep(params, index);
           default:
-            return this.swapBaseHandler.validateSwapStep(params, isXcmOk);
+            return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
         }
       };
 

@@ -330,7 +330,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
 
     let isXcmOk = false;
 
-    for (const step of params.process.steps) {
+    for (const [index, step] of params.process.steps.entries()) {
       const getErrors = async (): Promise<TransactionError[]> => {
         switch (step.type) {
           case SwapStepType.DEFAULT:
@@ -338,7 +338,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
           case SwapStepType.TOKEN_APPROVAL:
             return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
           default:
-            return this.swapBaseHandler.validateSwapStep(params, isXcmOk);
+            return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
         }
       };
 

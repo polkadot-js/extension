@@ -614,6 +614,7 @@ const Component = () => {
 
                 if (latestSwapQuote.optimalQuote) {
                   latestOptimalQuote = latestSwapQuote.optimalQuote;
+                  setQuoteOptions(latestSwapQuote.quotes);
                   setCurrentQuote(latestSwapQuote.optimalQuote);
                   setQuoteAliveUntil(latestSwapQuote.aliveUntil);
                 }
@@ -897,6 +898,7 @@ const Component = () => {
 
         getLatestSwapQuote(currentQuoteRequest).then((rs) => {
           if (sync) {
+            setQuoteOptions(rs.quotes);
             setCurrentQuote(rs.optimalQuote);
             setQuoteAliveUntil(rs.aliveUntil);
           }

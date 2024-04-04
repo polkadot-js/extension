@@ -461,36 +461,70 @@ export class HydradxHandler implements SwapBaseInterface {
     const fromAssetId = _getTokenOnChainAssetId(fromAsset);
     const toAssetId = _getTokenOnChainAssetId(toAsset);
 
-    if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
-      return Promise.resolve({
-        error: SwapErrorType.ASSET_NOT_SUPPORTED
-      });
-    }
-
-    if (!fromAssetId || !toAssetId) {
-      return Promise.resolve({
-        error: SwapErrorType.UNKNOWN
-      });
-    }
-
     try {
+      // todo: might need to optimize for performance, but prioritize safety for now
+      const allAssets = await this.tradeRouter?.getAllAssets();
+
+      if (!allAssets) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
+      const supportedFromAsset = allAssets.find((asset) => asset.id === fromAssetId && asset.symbol === fromAsset.symbol);
+      const supportedToAsset = allAssets.find((asset) => asset.id === toAssetId && asset.symbol === toAsset.symbol);
+
+      if (!supportedFromAsset || !supportedToAsset) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      const assetPairs = await this.tradeRouter?.getAssetPairs(fromAssetId);
+
+      if (!assetPairs) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
+      const pairedToAsset = assetPairs.find((supportedToAsset) => supportedToAsset.id === toAssetId && supportedToAsset.symbol === toAsset.symbol);
+
+      if (!pairedToAsset) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      if (!fromAssetId || !toAssetId) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
       const bnAmount = new BigNumber(request.fromAmount);
 
       if (bnAmount.lte(0)) {
-        return Promise.resolve({
+        return {
           error: SwapErrorType.AMOUNT_CANNOT_BE_ZERO
-        });
+        };
       }
 
-      return Promise.resolve({
+      return {
         metadata: {
           chain: this.chainService.getChainInfoByKey(this.chain)
         } as HydradxPreValidationMetadata
-      });
+      };
     } catch (e) {
-      return Promise.resolve({
+      return {
         error: SwapErrorType.UNKNOWN
-      });
+      };
     }
   }
 

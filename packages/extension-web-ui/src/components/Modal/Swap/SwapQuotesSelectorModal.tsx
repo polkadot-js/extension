@@ -42,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
             isRecommend={optimalQuoteItem?.provider.id === item.provider.id}
             key={item.provider.id}
             onSelect={onSelectItem}
-            quote={item}
+            quote={selectedItem?.provider.id === item.provider.id ? selectedItem : item}
             selected={selectedItem?.provider.id === item.provider.id}
           />
         ))}

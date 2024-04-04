@@ -7,7 +7,7 @@ import { FormCallbacks, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { ClipboardEventHandler, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -106,6 +106,32 @@ const Component: React.FC<Props> = (props: Props) => {
     setSelectedSlippage(undefined);
   }, []);
 
+  const onPaste = useCallback<ClipboardEventHandler<HTMLInputElement>>((event) => {
+    const data = event.clipboardData.getData('text');
+
+    const { selectionEnd: j, selectionStart: i, value } = event.currentTarget;
+    const newValue = `${value.substring(0, i || 0)}${data}${value.substring(j || 0)}`;
+
+    if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
+      event.preventDefault();
+    }
+  }, []);
+
+  const onKeyPress = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    const charCode = event.charCode;
+
+    if ((charCode < 48 || charCode > 57) && charCode !== 46) {
+      event.preventDefault();
+    }
+
+    const currentValue = event.currentTarget.value;
+    const newValue = parseFloat(currentValue + String.fromCharCode(charCode));
+
+    if (newValue < 0 || newValue > 100) {
+      event.preventDefault();
+    }
+  }, []);
+
   return (
     <>
       <BaseModal
@@ -166,7 +192,7 @@ const Component: React.FC<Props> = (props: Props) => {
               </div>
             ))}
           </div>
-          <div>Or custom slippage</div>
+          <div className={'__item-custom-slippage'}>Or custom slippage</div>
           <div className={'__slippage-form'}>
             <Form
               form={form}
@@ -178,6 +204,8 @@ const Component: React.FC<Props> = (props: Props) => {
               >
                 <Input
                   min={0}
+                  onKeyPress={onKeyPress}
+                  onPaste={onPaste}
                   placeholder={'0.1 - 2'}
                 />
               </Form.Item>
@@ -232,7 +260,31 @@ const SlippageModal = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.__slippage-form': {
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center'
+      alignItems: 'center',
+      backgroundColor: token.colorBgInput,
+      borderRadius: 8,
+      paddingRight: token.padding
+    },
+    '.__item-slippage-title, .__item-custom-slippage': {
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM,
+      fontWeight: token.bodyFontWeight,
+      color: token.colorTextTertiary
+    },
+    '.ant-input-container': {
+      backgroundColor: token.colorBgInput
+    },
+    '.ant-form-item': {
+      marginBottom: 0
+    },
+    '.ant-btn-ghost': {
+      color: token.colorWhite
+    },
+    '.ant-btn-ghost:hover': {
+      color: token['gray-6']
+    },
+    '.ant-sw-modal-footer': {
+      borderTop: 0
     }
 
   };

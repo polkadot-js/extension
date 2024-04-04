@@ -71,6 +71,10 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   };
 
+  const getWaitingTime = useMemo(() => {
+    return Math.ceil((data.quote.estimatedArrivalTime || 0) / 60);
+  }, [data.quote.estimatedArrivalTime]);
+
   useEffect(() => {
     let timer: NodeJS.Timer;
 
@@ -123,9 +127,9 @@ const Component: React.FC<Props> = (props: Props) => {
         >
         </MetaInfo.Default>
         <SwapRoute swapRoute={data.quote.route} />
-        {!showQuoteExpired && <AlertBox
+        {!showQuoteExpired && getWaitingTime > 0 && <AlertBox
           className={'__swap-arrival-time'}
-          description={t(`Swapping via ${data.provider.name} can take up to ${Math.ceil((data.quote.estimatedArrivalTime || 0) / 60)} minutes. Make sure you review all information carefully before submitting.`)}
+          description={t(`Swapping via ${data.provider.name} can take up to ${getWaitingTime} minutes. Make sure you review all information carefully before submitting.`)}
           title={t('Pay attention!')}
           type='warning'
         />}

@@ -18,7 +18,15 @@ import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
 
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+
 const HYDRADX_LOW_LIQUIDITY_THRESHOLD = 0.15;
+
+const HYDRADX_SUBWALLET_REFERRAL_CODE = 'WALLET';
+const HYDRADX_SUBWALLET_REFERRAL_ACCOUNT = '7PCsCpkgsHdNaZhv79wCCQ5z97uxVbSeSCtDMUa1eZHKXy4a';
+
+const HYDRADX_TESTNET_SUBWALLET_REFERRAL_CODE = 'ASSETHUB';
+const HYDRADX_TESTNET_SUBWALLET_REFERRAL_ACCOUNT = '7LCt6dFqtxzdKVB2648jWW9d85doiFfLSbZJDNAMVJNxh5rJ';
 
 export class HydradxHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -90,56 +98,64 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
-    if (!bnFromAssetBalance.gte(bnAmount)) { // if not enough balance
-      const alternativeAssetSlug = getSwapAlternativeAsset(params.request.pair);
-
-      if (alternativeAssetSlug) {
-        const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
-        const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
-        const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
-
-        if (bnAlternativeAssetBalance.gt(0)) {
-          const alternativeChainInfo = this.chainService.getChainInfoByKey(alternativeAsset.originChain);
-          const step: BaseStepDetail = {
-            metadata: {
-              sendingValue: bnAmount.toString(),
-              originTokenInfo: alternativeAsset,
-              destinationTokenInfo: fromAsset
-            },
-            name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
-            type: SwapStepType.XCM
-          };
-
-          const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
-
-          const xcmTransfer = await createXcmExtrinsic({
-            originTokenInfo: alternativeAsset,
-            destinationTokenInfo: fromAsset,
-            sendingValue: bnAmount.toString(),
-            recipient: params.request.address,
-            chainInfoMap: this.chainService.getChainInfoMap(),
-            substrateApi: xcmOriginSubstrateApi
-          });
-
-          const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
-          const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
-
-          const fee: SwapFeeInfo = {
-            feeComponent: [{
-              feeType: SwapFeeType.NETWORK_FEE,
-              amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
-              tokenSlug: _getChainNativeTokenSlug(alternativeChainInfo)
-            }],
-            defaultFeeToken: _getChainNativeTokenSlug(alternativeChainInfo),
-            feeOptions: [_getChainNativeTokenSlug(alternativeChainInfo)]
-          };
-
-          return [step, fee];
-        }
-      }
+    if (bnFromAssetBalance.gte(bnAmount)) {
+      return undefined; // enough balance, no need to xcm
     }
 
-    return undefined;
+    const alternativeAssetSlug = getSwapAlternativeAsset(params.request.pair);
+
+    if (!alternativeAssetSlug) {
+      return undefined;
+    }
+
+    const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
+    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+    const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
+
+    if (bnAlternativeAssetBalance.lte(0)) {
+      return undefined;
+    }
+
+    try {
+      const alternativeChainInfo = this.chainService.getChainInfoByKey(alternativeAsset.originChain);
+      const step: BaseStepDetail = {
+        metadata: {
+          sendingValue: bnAmount.toString(),
+          originTokenInfo: alternativeAsset,
+          destinationTokenInfo: fromAsset
+        },
+        name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
+        type: SwapStepType.XCM
+      };
+
+      const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
+
+      const xcmTransfer = await createXcmExtrinsic({
+        originTokenInfo: alternativeAsset,
+        destinationTokenInfo: fromAsset,
+        sendingValue: bnAmount.toString(),
+        recipient: params.request.address,
+        chainInfoMap: this.chainService.getChainInfoMap(),
+        substrateApi: xcmOriginSubstrateApi
+      });
+
+      const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
+      const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
+
+      const fee: SwapFeeInfo = {
+        feeComponent: [{
+          feeType: SwapFeeType.NETWORK_FEE,
+          amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
+          tokenSlug: _getChainNativeTokenSlug(alternativeChainInfo)
+        }],
+        defaultFeeToken: _getChainNativeTokenSlug(alternativeChainInfo),
+        feeOptions: [_getChainNativeTokenSlug(alternativeChainInfo)]
+      };
+
+      return [step, fee];
+    } catch (e) {
+      return undefined;
+    }
   }
 
   async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
@@ -188,7 +204,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const path: string[] = [];
 
-    swapList.forEach((swap) => {
+    swapList.reverse().forEach((swap) => { // swap returned are in reverse order [lastSwap,..., firstSwap]
       const swapAssetIn = swapAssetIdMap[swap.assetIn]?.slug;
       const swapAssetOut = swapAssetIdMap[swap.assetOut]?.slug;
 
@@ -231,14 +247,10 @@ export class HydradxHandler implements SwapBaseInterface {
       const parsedFromAmount = new BigNumber(request.fromAmount).shiftedBy(-1 * _getAssetDecimals(fromAsset)).toString();
       const quoteResponse = await this.tradeRouter.getBestSell(fromAssetId, toAssetId, parsedFromAmount);
 
-      console.log('quoteResponse', quoteResponse);
-
       const toAmount = quoteResponse.amountOut;
 
-      const minReceive = toAmount.times(1 - 0.02).integerValue(); // todo: multiply with slippage
+      const minReceive = toAmount.times(1 - request.slippage).integerValue();
       const txHex = quoteResponse.toTx(minReceive).hex;
-
-      console.log('txHex', txHex);
 
       const substrateApi = this.chainService.getSubstrateApi(this.chain);
       const extrinsic = substrateApi.api.tx(txHex);
@@ -259,8 +271,6 @@ export class HydradxHandler implements SwapBaseInterface {
       const swapRoute = this.parseSwapPath(quoteResponse.swaps);
       const swapPathErrors = this.getSwapPathErrors(quoteResponse.swaps);
 
-      console.log('swapPathErrors', swapPathErrors);
-
       if (swapPathErrors.length > 0) {
         const defaultError = swapPathErrors[0]; // might parse more errors
 
@@ -278,15 +288,13 @@ export class HydradxHandler implements SwapBaseInterface {
         }
       }
 
-      // todo: check price impact, if price impact > 0.15% -> low liquidity
-
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
         toAmount: toAmount.toString(),
         rate: calculateSwapRate(request.fromAmount, toAmount.toString(), fromAsset, toAsset),
         provider: this.providerInfo,
-        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default), // todo: ask HydraDX team
+        aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         feeInfo: {
           feeComponent: [networkFee, tradeFee],
           defaultFeeToken: fromChainNativeTokenSlug,
@@ -297,8 +305,6 @@ export class HydradxHandler implements SwapBaseInterface {
         metadata: txHex
       } as SwapQuote;
     } catch (e) {
-      console.error('getSwapQuote error', e);
-
       return new SwapError(SwapErrorType.ERROR_FETCHING_QUOTE);
     }
   }
@@ -319,9 +325,14 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const bnAmount = new BigNumber(params.quote.fromAmount);
     const bnDestinationAssetBalance = new BigNumber(destinationAssetBalance.value);
-    const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount);
 
-    const bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance).plus(bnXcmFee);
+    let bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance);
+
+    if (_isNativeToken(originAsset)) {
+      const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount); // xcm fee is paid in native token but swap token is not always native token
+
+      bnTotalAmount = bnTotalAmount.plus(bnXcmFee);
+    }
 
     const xcmTransfer = await createXcmExtrinsic({
       originTokenInfo: originAsset,
@@ -368,7 +379,19 @@ export class HydradxHandler implements SwapBaseInterface {
       txHex
     };
 
-    const extrinsic = chainApi.api.tx(txHex);
+    let extrinsic: SubmittableExtrinsic<'promise'>;
+
+    const _referral = await chainApi.api.query.referrals.linkedAccounts(params.address);
+    const referral = _referral?.toString();
+
+    if (!referral || referral === '') {
+      extrinsic = chainApi.api.tx.utility.batchAll([
+        chainApi.api.tx.referrals.linkCode(this.referralCode),
+        chainApi.api.tx(txHex)
+      ]);
+    } else {
+      extrinsic = chainApi.api.tx(txHex);
+    }
 
     return {
       txChain: fromAsset.originChain,
@@ -399,7 +422,6 @@ export class HydradxHandler implements SwapBaseInterface {
   }
 
   public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
-    // TODO: validate xcm amount
     const amount = params.selectedQuote.fromAmount;
     const bnAmount = new BigNumber(amount);
 
@@ -442,36 +464,86 @@ export class HydradxHandler implements SwapBaseInterface {
     const fromAssetId = _getTokenOnChainAssetId(fromAsset);
     const toAssetId = _getTokenOnChainAssetId(toAsset);
 
-    if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
-      return Promise.resolve({
-        error: SwapErrorType.ASSET_NOT_SUPPORTED
-      });
-    }
-
-    if (!fromAssetId || !toAssetId) {
-      return Promise.resolve({
-        error: SwapErrorType.UNKNOWN
-      });
-    }
-
     try {
+      // todo: might need to optimize for performance, but prioritize safety for now
+      const allAssets = await this.tradeRouter?.getAllAssets();
+
+      if (!allAssets) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
+      const supportedFromAsset = allAssets.find((asset) => asset.id === fromAssetId && asset.symbol === fromAsset.symbol);
+      const supportedToAsset = allAssets.find((asset) => asset.id === toAssetId && asset.symbol === toAsset.symbol);
+
+      if (!supportedFromAsset || !supportedToAsset) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      const assetPairs = await this.tradeRouter?.getAssetPairs(fromAssetId);
+
+      if (!assetPairs) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
+      const pairedToAsset = assetPairs.find((supportedToAsset) => supportedToAsset.id === toAssetId && supportedToAsset.symbol === toAsset.symbol);
+
+      if (!pairedToAsset) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      if (!(fromAsset.originChain === this.chain && toAsset.originChain === this.chain)) {
+        return {
+          error: SwapErrorType.ASSET_NOT_SUPPORTED
+        };
+      }
+
+      if (!fromAssetId || !toAssetId) {
+        return {
+          error: SwapErrorType.UNKNOWN
+        };
+      }
+
       const bnAmount = new BigNumber(request.fromAmount);
 
       if (bnAmount.lte(0)) {
-        return Promise.resolve({
+        return {
           error: SwapErrorType.AMOUNT_CANNOT_BE_ZERO
-        });
+        };
       }
 
-      return Promise.resolve({
+      return {
         metadata: {
           chain: this.chainService.getChainInfoByKey(this.chain)
         } as HydradxPreValidationMetadata
-      });
+      };
     } catch (e) {
-      return Promise.resolve({
+      return {
         error: SwapErrorType.UNKNOWN
-      });
+      };
     }
+  }
+
+  get referralCode () {
+    if (this.isTestnet) {
+      return HYDRADX_TESTNET_SUBWALLET_REFERRAL_CODE;
+    }
+
+    return HYDRADX_SUBWALLET_REFERRAL_CODE;
+  }
+
+  get referralAccount () {
+    if (this.isTestnet) {
+      return HYDRADX_TESTNET_SUBWALLET_REFERRAL_ACCOUNT;
+    }
+
+    return HYDRADX_SUBWALLET_REFERRAL_ACCOUNT;
   }
 }

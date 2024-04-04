@@ -190,7 +190,7 @@ export class SwapBaseHandler {
       const parsedMaxBalanceSwap = formatNumber(bnMaxBalanceSwap, _getAssetDecimals(fromAsset));
 
       return Promise.resolve([new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-        `Amount too high. Lower your amount below ${parsedMaxBalanceSwap} ${fromAsset.symbol} and try again`)]);
+        `Amount too high. Lower your amount ${bnMaxBalanceSwap.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromAsset.symbol}` : ''} and try again`)]);
     }
 
     if (params.recipient) {

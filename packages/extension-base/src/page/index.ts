@@ -55,7 +55,7 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
 
 // the enable function, called by the dapp to allow access
 export async function enable (origin: string): Promise<Injected> {
-  await sendMessage('pub(authorize.tabV2)', { origin });
+  await sendMessage('pub(authorize.tabV2)', { origin, accountAuthType: 'both' });
 
   return new Injected(sendMessage);
 }

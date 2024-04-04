@@ -9,7 +9,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_SWAP_FIRST_STEP, getSwapAlternativeAsset, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapFeeType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
@@ -154,7 +154,7 @@ export class SwapBaseHandler {
     return Promise.resolve([]);
   }
 
-  public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean): Promise<TransactionError[]> {
+  public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean, stepIndex: number): Promise<TransactionError[]> {
     if (!params.selectedQuote) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -169,8 +169,28 @@ export class SwapBaseHandler {
     const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
     const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
 
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug);
+    const stepFee = params.process.totalFee[stepIndex].feeComponent;
+    const networkFee = stepFee.find((fee) => fee.feeType === SwapFeeType.NETWORK_FEE);
+
+    if (!networkFee) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const feeTokenInfo = this.chainService.getAssetBySlug(networkFee.tokenSlug);
+    const feeTokenChain = this.chainService.getChainInfoByKey(feeTokenInfo.originChain);
+
+    const [feeTokenBalance, fromAssetBalance] = await Promise.all([
+      this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
+      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+    ]);
+
+    const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+
+    if (bnFeeTokenBalance.lte(new BigNumber(networkFee.amount))) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
+        `You don't have enough ${feeTokenInfo.symbol} (${feeTokenChain.name}) to pay transaction fee`)]);
+    }
 
     if (params.selectedQuote.minSwap) {
       const minProtocolSwap = new BigNumber(params.selectedQuote.minSwap);

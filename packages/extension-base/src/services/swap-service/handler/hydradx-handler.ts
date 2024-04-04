@@ -325,9 +325,14 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const bnAmount = new BigNumber(params.quote.fromAmount);
     const bnDestinationAssetBalance = new BigNumber(destinationAssetBalance.value);
-    const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount);
 
-    const bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance).plus(bnXcmFee);
+    let bnTotalAmount = bnAmount.minus(bnDestinationAssetBalance);
+
+    if (_isNativeToken(originAsset)) {
+      const bnXcmFee = new BigNumber(xcmFee.feeComponent[0].amount); // xcm fee is paid in native token but swap token is not always native token
+
+      bnTotalAmount = bnTotalAmount.plus(bnXcmFee);
+    }
 
     const xcmTransfer = await createXcmExtrinsic({
       originTokenInfo: originAsset,

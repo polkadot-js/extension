@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getBondedValidators, getEarningStatusByNominations, getParaCurrentInflation, InflationConfig, isUnstakeAll } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
+import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _STAKING_CHAIN_GROUP, MANTA_MIN_DELEGATION, MANTA_VALIDATOR_POINTS_PER_BLOCK } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
@@ -198,16 +198,20 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     let bnTotalUnstaking = BN_ZERO;
 
     const _roundInfo = await substrateApi.api.query.parachainStaking.round();
-    const roundInfo = _roundInfo.toPrimitive() as Record<string, number>;
+    const roundInfo = _roundInfo.toPrimitive() as unknown as PalletParachainStakingRoundInfo;
     const currentRound = roundInfo.current;
 
     await Promise.all(delegatorState.delegations.map(async (delegation) => {
-      const [_delegationScheduledRequests, [identity], _collatorInfo] = await Promise.all([
+      const [_delegationScheduledRequests, [identity], _collatorInfo, _currentBlock, _currentTimestamp] = await Promise.all([
         substrateApi.api.query.parachainStaking.delegationScheduledRequests(delegation.owner),
         parseIdentity(substrateApi, delegation.owner),
-        substrateApi.api.query.parachainStaking.candidateInfo(delegation.owner)
+        substrateApi.api.query.parachainStaking.candidateInfo(delegation.owner),
+        substrateApi.api.query.system.number(),
+        substrateApi.api.query.timestamp.now()
       ]);
 
+      const currentBlock = _currentBlock.toPrimitive() as number;
+      const currentTimestamp = _currentTimestamp.toPrimitive() as number;
       const collatorInfo = _collatorInfo.toPrimitive() as unknown as ParachainStakingCandidateMetadata;
       const minDelegation = collatorInfo?.lowestTopDelegationAmount.toString();
       const delegationScheduledRequests = _delegationScheduledRequests.toPrimitive() as unknown as PalletParachainStakingDelegationRequestsScheduledRequest[];
@@ -219,20 +223,23 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       if (delegationScheduledRequests) {
         for (const scheduledRequest of delegationScheduledRequests) {
           if (reformatAddress(scheduledRequest.delegator, 0) === reformatAddress(address, 0)) { // add network prefix
-            const isClaimable = scheduledRequest.whenExecutable - currentRound <= 0;
-            const remainingEra = scheduledRequest.whenExecutable - currentRound;
+            const isClaimable = scheduledRequest.whenExecutable - parseInt(currentRound) <= 0;
+            const remainingEra = scheduledRequest.whenExecutable - parseInt(currentRound);
             const waitingTime = remainingEra * _STAKING_ERA_LENGTH_MAP[chainInfo.slug];
             const claimable = Object.values(scheduledRequest.action)[0];
-            // const currentTimestampMs = Date.now();
-            // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
+
+            // noted: target timestamp in parachainStaking easily volatile if block time volatile
+            const targetBlock = remainingEra * parseInt(roundInfo.length) + parseInt(roundInfo.first);
+            const remainingBlock = targetBlock - currentBlock;
+            const targetTimestampMs = remainingBlock * _EXPECTED_BLOCK_TIME[chainInfo.slug] * 1000 + currentTimestamp;
 
             unstakingMap[delegation.owner] = {
               chain: chainInfo.slug,
               status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
               validatorAddress: delegation.owner,
               claimable: claimable.toString(),
-              waitingTime
-              // targetTimestampMs: targetTimestampMs
+              waitingTime,
+              targetTimestampMs: targetTimestampMs
             } as UnstakingInfo;
 
             hasUnstaking = true;

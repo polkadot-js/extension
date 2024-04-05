@@ -6,6 +6,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import BigN from 'bignumber.js';
 
 // core
 export type SwapRate = number;
@@ -205,6 +206,6 @@ export interface ValidateSwapProcessParams {
 }
 
 export interface SlippageType {
-  slippage: number,
+  slippage: BigN,
   isCustomType: boolean
 }

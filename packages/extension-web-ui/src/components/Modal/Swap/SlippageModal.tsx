@@ -5,6 +5,7 @@ import { SlippageType } from '@subwallet/extension-base/types/swap';
 import { AlertBox, BaseModal } from '@subwallet/extension-web-ui/components';
 import { FormCallbacks, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Form, Icon, Input, ModalContext } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CheckCircle, XCircle } from 'phosphor-react';
 import React, { ClipboardEventHandler, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -60,7 +61,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (!firstRenderRef.current) {
       if (slippageValue.isCustomType) {
         for (const [key, val] of Object.entries(SLIPPAGE_TOLERANCE)) {
-          if (val === slippageValue.slippage) {
+          if (slippageValue.slippage.isEqualTo(val)) {
             setSelectedSlippage(key);
             firstRenderRef.current = true;
             break;
@@ -70,7 +71,7 @@ const Component: React.FC<Props> = (props: Props) => {
         !firstRenderRef.current && setSelectedSlippage(undefined);
         form.setFieldValue('slippage', undefined);
       } else {
-        form.setFieldValue('slippage', slippageValue.slippage * 100);
+        form.setFieldValue('slippage', slippageValue.slippage.multipliedBy(100));
       }
     }
   }, [form, isActive, slippageValue.isCustomType, slippageValue.slippage]);
@@ -87,14 +88,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
     if (selectedSlippage) {
       const slippageObject: SlippageType = {
-        slippage: SLIPPAGE_TOLERANCE[selectedSlippage],
+        slippage: new BigN(SLIPPAGE_TOLERANCE[selectedSlippage]),
         isCustomType: true
       };
 
       onApplySlippage?.(slippageObject);
     } else if (slippageValueForm) {
       const slippageObject: SlippageType = {
-        slippage: Number(slippageValueForm) / 100,
+        slippage: new BigN(slippageValueForm).div(100),
         isCustomType: false
       };
 

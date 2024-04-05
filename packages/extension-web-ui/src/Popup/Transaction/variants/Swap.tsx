@@ -92,7 +92,7 @@ const Component = () => {
   const [currentQuoteRequest, setCurrentQuoteRequest] = useState<SwapRequest | undefined>(undefined);
   const [feeOptions, setFeeOptions] = useState<string[] | undefined>([]);
   const [currentFeeOption, setCurrentFeeOption] = useState<string | undefined>(undefined);
-  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: 0.01, isCustomType: true });
+  const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: new BigN(0.01), isCustomType: true });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
@@ -626,7 +626,7 @@ const Component = () => {
               currentStep: step,
               quote: latestOptimalQuote,
               address: from,
-              slippage: currentSlippage.slippage,
+              slippage: currentSlippage.slippage.toNumber(),
               recipient
             });
 
@@ -692,7 +692,7 @@ const Component = () => {
   }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
-    return destinationSwapValue.multipliedBy(1 - currentSlippage.slippage);
+    return destinationSwapValue.multipliedBy(1 - currentSlippage.slippage.toNumber());
   }, [destinationSwapValue, currentSlippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {
@@ -740,7 +740,7 @@ const Component = () => {
                     :
                 </div>
               )}
-                    &nbsp;<span>{currentSlippage.slippage * 100}%</span>
+                    &nbsp;<span>{currentSlippage.slippage.multipliedBy(100).toString()}%</span>
 
             {!supportSlippageSelection && (
               <div className='__slippage-editor-button'>
@@ -779,8 +779,8 @@ const Component = () => {
   }, [form, recipientValue, toAssetInfo]);
 
   useEffect(() => {
-    if ((currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_MAINNET || currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_TESTNET) && currentSlippage.slippage !== 0) {
-      setCurrentSlippage({ slippage: 0, isCustomType: true });
+    if ((currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_MAINNET || currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_TESTNET) && !currentSlippage.slippage.isEqualTo(0)) {
+      setCurrentSlippage({ slippage: BN_ZERO, isCustomType: true });
     }
   }, [currentQuote?.provider.id, currentSlippage.slippage]);
 
@@ -836,7 +836,7 @@ const Component = () => {
               to: toTokenSlugValue
             },
             fromAmount: fromAmountValue,
-            slippage: currentSlippage.slippage,
+            slippage: currentSlippage.slippage.toNumber(),
             recipient: recipientValue || undefined
           };
 

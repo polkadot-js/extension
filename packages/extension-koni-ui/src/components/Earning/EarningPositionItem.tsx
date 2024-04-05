@@ -94,10 +94,10 @@ const Component: React.FC<Props> = (props: Props) => {
                 className={'__item-tag'}
                 type={type}
               />
-              <NetworkTag
+              {isTestnet && <NetworkTag
                 className={'__item-tag'}
                 type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
-              />
+              />}
             </div>
 
             {

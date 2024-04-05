@@ -4,7 +4,8 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
@@ -138,7 +139,7 @@ const Component = () => {
   const toTokenSlugValue = useWatchTransaction('toTokenSlug', form, defaultData);
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const recipientValue = useWatchTransaction('recipient', form, defaultData);
-  const { checkChainConnected } = useChainConnection();
+  const { checkChainConnected, turnOnChain } = useChainConnection();
 
   const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
@@ -692,7 +693,7 @@ const Component = () => {
   }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
-    return destinationSwapValue.multipliedBy(1 - currentSlippage.slippage.toNumber());
+    return destinationSwapValue.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
   }, [destinationSwapValue, currentSlippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {
@@ -702,6 +703,23 @@ const Component = () => {
   const onViewQuoteDetail = useCallback(() => {
     setShowQuoteDetailOnMobile(true);
   }, []);
+
+  const altChain = useMemo(() => {
+    if (fromTokenSlugValue && toTokenSlugValue) {
+      const getSlug = `${fromTokenSlugValue}___${toTokenSlugValue}`;
+      const getSwapPair = swapPairs.find((item) => item.slug === getSlug);
+
+      if (getSwapPair) {
+        const alternativeAssetSlug = getSwapAlternativeAsset(getSwapPair);
+
+        if (alternativeAssetSlug) {
+          return _getOriginChainOfAsset(alternativeAssetSlug);
+        }
+      }
+    }
+
+    return undefined;
+  }, [fromTokenSlugValue, toTokenSlugValue, swapPairs]);
 
   const renderSlippage = () => {
     return (
@@ -1006,6 +1024,20 @@ const Component = () => {
     };
   }, [defaultFromValue, persistData]);
 
+  useEffect(() => {
+    if (altChain && !checkChainConnected(altChain)) {
+      turnOnChain(altChain);
+    }
+  }, [checkChainConnected, altChain, turnOnChain]);
+
+  const isNotConnectedAltChain = useMemo(() => {
+    if (altChain && !checkChainConnected(altChain)) {
+      return true;
+    }
+
+    return false;
+  }, [altChain, checkChainConnected]);
+
   return (
     <>
       <>
@@ -1201,7 +1233,7 @@ const Component = () => {
             <Button
               block={true}
               className={'__swap-submit-button'}
-              disabled={submitLoading || handleRequestLoading}
+              disabled={submitLoading || handleRequestLoading || isNotConnectedAltChain}
               loading={submitLoading}
               onClick={form.submit}
             >

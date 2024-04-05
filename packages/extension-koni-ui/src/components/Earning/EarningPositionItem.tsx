@@ -221,7 +221,7 @@ const EarningPositionItem = styled(Component)<Props>(({ theme: { token } }: Prop
       flex: 1,
       display: 'flex',
       overflow: 'hidden',
-      gap: token.sizeXS
+      gap: token.sizeXXS
     },
 
     '.__item-tag': {

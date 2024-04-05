@@ -207,7 +207,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             ? (
               <>
                 {item.name}
-                <div className={'__title-suffix'}>&nbsp;(Recommend)</div>
+                <div className={'__title-suffix'}>&nbsp;(Recommended)</div>
               </>
             )
             : (

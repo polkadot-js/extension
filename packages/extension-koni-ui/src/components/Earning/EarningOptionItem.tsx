@@ -32,95 +32,88 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className)}
       onClick={onClick}
     >
-      <Logo
-        className={'__item-logo'}
-        size={40}
-        token={token.toLowerCase()}
-      />
-      <div className={'__block-wrapper'}>
-        <div className={'__item-info'}>
-          <div className={'__item-left-part'}>
+      <div className={'__item-left-part'}>
+        <Logo
+          className={'__item-logo'}
+          size={40}
+          token={token.toLowerCase()}
+        />
 
-            <div className='__item-lines-container'>
-              <div className='__item-line-1'>
-                <div className='__item-name'>
-                  <span className={'__symbol'}>
-                    {symbol}
-                  </span>
+        <div className='__item-lines-container'>
+          <div className='__item-line-1'>
+            <div className='__item-name'>
+              <span className={'__symbol'}>
+                {symbol}
+              </span>
 
-                  {chain.slug === 'bifrost' && (
-                    <span className={'__chain-wrapper'}>
+              {chain.slug === 'bifrost' && (
+                <span className={'__chain-wrapper'}>
                   (<span className={'__chain'}>
-                        {chain.name}
-                      </span>)
-                    </span>
-                  )}
-                </div>
+                    {chain.name}
+                  </span>)
+                </span>
+              )}
+              <NetworkTag
+                className={'__item-tag'}
+                type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />
+            </div>
 
-                {
-                  !_isRelatedToAstar && !!maxApy && (
-                    <div className='__item-upto'>
-                      <div className='__item-upto-label'>
-                        {t('Up to')}:
-                      </div>
-                      <div className='__item-upto-value'>
-                        <Number
-                          decimal={0}
-                          suffix={'%'}
-                          value={maxApy}
-                        />
-                      </div>
-                    </div>
-                  )
-                }
-              </div>
-              <div className='__item-line-2'>
-                <div className='__item-available-balance'>
-                  <div className='__item-available-balance-label'>
-                    {t('Available')}:
+            {
+              !_isRelatedToAstar && !!maxApy && (
+                <div className='__item-upto'>
+                  <div className='__item-upto-label'>
+                    {t('Up to')}:
                   </div>
-                  <div className={'__item-available-balance-value'}>
+                  <div className='__item-upto-value'>
                     <Number
                       decimal={0}
-                      hide={!isShowBalance}
-                      suffix={symbol}
-                      value={balance.value}
+                      suffix={'%'}
+                      value={maxApy}
                     />
                   </div>
                 </div>
-                {
-                  !_isRelatedToAstar && !!maxApy && (
-                    <div className='__item-time'>
-                      {t('per year')}
-                    </div>
-                  )
-                }
+              )
+            }
+          </div>
+          <div className='__item-line-2'>
+            <div className='__item-available-balance'>
+              <div className='__item-available-balance-label'>
+                {t('Available')}:
+              </div>
+              <div className={'__item-available-balance-value'}>
+                <Number
+                  decimal={0}
+                  hide={!isShowBalance}
+                  suffix={symbol}
+                  value={balance.value}
+                />
               </div>
             </div>
-          </div>
-
-          <div className={'__item-right-part'}>
             {
-              _isRelatedToAstar && (
-                <div className={'__visit-dapp'}>
-                  {t('View on dApp')}
+              !_isRelatedToAstar && !!maxApy && (
+                <div className='__item-time'>
+                  {t('per year')}
                 </div>
               )
             }
-
-            <Icon
-              phosphorIcon={CaretRight}
-              size='sm'
-            />
           </div>
         </div>
-        <div className={'__separator'}></div>
-        <div>
-          <NetworkTag
-            className={'__item-tag'}
-            type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
-          />
-        </div>
+      </div>
+
+      <div className={'__item-right-part'}>
+        {
+          _isRelatedToAstar && (
+            <div className={'__visit-dapp'}>
+              {t('View on dApp')}
+            </div>
+          )
+        }
+
+        <Icon
+          phosphorIcon={CaretRight}
+          size='sm'
+        />
       </div>
     </div>
   );
@@ -139,21 +132,6 @@ const EarningOptionItem = styled(Component)<Props>(({ theme: { token } }: Props)
       backgroundColor: token.colorBgInput
     },
 
-    '.__item-info': {
-      display: 'flex'
-    },
-    '.__block-wrapper': {
-      display: 'flex',
-      flexDirection: 'column',
-      flex: 1
-    },
-    '.__separator': {
-      height: 2,
-      backgroundColor: 'rgba(33, 33, 33, 0.80)',
-      marginTop: 8,
-      marginBottom: 8
-    },
-
     '.__item-left-part': {
       display: 'flex',
       alignItems: 'center',
@@ -169,9 +147,7 @@ const EarningOptionItem = styled(Component)<Props>(({ theme: { token } }: Props)
     },
 
     '.__item-logo': {
-      marginRight: token.marginXS,
-      display: 'flex',
-      alignItems: 'center'
+      marginRight: token.marginXS
     },
 
     '.__item-lines-container': {

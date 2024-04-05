@@ -91,8 +91,10 @@ export class SwapBaseHandler {
     const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
     const fromAsset = this.chainService.getAssetBySlug(swapPair.from);
 
-    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug);
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug);
+    const [alternativeAssetBalance, fromAssetBalance] = await Promise.all([
+      this.balanceService.getTokenFreeBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug),
+      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+    ]);
 
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);

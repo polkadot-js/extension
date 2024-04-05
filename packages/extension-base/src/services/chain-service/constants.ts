@@ -108,7 +108,17 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   creditcoin: 12,
   vara_network: 3,
   goldberg_testnet: 20,
-  polimec: 12
+  polimec: 12,
+  bifrost: 13, // expect 12 but actual 13
+  moonbeam: 12,
+  moonriver: 12,
+  moonbase: 6,
+  turing: 12,
+  turingStaging: 12,
+  bifrost_testnet: 3,
+  calamari: 12,
+  calamari_test: 12,
+  manta_network: 12
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

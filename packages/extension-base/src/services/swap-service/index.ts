@@ -258,6 +258,10 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   public async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const handler = this.handlers[params.quote.provider.id];
 
+    if (params.process.steps.length === 1) { // todo: do better to handle error generating steps
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Please check your network and try again'));
+    }
+
     if (handler) {
       return handler.handleSwapProcess(params);
     } else {

@@ -3,9 +3,10 @@
 
 import { YieldPoolType } from '@subwallet/extension-base/types';
 import { BN_TEN } from '@subwallet/extension-base/utils';
+import { NetworkTag } from '@subwallet/extension-koni-ui/components';
 import EarningTypeTag from '@subwallet/extension-koni-ui/components/Earning/EarningTypeTag';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ExtraYieldPositionInfo, NetworkType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -26,6 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, isShowBalance,
     onClick,
     positionInfo } = props;
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { asset, balanceToken, chain, group, price, slug, totalStake, type } = positionInfo;
 
   const { poolInfoMap } = useSelector((state) => state.earning);
@@ -49,6 +51,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [asset.decimals, balanceValue, price]);
 
   const _isRelatedToAstar = isRelatedToAstar(slug);
+
+  const isTestnet = useMemo(() => {
+    return chainInfoMap[positionInfo.chain].isTestnet;
+  }, [chainInfoMap, positionInfo.chain]);
 
   return (
     <div
@@ -87,6 +93,10 @@ const Component: React.FC<Props> = (props: Props) => {
                 chain={chain}
                 className={'__item-tag'}
                 type={type}
+              />
+              <NetworkTag
+                className={'__item-tag'}
+                type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
               />
             </div>
 

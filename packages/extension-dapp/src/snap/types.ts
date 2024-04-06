@@ -3,12 +3,12 @@
 
 export type GetSnapsResponse = Record<string, Snap>;
 
-export type Snap = {
+export interface Snap {
   permissionName: string;
   id: string;
   version: string;
   initialPermissions: Record<string, unknown>;
-};
+}
 
 declare global {
   interface Window {
@@ -16,13 +16,13 @@ declare global {
   }
 }
 
-export type SnapRpcRequestParams = {
+export interface SnapRpcRequestParams {
   snapId?: string;
   method: string;
   params?: Record<string, any>;
-};
+}
 
-export type SnapInfo = {
+export interface SnapInfo {
   id: string;
   name: string;
   initialPermissions: string[];
@@ -30,6 +30,6 @@ export type SnapInfo = {
   version?: string;
   enabled: boolean;
   blocked: boolean;
-};
+}
 
-export type SnapObject =  Record<string, SnapInfo>;
+export type SnapObject = Record<string, SnapInfo>;

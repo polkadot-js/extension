@@ -1,9 +1,10 @@
 // Copyright 2019-2024 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getMetaDataList, injectedMetamaskSnap } from ".";
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+
 import { DEFAULT_SNAP_NAME, DEFAULT_SNAP_ORIGIN } from './defaults';
-import type { SignerPayloadJSON, SignerPayloadRaw } from "@polkadot/types/types";
+import { getMetaDataList, injectedMetamaskSnap } from '.';
 
 declare global {
   interface Window {
@@ -30,10 +31,10 @@ const TEST_PAYLOAD = {
     'CheckMortality',
     'CheckNonce',
     'CheckWeight',
-    'ChargeTransactionPayment',
+    'ChargeTransactionPayment'
   ],
   transactionVersion: 1,
-  version: 1,
+  version: 1
 } as unknown as SignerPayloadJSON;
 
 describe('Connection to Snap', () => {
@@ -54,7 +55,7 @@ describe('Connection to Snap', () => {
             if (snapRequest === 'getAddress') {
               return TEST_SUBSTRATE_ADDRESS;
             } else if (snapRequest === 'getMetadataList') {
-              return [{ "genesisHash": "0x", "specVersion": 0 }];
+              return [{ genesisHash: '0x', specVersion: 0 }];
             } else if (snapRequest === 'signRaw') {
               return { id: 1, signature: TEST_SIGNATURE };
             } else if (snapRequest === 'signJSON') {
@@ -76,7 +77,7 @@ describe('Connection to Snap', () => {
     }
 
     const connectToSnap = await injectedMetamaskSnap.connect('Random Dapp');
-    const accountsArray = await connectToSnap?.accounts.get()
+    const accountsArray = await connectToSnap?.accounts.get();
 
     expect(accountsArray).toEqual([{
       address: TEST_SUBSTRATE_ADDRESS,
@@ -97,11 +98,11 @@ describe('Connection to Snap', () => {
 
     expect(snapName).toBe(DEFAULT_SNAP_NAME);
     expect(snapVersion).toBe(1);
-    expect(metaData).toEqual([{ "genesisHash": "0x", "specVersion": 0 }]);
+    expect(metaData).toEqual([{ genesisHash: '0x', specVersion: 0 }]);
   });
 
   it('getMetaDataList empty', async () => {
-    const expectedResult = [{ "genesisHash": "0x", "specVersion": 0 }];
+    const expectedResult = [{ genesisHash: '0x', specVersion: 0 }];
 
     const metaDataList = await getMetaDataList();
 
@@ -114,6 +115,7 @@ describe('Connection to Snap', () => {
     }
 
     const connectToSnap = await injectedMetamaskSnap.connect(DEFAULT_SNAP_NAME);
+
     if (!connectToSnap.signer.signRaw) {
       return;
     }
@@ -129,6 +131,7 @@ describe('Connection to Snap', () => {
     }
 
     const connectToSnap = await injectedMetamaskSnap.connect(DEFAULT_SNAP_NAME);
+
     if (!connectToSnap.signer.signPayload) {
       return;
     }

@@ -10,5 +10,5 @@ export const DEFAULT_SNAP_VERSION = '0.2.2';
 export const DEFAULT_SNAP_NAME = 'polkagate-snap';
 
 export const SUPPORTED_SNAPS = {
-  [DEFAULT_SNAP_ORIGIN]: { version: `>=${DEFAULT_SNAP_VERSION}` },
+  [DEFAULT_SNAP_ORIGIN]: { version: `>=${DEFAULT_SNAP_VERSION}` }
 };

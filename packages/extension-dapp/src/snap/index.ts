@@ -1,20 +1,21 @@
 // Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccount, InjectedExtension, InjectedMetadata, InjectedMetadataKnown, InjectedWindowProvider, MetadataDef } from "@polkadot/extension-inject/types";
-import type { KeypairType } from "@polkadot/util-crypto/types";
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SignerResult } from '@polkadot/api/types/index.js';
-import type { GetSnapsResponse, Snap, SnapRpcRequestParams } from "./types";
-import { DEFAULT_SNAP_ORIGIN, DEFAULT_SNAP_NAME, DEFAULT_SNAP_VERSION, SUPPORTED_SNAPS } from "./defaults.js";
-import { hasMetamask } from "./utils.js";
+import type { InjectedAccount, InjectedExtension, InjectedMetadata, InjectedMetadataKnown, InjectedWindowProvider, MetadataDef } from '@polkadot/extension-inject/types';
+import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
+import type { GetSnapsResponse, Snap, SnapRpcRequestParams } from './types';
+
+import { DEFAULT_SNAP_NAME, DEFAULT_SNAP_ORIGIN, DEFAULT_SNAP_VERSION, SUPPORTED_SNAPS } from './defaults.js';
+import { hasMetamask } from './utils.js';
 
 export default class Metadata implements InjectedMetadata {
-  public get(): Promise<InjectedMetadataKnown[]> {
+  public get (): Promise<InjectedMetadataKnown[]> {
     return getMetaDataList();
   }
 
-  public provide(definition: MetadataDef): Promise<boolean> {
+  public provide (definition: MetadataDef): Promise<boolean> {
     return setMetadata(definition);
   }
 }
@@ -23,14 +24,14 @@ export default class Metadata implements InjectedMetadata {
 const connectSnap = async () => {
   return await window.ethereum.request({
     method: 'wallet_requestSnaps',
-    params: SUPPORTED_SNAPS,
+    params: SUPPORTED_SNAPS
   });
 };
 
 /** @internal Retrieves information about installed Snaps available for communication. */
 const getSnaps = async (): Promise<GetSnapsResponse> => {
   return (await window.ethereum.request({
-    method: 'wallet_getSnaps',
+    method: 'wallet_getSnaps'
   })) as unknown as GetSnapsResponse;
 };
 
@@ -45,10 +46,11 @@ const getSnap = async (_id: string = DEFAULT_SNAP_ORIGIN, _version?: string): Pr
 
     return Object.values(snaps).find(
       ({ id, version }) =>
-        id === _id && (!_version || version === _version),
+        id === _id && (!_version || version === _version)
     );
   } catch (e) {
     console.log('Failed to obtain installed snap', e);
+
     return undefined;
   }
 };
@@ -62,7 +64,7 @@ const invokeSnap = async (args: SnapRpcRequestParams) => {
     method: args.method,
     params: args?.params || []
   };
-  
+
   const result = await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
@@ -79,14 +81,14 @@ const getSnapAccounts = async (
   // anyType?: boolean,
 ): Promise<InjectedAccount[]> => {
   const _addressAnyChain = await invokeSnap({
-    method: 'getAddress',
+    method: 'getAddress'
     // params: { chainName: anyType ? 'any' : undefined }, // if we can have chainName here, we can show formatted address to users
   });
 
   const account = {
     address: _addressAnyChain,
     name: 'Metamask account 1 🍻',
-    type: 'sr25519' as KeypairType,
+    type: 'sr25519' as KeypairType
   };
 
   return [account];
@@ -94,21 +96,21 @@ const getSnapAccounts = async (
 
 /** @internal Requests the Snap to sign a JSON payload with the connected wallet. */
 const requestSignJSON = async (
-  payload: SignerPayloadJSON,
+  payload: SignerPayloadJSON
 ): Promise<SignerResult> => {
   return await invokeSnap({
     method: 'signJSON',
-    params: { payload },
+    params: { payload }
   });
 };
 
 /** @internal Requests the Snap to sign a raw payload with the connected wallet. */
 const requestSignRaw = async (
-  raw: SignerPayloadRaw,
+  raw: SignerPayloadRaw
 ): Promise<SignerResult> => {
   return await invokeSnap({
     method: 'signRaw',
-    params: { raw },
+    params: { raw }
   });
 };
 
@@ -122,7 +124,7 @@ const requestSignRaw = async (
 export const getMetaDataList = async (): Promise<InjectedMetadataKnown[]> => {
   return await invokeSnap({
     method: 'getMetadataList',
-    params: {},
+    params: {}
   });
 };
 
@@ -138,7 +140,7 @@ export const setMetadata = async (metaData: MetadataDef): Promise<boolean> => {
     method: 'setMetadata',
     params: {
       metaData
-    },
+    }
   });
 };
 
@@ -178,48 +180,49 @@ const metamaskSnap: InjectedExtension = {
   // provider?: InjectedProvider,
   signer: {
     signPayload: requestSignJSON,
-    signRaw: requestSignRaw,
+    signRaw: requestSignRaw
     // update?: (id: number, status: H256 | ISubmittableResult) => void
   },
-  version: DEFAULT_SNAP_VERSION,
-}
+  version: DEFAULT_SNAP_VERSION
+};
 
 /** @internal Connects to a specified dApp using the Snap API. */
 const connect = async (
-  appName: string,
+  appName: string
 ): Promise<InjectedExtension> => {
-  console.info(`${DEFAULT_SNAP_NAME} is connecting to ${appName} ...`)
+  console.info(`${DEFAULT_SNAP_NAME} is connecting to ${appName} ...`);
 
   const response = await connectSnap();
 
   return {
     ...metamaskSnap,
-    version: response?.[DEFAULT_SNAP_ORIGIN]?.version, // overwrites the default version
-  }
+    version: response?.[DEFAULT_SNAP_ORIGIN]?.version // overwrites the default version
+  };
 };
 
 /**
  * @summary Injected Metamask Snap for dApp connection.
- * @description 
- * Provides the necessary functionality to connect the injected Metamask Snap to a dApp. 
+ * @description
+ * Provides the necessary functionality to connect the injected Metamask Snap to a dApp.
  * The version property represents the default version of the injected Metamask Snap.
  */
 export const injectedMetamaskSnap: InjectedWindowProvider = {
   connect,
   enable: connect,
-  version: DEFAULT_SNAP_VERSION,
-}
+  version: DEFAULT_SNAP_VERSION
+};
 
 /**
  * @summary Verifies the presence of Polkagate Snap on the user's wallet.
- * @description 
+ * @description
  * This function asynchronously checks whether Polkagate Snap is installed in the user's Metamask extension.
  */
-export async function isPolkaMaskInstalled(): Promise<boolean> {
+export async function isPolkaMaskInstalled (): Promise<boolean> {
   try {
     return !!await getSnap();
   } catch (e) {
-    console.info(e)
+    console.info(e);
+
     return false;
   }
 }

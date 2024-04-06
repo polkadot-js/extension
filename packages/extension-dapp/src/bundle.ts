@@ -63,15 +63,17 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 
 /** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
+  let extensions: Record<string, InjectedWindowProvider>;
+  
   /** If originName indicates enabling only snap */
-  let extensions:Record<string, InjectedWindowProvider>;
-
-  if([ 'onlysnap', 'only_snap', 'snaponly','snap_only'].includes(originName.toLowerCase()) ){
-    extensions =  {}; // no other extensions
+  if (['onlysnap', 'only_snap', 'snaponly', 'snap_only'].includes(originName.toLowerCase())) {
+    extensions = { DEFAULT_SNAP_NAME : injectedMetamaskSnap }; // no other extensions
   } else {
     extensions = win.injectedWeb3;
   }
-  hasMetamask && (extensions[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
+
+  /** inject snap into window */
+  hasMetamask && (win.injectedWeb3[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
 
   return Promise
     .all(

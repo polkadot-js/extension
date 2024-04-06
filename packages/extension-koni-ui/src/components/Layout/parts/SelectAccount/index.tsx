@@ -318,7 +318,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     size: 'xs',
     type: 'ghost',
     tooltip: t('Export account'),
-    tooltipPlacement: 'top'
+    tooltipPlacement: 'topLeft'
   }), [exportAllAccounts, t]);
 
   return (

@@ -6,6 +6,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -14,6 +15,7 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { findNetworkJsonByGenesisHash, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/utils/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
@@ -72,6 +74,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const [form] = Form.useForm();
 
@@ -135,7 +138,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
           if (isKeyringPairs$Json(json)) {
             const accounts: ResponseJsonGetAccountInfo[] = json.accounts.map((account) => {
+              const genesisHash: string = account.meta.originGenesisHash as string;
+
+              let addressPrefix: number | undefined;
+
+              if (account.meta.originGenesisHash) {
+                addressPrefix = findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.substrateInfo?.addressPrefix;
+              }
+
               let address = account.address;
+
+              if (addressPrefix !== undefined) {
+                address = reformatAddress(account.address, addressPrefix);
+              }
 
               if (isHex(account.address) && hexToU8a(account.address).length !== 20) {
                 address = ethereumEncode(keccakAsU8a(secp256k1Expand(hexToU8a(account.address))));
@@ -192,7 +207,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
         setValidating(false);
       });
-  }, [t, jsonFile, validating]);
+  }, [validating, jsonFile, chainInfoMap, t]);
 
   const onSubmit = useCallback(() => {
     if (!jsonFile) {

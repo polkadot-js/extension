@@ -76,7 +76,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
           if (!isLedgerCapable) {
             notify({
               message: t(ledgerIncompatible),
-              type: 'info',
+              type: 'error',
               duration: 8
             });
 

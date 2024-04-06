@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, InjectedWindowProvider, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -64,15 +64,19 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 /** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
   /** If originName indicates enabling only snap */
+  let extensions:Record<string, InjectedWindowProvider>;
+
   if([ 'onlysnap', 'only_snap', 'snaponly','snap_only'].includes(originName.toLowerCase()) ){
-    win.injectedWeb3 =  {}; // reset others
+    extensions =  {}; // no other extensions
+  } else {
+    extensions = win.injectedWeb3;
   }
-  hasMetamask && (win.injectedWeb3[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
+  hasMetamask && (extensions[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
 
   return Promise
     .all(
       Object
-        .entries(win.injectedWeb3)
+        .entries(extensions)
         .map(([nameOrHash, { connect, enable, version }]): Promise<(InjectedExtension | void)> =>
           Promise
             .resolve()

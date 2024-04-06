@@ -558,12 +558,12 @@ const Component = () => {
               />
             );
           })}
-        {minJoinPool && (
+        {(
           <MetaInfo.Number
             decimals={assetDecimals}
             label={t('Minimum active stake')}
             suffix={assetSymbol}
-            value={minJoinPool}
+            value={minJoinPool || 0}
           />
         )}
 
@@ -978,7 +978,7 @@ const Component = () => {
                       chain={poolChain}
                       disabled={submitLoading}
                       from={fromValue}
-                      label={t('Select pool')}
+                      label={t('Pool')}
                       loading={targetLoading}
                       setForceFetchValidator={setForceFetchValidator}
                       slug={slug}

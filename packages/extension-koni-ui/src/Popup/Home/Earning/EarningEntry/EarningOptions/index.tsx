@@ -72,7 +72,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const { activeModal } = useContext(ModalContext);
 
@@ -168,7 +168,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
       if (isRelatedToAstar(item.group)) {
         openAlert({
           title: t('Enter Astar portal'),
-          content: t('You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.'),
+          content: t('Navigate to Astar portal to view and manage your stake in Astar dApp staking v3'),
           cancelButton: {
             text: t('Cancel'),
             schema: 'secondary',

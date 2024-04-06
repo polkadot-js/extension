@@ -1160,13 +1160,13 @@ export default class KoniExtension {
   }
 
   private async getBalance (reset?: boolean) {
-    return this.#koniState.getBalance(reset);
+    return this.#koniState.balanceService.getBalance(reset);
   }
 
   private async subscribeBalance (id: string, port: chrome.runtime.Port) {
     const cb = createSubscription<'pri(balance.getSubscription)'>(id, port);
 
-    const balanceSubscription = this.#koniState.subscribeBalance().subscribe({
+    const balanceSubscription = this.#koniState.balanceService.subscribeBalanceMap().subscribe({
       next: (rs) => {
         const data = { details: rs } as BalanceJson;
 
@@ -1732,18 +1732,19 @@ export default class KoniExtension {
       if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
         chainType = ChainType.EVM;
         const txVal: string = transferAll ? freeBalance.value : (value || '0');
+        const evmApi = evmApiMap[networkKey];
 
         // Estimate with EVM API
         if (_isTokenEvmSmartContract(tokenInfo) || _isLocalToken(tokenInfo)) {
           [
             transaction,
             transferAmount.value
-          ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+          ] = await getERC20TransactionObject(_getContractAddressOfToken(tokenInfo), chainInfo, from, to, txVal, !!transferAll, evmApi);
         } else {
           [
             transaction,
             transferAmount.value
-          ] = await getEVMTransactionObject(chainInfo, from, to, txVal, !!transferAll, evmApiMap);
+          ] = await getEVMTransactionObject(chainInfo, from, to, txVal, !!transferAll, evmApi);
         }
       } else if (_isMantaZkAsset(tokenInfo)) { // TODO
         transaction = undefined;

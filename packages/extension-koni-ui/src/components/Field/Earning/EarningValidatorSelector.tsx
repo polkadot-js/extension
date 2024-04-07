@@ -3,7 +3,7 @@
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { detectTranslate, reformatAddress } from '@subwallet/extension-base/utils';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
@@ -77,6 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -84,6 +85,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const items = useGetPoolTargetList(slug) as ValidatorDataType[];
+  const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
 
   const { compound } = useYieldPositionDetail(slug, from);
 
@@ -263,10 +265,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         key={key}
         onClick={onClickItem}
         onClickMoreBtn={onClickMore(item)}
+        prefixAddress = {networkPrefix}
         validatorInfo={item}
       />
     );
-  }, [changeValidators, nominatorValueList, onClickItem, onClickMore]);
+  }, [changeValidators, networkPrefix, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -274,10 +277,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const searchFunction = useCallback((item: ValidatorDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
-    const originAddress = reformatAddress(item.address, 42);
 
     return (
-      originAddress.toLowerCase().includes(searchTextLowerCase) ||
+      item.address.toLowerCase().includes(searchTextLowerCase) ||
       (item.identity
         ? item.identity.toLowerCase().includes(searchTextLowerCase)
         : false)

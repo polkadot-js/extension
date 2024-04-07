@@ -3,7 +3,6 @@
 
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { reformatAddress } from '@subwallet/extension-base/utils';
 import { StakingPoolItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
@@ -12,7 +11,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-koni-ui/components/
 import { EarningPoolDetailModalId } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/SortingModal';
-import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetPoolTargetList, useSelector, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -69,10 +68,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const isActive = checkActive(id);
 
   const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
+  const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
 
@@ -152,10 +153,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const searchFunction = useCallback((item: NominationPoolDataType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
-    const originAddress = reformatAddress(item.address, 42);
 
     return (
-      originAddress.toLowerCase().includes(searchTextLowerCase) ||
+      item.address.toLowerCase().includes(searchTextLowerCase) ||
       (item.name
         ? item.name.toLowerCase().includes(searchTextLowerCase)
         : false)
@@ -176,9 +176,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         {...item}
         className={'pool-item'}
         onClickMoreBtn={onClickMore(item)}
+        prefixAddress={networkPrefix}
       />
     );
-  }, [onClickMore]);
+  }, [networkPrefix, onClickMore]);
 
   const renderEmpty = useCallback(() => {
     return (

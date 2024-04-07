@@ -12,7 +12,7 @@ import Injected from './Injected.js';
 // when sending a message from the injector to the extension, we
 //  - create an event - this we send to the loader
 //  - the loader takes this event and uses port.postMessage to background
-//  - on response, the loader creates a reponse event
+//  - on response, the loader creates a response event
 //  - this injector, listens on the events, maps it to the original
 //  - resolves/rejects the promise with the result (or sub data)
 

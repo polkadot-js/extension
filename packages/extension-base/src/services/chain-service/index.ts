@@ -15,7 +15,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import AssetSettingStore from '@subwallet/extension-base/stores/AssetSetting';
-import { addLazy, fetchStaticData, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
+import { addLazy, fetchStaticData, filterAssetsByChainAndType, MODULE_SUPPORT } from '@subwallet/extension-base/utils';
 import { BehaviorSubject, Subject } from 'rxjs';
 import Web3 from 'web3';
 
@@ -359,15 +359,7 @@ export class ChainService {
   }
 
   public getAssetByChainAndType (chainSlug: string, assetTypes: _AssetType[]) {
-    const result: Record<string, _ChainAsset> = {};
-
-    Object.values(this.getAssetRegistry()).forEach((assetInfo) => {
-      if (assetTypes.includes(assetInfo.assetType) && assetInfo.originChain === chainSlug) {
-        result[assetInfo.slug] = assetInfo;
-      }
-    });
-
-    return result;
+    return filterAssetsByChainAndType(this.getAssetRegistry(), chainSlug, assetTypes);
   }
 
   public getSmartContractNfts () {
@@ -718,8 +710,6 @@ export class ChainService {
       const chainState = chainStateMap[originChain];
 
       if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
-        // @ts-ignore
-        // TODO: Merge issue detect balance to define manualTurnOff props
         if (!chainState || !chainState.manualTurnOff) {
           await this.updateAssetSetting(assetSlug, { visible: true });
         }

@@ -57,5 +57,9 @@ export interface ValidatorDataType extends ValidatorInfo {
   symbol: string;
   decimals: number;
 }
+export enum NetworkType {
+  MAIN_NETWORK = 'MAIN_NETWORK',
+  TEST_NETWORK = 'TEST_NETWORK',
+}
 
 export type PoolTargetData = NominationPoolDataType | ValidatorDataType;

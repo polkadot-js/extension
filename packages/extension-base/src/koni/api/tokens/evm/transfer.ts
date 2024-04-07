@@ -53,10 +53,9 @@ export async function getEVMTransactionObject (
   to: string,
   value: string,
   transferAll: boolean,
-  evmApiMap: Record<string, _EvmApi>
+  web3Api: _EvmApi
 ): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
-  const web3Api = evmApiMap[networkKey];
 
   const priority = await calculateGasFeeParams(web3Api, networkKey);
 
@@ -101,11 +100,10 @@ export async function getERC20TransactionObject (
   to: string,
   value: string,
   transferAll: boolean,
-  evmApiMap: Record<string, _EvmApi>
+  evmApi: _EvmApi
 ): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
-  const evmApi = evmApiMap[networkKey];
-  const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
+  const erc20Contract = getERC20Contract(assetAddress, evmApi);
 
   let freeAmount = new BigN(0);
   let transferValue = value;

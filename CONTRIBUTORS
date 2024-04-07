@@ -1,17 +1,17 @@
-    2358	AnhMTV                        	Update chain list patch with fixed version
+    2373	AnhMTV                        	Release version 1.1.52
     2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
-    1980	S2kael                        	[Issue-2824] Handle case online data is null
+    2000	S2kael                        	[Issue-2851] Update chain-list stable version
      620	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
      185	quangdo                       	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
       99	lw-cdm                        	
       88	dominhquang                   	[Issue-2649] Add send crash log feature
+      87	nguyentiendung                	[Issue-2827] Extension - Just only show Testnet network
       83	Hieu Dao                      	Update README.md
-      82	nguyentiendung                	[Issue-2784] Update url for redirect swap extension
       82	Thibaut Sardan                	Add account filtering feature (#832)
+      81	bluezdot                      	[Issue-2851] Update x layer testnet block explorer
       80	leewong                       	Update account filter for earn transaction
-      77	bluezdot                      	[Issue-2805] Update chainlist
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR

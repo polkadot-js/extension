@@ -16,6 +16,7 @@ import YieldPoolStore from '@subwallet/extension-base/services/storage-service/d
 import YieldPositionStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPositionStore';
 import { BalanceItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
+import keyring from '@subwallet/ui-keyring';
 import { Subscription } from 'dexie';
 import { DexieExportJsonStructure, exportDB } from 'dexie-export-import';
 
@@ -85,7 +86,10 @@ export default class DatabaseService {
 
   // Balance
   async getStoredBalance () {
-    return this.stores.balance.table.toArray();
+    const addresses = keyring.getPairs().map(({ address }) => address);
+
+    // Filter not exist address
+    return this.stores.balance.table.filter((obj) => addresses.includes(obj.address)).toArray();
   }
 
   async updateBalanceStore (item: BalanceItem) {

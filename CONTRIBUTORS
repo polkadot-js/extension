@@ -1,5 +1,5 @@
      634	Jaco                          	2024 (#1302)
-      90	Thibaut Sardan                	add search by address (#1198)
+      91	Thibaut Sardan                	fix typos (#1343)
       13	Tarik Gul                     	Update readme with notice (#1341)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

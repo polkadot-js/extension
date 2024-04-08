@@ -98,11 +98,13 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
   const balanceSubscribe: Observable<Codec[]> = substrateApi.rx.query.system.account.multi(addresses);
 
-  let poolSubscribe: Observable<Codec[]>;
+  let poolSubscribe: Observable<Codec[]> | undefined;
 
   if ((_isSubstrateRelayChain(chainInfo) && substrateApi.query.nominationPools)) {
     poolSubscribe = substrateApi.rx.query.nominationPools.poolMembers?.multi(addresses);
-  } else {
+  }
+
+  if (!poolSubscribe) {
     poolSubscribe = new Observable<Codec[]>((subscriber) => {
       subscriber.next(addresses.map(() => ({
         toPrimitive () {

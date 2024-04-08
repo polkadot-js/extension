@@ -4,7 +4,7 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
@@ -16,7 +16,7 @@ import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContex
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
 import { useChainConnection, useNotification, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
-import { FreeBalance, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
+import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
@@ -704,22 +704,27 @@ const Component = () => {
     setShowQuoteDetailOnMobile(true);
   }, []);
 
-  const altChain = useMemo(() => {
+  const currentPair = useMemo(() => {
     if (fromTokenSlugValue && toTokenSlugValue) {
-      const getSlug = `${fromTokenSlugValue}___${toTokenSlugValue}`;
-      const getSwapPair = swapPairs.find((item) => item.slug === getSlug);
+      const pairSlug = _parseAssetRefKey(fromTokenSlugValue, toTokenSlugValue);
 
-      if (getSwapPair) {
-        const alternativeAssetSlug = getSwapAlternativeAsset(getSwapPair);
+      return swapPairs.find((item) => item.slug === pairSlug);
+    }
 
-        if (alternativeAssetSlug) {
-          return _getOriginChainOfAsset(alternativeAssetSlug);
-        }
+    return undefined;
+  }, [fromTokenSlugValue, swapPairs, toTokenSlugValue]);
+
+  const altChain = useMemo(() => {
+    if (currentPair) {
+      const alternativeAssetSlug = getSwapAlternativeAsset(currentPair);
+
+      if (alternativeAssetSlug) {
+        return _getOriginChainOfAsset(alternativeAssetSlug);
       }
     }
 
     return undefined;
-  }, [fromTokenSlugValue, toTokenSlugValue, swapPairs]);
+  }, [currentPair]);
 
   const renderSlippage = () => {
     return (
@@ -1042,6 +1047,40 @@ const Component = () => {
     return processState.steps.some((item) => item.type === SwapStepType.XCM);
   }, [processState.steps]);
 
+  const xcmBalanceTokens = useMemo(() => {
+    if (!isSwapXCM || !fromAssetInfo || !currentPair) {
+      return [];
+    }
+
+    const result: {
+      token: string;
+      chain: string;
+    }[] = [{
+      token: fromAssetInfo.slug,
+      chain: fromAssetInfo.originChain
+    }];
+
+    const chainInfo = chainInfoMap[fromAssetInfo.originChain];
+
+    if (chainInfo) {
+      result.push({
+        token: _getChainNativeTokenSlug(chainInfo),
+        chain: fromAssetInfo.originChain
+      });
+    }
+
+    const alternativeAssetSlug = getSwapAlternativeAsset(currentPair);
+
+    if (alternativeAssetSlug) {
+      result.push({
+        token: alternativeAssetSlug,
+        chain: _getOriginChainOfAsset(alternativeAssetSlug)
+      });
+    }
+
+    return result;
+  }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
+
   return (
     <>
       <>
@@ -1071,10 +1110,17 @@ const Component = () => {
                 </Form.Item>
 
                 <div className={'__balance-display-area'}>
+                  <FreeBalanceToEarn
+                    address={fromValue}
+                    hidden={!canShowAvailableBalance || !isSwapXCM}
+                    label={`${t('Available balance')}:`}
+                    tokens={xcmBalanceTokens}
+                  />
+
                   <FreeBalance
                     address={fromValue}
                     chain={chainValue}
-                    hidden={!canShowAvailableBalance}
+                    hidden={!canShowAvailableBalance || isSwapXCM}
                     isSubscribe={true}
                     label={`${t('Available balance')}:`}
                     tokenSlug={fromTokenSlugValue}

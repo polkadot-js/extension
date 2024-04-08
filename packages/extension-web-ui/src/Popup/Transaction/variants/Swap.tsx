@@ -9,7 +9,7 @@ import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
-import { AccountSelector, AddMoreBalanceModal, AddressInput, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
+import { AccountSelector, AddMoreBalanceModal, AddressInput, AlertBox, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -84,6 +84,7 @@ const Component = () => {
   const priceMap = useSelector((state) => state.price.priceMap);
   const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const hasInternalConfirmations = useSelector((state: RootState) => state.requestState.hasInternalConfirmations);
+  const { multiChainAssetMap } = useSelector((state) => state.assetRegistry);
   const [form] = Form.useForm<SwapParams>();
   const formDefault = useMemo((): SwapParams => ({ ...defaultData }), [defaultData]);
 
@@ -782,6 +783,63 @@ const Component = () => {
     );
   };
 
+  const isSwapXCM = useMemo(() => {
+    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+  }, [processState.steps]);
+
+  const renderAlertBox = () => {
+    const multichainAsset = fromAssetInfo?.multiChainAsset;
+    const fromAssetName = multichainAsset && multiChainAssetMap[multichainAsset]?.name;
+    const toAssetName = chainInfoMap[toAssetInfo?.originChain]?.name;
+
+    return (
+      <>
+        {isSwapXCM && fromAssetName && toAssetName && (
+          <AlertBox
+            className={'__xcm-notification'}
+            description={`The amount you entered is higher than your available balance on ${toAssetName} network. You need to first transfer cross-chain from ${fromAssetName} network to ${toAssetName} network to continue swapping`}
+            title={'Action needed'}
+            type='warning'
+          />
+        )}
+      </>
+    );
+  };
+
+  const xcmBalanceTokens = useMemo(() => {
+    if (!isSwapXCM || !fromAssetInfo || !currentPair) {
+      return [];
+    }
+
+    const result: {
+      token: string;
+      chain: string;
+    }[] = [{
+      token: fromAssetInfo.slug,
+      chain: fromAssetInfo.originChain
+    }];
+
+    const chainInfo = chainInfoMap[fromAssetInfo.originChain];
+
+    if (chainInfo) {
+      result.push({
+        token: _getChainNativeTokenSlug(chainInfo),
+        chain: fromAssetInfo.originChain
+      });
+    }
+
+    const alternativeAssetSlug = getSwapAlternativeAsset(currentPair);
+
+    if (alternativeAssetSlug) {
+      result.push({
+        token: alternativeAssetSlug,
+        chain: _getOriginChainOfAsset(alternativeAssetSlug)
+      });
+    }
+
+    return result;
+  }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
+
   useEffect(() => {
     if (!isWebUI) {
       setBackProps((prev) => ({
@@ -1045,44 +1103,6 @@ const Component = () => {
     return false;
   }, [altChain, checkChainConnected]);
 
-  const isSwapXCM = useMemo(() => {
-    return processState.steps.some((item) => item.type === SwapStepType.XCM);
-  }, [processState.steps]);
-
-  const xcmBalanceTokens = useMemo(() => {
-    if (!isSwapXCM || !fromAssetInfo || !currentPair) {
-      return [];
-    }
-
-    const result: {
-      token: string;
-      chain: string;
-    }[] = [{
-      token: fromAssetInfo.slug,
-      chain: fromAssetInfo.originChain
-    }];
-
-    const chainInfo = chainInfoMap[fromAssetInfo.originChain];
-
-    if (chainInfo) {
-      result.push({
-        token: _getChainNativeTokenSlug(chainInfo),
-        chain: fromAssetInfo.originChain
-      });
-    }
-
-    const alternativeAssetSlug = getSwapAlternativeAsset(currentPair);
-
-    if (alternativeAssetSlug) {
-      result.push({
-        token: alternativeAssetSlug,
-        chain: _getOriginChainOfAsset(alternativeAssetSlug)
-      });
-    }
-
-    return result;
-  }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
-
   return (
     <>
       <>
@@ -1193,19 +1213,11 @@ const Component = () => {
                     />
                   </Form.Item>
                 )}
-                {/* {isSwapXCM && ( */}
-                {/*  <AlertBox */}
-                {/*    className={'__xcm-notification'} */}
-                {/*    description={`The amount you entered is higher than your available balance on ${toSwapTokenName} network. You need to first transfer cross-chain from ${fromSwapTokenName} network to ${toSwapTokenName} network to continue swapping`} */}
-                {/*    title={'Action needed'} */}
-                {/*    type='warning' */}
-                {/*  /> */}
-                {/* )} */}
               </Form>
+              {renderAlertBox()}
               {
                 (isWebUI || !showQuoteArea) && renderSlippage()
               }
-
               {
                 showQuoteArea && !isWebUI && (
                   <>

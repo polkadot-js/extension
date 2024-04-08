@@ -396,6 +396,7 @@ const Component = () => {
         <Number
           decimal={0}
           suffix={_getAssetSymbol(fromAssetInfo)}
+          unitOpacity={0.45}
           value={1}
         />
         <span>&nbsp;~&nbsp;</span>
@@ -405,6 +406,7 @@ const Component = () => {
           formatType={'custom'}
           metadata={numberMetadata}
           suffix={_getAssetSymbol(toAssetInfo)}
+          unitOpacity={0.45}
           value={currentQuote.rate}
         />
       </div>

@@ -4,12 +4,12 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetName, _getAssetOriginChain, _getAssetSymbol, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
-import { AccountSelector, AddMoreBalanceModal, AddressInput, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
+import { AccountSelector, AddMoreBalanceModal, AddressInput, AlertBox, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -1038,6 +1038,10 @@ const Component = () => {
     return false;
   }, [altChain, checkChainConnected]);
 
+  const isSwapXCM = useMemo(() => {
+    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+  }, [processState.steps]);
+
   return (
     <>
       <>
@@ -1140,6 +1144,14 @@ const Component = () => {
                       showScanner={true}
                     />
                   </Form.Item>
+                )}
+                {isSwapXCM && (
+                  <AlertBox
+                    className={'__xcm-notification'}
+                    description={`The amount you entered is higher than your available balance on ${toSwapTokenName} network. You need to first transfer cross-chain from ${fromSwapTokenName} network to ${toSwapTokenName} network to continue swapping`}
+                    title={'Action needed'}
+                    type='warning'
+                  />
                 )}
               </Form>
               {
@@ -1498,6 +1510,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'space-between',
       alignItems: 'center',
       cursor: 'pointer'
+    },
+    '.__xcm-notification': {
+      marginBottom: token.marginSM
     },
     '.__fee-paid-token': {
       display: 'flex',

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { EarningInstructionModal, EarningOptionDesktopItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
@@ -81,7 +82,6 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const { activeModal } = useContext(ModalContext);
-  const multiChainAssetMap = useSelector((state) => state.assetRegistry.multiChainAssetMap);
 
   const positionSlugs = useMemo(() => {
     return earningPositions.map((p) => p.slug);
@@ -243,21 +243,28 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
             if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
               let minJoinPool: string;
 
-              if (poolInfo.statistic) {
+              if (poolInfo.statistic && !positionSlugs.includes(poolSlug)) {
                 minJoinPool = poolInfo.statistic.earningThreshold.join;
               } else {
                 minJoinPool = '0';
               }
 
-              const originChainAsset = multiChainAssetMap[item.group] && multiChainAssetMap[item.group].originChainAsset;
+              let nativeSlug: string | undefined;
 
-              const availableBalance = originChainAsset && tokenBalanceMap[originChainAsset] && tokenBalanceMap[originChainAsset].free.value;
-              const assetInfo = assetRegistry[originChainAsset];
-              const minJoinPoolBalanceValue = getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+              const nativeAsset = poolInfo && poolInfo?.statistic?.assetEarning.find((item) => item.slug.toLowerCase().includes('native'));
+
+              if (nativeAsset) {
+                nativeSlug = nativeAsset.slug;
+              }
+
+              const assetInfo = nativeSlug && assetRegistry[nativeSlug];
+              const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+
+              const availableBalance = nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value;
 
               if (!availableBalance) {
                 isHiddenPool = true;
-              } else if (minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+              } else if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
                 isHiddenPool = true;
               }
             }
@@ -284,7 +291,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
         processPoolOptions(poolInfo, item);
       }
     };
-  }, [activeModal, assetRegistry, checkChainConnected, closeAlert, getAltChain, multiChainAssetMap, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t, tokenBalanceMap]);
+  }, [activeModal, assetRegistry, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t, tokenBalanceMap]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.1.53
+Build date: Apl 08, 2024.
+
+Bugs fixed:
+- Fixed bug fetching balance with Enjin Relay Chain (#2885)
+- Fixed bug Wallet Connect not show connection popup (#2407)
+- Fixed bug Some required methods are missing when connecting Dapp to Subwallet via WalletConnect (#2860)
+
 ## 1.1.52
 Build date: Apl 05, 2024.
 

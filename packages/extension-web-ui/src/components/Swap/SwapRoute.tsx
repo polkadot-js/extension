@@ -74,6 +74,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
     position: 'relative',
     '.__token-item': {
       height: 44,
+      position: 'relative',
       flexDirection: 'column',
       gap: 4,
       justifyContent: 'center',
@@ -102,8 +103,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'flex-end',
       '.__token-item-symbol': {
         right: 0,
-        'white-space': 'nowrap',
-        direction: 'rtl'
+        'white-space': 'nowrap'
       }
     },
     '.__line-arrow': {

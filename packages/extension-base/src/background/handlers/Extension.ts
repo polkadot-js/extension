@@ -130,7 +130,7 @@ export default class Extension {
 
     this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
 
-    // cycle through default account selection for auth and remove any occurence of the account
+    // cycle through default account selection for auth and remove any occurrence of the account
     const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
 
     this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);

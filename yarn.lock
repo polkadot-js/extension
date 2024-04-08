@@ -1837,15 +1837,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@chainflip/sdk@npm:^1.3.0-beta.1":
-  version: 1.3.0-beta.3
-  resolution: "@chainflip/sdk@npm:1.3.0-beta.3"
+"@chainflip/sdk@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@chainflip/sdk@npm:1.3.0"
   dependencies:
     "@polkadot/util": ^12.6.2
     "@polkadot/util-crypto": ^12.6.2
-    axios: ^1.6.7
+    axios: ^1.6.8
     ethers: ^6.11.1
-  checksum: a32782ef3e520db63093bcad1323f103569b3ad9d379ad586c2fcc7ea7f83f8de7076567281b761bd2731ddb2391fdf6734fbfc6e94e0071091516a046e7b630
+  checksum: ca4a8461411a15b02fd4d31ee56410b69059db0cd1157726c509f6f59e645a6d955c99b56d32051ec8d7697996af9d0d7c4badc9ab59cc0936cf1a9a0389c747
   languageName: node
   linkType: hard
 
@@ -6185,14 +6185,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.55-beta.0":
-  version: 0.2.55-beta.0
-  resolution: "@subwallet/chain-list@npm:0.2.55-beta.0"
+"@subwallet/chain-list@npm:0.2.55-beta.1":
+  version: 0.2.55-beta.1
+  resolution: "@subwallet/chain-list@npm:0.2.55-beta.1"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: b1541f9ff27911d535ac2b38f007f6c4f7ad8a28cb35f43db3a0159d63dcf4b222ceee81625381177c181235a12ae220b9a4d836aa68e7bf542808fb898dc463
+  checksum: 1a1fb20f98ea51863cd3cf41f9f3b8109f06386eae9dd426cf445fed766b608865a899f60be000bf704bcc75d2864420e4cc0af7a63e319901ed5eca10a58ced
   languageName: node
   linkType: hard
 
@@ -6203,7 +6203,7 @@ __metadata:
     "@acala-network/api": ^5.0.2
     "@apollo/client": ^3.7.14
     "@azns/resolver-core": ^1.4.0
-    "@chainflip/sdk": ^1.3.0-beta.1
+    "@chainflip/sdk": ^1.3.0
     "@equilab/api": ~1.14.25
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
@@ -6230,7 +6230,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.55-beta.0
+    "@subwallet/chain-list": 0.2.55-beta.1
     "@subwallet/extension-base": ^1.1.51-2
     "@subwallet/extension-chains": ^1.1.51-2
     "@subwallet/extension-dapp": ^1.1.51-2
@@ -6360,7 +6360,7 @@ __metadata:
     "@polkadot/util-crypto": 12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.55-beta.0
+    "@subwallet/chain-list": 0.2.55-beta.1
     "@subwallet/extension-base": ^1.1.51-2
     "@subwallet/extension-chains": ^1.1.51-2
     "@subwallet/extension-dapp": ^1.1.51-2
@@ -6493,7 +6493,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.55-beta.0
+    "@subwallet/chain-list": 0.2.55-beta.1
     "@subwallet/extension-base": ^1.1.51-2
     "@subwallet/extension-chains": ^1.1.51-2
     "@subwallet/extension-dapp": ^1.1.51-2
@@ -9779,7 +9779,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.7":
+"axios@npm:^1.6.8":
   version: 1.6.8
   resolution: "axios@npm:1.6.8"
   dependencies:

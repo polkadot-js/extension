@@ -106,8 +106,8 @@ const parseResult = (type: string, input: NestedArray<any>, name: NestedArray<st
     };
   } else {
     return {
-      type: types,
       name: genName(name),
+      type: types,
       value: genInput(input)
     };
   }

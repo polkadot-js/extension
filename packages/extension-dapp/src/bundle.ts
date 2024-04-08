@@ -156,8 +156,8 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
 /**
  * @summary Retrieves all the accounts across all providers
  * @description
- * This returns the full list of account available (accross all extensions) to
- * the page. Filtereing options are available of a per-extension, per type and
+ * This returns the full list of account available (across all extensions) to
+ * the page. Filtering options are available of a per-extension, per type and
  * per-genesisHash basis. Optionally the accounts can be encoded with the provided
  * ss58Format
  */

@@ -11,7 +11,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
 import { HydradxHandler } from '@subwallet/extension-base/services/swap-service/handler/hydradx-handler';
-import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { DEFAULT_SWAP_FIRST_STEP, getSwapAltToken, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapErrorType, SwapPair, SwapProviderId, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
@@ -231,11 +231,15 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
   public getSwapPairs (): SwapPair[] {
     return Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
+      const fromAsset = this.chainService.getAssetBySlug(assetRef.srcAsset);
+
       return {
         slug,
         from: assetRef.srcAsset,
         to: assetRef.destAsset,
-        metadata: assetRef.metadata
+        metadata: {
+          alternativeAsset: getSwapAltToken(fromAsset)
+        }
       } as SwapPair;
     });
   }
@@ -272,11 +276,15 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   public subscribeSwapPairs (callback: (pairs: SwapPair[]) => void) {
     return this.chainService.subscribeSwapRefMap().subscribe((refMap) => {
       const latestData = Object.entries(refMap).map(([slug, assetRef]) => {
+        const fromAsset = this.chainService.getAssetBySlug(assetRef.srcAsset);
+
         return {
           slug,
           from: assetRef.srcAsset,
           to: assetRef.destAsset,
-          metadata: assetRef.metadata
+          metadata: {
+            alternativeAsset: getSwapAltToken(fromAsset)
+          }
         } as SwapPair;
       });
 

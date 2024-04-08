@@ -19,7 +19,7 @@ import { useIsMantaPayEnabled } from '@subwallet/extension-web-ui/hooks/account/
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
-import { findAccountByAddress, formatBalance, noop, transactionDefaultFilterAccount } from '@subwallet/extension-web-ui/utils';
+import { findAccountByAddress, formatBalance, noop, reformatAddress, transactionDefaultFilterAccount } from '@subwallet/extension-web-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-web-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -332,9 +332,17 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       return Promise.resolve();
     }
 
-    const isOnChain = chain === destChain;
+    if (!isEthereumAddress(_recipientAddress)) {
+      const destChainInfo = chainInfoMap[destChain];
+      const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
+      const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
 
-    const account = findAccountByAddress(accounts, _recipientAddress);
+      if (_addressOnChain !== _recipientAddress) {
+        return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: destChainInfo.name } }));
+      }
+    }
+
+    const isOnChain = chain === destChain;
 
     if (isOnChain) {
       if (isSameAddress(from, _recipientAddress)) {
@@ -361,6 +369,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         }
       }
     }
+
+    const account = findAccountByAddress(accounts, _recipientAddress);
 
     if (account?.isHardware) {
       const destChainInfo = chainInfoMap[destChain];
@@ -449,11 +459,11 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   // Submit transaction
   const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
-    const { asset, chain, destChain, from, to, value } = values;
+    const { asset, chain, destChain, from: _from, to, value } = values;
 
     let sendPromise: Promise<SWTransactionResponse>;
 
-    const account = findAccountByAddress(accounts, from);
+    const account = findAccountByAddress(accounts, _from);
 
     if (!account) {
       setLoading(false);
@@ -464,6 +474,10 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
       return;
     }
+
+    const chainInfo = chainInfoMap[chain];
+    const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+    const from = reformatAddress(_from, addressPrefix);
 
     const isLedger = !!account.isHardware;
     const isEthereum = isEthereumAddress(account.address);
@@ -526,7 +540,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         })
       ;
     }, 300);
-  }, [accounts, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
+  }, [accounts, chainInfoMap, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -738,7 +752,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               allowDomain={true}
-              chain={chain}
+              chain={destChain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}

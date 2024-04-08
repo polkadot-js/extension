@@ -11,7 +11,7 @@ import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContex
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-web-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
+import { findAccountByAddress, noop, reformatAddress, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
@@ -108,6 +108,16 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
           return Promise.reject(t('Invalid recipient address'));
         }
 
+        if (!isEthereumAddress(_recipientAddress)) {
+          const chainInfo = chainInfoMap[chain];
+          const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+          const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
+
+          if (_addressOnChain !== _recipientAddress) {
+            return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: chainInfo.name } }));
+          }
+        }
+
         if (isSameAddress(_recipientAddress, from)) {
           return Promise.reject(t('The recipient address can not be the same as the sender address'));
         }
@@ -146,8 +156,9 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   // Submit transaction
   const onSubmit: FormCallbacks<SendNftParams>['onFinish'] = useCallback(
     (values: SendNftParams) => {
-      const isEthereumInterface = isEthereumAddress(from);
-      const { to } = values;
+      const { chain, from: _from, to } = values;
+      const isEthereumInterface = isEthereumAddress(_from);
+      const from = reformatAddress(_from, addressPrefix);
       const params = nftParamsHandler(nftItem, chain);
       let sendPromise: Promise<SWTransactionResponse>;
 
@@ -185,7 +196,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
           });
       }, 300);
     },
-    [chain, from, nftItem, onError, onSuccess]
+    [addressPrefix, nftItem, onError, onSuccess]
   );
 
   const checkAction = usePreCheckAction(from);
@@ -255,6 +266,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
               addressPrefix={addressPrefix}
               allowDomain={true}
               chain={chain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}

@@ -204,7 +204,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const path: string[] = [];
 
-    swapList.reverse().forEach((swap) => { // swap returned are in reverse order [lastSwap,..., firstSwap]
+    swapList.forEach((swap) => {
       const swapAssetIn = swapAssetIdMap[swap.assetIn]?.slug;
       const swapAssetOut = swapAssetIdMap[swap.assetOut]?.slug;
 
@@ -376,7 +376,8 @@ export class HydradxHandler implements SwapBaseInterface {
       quote: params.quote,
       address: params.address,
       slippage: params.slippage,
-      txHex
+      txHex,
+      process: params.process
     };
 
     let extrinsic: SubmittableExtrinsic<'promise'>;

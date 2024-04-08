@@ -119,6 +119,7 @@ export interface SwapBaseTxData {
   address: string;
   slippage: number;
   recipient?: string;
+  process: OptimalSwapPath;
 }
 
 export interface ChainflipSwapTxData extends SwapBaseTxData {

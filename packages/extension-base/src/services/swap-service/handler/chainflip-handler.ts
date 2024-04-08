@@ -386,7 +386,8 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       slippage: params.slippage,
       recipient,
       depositChannelId: depositAddressResponse.depositChannelId,
-      depositAddress: depositAddressResponse.depositAddress
+      depositAddress: depositAddressResponse.depositAddress,
+      process: params.process
     };
 
     let extrinsic: TransactionData;

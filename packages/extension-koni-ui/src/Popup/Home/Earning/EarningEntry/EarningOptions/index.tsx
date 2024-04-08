@@ -1,12 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-koni-ui/hooks';
+import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
+import { useFilterModal, useGroupYieldPosition, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-koni-ui/hooks';
+import { getBalanceValue } from '@subwallet/extension-koni-ui/hooks/screen/home/useAccountBalance';
 import { ChainConnectionWrapper } from '@subwallet/extension-koni-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -65,10 +69,12 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
+  const { accountBalance: { tokenBalanceMap } } = useContext(HomeContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
+  const yieldPositions = useGroupYieldPosition();
 
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
 
@@ -163,6 +169,10 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
     return '';
   }, [assetRegistry]);
 
+  const positionSlugs = useMemo(() => {
+    return yieldPositions.map((p) => p.slug);
+  }, [yieldPositions]);
+
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
       if (isRelatedToAstar(item.group)) {
@@ -188,14 +198,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
       setSelectedPoolGroup(item);
 
-      if (item.poolListLength > 1) {
-        navigate('/home/earning/pools', { state: {
-          poolGroup: item.group,
-          symbol: item.symbol
-        } as EarningPoolsParam });
-      } else if (item.poolListLength === 1) {
-        const poolInfo = poolInfoMap[item.poolSlugs[0]];
-
+      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo) => {
         if (!poolInfo) {
           // will not happen
 
@@ -214,10 +217,72 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
           return;
         }
 
+        if (altChain && !checkChainConnected(altChain)) {
+          onConnectChain(altChain);
+
+          return;
+        }
+
         navigateToEarnTransaction(item);
+      };
+
+      if (item.poolListLength > 1) {
+        let isHiddenPool = false;
+
+        if (item.poolListLength === 2) {
+          item.poolSlugs.forEach((poolSlug) => {
+            const poolInfo = poolInfoMap[poolSlug];
+
+            if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+              let minJoinPool: string;
+
+              if (poolInfo.statistic && !positionSlugs.includes(poolSlug)) {
+                minJoinPool = poolInfo.statistic.earningThreshold.join;
+              } else {
+                minJoinPool = '0';
+              }
+
+              let nativeSlug: string | undefined;
+
+              const nativeAsset = poolInfo && poolInfo?.statistic?.assetEarning.find((item) => item.slug.toLowerCase().includes('native'));
+
+              if (nativeAsset) {
+                nativeSlug = nativeAsset.slug;
+              }
+
+              const assetInfo = nativeSlug && assetRegistry[nativeSlug];
+              const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+
+              const availableBalance = nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value;
+
+              if (!availableBalance) {
+                isHiddenPool = true;
+              } else if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+                isHiddenPool = true;
+              }
+            }
+          });
+        }
+
+        if (isHiddenPool && item.poolListLength === 2) {
+          const index = item.poolSlugs.findIndex((item) => item.includes(YieldPoolType.NOMINATION_POOL.toLowerCase()));
+
+          const poolInfo = poolInfoMap[item.poolSlugs[index]];
+
+          processPoolOptions(poolInfo, item);
+        } else {
+          navigate('/home/earning/pools', { state: {
+            poolGroup: item.group,
+            symbol: item.symbol
+          } as EarningPoolsParam });
+        }
+      } else {
+        const poolInfo = poolInfoMap[item.poolSlugs[0]];
+
+        processPoolOptions(poolInfo, item);
       }
     };
-  }, [checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, openAlert, openConnectChainModal, poolInfoMap, t]);
+  }, [assetRegistry, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t, tokenBalanceMap]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

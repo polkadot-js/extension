@@ -35,7 +35,16 @@ const Component: React.FC<Props> = (props: Props) => {
       middleItem={
         <div className={'middle-item'}>
           <div className={'middle-item__name'}>
-            <span>{name || `Pool #${id}`}</span>
+            {name?.includes('SubWallet')
+              ? (
+                <>
+                  {name}
+                  <span className={'__title-suffix'}>&nbsp;(Recommended)</span>
+                </>
+              )
+              : (
+                <span>{name || `Pool #${id}`}</span>
+              )}
           </div>
           <div className={'middle-item__bond-amount'}>
             <span className={'middle-item__bond-amount-label'}>{t('Staked:')}</span>
@@ -83,6 +92,12 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.ant-web3-block-middle-item': {
       paddingRight: token.paddingXXS
+    },
+    '.__title-suffix': {
+      fontSize: token.fontSizeSM,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightSM,
+      color: token.colorTextTertiary
     },
 
     '.middle-item__name': {

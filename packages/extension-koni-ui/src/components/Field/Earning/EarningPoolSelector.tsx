@@ -135,6 +135,15 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           return 1;
         }
 
+        const isSpecialA = a.name && (a.name.includes('Talisman') || a.name.includes('Nova'));
+        const isSpecialB = b.name && (b.name.includes('Talisman') || b.name.includes('Nova'));
+
+        if (isSpecialA && !isSpecialB) {
+          return 1;
+        } else if (!isSpecialA && isSpecialB) {
+          return -1;
+        }
+
         switch (sortSelection) {
           case SortKey.MEMBER:
             return a.memberCounter - b.memberCounter;
@@ -326,7 +335,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               />
             </div>
           )}
-        title={label || placeholder || t('Select pool')}
+        title={t('Select pool')}
       />
 
       <FilterModal

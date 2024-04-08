@@ -738,7 +738,7 @@ const Component = () => {
             onClick={onOpenSlippageModal}
           >
             {supportSlippageSelection
-              ? (
+              ? (<>
                 <Tooltip
                   placement={'topRight'}
                   title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
@@ -753,20 +753,25 @@ const Component = () => {
                     />
                 :
                   </div>
-                </Tooltip>)
+                </Tooltip>
+                      &nbsp;<span>0%</span>
+              </>
+              )
               : (
-                <div className={'__slippage-title-wrapper'}>Slippage
-                  <Icon
-                    customSize={'16px'}
-                    iconColor={token.colorSuccess}
-                    phosphorIcon={Info}
-                    size='sm'
-                    weight='fill'
-                  />
+                <>
+                  <div className={'__slippage-title-wrapper'}>Slippage
+                    <Icon
+                      customSize={'16px'}
+                      iconColor={token.colorSuccess}
+                      phosphorIcon={Info}
+                      size='sm'
+                      weight='fill'
+                    />
                     :
-                </div>
-              )}
+                  </div>
                     &nbsp;<span>{currentSlippage.slippage.multipliedBy(100).toString()}%</span>
+                </>
+              )}
 
             {!supportSlippageSelection && (
               <div className='__slippage-editor-button'>
@@ -864,12 +869,6 @@ const Component = () => {
       });
     }
   }, [form, recipientValue, toAssetInfo]);
-
-  useEffect(() => {
-    if ((currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_MAINNET || currentQuote?.provider.id === SwapProviderId.CHAIN_FLIP_TESTNET) && !currentSlippage.slippage.isEqualTo(0)) {
-      setCurrentSlippage({ slippage: BN_ZERO, isCustomType: true });
-    }
-  }, [currentQuote?.provider.id, currentSlippage.slippage]);
 
   useEffect(() => {
     if (isWebUI) {

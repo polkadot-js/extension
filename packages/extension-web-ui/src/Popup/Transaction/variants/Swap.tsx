@@ -822,10 +822,14 @@ const Component = () => {
     const chainInfo = chainInfoMap[fromAssetInfo.originChain];
 
     if (chainInfo) {
-      result.push({
-        token: _getChainNativeTokenSlug(chainInfo),
-        chain: fromAssetInfo.originChain
-      });
+      const _nativeSlug = _getChainNativeTokenSlug(chainInfo);
+
+      if (_nativeSlug !== fromAssetInfo.slug) {
+        result.push({
+          token: _getChainNativeTokenSlug(chainInfo),
+          chain: fromAssetInfo.originChain
+        });
+      }
     }
 
     const alternativeAssetSlug = getSwapAlternativeAsset(currentPair);
@@ -896,7 +900,7 @@ const Component = () => {
     let timeout: NodeJS.Timeout;
 
     // todo: simple validate before do this
-    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue && (!showRecipientField || recipientValue)) {
+    if (fromValue && fromTokenSlugValue && toTokenSlugValue && fromAmountValue) {
       timeout = setTimeout(() => {
         form.validateFields(['from', 'recipient']).then(() => {
           if (!sync) {

@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { groupBalance } from '@subwallet/extension-base/services/balance-service/helpers/group';
 import { BalanceInfo, BalanceItem, BalanceMap } from '@subwallet/extension-base/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
+
+import { groupBalance } from './helpers';
 
 export class BalanceMapImpl {
   private _mapSubject: BehaviorSubject<BalanceMap>;

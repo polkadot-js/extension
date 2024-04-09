@@ -50,7 +50,6 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const assetRegistry = useSelector((state) => state.assetRegistry.assetRegistry);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
-  const multiChainAssetMap = useSelector((state) => state.assetRegistry.multiChainAssetMap);
   const { accountBalance: { tokenBalanceMap } } = useContext(HomeContext);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
@@ -61,6 +60,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const { activeModal } = useContext(ModalContext);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+
+  const positionSlugs = useMemo(() => {
+    return yieldPositions.map((p) => p.slug);
+  }, [yieldPositions]);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
@@ -81,18 +84,26 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
         let minJoinPool: string;
 
-        if (poolInfo.statistic) {
+        if (poolInfo.statistic && !positionSlugs.includes(poolInfo.slug)) {
           minJoinPool = poolInfo.statistic.earningThreshold.join;
         } else {
           minJoinPool = '0';
         }
 
-        const originChainAsset = multiChainAssetMap[poolGroup] && multiChainAssetMap[poolGroup].originChainAsset;
-        const availableBalance = tokenBalanceMap[originChainAsset] && tokenBalanceMap[originChainAsset].free.value;
-        const assetInfo = assetRegistry[originChainAsset];
-        const minJoinPoolBalanceValue = getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+        let nativeSlug: string | undefined;
 
-        if (availableBalance && availableBalance.isGreaterThan(minJoinPoolBalanceValue)) {
+        const nativeAsset = poolInfo && poolInfo?.statistic?.assetEarning.find((item) => item.slug.toLowerCase().includes('native'));
+
+        if (nativeAsset) {
+          nativeSlug = nativeAsset.slug;
+        }
+
+        const assetInfo = nativeSlug && assetRegistry[nativeSlug];
+        const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+
+        const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || 0;
+
+        if (minJoinPoolBalanceValue && availableBalance && availableBalance.isGreaterThanOrEqualTo(minJoinPoolBalanceValue)) {
           result.push(poolInfo);
         }
       } else {
@@ -119,7 +130,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     });
 
     return result;
-  }, [assetRegistry, multiChainAssetMap, poolGroup, pools, tokenBalanceMap]);
+  }, [assetRegistry, pools, positionSlugs, tokenBalanceMap]);
 
   const filterFunction = useMemo<(item: YieldPoolInfo) => boolean>(() => {
     return (item) => {

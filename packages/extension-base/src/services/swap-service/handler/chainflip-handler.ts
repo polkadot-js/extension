@@ -11,11 +11,12 @@ import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dots
 import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, DEFAULT_SWAP_FIRST_STEP, getSwapEarlyValidationError, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { TransactionData, YieldStepType } from '@subwallet/extension-base/types';
-import { ChainflipPreValidationMetadata, ChainflipTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeType, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, getChainflipEarlyValidationError, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { TransactionData } from '@subwallet/extension-base/types';
+import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
@@ -42,8 +43,13 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
   private readonly isTestnet: boolean;
   private swapBaseHandler: SwapBaseHandler;
 
-  constructor (providerSlug: string, providerName: string, chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
-    this.swapBaseHandler = new SwapBaseHandler(providerSlug, providerName, chainService, balanceService);
+  constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
+    this.swapBaseHandler = new SwapBaseHandler({
+      chainService,
+      balanceService,
+      providerName: isTestnet ? 'Chainflip Testnet' : 'Chainflip',
+      providerSlug: isTestnet ? SwapProviderId.CHAIN_FLIP_TESTNET : SwapProviderId.CHAIN_FLIP_MAINNET
+    });
     this.isTestnet = isTestnet;
 
     this.swapSdk = new SwapSDK({
@@ -117,11 +123,10 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         };
       }
 
-      const [supportedDestChains, srcAssets, destAssets, fromAssetBalance] = await Promise.all([
+      const [supportedDestChains, srcAssets, destAssets] = await Promise.all([
         this.swapSdk.getChains(srcChainId),
         this.swapSdk.getAssets(srcChainId),
-        this.swapSdk.getAssets(destChainId),
-        this.balanceService.getTokenFreeBalance(request.address, srcChain, fromAsset.slug)
+        this.swapSdk.getAssets(destChainId)
       ]);
 
       const supportedDestChainId = supportedDestChains.find((c) => c.chain === destChainId);
@@ -133,57 +138,36 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       }
 
       const bnAmount = new BigNumber(request.fromAmount);
-      const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-      const bnMaxBalanceSwap = new BigNumber(fromAssetBalance.value).minus(bnSrcAssetMinAmount);
       const bnMinSwap = new BigNumber(srcAssetData.minimumSwapAmount);
-
-      let bnSwapMaxAllowance: BigNumber = bnMaxBalanceSwap;
 
       if (srcAssetData.maximumSwapAmount) {
         const bnMaxProtocolSwap = new BigNumber(srcAssetData.maximumSwapAmount);
 
-        bnSwapMaxAllowance = BigNumber.min(bnMaxProtocolSwap, bnMaxBalanceSwap);
+        if (bnMinSwap.gte(bnMaxProtocolSwap)) {
+          return { error: SwapErrorType.UNKNOWN };
+        }
+
+        if (bnAmount.gte(bnMaxProtocolSwap)) {
+          return {
+            error: SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+            metadata: {
+              minSwap: {
+                value: srcAssetData.minimumSwapAmount,
+                decimals: _getAssetDecimals(fromAsset),
+                symbol: fromAsset.symbol
+              },
+              maxSwap: {
+                value: bnMaxProtocolSwap.toString(),
+                decimals: _getAssetDecimals(fromAsset),
+                symbol: fromAsset.symbol
+              },
+              chain: srcChainInfo
+            } as ChainflipPreValidationMetadata
+          };
+        }
       }
 
-      if (bnMinSwap.gte(bnSwapMaxAllowance)) {
-        return {
-          error: SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
-          metadata: {
-            minSwap: {
-              value: srcAssetData.minimumSwapAmount,
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            maxSwap: {
-              value: bnSwapMaxAllowance.toString(),
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            chain: srcChainInfo
-          } as ChainflipPreValidationMetadata
-        };
-      }
-
-      if (bnAmount.gte(bnSwapMaxAllowance)) {
-        return {
-          error: SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-          metadata: {
-            minSwap: {
-              value: srcAssetData.minimumSwapAmount,
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            maxSwap: {
-              value: bnSwapMaxAllowance.toString(),
-              decimals: _getAssetDecimals(fromAsset),
-              symbol: fromAsset.symbol
-            },
-            chain: srcChainInfo
-          } as ChainflipPreValidationMetadata
-        };
-      }
-
-      if (bnAmount.lt(bnMinSwap)) {
+      if (bnAmount.lt(bnMinSwap)) { // might miss case when minSwap is 0
         return {
           error: SwapErrorType.NOT_MEET_MIN_SWAP,
           metadata: {
@@ -246,7 +230,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
-      return getSwapEarlyValidationError(earlyValidation.error, metadata);
+      return getChainflipEarlyValidationError(earlyValidation.error, metadata);
     }
 
     const srcChainId = this.chainMapping[fromAsset.originChain];
@@ -308,7 +292,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         provider: this.providerInfo,
         aliveUntil: +Date.now() + (SWAP_QUOTE_TIMEOUT_MAP[this.slug] || SWAP_QUOTE_TIMEOUT_MAP.default),
         minSwap: metadata.minSwap.value,
-        maxSwap: metadata.maxSwap,
+        maxSwap: metadata.maxSwap?.value,
         estimatedArrivalTime: quoteResponse.quote.estimatedDurationSeconds, // in seconds
         isLowLiquidity: quoteResponse.quote.lowLiquidityWarning,
         feeInfo: {
@@ -346,17 +330,15 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
 
     let isXcmOk = false;
 
-    for (const step of params.process.steps) {
+    for (const [index, step] of params.process.steps.entries()) {
       const getErrors = async (): Promise<TransactionError[]> => {
         switch (step.type) {
           case SwapStepType.DEFAULT:
             return Promise.resolve([]);
-          case SwapStepType.XCM:
-            return this.swapBaseHandler.validateXcmStep(params);
           case SwapStepType.TOKEN_APPROVAL:
-            return this.swapBaseHandler.validateTokenApproveStep(params);
+            return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
           default:
-            return this.swapBaseHandler.validateJoinStep(params, isXcmOk);
+            return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
         }
       };
 
@@ -364,7 +346,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === YieldStepType.XCM) {
+      } else if (step.type === SwapStepType.XCM) {
         isXcmOk = true;
       }
     }
@@ -397,14 +379,15 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       amount: quote.fromAmount
     });
 
-    const txData: ChainflipTxData = {
+    const txData: ChainflipSwapTxData = {
       address,
       provider: this.providerInfo,
       quote: params.quote,
       slippage: params.slippage,
       recipient,
       depositChannelId: depositAddressResponse.depositChannelId,
-      depositAddress: depositAddressResponse.depositAddress
+      depositAddress: depositAddressResponse.depositAddress,
+      process: params.process
     };
 
     let extrinsic: TransactionData;
@@ -427,11 +410,11 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       extrinsic = submittableExtrinsic as SubmittableExtrinsic<'promise'>;
     } else {
       if (_isNativeToken(fromAsset)) {
-        const [transactionConfig] = await getEVMTransactionObject(chainInfo, address, depositAddressResponse.depositAddress, quote.fromAmount, false, this.chainService.getEvmApiMap());
+        const [transactionConfig] = await getEVMTransactionObject(chainInfo, address, depositAddressResponse.depositAddress, quote.fromAmount, false, this.chainService.getEvmApi(chainInfo.slug));
 
         extrinsic = transactionConfig;
       } else {
-        const [transactionConfig] = await getERC20TransactionObject(_getContractAddressOfToken(fromAsset), chainInfo, address, depositAddressResponse.depositAddress, quote.fromAmount, false, this.chainService.getEvmApiMap());
+        const [transactionConfig] = await getERC20TransactionObject(_getContractAddressOfToken(fromAsset), chainInfo, address, depositAddressResponse.depositAddress, quote.fromAmount, false, this.chainService.getEvmApi(chainInfo.slug));
 
         extrinsic = transactionConfig;
       }
@@ -461,32 +444,22 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     }
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
-    const result: OptimalSwapPath = {
-      totalFee: [MOCK_SWAP_FEE],
-      steps: [DEFAULT_SWAP_FIRST_STEP]
-    };
-
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
     if (params.selectedQuote) {
-      result.totalFee.push(params.selectedQuote.feeInfo);
-      result.steps.push({
-        id: result.steps.length,
+      const submitStep = {
         name: 'Swap',
         type: SwapStepType.SWAP
-      });
-    } else { // todo: improve this
-      result.totalFee.push({
-        feeComponent: [],
-        feeOptions: [params.request.pair.from],
-        defaultFeeToken: params.request.pair.from
-      });
-      result.steps.push({
-        id: result.steps.length,
-        name: 'Swap',
-        type: SwapStepType.SWAP
-      });
+      };
+
+      return Promise.resolve([submitStep, params.selectedQuote.feeInfo]);
     }
 
-    return Promise.resolve(result);
+    return Promise.resolve(undefined);
+  }
+
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+    return this.swapBaseHandler.generateOptimalProcess(params, [
+      this.getSubmitStep
+    ]);
   }
 }

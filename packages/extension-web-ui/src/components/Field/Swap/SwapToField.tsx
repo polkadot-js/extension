@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { swapCustomFormatter } from '@subwallet/extension-base/utils';
+import { formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { SwapTokenSelector } from '@subwallet/extension-web-ui/components/Field/Swap/parts';
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -41,6 +41,14 @@ const Component = (props: Props) => {
     return BN_ZERO;
   }, [priceMap, swapValue, toAsset]);
 
+  const convertedDestinationSwapValue = useMemo(() => {
+    if (swapValue.toString().includes('e')) {
+      return formatNumberString(swapValue.toString());
+    } else {
+      return swapValue.toString();
+    }
+  }, [swapValue]);
+
   return (
     <div className={CN(className, 'swap-to-field')}>
       <div className={'__label-wrapper'}>
@@ -65,7 +73,7 @@ const Component = (props: Props) => {
           {
             !loading && (
               <>
-                <div className={'__amount-destination'}>{swapCustomFormatter(swapValue.toString())}</div>
+                <div className={'__amount-destination'}>{swapCustomFormatter(convertedDestinationSwapValue)}</div>
                 <Number
                   className={'__amount-convert'}
                   customFormatter={swapCustomFormatter}

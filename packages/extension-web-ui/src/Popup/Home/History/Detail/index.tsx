@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType, TransactionAdditionalInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getExplorerLink, getSwapExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
-import { SwapTxData } from '@subwallet/extension-base/types/swap';
+import { getChainflipExplorerLink, getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
+import { ChainflipSwapTxData, SwapProviderId, SwapTxData } from '@subwallet/extension-base/types/swap';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components';
 import { BaseModal } from '@subwallet/extension-web-ui/components/Modal/BaseModal';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -60,7 +60,11 @@ function Component ({ className = '', data, onCancel }: Props): React.ReactEleme
     let link = (data.extrinsicHash && data.extrinsicHash !== '') && getExplorerLink(originChainInfo, data.extrinsicHash, 'tx');
 
     if (extrinsicType === ExtrinsicType.SWAP) {
-      link = getSwapExplorerLink(data.additionalInfo as SwapTxData, originChainInfo);
+      const additionalInfo = data.additionalInfo as SwapTxData;
+
+      if ([SwapProviderId.CHAIN_FLIP_TESTNET, SwapProviderId.CHAIN_FLIP_MAINNET].includes(additionalInfo.provider.id)) {
+        link = getChainflipExplorerLink(additionalInfo as ChainflipSwapTxData, originChainInfo);
+      }
     }
 
     return (

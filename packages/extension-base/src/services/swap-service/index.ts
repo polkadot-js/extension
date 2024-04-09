@@ -10,7 +10,8 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
-import { DEFAULT_SWAP_FIRST_STEP, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { HydradxHandler } from '@subwallet/extension-base/services/swap-service/handler/hydradx-handler';
+import { DEFAULT_SWAP_FIRST_STEP, getSwapAltToken, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapErrorType, SwapPair, SwapProviderId, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
@@ -36,6 +37,10 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     const availableQuotes: QuoteAskResponse[] = [];
 
     await Promise.all(Object.values(this.handlers).map(async (handler) => {
+      if (handler.init && handler.isReady === false) {
+        await handler.init();
+      }
+
       const quote = await handler.getSwapQuote(request);
 
       if (!(quote instanceof SwapError)) {
@@ -108,6 +113,7 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   }
 
   public async getLatestQuotes (request: SwapRequest): Promise<SwapQuoteResponse> {
+    request.pair.metadata = this.getSwapPairMetadata(request.pair.slug); // todo: improve this
     const quoteAskResponses = await this.askProvidersForQuote(request);
 
     // todo: handle error to return back to UI
@@ -143,13 +149,22 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     _SUPPORTED_SWAP_PROVIDERS.forEach((providerId) => {
       switch (providerId) {
         case SwapProviderId.CHAIN_FLIP_TESTNET:
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip Testnet', this.chainService, this.state.balanceService);
+          this.handlers[providerId] = new ChainflipSwapHandler(this.chainService, this.state.balanceService);
 
           break;
         case SwapProviderId.CHAIN_FLIP_MAINNET:
-          this.handlers[providerId] = new ChainflipSwapHandler(providerId, 'Chainflip', this.chainService, this.state.balanceService, false);
+          this.handlers[providerId] = new ChainflipSwapHandler(this.chainService, this.state.balanceService, false);
 
           break;
+
+        case SwapProviderId.HYDRADX_TESTNET:
+          this.handlers[providerId] = new HydradxHandler(this.chainService, this.state.balanceService);
+          break;
+
+        case SwapProviderId.HYDRADX_MAINNET:
+          this.handlers[providerId] = new HydradxHandler(this.chainService, this.state.balanceService, false);
+          break;
+
         default:
           throw new Error('Unsupported provider');
       }
@@ -158,7 +173,7 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
   async init (): Promise<void> {
     this.status = ServiceStatus.INITIALIZING;
-    this.eventService.emit('earning.ready', true);
+    this.eventService.emit('swap.ready', true);
 
     this.status = ServiceStatus.INITIALIZED;
 
@@ -216,12 +231,21 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
   public getSwapPairs (): SwapPair[] {
     return Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
+      const fromAsset = this.chainService.getAssetBySlug(assetRef.srcAsset);
+
       return {
         slug,
         from: assetRef.srcAsset,
-        to: assetRef.destAsset
+        to: assetRef.destAsset,
+        metadata: {
+          alternativeAsset: getSwapAltToken(fromAsset)
+        }
       } as SwapPair;
     });
+  }
+
+  private getSwapPairMetadata (slug: string): Record<string, any> | undefined {
+    return this.getSwapPairs().find((pair) => pair.slug === slug)?.metadata;
   }
 
   public async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
@@ -238,6 +262,10 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   public async handleSwapProcess (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const handler = this.handlers[params.quote.provider.id];
 
+    if (params.process.steps.length === 1) { // todo: do better to handle error generating steps
+      return Promise.reject(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, 'Please check your network and try again'));
+    }
+
     if (handler) {
       return handler.handleSwapProcess(params);
     } else {
@@ -246,12 +274,17 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
   }
 
   public subscribeSwapPairs (callback: (pairs: SwapPair[]) => void) {
-    return this.chainService.subscribeSwapRefMap().subscribe((ref) => {
-      const latestData = Object.entries(this.chainService.swapRefMap).map(([slug, assetRef]) => {
+    return this.chainService.subscribeSwapRefMap().subscribe((refMap) => {
+      const latestData = Object.entries(refMap).map(([slug, assetRef]) => {
+        const fromAsset = this.chainService.getAssetBySlug(assetRef.srcAsset);
+
         return {
           slug,
           from: assetRef.srcAsset,
-          to: assetRef.destAsset
+          to: assetRef.destAsset,
+          metadata: {
+            alternativeAsset: getSwapAltToken(fromAsset)
+          }
         } as SwapPair;
       });
 

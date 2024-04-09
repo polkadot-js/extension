@@ -6,7 +6,7 @@ import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { ChainflipPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapPair, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
@@ -53,6 +53,14 @@ export const MOCK_SWAP_FEE: SwapFeeInfo = {
   feeOptions: []
 };
 
+export function getSwapAlternativeAsset (swapPair: SwapPair): string | undefined {
+  return swapPair?.metadata?.alternativeAsset as string;
+}
+
+export function getSwapAltToken (chainAsset: _ChainAsset): string | undefined {
+  return chainAsset.metadata?.alternativeSwapAsset as string;
+}
+
 export function calculateSwapRate (fromAmount: string, toAmount: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {
   const bnFromAmount = new BigN(fromAmount);
   const bnToAmount = new BigN(toAmount);
@@ -63,7 +71,7 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
 }
 
-export function getSwapEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata): SwapError { // todo: support more providers
+export function getChainflipEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata): SwapError { // todo: support more providers
   switch (error) {
     case SwapErrorType.NOT_MEET_MIN_SWAP: {
       const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
@@ -84,13 +92,23 @@ export function getSwapEarlyValidationError (error: SwapErrorType, metadata: Cha
 
     case SwapErrorType.ASSET_NOT_SUPPORTED:
       return new SwapError(error, 'This swap pair is not supported');
+    case SwapErrorType.UNKNOWN:
+      return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
+    case SwapErrorType.ERROR_FETCHING_QUOTE:
+      return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
+    default:
+      return new SwapError(error);
+  }
+}
 
-    case SwapErrorType.SWAP_NOT_ENOUGH_BALANCE: {
-      const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
-
-      return new SwapError(error, `Insufficient balance. You need more than ${parsedMinSwapValue} ${metadata.minSwap.symbol} to start swapping. Deposit ${metadata.minSwap.symbol} and try again.`);
+export function getEarlyHydradxValidationError (error: SwapErrorType, metadata: HydradxPreValidationMetadata): SwapError {
+  switch (error) {
+    case SwapErrorType.AMOUNT_CANNOT_BE_ZERO: {
+      return new SwapError(error, 'Amount too low. Increase your amount above 0 and try again');
     }
 
+    case SwapErrorType.ASSET_NOT_SUPPORTED:
+      return new SwapError(error, 'This swap pair is not supported');
     case SwapErrorType.UNKNOWN:
       return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:

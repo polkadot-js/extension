@@ -154,6 +154,10 @@ export const SwapTermsOfServiceModal = styled(Component)<Props>(({ theme: { toke
       lineHeight: token.lineHeightSM,
       color: token.colorTextTertiary
     },
+    '.ant-sw-sub-header-title-content': {
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3
+    },
     '.__content-body': {
       maxHeight: 232,
       display: 'block',

@@ -12,7 +12,6 @@ import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowRight } from 'phosphor-react';
 import React, { useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
@@ -23,7 +22,6 @@ const numberMetadata = { maxNumberFormat: 8 };
 const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
-  const { t } = useTranslation();
   const swapInfo = data;
 
   const toAssetInfo = useMemo(() => {
@@ -54,10 +52,9 @@ const Component: React.FC<Props> = (props: Props) => {
             decimal={_getAssetDecimals(fromAssetInfo)}
             formatType={'custom'}
             metadata={numberMetadata}
-            suffix={_getAssetSymbol(fromAssetInfo)}
             value={swapInfo.quote.fromAmount}
           />
-          <span className={'__quote-footer-label'}>Swap</span>
+          <span className={'__quote-footer-label'}>{_getAssetSymbol(fromAssetInfo)}</span>
         </div>
         <Icon
           className={'middle-icon'}
@@ -79,10 +76,9 @@ const Component: React.FC<Props> = (props: Props) => {
             decimal={0}
             formatType={'custom'}
             metadata={numberMetadata}
-            suffix={_getAssetSymbol(toAssetInfo)}
             value={destinationValue}
           />
-          <span className={'__quote-footer-label'}>{t('Minimum received')}</span>
+          <span className={'__quote-footer-label'}>{_getAssetSymbol(toAssetInfo)}</span>
         </div>
       </div>
     </div>

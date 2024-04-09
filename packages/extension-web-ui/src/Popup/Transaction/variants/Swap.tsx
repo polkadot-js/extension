@@ -8,7 +8,7 @@ import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNati
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
-import { isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
+import { formatNumberString, isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddMoreBalanceModal, AddressInput, AlertBox, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
@@ -697,10 +697,14 @@ const Component = () => {
 
   const minimumReceived = useMemo(() => {
     if (supportSlippageSelection) {
-      return destinationSwapValue;
+      if (destinationSwapValue.toString().includes('e')) {
+        return formatNumberString(destinationSwapValue.toString());
+      } else {
+        return destinationSwapValue;
+      }
     }
 
-    return destinationSwapValue.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
+    return formatNumberString(destinationSwapValue.multipliedBy(new BigN(1).minus(currentSlippage.slippage)).toString());
   }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {

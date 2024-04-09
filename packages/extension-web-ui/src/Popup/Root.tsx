@@ -80,7 +80,7 @@ function removeLoadingPlaceholder (animation: boolean): void {
 
       // Callback after 1 second
       setTimeout(() => {
-      // Remove element
+        // Remove element
         element.parentNode?.removeChild(element);
       }, 150);
     } else {

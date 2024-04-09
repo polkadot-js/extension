@@ -1093,7 +1093,6 @@
   "Mainnet": "",
   "Testnet": "",
   "Enter Astar portal": "",
-  "You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.": "",
   "No earning option found": "",
   "Change your search and try again": "",
   "Earning options": "",
@@ -1197,5 +1196,7 @@
   "Live": "",
   "Archived": "",
   "Transferring all will remove all assets on this network. Are you sure?": "",
-  "Swap": ""
+  "Swap": "",
+  "Navigate to Astar portal to view and manage your stake in Astar dApp staking v3": "",
+  "Apply {{number}} account{{s}}": ""
 }

@@ -2,24 +2,24 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
-import { HiddenInput } from '@subwallet/extension-web-ui/components';
+import { AlertModal, HiddenInput } from '@subwallet/extension-web-ui/components';
 import { AccountSelector } from '@subwallet/extension-web-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-web-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { ChainSelector } from '@subwallet/extension-web-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components/Field/TokenSelector';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-web-ui/hooks/account/useIsMantaPayEnabled';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
-import { findAccountByAddress, formatBalance, noop, transactionDefaultFilterAccount } from '@subwallet/extension-web-ui/utils';
+import { findAccountByAddress, formatBalance, noop, reformatAddress, transactionDefaultFilterAccount } from '@subwallet/extension-web-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-web-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
@@ -213,6 +213,7 @@ const filterAccountFunc = (
 
 const hiddenFields: Array<keyof TransferParams> = ['chain'];
 const validateFields: Array<keyof TransferParams> = ['value', 'to'];
+const alertModalId = 'confirmation-alert-modal';
 
 const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<Props> => {
   useSetCurrentPage('/transaction/send-fund');
@@ -239,6 +240,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const asset = useWatchTransaction('asset', form, defaultData);
 
   const assetInfo = useFetchChainAssetInfo(asset);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
@@ -330,9 +332,17 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       return Promise.resolve();
     }
 
-    const isOnChain = chain === destChain;
+    if (!isEthereumAddress(_recipientAddress)) {
+      const destChainInfo = chainInfoMap[destChain];
+      const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
+      const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
 
-    const account = findAccountByAddress(accounts, _recipientAddress);
+      if (_addressOnChain !== _recipientAddress) {
+        return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: destChainInfo.name } }));
+      }
+    }
+
+    const isOnChain = chain === destChain;
 
     if (isOnChain) {
       if (isSameAddress(from, _recipientAddress)) {
@@ -359,6 +369,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         }
       }
     }
+
+    const account = findAccountByAddress(accounts, _recipientAddress);
 
     if (account?.isHardware) {
       const destChainInfo = chainInfoMap[destChain];
@@ -447,11 +459,11 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   // Submit transaction
   const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
-    const { asset, chain, destChain, from, to, value } = values;
+    const { asset, chain, destChain, from: _from, to, value } = values;
 
     let sendPromise: Promise<SWTransactionResponse>;
 
-    const account = findAccountByAddress(accounts, from);
+    const account = findAccountByAddress(accounts, _from);
 
     if (!account) {
       setLoading(false);
@@ -462,6 +474,10 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
 
       return;
     }
+
+    const chainInfo = chainInfoMap[chain];
+    const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+    const from = reformatAddress(_from, addressPrefix);
 
     const isLedger = !!account.isHardware;
     const isEthereum = isEthereumAddress(account.address);
@@ -524,7 +540,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         })
       ;
     }, 300);
-  }, [accounts, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
+  }, [accounts, chainInfoMap, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -535,6 +551,35 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(value);
     }
   }, [maxTransfer]);
+  const onPreSubmit = useCallback(() => {
+    if (_isNativeToken(assetInfo)) {
+      const minAmount = _getTokenMinAmount(assetInfo);
+      const bnMinAmount = new BN(minAmount);
+
+      if (bnMinAmount.gt(BN_ZERO) && isTransferAll && chain === destChain) {
+        openAlert({
+          type: NotificationType.WARNING,
+          content: t('Transferring all will remove all assets on this network. Are you sure?'),
+          title: t('Pay attention!'),
+          okButton: {
+            text: t('Transfer'),
+            onClick: () => {
+              closeAlert();
+              form.submit();
+            }
+          },
+          cancelButton: {
+            text: t('Cancel'),
+            onClick: closeAlert
+          }
+        });
+
+        return;
+      }
+    }
+
+    form.submit();
+  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic
@@ -707,7 +752,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               allowDomain={true}
-              chain={chain}
+              chain={destChain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}
@@ -745,6 +791,14 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
+        {
+          !!alertProps && (
+            <AlertModal
+              modalId={alertModalId}
+              {...alertProps}
+            />
+          )
+        }
       </TransactionContent>
       <TransactionFooter
         className={CN(`${className} -transaction-footer`, {
@@ -760,7 +814,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             />
           )}
           loading={loading}
-          onClick={checkAction(form.submit, extrinsicType)}
+          onClick={checkAction(onPreSubmit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}

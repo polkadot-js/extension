@@ -29,8 +29,16 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
     [chainInfoMap, transaction.chain]
   );
 
+  const receiveChain = useMemo(() => {
+    if (xcmData) {
+      return xcmData.destinationNetworkKey || transaction.chain;
+    } else {
+      return transaction.chain;
+    }
+  }, [transaction.chain, xcmData]);
   const { decimals: chainDecimals, symbol: chainSymbol } = useGetNativeTokenBasicInfo(transaction.chain);
   const senderPrefix = useGetChainPrefixBySlug(transaction.chain);
+  const receiverPrefix = useGetChainPrefixBySlug(receiveChain);
 
   return (
     <>
@@ -54,6 +62,7 @@ const Component: React.FC<Props> = ({ className, transaction }: Props) => {
         <MetaInfo.Account
           address={data.to}
           label={t('Send to')}
+          networkPrefix={receiverPrefix}
         />
 
         {

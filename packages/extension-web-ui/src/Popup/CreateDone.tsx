@@ -33,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const onDone = useCallback(() => {
-    navigate(returnPath);
+    navigate(returnPath, { state: { from: returnPath } });
     setReturnStorage(DEFAULT_ROUTER_PATH);
   }, [navigate, returnPath, setReturnStorage]);
 

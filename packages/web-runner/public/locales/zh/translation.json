@@ -1197,5 +1197,6 @@
   "Archived": "",
   "Transferring all will remove all assets on this network. Are you sure?": "",
   "Swap": "",
-  "Navigate to Astar portal to view and manage your stake in Astar dApp staking v3": "请导航到Astar portal以查看并管理你在Astar dApp staking v3里的质押"
+  "Navigate to Astar portal to view and manage your stake in Astar dApp staking v3": "请导航到Astar portal以查看并管理你在Astar dApp staking v3里的质押",
+  "Apply {{number}} account{{s}}": ""
 }

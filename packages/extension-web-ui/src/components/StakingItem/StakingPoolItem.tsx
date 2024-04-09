@@ -122,13 +122,16 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       paddingLeft: token.paddingXS,
       paddingRight: token.paddingXS,
       paddingBottom: 2,
-      paddingTop: 2
+      paddingTop: 2,
+      overflow: 'hidden'
     },
     '.__tag-title': {
       fontSize: token.fontSizeXS,
       fontWeight: 700,
       lineHeight: token.lineHeightXS,
-      color: token.colorSuccess
+      color: token.colorSuccess,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.middle-item__bond-amount-label, .middle-item__bond-amount-number, .middle-item__pool-earning-status': {

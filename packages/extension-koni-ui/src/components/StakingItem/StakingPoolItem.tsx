@@ -45,7 +45,7 @@ const Component: React.FC<Props> = (props: Props) => {
                       customSize={'12px'}
                       iconColor={token.colorSuccess}
                       phosphorIcon={ThumbsUp}
-                      weight={'bold'}
+                      weight={'fill'}
                     />
                     <div className={'__tag-title'}>Recommended</div>
                   </div>
@@ -117,13 +117,16 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       paddingLeft: token.paddingXS,
       paddingRight: token.paddingXS,
       paddingBottom: 2,
-      paddingTop: 2
+      paddingTop: 2,
+      overflow: 'hidden'
     },
     '.__tag-title': {
       fontSize: token.fontSizeXS,
       fontWeight: 700,
       lineHeight: token.lineHeightXS,
-      color: token.colorSuccess
+      color: token.colorSuccess,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis'
     },
 
     '.middle-item__name': {

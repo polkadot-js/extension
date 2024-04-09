@@ -1092,8 +1092,7 @@
   "No crowdloans found": "",
   "Mainnet": "",
   "Testnet": "",
-  "Enter Astar portal": "",
-  "You are navigating to Astar portal to view and manage your stake in Astar dApp staking v3. SubWallet will offer support for Astar dApp staking v3 soon.": "",
+  "Enter Astar portal": "登录Astar portal",
   "No earning option found": "",
   "Change your search and try again": "",
   "Earning options": "",
@@ -1197,5 +1196,7 @@
   "Live": "",
   "Archived": "",
   "Transferring all will remove all assets on this network. Are you sure?": "",
-  "Swap": ""
+  "Swap": "",
+  "Navigate to Astar portal to view and manage your stake in Astar dApp staking v3": "请导航到Astar portal以查看并管理你在Astar dApp staking v3里的质押",
+  "Apply {{number}} account{{s}}": ""
 }

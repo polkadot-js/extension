@@ -38,6 +38,7 @@ const loginUrl = '/keyring/login';
 const phishingUrl = '/phishing-page-detected';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
+const accountNewSeedPhrase = '/accounts/new-seed-phrase';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
 
@@ -200,6 +201,8 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       } else {
         redirectTarget = DEFAULT_ROUTER_PATH;
       }
+    } else if (hasInternalConfirmations && pathName === accountNewSeedPhrase) {
+      openPModal(null);
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');
     } else if (!hasInternalConfirmations && isOpenPModal('confirmations')) {

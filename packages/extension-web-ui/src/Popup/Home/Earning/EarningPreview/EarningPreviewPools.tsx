@@ -6,7 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { EarningInstructionModal, EarningPoolItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { EarningPoolItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { CREATE_RETURN, DEFAULT_EARN_PARAMS, DEFAULT_ROUTER_PATH, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, usePreviewYieldPoolInfoByGroup, useSelector, useSetSelectedAccountTypes, useTranslation } from '@subwallet/extension-web-ui/hooks';
@@ -39,6 +39,7 @@ const alertModalId = 'earning-pools-alert-modal';
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 const FILTER_MODAL_ID = 'earning-pool-filter-modal';
+const earnPath = '/transaction/earn';
 
 const getFilteredAccount = (chainInfo: _ChainInfo) => (account: AccountJson) => {
   if (isAccountAll(account.address)) {
@@ -74,7 +75,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [, setReturnStorage] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
 
-  const [selectedPool, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
+  const [, setSelectedPool] = React.useState<YieldPoolInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
 
   const { activeModal } = useContext(ModalContext);
@@ -174,7 +175,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
       if (isNoAccount) {
         setEarnStorage(earnParams);
-        setReturnStorage('/transaction/earn');
+        setReturnStorage(earnPath);
         navigate(DEFAULT_ROUTER_PATH);
       } else {
         const chainInfo = chainInfoMap[chain];
@@ -192,18 +193,18 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           if (_filteredAccounts.length === 1) {
             earnParams.from = _filteredAccounts[0].address;
             setEarnStorage(earnParams);
-            saveCurrentAccountAddress(_filteredAccounts[0]).then(() => navigate('/transaction/earn')).catch(() => console.error());
+            saveCurrentAccountAddress(_filteredAccounts[0]).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           } else {
             if (currentAccount && _filteredAccounts.some((acc) => acc.address === currentAccount.address)) {
               earnParams.from = currentAccount.address;
               setEarnStorage(earnParams);
-              navigate('/transaction/earn');
+              navigate(earnPath, { state: { from: earnPath } });
 
               return;
             }
 
             setEarnStorage(earnParams);
-            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate('/transaction/earn')).catch(() => console.error());
+            saveCurrentAccountAddress({ address: 'ALL' }).then(() => navigate(earnPath, { state: { from: earnPath } })).catch(() => console.error());
           }
         }
       }
@@ -217,11 +218,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
   const { alertProps,
     checkChainConnected,
-    closeAlert,
     closeConnectChainModal,
     connectingChain,
     onConnectChain,
-    openAlert,
     setExtraSuccessFlag, turnOnChain } = useHandleChainConnection({
     alertModalId,
     chainConnectionLoadingModalId,
@@ -263,9 +262,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
-      activeModal(instructionModalId);
+      navigateToEarnTransaction(item.slug, item.chain);
     };
-  }, [activeModal, checkChainConnected, getAltChain, onConnectChain]);
+  }, [checkChainConnected, getAltChain, navigateToEarnTransaction, onConnectChain]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {
@@ -409,21 +408,6 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
           title={t('Filter')}
         />
       </Layout.Base>
-
-      {
-        selectedPool && (
-          <EarningInstructionModal
-            address={currentAccount?.address}
-            assetRegistry={assetRegistry}
-            bypassEarlyValidate={true}
-            closeAlert={closeAlert}
-            isShowStakeMoreButton={true}
-            onStakeMore={navigateToEarnTransaction}
-            openAlert={openAlert}
-            poolInfo={selectedPool}
-          />
-        )
-      }
     </ChainConnectionWrapper>
   );
 }

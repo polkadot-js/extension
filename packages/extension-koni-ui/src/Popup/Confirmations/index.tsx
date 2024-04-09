@@ -103,16 +103,6 @@ const Component = function ({ className }: Props) {
       }
     }
 
-    if (confirmation.item.isInternal) {
-      return (
-        <TransactionConfirmation
-          closeAlert={closeAlert}
-          confirmation={confirmation}
-          openAlert={openAlert}
-        />
-      );
-    }
-
     switch (confirmation.type) {
       case 'addNetworkRequest':
         return <AddNetworkConfirmation request={confirmation.item as ConfirmationDefinitions['addNetworkRequest'][0]} />;
@@ -150,6 +140,16 @@ const Component = function ({ className }: Props) {
         );
       case 'notSupportWCRequest':
         return (<NotSupportWCConfirmation request={confirmation.item as WalletConnectNotSupportRequest} />);
+    }
+
+    if (confirmation.item.isInternal) {
+      return (
+        <TransactionConfirmation
+          closeAlert={closeAlert}
+          confirmation={confirmation}
+          openAlert={openAlert}
+        />
+      );
     }
 
     return null;

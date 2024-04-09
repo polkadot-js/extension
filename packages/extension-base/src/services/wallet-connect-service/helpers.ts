@@ -18,7 +18,7 @@ export const getWCId = (id: number): string => {
 export const convertConnectRequest = (request: SignClientTypes.EventArguments['session_proposal']): WalletConnectSessionRequest => {
   return {
     id: getWCId(request.id),
-    isInternal: false,
+    isInternal: true,
     request: request,
     url: request.params.proposer.metadata.url
   };

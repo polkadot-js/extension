@@ -4,8 +4,8 @@
 import { sendMessage } from '@subwallet/extension-web-ui/messaging/base';
 import { KeyringAddress } from '@subwallet/ui-keyring/types';
 
-export async function saveRecentAccount (accountId: string): Promise<KeyringAddress> {
-  return sendMessage('pri(accounts.saveRecent)', { accountId });
+export async function saveRecentAccount (accountId: string, chain?: string): Promise<KeyringAddress> {
+  return sendMessage('pri(accounts.saveRecent)', { accountId, chain });
 }
 
 export async function editContactAddress (address: string, name: string): Promise<boolean> {

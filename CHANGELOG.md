@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.54
+Build date: Apl 09, 2024.
+
+Bugs fixed:
+- Fix issue in transaction screen (#2891)
+- Fix error in setting screen
+
 ## 1.1.53
 Build date: Apl 08, 2024.
 

@@ -51,8 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
       uri
     })
       .then(() => {
-        setLoading(false);
-        navigate('/wallet-connect/list');
+        setTimeout(() => setLoading(false), 5000);
       })
       .catch((e) => {
         console.error(e);
@@ -64,11 +63,8 @@ const Component: React.FC<Props> = (props: Props) => {
           message: message
         });
         setLoading(false);
-      })
-      .finally(() => {
-        setLoading(false);
       });
-  }, [navigate, notification, t]);
+  }, [notification, t]);
 
   const onFinish: FormCallbacks<AddConnectionFormState>['onFinish'] = useCallback((values: AddConnectionFormState) => {
     const { uri } = values;

@@ -27,6 +27,7 @@ const titleMap: Record<ConfirmationType, string> = {
   addTokenRequest: detectTranslate('Add token request'),
   authorizeRequest: detectTranslate('Connect with SubWallet'),
   evmSendTransactionRequest: detectTranslate('Transaction request'),
+  evmWatchTransactionRequest: detectTranslate('Transaction request'),
   evmSignatureRequest: detectTranslate('Signature request'),
   metadataRequest: detectTranslate('Update metadata'),
   signingRequest: detectTranslate('Signature request'),
@@ -103,7 +104,7 @@ const Component = function ({ className }: Props) {
       }
     }
 
-    if (confirmation.item.isInternal) {
+    if (confirmation.item.isInternal && confirmation.type !== 'connectWCRequest') {
       return (
         <TransactionConfirmation
           closeAlert={closeAlert}
@@ -122,6 +123,13 @@ const Component = function ({ className }: Props) {
         return (
           <EvmSignatureConfirmation
             request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
+            type={confirmation.type}
+          />
+        );
+      case 'evmWatchTransactionRequest':
+        return (
+          <EvmTransactionConfirmation
+            request={confirmation.item as ConfirmationDefinitions['evmWatchTransactionRequest'][0]}
             type={confirmation.type}
           />
         );

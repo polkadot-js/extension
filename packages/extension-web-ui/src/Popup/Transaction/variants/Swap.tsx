@@ -696,8 +696,12 @@ const Component = () => {
   }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
+    if (supportSlippageSelection) {
+      return destinationSwapValue;
+    }
+
     return destinationSwapValue.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
-  }, [destinationSwapValue, currentSlippage]);
+  }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');
@@ -1670,7 +1674,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       color: token.colorWhite
     },
 
-    '.__quote-info-block, __quote-fee-info-block': {
+    '.__quote-info-block, .__quote-fee-info-block': {
       paddingLeft: 24,
       paddingRight: 24,
       paddingTop: 16,

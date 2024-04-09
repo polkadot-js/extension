@@ -775,6 +775,19 @@ export class ChainService {
       }));
   }
 
+  public async initSingleApi (slug: string) {
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!chainStateMap[slug].active) {
+      return false;
+    }
+
+    await this.initApiForChain(chainInfoMap[slug]);
+
+    return true;
+  }
+
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 

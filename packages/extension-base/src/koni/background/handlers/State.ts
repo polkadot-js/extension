@@ -38,7 +38,7 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
-import { isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
+import { isAccountAll, stripUrl, TARGET_ENV, wait } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -1480,13 +1480,35 @@ export default class KoniState {
       data: transactionParams.data
     };
 
+    const getTransactionGas = async () => {
+      try {
+        transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      } catch (e) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+      }
+    };
+
     // Calculate transaction data
     try {
-      transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      await Promise.race([
+        getTransactionGas(),
+        wait(3000).then(async () => {
+          if (!transaction.gas) {
+            await this.chainService.initSingleApi(networkKey);
+            await getTransactionGas();
+          }
+        })
+      ]);
     } catch (e) {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+    }
+
+    if (!transaction.gas) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS);
     }
 
     let estimateGas: string;

@@ -696,15 +696,17 @@ const Component = () => {
   }, [currentQuote, fromAmountValue, fromAssetInfo]);
 
   const minimumReceived = useMemo(() => {
-    if (supportSlippageSelection) {
-      if (destinationSwapValue.toString().includes('e')) {
-        return formatNumberString(destinationSwapValue.toString());
-      } else {
-        return destinationSwapValue;
-      }
-    }
+    const calcMinimumReceived = (value: BigN) => {
+      const adjustedValue = supportSlippageSelection
+        ? value
+        : value.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
 
-    return formatNumberString(destinationSwapValue.multipliedBy(new BigN(1).minus(currentSlippage.slippage)).toString());
+      return adjustedValue.toString().includes('e')
+        ? formatNumberString(adjustedValue.toString())
+        : adjustedValue.toString();
+    };
+
+    return calcMinimumReceived(destinationSwapValue);
   }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {

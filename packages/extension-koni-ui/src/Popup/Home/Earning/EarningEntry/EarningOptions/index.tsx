@@ -255,9 +255,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
 
               const availableBalance = nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value;
 
-              if (!availableBalance) {
-                isHiddenPool = true;
-              } else if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && availableBalance && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
                 isHiddenPool = true;
               }
             }

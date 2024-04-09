@@ -97,9 +97,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         const assetInfo = nativeSlug && assetRegistry[nativeSlug];
         const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
 
-        const availableBalance = nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value;
+        const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || 0;
 
-        if (minJoinPoolBalanceValue && availableBalance && availableBalance.isGreaterThan(minJoinPoolBalanceValue)) {
+        if (minJoinPoolBalanceValue && availableBalance && availableBalance.isGreaterThanOrEqualTo(minJoinPoolBalanceValue)) {
           result.push(poolInfo);
         }
       } else {

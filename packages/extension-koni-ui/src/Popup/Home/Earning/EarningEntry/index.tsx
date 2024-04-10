@@ -3,7 +3,7 @@
 
 import { LoadingScreen, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useGroupYieldPosition, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGroupYieldPosition, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import EarningOptions from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningEntry/EarningOptions';
 import EarningPositions from '@subwallet/extension-koni-ui/Popup/Home/Earning/EarningEntry/EarningPositions';
 import { EarningEntryParam, EarningEntryView, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -15,6 +15,7 @@ import styled from 'styled-components';
 type Props = ThemeProps;
 
 function Component () {
+  useSetCurrentPage('/home/earning');
   const locationState = useLocation().state as EarningEntryParam;
   const { currentAccount } = useSelector((state) => state.accountState);
   const currentAccountRef = useRef(currentAccount?.address);

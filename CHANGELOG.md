@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 1.1.53
+Build date: Apl 08, 2024.
+
+Bugs fixed:
+- Fixed bug fetching balance with Enjin Relay Chain (#2885)
+- Fixed bug Wallet Connect not show connection popup (#2407)
+- Fixed bug Some required methods are missing when connecting Dapp to Subwallet via WalletConnect (#2860)
+
+## 1.1.52
+Build date: Apl 05, 2024.
+
+Features & Update:
+- Update balance service (#2416)
+- Improve UX UI for earning feature (#2827)
+- Update message when navigate user to the Astar portal to stake (#2847)
+- Update chain-list (#2851)
+  - Add support for X Layer mainnet, X Layer testnet
+  - Add support for ASTR token on Astar zkEVM
+  - Add support DOTA token on Polkadot Asset Hub
+  - Add support BNCS for Moonbeam
+
+Bugs fixed:
+- Fixed bug show earnings screen although back to home (#2742)
+
+
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
 ## 1.1.50
 Build date: Mar 28, 2024.
 

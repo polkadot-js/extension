@@ -58,7 +58,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     id = 'pool-selector',
     label, loading, onChange,
     onClickBookButton,
-    placeholder,
     setForceFetchValidator,
     slug, statusHelp,
     value } = props;
@@ -330,7 +329,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               />
             </div>
           )}
-        title={label || placeholder || t('Select pool')}
+        title={t('Select pool')}
       />
 
       <FilterModal

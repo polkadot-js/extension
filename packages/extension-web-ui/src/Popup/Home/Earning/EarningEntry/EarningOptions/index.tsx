@@ -5,6 +5,7 @@ import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-serv
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
 import { EarningInstructionModal, EarningOptionDesktopItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-web-ui/components/Earning';
 import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -78,6 +79,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [poolSlug, setPoolSlug] = useState<string>('');
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
@@ -208,6 +210,8 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
           return;
         }
 
+        setPoolSlug(poolInfo.slug);
+
         const altChain = getAltChain(poolInfo);
 
         if (!checkChainConnected(item.chain)) {
@@ -258,11 +262,11 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
               }
 
               const assetInfo = nativeSlug && assetRegistry[nativeSlug];
-              const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+              const minJoinPoolBalanceValue = (assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo))) || BN_ZERO;
 
-              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value);
+              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || 0;
 
-              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && availableBalance && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
                 isHiddenPool = true;
               }
             }
@@ -451,7 +455,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
-            poolInfo={poolInfoMap[selectedPoolGroup.poolSlugs[0]]}
+            poolInfo={poolInfoMap[poolSlug]}
           />
         )
       }

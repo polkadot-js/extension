@@ -288,6 +288,8 @@ export class HydradxHandler implements SwapBaseInterface {
         }
       }
 
+      const feeTokenOptions = this.chainService.getFeeTokensByChain(this.chain);
+
       return {
         pair: request.pair,
         fromAmount: request.fromAmount,
@@ -298,7 +300,7 @@ export class HydradxHandler implements SwapBaseInterface {
         feeInfo: {
           feeComponent: [networkFee, tradeFee],
           defaultFeeToken: fromChainNativeTokenSlug,
-          feeOptions: [fromChainNativeTokenSlug] // todo: parse fee options
+          feeOptions: feeTokenOptions
         },
         isLowLiquidity: Math.abs(quoteResponse.priceImpactPct) >= HYDRADX_LOW_LIQUIDITY_THRESHOLD,
         route: swapRoute,

@@ -475,6 +475,10 @@ export function randomizeProvider (providers: Record<string, string>, excludedKe
   };
 }
 
+export function _isAssetCanPayTxFee (chainAsset: _ChainAsset): boolean {
+  return chainAsset.metadata?.canPayTxFee as boolean ?? false;
+}
+
 export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfoList: _ChainInfo[]) {
   const currentChainInfoMap = currentDataMap.chainInfoMap;
   const currentChainStateMap = currentDataMap.chainStateMap;

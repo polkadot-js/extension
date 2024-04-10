@@ -5,6 +5,7 @@ import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-serv
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
 import { EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
@@ -123,25 +124,21 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
   }, [filterOptions.length, selectedFilters]);
 
   const navigateToEarnTransaction = useCallback(
-    (item: YieldGroupInfo) => {
-      const slug = Object.values(poolInfoMap).find(
-        (i) => i.group === item.group && i.chain === item.chain
-      )?.slug || '';
-
+    (slug: string, chain: string) => {
       setEarnStorage({
         ...DEFAULT_EARN_PARAMS,
         slug,
-        chain: item.chain,
+        chain,
         from: currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : ''
       });
       navigate('/transaction/earn');
     },
-    [currentAccount?.address, navigate, poolInfoMap, setEarnStorage]
+    [currentAccount?.address, navigate, setEarnStorage]
   );
 
   const onConnectChainSuccess = useCallback(() => {
     if (selectedPoolGroup) {
-      navigateToEarnTransaction(selectedPoolGroup);
+      navigateToEarnTransaction(selectedPoolGroup.poolSlugs[0], selectedPoolGroup.chain);
     }
   }, [navigateToEarnTransaction, selectedPoolGroup]);
 
@@ -223,7 +220,7 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
           return;
         }
 
-        navigateToEarnTransaction(item);
+        navigateToEarnTransaction(poolInfo.slug, item.chain);
       };
 
       if (item.poolListLength > 1) {
@@ -251,11 +248,11 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
               }
 
               const assetInfo = nativeSlug && assetRegistry[nativeSlug];
-              const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+              const minJoinPoolBalanceValue = (assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo))) || BN_ZERO;
 
-              const availableBalance = nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value;
+              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || BN_ZERO;
 
-              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue && availableBalance && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
                 isHiddenPool = true;
               }
             }

@@ -15,7 +15,7 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { getAccountType, isAccountAll, openInNewTab, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
+import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import classNames from 'classnames';
@@ -283,8 +283,8 @@ function Component (): React.ReactElement {
   );
 
   const onOpenSwap = useCallback(() => {
-    openInNewTab('https://web.subwallet.app/redirect-handler/swap')();
-  }, []);
+    navigate('/transaction/swap');
+  }, [navigate]);
 
   useEffect(() => {
     if (currentTokenInfo) {

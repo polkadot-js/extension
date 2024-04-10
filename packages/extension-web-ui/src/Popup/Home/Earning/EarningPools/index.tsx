@@ -11,7 +11,7 @@ import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-web-ui/hooks';
+import { useFilterModal, useGroupYieldPosition, useHandleChainConnection, useSelector, useTranslation, useYieldPoolInfoByGroup } from '@subwallet/extension-web-ui/hooks';
 import { getBalanceValue } from '@subwallet/extension-web-ui/hooks/screen/home/useAccountBalance';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { EarningPoolsTable } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/EarningPoolsTable';
@@ -60,10 +60,11 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
   const { activeModal } = useContext(ModalContext);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
+  const yieldPositionsList = useGroupYieldPosition();
 
   const positionSlugs = useMemo(() => {
-    return yieldPositions.map((p) => p.slug);
-  }, [yieldPositions]);
+    return yieldPositionsList.map((p) => p.slug);
+  }, [yieldPositionsList]);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },

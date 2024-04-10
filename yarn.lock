@@ -2533,10 +2533,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@galacticcouncil/math-stableswap@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@galacticcouncil/math-stableswap@npm:0.2.1"
-  checksum: 22fe16badc94c35170523e4d39c6ca2835d3bb5fceb7dddb44812bff3b20c6b854c75d172fe4cd9a0c6849b12f7f10b20e34de63a9e7871b3caaf4bd3b9f2dda
+"@galacticcouncil/math-stableswap@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@galacticcouncil/math-stableswap@npm:0.2.2"
+  checksum: 96a2767a84654665a8e7f8e447f21bec99daca18d40bf4a020aa49fe3b3c593fcc25453b93f17c159c681385748c7486055fdf7bb23a37d31283dd6eeab586bd
   languageName: node
   linkType: hard
 
@@ -2547,13 +2547,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@galacticcouncil/sdk@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@galacticcouncil/sdk@npm:1.2.1"
+"@galacticcouncil/sdk@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@galacticcouncil/sdk@npm:2.1.0"
   dependencies:
     "@galacticcouncil/math-lbp": ^0.2.1
     "@galacticcouncil/math-omnipool": ^0.2.0
-    "@galacticcouncil/math-stableswap": ^0.2.1
+    "@galacticcouncil/math-stableswap": ^0.2.2
     "@galacticcouncil/math-xyk": ^0.2.0
     "@thi.ng/cache": ^2.1.35
     bignumber.js: ^9.1.0
@@ -2574,7 +2574,7 @@ __metadata:
     "@polkadot/types-known": ^10.9.1
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-  checksum: e14949e4c1f7b1deec374812d684602f0e2136113da26d79b7a2c8b38b0b68125dbd06231e51926b459dc7279533bb3224bfca53dd6aa69d505b1a5d86e0f605
+  checksum: 21b74dd1b7aa96ddbc53fc70eaf0b9ea50414247c08b809716f717a9e77971693aaa848ced1cac11abc29fe4c9cb9021ba938ecdbbab07a280e2d38364ede9ec
   languageName: node
   linkType: hard
 
@@ -6185,14 +6185,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.55-beta.3":
-  version: 0.2.55-beta.3
-  resolution: "@subwallet/chain-list@npm:0.2.55-beta.3"
+"@subwallet/chain-list@npm:0.2.55-beta.7":
+  version: 0.2.55-beta.7
+  resolution: "@subwallet/chain-list@npm:0.2.55-beta.7"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: 5643fdfe2b24aa0da576b0020ff5f09244e09bb3d681adb0c1be9a4c6fc3163f3324ce1cc8701abe409b6f29a65451aa185d580538fce9f4089d9018c87e8ffb
+  checksum: 3666a88a2687570f3980923d393f8f07686596fe2242bf616a66108a8914a2a46fbbbd71684d1a04c293920b95c9155871bb41ad0ffb6b0b40210bc8b34b3597
   languageName: node
   linkType: hard
 
@@ -6208,7 +6208,7 @@ __metadata:
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
     "@ethersproject/abi": ^5.7.0
-    "@galacticcouncil/sdk": ^1.2.1
+    "@galacticcouncil/sdk": ^2.1.0
     "@json-rpc-tools/utils": ^1.7.6
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
@@ -6230,7 +6230,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.7.26
-    "@subwallet/chain-list": 0.2.55-beta.3
+    "@subwallet/chain-list": 0.2.55-beta.7
     "@subwallet/extension-base": ^1.1.53-0
     "@subwallet/extension-chains": ^1.1.53-0
     "@subwallet/extension-dapp": ^1.1.53-0
@@ -6360,7 +6360,7 @@ __metadata:
     "@polkadot/util-crypto": 12.3.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.55-beta.3
+    "@subwallet/chain-list": 0.2.55-beta.7
     "@subwallet/extension-base": ^1.1.53-0
     "@subwallet/extension-chains": ^1.1.53-0
     "@subwallet/extension-dapp": ^1.1.53-0
@@ -6493,7 +6493,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.55-beta.3
+    "@subwallet/chain-list": 0.2.55-beta.7
     "@subwallet/extension-base": ^1.1.53-0
     "@subwallet/extension-chains": ^1.1.53-0
     "@subwallet/extension-dapp": ^1.1.53-0

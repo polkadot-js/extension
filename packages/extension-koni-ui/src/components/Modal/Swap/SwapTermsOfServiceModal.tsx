@@ -42,7 +42,7 @@ const Component = ({ className, onOk }: Props) => {
   }, [isContentShort, isScrollEnd]);
 
   const onScrollContent = useCallback(() => {
-    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight <= 232) {
+    if (scrollRef && scrollRef?.current && scrollRef?.current?.scrollHeight <= 110) {
       setIsScrollEnd(true);
     }
 
@@ -54,7 +54,7 @@ const Component = ({ className, onOk }: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 232);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 110);
   }, []);
 
   return (
@@ -149,11 +149,11 @@ export const SwapTermsOfServiceModal = styled(Component)<Props>(({ theme: { toke
       color: token.colorTextTertiary
     },
     '.ant-sw-sub-header-title-content': {
-      fontSize: token.fontSizeHeading3,
-      lineHeight: token.lineHeightHeading3
+      fontSize: token.fontSizeXL,
+      lineHeight: token.lineHeightHeading4
     },
     '.__content-body': {
-      maxHeight: 232,
+      maxHeight: 110,
       display: 'block',
       overflowY: 'scroll',
       scrollBehavior: 'smooth',
@@ -190,7 +190,7 @@ export const SwapTermsOfServiceModal = styled(Component)<Props>(({ theme: { toke
       fontWeight: token.fontWeightStrong
     },
     '.__content-footer-button-group': {
-      marginTop: 24,
+      marginTop: 16,
       marginBottom: 8,
       alignItems: 'center',
       justifyContent: 'center',

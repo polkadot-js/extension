@@ -281,7 +281,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Claim reward'), value: FilterValue.CLAIM },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed'), value: FilterValue.FAILED },
+      { label: t('Failed'), value: FilterValue.FAILED }
     ];
   }, [t]);
 

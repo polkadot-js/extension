@@ -6,7 +6,11 @@ import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Mo
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import {
+  DEFAULT_SWAP_PARAMS,
+  DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION,
+  TRANSFER_TRANSACTION
+} from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -46,7 +50,6 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 }
 
 const TokenDetailModalId = 'tokenDetailModalId';
-
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
 
@@ -64,6 +67,11 @@ function Component (): React.ReactElement {
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { tokens } = useSelector((state: RootState) => state.buyService);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
+  const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
@@ -253,11 +261,10 @@ function Component (): React.ReactElement {
       return;
     }
 
-    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
 
     setStorage({
       ...DEFAULT_TRANSFER_PARAMS,
-      from: address,
+      from: transactionFromValue,
       defaultSlug: tokenGroupSlug || ''
     });
 
@@ -283,6 +290,10 @@ function Component (): React.ReactElement {
   );
 
   const onOpenSwap = useCallback(() => {
+      setSwapStorage({
+        ...DEFAULT_SWAP_PARAMS,
+        from: transactionFromValue
+      });
     navigate('/transaction/swap');
   }, [navigate]);
 

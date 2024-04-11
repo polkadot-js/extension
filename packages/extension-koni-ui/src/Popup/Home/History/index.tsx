@@ -277,12 +277,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Send token'), value: FilterValue.SEND },
       { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
-      { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
+      { label: t('Earning transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward'), value: FilterValue.CLAIM },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
       { label: t('Failed'), value: FilterValue.FAILED },
-      { label: t('Start earning'), value: FilterValue.EARN }
     ];
   }, [t]);
 

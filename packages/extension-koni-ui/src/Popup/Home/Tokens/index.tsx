@@ -6,7 +6,11 @@ import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Mo
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
-import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import {
+  DEFAULT_SWAP_PARAMS,
+  DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION,
+  TRANSFER_TRANSACTION
+} from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
@@ -51,6 +55,11 @@ const Component = (): React.ReactElement => {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const zkModeSyncProgress = useSelector((state: RootState) => state.mantaPay.progress);
   const [, setStorage] = useLocalStorage<TransferParams>(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
+  const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -165,6 +174,10 @@ const Component = (): React.ReactElement => {
   );
 
   const onOpenSwap = useCallback(() => {
+      setSwapStorage({
+        ...DEFAULT_SWAP_PARAMS,
+        from: transactionFromValue
+      });
     navigate('/transaction/swap');
   }, [navigate]);
 

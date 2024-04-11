@@ -1,4 +1,4 @@
-    2378	AnhMTV                        	Release version 1.1.53
+    2381	AnhMTV                        	
     2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
     2001	S2kael                        	[Issue-2885] Fix error when fetching balance with Enjin relay chain
      620	lw-cdm                        	Fix eslint issues
@@ -15,7 +15,7 @@
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
-      38	Thiendekaco                   	[Issue 2407] Resolve Ui bug
+      39	Thiendekaco                   	[Issue 2891] Extension - Show dApp confirmation although performing transaction in app
       29	Automation Bot                	[CI Skip] Auto increase webapp build number
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts

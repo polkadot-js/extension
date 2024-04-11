@@ -3,6 +3,10 @@
 
 import { _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapStepType, SwapTxData } from '@subwallet/extension-base/types/swap';
+import { AlertBox, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { SwapRoute, SwapTransactionBlock } from '@subwallet/extension-koni-ui/components/Swap';
+import { BN_TEN, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
+import { useGetAccountByAddress, useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -11,10 +15,6 @@ import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
-import {useGetAccountByAddress, useGetChainPrefixBySlug, useSelector} from "@subwallet/extension-koni-ui/hooks";
-import {BN_TEN, BN_ZERO} from "@subwallet/extension-koni-ui/constants";
-import {SwapRoute, SwapTransactionBlock} from "@subwallet/extension-koni-ui/components/Swap";
-import {AlertBox, MetaInfo} from "@subwallet/extension-koni-ui/components";
 
 type Props = BaseTransactionConfirmationProps;
 

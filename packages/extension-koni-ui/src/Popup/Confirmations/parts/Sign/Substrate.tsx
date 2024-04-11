@@ -63,7 +63,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
   const isMessage = isSubstrateMessage(payload);
 
-
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case AccountSignMode.QR:
@@ -223,6 +222,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onCancel();
       }
     }
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -240,7 +240,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [txExpirationTime, checkUnlock, extrinsicType, onApprovePassword, onConfirmInject, onConfirmLedger, onConfirmQr, signMode]);
+  }, [extrinsicType, txExpirationTime, signMode, notify, t, onCancel, onConfirmQr, onConfirmLedger, onConfirmInject, checkUnlock, onApprovePassword]);
 
   useEffect(() => {
     !!ledgerError && notify({

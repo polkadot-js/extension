@@ -6,11 +6,7 @@ import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Mo
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import {
-  DEFAULT_SWAP_PARAMS,
-  DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION,
-  TRANSFER_TRANSACTION
-} from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SWAP_PARAMS, DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -50,6 +46,7 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 }
 
 const TokenDetailModalId = 'tokenDetailModalId';
+
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
 
@@ -261,7 +258,6 @@ function Component (): React.ReactElement {
       return;
     }
 
-
     setStorage({
       ...DEFAULT_TRANSFER_PARAMS,
       from: transactionFromValue,
@@ -270,7 +266,7 @@ function Component (): React.ReactElement {
 
     navigate('/transaction/send-fund');
   },
-  [currentAccount, navigate, notify, setStorage, t, tokenGroupSlug]
+  [currentAccount, navigate, notify, setStorage, t, tokenGroupSlug, transactionFromValue]
   );
 
   const onOpenBuyTokens = useCallback(() => {
@@ -290,12 +286,12 @@ function Component (): React.ReactElement {
   );
 
   const onOpenSwap = useCallback(() => {
-      setSwapStorage({
-        ...DEFAULT_SWAP_PARAMS,
-        from: transactionFromValue
-      });
+    setSwapStorage({
+      ...DEFAULT_SWAP_PARAMS,
+      from: transactionFromValue
+    });
     navigate('/transaction/swap');
-  }, [navigate]);
+  }, [navigate, setSwapStorage, transactionFromValue]);
 
   useEffect(() => {
     if (currentTokenInfo) {

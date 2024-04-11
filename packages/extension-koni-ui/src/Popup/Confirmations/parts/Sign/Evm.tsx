@@ -54,7 +54,7 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, extrinsicType, id, payload, type , txExpirationTime} = props;
+  const { className, extrinsicType, id, payload, txExpirationTime, type } = props;
   const { payload: { account, canSign, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
@@ -235,7 +235,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [txExpirationTime, checkUnlock, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [extrinsicType, txExpirationTime, signMode, notify, t, onCancel, onConfirmQr, onConfirmLedger, onConfirmInject, checkUnlock, onApprovePassword]);
 
   useEffect(() => {
     !!ledgerError && notify({

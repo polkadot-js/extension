@@ -507,6 +507,8 @@ export enum ExtrinsicType {
 
   SWAP = 'swap',
 
+  SET_FEE_TOKEN = 'set_fee-token',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
@@ -1543,6 +1545,11 @@ export interface RequestQrSignEvm {
 
 export interface ResponseQrSignEvm {
   signature: string;
+}
+
+export interface RequestChangeFeeToken {
+  currentFeeToken?: string;
+  selectedFeeToken: string;
 }
 
 /// Transfer

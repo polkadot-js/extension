@@ -100,6 +100,7 @@ export interface SwapFeeInfo {
   feeComponent: SwapFeeComponent[];
   defaultFeeToken: string; // token to pay transaction fee with
   feeOptions: string[]; // list of tokenSlug, always include defaultFeeToken
+  selectedFeeToken?: string;
 }
 
 export interface SwapStepDetail extends BaseStepDetail {
@@ -157,6 +158,7 @@ export interface SwapRequest {
   fromAmount: string;
   slippage: number; // Example: 0.01 for 1%
   recipient?: string;
+  feeToken?: string;
 }
 
 export interface SwapRequestResult {

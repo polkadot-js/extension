@@ -348,12 +348,13 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const allValidators: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
 
-    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators] = await Promise.all([
+    const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators, _minimumActiveStake] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
       chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
       chainApi.api.query.staking.minNominatorBond(),
       chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data(),
-      chainApi.api.query.staking.validators.entries()
+      chainApi.api.query.staking.validators.entries(),
+      chainApi.api.query?.staking?.minimumActiveStake && chainApi.api.query?.staking?.minimumActiveStake()
     ]);
 
     // filter blocked validators
@@ -382,6 +383,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const rawMinBond = _minBond.toHuman() as string;
     const minBond = rawMinBond.replaceAll(',', '');
+    const minActiveStake = _minimumActiveStake?.toString() || '0';
+    const bnMinNominatorBond = new BN(minBond);
+    const bnMinActiveStake = new BN(minActiveStake);
+
+    const minStake = bnMinActiveStake.gt(bnMinNominatorBond) ? bnMinActiveStake : bnMinNominatorBond;
 
     const totalStakeMap: Record<string, BN> = {};
     const bnDecimals = new BN((10 ** decimals).toString());
@@ -425,7 +431,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           expectedReturn: 0,
           blocked: false,
           isVerified: false,
-          minBond,
+          minBond: minStake.toString(),
           isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded)
         } as ValidatorInfo);
       }

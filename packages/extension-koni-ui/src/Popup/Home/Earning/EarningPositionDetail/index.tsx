@@ -43,7 +43,7 @@ function Component ({ compound,
   // @ts-ignore
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { priceMap } = useSelector((state) => state.price);
+  const { priceMap, symbol: symbolCurrency } = useSelector((state) => state.price);
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
@@ -189,7 +189,7 @@ function Component ({ compound,
             className={'__active-stake-converted-value'}
             decimal={0}
             hide={!isShowBalance}
-            prefix={'$'}
+            prefix={symbolCurrency || '$'}
             value={convertActiveStake}
           />
         </div>

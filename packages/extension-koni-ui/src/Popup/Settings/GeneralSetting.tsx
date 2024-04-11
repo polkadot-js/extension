@@ -3,16 +3,17 @@
 
 import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
-import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
-import { saveBrowserConfirmationType, saveLanguage, saveTheme } from '@subwallet/extension-koni-ui/messaging';
+import { saveBrowserConfirmationType, saveLanguage, savePriceCurrency, saveTheme } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -26,6 +27,8 @@ type SelectionItemType = {
   title: string,
   disabled?: boolean,
 };
+
+const renderEmpty = () => <GeneralEmptyList />;
 
 function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
   return (
@@ -87,19 +90,22 @@ function renderModalTrigger (item: SelectionItemType) {
 type LoadingMap = {
   language: boolean;
   browserConfirmationType: boolean;
+  currency: boolean;
 };
 // "TODO: Will be shown when support for the LIGHT theme is implemented."
 const isShowWalletTheme = false;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-
+  const dataContext = useContext(DataContext);
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
+  const { currency, exchangeRateMap } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
-    language: false
+    language: false,
+    currency: false
   });
 
   const goBack = useDefaultNavigate().goBack;
@@ -132,6 +138,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       disabled: !ENABLE_LANGUAGES.includes(item.value)
     }));
   }, [token]);
+
+  const currencyItems = useMemo<SelectionItemType[]>(() => {
+    return exchangeRateMap
+      ? Object.keys(exchangeRateMap).map((item) => ({
+        key: item.toLowerCase(),
+        leftIcon: Coins,
+        leftIconBgColor: token['yellow-5'],
+        title: item
+      }))
+      : [];
+  }, [exchangeRateMap, token]);
 
   const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
     return [
@@ -170,6 +187,27 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
   }, []);
 
+  const onSelectCurrency = useCallback((value: string) => {
+    setLoadingMap((prev) => ({
+      ...prev,
+      currency: true
+    }));
+    savePriceCurrency(value)
+      .finally(() => {
+        setLoadingMap((prev) => ({
+          ...prev,
+          currency: false
+        }));
+      });
+  }, []);
+
+  const searchFunction = useCallback((item: SelectionItemType, searchText: string) => {
+    const searchTextLowerCase = searchText.toLowerCase();
+
+    return (
+      item ? item.key.toLowerCase().includes(searchTextLowerCase) : false);
+  }, []);
+
   const onSelectBrowserConfirmationType = useCallback((value: string) => {
     setLoadingMap((prev) => ({
       ...prev,
@@ -192,7 +230,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   return (
-    <PageWrapper className={`general-setting ${className}`}>
+    <PageWrapper
+      className={`general-setting ${className}`}
+      hideLoading={true}
+      resolve={dataContext.awaitStores(['price'])}
+    >
       <Layout.WithSubHeaderOnly
         onBack={goBack}
         title={t('General settings')}
@@ -214,10 +256,37 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               items={themeItems}
               onSelect={onSelectTheme}
               renderItem={renderSelectionItem}
+              searchFunction={searchFunction}
               selected={theme}
               shape='round'
               title={t('Wallet theme')}
             />}
+
+          <SelectModal
+            background={'default'}
+            className={`__modal ${className}`}
+            customInput={renderModalTrigger({
+              key: 'price-currency-trigger',
+              leftIcon: Coins,
+              leftIconBgColor: token['yellow-5'],
+              title: t('Currency')
+            })}
+            disabled={loadingMap.currency}
+            id='currency-select-modal'
+            inputWidth={'100%'}
+            itemKey='key'
+            items={currencyItems}
+            onSelect={onSelectCurrency}
+            renderItem={renderSelectionItem}
+            renderWhenEmpty={renderEmpty}
+            searchFunction={searchFunction}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search Currency')}
+            selected={currency}
+            shape='round'
+            size='small'
+            title={t('Currency')}
+          />
 
           <SelectModal
             background={'default'}

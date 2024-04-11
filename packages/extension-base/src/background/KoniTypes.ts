@@ -192,6 +192,8 @@ export interface StakingRewardJson {
 export interface PriceJson {
   ready?: boolean,
   currency: string,
+  symbol?: string,
+  exchangeRateMap: Record<string, number>,
   priceMap: Record<string, number>,
   price24hMap: Record<string, number>
 }
@@ -415,6 +417,7 @@ export enum WalletUnlockType {
 
 export interface UiSettings {
   language: LanguageType,
+  currency: string,
   browserConfirmationType: BrowserConfirmationType;
   isShowZeroBalance: boolean;
   isShowBalance: boolean;
@@ -441,6 +444,8 @@ export type RequestChangeEnableChainPatrol = { enable: boolean };
 export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
+
+export type RequestChanePriceCurrency = { currency: string }
 
 export type RequestChangeShowBalance = { enable: boolean };
 
@@ -2333,6 +2338,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveUnlockType)': [RequestUnlockType, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
+  'pri(settings.savePriceCurrency)': [RequestChanePriceCurrency, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
   'pri(settings.logo.assets.subscribe)': [null, Record<string, string>, Record<string, string>];

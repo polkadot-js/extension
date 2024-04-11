@@ -25,6 +25,7 @@ function Component (
     priceValue,
     slug,
     symbol,
+    symbolCurrency,
     total }: Props) {
   // todo: Create new Web3block item in react-ui lib
   // - loading
@@ -70,7 +71,7 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix='$'
+                  prefix={symbolCurrency || '$'}
                   size={12}
                   unitOpacity={0.45}
                   value={total.convertedValue}

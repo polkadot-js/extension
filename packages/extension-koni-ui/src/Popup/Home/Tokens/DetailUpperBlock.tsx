@@ -38,7 +38,7 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
-
+  const { symbol: symbolCurrency } = useSelector((state: RootState) => state.price);
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
   }, [isShowBalance]);
@@ -70,7 +70,7 @@ function Component (
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix='$'
+            prefix={symbolCurrency || '$'}
             size={38}
             subFloatNumber
             value={balanceValue}

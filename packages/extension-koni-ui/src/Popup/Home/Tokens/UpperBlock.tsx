@@ -36,6 +36,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
   const [reloading, setReloading] = useState(false);
+  const { symbol: symbolCurrency } = useSelector((state) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -62,7 +63,7 @@ function Component (
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix='$'
+            prefix={symbolCurrency || '$'}
             size={38}
             subFloatNumber
             value={totalValue}
@@ -88,7 +89,7 @@ function Component (
             decimal={0}
             decimalOpacity={1}
             hide={!isShowBalance}
-            prefix={isPriceDecrease ? '- $' : '+ $'}
+            prefix={`${isPriceDecrease ? '- ' : '+ '}${symbolCurrency || '$'}` }
             value={totalChangeValue}
           />
           <Tag

@@ -36,6 +36,7 @@ export type _CrowdloanItemType = {
   relayChainName: string;
   contribution: {
     symbol: string;
+    symbolCurrency?: string;
     value: BigN;
     convertedValue: BigN;
   };

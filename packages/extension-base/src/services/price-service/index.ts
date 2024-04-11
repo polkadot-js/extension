@@ -11,7 +11,7 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
 
-const DEFAULT_PRICE_SUBJECT: PriceJson = { ready: false, currency: 'usd', priceMap: {}, price24hMap: {} };
+const DEFAULT_PRICE_SUBJECT: PriceJson = { ready: false, currency: 'usd', priceMap: {}, price24hMap: {}, exchangeRateMap: {}, symbol: '$' };
 
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
@@ -47,17 +47,35 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     return new Set(priceIdList);
   }
 
-  public refreshPriceData (priceIds?: Set<string>) {
+  public setPriceCurrency (currency: string, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
+    const { currency: currentCurrency, exchangeRateMap } = this.getPriceSubject().value;
+
+    if (currentCurrency === currency) {
+      return;
+    }
+
+    if (!(exchangeRateMap[currency.toUpperCase()] || exchangeRateMap[currency])) {
+      return;
+    }
+
+    this.refreshPriceData(undefined, currency, resolve, reject);
+  }
+
+  public refreshPriceData (priceIds?: Set<string>, currency?: string, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
     clearTimeout(this.refreshTimeout);
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
-    getTokenPrice(this.priceIds)
+    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currency)
       .then((rs) => {
         this.priceSubject.next({ ...rs, ready: true });
         this.dbService.updatePriceStore(rs).catch(console.error);
+        resolve && resolve(true);
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        reject && reject(false);
+      });
 
     this.refreshTimeout = setTimeout(this.refreshPriceData.bind(this), CRON_REFRESH_PRICE_INTERVAL);
   }

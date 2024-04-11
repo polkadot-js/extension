@@ -44,6 +44,10 @@ export async function saveShowZeroBalance (show: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveShowZeroBalance)', { show });
 }
 
+export async function savePriceCurrency (currency: string): Promise<boolean> {
+  return sendMessage('pri(settings.savePriceCurrency)', { currency });
+}
+
 export async function saveShowBalance (value: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveShowBalance)', { enable: value });
 }

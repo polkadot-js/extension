@@ -24,6 +24,7 @@ export enum EarningEntryView {
 export type ExtraYieldPositionInfo = YieldPositionInfo & {
   asset: _ChainAsset;
   price: number;
+  symbolCurrency?: string;
   // exchangeRate: number;
 }
 

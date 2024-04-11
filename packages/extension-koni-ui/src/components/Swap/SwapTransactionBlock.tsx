@@ -11,7 +11,7 @@ import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowRight } from 'phosphor-react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{

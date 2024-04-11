@@ -4,91 +4,32 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
-import {
-  _getAssetDecimals,
-  _getAssetOriginChain,
-  _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset,
-  _isChainEvmCompatible, _parseAssetRefKey
-} from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import {
-  OptimalSwapPath,
-  SlippageType, SwapFeeComponent,
-  SwapFeeType, SwapProviderId,
-  SwapQuote,
-  SwapRequest, SwapStepType
-} from '@subwallet/extension-base/types/swap';
+import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
 import { formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
-import {
-  AccountSelector,
-  AddressInput,
-  AlertBox,
-  HiddenInput,
-  MetaInfo, PageWrapper
-} from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AddressInput, AlertBox, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { SwapFromField, SwapToField } from '@subwallet/extension-koni-ui/components/Field/Swap';
-import {
-  AddMoreBalanceModal,
-  ChooseFeeTokenModal,
-  SlippageModal, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapTermsOfServiceModal
-} from '@subwallet/extension-koni-ui/components/Modal/Swap';
+import { AddMoreBalanceModal, ChooseFeeTokenModal, SlippageModal, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapTermsOfServiceModal } from '@subwallet/extension-koni-ui/components/Modal/Swap';
 import { QuoteResetTime, SwapRoute } from '@subwallet/extension-koni-ui/components/Swap';
-import {
-  BN_TEN,
-  BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS,
-  SWAP_ALL_QUOTES_MODAL,
-  SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL,
-  SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL
-} from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import {
-  useChainConnection,
-  useNotification,
-  useSelector,
-  useTransactionContext,
-  useWatchTransaction
-} from '@subwallet/extension-koni-ui/hooks';
-import {
-  getLatestSwapQuote, handleSwapRequest,
-  handleSwapStep,
-  validateSwapProcess
-} from '@subwallet/extension-koni-ui/messaging/transaction/swap';
-import {
-  FreeBalance,
-  FreeBalanceToEarn,
-  TransactionContent, TransactionFooter
-} from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
+import { useChainConnection, useNotification, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-koni-ui/messaging/transaction/swap';
+import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
 import { convertFieldToObject, findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import {
-  ActivityIndicator,
-  BackgroundIcon,
-  Button,
-  Form,
-  Icon,
-  Logo,
-  ModalContext, Number,
-  Tooltip
-} from '@subwallet/react-ui';
+import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import {
-  ArrowsDownUp, CaretDown,
-  CaretRight,
-  CaretUp,
-  CheckCircle,
-  Info,
-  ListBullets,
-  PencilSimpleLine,
-  XCircle
-} from 'phosphor-react';
+import { ArrowsDownUp, CaretDown, CaretRight, CaretUp, CheckCircle, Info, ListBullets, PencilSimpleLine, XCircle } from 'phosphor-react';
 import { Rule } from 'rc-field-form/lib/interface';
-import { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useIdleTimer } from 'react-idle-timer';
 import styled, { useTheme } from 'styled-components';
@@ -352,7 +293,6 @@ const Component = () => {
   }, []);
 
   const onSelectFeeOption = useCallback((slug: string) => {
-    console.log('slug', slug);
     setCurrentFeeOption(slug);
   }, []);
   const onSelectSlippage = useCallback((slippage: SlippageType) => {
@@ -810,23 +750,23 @@ const Component = () => {
           >
             {supportSlippageSelection
               ? (<>
-                  <Tooltip
-                    placement={'topRight'}
-                    title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
-                  >
-                    <div className={'__slippage-title-wrapper'}>Slippage
-                      <Icon
-                        customSize={'16px'}
-                        iconColor={token.colorSuccess}
-                        phosphorIcon={Info}
-                        size='sm'
-                        weight='fill'
-                      />
+                <Tooltip
+                  placement={'topRight'}
+                  title={'Chainflip uses Just In Time AMM to optimize swap quote without setting slippage'}
+                >
+                  <div className={'__slippage-title-wrapper'}>Slippage
+                    <Icon
+                      customSize={'16px'}
+                      iconColor={token.colorSuccess}
+                      phosphorIcon={Info}
+                      size='sm'
+                      weight='fill'
+                    />
                       :
-                    </div>
-                  </Tooltip>
+                  </div>
+                </Tooltip>
                   &nbsp;<span>0%</span>
-                </>
+              </>
               )
               : (
                 <>
@@ -921,14 +861,14 @@ const Component = () => {
   }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
 
   useEffect(() => {
-      setBackProps((prev) => ({
-        ...prev,
-        onClick: showQuoteDetailOnMobile
-          ? () => {
-            setShowQuoteDetailOnMobile(false);
-          }
-          : null
-      }));
+    setBackProps((prev) => ({
+      ...prev,
+      onClick: showQuoteDetailOnMobile
+        ? () => {
+          setShowQuoteDetailOnMobile(false);
+        }
+        : null
+    }));
   }, [setBackProps, showQuoteDetailOnMobile]);
 
   useEffect(() => {
@@ -940,11 +880,7 @@ const Component = () => {
   }, [form, recipientValue, toAssetInfo]);
 
   useEffect(() => {
-
-      setCustomScreenTitle(showQuoteDetailOnMobile ? t('Swap quote detail') : t('Swap'));
-
-    return () => {
-    };
+    setCustomScreenTitle(showQuoteDetailOnMobile ? t('Swap quote detail') : t('Swap'));
   }, [setCustomScreenTitle, showQuoteDetailOnMobile, t]);
 
   useEffect(() => {
@@ -1573,7 +1509,7 @@ const Component = () => {
         estimatedFee={estimatedFeeValue}
         items={feeOptions}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
-        // onSelectItem={onSelectFeeOption}
+        onSelectItem={onSelectFeeOption}
         selectedItem={currentFeeOption}
       />
       <SlippageModal

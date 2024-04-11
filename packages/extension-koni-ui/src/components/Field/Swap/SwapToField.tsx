@@ -11,7 +11,7 @@ import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field'
 import { ActivityIndicator, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 

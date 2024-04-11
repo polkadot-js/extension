@@ -1198,5 +1198,6 @@
   "Transferring all will remove all assets on this network. Are you sure?": "",
   "Swap": "",
   "Navigate to Astar portal to view and manage your stake in Astar dApp staking v3": "请导航到Astar portal以查看并管理你在Astar dApp staking v3里的质押",
-  "Apply {{number}} account{{s}}": ""
+  "Apply {{number}} account{{s}}": "",
+  "Cross-chain transfer to an exchange (CEX) will result in loss of funds. Make sure the receiving address is not an exchange address.": "请勿将资产跨链转移到中心化交易所（CEX）上的地址，以防止资产丢失。"
 }

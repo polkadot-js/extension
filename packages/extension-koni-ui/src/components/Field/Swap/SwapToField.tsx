@@ -8,7 +8,7 @@ import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
-import { ActivityIndicator } from '@subwallet/react-ui';
+import { ActivityIndicator, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { useMemo } from 'react';
@@ -133,7 +133,7 @@ const SwapToField = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
     '.__amount-destination': {
       maxHeight: 24,
-      maxWidth: 185,
+      maxWidth: 170,
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',

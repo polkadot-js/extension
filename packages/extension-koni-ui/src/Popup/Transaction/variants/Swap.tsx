@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
@@ -352,6 +352,7 @@ const Component = () => {
   }, []);
 
   const onSelectFeeOption = useCallback((slug: string) => {
+    console.log('slug', slug);
     setCurrentFeeOption(slug);
   }, []);
   const onSelectSlippage = useCallback((slippage: SlippageType) => {
@@ -1572,7 +1573,7 @@ const Component = () => {
         estimatedFee={estimatedFeeValue}
         items={feeOptions}
         modalId={SWAP_CHOOSE_FEE_TOKEN_MODAL}
-        onSelectItem={onSelectFeeOption}
+        // onSelectItem={onSelectFeeOption}
         selectedItem={currentFeeOption}
       />
       <SlippageModal
@@ -1601,7 +1602,7 @@ const Component = () => {
 
 const Wrapper: React.FC<Props> = (props: Props) => {
   const { className } = props;
-  const dataContext = useContext(DataContext)
+  const dataContext = useContext(DataContext);
 
   return (
     <PageWrapper
@@ -1621,6 +1622,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       justifyContent: 'space-between',
       alignItems: 'center',
       cursor: 'pointer'
+    },
+    '.__quote-rate .__label-col': {
+      flex: '0 1 auto'
     },
     '.__xcm-notification': {
       marginBottom: token.marginSM

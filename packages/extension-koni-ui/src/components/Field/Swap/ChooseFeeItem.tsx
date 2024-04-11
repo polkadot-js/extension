@@ -3,10 +3,9 @@
 
 import { _getAssetPriceId, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { swapCustomFormatter } from '@subwallet/extension-base/utils';
-import Logo from '@subwallet/extension-koni-ui/assets/logo';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, Number } from '@subwallet/react-ui';
+import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';

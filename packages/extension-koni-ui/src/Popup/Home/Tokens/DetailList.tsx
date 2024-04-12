@@ -286,12 +286,30 @@ function Component (): React.ReactElement {
   );
 
   const onOpenSwap = useCallback(() => {
+    if (currentAccount && currentAccount.isHardware) {
+      notify({
+        message: 'The account you are using is Ledger account, you cannot use this feature with it',
+        type: 'error',
+        duration: 3
+      });
+    }
+
+    if (currentAccount && currentAccount.isReadOnly) {
+      notify({
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
+        type: 'info',
+        duration: 3
+      });
+
+      return;
+    }
+
     setSwapStorage({
       ...DEFAULT_SWAP_PARAMS,
       from: transactionFromValue
     });
     navigate('/transaction/swap');
-  }, [navigate, setSwapStorage, transactionFromValue]);
+  }, [currentAccount, navigate, notify, setSwapStorage, t, transactionFromValue]);
 
   useEffect(() => {
     if (currentTokenInfo) {

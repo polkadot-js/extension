@@ -104,6 +104,7 @@ const Component: React.FC<Props> = (props: Props) => {
       />
       <MetaInfo
         hasBackgroundWrapper={false}
+        className={'__swap-confirmation-wrapper'}
       >
         <MetaInfo.Account
           address={data.recipient || ''}
@@ -163,7 +164,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    paddingTop: 10,
     '.__quote-rate-wrapper': {
       display: 'flex'
     },
@@ -172,6 +172,10 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
     },
     '.__swap-quote-expired': {
       marginTop: 12
+    },
+    '.__swap-confirmation-wrapper': {
+      paddingLeft: token.paddingXS,
+      paddingRight: token.paddingXS
     },
     '.__summary-to, .__summary-from': {
       display: 'flex',

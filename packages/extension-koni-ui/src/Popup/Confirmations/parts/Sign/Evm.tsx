@@ -293,7 +293,7 @@ const Component: React.FC<Props> = (props: Props) => {
         loading={loading}
         onClick={onConfirm}
       >
-        {t('Approve1')}
+        {t('Approve')}
       </Button>
       {
         signMode === AccountSignMode.QR && (

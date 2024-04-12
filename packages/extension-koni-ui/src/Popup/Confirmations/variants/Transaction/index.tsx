@@ -4,6 +4,7 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
+import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -109,6 +110,18 @@ const Component: React.FC<Props> = (props: Props) => {
     );
   }, [closeAlert, openAlert]);
 
+  const txExpirationTime = useMemo((): number | undefined => {
+    // transaction might only be valid for a certain period of time
+    if (transaction.extrinsicType === ExtrinsicType.SWAP) {
+      const data = transaction.data as SwapTxData;
+
+      return data.quote.aliveUntil;
+    }
+    // todo: there might be more types of extrinsic
+
+    return undefined;
+  }, [transaction.data, transaction.extrinsicType]);
+
   return (
     <>
       <div className={CN(className, 'confirmation-content')}>
@@ -129,6 +142,7 @@ const Component: React.FC<Props> = (props: Props) => {
             extrinsicType={transaction.extrinsicType}
             id={item.id}
             request={(item as SigningRequest).request}
+            txExpirationTime={txExpirationTime}
           />
         )
       }
@@ -138,6 +152,7 @@ const Component: React.FC<Props> = (props: Props) => {
             extrinsicType={transaction.extrinsicType}
             id={item.id}
             payload={(item as ConfirmationDefinitions['evmSendTransactionRequest' | 'evmWatchTransactionRequest'][0])}
+            txExpirationTime={txExpirationTime}
             type={type}
           />
         )

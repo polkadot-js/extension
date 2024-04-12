@@ -1108,6 +1108,10 @@ const Component = () => {
     return false;
   }, [altChain, checkChainConnected]);
 
+  const onFilterAccount = useMemo(() => {
+    return accounts.filter((account) => !isAccountAll(account.address) && !account.isHardware);
+  }, [accounts]);
+
   return (
     <>
       <>
@@ -1128,31 +1132,15 @@ const Component = () => {
                 <HiddenInput fields={hideFields} />
 
                 <Form.Item
+                  className={CN({ hidden: !isAllAccount })}
                   name={'from'}
                 >
                   <AccountSelector
                     disabled={!isAllAccount}
+                    externalAccounts={onFilterAccount}
                     label={t('Swap from account')}
                   />
                 </Form.Item>
-
-                <div className={'__balance-display-area'}>
-                  <FreeBalanceToEarn
-                    address={fromValue}
-                    hidden={!canShowAvailableBalance || !isSwapXCM}
-                    label={`${t('Available balance')}:`}
-                    tokens={xcmBalanceTokens}
-                  />
-
-                  <FreeBalance
-                    address={fromValue}
-                    chain={chainValue}
-                    hidden={!canShowAvailableBalance || isSwapXCM}
-                    isSubscribe={true}
-                    label={`${t('Available balance')}:`}
-                    tokenSlug={fromTokenSlugValue}
-                  />
-                </div>
 
                 <div className={'__swap-field-area'}>
                   <SwapFromField
@@ -1217,6 +1205,24 @@ const Component = () => {
                     />
                   </Form.Item>
                 )}
+                <div className={'__balance-display-area'}>
+                  <FreeBalanceToEarn
+                    address={fromValue}
+                    hidden={!canShowAvailableBalance || !isSwapXCM}
+                    label={`${t('Available balance')}:`}
+                    tokens={xcmBalanceTokens}
+                  />
+
+                  <FreeBalance
+                    address={fromValue}
+                    chain={chainValue}
+                    hidden={!canShowAvailableBalance || isSwapXCM}
+                    isSubscribe={true}
+                    label={`${t('Available balance')}:`}
+                    tokenSlug={fromTokenSlugValue}
+                  />
+                </div>
+                <div className={CN('__separator', { hidden: !currentQuote })}></div>
               </Form>
               {renderAlertBox()}
               {
@@ -1273,7 +1279,7 @@ const Component = () => {
                     }
 
                     {
-                      !isFormInvalid && (
+                      !isFormInvalid && !handleRequestLoading && (
                         <div className='__view-quote-detail-action-wrapper'>
                           <div className={'__quote-reset-time'}>
                             <QuoteResetTime
@@ -1568,10 +1574,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__swap-quote': {
       marginRight: -8
-    },
-    '.__balance-display-area .error-message': {
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightSM
     },
     '.__xcm-notification': {
       marginBottom: token.marginSM
@@ -1972,9 +1974,9 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       },
       '.__error-message': {
         color: token.colorError,
-        fontSize: token.fontSizeSM,
+        fontSize: token.fontSize,
         fontWeight: token.bodyFontWeight,
-        lineHeight: token.lineHeightSM,
+        lineHeight: token.lineHeight,
         marginTop: -token.marginXXS,
         paddingBottom: token.padding
       },

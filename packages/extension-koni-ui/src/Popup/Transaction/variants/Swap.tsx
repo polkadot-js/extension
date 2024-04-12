@@ -623,6 +623,7 @@ const Component = () => {
                   setQuoteOptions(latestSwapQuote.quotes);
                   setCurrentQuote(latestSwapQuote.optimalQuote);
                   setQuoteAliveUntil(latestSwapQuote.aliveUntil);
+                  setSwapError(latestSwapQuote.error);
                 }
               }
             }
@@ -987,6 +988,7 @@ const Component = () => {
             setQuoteOptions(rs.quotes);
             setCurrentQuote(rs.optimalQuote);
             setQuoteAliveUntil(rs.aliveUntil);
+            setSwapError(rs.error);
           }
         }).catch((e) => {
           console.log('Error when getLatestSwapQuote', e);

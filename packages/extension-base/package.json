@@ -47,7 +47,7 @@
     "@polkadot/util-crypto": "^12.6.2",
     "@reduxjs/toolkit": "^1.9.1",
     "@sora-substrate/type-definitions": "^1.17.7",
-    "@substrate/connect": "^0.7.26",
+    "@substrate/connect": "^0.8.9",
     "@subwallet/chain-list": "0.2.53",
     "@subwallet/extension-base": "^1.1.51-1",
     "@subwallet/extension-chains": "^1.1.51-1",

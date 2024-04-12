@@ -191,11 +191,16 @@ export interface StakingRewardJson {
 
 export interface PriceJson {
   ready?: boolean,
-  currency: string,
-  symbol?: string,
+  currency: CurrencyJson,
   exchangeRateMap: Record<string, number>,
   priceMap: Record<string, number>,
   price24hMap: Record<string, number>
+}
+
+export interface CurrencyJson {
+  label: string;
+  isPrefix: boolean;
+  symbol: string;
 }
 
 export enum APIItemState {

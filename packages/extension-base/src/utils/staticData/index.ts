@@ -15,7 +15,7 @@ export const marketingCampaigns: Record<string, unknown> = require('./marketingC
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const termAndCondition: Record<string, unknown> = require('./termAndCondition.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
-export const currencySymbol: Record<string, string> = require('./currencySymbol.json');
+export const currencySymbol: Record<string, unknown> = require('./currencySymbol.json');
 
 export enum StaticKey {
   BUY_SERVICE_INFOS = 'buy-service-infos',

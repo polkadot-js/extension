@@ -19,13 +19,13 @@ function Component (
   { chain,
     chainDisplayName = '',
     className = '',
+    currency,
     isReady,
     logoKey,
     onClick,
     priceValue,
     slug,
     symbol,
-    symbolCurrency,
     total }: Props) {
   // todo: Create new Web3block item in react-ui lib
   // - loading
@@ -71,8 +71,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix={symbolCurrency || '$'}
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />

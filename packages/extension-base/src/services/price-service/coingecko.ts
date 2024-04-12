@@ -25,7 +25,7 @@ interface ExchangeRateItem {
 
 let useBackupApi = false;
 
-export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Set<string>, currencyLabel = 'USD'): Promise<PriceJson> => {
   try {
     const idStr = Array.from(priceIds).join(',');
     const res: AxiosResponse<any, any>[] = [];
@@ -33,7 +33,7 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
     const getPriceMap = async () => {
       if (!useBackupApi) {
         try {
-          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=250&ids=${idStr}`);
+          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyLabel}&per_page=250&ids=${idStr}`);
         } catch (err) {
           useBackupApi = true;
         }
@@ -71,19 +71,18 @@ export const getTokenPrice = async (priceIds: Set<string>, currency = 'usd'): Pr
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
     const exchangeRateMap: Record<string, number> = responseDataExchangeRate.conversion_rates;
-    const symbol = staticData[StaticKey.CURRENCY_SYMBOL][currency];
+    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyLabel];
 
     responseDataPrice.forEach((val) => {
       const currentPrice = val.current_price || 0;
       const price24h = currentPrice - (val.price_change_24h || 0);
-      const exchangeRate = exchangeRateMap[currency.toUpperCase()] || 1;
+      const exchangeRate = exchangeRateMap[currencyLabel] || 1;
 
       priceMap[val.id] = currentPrice * exchangeRate;
       price24hMap[val.id] = price24h * exchangeRate;
     });
 
     return {
-      symbol,
       currency,
       exchangeRateMap,
       priceMap,

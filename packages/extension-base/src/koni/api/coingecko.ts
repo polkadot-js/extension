@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import axios from 'axios';
+import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
+import axios, { AxiosResponse } from 'axios';
 
 interface GeckoItem {
   id: string,
@@ -12,31 +13,78 @@ interface GeckoItem {
   symbol: string
 }
 
-export const getTokenPrice = async (priceIds: Array<string>, currency = 'usd'): Promise<PriceJson> => {
-  try {
-    // const inverseMap: Record<string, string> = {};
-    const idStr = priceIds.join(',');
-    const res = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&per_page=1000&ids=${idStr}`);
+interface ExchangeRateItem {
+  result: string,
+  time_last_update_unix: number,
+  time_last_update_utc: string,
+  time_next_update_unix: 1712880001,
+  time_next_update_utc: number,
+  base_code: string,
+  conversion_rates: Record<string, number>
+}
 
-    const responseData = res.data as Array<GeckoItem>;
+let useBackupApi = false;
+
+export const getTokenPrice = async (priceIds: Set<string>, currencyLabel = 'USD'): Promise<PriceJson> => {
+  try {
+    const idStr = Array.from(priceIds).join(',');
+    const res: AxiosResponse<any, any>[] = [];
+
+    const getPriceMap = async () => {
+      if (!useBackupApi) {
+        try {
+          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyLabel}&per_page=250&ids=${idStr}`);
+        } catch (err) {
+          useBackupApi = true;
+        }
+      }
+
+      if (useBackupApi || res[0]?.status !== 200) {
+        useBackupApi = true;
+        res[0] = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
+      }
+
+      if (res[0].status !== 200) {
+        console.warn('Failed to get token price');
+      }
+    };
+
+    const getExchangeRate = async () => {
+      try {
+        res[1] = await axios.get('https://api-cache.subwallet.app/exchange-rate');
+      } catch (e) {
+        console.warn('Failed to get exchange rate');
+      }
+
+      if (res[1].status !== 200) {
+        console.warn('Failed to get exchange rate');
+      }
+    };
+
+    await Promise.all([
+      getPriceMap(),
+      getExchangeRate()
+    ]);
+
+    const responseDataPrice = res[0].data as Array<GeckoItem> || [];
+    const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
+    const exchangeRateMap: Record<string, number> = responseDataExchangeRate.conversion_rates;
+    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyLabel];
 
-    responseData.forEach((val) => {
+    responseDataPrice.forEach((val) => {
       const currentPrice = val.current_price || 0;
       const price24h = currentPrice - (val.price_change_24h || 0);
+      const exchangeRate = exchangeRateMap[currencyLabel] || 1;
 
-      priceMap[val.id] = currentPrice;
-      price24hMap[val.id] = price24h;
-
-      // if (inverseMap[val.id]) {
-      //   priceMap[inverseMap[val.id]] = currentPrice;
-      //   price24hMap[inverseMap[val.id]] = price24h;
-      // }
+      priceMap[val.id] = currentPrice * exchangeRate;
+      price24hMap[val.id] = price24h * exchangeRate;
     });
 
     return {
       currency,
+      exchangeRateMap,
       priceMap,
       price24hMap
     } as PriceJson;

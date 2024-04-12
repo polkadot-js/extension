@@ -16,6 +16,7 @@ type Props = TokenBalanceItemType & ThemeProps & {
 
 function Component (
   { className = '',
+    currency,
     isReady,
     logoKey,
     onPressItem,
@@ -23,7 +24,6 @@ function Component (
     priceValue,
     slug,
     symbol,
-    symbolCurrency,
     total }: Props) {
   // todo: Update BalanceItem in react-ui lib
   // - loading
@@ -63,8 +63,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix={symbolCurrency || '$'}
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />

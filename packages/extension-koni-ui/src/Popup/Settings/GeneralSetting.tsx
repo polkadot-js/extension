@@ -142,7 +142,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const currencyItems = useMemo<SelectionItemType[]>(() => {
     return exchangeRateMap
       ? Object.keys(exchangeRateMap).map((item) => ({
-        key: item.toLowerCase(),
+        key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
         title: item
@@ -282,7 +282,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
             searchPlaceholder={t<string>('Search Currency')}
-            selected={currency}
+            selected={currency.label}
             shape='round'
             size='small'
             title={t('Currency')}

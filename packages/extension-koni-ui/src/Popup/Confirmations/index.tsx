@@ -103,7 +103,7 @@ const Component = function ({ className }: Props) {
       }
     }
 
-    if (confirmation.item.isInternal) {
+    if (confirmation.item.isInternal && confirmation.type !== 'connectWCRequest') {
       return (
         <TransactionConfirmation
           closeAlert={closeAlert}

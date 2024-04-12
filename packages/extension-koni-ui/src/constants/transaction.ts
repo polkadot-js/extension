@@ -136,5 +136,6 @@ export const DEFAULT_SWAP_PARAMS: SwapParams = {
   ...DEFAULT_TRANSACTION_PARAMS,
   fromAmount: '',
   fromTokenSlug: '',
-  toTokenSlug: ''
+  toTokenSlug: '',
+  defaultSlug: ''
 };

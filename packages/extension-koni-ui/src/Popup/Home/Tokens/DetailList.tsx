@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
@@ -15,6 +16,7 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
+import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
 import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
@@ -45,6 +47,25 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
   );
 }
 
+function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<string, _ChainAsset>): TokenSelectorItemType[] {
+  const result: TokenSelectorItemType[] = [];
+
+  tokenSlugs.forEach((slug) => {
+    const asset = assetRegistryMap[slug];
+
+    if (asset) {
+      result.push({
+        originChain: asset.originChain,
+        slug,
+        symbol: asset.symbol,
+        name: asset.name
+      });
+    }
+  });
+
+  return result;
+}
+
 const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
@@ -63,12 +84,42 @@ function Component (): React.ReactElement {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { tokens } = useSelector((state: RootState) => state.buyService);
+  const swapPairs = useSelector((state) => state.swap.swapPairs);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
   const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
 
   const transactionFromValue = useMemo(() => {
     return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
   }, [currentAccount?.address]);
+
+  const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {};
+
+    swapPairs.forEach((pair) => {
+      if (!result[pair.from]) {
+        result[pair.from] = [pair.to];
+      } else {
+        result[pair.from].push(pair.to);
+      }
+    });
+
+    return result;
+  }, [swapPairs]);
+
+  const rawFromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
+    return getTokenSelectorItem(Object.keys(fromAndToTokenMap), assetRegistryMap);
+  }, [assetRegistryMap, fromAndToTokenMap]);
+
+  const filterFromAssetInfo = useMemo(() => {
+    if (!rawFromTokenItems || !assetRegistryMap) {
+      return [];
+    }
+
+    const filteredAssets = rawFromTokenItems.map((item) => assetRegistryMap[item.slug])
+      .filter((chainAsset) => chainAsset.slug === tokenGroupSlug || chainAsset.multiChainAsset === tokenGroupSlug);
+
+    return filteredAssets;
+  }, [assetRegistryMap, rawFromTokenItems, tokenGroupSlug]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
@@ -306,10 +357,11 @@ function Component (): React.ReactElement {
 
     setSwapStorage({
       ...DEFAULT_SWAP_PARAMS,
-      from: transactionFromValue
+      from: transactionFromValue,
+      defaultSlug: tokenGroupSlug || ''
     });
     navigate('/transaction/swap');
-  }, [currentAccount, navigate, notify, setSwapStorage, t, transactionFromValue]);
+  }, [currentAccount, navigate, notify, setSwapStorage, t, tokenGroupSlug, transactionFromValue]);
 
   useEffect(() => {
     if (currentTokenInfo) {
@@ -354,6 +406,7 @@ function Component (): React.ReactElement {
           className={'__static-block'}
           isShrink={isShrink}
           isSupportBuyTokens={!!buyInfos.length}
+          isSupportSwap={!!filterFromAssetInfo.length}
           onClickBack={goHome}
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}

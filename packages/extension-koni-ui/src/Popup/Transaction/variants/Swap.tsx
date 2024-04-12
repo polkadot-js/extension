@@ -112,6 +112,7 @@ const Component = () => {
   const continueRefreshQuoteRef = useRef<boolean>(false);
   const { token } = useTheme() as Theme;
 
+  const { defaultSlug: swapSlug } = defaultData;
   const onIdle = useCallback(() => {
     !hasInternalConfirmations && !!confirmedTerm && showQuoteArea && setRequestUserInteractToContinue(true);
   }, [confirmedTerm, hasInternalConfirmations, showQuoteArea]);
@@ -173,6 +174,17 @@ const Component = () => {
       return chainInfoMap[i.originChain] && isEthereumAddress(fromValue) === _isChainEvmCompatible(chainInfoMap[i.originChain]);
     });
   }, [chainInfoMap, fromValue, rawFromTokenItems]);
+
+  const filterFromAssetInfo = useMemo(() => {
+    if (!fromTokenItems || !assetRegistryMap) {
+      return [];
+    }
+
+    const filteredAssets = fromTokenItems.map((item) => assetRegistryMap[item.slug])
+      .filter((chainAsset) => chainAsset.slug === swapSlug || chainAsset.multiChainAsset === swapSlug);
+
+    return filteredAssets;
+  }, [assetRegistryMap, fromTokenItems, swapSlug]);
 
   const toTokenItems = useMemo<TokenSelectorItemType[]>(() => {
     return getTokenSelectorItem(fromAndToTokenMap[fromTokenSlugValue] || [], assetRegistryMap);
@@ -862,6 +874,10 @@ const Component = () => {
     return result;
   }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
 
+  const fromTokenLists = useMemo(() => {
+    return swapSlug ? filterFromAssetInfo : fromTokenItems;
+  }, [swapSlug, filterFromAssetInfo, fromTokenItems]);
+
   useEffect(() => {
     setBackProps((prev) => ({
       ...prev,
@@ -1050,16 +1066,16 @@ const Component = () => {
   }, [activeModal, inactiveAll, requestUserInteractToContinue]);
 
   useEffect(() => {
-    if (fromTokenItems.length) {
+    if (fromTokenLists.length) {
       if (!fromTokenSlugValue) {
-        form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+        form.setFieldValue('fromTokenSlug', fromTokenLists[0].slug);
       } else {
-        if (!fromTokenItems.some((i) => i.slug === fromTokenSlugValue)) {
-          form.setFieldValue('fromTokenSlug', fromTokenItems[0].slug);
+        if (!fromTokenLists.some((i) => i.slug === fromTokenSlugValue)) {
+          form.setFieldValue('fromTokenSlug', fromTokenLists[0].slug);
         }
       }
     }
-  }, [form, fromTokenItems, fromTokenSlugValue, fromValue]);
+  }, [filterFromAssetInfo, form, fromTokenLists, fromTokenSlugValue, fromValue]);
 
   useEffect(() => {
     if (toTokenItems.length) {
@@ -1149,7 +1165,7 @@ const Component = () => {
                     label={t('From')}
                     onChangeAmount={onChangeAmount}
                     onSelectToken={onSelectFromToken}
-                    tokenSelectorItems={fromTokenItems}
+                    tokenSelectorItems={fromTokenLists}
                     tokenSelectorValue={fromTokenSlugValue}
                   />
 

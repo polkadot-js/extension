@@ -63,4 +63,5 @@ export interface SwapParams extends TransactionFormBaseProps {
   fromTokenSlug: string;
   toTokenSlug: string;
   recipient?: string;
+  defaultSlug: string;
 }

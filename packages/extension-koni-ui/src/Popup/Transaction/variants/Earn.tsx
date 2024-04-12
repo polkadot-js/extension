@@ -525,7 +525,7 @@ const Component = () => {
         if ('minBond' in targeted) {
           const minTargetJoin = new BigN(targeted.minBond || '0');
 
-          minJoinPool = minTargetJoin.gt(minJoinPool || '0') ? minTargetJoin.toString() : minJoinPool;
+          minJoinPool = minTargetJoin.gt(minPoolJoin || '0') ? minTargetJoin.toString() : minPoolJoin;
         } else {
           minJoinPool = minPoolJoin;
         }

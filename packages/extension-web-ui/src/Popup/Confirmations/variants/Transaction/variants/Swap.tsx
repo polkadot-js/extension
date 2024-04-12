@@ -25,8 +25,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   // @ts-ignore
   const data = transaction.data as SwapTxData;
-
-  const account = useGetAccountByAddress(data.address);
+  const recipientAddress = data.recipient || data.address;
+  const account = useGetAccountByAddress(recipientAddress);
   const networkPrefix = useGetChainPrefixBySlug(transaction.chain);
 
   const toAssetInfo = useMemo(() => {

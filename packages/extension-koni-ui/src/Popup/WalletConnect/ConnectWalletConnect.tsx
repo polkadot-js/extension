@@ -2,19 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, QrScannerErrorNotice, WalletConnect } from '@subwallet/extension-koni-ui/components';
+import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useOpenQrScanner } from '@subwallet/extension-koni-ui/hooks';
 import { addConnection } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
+import { noop, validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, PageIcon, SwModal, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Scan, XCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -30,6 +32,12 @@ const faqUrl = 'https://docs.subwallet.app/main/extension-user-guide/faqs#i-see-
 const modalId = 'WALLET_CONNECT_CONFIRM_MODAL';
 const scannerId = 'connect-connection-scanner-modal';
 const showScanner = true;
+const keyRecords = 'unsuccessful_connect_wc_modal';
+let idTimeOut: NodeJS.Timeout;
+
+const getTimeOutRecords = () => {
+  return JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -38,19 +46,45 @@ const Component: React.FC<Props> = (props: Props) => {
   const { goHome } = useDefaultNavigate();
   const { token } = useTheme() as Theme;
 
-  const { activeModal, inactiveModal } = useContext(ModalContext);
-
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const [, setTimeOutRecords] = useLocalStorage(TIME_OUT_RECORD, {});
   const [form] = Form.useForm<AddConnectionFormState>();
 
   const [loading, setLoading] = useState(false);
   const [scanError, setScanError] = useState('');
 
+  const reOpenModalWhenTimeOut = useCallback(() => {
+    const timeOutRecord = getTimeOutRecords();
+
+    if (timeOutRecord[keyRecords]) {
+      setLoading(false);
+      activeModal(modalId);
+    }
+  }, [activeModal]);
+
+  useEffect(() => {
+    const timeOutRecord = getTimeOutRecords();
+
+    if (loading && !checkActive(modalId) && !timeOutRecord[keyRecords]) {
+      idTimeOut = setTimeout(reOpenModalWhenTimeOut, 20000);
+      setTimeOutRecords({ ...timeOutRecord, [keyRecords]: idTimeOut });
+    } else if (timeOutRecord[keyRecords]) {
+      setLoading(false);
+    }
+  }, [checkActive, loading, reOpenModalWhenTimeOut, setTimeOutRecords]);
+
   const onClickToFAQ = useCallback((isDismiss: boolean) => {
     return () => {
+      const timeOutRecord = getTimeOutRecords();
+
+      clearTimeout(idTimeOut);
+      delete timeOutRecord[keyRecords];
       !isDismiss && window.open(faqUrl, '_blank');
       inactiveModal(modalId);
+      form.setFieldValue('uri', DEFAULT_FORM_VALUES.uri);
+      setTimeOutRecords(timeOutRecord);
     };
-  }, [inactiveModal]);
+  }, [form, inactiveModal, setTimeOutRecords]);
 
   const footerModalWC = useMemo(() => {
     return (
@@ -74,9 +108,7 @@ const Component: React.FC<Props> = (props: Props) => {
     addConnection({
       uri
     })
-      .then(() => {
-        setTimeout(() => setLoading(false), 5000);
-      })
+      .then(noop)
       .catch((e) => {
         console.error(e);
         setLoading(false);

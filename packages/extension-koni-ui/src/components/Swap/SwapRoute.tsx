@@ -111,7 +111,7 @@ const SwapRoute = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'absolute',
       height: 2,
       backgroundColor: token['gray-3'],
-      marginTop: 12,
+      marginTop: 16,
       marginBottom: 16,
       left: 28,
       right: 33

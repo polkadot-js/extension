@@ -343,6 +343,8 @@ function Component (): React.ReactElement {
         type: 'error',
         duration: 3
       });
+
+      return;
     }
 
     if (currentAccount && currentAccount.isReadOnly) {

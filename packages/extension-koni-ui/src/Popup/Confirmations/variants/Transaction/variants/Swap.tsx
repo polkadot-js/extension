@@ -27,7 +27,8 @@ const Component: React.FC<Props> = (props: Props) => {
   // @ts-ignore
   const data = transaction.data as SwapTxData;
 
-  const account = useGetAccountByAddress(data.address);
+  const recipientAddress = data.recipient || data.address;
+  const account = useGetAccountByAddress(recipientAddress);
   const networkPrefix = useGetChainPrefixBySlug(transaction.chain);
 
   const toAssetInfo = useMemo(() => {
@@ -182,6 +183,9 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
       alignItems: 'center',
       flexDirection: 'column',
       flex: 1
+    },
+    '.__estimate-transaction-fee .__value-col': {
+      flex: '0 1 auto'
     },
     '.__quote-footer-label': {
       color: token.colorTextTertiary,

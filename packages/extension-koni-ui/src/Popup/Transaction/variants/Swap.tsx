@@ -1238,7 +1238,7 @@ const Component = () => {
                     tokenSlug={fromTokenSlugValue}
                   />
                 </div>
-                <div className={CN('__separator', { hidden: !currentQuote })}></div>
+                <div className={CN('__separator', { hidden: (!currentQuote || isFormInvalid) })}></div>
               </Form>
               {renderAlertBox()}
               {

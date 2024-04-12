@@ -186,6 +186,8 @@ const Component = (): React.ReactElement => {
         type: 'error',
         duration: 3
       });
+
+      return;
     }
 
     setSwapStorage({

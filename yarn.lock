@@ -2533,10 +2533,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@galacticcouncil/math-stableswap@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@galacticcouncil/math-stableswap@npm:0.2.1"
-  checksum: 22fe16badc94c35170523e4d39c6ca2835d3bb5fceb7dddb44812bff3b20c6b854c75d172fe4cd9a0c6849b12f7f10b20e34de63a9e7871b3caaf4bd3b9f2dda
+"@galacticcouncil/math-stableswap@npm:^0.2.2":
+  version: 0.2.2
+  resolution: "@galacticcouncil/math-stableswap@npm:0.2.2"
+  checksum: 96a2767a84654665a8e7f8e447f21bec99daca18d40bf4a020aa49fe3b3c593fcc25453b93f17c159c681385748c7486055fdf7bb23a37d31283dd6eeab586bd
   languageName: node
   linkType: hard
 
@@ -2547,13 +2547,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@galacticcouncil/sdk@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@galacticcouncil/sdk@npm:1.2.1"
+"@galacticcouncil/sdk@npm:^2.1.0":
+  version: 2.2.1
+  resolution: "@galacticcouncil/sdk@npm:2.2.1"
   dependencies:
     "@galacticcouncil/math-lbp": ^0.2.1
     "@galacticcouncil/math-omnipool": ^0.2.0
-    "@galacticcouncil/math-stableswap": ^0.2.1
+    "@galacticcouncil/math-stableswap": ^0.2.2
     "@galacticcouncil/math-xyk": ^0.2.0
     "@thi.ng/cache": ^2.1.35
     bignumber.js: ^9.1.0
@@ -2574,7 +2574,7 @@ __metadata:
     "@polkadot/types-known": ^10.9.1
     "@polkadot/util": ^12.3.2
     "@polkadot/util-crypto": ^12.3.2
-  checksum: e14949e4c1f7b1deec374812d684602f0e2136113da26d79b7a2c8b38b0b68125dbd06231e51926b459dc7279533bb3224bfca53dd6aa69d505b1a5d86e0f605
+  checksum: 88b009db014e461ee1a72fb7b689e5a93eb53668f4e1ede17d3acf353f43b28a47aaea0a39c5a33ff39629ccb2da33d4b3cc238c49939dfd5794ab3d6e5cc9dd
   languageName: node
   linkType: hard
 
@@ -6208,7 +6208,7 @@ __metadata:
     "@ethereumjs/common": ^4.1.0
     "@ethereumjs/tx": ^5.1.0
     "@ethersproject/abi": ^5.7.0
-    "@galacticcouncil/sdk": ^1.2.1
+    "@galacticcouncil/sdk": ^2.1.0
     "@json-rpc-tools/utils": ^1.7.6
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13

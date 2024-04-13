@@ -228,7 +228,7 @@ export class HydradxHandler implements SwapBaseInterface {
   generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
     return this.swapBaseHandler.generateOptimalProcess(params, [
       this.getXcmStep,
-      this.getFeeOptionStep.bind(this),
+      // this.getFeeOptionStep.bind(this),
       this.getSubmitStep
     ]);
   }
@@ -338,13 +338,15 @@ export class HydradxHandler implements SwapBaseInterface {
         }
       }
 
-      const feeTokenOptions = this.chainService.getFeeTokensByChain(this.chain());
+      // const feeTokenOptions = this.chainService.getFeeTokensByChain(this.chain());
+      const feeTokenOptions = [fromChainNativeTokenSlug];
 
-      if (request.feeToken && !feeTokenOptions.includes(request.feeToken)) {
-        return new SwapError(SwapErrorType.UNKNOWN);
-      }
+      // if (request.feeToken && !feeTokenOptions.includes(request.feeToken)) {
+      //   return new SwapError(SwapErrorType.UNKNOWN);
+      // }
 
-      const selectedFeeToken = request.feeToken || fromChainNativeTokenSlug;
+      // const selectedFeeToken = request.feeToken || fromChainNativeTokenSlug;
+      const selectedFeeToken = fromChainNativeTokenSlug;
 
       return {
         pair: request.pair,
@@ -356,7 +358,7 @@ export class HydradxHandler implements SwapBaseInterface {
         feeInfo: {
           feeComponent: [networkFee, tradeFee],
           defaultFeeToken: fromChainNativeTokenSlug,
-          feeOptions: feeTokenOptions,
+          feeOptions: feeTokenOptions, // TODO: enable fee options
           selectedFeeToken
         },
         isLowLiquidity: Math.abs(quoteResponse.priceImpactPct) >= HYDRADX_LOW_LIQUIDITY_THRESHOLD,

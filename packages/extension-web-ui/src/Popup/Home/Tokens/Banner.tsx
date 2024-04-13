@@ -4,22 +4,18 @@
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon } from '@subwallet/react-ui';
 import { Coins, Vault } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   title: string,
-  content: string
+  content: string,
+  onClickEarnNow: VoidFunction;
 };
 
-const Component: React.FC<Props> = ({ className, content, title }: Props) => {
+const Component: React.FC<Props> = ({ className, content, onClickEarnNow, title }: Props) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const goEarning = useCallback(() => {
-    navigate('/home/earning/overview');
-  }, [navigate]);
 
   return (
     <div className={className}>
@@ -50,7 +46,7 @@ const Component: React.FC<Props> = ({ className, content, title }: Props) => {
             weight='fill'
           />
         }
-        onClick={goEarning}
+        onClick={onClickEarnNow}
       >
         <div className={'__footer-button-content'}>
           <div className={'__footer-button-title'}>{t('Rewards: 14.8% - 18.5%')}</div>
@@ -76,7 +72,7 @@ const Banner = styled(Component)<Props>(({ theme: { token } }: Props) => {
     zIndex: 10,
     '.__note-box': {
       maxWidth: 684,
-      flex: '1 0 300px'
+      flex: '1 1 300px'
     },
     '.__title-wrapper': {
       display: 'flex',

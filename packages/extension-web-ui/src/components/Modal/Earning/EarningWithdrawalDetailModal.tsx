@@ -1,40 +1,138 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
 import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { getWaitingTime } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
+import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, ProhibitInset } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
-import styled from 'styled-components';
+import { CheckCircle, ProhibitInset, StopCircle } from 'phosphor-react';
+import React, { Context, useCallback, useContext, useMemo } from 'react';
+import styled, { ThemeContext } from 'styled-components';
 
-type Props = ThemeProps;
-const modalId = 'earning-withdrawal-detail-modal';
+type Props = ThemeProps & {
+  modalId: string;
+  inputAsset: _ChainAsset;
+  unstakingItems: UnstakingInfo[];
+  poolInfo: YieldPoolInfo;
+  onCancelWithDraw: VoidFunction;
+  canWithdraw: boolean;
+  onWithdraw: VoidFunction;
+  currentTimestampMs: number;
+};
 
-function Component ({ className }: Props) {
+function Component ({ canWithdraw, className, currentTimestampMs, inputAsset, modalId, onCancelWithDraw, onWithdraw, poolInfo, unstakingItems }: Props) {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
-  const onClickViewExplore = useCallback(() => {
-    const currentAccount = 'p8DyH23aDbJCpioSXLSv9unX7b1fsF1Wg4FzKuyoPpUwW4yFL';
 
-    if (currentAccount) {
-      const subscanSlug = 'dung-nguyen';
+  const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
 
-      if (subscanSlug) {
-        openInNewTab(`https://${subscanSlug}.subscan.io/account/${currentAccount}?tab=reward`)();
-      }
-    }
-  }, []);
   const closeModal = useCallback(() => {
     inactiveModal(modalId);
-  }, [inactiveModal]);
+  }, [inactiveModal, modalId]);
+
+  const renderWithdrawTime = useCallback(
+    (item: UnstakingInfo) => {
+      if (!poolInfo.metadata.availableMethod.withdraw) {
+        return (
+          <div className={'__withdraw-time-label'}>{t('Automatic withdrawal')}</div>
+        );
+      } else {
+        if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        } else {
+          return (
+            <>
+              <div className={'__withdraw-time-label'}>{getWaitingTime(t, currentTimestampMs, item.targetTimestampMs, item.waitingTime)}</div>
+              {item.status === UnstakingStatus.CLAIMABLE && (
+                <Icon
+                  iconColor={token.colorSecondary}
+                  phosphorIcon={CheckCircle}
+                  size='sm'
+                  weight='fill'
+                />
+              )}
+            </>
+          );
+        }
+      }
+    },
+    [currentTimestampMs, poolInfo.metadata.availableMethod.withdraw, t, token.colorSecondary]
+  );
+
+  const haveUnlocking = useMemo(() => unstakingItems.some((i) => i.status === UnstakingStatus.UNLOCKING), [unstakingItems]);
+
+  const canCancelWithdraw = useMemo(
+    () => haveUnlocking && poolInfo.metadata.availableMethod.cancelUnstake,
+    [haveUnlocking, poolInfo.metadata.availableMethod.cancelUnstake]
+  );
+
+  const onClickCancelUnstaking = useCallback(() => {
+    if (!canCancelWithdraw) {
+      return;
+    }
+
+    onCancelWithDraw();
+  }, [canCancelWithdraw, onCancelWithDraw]);
 
   return (
     <BaseModal
-      className={CN(className)}
+      className={CN(className, '__withdrawal-detail-modal')}
+      footer={canCancelWithdraw || canWithdraw
+        ? (
+          <>
+            {
+              canWithdraw && (
+                <Button
+                  block={true}
+                  className={'__withdraw-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={StopCircle}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onWithdraw}
+                >
+                  {t('Withdraw')}
+                </Button>)
+            }
+            {
+              canCancelWithdraw && (
+                <Button
+                  block={true}
+                  className={'__cancel-unstake-button'}
+                  icon={(
+                    <Icon
+                      phosphorIcon={ProhibitInset}
+                      weight={'fill'}
+                    />
+                  )}
+                  onClick={onClickCancelUnstaking}
+                  schema={'secondary'}
+                >
+                  {t('Cancel unstake')}
+                </Button>)
+            }
+          </>
+        )
+        : undefined}
       id={modalId}
       onCancel={closeModal}
       title={'Withdraw info'}
@@ -42,55 +140,22 @@ function Component ({ className }: Props) {
       <MetaInfo
         labelColorScheme='gray'
         labelFontWeight='regular'
-        spaceSize='sm'
-        valueColorScheme='light'
+        spaceSize='ms'
       >
-        <MetaInfo.Number
-          decimals={2}
-          label={(
-            <>
-              <span className={'__withdraw-now'}>Withdraw now</span>
-              <Icon
-                className={'earning-item-stake-btn'}
-                iconColor={'#4cd9ac'}
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            </>
-          )}
-          suffix={'DOT'}
-          value={2008}
-        />
-        <MetaInfo.Number
-          decimals={1}
-          label={'9 days until withdraw'}
-          suffix={'DOT'}
-          value={402}
-        />
-        <MetaInfo.Number
-          decimals={2}
-          label={'10 days until withdraw'}
-          suffix={'DOT'}
-          value={102}
-        />
+        {unstakingItems.map((item, index) => {
+          return (
+            <MetaInfo.Number
+              className={'__withdraw-time-item'}
+              decimals={inputAsset?.decimals || 0}
+              key={index}
+              label={renderWithdrawTime(item)}
+              suffix={inputAsset?.symbol}
+              value={item.claimable}
+              valueColorSchema='even-odd'
+            />
+          );
+        })}
       </MetaInfo>
-
-      <Button
-        block={true}
-        className={'__cancel-unstake-button'}
-        icon={(
-          <Icon
-            phosphorIcon={ProhibitInset}
-            weight={'fill'}
-          />
-        )}
-        onClick={onClickViewExplore}
-        size={'xs'}
-        type={'ghost'}
-      >
-        {t('Cancel unstake')}
-      </Button>
     </BaseModal>
   );
 }
@@ -99,6 +164,18 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
   minHeight: 54,
+
+  '.ant-sw-modal-footer': {
+    borderTop: 0,
+    paddingTop: 0,
+    paddingBottom: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: token.sizeSM
+  },
+  '.ant-sw-modal-footer .ant-btn+.ant-btn:not(.ant-dropdown-trigger)': {
+    marginLeft: 0
+  },
 
   '.__part-title': {
     paddingTop: token.padding,
@@ -127,6 +204,17 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
     paddingBottom: token.paddingSM,
     paddingLeft: token.padding,
     paddingRight: token.padding
+  },
+
+  '.__withdraw-time-item .__label': {
+    display: 'flex',
+    gap: 4,
+    'white-space': 'nowrap'
+  },
+
+  '.__withdraw-time-item .__withdraw-time-label': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden'
   },
 
   '.__claim-reward-value': {
@@ -162,9 +250,5 @@ export const EarningWithdrawalDetailModal = styled(Component)<Props>(({ theme: {
 
   '.__separator + .__reward-history-panel': {
     marginTop: -13
-  },
-
-  '.__cancel-unstake-button': {
-    marginTop: token.marginSM
   }
 }));

@@ -12,7 +12,7 @@ const useTransactionContext = <T extends TransactionFormBaseProps>() => {
     openAlert,
     openRecheckChainConnectionModal,
     persistData,
-    setBackProps, setSubHeaderRightButtons } = useContext(TransactionContext);
+    setBackProps, setCustomScreenTitle, setSubHeaderRightButtons } = useContext(TransactionContext);
 
   return {
     modalId,
@@ -26,7 +26,8 @@ const useTransactionContext = <T extends TransactionFormBaseProps>() => {
     closeAlert,
     closeRecheckChainConnectionModal,
     openAlert,
-    openRecheckChainConnectionModal
+    openRecheckChainConnectionModal,
+    setCustomScreenTitle
   };
 };
 

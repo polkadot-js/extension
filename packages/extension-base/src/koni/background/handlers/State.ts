@@ -32,6 +32,7 @@ import SettingService from '@subwallet/extension-base/services/setting-service/S
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
 import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SwapService } from '@subwallet/extension-base/services/swap-service';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
@@ -135,6 +136,7 @@ export default class KoniState {
   readonly buyService: BuyService;
   readonly earningService: EarningService;
   readonly feeService: FeeService;
+  readonly swapService: SwapService;
 
   // Handle the general status of the extension
   private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
@@ -165,6 +167,7 @@ export default class KoniState {
     this.transactionService = new TransactionService(this);
     this.earningService = new EarningService(this);
     this.feeService = new FeeService(this);
+    this.swapService = new SwapService(this);
 
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
@@ -319,6 +322,7 @@ export default class KoniState {
 
     await this.balanceService.init();
     await this.earningService.init();
+    await this.swapService.init();
 
     this.onReady();
     this.onAccountAdd();
@@ -1693,7 +1697,7 @@ export default class KoniState {
     // Stopping services
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop()]);
+    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop(), this.swapService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1729,7 +1733,7 @@ export default class KoniState {
     }
 
     // Start services
-    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.balanceService.start(), this.earningService.start()]);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.balanceService.start(), this.earningService.start(), this.swapService.start()]);
 
     // Complete starting
     starting.resolve();

@@ -46,7 +46,8 @@ const LoadingModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
       minWidth: 150,
       borderRadius: token.borderRadiusXL,
       maxHeight: 'none',
-      borderBottom: 0
+      borderBottom: 0,
+      paddingBottom: token.padding
     },
 
     '.ant-sw-modal-body.ant-sw-modal-body': {

@@ -63,6 +63,7 @@
     "react-dom": "^18.2.0",
     "react-dropzone": "^11.5.1",
     "react-i18next": "^11.15.3",
+    "react-idle-timer": "^5.7.2",
     "react-infinite-scroll-component": "^6.1.0",
     "react-is": "^17.0.2",
     "react-lazy-load-image-component": "^1.5.6",

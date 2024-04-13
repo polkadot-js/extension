@@ -23,7 +23,7 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
-import { convertFieldToObject, findAccountByAddress, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { convertFieldToObject, findAccountByAddress, isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -228,6 +228,16 @@ const Component = () => {
 
     if (!isAddress(_recipientAddress)) {
       return Promise.reject(t('Invalid recipient address'));
+    }
+
+    if (!isEthereumAddress(_recipientAddress)) {
+      const destChainInfo = chainInfoMap[toAssetInfo.originChain];
+      const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
+      const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
+
+      if (_addressOnChain !== _recipientAddress) {
+        return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: destChainInfo.name } }));
+      }
     }
 
     if (toAssetInfo?.originChain && chainInfoMap[toAssetInfo?.originChain]) {
@@ -874,6 +884,10 @@ const Component = () => {
     return result;
   }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
 
+  const isChainConnected = useMemo(() => {
+    return checkChainConnected(chainValue);
+  }, [chainValue, checkChainConnected]);
+
   const fromTokenLists = useMemo(() => {
     return swapSlug ? filterFromAssetInfo : fromTokenItems;
   }, [swapSlug, filterFromAssetInfo, fromTokenItems]);
@@ -1206,12 +1220,14 @@ const Component = () => {
                         validator: recipientAddressValidator
                       }
                     ]}
+                    statusHelpAsTooltip={true}
                     validateTrigger='onBlur'
                   >
                     <AddressInput
                       addressPrefix={destChainNetworkPrefix}
                       allowDomain={true}
                       chain={destChain}
+                      fitNetwork={true}
                       label={t('Recipient account')}
                       networkGenesisHash={destChainGenesisHash}
                       placeholder={t('Input your recipient account')}
@@ -1240,7 +1256,6 @@ const Component = () => {
                 </div>
                 <div className={CN('__separator', { hidden: (!currentQuote || isFormInvalid) })}></div>
               </Form>
-              {renderAlertBox()}
               {
                 showQuoteArea && (
                   <>
@@ -1287,7 +1302,7 @@ const Component = () => {
                     }
 
                     {
-                      swapError && (
+                      isChainConnected && swapError && (
                         <div className={'__error-message'}>
                           {swapError.message}
                         </div>
@@ -1320,6 +1335,8 @@ const Component = () => {
                         </div>
                       )
                     }
+                    {renderAlertBox()}
+
                   </>
                 )
               }
@@ -1590,9 +1607,6 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__swap-quote': {
       marginRight: -8
-    },
-    '.__xcm-notification': {
-      marginBottom: token.marginSM
     },
     '.__fee-paid-token': {
       display: 'flex',

@@ -83,7 +83,7 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
           ? (
             <ChainItem
               chain={originChain.slug}
-              label={t('Networks')}
+              label={t('Network')}
             />
           )
           : (

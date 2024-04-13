@@ -40,7 +40,7 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
   return (
     <PageWrapper
       className={`tokens ${className}`}
-      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
+      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'swap'])}
     >
       <Component />
     </PageWrapper>

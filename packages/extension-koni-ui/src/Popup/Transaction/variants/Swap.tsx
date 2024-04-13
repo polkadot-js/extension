@@ -1087,6 +1087,8 @@ const Component = () => {
           form.setFieldValue('fromTokenSlug', fromTokenLists[0].slug);
         }
       }
+    } else {
+      form.setFieldValue('fromTokenSlug', '');
     }
   }, [filterFromAssetInfo, form, fromTokenLists, fromTokenSlugValue, fromValue]);
 
@@ -1140,6 +1142,10 @@ const Component = () => {
   const onFilterAccount = useMemo(() => {
     return accounts.filter((account) => !isAccountAll(account.address) && !account.isHardware);
   }, [accounts]);
+
+  const networkName = useMemo(() => {
+    return (isEthereumAddress(fromValue)) ? 'Polkadot' : 'Ethereum';
+  }, [fromValue]);
 
   return (
     <>
@@ -1210,6 +1216,14 @@ const Component = () => {
                     tokenSelectorValue={toTokenSlugValue}
                   />
                 </div>
+
+                {swapSlug && !fromAssetInfo && (
+                  <AlertBox
+                    description={`No swap pair for this token found. Switch to ${networkName} account to see available swap pairs`}
+                    title={'Pay attention!'}
+                    type={'warning'}
+                  />
+                )}
 
                 {showRecipientField && (
                   <Form.Item

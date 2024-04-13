@@ -36,6 +36,7 @@ const Component = (): React.ReactElement => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
@@ -180,7 +181,11 @@ const Component = (): React.ReactElement => {
       return;
     }
 
-    if (currentAccount && currentAccount.isHardware) {
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
+
+    const isAllLedger = (filteredAccounts.length > 0 && filteredAccounts.every((account) => account.isHardware)) || (currentAccount && !isAccountAll(currentAccount.address) && (currentAccount.isHardware));
+
+    if ((currentAccount && currentAccount.isHardware) || (isAllLedger)) {
       notify({
         message: 'The account you are using is Ledger account, you cannot use this feature with it',
         type: 'error',

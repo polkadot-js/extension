@@ -558,6 +558,10 @@ const Component = () => {
     [notify, onDone, onError, t]
   );
 
+  const isChainConnected = useMemo(() => {
+    return checkChainConnected(chainValue);
+  }, [chainValue, checkChainConnected]);
+
   const onSubmit: FormCallbacks<SwapParams>['onFinish'] = useCallback((values: SwapParams) => {
     if (chainValue && !checkChainConnected(chainValue)) {
       openAlert({
@@ -569,6 +573,16 @@ const Component = () => {
           onClick: closeAlert,
           icon: CheckCircle
         }
+      });
+
+      return;
+    }
+
+    if (isChainConnected && swapError) {
+      notify({
+        message: swapError?.message,
+        type: 'error',
+        duration: 5
       });
 
       return;
@@ -705,7 +719,7 @@ const Component = () => {
     } else {
       transactionBlockProcess();
     }
-  }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
+  }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, isChainConnected, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, swapError, t]);
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
@@ -882,10 +896,6 @@ const Component = () => {
 
     return result;
   }, [chainInfoMap, currentPair, fromAssetInfo, isSwapXCM]);
-
-  const isChainConnected = useMemo(() => {
-    return checkChainConnected(chainValue);
-  }, [chainValue, checkChainConnected]);
 
   const fromTokenLists = useMemo(() => {
     return swapSlug ? filterFromAssetInfo : fromTokenItems;
@@ -1147,6 +1157,16 @@ const Component = () => {
     return (isEthereumAddress(fromValue)) ? 'Polkadot' : 'Ethereum';
   }, [fromValue]);
 
+  useEffect(() => {
+    if (isChainConnected && swapError) {
+      notify({
+        message: swapError?.message,
+        type: 'error',
+        duration: 5
+      });
+    }
+  }, [isChainConnected, notify, swapError, swapError?.message, t]);
+
   return (
     <>
       <>
@@ -1315,15 +1335,7 @@ const Component = () => {
                     }
 
                     {
-                      isChainConnected && swapError && (
-                        <div className={'__error-message'}>
-                          {swapError.message}
-                        </div>
-                      )
-                    }
-
-                    {
-                      !isFormInvalid && !handleRequestLoading && (
+                      !isFormInvalid && !handleRequestLoading && currentQuote && (
                         <div className='__view-quote-detail-action-wrapper'>
                           <div className={'__quote-reset-time'}>
                             <QuoteResetTime

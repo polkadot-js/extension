@@ -90,7 +90,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Number
           className={'__estimate-transaction-fee'}
           decimals={0}
-          label={'Estimated transaction fee'}
+          label={'Estimated fee'}
           prefix={'$'}
           value={estimatedFeeValue}
         />

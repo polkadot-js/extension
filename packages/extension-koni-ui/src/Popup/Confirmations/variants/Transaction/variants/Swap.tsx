@@ -123,7 +123,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Number
           className={'__estimate-transaction-fee'}
           decimals={0}
-          label={'Estimated transaction fee'}
+          label={'Estimated fee'}
           prefix={'$'}
           value={estimatedFeeValue}
         />
@@ -183,7 +183,7 @@ const SwapTransactionConfirmation = styled(Component)<Props>(({ theme: { token }
       flexDirection: 'column',
       flex: 1
     },
-    '.__estimate-transaction-fee .__value-col': {
+    '.__quote-rate-confirm .__label-col': {
       flex: '0 1 auto'
     },
     '.__quote-footer-label': {

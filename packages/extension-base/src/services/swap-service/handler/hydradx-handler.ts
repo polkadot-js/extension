@@ -447,7 +447,8 @@ export class HydradxHandler implements SwapBaseInterface {
     return {
       txChain: this.chain(),
       extrinsic,
-      extrinsicType: ExtrinsicType.SET_FEE_TOKEN,
+      // extrinsicType: ExtrinsicType.SET_FEE_TOKEN,
+      extrinsicType: ExtrinsicType.SWAP,
       chainType: ChainType.SUBSTRATE,
       txData
     } as SwapSubmitStepData;

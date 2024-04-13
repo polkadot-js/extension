@@ -507,7 +507,7 @@ export enum ExtrinsicType {
 
   SWAP = 'swap',
 
-  SET_FEE_TOKEN = 'set_fee-token',
+  // SET_FEE_TOKEN = 'set_fee-token',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrencyJson, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import axios, { AxiosResponse } from 'axios';
 
@@ -25,7 +25,7 @@ interface ExchangeRateItem {
 
 let useBackupApi = false;
 
-export const getTokenPrice = async (priceIds: Set<string>, currencyLabel = 'USD'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD'): Promise<PriceJson> => {
   try {
     const idStr = Array.from(priceIds).join(',');
     const res: AxiosResponse<any, any>[] = [];
@@ -33,7 +33,7 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyLabel = 'USD'
     const getPriceMap = async () => {
       if (!useBackupApi) {
         try {
-          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyLabel}&per_page=250&ids=${idStr}`);
+          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyCode.toLowerCase()}&per_page=250&ids=${idStr}`);
         } catch (err) {
           useBackupApi = true;
         }
@@ -66,23 +66,32 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyLabel = 'USD'
       getExchangeRate()
     ]);
 
-    const responseDataPrice = res[0].data as Array<GeckoItem> || [];
     const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
+    const responseDataPrice = res[0].data as Array<GeckoItem> || [];
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
-    const exchangeRateMap: Record<string, number> = responseDataExchangeRate.conversion_rates;
-    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyLabel];
+    const exchangeRateMap: Record<string, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
+      .reduce((map, exchangeKey) => {
+        map[exchangeKey] = {
+          exchange: responseDataExchangeRate.conversion_rates[exchangeKey],
+          label: (staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey] as CurrencyJson).label
+        };
+
+        return map;
+      }, {} as Record<string, ExchangeRateJSON>);
+    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
 
     responseDataPrice.forEach((val) => {
       const currentPrice = val.current_price || 0;
       const price24h = currentPrice - (val.price_change_24h || 0);
-      const exchangeRate = exchangeRateMap[currencyLabel] || 1;
+      const exchangeRate = exchangeRateMap[currencyCode] || 1;
 
-      priceMap[val.id] = currentPrice * exchangeRate;
-      price24hMap[val.id] = price24h * exchangeRate;
+      priceMap[val.id] = currentPrice * exchangeRate.exchange;
+      price24hMap[val.id] = price24h * exchangeRate.exchange;
     });
 
     return {
+      currencyCode,
       currency,
       exchangeRateMap,
       priceMap,

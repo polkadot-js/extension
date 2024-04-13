@@ -12,7 +12,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -25,6 +25,7 @@ type SelectionItemType = {
   leftIcon: SwIconProps['phosphorIcon'],
   leftIconBgColor: string,
   title: string,
+  subTitle?: string,
   disabled?: boolean,
 };
 
@@ -33,16 +34,13 @@ const renderEmpty = () => <GeneralEmptyList />;
 function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
   return (
     <SettingItem
-      className={CN('__selection-item', { 'item-disabled': item.disabled })}
+      className={CN('__selection-item', {
+        'item-disabled': item.disabled,
+        '-subTitle-container': !!item.subTitle
+      })}
       key={item.key}
       leftItemIcon={
-        <BackgroundIcon
-          backgroundColor={item.leftIconBgColor}
-          phosphorIcon={item.leftIcon}
-          size='sm'
-          type='phosphor'
-          weight='fill'
-        />
+        item.subTitle && <div className={'__subTitle-setting-item'}>{item.subTitle}</div>
       }
       name={item.title}
       rightItem={
@@ -63,7 +61,7 @@ function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
 function renderModalTrigger (item: SelectionItemType) {
   return (
     <SettingItem
-      className={'__trigger-item setting-item'}
+      className={CN('__trigger-item setting-item', { '-subTitle-container': !!item.subTitle })}
       key={item.key}
       leftItemIcon={
         <BackgroundIcon
@@ -76,12 +74,18 @@ function renderModalTrigger (item: SelectionItemType) {
       }
       name={item.title}
       rightItem={
-        <Icon
-          className='__right-icon'
-          customSize={'20px'}
-          phosphorIcon={CaretRight}
-          type='phosphor'
-        />
+        <div className={'__trigger-right-item'}>
+          <div className={'__trigger-item-currency-code'}>
+            {!!item.subTitle && item.subTitle}
+          </div>
+          <Icon
+            className='__right-icon'
+            customSize={'20px'}
+            phosphorIcon={CaretRight}
+            type='phosphor'
+          />
+        </div>
+
       }
     />
   );
@@ -101,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const { currency, exchangeRateMap } = useSelector((state: RootState) => state.price);
+  const { currencyCode, exchangeRateMap } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false,
@@ -145,7 +149,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
-        title: item
+        title: exchangeRateMap[item].label,
+        subTitle: item
       }))
       : [];
   }, [exchangeRateMap, token]);
@@ -267,9 +272,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             className={`__modal ${className}`}
             customInput={renderModalTrigger({
               key: 'price-currency-trigger',
-              leftIcon: Coins,
-              leftIconBgColor: token['yellow-5'],
-              title: t('Currency')
+              leftIcon: CurrencyCircleDollar,
+              leftIconBgColor: token['gold-6'],
+              title: t('Currency'),
+              subTitle: currencyCode
             })}
             disabled={loadingMap.currency}
             id='currency-select-modal'
@@ -279,13 +285,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onSelect={onSelectCurrency}
             renderItem={renderSelectionItem}
             renderWhenEmpty={renderEmpty}
-            searchFunction={searchFunction}
-            searchMinCharactersCount={2}
-            searchPlaceholder={t<string>('Search Currency')}
-            selected={currency.label}
+            selected={currencyCode}
             shape='round'
             size='small'
-            title={t('Currency')}
+            title={t('Select a currency')}
           />
 
           <SelectModal
@@ -392,6 +395,37 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         paddingRight: token.padding,
         paddingLeft: token.padding,
         paddingBottom: token.paddingLG
+      }
+    },
+
+    '.__trigger-item.setting-item.-subTitle-container .ant-web3-block-middle-item': {
+      width: 'auto',
+    },
+
+    '.__selection-item.-subTitle-container': {
+      backgroundColor: token.colorTextDark1
+    },
+
+    '.__subTitle-setting-item': {
+      minWidth: 48,
+      borderRadius: 8,
+      textAlign: 'center',
+      padding: '2px 8px 2px 8px',
+      backgroundColor: token.colorBgSecondary,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      fontWeight: 600
+    },
+
+    '.__trigger-right-item': {
+      display: 'flex',
+      gap: token.paddingSM + token.paddingMD,
+      alignItems: 'center',
+
+      '.__trigger-item-currency-code': {
+        fontWeight: 500,
+        fontSize: token.fontSizeHeading6,
+        lineHeight: token.lineHeightHeading6
       }
     },
 

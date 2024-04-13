@@ -19,6 +19,8 @@ export default class BaseStore<T> {
   }
 
   public upsert (record: T): Promise<unknown> {
+    console.log(record, '12312321');
+
     return this.table.put(record);
   }
 

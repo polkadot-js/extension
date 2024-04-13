@@ -11,7 +11,7 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
 
-const DEFAULT_PRICE_SUBJECT: PriceJson = { ready: false, currency: { label: 'USD', symbol: '$', isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
+const DEFAULT_PRICE_SUBJECT: PriceJson = { currencyCode: 'USD', ready: false, currency: { label: 'United States Dollar', symbol: '$', isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
 
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
@@ -48,9 +48,9 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   public setPriceCurrency (currency: string, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
-    const { currency: currentCurrency, exchangeRateMap } = this.getPriceSubject().value;
+    const { currencyCode, exchangeRateMap } = this.getPriceSubject().value;
 
-    if (currentCurrency.label === currency) {
+    if (currencyCode === currency) {
       return;
     }
 
@@ -66,7 +66,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
-    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currency.label)
+    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currencyCode)
       .then((rs) => {
         this.priceSubject.next({ ...rs, ready: true });
         this.dbService.updatePriceStore(rs).catch(console.error);

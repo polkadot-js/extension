@@ -29,11 +29,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const recipientAddress = data.recipient || data.address;
   const account = useGetAccountByAddress(recipientAddress);
-  const networkPrefix = useGetChainPrefixBySlug(transaction.chain);
-
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[data.quote.pair.to] || undefined;
   }, [assetRegistryMap, data.quote.pair.to]);
+  const networkPrefix = useGetChainPrefixBySlug(toAssetInfo.originChain);
   const fromAssetInfo = useMemo(() => {
     return assetRegistryMap[data.quote.pair.from] || undefined;
   }, [assetRegistryMap, data.quote.pair.from]);
@@ -104,11 +103,11 @@ const Component: React.FC<Props> = (props: Props) => {
         data={data}
       />
       <MetaInfo
-        hasBackgroundWrapper={false}
         className={'__swap-confirmation-wrapper'}
+        hasBackgroundWrapper={false}
       >
         <MetaInfo.Account
-          address={data.recipient || ''}
+          address={recipientAddress}
           className={'__recipient-item'}
           label={t('Recipient')}
           name={account?.name}

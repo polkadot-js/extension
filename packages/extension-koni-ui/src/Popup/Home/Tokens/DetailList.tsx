@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset } from '@subwallet/chain-list/types';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
@@ -16,7 +16,6 @@ import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { BuyTokenInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
 import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
@@ -26,6 +25,8 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
+
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -47,25 +48,6 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
   );
 }
 
-function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<string, _ChainAsset>): TokenSelectorItemType[] {
-  const result: TokenSelectorItemType[] = [];
-
-  tokenSlugs.forEach((slug) => {
-    const asset = assetRegistryMap[slug];
-
-    if (asset) {
-      result.push({
-        originChain: asset.originChain,
-        slug,
-        symbol: asset.symbol,
-        name: asset.name
-      });
-    }
-  });
-
-  return result;
-}
-
 const TokenDetailModalId = 'tokenDetailModalId';
 
 function Component (): React.ReactElement {
@@ -85,6 +67,7 @@ function Component (): React.ReactElement {
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { tokens } = useSelector((state: RootState) => state.buyService);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
+  const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
   const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
 
@@ -106,20 +89,34 @@ function Component (): React.ReactElement {
     return result;
   }, [swapPairs]);
 
-  const rawFromTokenItems = useMemo<TokenSelectorItemType[]>(() => {
-    return getTokenSelectorItem(Object.keys(fromAndToTokenMap), assetRegistryMap);
-  }, [assetRegistryMap, fromAndToTokenMap]);
-
   const filterFromAssetInfo = useMemo(() => {
-    if (!rawFromTokenItems || !assetRegistryMap) {
-      return [];
-    }
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
 
-    const filteredAssets = rawFromTokenItems.map((item) => assetRegistryMap[item.slug])
-      .filter((chainAsset) => chainAsset.slug === tokenGroupSlug || chainAsset.multiChainAsset === tokenGroupSlug);
+    const isAllEthereum = (filteredAccounts.length > 0 && filteredAccounts.every((account) => isEthereumAddress(account.address))) || (currentAccount && !isAccountAll(currentAccount.address) && isEthereumAddress(currentAccount.address));
+    const isAllNonEthereum = (filteredAccounts.length > 0 && filteredAccounts.every((account) => !isEthereumAddress(account.address))) || (currentAccount && !isAccountAll(currentAccount.address) && !isEthereumAddress(currentAccount.address));
 
-    return filteredAssets;
-  }, [assetRegistryMap, rawFromTokenItems, tokenGroupSlug]);
+    const filteredAssets = Object.keys(fromAndToTokenMap).map((slug) => assetRegistryMap[slug]);
+
+    const filteredAssetsByChain = filteredAssets.filter((chainAsset) => {
+      const chainInfo = chainInfoMap[chainAsset.originChain];
+
+      if (isAllEthereum && _isChainEvmCompatible(chainInfo)) {
+        return true;
+      }
+
+      if (isAllNonEthereum && !_isChainEvmCompatible(chainInfo)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const filteredAssetsList = ((isAllNonEthereum || isAllEthereum) ? filteredAssetsByChain : filteredAssets);
+
+    const filteredAssetsByTokenGroup = filteredAssetsList.filter((chainAsset) => chainAsset.slug === tokenGroupSlug || chainAsset.multiChainAsset === tokenGroupSlug);
+
+    return filteredAssetsByTokenGroup;
+  }, [accounts, assetRegistryMap, chainInfoMap, currentAccount, fromAndToTokenMap, tokenGroupSlug]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
@@ -337,20 +334,24 @@ function Component (): React.ReactElement {
   );
 
   const onOpenSwap = useCallback(() => {
-    if (currentAccount && currentAccount.isHardware) {
+    if (currentAccount && currentAccount.isReadOnly) {
       notify({
-        message: 'The account you are using is Ledger account, you cannot use this feature with it',
-        type: 'error',
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
+        type: 'info',
         duration: 3
       });
 
       return;
     }
 
-    if (currentAccount && currentAccount.isReadOnly) {
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
+
+    const isAllLedger = (filteredAccounts.length > 0 && filteredAccounts.every((account) => account.isHardware)) || (currentAccount && !isAccountAll(currentAccount.address) && (currentAccount.isHardware));
+
+    if ((currentAccount && currentAccount.isHardware) || (isAllLedger)) {
       notify({
-        message: t('The account you are using is watch-only, you cannot send assets with it'),
-        type: 'info',
+        message: 'The account you are using is Ledger account, you cannot use this feature with it',
+        type: 'error',
         duration: 3
       });
 

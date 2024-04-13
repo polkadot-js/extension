@@ -3,19 +3,23 @@
 
 import { stripUrl } from '@subwallet/extension-base/utils';
 import { ConnectionItem, EmptyList, Layout, PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
+import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import { SessionTypes } from '@walletconnect/types';
 import CN from 'classnames';
 import { GlobeHemisphereWest } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
+
+const timeOutWCMissingKey = 'unsuccessful_connect_wc_modal';
+const wcMissingModalId = 'WALLET_CONNECT_CONFIRM_MODAL';
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
@@ -28,6 +32,16 @@ const Component: React.FC<Props> = (props: Props) => {
   const { sessions } = useSelector((state) => state.walletConnect);
 
   const items = useMemo(() => Object.values(sessions), [sessions]);
+  const { inactiveModal } = useContext(ModalContext);
+
+  useEffect(() => {
+    const timeOut = JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
+
+    inactiveModal(wcMissingModalId);
+    clearTimeout(timeOut[timeOutWCMissingKey]);
+    delete timeOut[timeOutWCMissingKey];
+    localStorage.setItem(TIME_OUT_RECORD, JSON.stringify(timeOut));
+  }, [inactiveModal]);
 
   const goBack = useCallback(() => {
     navigate('/settings/list');

@@ -204,7 +204,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
           const remainingBlock = parseInt(unstakingBlock) - currentBlock;
           const waitingTime = remainingBlock * blockDuration;
 
-          const targetTimestampMs = remainingBlock * blockDuration + currentTimestamp;
+          const targetTimestampMs = remainingBlock * blockDuration * 3600 * 1000 + currentTimestamp;
 
           unstakingBalance = unstakingAmount.toString();
 

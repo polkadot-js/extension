@@ -612,7 +612,7 @@ const Component = () => {
           } else {
             let latestOptimalQuote = currentQuote;
 
-            if (currentOptimalSwapPath.steps.length > 2) {
+            if (currentOptimalSwapPath.steps.length > 2 && isLastStep) {
               if (currentQuoteRequest) {
                 const latestSwapQuote = await getLatestSwapQuote(currentQuoteRequest);
 

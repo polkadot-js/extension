@@ -153,7 +153,23 @@ export class SwapBaseHandler {
   }
 
   public async validateSetFeeTokenStep (params: ValidateSwapProcessParams, stepIndex: number): Promise<TransactionError[]> {
-    return Promise.resolve([]);
+    if (!params.selectedQuote) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const feeInfo = params.process.totalFee[stepIndex];
+    const feeAmount = feeInfo.feeComponent[0];
+    const feeTokenInfo = this.chainService.getAssetBySlug(feeInfo.defaultFeeToken);
+
+    const feeTokenBalance = await this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug);
+    const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
+    const bnFeeAmount = new BigNumber(feeAmount.amount);
+
+    if (bnFeeAmount.gte(bnFeeTokenBalance)) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE)]);
+    }
+
+    return [];
   }
 
   public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean, stepIndex: number): Promise<TransactionError[]> {
@@ -188,10 +204,18 @@ export class SwapBaseHandler {
 
     const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
+    const bnFeeAmount = new BigNumber(networkFee.amount);
 
-    if (bnFeeTokenBalance.lte(new BigNumber(networkFee.amount))) {
+    if (bnFeeTokenBalance.lte(bnFeeAmount)) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
         `You don't have enough ${feeTokenInfo.symbol} (${feeTokenChain.name}) to pay transaction fee`)]);
+    }
+
+    if (fromAsset.slug === feeTokenInfo.slug) {
+      if (bnFromAssetBalance.lte(bnFeeAmount.plus(bnAmount))) {
+        return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
+          `Insufficient balance. Deposit ${fromAsset.symbol} and try again.`)]);
+      }
     }
 
     if (params.selectedQuote.minSwap) {

@@ -364,7 +364,7 @@ function Component (): React.ReactElement {
       defaultSlug: tokenGroupSlug || ''
     });
     navigate('/transaction/swap');
-  }, [currentAccount, navigate, notify, setSwapStorage, t, tokenGroupSlug, transactionFromValue]);
+  }, [accounts, currentAccount, navigate, notify, setSwapStorage, t, tokenGroupSlug, transactionFromValue]);
 
   useEffect(() => {
     if (currentTokenInfo) {

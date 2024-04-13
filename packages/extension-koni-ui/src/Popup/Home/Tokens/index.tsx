@@ -200,7 +200,7 @@ const Component = (): React.ReactElement => {
       from: transactionFromValue
     });
     navigate('/transaction/swap');
-  }, [currentAccount, navigate, notify, setSwapStorage, t, transactionFromValue]);
+  }, [accounts, currentAccount, navigate, notify, setSwapStorage, t, transactionFromValue]);
 
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];

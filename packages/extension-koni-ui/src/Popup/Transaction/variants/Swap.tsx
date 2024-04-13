@@ -276,7 +276,7 @@ const Component = () => {
     }
 
     return false; // Add a default return value in case none of the conditions are met
-  }, [chainInfoMap, fromValue, toAssetInfo?.originChain]);
+  }, [chainInfoMap, fromValue, toAssetInfo]);
 
   const onSelectFromToken = useCallback((tokenSlug: string) => {
     form.setFieldValue('fromTokenSlug', tokenSlug);
@@ -1099,6 +1099,7 @@ const Component = () => {
       }
     } else {
       form.setFieldValue('fromTokenSlug', '');
+      form.setFieldValue('toTokenSlug', '');
     }
   }, [filterFromAssetInfo, form, fromTokenLists, fromTokenSlugValue, fromValue]);
 

@@ -33,6 +33,17 @@ type Props = ThemeProps & {
 // todo: support max later
 const numberMetadata = { maxNumberFormat: 2 };
 
+type DebounceFunc<T extends any[]> = (func: (...args: T) => void, delay: number) => (...args: T) => void;
+
+const debounce: DebounceFunc<[BasicInputEvent]> = (func, delay) => {
+  let timer: NodeJS.Timeout;
+
+  return function (event) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func(event), delay);
+  };
+};
+
 const Component = (props: Props) => {
   const { amountValue, className, fromAsset, label,
     onChangeAmount, onSelectToken, tokenSelectorItems,
@@ -89,7 +100,7 @@ const Component = (props: Props) => {
             decimals={decimals}
             defaultInvalidOutputValue={'00'}
             maxValue={'0'} // support later
-            onChange={onChangeInput}
+            onChange={debounce(onChangeInput, 500)}
             showMaxButton={false}
             value={amountValue}
           />

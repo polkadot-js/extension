@@ -53,7 +53,6 @@ function Component ({ className, request }: Props) {
   useEffect(() => {
     const timeOut = JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
 
-    console.log(timeOut, '123131');
     inactiveModal(wcMissingModalId);
     clearTimeout(timeOut[timeOutWCMissingKey]);
     delete timeOut[timeOutWCMissingKey];

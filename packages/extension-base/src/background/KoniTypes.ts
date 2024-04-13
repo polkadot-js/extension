@@ -456,7 +456,7 @@ export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
 
-export type RequestChanePriceCurrency = { currency: string }
+export type RequestChangePriceCurrency = { currency: string }
 
 export type RequestChangeShowBalance = { enable: boolean };
 
@@ -2349,7 +2349,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveUnlockType)': [RequestUnlockType, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
-  'pri(settings.savePriceCurrency)': [RequestChanePriceCurrency, boolean];
+  'pri(settings.savePriceCurrency)': [RequestChangePriceCurrency, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
   'pri(settings.logo.assets.subscribe)': [null, Record<string, string>, Record<string, string>];

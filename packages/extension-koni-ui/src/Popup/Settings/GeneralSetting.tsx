@@ -210,7 +210,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const searchTextLowerCase = searchText.toLowerCase();
 
     return (
-      item ? item.key.toLowerCase().includes(searchTextLowerCase) : false);
+      item ? item.key.toLowerCase().includes(searchTextLowerCase) || item.title.toLowerCase().includes(searchTextLowerCase) : false);
   }, []);
 
   const onSelectBrowserConfirmationType = useCallback((value: string) => {
@@ -285,6 +285,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             onSelect={onSelectCurrency}
             renderItem={renderSelectionItem}
             renderWhenEmpty={renderEmpty}
+            searchFunction={searchFunction}
+            searchMinCharactersCount={2}
+            searchPlaceholder={t<string>('Search Currency')}
             selected={currencyCode}
             shape='round'
             size='small'
@@ -399,11 +402,16 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
     },
 
     '.__trigger-item.setting-item.-subTitle-container .ant-web3-block-middle-item': {
-      width: 'auto',
+      width: 'auto'
     },
 
     '.__selection-item.-subTitle-container': {
-      backgroundColor: token.colorTextDark1
+      backgroundColor: token.colorTextDark1,
+      '.ant-setting-item-name': {
+        fontWeight: 500,
+        fontSize: token.fontSizeHeading6,
+        lineHeight: token.lineHeightHeading6
+      }
     },
 
     '.__subTitle-setting-item': {

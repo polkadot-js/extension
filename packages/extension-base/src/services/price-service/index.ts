@@ -51,10 +51,14 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     const { currencyCode, exchangeRateMap } = this.getPriceSubject().value;
 
     if (currencyCode === currency) {
+      reject(false);
+
       return;
     }
 
     if (!exchangeRateMap[currency]) {
+      reject(false);
+
       return;
     }
 

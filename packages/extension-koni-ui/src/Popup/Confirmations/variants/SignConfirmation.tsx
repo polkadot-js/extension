@@ -29,7 +29,8 @@ function Component ({ className, request }: Props) {
   const { account } = request;
   const { t } = useTranslation();
   const payload = useParseSubstrateRequestPayload(request.request);
-  const chainInfo = useGetChainInfoByGenesisHash((payload as ExtrinsicPayload).genesisHash.toString());
+
+  const chainInfo = useGetChainInfoByGenesisHash(((payload as ExtrinsicPayload).genesisHash || '').toString());
   const { chainStateMap } = useSelector((root: RootState) => root.chainStore);
   const onClickDetail = useOpenDetailModal();
 

@@ -4,6 +4,7 @@
 import Search from '@subwallet/extension-web-ui/components/Search';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
+import { openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Question } from 'phosphor-react';
@@ -15,14 +16,14 @@ interface Props extends ThemeProps{
   onSearch: (value: string) => void;
   inputPlaceholder: string;
   searchValue: string;
-  showReload?: boolean; // todo: later
+  extraActionNode?: React.ReactNode; // todo: later
 }
 
-function Component ({ className, inputPlaceholder, onClickFilter, onSearch, searchValue }: Props): React.ReactElement<Props> {
+function Component ({ className, extraActionNode, inputPlaceholder, onClickFilter, onSearch, searchValue }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
 
   const onClickHelp = useCallback(() => {
-    // todo: open earning doc
+    openInNewTab('https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs')();
   }, []);
 
   return (
@@ -35,19 +36,25 @@ function Component ({ className, inputPlaceholder, onClickFilter, onSearch, sear
           />
         )}
         extraButton={
-          <Button
-            icon={(
-              <Icon
-                customSize={'28px'}
-                phosphorIcon={Question}
-              />
-            )}
-            onClick={onClickHelp}
-            size='xs'
-            type='ghost'
-          >
-            {t('Help')}
-          </Button>
+          (
+            <>
+              <Button
+                icon={(
+                  <Icon
+                    customSize={'28px'}
+                    phosphorIcon={Question}
+                  />
+                )}
+                onClick={onClickHelp}
+                size='xs'
+                type='ghost'
+              >
+                {t('Help')}
+              </Button>
+
+              {extraActionNode}
+            </>
+          )
         }
         onClickActionBtn={onClickFilter}
         onSearch={onSearch}

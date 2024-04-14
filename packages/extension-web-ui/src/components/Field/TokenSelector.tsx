@@ -18,6 +18,7 @@ import styled, { useTheme } from 'styled-components';
 
 import { GeneralEmptyList } from '../EmptyList';
 
+// todo: use TokenSelectorItemType instead
 export type TokenItemType = {
   name: string;
   slug: string;

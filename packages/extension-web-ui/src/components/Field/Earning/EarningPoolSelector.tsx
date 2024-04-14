@@ -3,7 +3,7 @@
 
 import { PREDEFINED_STAKING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
-import { StakingPoolItem } from '@subwallet/extension-web-ui/components';
+import { BaseSelectModal, StakingPoolItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-web-ui/components/Avatar';
 import { BasicInputWrapper } from '@subwallet/extension-web-ui/components/Field/Base';
@@ -13,7 +13,7 @@ import { FilterModal } from '@subwallet/extension-web-ui/components/Modal/Filter
 import { SortingModal } from '@subwallet/extension-web-ui/components/Modal/SortingModal';
 import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
+import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, Lightning, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -84,7 +84,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       },
       {
         desc: true,
-        label: t('Highest total bonded'),
+        label: t('Highest total staked'),
         value: SortKey.TOTAL_POOLED
       }
     ];
@@ -246,13 +246,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   return (
     <>
-      <SelectModal
+      <BaseSelectModal
         actionBtnIcon={(
           <Badge dot={!!selectedFilters.length}>
             <Icon phosphorIcon={FadersHorizontal} />
           </Badge>
         )}
-        className={`${className} modal-full`}
+        className={`${className}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -363,11 +363,6 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
-
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
     },

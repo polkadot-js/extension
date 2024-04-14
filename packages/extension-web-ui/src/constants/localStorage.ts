@@ -13,6 +13,7 @@ export const TRANSFER_TRANSACTION = 'transaction.transfer';
 export const NFT_TRANSACTION = 'transaction.nft';
 export const STAKE_TRANSACTION = 'transaction.stake';
 export const EARN_TRANSACTION = 'transaction.earn';
+export const SWAP_TRANSACTION = 'transaction.swap';
 export const UN_STAKE_TRANSACTION = 'transaction.un-stake';
 export const CANCEL_UN_STAKE_TRANSACTION = 'transaction.cancel-un-stake';
 export const WITHDRAW_TRANSACTION = 'transaction.withdraw';
@@ -24,6 +25,7 @@ export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
 
 export const CONFIRM_GENERAL_TERM = 'general.term-and-condition';
+export const CONFIRM_SWAP_TERM = 'swap.term-and-service';
 export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
 
 export const DAPPS_FAVORITE = 'dapps.favorite';

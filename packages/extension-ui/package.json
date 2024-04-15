@@ -22,6 +22,7 @@
     "@fortawesome/free-regular-svg-icons": "^6.5.1",
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
+    "@paraspell/xcm-analyser": "^1.2.0",
     "@polkadot/api": "^10.12.4",
     "@polkadot/extension-base": "0.46.10-5-x",
     "@polkadot/extension-chains": "0.46.10-5-x",

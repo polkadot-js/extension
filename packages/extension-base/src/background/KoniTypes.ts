@@ -507,6 +507,8 @@ export enum ExtrinsicType {
 
   SWAP = 'swap',
 
+  // SET_FEE_TOKEN = 'set_fee-token',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
@@ -793,6 +795,17 @@ export interface RequestAccountExportPrivateKey {
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
   publicKey: string;
+}
+
+// Export batch accounts
+
+export interface RequestAccountBatchExportV2 {
+  password: string;
+  addresses?: string[];
+}
+
+export interface ResponseAccountBatchExportV2 {
+  exportedJson: KeyringPairs$Json;
 }
 
 // Get account info with private key
@@ -1545,6 +1558,11 @@ export interface ResponseQrSignEvm {
   signature: string;
 }
 
+export interface RequestChangeFeeToken {
+  currentFeeToken?: string;
+  selectedFeeToken: string;
+}
+
 /// Transfer
 
 export interface RequestCheckTransfer extends BaseRequestSign {
@@ -2290,6 +2308,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
 
   // Export account
+  'pri(accounts.batchExportV2)': [RequestAccountBatchExportV2, ResponseAccountBatchExportV2];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
 
   // Current account

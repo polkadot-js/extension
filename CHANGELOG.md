@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## 1.1.55
+Build date: Apl 14, 2024.
+
+Features & Update:
+- Implement Swap feature for extension (#2823)
+- Support Export all accounts feature (#2819)
+- Add warning message for cross chain transfer to an exchange (CEX) (#2873)
+- Update chain-list (#2890)
+  - Add support for Acurast Canary
+  - Add support for token BEEFY for AssetHub and HydraDX
+  - Add support Humanode - HMND (Substrate) / eHMND (EVM)
+  - Update logo for Viction
+  - Add xcDED for Moonbeam
+  - Update ChainAsset
+- Automatically enable network when connecting via Substrate provider (#2899)
+
+- Bugs fixed:
+- Fixed bug show minimum active stake (#2889)
+- Fixed bug Error page when sign message with WalletConnect (#2915)
+- Fixed bug displaying 'connection existed' when connecting WalletConnect (#2903)
+
+## 1.1.54
+Build date: Apl 09, 2024.
+
+Bugs fixed:
+- Fix issue in transaction screen (#2891)
+- Fix error in setting screen
+
 ## 1.1.53
 Build date: Apl 08, 2024.
 

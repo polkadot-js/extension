@@ -3,3 +3,4 @@
 
 export * from './signing';
 export * from './earning';
+export * from './swap';

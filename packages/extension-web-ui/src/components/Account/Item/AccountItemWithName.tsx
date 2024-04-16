@@ -6,19 +6,32 @@ import AvatarGroup from '@subwallet/extension-web-ui/components/Account/Info/Ava
 import AccountItemBase, { AccountItemBaseProps } from '@subwallet/extension-web-ui/components/Account/Item/AccountItemBase';
 import { isAccountAll, toShort } from '@subwallet/extension-web-ui/utils';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends AccountItemBaseProps {
   direction?: 'vertical' | 'horizontal';
   accounts?: AbstractAddressJson[];
+  fallbackName?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { accountName, accounts, address, addressPreLength = 4, addressSufLength = 4, direction = 'horizontal' } = props;
+  const { accountName, accounts, address, addressPreLength = 4, addressSufLength = 4, direction = 'horizontal', fallbackName = true } = props;
   const isAll = isAccountAll(address);
   const { t } = useTranslation();
+
+  const showFallback = useMemo(() => {
+    if (isAll) {
+      return false;
+    } else {
+      if (fallbackName) {
+        return true;
+      } else {
+        return !!accountName;
+      }
+    }
+  }, [accountName, fallbackName, isAll]);
 
   return (
     <AccountItemBase
@@ -29,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
       middleItem={(
         <div className={CN('account-item-content-wrapper', `direction-${direction}`)}>
           <div className={'account-item-name'}>{isAll ? t('All accounts') : (accountName || toShort(address, addressPreLength, addressSufLength))}</div>
-          {!isAll && <div className={'account-item-address-wrapper'}>{toShort(address, addressPreLength, addressSufLength)}</div>}
+          {showFallback && <div className={'account-item-address-wrapper'}>{toShort(address, addressPreLength, addressSufLength)}</div>}
         </div>
       )}
     />

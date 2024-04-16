@@ -1,122 +1,298 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { UnstakingInfo, UnstakingStatus, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import { EarningWithdrawalDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningWithdrawalDetailModal';
+import { CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
+import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake';
+import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, ModalContext, Number } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useCallback, useContext } from 'react';
+import { Eye } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps;
-const modalId = 'earning-withdrawal-detail-modal';
+type Props = ThemeProps & {
+  unstakings: UnstakingInfo[];
+  poolInfo: YieldPoolInfo;
+  inputAsset: _ChainAsset;
+  transactionFromValue: string;
+  transactionChainValue: string;
+};
 
-function Component ({ className }: Props) {
+const withdrawalDetailModalId = 'earning-withdrawal-detail-modal';
+
+function Component ({ className, inputAsset, poolInfo, transactionChainValue, transactionFromValue,
+  unstakings }: Props) {
   const { t } = useTranslation();
-  const { activeModal } = useContext(ModalContext);
-  const onClaimReward = useCallback(() => {
-    alert('Dung Nguyen');
-  }, []);
+  const { isWebUI } = useContext(ScreenContext);
+  const navigate = useNavigate();
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const onOpenModal = useCallback(() => {
-    activeModal(modalId);
+  const { slug } = poolInfo;
+
+  const [, setCancelUnStakeStorage] = useLocalStorage(CANCEL_UN_STAKE_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS);
+  const [, setWithdrawStorage] = useLocalStorage(WITHDRAW_TRANSACTION, DEFAULT_WITHDRAW_PARAMS);
+  const [currentTimestampMs, setCurrentTimestampMs] = useState(Date.now());
+
+  const unstakingItems = useMemo(() => {
+    return [...unstakings].sort((a, b) => {
+      if (a.targetTimestampMs === undefined && b.targetTimestampMs === undefined) {
+        if (a.waitingTime === undefined && b.waitingTime === undefined) {
+          return 0;
+        }
+
+        if (a.waitingTime === undefined) {
+          return -1;
+        }
+
+        if (b.waitingTime === undefined) {
+          return 1;
+        }
+
+        return a.waitingTime - b.waitingTime;
+      }
+
+      if (a.targetTimestampMs === undefined) {
+        return -1;
+      }
+
+      if (b.targetTimestampMs === undefined) {
+        return 1;
+      }
+
+      return a.targetTimestampMs - b.targetTimestampMs;
+    });
+  }, [unstakings]);
+
+  const totalWithdrawable = useMemo(() => {
+    let result = BN_ZERO;
+
+    unstakings.forEach((value) => {
+      const canClaim = value.targetTimestampMs
+        ? value.targetTimestampMs <= currentTimestampMs
+        : value.status === UnstakingStatus.CLAIMABLE;
+
+      if (canClaim) {
+        result = result.plus(value.claimable);
+      }
+    });
+
+    return result;
+  }, [currentTimestampMs, unstakings]);
+
+  const canWithdraw = useMemo(() => {
+    return poolInfo.metadata.availableMethod.withdraw && totalWithdrawable.gt(BN_ZERO);
+  }, [poolInfo.metadata.availableMethod.withdraw, totalWithdrawable]);
+
+  const withdrawableValue = useMemo(() => {
+    if (canWithdraw) {
+      return totalWithdrawable;
+    }
+
+    let unstakingItemValue = new BigN('0');
+
+    unstakingItems.forEach((i) => {
+      unstakingItemValue = unstakingItemValue.plus(i.claimable);
+    });
+
+    return unstakingItemValue;
+  }, [canWithdraw, totalWithdrawable, unstakingItems]);
+
+  const onWithDraw = useCallback(() => {
+    setWithdrawStorage({
+      ...DEFAULT_WITHDRAW_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+    } else {
+      navigate('/transaction/withdraw');
+    }
+
+    // todo: open WithDraw modal
+  }, [activeModal, isWebUI, navigate, setWithdrawStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const onCancelWithDraw = useCallback(() => {
+    setCancelUnStakeStorage({
+      ...DEFAULT_CANCEL_UN_STAKE_PARAMS,
+      slug: slug,
+      chain: transactionChainValue,
+      from: transactionFromValue
+    });
+
+    // todo: open CancelWithDraw
+    if (isWebUI) {
+      activeModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+    } else {
+      navigate('/transaction/cancel-unstake');
+    }
+  }, [activeModal, isWebUI, navigate, setCancelUnStakeStorage, slug, transactionChainValue, transactionFromValue]);
+
+  const onOpenDetailModal = useCallback(() => {
+    activeModal(withdrawalDetailModalId);
   }, [activeModal]);
 
+  const handleCloseWithdraw = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_WITHDRAW_MODAL);
+  }, [inactiveModal]);
+
+  const handleCloseCancelUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL);
+  }, [inactiveModal]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimestampMs(Date.now());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
+
+  if (!unstakingItems.length) {
+    return (
+      <div className={CN(className, '-no-content')}></div>
+    );
+  }
+
   return (
-    <div
-      className={CN(className, 'withdraw-info-desktop')}
-    >
-      <div className={'__claim-reward-area'}>
-        <div className={'earning-info-title'}>Withdraw info</div>
-        <div className={'claim-reward-action'}>
+    <>
+      <div
+        className={CN(className, '__withdraw-info-desktop-part')}
+      >
+        <div className={'__part-title'}>{t('Withdraw info')}</div>
+
+        <div className={'__withdraw-area'}>
           <Number
-            className={'__claim-reward-value'}
-            decimal={7}
+            className={'__withdraw-value'}
+            decimal={inputAsset.decimals || 0}
             decimalOpacity={0.45}
             subFloatNumber={true}
-            suffix={'DOT'}
+            suffix={inputAsset.symbol}
             unitOpacity={0.45}
-            value={10360002344}
+            value={withdrawableValue}
           />
-          <Button
-            onClick={onClaimReward}
-            size='xs'
-          >
-            {t('Withdraw')}
-          </Button>
+
+          {canWithdraw && (
+            <Button
+              onClick={onWithDraw}
+              size='xs'
+            >
+              {t('Withdraw')}
+            </Button>
+          )}
         </div>
-        <div className='__block-divider' />
+
+        <div className={'__separator'}></div>
+
         <Button
           block={true}
-          className={'rewards-history'}
-          onClick={onOpenModal}
+          className={'rewards-history -ghost-type-3'}
+          icon={
+            <Icon
+              customSize={'28px'}
+              phosphorIcon={Eye}
+            />
+          }
+          onClick={onOpenDetailModal}
           type={'ghost'}
-        >{t('View detail')}</Button>
-        <EarningWithdrawalDetailModal />
+        >{t('View details')}</Button>
       </div>
-    </div>
+
+      <EarningWithdrawalDetailModal
+        canWithdraw={canWithdraw}
+        currentTimestampMs={currentTimestampMs}
+        inputAsset={inputAsset}
+        modalId={withdrawalDetailModalId}
+        onCancelWithDraw={onCancelWithDraw}
+        onWithdraw={onWithDraw}
+        poolInfo={poolInfo}
+        unstakingItems={unstakingItems}
+      />
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_WITHDRAW_MODAL}
+        onCancel={handleCloseWithdraw}
+        title={t('Withdraw')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_WITHDRAW_MODAL}
+        >
+          <Withdraw />
+        </Transaction>
+      </BaseModal>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
+        onCancel={handleCloseCancelUnstake}
+        title={t('Cancel unstake')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL}
+        >
+          <CancelUnstake />
+        </Transaction>
+      </BaseModal>
+    </>
   );
 }
 
 export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-  minHeight: 54,
-  width: 384,
+  paddingRight: token.paddingLG,
+  paddingLeft: token.paddingLG,
   paddingTop: token.padding,
   paddingBottom: token.padding,
-  paddingLeft: token.paddingLG,
-  paddingRight: token.paddingLG,
+  flex: 1,
+  display: 'flex',
+  gap: 12,
+  flexDirection: 'column',
+  flexBasis: 384,
 
-  '&:hover': {
-    backgroundColor: token.colorBgInput
+  '&.-no-content': {
+    opacity: 0,
+    padding: 0,
+    flexBasis: 384
+  },
+
+  '.-is-show-button': {
+    paddingBottom: 6,
+    paddingTop: 6
+  },
+
+  '&.__withdraw-info-desktop-part': {
+    paddingBottom: 0
   },
 
   '.__part-title': {
-    paddingTop: token.padding,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.earning-info-title': {
-    fontSize: token.fontSize,
-    lineHeight: token.lineHeight,
-    color: token.colorWhite,
-    width: '100%'
-  },
-  '.__block-divider': {
-    height: 2,
-    width: 336,
-    backgroundColor: token.colorBgDivider,
-    marginTop: token.marginSM
+    lineHeight: token.lineHeight
   },
 
-  '.__separator': {
-    height: 2,
-    backgroundColor: 'rgba(33, 33, 33, 0.80)',
-    marginTop: token.marginSM,
-    marginBottom: token.marginSM,
-    marginLeft: token.margin,
-    marginRight: token.margin
+  '.__withdraw-area.-no-content': {
+    height: 36
   },
 
-  '.__claim-reward-area': {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: token.sizeSM,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.claim-reward-action': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '100%'
-  },
-
-  '.__claim-reward-value': {
+  '.__withdraw-value': {
     fontSize: token.fontSizeHeading4,
     lineHeight: token.lineHeightHeading4,
     fontWeight: token.headingFontWeight,
@@ -137,15 +313,23 @@ export const WithdrawInfoDesktopPart = styled(Component)<Props>(({ theme: { toke
     }
   },
 
-  '.__claim-reward-area + .__separator': {
-    marginTop: 0
+  '.ant-btn-content-wrapper': {
+    fontSize: token.fontSize,
+    lineHeight: token.lineHeight,
+    fontWeight: token.fontWeightStrong
   },
 
-  '.__separator + .__reward-history-panel': {
-    marginTop: -13
+  '.__withdraw-area': {
+    display: 'flex',
+    gap: token.sizeSM,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: 40
   },
 
-  '.__view-explorer-button': {
-    marginTop: token.marginSM
+  '.__separator': {
+    height: 2,
+    backgroundColor: 'rgba(33, 33, 33, 0.80)',
+    marginBottom: -token.marginSM
   }
 }));

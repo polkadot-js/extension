@@ -20,3 +20,4 @@ export * from './ProviderSelector';
 export * from './TokenSelector';
 export * from './TokenTypeSelector';
 export * from './Earning';
+export * from './Swap';

@@ -196,7 +196,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   }, [propAddress]);
 
   const goEarningDemo = useCallback(() => {
-    openInNewTab(`${window.location.origin}/earning-demo`)();
+    openInNewTab(`${window.location.origin}/earning-preview`)();
   }, []);
 
   const onBack = useCallback(() => {

@@ -9,6 +9,7 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 import { addLazy, canDerive, fetchStaticData } from '@subwallet/extension-base/utils';
 import { lazySubscribeMessage } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -157,13 +158,17 @@ export const updateUiSettings = (data: UiSettings) => {
 export const subscribeUiSettings = lazySubscribeMessage('pri(settings.subscribe)', null, updateUiSettings, updateUiSettings);
 
 export const updateChainLogoMaps = (data: Record<string, string>) => {
-  store.dispatch({ type: 'settings/updateChainLogoMaps', payload: data });
+  addLazy('updateChainLogoMaps', () => {
+    store.dispatch({ type: 'settings/updateChainLogoMaps', payload: data });
+  }, 100, 300, false);
 };
 
 export const subscribeChainLogoMaps = lazySubscribeMessage('pri(settings.logo.chains.subscribe)', null, updateChainLogoMaps, updateChainLogoMaps);
 
 export const updateAssetLogoMaps = (data: Record<string, string>) => {
-  store.dispatch({ type: 'settings/updateAssetLogoMaps', payload: data });
+  addLazy('updateAssetLogoMaps', () => {
+    store.dispatch({ type: 'settings/updateAssetLogoMaps', payload: data });
+  }, 100, 300, false);
 };
 
 export const subscribeAssetLogoMaps = lazySubscribeMessage('pri(settings.logo.assets.subscribe)', null, updateAssetLogoMaps, updateAssetLogoMaps);
@@ -448,3 +453,11 @@ export const subscribeYieldMinAmountPercent = lazySubscribeMessage(
 );
 
 /* Earning */
+
+/* Swap */
+export const updateSwapPairs = (data: SwapPair[]) => {
+  store.dispatch({ type: 'swap/updateSwapPairs', payload: data });
+};
+
+export const subscribeSwapPairs = lazySubscribeMessage('pri(swapService.subscribePairs)', null, updateSwapPairs, updateSwapPairs);
+/* Swap */

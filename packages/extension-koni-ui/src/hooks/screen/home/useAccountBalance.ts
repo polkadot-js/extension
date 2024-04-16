@@ -16,7 +16,7 @@ import { useSelector } from 'react-redux';
 const BN_0 = new BigN(0);
 const BN_10 = new BigN(10);
 const BN_100 = new BigN(100);
-const defaultCurrency = { label: 'United States Dollar', symbol: '$', isPrefix: true };
+const defaultCurrency = { label: 'United States Dollar', symbol: 'USD', isPrefix: true };
 
 export function getBalanceValue (balance: string, decimals: number): BigN {
   return new BigN(balance).div(BN_10.pow(decimals));

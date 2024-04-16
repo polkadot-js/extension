@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BrowserConfirmationType, LanguageType, RequestSettingsType, RequestSubscribeBalancesVisibility, ThemeNames, UiSettings, WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
+import { BrowserConfirmationType, CurrencyType, LanguageType, RequestSettingsType, RequestSubscribeBalancesVisibility, ThemeNames, UiSettings, WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging';
 
 export async function toggleBalancesVisibility (): Promise<boolean> {
@@ -44,7 +44,7 @@ export async function saveShowZeroBalance (show: boolean): Promise<boolean> {
   return sendMessage('pri(settings.saveShowZeroBalance)', { show });
 }
 
-export async function savePriceCurrency (currency: string): Promise<boolean> {
+export async function savePriceCurrency (currency: CurrencyType): Promise<boolean> {
   return sendMessage('pri(settings.savePriceCurrency)', { currency });
 }
 

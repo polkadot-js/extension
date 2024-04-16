@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BrowserConfirmationType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { BrowserConfirmationType, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
@@ -197,7 +197,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       ...prev,
       currency: true
     }));
-    savePriceCurrency(value)
+    savePriceCurrency(value as CurrencyType)
       .finally(() => {
         setLoadingMap((prev) => ({
           ...prev,
@@ -435,6 +435,10 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
         fontSize: token.fontSizeHeading6,
         lineHeight: token.lineHeightHeading6
       }
+    },
+
+    '.ant-setting-item-name, .__subTitle-setting-item': {
+      color: token.colorTextLight2
     },
 
     '&.__modal': {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrencyJson, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrencyJson, CurrencyType, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import axios, { AxiosResponse } from 'axios';
 
@@ -25,7 +25,7 @@ interface ExchangeRateItem {
 
 let useBackupApi = false;
 
-export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Set<string>, currencyCode: CurrencyType = 'USD'): Promise<PriceJson> => {
   try {
     const idStr = Array.from(priceIds).join(',');
     const res: AxiosResponse<any, any>[] = [];
@@ -70,19 +70,19 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD')
     const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
-    const exchangeRateMap: Record<string, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
+    const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
       .reduce((map, exchangeKey) => {
         if (!staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey]) {
           return map;
         }
 
-        map[exchangeKey] = {
+        map[exchangeKey as CurrencyType] = {
           exchange: responseDataExchangeRate.conversion_rates[exchangeKey],
           label: (staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey] as CurrencyJson).label
         };
 
         return map;
-      }, {} as Record<string, ExchangeRateJSON>);
+      }, {} as Record<CurrencyType, ExchangeRateJSON>);
     const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
 
     responseDataPrice.forEach((val) => {

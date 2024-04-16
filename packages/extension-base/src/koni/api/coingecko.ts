@@ -66,12 +66,16 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD')
       getExchangeRate()
     ]);
 
-    const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
     const responseDataPrice = res[0].data as Array<GeckoItem> || [];
+    const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
     const exchangeRateMap: Record<string, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
       .reduce((map, exchangeKey) => {
+        if (!staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey]) {
+          return map;
+        }
+
         map[exchangeKey] = {
           exchange: responseDataExchangeRate.conversion_rates[exchangeKey],
           label: (staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey] as CurrencyJson).label

@@ -191,7 +191,7 @@ export interface StakingRewardJson {
 }
 
 export interface PriceJson {
-  currencyCode: string;
+  currencyCode: CurrencyType;
   ready?: boolean,
   currency: CurrencyJson,
   exchangeRateMap: Record<string, ExchangeRateJSON>,
@@ -415,6 +415,16 @@ export type LanguageType = 'en'
 | 'ja'
 | 'ru';
 
+export type CurrencyType = 'USD'
+| 'BRL'
+| 'CNY'
+| 'EUR'
+| 'GBP'
+| 'HKD'
+| 'JPY'
+| 'RUB'
+| 'VND'
+
 export type LanguageOptionType = {
   text: string;
   value: LanguageType;
@@ -457,7 +467,7 @@ export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
 
-export type RequestChangePriceCurrency = { currency: string }
+export type RequestChangePriceCurrency = { currency: CurrencyType }
 
 export type RequestChangeShowBalance = { enable: boolean };
 

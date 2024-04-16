@@ -869,6 +869,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@paraspell/xcm-analyser@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "@paraspell/xcm-analyser@npm:1.2.0"
+  dependencies:
+    zod: "npm:^3.22.4"
+  checksum: 10/920f211583e2d01b0dc26812b010489c2611dd65244aba461efbc6688fdda0e18bb8820a71e5490cb96650c4d22ac5ae1eb86e04845b9601f083418032b7dc9c
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/client@npm:0.0.1-492c132563ea6b40ae1fc5470dec4cd18768d182.1.0":
   version: 0.0.1-492c132563ea6b40ae1fc5470dec4cd18768d182.1.0
   resolution: "@polkadot-api/client@npm:0.0.1-492c132563ea6b40ae1fc5470dec4cd18768d182.1.0"
@@ -1207,6 +1216,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:^6.5.1"
     "@fortawesome/free-solid-svg-icons": "npm:^6.5.1"
     "@fortawesome/react-fontawesome": "npm:^0.2.0"
+    "@paraspell/xcm-analyser": "npm:^1.2.0"
     "@polkadot/api": "npm:^10.12.4"
     "@polkadot/extension-base": "npm:0.46.10-5-x"
     "@polkadot/extension-chains": "npm:0.46.10-5-x"
@@ -15761,5 +15771,12 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: 10/f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.22.4":
+  version: 3.22.4
+  resolution: "zod@npm:3.22.4"
+  checksum: 10/73622ca36a916f785cf528fe612a884b3e0f183dbe6b33365a7d0fc92abdbedf7804c5e2bd8df0a278e1472106d46674281397a3dd800fa9031dc3429758c6ac
   languageName: node
   linkType: hard

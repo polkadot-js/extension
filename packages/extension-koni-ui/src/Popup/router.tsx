@@ -108,6 +108,7 @@ const AccountExport = new LazyLoader('AccountExport', () => import('@subwallet/e
 const Transaction = new LazyLoader('Transaction', () => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
 const TransactionDone = new LazyLoader('TransactionDone', () => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
 const SendFund = new LazyLoader('SendFund', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
+const SwapTransaction = new LazyLoader('SwapTransaction', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Swap'));
 const SendNFT = new LazyLoader('SendNFT', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
 const Earn = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Earn'));
 const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unbond'));
@@ -181,6 +182,7 @@ export const router = createHashRouter([
         ...Transaction.generateRouterObject('/transaction'),
         children: [
           SendFund.generateRouterObject('send-fund'),
+          SwapTransaction.generateRouterObject('swap'),
           SendNFT.generateRouterObject('send-nft'),
           Earn.generateRouterObject('earn'),
           Unstake.generateRouterObject('unstake'),

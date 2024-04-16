@@ -5,10 +5,12 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BasicOnChangeFunction } from '@subwallet/extension-web-ui/components/Field/Base';
 import { useNotification, useTranslation } from '@subwallet/extension-web-ui/hooks/common';
+import { ValidatorDataType } from '@subwallet/extension-web-ui/types';
+import { autoSelectValidatorOptimally, getValidatorKey } from '@subwallet/extension-web-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useMemo, useState } from 'react';
 
-export function useSelectValidators (modalId: string, chain: string, maxCount: number, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
+export function useSelectValidators (validatorList: ValidatorDataType[], modalId: string, chain: string, maxCount: number, onChange?: BasicOnChangeFunction, isSingleSelect?: boolean) {
   const notify = useNotification();
   const { t } = useTranslation();
 
@@ -88,12 +90,15 @@ export function useSelectValidators (modalId: string, chain: string, maxCount: n
     });
   }, [notiMessage, defaultSelected, isSingleSelect, maxCount, notify, t]);
 
-  const onApplyChangeValidators = useCallback(() => {
-    onChange && onChange({ target: { value: changeValidators.join(',') } });
-
-    setSelected(changeValidators);
+  const _onApplyChangeValidators = useCallback((_changeValidators: string[]) => {
+    onChange && onChange({ target: { value: _changeValidators.join(',') } });
+    setSelected(_changeValidators);
     inactiveModal(modalId);
-  }, [changeValidators, inactiveModal, modalId, onChange]);
+  }, [inactiveModal, modalId, onChange]);
+
+  const onApplyChangeValidators = useCallback(() => {
+    _onApplyChangeValidators(changeValidators);
+  }, [_onApplyChangeValidators, changeValidators]);
 
   const onCancelSelectValidator = useCallback(() => {
     setChangeValidators(selected);
@@ -109,11 +114,20 @@ export function useSelectValidators (modalId: string, chain: string, maxCount: n
     setSelected(_selected);
   }, []);
 
+  const onAutoSelectValidator = useCallback(() => {
+    const validators = autoSelectValidatorOptimally(validatorList, maxCount);
+    const validatorKeyList = validators.map((v) => getValidatorKey(v.address, v.identity));
+
+    setChangeValidators(validatorKeyList);
+    _onApplyChangeValidators(validatorKeyList);
+  }, [_onApplyChangeValidators, maxCount, validatorList]);
+
   return {
     onChangeSelectedValidator,
     changeValidators,
     onApplyChangeValidators,
     onCancelSelectValidator,
-    onInitValidators
+    onInitValidators,
+    onAutoSelectValidator
   };
 }

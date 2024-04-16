@@ -207,7 +207,9 @@ export class BalanceService implements StoppableServiceInterface {
       const evmApiMap = this.state.chainService.getEvmApiMap();
       const substrateApiMap = this.state.chainService.getSubstrateApiMap();
 
-      const unsub = subscribeBalance([address], [chain], [tSlug], assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
+      let unsub = noop;
+
+      unsub = subscribeBalance([address], [chain], [tSlug], assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
         const rs = result[0];
 
         if (rs.tokenSlug === tSlug) {
@@ -222,7 +224,7 @@ export class BalanceService implements StoppableServiceInterface {
             callback(balance);
           } else {
             // Auto unsubscribe if no callback
-            unsub();
+            unsub?.();
           }
 
           resolve([unsub, balance]);
@@ -231,7 +233,7 @@ export class BalanceService implements StoppableServiceInterface {
 
       setTimeout(() => {
         if (hasError) {
-          unsub();
+          unsub?.();
           reject(new Error(t('Failed to get balance. Please check your internet connection or change your network endpoint')));
         }
       }, 9999);

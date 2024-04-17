@@ -32,7 +32,7 @@ interface CollectionDetail {
   description?: string
 }
 
-export default class StatemintNftApi extends BaseNftApi {
+export default class AssetHubNftsPalletApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);

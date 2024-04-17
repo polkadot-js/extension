@@ -91,7 +91,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   goldberg_testnet: 24,
   manta_network: 6,
   krest_network: 4,
-  polimec: 6
+  polimec: 6,
+  enjin_relaychain: 24
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -108,7 +109,8 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   creditcoin: 12,
   vara_network: 3,
   goldberg_testnet: 20,
-  polimec: 12
+  polimec: 12,
+  enjin_relaychain: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

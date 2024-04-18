@@ -4,13 +4,13 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AcalaNftApi } from '@subwallet/extension-base/koni/api/nft/acala_nft';
+import AssetHubUniquesPalletApi from '@subwallet/extension-base/koni/api/nft/assethub_unique';
 import { BitCountryNftApi } from '@subwallet/extension-base/koni/api/nft/bit.country';
 import { EvmNftApi } from '@subwallet/extension-base/koni/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-base/koni/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
 import OrdinalNftApi from '@subwallet/extension-base/koni/api/nft/ordinal_nft';
 import { RmrkNftApi } from '@subwallet/extension-base/koni/api/nft/rmrk_nft';
-import AssetHubUniquesPalletApi from '@subwallet/extension-base/koni/api/nft/statemine_nft';
 import { UniqueNftApi } from '@subwallet/extension-base/koni/api/nft/unique_network_nft';
 // import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
 import { VaraNftApi } from '@subwallet/extension-base/koni/api/nft/vara_nft';

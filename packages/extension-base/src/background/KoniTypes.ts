@@ -216,7 +216,7 @@ export enum CrowdloanParaState {
   FAILED = 'failed'
 }
 
-export interface NftItem {
+export interface NftItem extends NftItemExtraInfo {
   // must-have
   id: string;
   chain: string;
@@ -230,9 +230,18 @@ export interface NftItem {
   rarity?: string;
   description?: string;
   properties?: Record<any, any> | null;
+}
+
+interface NftItemExtraInfo {
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
+  assetHubType?: AssetHubNftType // for sending assetHub nft. There're 2 types nft
+}
+
+export enum AssetHubNftType {
+  NFTS = 'nfts',
+  UNIQUES = 'uniques'
 }
 
 export interface NftCollection {

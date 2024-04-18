@@ -1,12 +1,31 @@
 # CHANGELOG
 
+## 0.47.1 Apr 18, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- feat(extrinsic-ui): extrinsic asset id (Thanks to https://github.com/ryanleecode)
+- feat: display asset id in xcm format (Thanks to https://github.com/ryanleecode)
+
+Changes:
+
+- Update nvmrc version
+- Bump yarn to 4.1.1
+- Update the README with library notice
+- Fix typos
+- Update CI checkout and setup_node to v4
+- Update polkadot/* deps
+
+
 ## 0.46.9 Mar 20, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.
 
 Contributed:
 
- - Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
+- Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
 
 Changes:
 

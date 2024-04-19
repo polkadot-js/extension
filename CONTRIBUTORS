@@ -1,14 +1,14 @@
-    2435	AnhMTV                        	Release version 1.1.55
-    2325	Nam Phạm                      	[Issue 2823] fix: remove unused interfaces
-    2010	S2kael                        	[Issue-2890] Update chain-list stable version
+    2440	AnhMTV                        	
+    2334	Nam Phạm                      	[Issue 2937] style: remove logs
+    2012	S2kael                        	
      799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
      292	nguyentiendung                	[Issue-2823] Update debounce when input amount
      185	quangdo                       	
      105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
+     103	bluezdot                      	[Issue-2934] Handle metadata TokenId
      101	lw-cdm                        	
-      93	bluezdot                      	[Issue-2890] Add xcDED Moonbeam
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s

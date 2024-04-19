@@ -208,8 +208,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
       await Promise.all(validatorList.map(async (validatorAddress) => {
         let sortedNominators: PalletStakingExposureItem[] = [];
 
-        if (['kusama'].includes(this.chain)) {
-          console.log('new logic', this.chain);
+        if (['kusama'].includes(this.chain)) { // todo: hot fix for kusama first, we'll review all relaychains later
           const _eraStaker = await substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress);
           const eraStakerOtherList: PalletStakingExposureItem[] = [];
 
@@ -225,7 +224,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
             })
           ;
         } else {
-          console.log('old logic', this.chain);
           const _eraStaker = await substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress);
           const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
 
@@ -285,7 +283,6 @@ export default class NominationPoolHandler extends BasePoolHandler {
     const bnTotalStake = bnActiveStake.add(unstakingBalance);
 
     if (!bnActiveStake.gt(BN_ZERO)) {
-      console.log('not earning shit cuz no active stake');
       stakingStatus = EarningStatus.NOT_EARNING;
     }
 

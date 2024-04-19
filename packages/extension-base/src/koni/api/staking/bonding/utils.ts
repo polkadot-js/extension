@@ -7,7 +7,7 @@ import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, PalletStakingEraRewardPoints, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import BigNumber from 'bignumber.js';
@@ -374,17 +374,17 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
     result.push(YieldAction.STAKE);
 
-    const bnActiveStake = new BN(yieldPosition.activeStake);
+    const bnActiveStake = new BigNumber(yieldPosition.activeStake);
 
-    if (yieldPosition.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    if (yieldPosition.activeStake && bnActiveStake.gt('0')) {
       result.push(YieldAction.UNSTAKE);
 
       const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
       const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
-      const bnUnclaimedReward = new BN(unclaimedReward || '0');
+      const bnUnclaimedReward = new BigNumber(unclaimedReward || '0');
 
       if (
-        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt('0')) ||
         isAstarNetwork
       ) {
         result.push(YieldAction.CLAIM_REWARD);
@@ -402,9 +402,9 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
     result.push(YieldAction.START_EARNING);
 
-    const activeBalance = new BN(yieldPosition.activeStake || '0');
+    const activeBalance = new BigNumber(yieldPosition.activeStake);
 
-    if (activeBalance.gt(BN_ZERO)) {
+    if (activeBalance.gt('0')) {
       result.push(YieldAction.UNSTAKE);
     }
 
@@ -573,6 +573,48 @@ export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupported
   } else {
     return 15;
   }
+}
+
+export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+  // mapping store validator and totalPoints
+  const validatorTotalPointsMap: Record<string, BigNumber> = {};
+
+  Object.values(eraRewardMap).forEach((info) => {
+    const individual = info.individual;
+
+    Object.entries(individual).forEach(([validator, rawPoints]) => {
+      const points = rawPoints.replaceAll(',', '');
+
+      if (!validatorTotalPointsMap[validator]) {
+        validatorTotalPointsMap[validator] = new BigNumber(points);
+      } else {
+        validatorTotalPointsMap[validator] = validatorTotalPointsMap[validator].plus(points);
+      }
+    });
+  });
+
+  return validatorTotalPointsMap;
+}
+
+export function getTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
+  const sortValidatorPointsList = Object.fromEntries(
+    Object.entries(validatorPointsList)
+      .sort(
+        (
+          a: [string, BigNumber],
+          b: [string, BigNumber]
+        ) => a[1].minus(b[1]).toNumber()
+      )
+      .reverse()
+  );
+
+  // keep 50% first validator
+  const entries = Object.entries(sortValidatorPointsList);
+  const endIndex = Math.ceil(entries.length / 2);
+  const top50PercentEntries = entries.slice(0, endIndex);
+  const top50PercentRecord = Object.fromEntries(top50PercentEntries);
+
+  return Object.keys(top50PercentRecord);
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

@@ -1,5 +1,64 @@
 # CHANGELOG
 
+## 1.1.55
+Build date: Apl 14, 2024.
+
+Features & Update:
+- Implement Swap feature for extension (#2823)
+- Support Export all accounts feature (#2819)
+- Add warning message for cross chain transfer to an exchange (CEX) (#2873)
+- Update chain-list (#2890)
+  - Add support for Acurast Canary
+  - Add support for token BEEFY for AssetHub and HydraDX
+  - Add support Humanode - HMND (Substrate) / eHMND (EVM)
+  - Update logo for Viction
+  - Add xcDED for Moonbeam
+  - Update ChainAsset
+- Automatically enable network when connecting via Substrate provider (#2899)
+
+- Bugs fixed:
+- Fixed bug show minimum active stake (#2889)
+- Fixed bug Error page when sign message with WalletConnect (#2915)
+- Fixed bug displaying 'connection existed' when connecting WalletConnect (#2903)
+
+## 1.1.54
+Build date: Apl 09, 2024.
+
+Bugs fixed:
+- Fix issue in transaction screen (#2891)
+- Fix error in setting screen
+
+## 1.1.53
+Build date: Apl 08, 2024.
+
+Bugs fixed:
+- Fixed bug fetching balance with Enjin Relay Chain (#2885)
+- Fixed bug Wallet Connect not show connection popup (#2407)
+- Fixed bug Some required methods are missing when connecting Dapp to Subwallet via WalletConnect (#2860)
+
+## 1.1.52
+Build date: Apl 05, 2024.
+
+Features & Update:
+- Update balance service (#2416)
+- Improve UX UI for earning feature (#2827)
+- Update message when navigate user to the Astar portal to stake (#2847)
+- Update chain-list (#2851)
+  - Add support for X Layer mainnet, X Layer testnet
+  - Add support for ASTR token on Astar zkEVM
+  - Add support DOTA token on Polkadot Asset Hub
+  - Add support BNCS for Moonbeam
+
+Bugs fixed:
+- Fixed bug show earnings screen although back to home (#2742)
+
+
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
 ## 1.1.50
 Build date: Mar 28, 2024.
 

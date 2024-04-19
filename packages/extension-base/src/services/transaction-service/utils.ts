@@ -3,7 +3,9 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getBlockExplorerFromChain, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getBlockExplorerFromChain, _isChainTestNet, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { CHAIN_FLIP_MAINNET_EXPLORER, CHAIN_FLIP_TESTNET_EXPLORER } from '@subwallet/extension-base/services/swap-service/utils';
+import { ChainflipSwapTxData } from '@subwallet/extension-base/types/swap';
 
 // @ts-ignore
 export function parseTransactionData<T extends ExtrinsicType> (data: unknown): ExtrinsicDataTypeMap[T] {
@@ -64,4 +66,10 @@ export function getExplorerLink (chainInfo: _ChainInfo, value: string, type: 'ac
   }
 
   return undefined;
+}
+
+export function getChainflipExplorerLink (data: ChainflipSwapTxData, chainInfo: _ChainInfo) {
+  const chainflipDomain = _isChainTestNet(chainInfo) ? CHAIN_FLIP_TESTNET_EXPLORER : CHAIN_FLIP_MAINNET_EXPLORER;
+
+  return `${chainflipDomain}/channels/${data.depositChannelId}`;
 }

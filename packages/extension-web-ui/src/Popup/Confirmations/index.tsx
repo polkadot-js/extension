@@ -175,17 +175,65 @@ const Component = function ({ className }: Props) {
           return t('Transfer confirmation');
         case ExtrinsicType.STAKING_JOIN_POOL:
         case ExtrinsicType.STAKING_BOND:
-          return t('Add to bond confirm');
+        case ExtrinsicType.JOIN_YIELD_POOL:
+          return t('Add to stake confirm');
         case ExtrinsicType.STAKING_LEAVE_POOL:
         case ExtrinsicType.STAKING_UNBOND:
-          return t('Unbond confirm');
+          return t('Unstake confirm');
         case ExtrinsicType.STAKING_WITHDRAW:
+        case ExtrinsicType.STAKING_POOL_WITHDRAW:
           return t('Withdrawal confirm');
         case ExtrinsicType.STAKING_CLAIM_REWARD:
           return t('Claim rewards confirm');
         case ExtrinsicType.STAKING_CANCEL_UNSTAKE:
           return t('Cancel unstake confirm');
-        default:
+        case ExtrinsicType.MINT_VDOT:
+          return t('Mint vDOT confirm');
+        case ExtrinsicType.MINT_VMANTA:
+          return t('Mint vMANTA confirm');
+        case ExtrinsicType.MINT_LDOT:
+          return t('Mint LDOT confirm');
+        case ExtrinsicType.MINT_SDOT:
+          return t('Mint sDOT confirm');
+        case ExtrinsicType.MINT_QDOT:
+          return t('Mint qDOT confirm');
+        case ExtrinsicType.MINT_STDOT:
+          return t('Mint stDOT confirm');
+        case ExtrinsicType.REDEEM_VDOT:
+          return t('Redeem vDOT confirm');
+        case ExtrinsicType.REDEEM_VMANTA:
+          return t('Redeem vMANTA confirm');
+        case ExtrinsicType.REDEEM_LDOT:
+          return t('Redeem LDOT confirm');
+        case ExtrinsicType.REDEEM_SDOT:
+          return t('Redeem sDOT confirm');
+        case ExtrinsicType.REDEEM_QDOT:
+          return t('Redeem qDOT confirm');
+        case ExtrinsicType.REDEEM_STDOT:
+          return t('Redeem stDOT confirm');
+        case ExtrinsicType.UNSTAKE_VDOT:
+          return t('Unstake vDOT confirm');
+        case ExtrinsicType.UNSTAKE_VMANTA:
+          return t('Unstake vMANTA confirm');
+        case ExtrinsicType.UNSTAKE_LDOT:
+          return t('Unstake LDOT confirm');
+        case ExtrinsicType.UNSTAKE_SDOT:
+          return t('Unstake sDOT confirm');
+        case ExtrinsicType.UNSTAKE_STDOT:
+          return t('Unstake qDOT confirm');
+        case ExtrinsicType.UNSTAKE_QDOT:
+          return t('Unstake stDOT confirm');
+        case ExtrinsicType.STAKING_COMPOUNDING:
+          return t('Stake compound confirm');
+        case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
+          return t('Cancel compound confirm');
+        case ExtrinsicType.TOKEN_APPROVE:
+          return t('Token approve');
+        case ExtrinsicType.SWAP:
+          return t('Swap confirmation');
+        case ExtrinsicType.CROWDLOAN:
+        case ExtrinsicType.EVM_EXECUTE:
+        case ExtrinsicType.UNKNOWN:
           return t('Transaction confirm');
       }
     } else {

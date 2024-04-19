@@ -517,5 +517,7 @@
   "Address Prefix": "",
   "ParaId": "",
   "Chain Type": "",
-  "Price ID (Optional - from CoinGecko)": ""
+  "Price ID (Optional - from CoinGecko)": "",
+  "Pay attention!": "",
+  "Cross-chain transfer to an exchange (CEX) will result in loss of funds. Make sure the receiving address is not an exchange address.": ""
 }

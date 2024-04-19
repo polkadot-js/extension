@@ -9,6 +9,7 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 import { MissionInfo } from '@subwallet/extension-koni-ui/types';
 import { SessionTypes } from '@walletconnect/types';
 
@@ -191,4 +192,8 @@ export interface EarningStore extends BaseReduxStore {
 
 export interface MissionPoolStore extends BaseReduxStore {
   missions: MissionInfo[];
+}
+
+export interface SwapStore extends BaseReduxStore {
+  swapPairs: SwapPair[];
 }

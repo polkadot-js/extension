@@ -38,19 +38,20 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
       className: '__table-token-col',
       render: (row: YieldPoolInfo) => {
         return (
-          <div className={'__row-token-name-wrapper'}>
+          <div className={'__row-token-info-wrapper'}>
             <Logo
+              className={'__row-token-logo'}
               network={row.metadata.logo || row.chain}
               size={48}
             />
-            <div className={'token-item'}>
-              <div className={'token-info'}>
+            <div className={'__row-token-meta'}>
+              <div className={'__row-token-title'}>
                 <span>{assetRegistry[row.metadata.inputAsset]?.symbol}</span>
-                <span className={'__token-name'}>
+                <span className={'__row-token-shortname'}>
                 &nbsp;(<span>{row.metadata.shortName}</span>)
                 </span>
               </div>
-              <div className={'__description'}>{row.metadata.description}</div>
+              <div className={'__row-token-description'}>{row.metadata.description}</div>
             </div>
           </div>
         );
@@ -58,9 +59,9 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
     };
 
     const stakingTypeCol = {
-      title: t('Staking type'),
+      title: t('Earning type'),
       key: 'staking_type',
-      className: '__table-create-at-col',
+      className: '__table-staking-type-col',
       sortable: true,
       render: (row: YieldPoolInfo) => {
         return (
@@ -76,7 +77,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
     const totalValueStakedCol = {
       title: t('Total value staked'),
       key: 'total_value_staked',
-      className: '__table-progress-col',
+      className: '__table-total-value-stake-col',
       render: (row: YieldPoolInfo) => {
         const total = ((): string => {
           const tvl = row.statistic?.tvl;
@@ -101,17 +102,18 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
         })();
 
         return (
-          <div className={'__row-progress-wrapper'}>
+          <div className={'__row-total-stake-wrapper'}>
             {total
               ? (
                 <Number
+                  className={'__row-total-stake-value'}
                   decimal={0}
                   prefix={'$'}
                   value={total}
                 />
               )
               : (
-                <span>
+                <span className={'__tbd'}>
                   {t('TBD')}
                 </span>
               )}
@@ -123,7 +125,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
     const rewardsPerYearCol = {
       title: t('Rewards per year'),
       key: 'rewards_per_year',
-      className: '__table-limit-col',
+      className: '__table-rewards-col',
       sortable: true,
       render: (row: YieldPoolInfo) => {
         const totalApy = row.statistic?.totalApy;
@@ -144,15 +146,22 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
         })();
 
         return (
-          <div className={'__row-reward-per-year'}>
-            {!!apy && (
-              <Number
-                className='__row-reward-per-year-value'
-                decimal={0}
-                suffix={'%'}
-                value={apy}
-              />
-            )}
+          <div className={'__row-reward-wrapper'}>
+            {apy
+              ? (
+                <Number
+                  className='__row-reward-per-year-value'
+                  decimal={0}
+                  suffix={'%'}
+                  value={apy}
+                />
+              )
+              : (
+                <span className={'__tbd'}>
+                  {t('TBD')}
+                </span>
+              )
+            }
           </div>
         );
       }
@@ -163,11 +172,11 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
       className: '__table-detail_action-col',
       render: () => {
         return (
-          <div>
+          <div className={'__row-stake-button-wrapper'}>
             <Button
+              className={'__row-stake-button'}
               icon={(
                 <Icon
-                  className={'earning-item-stake-btn'}
                   phosphorIcon={PlusCircle}
                   size='sm'
                   weight='fill'
@@ -176,7 +185,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
               shape='circle'
               size='xs'
             >
-              {'Stake'}
+              {'Stake to earn'}
             </Button>
           </div>
         );
@@ -216,32 +225,80 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
 
 export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.__table-token-col.__table-token-col, .__table-create-at-col.__table-create-at-col': {
+    '.__table-token-col.__table-token-col': {
       flex: 1.2
     },
 
-    ['.__table-create-at-col, .__table-progress-col, ' +
-        '.__table-holder-col, .__table-transactions-col, ' +
-        '.__table-limit-col, .__table-mint-col']: {
-      textAlign: 'center'
+    '.__table-staking-type-col.__table-staking-type-col': {
+      flex: 0.8
     },
 
-    ['th.__table-create-at-col.__table-create-at-col, ' +
-        'th.__table-progress-col.__table-progress-col, ' +
-        'th.__table-limit-col.__table-limit-col, ' +
-        'th.__table-holder-col.__table-holder-col, ' +
-        'th.__table-transactions-col.__table-transactions-col, ' +
-        'th.__table-mint-col.__table-mint-col']: {
-      textAlign: 'center'
+    '.__table-staking-type-col': {
+      display: 'flex',
+      justifyContent: 'flex-start'
+    },
+
+    '.__table-total-value-stake-col, .__table-rewards-col': {
+      display: 'flex',
+      justifyContent: 'flex-end'
     },
 
     '.__tr': {
       'white-space': 'nowrap',
-      cursor: 'pointer'
+      cursor: 'pointer',
+      paddingTop: token.padding,
+      paddingBottom: token.padding
+    },
+
+    '.__row-total-stake-value': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+
+      '.ant-number-integer': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal, .ant-number-suffix': {
+        color: `${token.colorWhite} !important`,
+        fontSize: `${token.fontSizeLG}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.lineHeightLG
+      }
+    },
+
+    '.__row-reward-per-year-value': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorSuccess,
+
+      '.ant-number-integer': {
+        color: 'inherit !important',
+        fontSize: 'inherit !important',
+        fontWeight: 'inherit !important',
+        lineHeight: 'inherit'
+      },
+
+      '.ant-number-decimal, .ant-number-suffix': {
+        color: `${token.colorSuccess} !important`,
+        fontSize: `${token.fontSizeLG}px !important`,
+        fontWeight: 'inherit !important',
+        lineHeight: token.lineHeightLG
+      }
     },
 
     '.__td': {
       overflow: 'hidden'
+    },
+
+    '.__tbd': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG
     },
 
     '.ant-number': {
@@ -255,38 +312,47 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       color: 'inherit !important',
       lineHeight: 'inherit'
     },
-    '.__table-create-at-col .__td-inner': {
+    '.__table-staking-type-col .__td-inner': {
       alignItems: 'center'
     },
 
-    '.__row-token-name-wrapper': {
+    '.__row-token-info-wrapper': {
       display: 'flex',
       gap: token.sizeSM
     },
 
-    '.token-info': {
+    '.__row-token-title': {
       display: 'flex',
       color: token.colorTextLight1,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
-      'white-space': 'nowrap'
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      fontWeight: token.fontWeightStrong,
+      marginBottom: token.marginXXS
     },
-    '.token-item': {
+    '.__row-token-meta': {
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     },
-    '.__token-name': {
+    '.__row-token-shortname': {
       color: token.colorTextTertiary,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
       whiteSpace: 'nowrap'
     },
-    '.__description': {
+
+    '.__row-token-description': {
       fontSize: token.fontSizeSM,
       color: token.colorTextLabel,
-      lineHeight: token.lineHeightSM
+      lineHeight: token.lineHeightSM,
+      textOverflow: 'ellipsis',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap'
     },
-    '.__row-reward-per-year': {
+    '.__row-reward-wrapper': {
       color: token.colorSuccess
     },
     '.__item-tag': {
@@ -297,62 +363,11 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       minWidth: 70
     },
 
-    '.__row-mint-button': {
-      cursor: 'pointer',
-      padding: token.paddingXXS,
-
-      '.ant-tag': {
-        marginRight: 0
-      },
-
-      '&.-disabled': {
-        opacity: 0.4,
-        cursor: 'not-allowed'
-      }
-    },
     '.__table-detail_action-col.__table-detail_action-col': {
-      flexGrow: 0,
-      minWidth: 140
-    },
-    '.__table-mint-col.__table-mint-col': {
-      flexGrow: 0,
-      minWidth: 100
-    },
-    '.__row-create-at-value': {
-      color: token.colorTextLight4,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight,
-      textOverflow: 'ellipsis',
-      overflow: 'hidden'
-    },
-
-    '.__row-progress-value, .__row-transactions-value, .__row-holders-value, .__row-limit-value': {
-      color: token.colorWhite,
-      fontSize: token.fontSize,
-      lineHeight: token.lineHeight
-    },
-
-    '.__row-progress-bar': {
-      backgroundColor: token.colorBgDefault
-    },
-
-    '.__row-progress-value-wrapper': {
+      flex: 1,
+      minWidth: 140,
       display: 'flex',
-      justifyContent: 'center',
-      marginBottom: token.marginXXS
-    },
-
-    '.__row-progress': {
-      maxWidth: 200,
-      marginLeft: 'auto',
-      marginRight: 'auto'
-    },
-
-    '.__pagination-wrapper': {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      paddingTop: token.padding,
-      paddingBottom: token.padding
+      justifyContent: 'flex-end'
     },
 
     '.empty-list': {
@@ -360,19 +375,34 @@ export const EarningPoolsTable = styled(Component)<Props>(({ theme: { token } }:
       marginBottom: 0
     },
 
-    '.__tr-list, .__loading-area, .empty-list': {
+    '.__loading-area, .empty-list': {
       minHeight: 376
     },
 
-    '@media(max-width: 1199px)': {
-      '.__table-create-at-col.__table-create-at-col, .__table-limit-col.__table-limit-col': {
-        display: 'none'
-      }
+    '.__tr-list': {
+      gap: 8,
+      display: 'flex',
+      flexDirection: 'column'
     },
 
-    '@media(max-width: 991px)': {
-      '.__table-mint-col.__table-mint-col': {
-        minWidth: 80
+    '.earning-pools-table .__thead': {
+      color: token.colorWhite,
+      fontWeight: token.fontWeightStrong,
+      lineHeight: token.lineHeight
+    },
+
+    '.earning-pools-table .__tr': {
+      flex: '0 1 auto'
+    },
+
+    '.__row-stake-button .anticon': {
+      width: 20,
+      height: 20
+    },
+
+    '@media(max-width: 1199px)': {
+      '.__table-staking-type-col.__table-staking-type-col, .__table-rewards-col.__table-rewards-col': {
+        display: 'none'
       }
     }
   };

@@ -27,6 +27,7 @@ interface Props extends ThemeProps {
   type: EvmSignatureSupportType;
   payload: ConfirmationDefinitions[EvmSignatureSupportType][0];
   extrinsicType?: ExtrinsicType;
+  txExpirationTime?: number;
 }
 
 const handleConfirm = async (type: EvmSignatureSupportType, id: string, payload: string) => {
@@ -53,7 +54,7 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, extrinsicType, id, payload, type } = props;
+  const { className, extrinsicType, id, payload, txExpirationTime, type } = props;
   const { payload: { account, canSign, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
@@ -68,6 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
+  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
   const isMessage = isEvmMessage(payload);
 
   const [loading, setLoading] = useState(false);
@@ -204,6 +206,18 @@ const Component: React.FC<Props> = (props: Props) => {
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
 
+    if (txExpirationTime) {
+      const currentTime = +Date.now();
+
+      if (currentTime >= txExpirationTime) {
+        notify({
+          message: t('Transaction expired'),
+          type: 'error'
+        });
+        onCancel();
+      }
+    }
+
     switch (signMode) {
       case AccountSignMode.QR:
         onConfirmQr();
@@ -221,7 +235,7 @@ const Component: React.FC<Props> = (props: Props) => {
           // Unlock is cancelled
         });
     }
-  }, [checkUnlock, extrinsicType, onConfirmInject, onApprovePassword, onConfirmLedger, onConfirmQr, signMode]);
+  }, [extrinsicType, txExpirationTime, signMode, notify, t, onCancel, onConfirmQr, onConfirmLedger, onConfirmInject, checkUnlock, onApprovePassword]);
 
   useEffect(() => {
     !!ledgerError && notify({
@@ -236,6 +250,22 @@ const Component: React.FC<Props> = (props: Props) => {
       type: 'warning'
     });
   }, [ledgerWarning, notify]);
+  useEffect(() => {
+    let timer: NodeJS.Timer;
+
+    if (txExpirationTime) {
+      timer = setInterval(() => {
+        if (Date.now() >= txExpirationTime) {
+          setShowQuoteExpired(true);
+          clearInterval(timer);
+        }
+      }, 1000);
+    }
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [txExpirationTime]);
 
   return (
     <div className={CN(className, 'confirmation-footer')}>
@@ -253,7 +283,7 @@ const Component: React.FC<Props> = (props: Props) => {
         {t('Cancel')}
       </Button>
       <Button
-        disabled={!canSign}
+        disabled={showQuoteExpired || !canSign}
         icon={(
           <Icon
             phosphorIcon={approveIcon}

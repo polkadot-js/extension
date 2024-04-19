@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SpecialYieldPoolInfo, SubmitYieldStepData, UnstakingStatus, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { SpecialYieldPoolInfo, SubmitYieldStepData, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 // @ts-ignore
 import humanizeDuration from 'humanize-duration';
 import { TFunction } from 'react-i18next';
@@ -20,15 +20,29 @@ export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
   return '';
 }
 
-export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t: TFunction) {
-  if (status === UnstakingStatus.CLAIMABLE) {
+export function getWaitingTime (t: TFunction, currentTimestampMs: number, targetTimestampMs?: number, waitingTime?: number) {
+  let remainingTimestampMs: number;
+
+  if (targetTimestampMs !== undefined) {
+    remainingTimestampMs = targetTimestampMs - currentTimestampMs;
+  } else {
+    if (waitingTime !== undefined) {
+      remainingTimestampMs = waitingTime * 60 * 60 * 1000;
+    } else {
+      return t('Automatic withdrawal');
+    }
+  }
+
+  if (remainingTimestampMs <= 0) {
     return t('Available for withdrawal');
   } else {
-    const waitingTimeInMs = waitingTime * 60 * 60 * 1000;
+    const remainingTimeHr = remainingTimestampMs / 1000 / 60 / 60;
+
+    // Formatted waitting time without round up
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
-    const formattedWaitingTime = humanizeDuration(waitingTimeInMs, {
-      units: ['d', 'h'],
-      round: true,
+    const _formattedWaitingTime = humanizeDuration(remainingTimestampMs, {
+      units: remainingTimeHr >= 24 ? ['d', 'h'] : ['h', 'm'],
+      round: false,
       delimiter: ' ',
       language: 'shortEn',
       languages: {
@@ -44,6 +58,15 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
         }
       } // TODO: should not be shorten
     }) as string;
+
+    // Formatted waitting time with round up
+    const formattedWaitingTime = _formattedWaitingTime.split(' ').map((segment, index) => {
+      if (index % 2 === 0) {
+        return Math.ceil(parseFloat(segment)).toString();
+      }
+
+      return segment;
+    }).join(' ');
 
     return t('Withdrawable in {{time}}', { replace: { time: formattedWaitingTime } });
   }

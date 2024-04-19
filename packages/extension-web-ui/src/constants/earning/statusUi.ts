@@ -1,44 +1,41 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PalletNominationPoolsBondedPoolInner } from '@subwallet/extension-base/types';
+import { EarningStatus } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts/types';
-import { PhosphorIcon } from '@subwallet/extension-web-ui/types';
+import { EarningStatusUiProps, NominationPoolState } from '@subwallet/extension-web-ui/types';
 import { CheckCircle, ListChecks, XCircle } from 'phosphor-react';
 
-export type StakingStatusType = 'active' | 'inactive' | 'partialEarning' | 'waiting';
-export type NominationPoolState = Pick<PalletNominationPoolsBondedPoolInner, 'state'>;
-interface StakingStatusUiProps {
-  schema: InfoItemBase['valueColorSchema'];
-  icon: PhosphorIcon;
-  name: string;
-}
-
-export const StakingStatusUi: Record<StakingStatusType, StakingStatusUiProps> = {
-  active: {
+export const EarningStatusUi: Record<EarningStatus, EarningStatusUiProps> = {
+  [EarningStatus.EARNING_REWARD]: {
     schema: 'success' as InfoItemBase['valueColorSchema'],
     icon: CheckCircle,
     name: detectTranslate('Earning reward')
   },
-  partialEarning: {
+  [EarningStatus.PARTIALLY_EARNING]: {
     schema: 'warning' as InfoItemBase['valueColorSchema'],
     icon: ListChecks,
     name: detectTranslate('Earning reward')
   },
-  inactive: {
+  [EarningStatus.NOT_EARNING]: {
     schema: 'danger' as InfoItemBase['valueColorSchema'],
     icon: XCircle,
     name: detectTranslate('Not earning')
   },
-  waiting: {
+  [EarningStatus.WAITING]: {
     schema: 'success' as InfoItemBase['valueColorSchema'],
     icon: CheckCircle,
     name: detectTranslate('Waiting')
+  },
+  [EarningStatus.NOT_STAKING]: {
+    schema: 'danger' as InfoItemBase['valueColorSchema'],
+    icon: XCircle,
+    name: detectTranslate('Not earning')
   }
 };
 
-export const NominationPoolsEarningStatusUi: Record<NominationPoolState['state'], StakingStatusUiProps> = {
+export const NominationPoolsEarningStatusUi: Record<NominationPoolState['state'], EarningStatusUiProps> = {
   Open: {
     schema: 'success' as InfoItemBase['valueColorSchema'],
     icon: CheckCircle,

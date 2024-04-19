@@ -5,6 +5,7 @@ import { balanceNoPrefixFormater } from '@subwallet/extension-base/utils';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import { Button, formatNumber, Icon, Number, SwNumberProps, Tag, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
@@ -75,7 +76,10 @@ function Component (
               subFloatNumber
               value={totalValue}
             />
-            {isShowBalance && <div className={'__total-balance-symbol'}>
+            {isShowBalance && <div className={CN('__total-balance-symbol', {
+              '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
+            })}
+            >
               {currency.symbol}
             </div>}
           </div>
@@ -280,7 +284,12 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     '.__total-balance-symbol': {
       marginLeft: -2,
       fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightHeading6
+      lineHeight: token.lineHeightHeading6,
+
+      '&.-not-show-balance': {
+        display: 'none'
+      }
+
     },
 
     '&.-shrink': {
@@ -289,10 +298,6 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
 
       '.__total-balance-value-container': {
         flex: 1
-      },
-
-      '.__total-balance-symbol': {
-        display: 'none'
       },
 
       '.__total-balance-value-content': {

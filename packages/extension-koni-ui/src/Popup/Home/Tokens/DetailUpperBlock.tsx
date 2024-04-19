@@ -6,6 +6,7 @@ import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import { Button, formatNumber, Icon, Number, Tooltip } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import CN from 'classnames';
@@ -84,7 +85,10 @@ function Component (
               subFloatNumber
               value={balanceValue}
             />
-            {isShowBalance && <div className={'__total-balance-symbol'}>
+            {isShowBalance && <div className={CN('__total-balance-symbol', {
+              '-not-show-balance': isShrink && formatBalance(balanceValue, 0).length > 10
+            })}
+            >
               {currency.symbol}
             </div>}
           </div>
@@ -216,7 +220,12 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
     '.__total-balance-symbol': {
       marginLeft: -2,
       fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightHeading6
+      lineHeight: token.lineHeightHeading6,
+
+      '&.-not-show-balance': {
+        display: 'none'
+      }
+
     },
 
     '.__balance-value-wrapper': {
@@ -234,11 +243,10 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
 
       '.__balance-value-wrapper': {
         flex: 1,
-        margin: 0
-      },
-
-      '.__total-balance-symbol': {
-        display: 'none'
+        margin: 0,
+        cursor: 'pointer',
+        justifyContent: 'flex-start',
+        width: 'fit-content'
       },
 
       '.__balance-value': {

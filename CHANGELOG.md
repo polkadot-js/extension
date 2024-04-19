@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 1.1.56
+Build date: Apl 19, 2024.
+
+Features & Update:
+- Update chainlist (#2931)
+  - Add rpc  for Liberland: wss://liberland-rpc.dwellir.com
+  - Add support for STINK token
+  - Add support for PINK token on Base network
+  - Support Paseo network
+- Bump Polkadot dependencies (#2853)
+- Support NFTs on Asset Hub (#2934)
+- Update withdraw time for Parachain (#2830)
+
+Bugs fixed:
+- Fixed bug parsing Earning status for Nomination pool (#2937)
+
 ## 1.1.55
 Build date: Apl 14, 2024.
 
@@ -16,7 +32,7 @@ Features & Update:
   - Update ChainAsset
 - Automatically enable network when connecting via Substrate provider (#2899)
 
-- Bugs fixed:
+Bugs fixed:
 - Fixed bug show minimum active stake (#2889)
 - Fixed bug Error page when sign message with WalletConnect (#2915)
 - Fixed bug displaying 'connection existed' when connecting WalletConnect (#2903)

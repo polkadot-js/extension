@@ -74,7 +74,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shiden: 24,
   shibuya: 24,
   bifrost_testnet: 0.5,
-  bifrost: 2,
+  bifrost: 13 * 600 / 3600, // real blocktime of bifros ksm = 13s
   bifrost_dot: 24,
   ternoa: 24,
   calamari: 6,
@@ -91,7 +91,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   goldberg_testnet: 24,
   manta_network: 6,
   krest_network: 4,
-  polimec: 6
+  polimec: 6,
+  enjin_relaychain: 24
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -108,7 +109,18 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   creditcoin: 12,
   vara_network: 3,
   goldberg_testnet: 20,
-  polimec: 12
+  polimec: 12,
+  bifrost: 13, // expect 12 but actual 13
+  moonbeam: 12,
+  moonriver: 12,
+  moonbase: 6,
+  turing: 12,
+  turingStaging: 12,
+  bifrost_testnet: 3,
+  calamari: 12,
+  calamari_test: 12,
+  manta_network: 12,
+  enjin_relaychain: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

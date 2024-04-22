@@ -176,14 +176,6 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     return '';
   }, [assetRegistry]);
 
-  useEffect(() => {
-    items.forEach((item) => {
-      if (!checkChainConnected(item.chain)) {
-        turnOnChain(item.chain);
-      }
-    });
-  }, [checkChainConnected, items, turnOnChain]);
-
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
       setCurrentAltChain(undefined);

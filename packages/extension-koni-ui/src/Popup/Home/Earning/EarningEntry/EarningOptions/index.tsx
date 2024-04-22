@@ -170,14 +170,6 @@ function Component ({ className, hasEarningPositions, setEntryView }: Props) {
     return yieldPositions.map((p) => p.slug);
   }, [yieldPositions]);
 
-  useEffect(() => {
-    items.forEach((item) => {
-      if (!checkChainConnected(item.chain)) {
-        turnOnChain(item.chain);
-      }
-    });
-  }, [checkChainConnected, items, turnOnChain]);
-
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
       if (isRelatedToAstar(item.group)) {

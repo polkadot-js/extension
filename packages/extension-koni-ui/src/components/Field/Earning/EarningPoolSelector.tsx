@@ -204,7 +204,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         ? (
           <Tooltip
             placement={'top'}
-            title={t('This pool has reached the maximum number of members/nominators. Select another to continue')}
+            title={t('This pool has reached the maximum number of members. Select another to continue')}
           >
             <div className={'__pool-item-wrapper'}>
               <StakingPoolItem

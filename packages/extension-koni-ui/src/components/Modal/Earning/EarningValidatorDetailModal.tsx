@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
@@ -36,6 +37,13 @@ function Component (props: Props): React.ReactElement<Props> {
 
   const networkPrefix = useGetChainPrefixBySlug(chain);
 
+  const isRelayChain = useMemo(() => {
+    return _STAKING_CHAIN_GROUP.relay.includes(chain);
+  }, [chain]);
+
+  const isParaChain = useMemo(() => {
+    return _STAKING_CHAIN_GROUP.para.includes(chain);
+  }, [chain]);
   const title = useMemo(() => {
     const label = getValidatorLabel(chain);
 
@@ -136,8 +144,8 @@ function Component (props: Props): React.ReactElement<Props> {
         />
 
         {
-          maxPoolMembersValue && <MetaInfo.Number
-            label={t('Delegators')}
+          maxPoolMembersValue && (isParaChain || isRelayChain) && <MetaInfo.Number
+            label={t(isParaChain ? 'Delegators' : 'Nominator')}
             value={maxPoolMembersValue}
             valueColorSchema={'even-odd'}
           />

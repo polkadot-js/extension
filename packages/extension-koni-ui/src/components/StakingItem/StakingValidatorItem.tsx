@@ -39,7 +39,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div
-      className={CN(className, { disabled: disabled, 'is-crowded': validatorInfo.isCrowded })}
+      className={CN(className, { disabled: disabled })}
       onClick={disabled ? undefined : _onSelect}
     >
       <Web3Block
@@ -124,11 +124,6 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
       '.ant-web3-block:hover': {
         cursor: 'not-allowed',
         background: token.colorBgSecondary
-      }
-    },
-    '&.is-crowded': {
-      '.ant-web3-block-left-item, .ant-web3-block-middle-item, .right-item__select-icon': {
-        opacity: 0.4
       }
     },
 

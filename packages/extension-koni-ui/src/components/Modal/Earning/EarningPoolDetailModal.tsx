@@ -79,7 +79,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
         {
           maxPoolMembersValue && (
             <MetaInfo.Number
-              label={t('Delegators')}
+              label={t('Members')}
               value={maxPoolMembersValue}
               valueColorSchema={'even-odd'}
             />

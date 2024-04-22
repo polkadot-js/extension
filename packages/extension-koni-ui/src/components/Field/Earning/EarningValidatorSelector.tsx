@@ -15,7 +15,7 @@ import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useGetPoolTargetList, useSelector, useSelectValidators, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
-import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, Tooltip, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -240,14 +240,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     setSortSelection(value as SortKey);
   }, []);
 
-  const onClickItem = useCallback((item: ValidatorDataType) => {
-    if (!item.isCrowded) {
-      return () => {
-        onChangeSelectedValidator(getValidatorKey(item.address, item.identity));
-      };
-    }
-
-    return undefined;
+  const onClickItem = useCallback((value: string) => {
+    onChangeSelectedValidator(value);
   }, [onChangeSelectedValidator]);
 
   const onClickMore = useCallback((item: ValidatorDataType) => {
@@ -278,39 +272,19 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const selected = changeValidators.includes(key);
     const nominated = nominatorValueList.includes(key);
 
-    return item.isCrowded
-      // eslint-disable-next-line multiline-ternary
-      ? (
-        <Tooltip
-          placement={'top'}
-          title={t(`This ${handleValidatorLabel} has reached the maximum number of members/nominators. Select another to continue`)}
-        >
-          <div className={'__pool-item-wrapper'}>
-            <StakingValidatorItem
-              apy={item?.expectedReturn?.toString() || '0'}
-              className={'pool-item'}
-              isNominated={nominated}
-              isSelected={selected}
-              key={key}
-              onClick={onClickItem(item)}
-              onClickMoreBtn={onClickMore(item)}
-              validatorInfo={item}
-            />
-          </div>
-        </Tooltip>
-      ) : (
-        <StakingValidatorItem
-          apy={item?.expectedReturn?.toString() || '0'}
-          className={'pool-item'}
-          isNominated={nominated}
-          isSelected={selected}
-          key={key}
-          onClick={onClickItem(item)}
-          onClickMoreBtn={onClickMore(item)}
-          validatorInfo={item}
-        />
-      );
-  }, [changeValidators, handleValidatorLabel, nominatorValueList, onClickItem, onClickMore, t]);
+    return (
+      <StakingValidatorItem
+        apy={item?.expectedReturn?.toString() || '0'}
+        className={'pool-item'}
+        isNominated={nominated}
+        isSelected={selected}
+        key={key}
+        onClick={onClickItem}
+        onClickMoreBtn={onClickMore(item)}
+        validatorInfo={item}
+      />
+    );
+  }, [changeValidators, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);

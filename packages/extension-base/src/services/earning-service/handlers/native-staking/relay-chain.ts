@@ -376,9 +376,17 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const endEraForPoints = parseInt(activeEra) - 1;
     let startEraForPoints = endEraForPoints - maxEraRewardPointsEras + 1;
 
+    let _eraStakersPromise;
+
+    if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+      _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
+    } else {
+      _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
+    }
+
     const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators, ..._eraRewardPoints] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
-      chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
+      _eraStakersPromise,
       chainApi.api.query.staking.minNominatorBond(),
       chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data(),
       chainApi.api.query.staking.validators.entries(),
@@ -417,13 +425,14 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
-    const eraStakers = _eraStakers as any[];
 
     const rawMinBond = _minBond.toHuman() as string;
     const minBond = rawMinBond.replaceAll(',', '');
 
     const totalStakeMap: Record<string, BN> = {};
     const bnDecimals = new BN((10 ** decimals).toString());
+
+    const eraStakers = _eraStakers as unknown as any[];
 
     for (const item of eraStakers) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

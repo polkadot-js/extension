@@ -53,19 +53,23 @@ const TableRow = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProps
       flex: 1
     },
     '.__td-inner': {
-      // padding: token.padding,
       display: 'flex',
       alignItems: 'stretch',
       height: '100%',
       justifyContent: 'center',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingLeft: token.paddingXS,
+      paddingRight: token.paddingXS,
+      overflow: 'hidden'
     },
-    '.__td:last-of-type .__td-inner': {
-      paddingRight: token.paddingSM
-    },
+
     '&.__tr': {
       transition: 'background-color 0.2s ease-in-out',
-      padding: token.padding
+      padding: token.paddingSM,
+      paddingRight: token.paddingXXS,
+      paddingBottom: token.paddingSM,
+      paddingLeft: token.paddingXXS,
+      gap: token.sizeXS
     },
     '&.__tr:hover': {
       backgroundColor: token.colorBgInput

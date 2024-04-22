@@ -4,9 +4,19 @@
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useState } from 'react';
 
-export function useFilterModal (modalId: string) {
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
-  const [filterSelectionMap, setFilterSelectionMap] = useState<Record<string, boolean>>({});
+function getFilterSelectionMap (defaultFilterSelectionMap: string[]): Record<string, boolean> {
+  const initialFilterSelectionMap: Record<string, boolean> = {};
+
+  defaultFilterSelectionMap.forEach((filter) => {
+    initialFilterSelectionMap[filter] = true;
+  });
+
+  return initialFilterSelectionMap;
+}
+
+export function useFilterModal (modalId: string, defaultFilterSelectionMap: string[] = []) {
+  const [selectedFilters, setSelectedFilters] = useState<string[]>(defaultFilterSelectionMap);
+  const [filterSelectionMap, setFilterSelectionMap] = useState<Record<string, boolean>>(getFilterSelectionMap(defaultFilterSelectionMap));
   const { inactiveModal } = useContext(ModalContext);
 
   const onCloseFilterModal = useCallback(() => {

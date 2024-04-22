@@ -20,8 +20,9 @@ export interface DefaultDocWithAddressAndChain extends DefaultChainDoc, DefaultA
 
 export interface IBalance extends BalanceItem, DefaultAddressDoc {}
 export interface IChain extends _ChainInfo {
-  active: boolean,
-  currentProvider: string
+  active: boolean;
+  currentProvider: string;
+  manualTurnOff: boolean;
 }
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
 export interface INft extends NftItem, DefaultAddressDoc {}

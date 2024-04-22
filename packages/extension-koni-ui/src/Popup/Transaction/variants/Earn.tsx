@@ -524,7 +524,7 @@ const Component = () => {
         if ('minBond' in targeted) {
           const minTargetJoin = new BigN(targeted.minBond || '0');
 
-          minJoinPool = minTargetJoin.gt(minJoinPool || '0') ? minTargetJoin.toString() : minJoinPool;
+          minJoinPool = minTargetJoin.gt(minPoolJoin || '0') ? minTargetJoin.toString() : minPoolJoin;
         } else {
           minJoinPool = minPoolJoin;
         }
@@ -558,12 +558,12 @@ const Component = () => {
               />
             );
           })}
-        {minJoinPool && (
+        {(
           <MetaInfo.Number
             decimals={assetDecimals}
             label={t('Minimum active stake')}
             suffix={assetSymbol}
-            value={minJoinPool}
+            value={minJoinPool || 0}
           />
         )}
 
@@ -978,7 +978,7 @@ const Component = () => {
                       chain={poolChain}
                       disabled={submitLoading}
                       from={fromValue}
-                      label={t('Select pool')}
+                      label={t('Pool')}
                       loading={targetLoading}
                       setForceFetchValidator={setForceFetchValidator}
                       slug={slug}

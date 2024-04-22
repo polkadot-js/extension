@@ -83,7 +83,7 @@ const Component: React.FC<Props> = ({ className = '' }: Props) => {
   );
 
   const goEarningDemo = useCallback(() => {
-    openInNewTab(`${window.location.origin}/earning-demo`)();
+    openInNewTab(`${window.location.origin}/earning-preview`)();
   }, []);
 
   const { isNoAccount } = useSelector((state: RootState) => state.accountState);

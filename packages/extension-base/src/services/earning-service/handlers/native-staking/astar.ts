@@ -300,7 +300,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
     const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
-    const unsub = await substrateApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
+    const unsub = await substrateApi.api.query.dappsStaking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
         unsub();
 
@@ -343,7 +343,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     return () => {
       cancel = true;
-      unsub();
+      unsub && unsub();
     };
   }
 

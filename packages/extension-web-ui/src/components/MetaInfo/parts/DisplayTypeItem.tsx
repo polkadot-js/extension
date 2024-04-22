@@ -25,7 +25,7 @@ const Component: React.FC<DisplayTypeInfoItem> = (props: DisplayTypeInfoItem) =>
           </div>
         )
       }
-      <div className={'__col __value-col -to-right'}>
+      <div className={'__col __value-col -to-right -inline'}>
         <div className={'__type-name __value'}>
           {typeName}
         </div>

@@ -66,11 +66,13 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__row': {
       display: 'flex',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      gap: token.sizeSM
     },
 
     '.__row.-d-column': {
-      flexDirection: 'column'
+      flexDirection: 'column',
+      gap: 0
     },
 
     '&.-space-size-xxs': {
@@ -91,6 +93,14 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.__row + .__row, .__row.-d-column .__col + .__col': {
       marginTop: 'var(--space-size)'
+    },
+    '.__row.-type-chain .__chain-name, .__row.-type-display-type .__type-name, .__row.-type-status .__status-name': {
+      textOverflow: 'ellipsis',
+      overflow: 'hidden'
+    },
+
+    '.__row.-type-default .__value': {
+      wordBreak: 'break-word'
     },
 
     '.__row.-type-total': {
@@ -117,7 +127,6 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.__col': {
-      flex: 1,
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'center',
@@ -125,12 +134,18 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '> div + div': {
         marginTop: token.marginSM
+      },
+      '&.-inline': {
+        whiteSpace: 'nowrap'
       }
     },
 
     '.__col.-to-right': {
       flex: 1,
       alignItems: 'flex-end'
+    },
+    '.__row.-type-transfer .__col': {
+      flex: 1
     },
 
     '.__col.-v-align-top': {
@@ -202,6 +217,15 @@ const _MetaInfo = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       alignItems: 'center',
       maxWidth: '100%'
+    },
+
+    '.__value.-clickable': {
+      cursor: 'pointer',
+      userSelect: 'none'
+    },
+
+    '.__value.-disabled': {
+      cursor: 'not-allowed'
     },
 
     '.__status-item': {

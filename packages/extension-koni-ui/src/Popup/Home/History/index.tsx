@@ -9,12 +9,13 @@ import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
 import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowsLeftRight, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -35,7 +36,8 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   nft: Aperture,
   processing: Spinner,
   default: ClockCounterClockwise,
-  timeout: ClockCounterClockwise
+  timeout: ClockCounterClockwise,
+  swap: ArrowsLeftRight
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
@@ -57,6 +59,10 @@ function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
 
   if (item.type === ExtrinsicType.STAKING_CLAIM_REWARD) {
     return IconMap.claim_reward;
+  }
+
+  if (item.type === ExtrinsicType.SWAP) {
+    return IconMap.swap;
   }
 
   if (isTypeStaking(item.type)) {
@@ -133,7 +139,8 @@ enum FilterValue {
   CROWDLOAN = 'crowdloan',
   SUCCESSFUL = 'successful',
   FAILED = 'failed',
-  EARN = 'earn'
+  EARN = 'earn',
+  SWAP = 'swap'
 }
 
 function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
@@ -207,6 +214,7 @@ const NEXT_ITEMS_COUNT = 10;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');
+  const dataContext = useContext(DataContext);
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount, isAllAccount } = useSelector((root) => root.accountState);
@@ -251,6 +259,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           if (item.type === ExtrinsicType.CROWDLOAN) {
             return true;
           }
+        } else if (filter === FilterValue.SWAP) {
+          if (item.type === ExtrinsicType.SWAP) {
+            return true;
+          }
         } else if (filter === FilterValue.SUCCESSFUL) {
           if (item.status === ExtrinsicStatus.SUCCESS) {
             return true;
@@ -275,12 +287,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Send token'), value: FilterValue.SEND },
       { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
-      { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
+      { label: t('Earning transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward'), value: FilterValue.CLAIM },
+      { label: t('Swap'), value: FilterValue.SWAP },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed'), value: FilterValue.FAILED },
-      { label: t('Start earning'), value: FilterValue.EARN }
+      { label: t('Failed'), value: FilterValue.FAILED }
     ];
   }, [t]);
 
@@ -335,6 +347,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
     [ExtrinsicType.TOKEN_APPROVE]: t('Token approve'),
+    [ExtrinsicType.SWAP]: t('Swap'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
@@ -378,6 +391,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
     [ExtrinsicType.TOKEN_APPROVE]: t('Token approve transaction'),
+    [ExtrinsicType.SWAP]: t('Swap transaction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 
@@ -701,6 +715,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <>
       <PageWrapper
         className={`history ${className}`}
+        resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'mantaPay'])}
       >
         <Layout.Base>
           <SwSubHeader

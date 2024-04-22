@@ -176,6 +176,14 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
     return '';
   }, [assetRegistry]);
 
+  useEffect(() => {
+    items.forEach((item) => {
+      if (!checkChainConnected(item.chain)) {
+        turnOnChain(item.chain);
+      }
+    });
+  }, [checkChainConnected, items, turnOnChain]);
+
   const onClickItem = useCallback((item: YieldGroupInfo) => {
     return () => {
       setCurrentAltChain(undefined);
@@ -264,7 +272,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
               const assetInfo = nativeSlug && assetRegistry[nativeSlug];
               const minJoinPoolBalanceValue = (assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo))) || BN_ZERO;
 
-              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || 0;
+              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || BN_ZERO;
 
               if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
                 isHiddenPool = true;

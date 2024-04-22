@@ -7,7 +7,7 @@ import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { EarningInstructionModal, EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { EarningPoolItem } from '@subwallet/extension-web-ui/components/Earning';
-import { DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO, DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -100,9 +100,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         }
 
         const assetInfo = nativeSlug && assetRegistry[nativeSlug];
-        const minJoinPoolBalanceValue = assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo));
+        const minJoinPoolBalanceValue = (assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo))) || BN_ZERO;
 
-        const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || 0;
+        const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || BN_ZERO;
 
         if (minJoinPoolBalanceValue && availableBalance && availableBalance.isGreaterThanOrEqualTo(minJoinPoolBalanceValue)) {
           result.push(poolInfo);

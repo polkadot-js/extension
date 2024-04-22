@@ -206,33 +206,24 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const validatorList = nominations.targets;
 
       await Promise.all(validatorList.map(async (validatorAddress) => {
-        let sortedNominators: PalletStakingExposureItem[] = [];
+        let eraStakerOtherList: PalletStakingExposureItem[] = [];
 
-        if (['kusama'].includes(this.chain)) { // todo: hot fix for kusama first, we'll review all relaychains later
+        if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
           const _eraStaker = await substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress);
-          const eraStakerOtherList: PalletStakingExposureItem[] = [];
 
-          _eraStaker.forEach((paged) => {
-            const pagedExposure = paged[1].toPrimitive() as unknown as SpStakingExposurePage;
-
-            eraStakerOtherList.push(...pagedExposure.others);
-          });
-
-          sortedNominators = eraStakerOtherList
-            .sort((a, b) => {
-              return new BigN(b.value).minus(a.value).toNumber();
-            })
-          ;
+          eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);
         } else {
           const _eraStaker = await substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress);
           const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
 
-          sortedNominators = eraStaker.others
-            .sort((a, b) => {
-              return new BigN(b.value).minus(a.value).toNumber();
-            })
-          ;
+          eraStakerOtherList = eraStaker.others;
         }
+
+        const sortedNominators: PalletStakingExposureItem[] = eraStakerOtherList
+          .sort((a, b) => {
+            return new BigN(b.value).minus(a.value).toNumber();
+          })
+        ;
 
         const topNominators = sortedNominators
           .map((nominator) => {

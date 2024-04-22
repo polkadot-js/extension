@@ -75,8 +75,8 @@ const Component: React.FC<Props> = (props: Props) => {
       setCrowdloanFundInfoMap(crowdloanFundsToMap(crowdloanFunds));
       setChainInfoMap(chainInfoItemsToMap(chainInfoItems));
 
-      const curerntTimestamp = (new Date()).getTime();
-      const nearestTime = Object.values(periodTimeInfo.polkadot).find((t) => t > curerntTimestamp);
+      const currentTimestamp = (new Date()).getTime();
+      const nearestTime = Object.values(periodTimeInfo.polkadot).find((t) => t > currentTimestamp);
 
       setCrowdloanUnlockTime(nearestTime || 0);
 

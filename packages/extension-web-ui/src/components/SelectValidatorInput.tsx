@@ -91,15 +91,17 @@ const Component: React.FC<Props> = (props: Props) => {
                 />
               )
               : (
-                <Button
-                  disabled={disabled}
-                  icon={<Icon
-                    phosphorIcon={Book}
-                    size={'sm'}
-                  />}
-                  size={'xs'}
-                  type={'ghost'}
-                />
+                <>
+                  <Button
+                    disabled={disabled}
+                    icon={<Icon
+                      phosphorIcon={Book}
+                      size={'sm'}
+                    />}
+                    size={'xs'}
+                    type={'ghost'}
+                  />
+                </>
               )
           }
         </div>

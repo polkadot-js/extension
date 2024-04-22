@@ -19,7 +19,7 @@ import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHi
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Aperture, ArrowDownLeft, ArrowUpRight, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowsLeftRight, ArrowUpRight, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -39,7 +39,8 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   crowdloan: Rocket,
   nft: Aperture,
   processing: Spinner,
-  default: ClockCounterClockwise
+  default: ClockCounterClockwise,
+  swap: ArrowsLeftRight
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
@@ -57,6 +58,10 @@ function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
 
   if (item.type === ExtrinsicType.STAKING_CLAIM_REWARD) {
     return IconMap.claim_reward;
+  }
+
+  if (item.type === ExtrinsicType.SWAP) {
+    return IconMap.swap;
   }
 
   if (isTypeStaking(item.type)) {
@@ -128,7 +133,8 @@ enum FilterValue {
   CROWDLOAN = 'crowdloan',
   SUCCESSFUL = 'successful',
   FAILED = 'failed',
-  EARN = 'earn'
+  EARN = 'earn',
+  SWAP = 'swap'
 }
 
 function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
@@ -249,6 +255,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           if (item.type === ExtrinsicType.CROWDLOAN) {
             return true;
           }
+        } else if (filter === FilterValue.SWAP) {
+          if (item.type === ExtrinsicType.SWAP) {
+            return true;
+          }
         } else if (filter === FilterValue.SUCCESSFUL) {
           if (item.status === ExtrinsicStatus.SUCCESS) {
             return true;
@@ -301,12 +311,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Send token'), value: FilterValue.SEND },
       { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
-      { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
+      { label: t('Earning transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward'), value: FilterValue.CLAIM },
+      { label: t('Swap'), value: FilterValue.SWAP },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
-      { label: t('Failed'), value: FilterValue.FAILED },
-      { label: t('Start earning'), value: FilterValue.EARN }
+      { label: t('Failed'), value: FilterValue.FAILED }
     ];
   }, [t]);
 
@@ -318,7 +328,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, {} as Record<string, string>);
   }, [accounts]);
 
-  const typeNameMap: Record<string, string> = useMemo((): Record<string, string> => ({
+  const typeNameMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'submitting' | 'processing' | 'timeout' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
@@ -332,7 +342,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake'),
     [ExtrinsicType.STAKING_UNBOND]: t('Unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
@@ -346,22 +356,26 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA'),
     [ExtrinsicType.MINT_STDOT]: t('Mint stDOT'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
     [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT'),
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
     [ExtrinsicType.TOKEN_APPROVE]: t('Token approve'),
+    [ExtrinsicType.SWAP]: t('Swap'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
-  const typeTitleMap: Record<string, string> = useMemo(() => ({
+  const typeTitleMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     send: t('Send token'),
     received: t('Receive token'),
@@ -372,8 +386,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake transaction'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
-    [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake transaction'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unstake transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
     [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw transaction'),
@@ -386,18 +400,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
     [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
     [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA transaction'),
     [ExtrinsicType.MINT_STDOT]: t('Mint stDOT transaction'),
     [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
     [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
     [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
     [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA transaction'),
     [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
     [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT tranasction'),
     [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA tranasction'),
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
     [ExtrinsicType.TOKEN_APPROVE]: t('Token approve transaction'),
+    [ExtrinsicType.SWAP]: t('Swap transaction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 

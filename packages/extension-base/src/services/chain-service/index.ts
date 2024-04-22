@@ -10,7 +10,7 @@ import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-se
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _CUSTOM_PREFIX, _DataMap, _EvmApi, _NetworkUpsertParams, _NFT_CONTRACT_STANDARDS, _SMART_CONTRACT_STANDARDS, _SmartContractTokenInfo, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse } from '@subwallet/extension-base/services/chain-service/types';
-import { _isAssetAutoEnable, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isAssetAutoEnable, _isAssetCanPayTxFee, _isAssetFungibleToken, _isChainEnabled, _isCustomAsset, _isCustomChain, _isCustomProvider, _isEqualContractAddress, _isEqualSmartContractAsset, _isMantaZkAsset, _isPureEvmChain, _isPureSubstrateChain, _parseAssetRefKey, fetchPatchData, randomizeProvider, updateLatestChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { IChain, IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -52,6 +52,7 @@ export class ChainService {
   private assetRegistrySubject = new Subject<Record<string, _ChainAsset>>();
   private multiChainAssetMapSubject = new Subject<Record<string, _MultiChainAsset>>();
   private xcmRefMapSubject = new Subject<Record<string, _AssetRef>>();
+  private swapRefMapSubject = new Subject<Record<string, _AssetRef>>();
   private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
   private chainLogoMapSubject = new BehaviorSubject<Record<string, string>>(ChainLogoMap);
   private assetMapPatch: string = JSON.stringify({});
@@ -71,6 +72,7 @@ export class ChainService {
     this.chainStateMapSubject.next(this.dataMap.chainStateMap);
     this.assetRegistrySubject.next(this.dataMap.assetRegistry);
     this.xcmRefMapSubject.next(this.xcmRefMap);
+    this.swapRefMapSubject.next(this.swapRefMap);
 
     if (MODULE_SUPPORT.MANTA_ZK) {
       console.log('Init Manta ZK');
@@ -83,12 +85,28 @@ export class ChainService {
     this.logger = createLogger('chain-service');
   }
 
+  public subscribeSwapRefMap () {
+    return this.swapRefMapSubject;
+  }
+
   // Getter
   get xcmRefMap () {
     const result: Record<string, _AssetRef> = {};
 
     Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
       if (assetRef.path === _AssetRefPath.XCM) {
+        result[key] = assetRef;
+      }
+    });
+
+    return result;
+  }
+
+  get swapRefMap () {
+    const result: Record<string, _AssetRef> = {};
+
+    Object.entries(this.dataMap.assetRefMap).forEach(([key, assetRef]) => {
+      if (assetRef.path === _AssetRefPath.SWAP) {
         result[key] = assetRef;
       }
     });
@@ -627,6 +645,7 @@ export class ChainService {
     this.dataMap.assetRefMap = updatedAssetRefMap;
 
     this.xcmRefMapSubject.next(this.xcmRefMap);
+    this.swapRefMapSubject.next(this.swapRefMap);
     this.logger.log('Finished updating latest asset ref');
   }
 
@@ -754,6 +773,19 @@ export class ChainService {
           return Promise.resolve();
         }
       }));
+  }
+
+  public async initSingleApi (slug: string) {
+    const chainInfoMap = this.getChainInfoMap();
+    const chainStateMap = this.getChainStateMap();
+
+    if (!chainStateMap[slug].active) {
+      return false;
+    }
+
+    await this.initApiForChain(chainInfoMap[slug]);
+
+    return true;
   }
 
   private async initApiForChain (chainInfo: _ChainInfo) {
@@ -1909,5 +1941,11 @@ export class ChainService {
     }
 
     return result;
+  }
+
+  public getFeeTokensByChain (chainSlug: string): string[] {
+    return Object.values(this.getAssetRegistry()).filter((chainAsset) => {
+      return chainAsset.originChain === chainSlug && (chainAsset.assetType === _AssetType.NATIVE || _isAssetCanPayTxFee(chainAsset));
+    }).map((chainAsset) => chainAsset.slug);
   }
 }

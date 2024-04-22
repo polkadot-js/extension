@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetHubNftType, NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-base/utils';
@@ -32,7 +32,7 @@ interface CollectionDetail {
   description?: string
 }
 
-export default class StatemineNftApi extends BaseNftApi {
+export default class AssetHubUniquesPalletApi extends BaseNftApi {
   // eslint-disable-next-line no-useless-constructor
   constructor (api: _SubstrateApi | null, addresses: string[], chain: string) {
     super(chain, api, addresses);
@@ -152,7 +152,8 @@ export default class StatemineNftApi extends BaseNftApi {
           image: tokenInfo && tokenInfo.image ? this.parseUrl(tokenInfo?.image) : undefined,
           collectionId: this.parseTokenId(parsedClassId),
           chain: this.chain,
-          owner: address
+          owner: address,
+          assetHubType: AssetHubNftType.UNIQUES
         } as NftItem;
 
         params.updateItem(this.chain, parsedNft, address);

@@ -6,7 +6,7 @@ export const getValidatorKey = (address?: string, identity?: string) => {
 };
 
 export const parseNominations = (nomination: string) => {
-  const infoList = nomination.split(',');
+  const infoList = (nomination || '').split(',');
 
   const result: string[] = [];
 

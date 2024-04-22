@@ -13,9 +13,9 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { PageStatus, responseMessage, setupHandlers } from './messageHandle';
 
-responseMessage({ id: '0', response: { status: 'load' } } as PageStatus);
-
 setupHandlers();
+
+responseMessage({ id: '0', response: { status: 'load' } } as PageStatus);
 
 // initial setup
 cryptoWaitReady()

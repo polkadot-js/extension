@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import { HistoryStatusMap, TxTypeNameMap } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import SwapLayout from '@subwallet/extension-web-ui/Popup/Home/History/Detail/parts/SwapLayout';
 import { ThemeProps, TransactionHistoryDisplayItem } from '@subwallet/extension-web-ui/types';
 import { formatHistoryDate, isAbleToShowFee, toShort } from '@subwallet/extension-web-ui/utils';
 import CN from 'classnames';
@@ -25,6 +27,12 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const { language } = useSelector((state) => state.settings);
+
+  if (data.type === ExtrinsicType.SWAP) {
+    return (
+      <SwapLayout data={data} />
+    );
+  }
 
   return (
     <MetaInfo className={CN(className)}>

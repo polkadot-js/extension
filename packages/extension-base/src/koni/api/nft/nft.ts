@@ -77,7 +77,7 @@ export abstract class BaseNftApi {
 
   protected parseTokenId (tokenId: string) {
     if (tokenId.includes(',')) {
-      return tokenId.replace(',', '');
+      return tokenId.replaceAll(',', '');
     }
 
     return tokenId;

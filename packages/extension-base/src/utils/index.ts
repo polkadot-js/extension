@@ -433,3 +433,4 @@ export * from './translate';
 export * from './object';
 export * from './fetchStaticData';
 export * from './fetchEvmChainInfo';
+export * from './swap';

@@ -66,7 +66,6 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.empty-list-inner': {
-      maxWidth: 358,
       width: '100%',
       display: 'flex',
       gap: token.padding,

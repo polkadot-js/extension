@@ -66,8 +66,13 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         return;
       }
 
+      let maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+      const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
+      const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
+
+      maxNominations = maxNominationsByNominationQuota ?? maxNominations;
+
       const currentEra = _currentEra.toString();
-      const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 

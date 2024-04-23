@@ -13,11 +13,13 @@ import { getInternalError, getSdkError } from '@walletconnect/utils';
 import { BehaviorSubject } from 'rxjs';
 
 import PolkadotRequestHandler from './handler/PolkadotRequestHandler';
-import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
+import { ALL_WALLET_CONNECT_EVENT, DEFAULT_WALLET_CONNECT_OPTIONS, WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_SUPPORTED_METHODS } from './constants';
 import { convertConnectRequest, convertNotSupportRequest, isSupportWalletConnectChain } from './helpers';
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletConnectSession, WalletConnectSigningMethod } from './types';
 
 const storage = SWStorage.instance;
+const methodDOTRequire = [POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_MESSAGE, POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_TRANSACTION];
+const methodEVMRequire = [EIP155_SIGNING_METHODS.PERSONAL_SIGN, EIP155_SIGNING_METHODS.ETH_SIGN, EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION];
 
 class WCStorage implements IKeyValueStorage {
   async getEntries<T = any> (): Promise<[string, T][]> {
@@ -223,6 +225,18 @@ export default class WalletConnectService {
 
   public async approveSession (result: ResultApproveWalletConnectSession) {
     this.#checkClient();
+
+    Object.entries(result.namespaces).forEach(([namespace, { methods }]) => {
+      methods = [
+        ...methods,
+        ...this.findMethodsMissing(WALLET_CONNECT_EIP155_NAMESPACE === namespace
+          ? methodEVMRequire
+          : methodDOTRequire, methods
+        )
+      ];
+      result.namespaces[namespace].methods = methods;
+    });
+
     await this.#client?.approve(result);
     this.#updateSessions();
   }
@@ -295,5 +309,16 @@ export default class WalletConnectService {
     });
 
     this.#updateSessions();
+  }
+
+  private findMethodsMissing (methodRequire: (POLKADOT_SIGNING_METHODS | EIP155_SIGNING_METHODS) [], methods: string[]) {
+    const methodMap = methods.reduce((obj, m) =>
+      ({ ...obj, [m]: m }), {} as Record<EIP155_SIGNING_METHODS | POLKADOT_SIGNING_METHODS, string>);
+
+    return methodEVMRequire.reduce((methods, m) => {
+      !methodMap[m] && methods.push(m);
+
+      return methods;
+    }, [] as string[]);
   }
 }

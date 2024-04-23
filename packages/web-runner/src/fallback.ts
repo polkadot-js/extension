@@ -35,7 +35,8 @@ global.chrome.tabs = {
   // @ts-ignore
   query: () => {
     // void
-  }
+  },
+  getURL: (input: string) => (input)
 };
 
 global.chrome.storage = {

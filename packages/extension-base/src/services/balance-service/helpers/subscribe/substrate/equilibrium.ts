@@ -4,12 +4,11 @@
 import { SignedBalance } from '@equilab/api/genshiro/interfaces';
 import { _AssetType } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
-import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
-import { BalanceItem } from '@subwallet/extension-base/types';
+import { BalanceItem, SubscribeSubstratePalletBalance } from '@subwallet/extension-base/types';
+import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
-import { ApiPromise } from '@polkadot/api';
 import { BN, BN_ZERO } from '@polkadot/util';
 
 type EqBalanceItem = [number, { positive: number }];
@@ -20,13 +19,13 @@ type EqBalanceV0 = {
   }
 }
 
-export async function subscribeEquilibriumTokenBalance (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean): Promise<() => void> {
-  const state = SWHandler.instance.state;
+export const subscribeEquilibriumTokenBalance = async ({ addresses, assetMap, callback, chainInfo, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance): Promise<() => void> => {
+  const chain = chainInfo.slug;
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
-  const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
+  const tokenMap = filterAssetsByChainAndType(assetMap, chain, tokenTypes);
 
   try {
-    const unsub = await api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => { // Equilibrium customizes the SystemAccount pallet
+    const unsub = await substrateApi.query.system.account.multi(addresses, (balances: Record<string, any>[]) => { // Equilibrium customizes the SystemAccount pallet
       Object.values(tokenMap).forEach((tokenInfo) => {
         const assetId = _getTokenOnChainAssetId(tokenInfo);
 
@@ -48,7 +47,7 @@ export async function subscribeEquilibriumTokenBalance (addresses: string[], cha
           };
         });
 
-        callBack(items);
+        callback(items);
       });
     });
 
@@ -67,25 +66,25 @@ export async function subscribeEquilibriumTokenBalance (addresses: string[], cha
         };
       });
 
-      callBack(items);
+      callback(items);
     });
 
     return () => {
       // Empty
     };
   }
-}
+};
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function subscribeEqBalanceAccountPallet (addresses: string[], chain: string, api: ApiPromise, callBack: (rs: BalanceItem[]) => void, includeNativeToken?: boolean): Promise<() => void> {
-  const state = SWHandler.instance.state;
+export const subscribeEqBalanceAccountPallet = async ({ addresses, assetMap, callback, chainInfo, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance): Promise<() => void> => {
+  const chain = chainInfo.slug;
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
-  const tokenMap = state.getAssetByChainAndAsset(chain, tokenTypes);
+  const tokenMap = filterAssetsByChainAndType(assetMap, chain, tokenTypes);
 
   const unsubList = Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const assetId = _getTokenOnChainAssetId(tokenInfo);
-      const unsub = await api.query.eqBalances.account.multi(addresses.map((address) => [address, [assetId]]), (balances: SignedBalance[]) => {
+      const unsub = await substrateApi.query.eqBalances.account.multi(addresses.map((address) => [address, [assetId]]), (balances: SignedBalance[]) => {
         const items: BalanceItem[] = balances.map((balance, index) => {
           return {
             address: addresses[index],
@@ -96,7 +95,7 @@ export async function subscribeEqBalanceAccountPallet (addresses: string[], chai
           };
         });
 
-        callBack(items);
+        callback(items);
       });
 
       return unsub;
@@ -113,7 +112,7 @@ export async function subscribeEqBalanceAccountPallet (addresses: string[], chai
         };
       });
 
-      callBack(items);
+      callback(items);
 
       return undefined;
     }
@@ -126,4 +125,4 @@ export async function subscribeEqBalanceAccountPallet (addresses: string[], chai
       }).catch(console.error);
     });
   };
-}
+};

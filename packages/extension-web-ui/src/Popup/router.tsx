@@ -53,6 +53,7 @@ export class LazyLoader {
 const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwallet/extension-web-ui/Popup/PhishingDetected'));
 const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-web-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-web-ui/Popup/CreateDone'));
+const RedirectHandler = new LazyLoader('RedirectHandler', () => import('@subwallet/extension-web-ui/Popup/RedirectHandler'));
 const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-web-ui/Popup/BuyTokens'));
 
 const Tokens = new LazyLoader('Tokens', () => import('@subwallet/extension-web-ui/Popup/Home/Tokens'));
@@ -115,6 +116,7 @@ const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-web
 const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake'));
 const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward'));
 const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw'));
+const SwapTransaction = new LazyLoader('SwapTransaction', () => import('@subwallet/extension-web-ui/Popup/Transaction/variants/Swap'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-web-ui/Popup/WalletConnect/ConnectWalletConnect'));
@@ -128,6 +130,9 @@ const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-web-ui/
 const EarningEntry = new LazyLoader('EarningEntry', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry'));
 const EarningPools = new LazyLoader('EarningPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPools'));
 const EarningPositionDetail = new LazyLoader('EarningPositionDetail', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPositionDetail'));
+const EarningPreviewOptions = new LazyLoader('EarningPreviewOptions', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewOptions'));
+const EarningPreviewPools = new LazyLoader('EarningPreviewPools', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewPools'));
+const EarningPreviewOutlet = new LazyLoader('EarningPreviewOutlet', () => import('@subwallet/extension-web-ui/Popup/Home/Earning/EarningPreview/EarningPreviewOutlet'));
 
 // const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Outlet'));
 // const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-web-ui/Popup/EarningDone/Content'));
@@ -172,6 +177,7 @@ export const router = createBrowserRouter([
       Welcome.generateRouterObject('/welcome', true),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
+      RedirectHandler.generateRouterObject('/redirect-handler/:feature'),
       {
         ...Home.generateRouterObject('/home'),
         children: [
@@ -221,6 +227,7 @@ export const router = createBrowserRouter([
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),
           Withdraw.generateRouterObject('withdraw'),
+          SwapTransaction.generateRouterObject('swap'),
           {
             path: 'compound',
             element: <Example />
@@ -230,12 +237,13 @@ export const router = createBrowserRouter([
       {
         ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
-      // {
-      //   ...EarningDoneOutlet.generateRouterObject('earning-done'),
-      //   children: [
-      //     EarningDoneContent.generateRouterObject(':address/:chain/:transactionId')
-      //   ]
-      // },
+      {
+        ...EarningPreviewOutlet.generateRouterObject('/earning-preview'),
+        children: [
+          EarningPreviewOptions.generateRouterObject(''),
+          EarningPreviewPools.generateRouterObject('pools')
+        ]
+      },
       {
         path: '/keyring',
         element: <Outlet />,
@@ -304,12 +312,6 @@ export const router = createBrowserRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      // {
-      //   ...EarningOutlet.generateRouterObject('earning-demo'),
-      //   children: [
-      //     EarningDemo.generateRouterObject('')
-      //   ]
-      // },
       {
         ...CrowdloanUnlockCampaign.generateRouterObject('/crowdloan-unlock-campaign'),
         children: [

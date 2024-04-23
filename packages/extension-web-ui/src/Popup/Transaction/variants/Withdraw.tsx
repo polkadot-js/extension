@@ -10,6 +10,7 @@ import { RequestYieldWithdrawal, UnstakingInfo, UnstakingStatus, YieldPoolType, 
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useGetBalance, useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-web-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
@@ -18,7 +19,7 @@ import { convertFieldToObject, isAccountAll, simpleCheckForm } from '@subwallet/
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight, XCircle } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -50,6 +51,7 @@ const filterAccount = (
 const Component = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { defaultData, persistData } = useTransactionContext<WithdrawParams>();
   const { slug } = defaultData;
@@ -170,6 +172,22 @@ const Component = () => {
     return accounts.filter(filterAccount(chainInfoMap, allPositionInfos, poolInfo.type));
   }, [accounts, allPositionInfos, chainInfoMap, poolInfo.type]);
 
+  const exType = useMemo(() => {
+    if (type === YieldPoolType.LIQUID_STAKING) {
+      if (chainValue === 'moonbeam') {
+        return ExtrinsicType.EVM_EXECUTE;
+      } else {
+        return ExtrinsicType.UNKNOWN;
+      }
+    }
+
+    if (type === YieldPoolType.LENDING) {
+      return ExtrinsicType.UNKNOWN;
+    }
+
+    return ExtrinsicType.STAKING_WITHDRAW;
+  }, [type, chainValue]);
+
   useEffect(() => {
     if (!fromValue && accountList.length === 1) {
       form.setFieldValue('from', accountList[0].address);
@@ -228,19 +246,23 @@ const Component = () => {
         </Form>
       </TransactionContent>
       <TransactionFooter>
-        <Button
-          disabled={loading}
-          icon={(
-            <Icon
-              phosphorIcon={XCircle}
-              weight='fill'
-            />
-          )}
-          onClick={goHome}
-          schema={'secondary'}
-        >
-          {t('Cancel')}
-        </Button>
+        {
+          !isWebUI && (
+            <Button
+              disabled={loading}
+              icon={(
+                <Icon
+                  phosphorIcon={XCircle}
+                  weight='fill'
+                />
+              )}
+              onClick={goHome}
+              schema={'secondary'}
+            >
+              {t('Cancel')}
+            </Button>
+          )
+        }
 
         <Button
           disabled={isDisable || !isBalanceReady}
@@ -251,7 +273,7 @@ const Component = () => {
             />
           )}
           loading={loading}
-          onClick={onPreCheck(form.submit, type === YieldPoolType.NOMINATION_POOL ? ExtrinsicType.STAKING_POOL_WITHDRAW : ExtrinsicType.STAKING_WITHDRAW)}
+          onClick={onPreCheck(form.submit, exType)}
         >
           {t('Continue')}
         </Button>

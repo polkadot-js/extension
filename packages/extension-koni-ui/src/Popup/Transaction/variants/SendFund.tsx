@@ -7,7 +7,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
-import { AccountSelector, AddressInput, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { AccountSelector, AddressInput, AlertBox, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useIsMantaPayEnabled, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -778,6 +778,17 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           tokenSlug={asset}
         />
         {
+          chain !== destChain && (
+            <div className={'__warning_message_cross_chain'}>
+              <AlertBox
+                description={t('Cross-chain transfer to an exchange (CEX) will result in loss of funds. Make sure the receiving address is not an exchange address.')}
+                title={t('Pay attention!')}
+                type={'warning'}
+              />
+            </div>
+          )
+        }
+        {
           !!alertProps && (
             <AlertModal
               modalId={alertModalId}
@@ -824,6 +835,10 @@ const SendFund = styled(_SendFund)(({ theme }) => {
 
     '.middle-item': {
       marginBottom: token.marginSM
+    },
+
+    '.__warning_message_cross_chain': {
+      marginTop: token.marginXS
     },
 
     '&.-transaction-content.-is-zero-balance': {

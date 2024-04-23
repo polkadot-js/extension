@@ -28,7 +28,7 @@ const Component: React.FC<StatusInfoItem> = (props: StatusInfoItem) => {
         )
       }
 
-      <div className={'__col __value-col -to-right'}>
+      <div className={'__col __value-col -to-right -inline'}>
         <div className={`__status-item __value -is-wrapper -schema-${valueColorSchema}`}>
           <Icon
             className={'__status-icon'}

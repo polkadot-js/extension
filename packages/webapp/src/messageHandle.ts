@@ -52,3 +52,5 @@ export function setupHandlers () {
     }
   });
 }
+
+bgMessage.setReady();

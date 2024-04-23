@@ -4,7 +4,7 @@
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-web-ui/components';
+import { BaseModal, SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
 import { BasicInputWrapper } from '@subwallet/extension-web-ui/components/Field/Base';
 import { EarningValidatorDetailModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
@@ -14,7 +14,7 @@ import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useFilterModal, useGetPoolTargetList, useSelector, useSelectValidators, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-web-ui/types';
 import { getValidatorKey } from '@subwallet/extension-web-ui/utils/transaction/stake';
-import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import BigN from 'bignumber.js';
 import { CaretLeft, CheckCircle, FadersHorizontal, SortAscending } from 'phosphor-react';
@@ -77,6 +77,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
+  const defaultValueRef = useRef({ _default: '_', selected: '_' });
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -135,7 +136,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     onApplyChangeValidators,
     onCancelSelectValidator,
     onChangeSelectedValidator,
-    onInitValidators } = useSelectValidators(id, chain, maxCount, onChange, isSingleSelect);
+    onInitValidators } = useSelectValidators(items, id, chain, maxCount, onChange, isSingleSelect);
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
@@ -291,11 +292,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
     const selected = defaultValue || (isSingleSelect ? '' : _default);
 
+    if (defaultValueRef.current._default === _default && defaultValueRef.current.selected === selected) {
+      return;
+    }
+
     onInitValidators(_default, selected);
     onChange && onChange({ target: { value: selected } });
 
+    defaultValueRef.current = { _default, selected };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators, isSingleSelect]);
+  }, [nominations, onInitValidators, isSingleSelect, defaultValue]);
 
   useEffect(() => {
     if (!isActive) {
@@ -322,8 +328,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />
-      <SwModal
-        className={`${className} modal-full`}
+      <BaseModal
+        className={`${className}`}
         closeIcon={(
           <Icon
             phosphorIcon={CaretLeft}
@@ -331,19 +337,21 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           />
         )}
         footer={(
-          <Button
-            block
-            disabled={!changeValidators.length}
-            icon={(
-              <Icon
-                phosphorIcon={CheckCircle}
-                weight={'fill'}
-              />
-            )}
-            onClick={onApplyChangeValidators}
-          >
-            {t(applyLabel, { number: changeValidators.length })}
-          </Button>
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <Button
+              block
+              disabled={!changeValidators.length}
+              icon={(
+                <Icon
+                  phosphorIcon={CheckCircle}
+                  weight={'fill'}
+                />
+              )}
+              onClick={onApplyChangeValidators}
+            >
+              {t(applyLabel, { number: changeValidators.length })}
+            </Button>
+          </div>
         )}
         id={id}
         onCancel={onCancelSelectValidator}
@@ -373,7 +381,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
           // showActionBtn
         />
-      </SwModal>
+      </BaseModal>
 
       <FilterModal
         id={FILTER_MODAL_ID}
@@ -404,22 +412,18 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
 const EarningValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-header': {
-      paddingTop: token.paddingXS,
-      paddingBottom: token.paddingLG
-    },
-
     '.ant-sw-modal-body': {
       overflow: 'hidden',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      paddingLeft: 0,
+      paddingRight: 0
     },
-
     '.ant-sw-modal-footer': {
       margin: 0,
-      marginTop: token.marginXS,
       borderTop: 0,
-      marginBottom: token.margin
+      paddingLeft: 0,
+      paddingRight: 0
     },
 
     '.pool-item:not(:last-child)': {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
@@ -10,9 +11,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, ButtonProps, Icon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { Export, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -49,6 +50,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
 const simpleQrModalId = 'simple-qr-modal-id';
+const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -301,6 +303,24 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     inactiveModal(ConnectWebsiteId);
   }, [inactiveModal]);
 
+  const exportAllAccounts = useCallback(() => {
+    activeModal(multiExportAccountModalId);
+  }, [activeModal]);
+
+  const rightButton = useMemo((): ButtonProps => ({
+    icon: (
+      <Icon
+        phosphorIcon={Export}
+        weight='fill'
+      />
+    ),
+    onClick: exportAllAccounts,
+    size: 'xs',
+    type: 'ghost',
+    tooltip: t('Export account'),
+    tooltipPlacement: 'topLeft'
+  }), [exportAllAccounts, t]);
+
   return (
     <div className={CN(className, 'container')}>
       {isPopup && (
@@ -337,6 +357,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
+        rightIconProps={rightButton}
         searchFunction={searchAccountFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Account name')}
@@ -358,6 +379,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         address={selectedQrAddress}
         id={simpleQrModalId}
         onBack={onQrModalBack}
+      />
+
+      <ExportAllSelector
+        items={accounts}
       />
     </div>
   );

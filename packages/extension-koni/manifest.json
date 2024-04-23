@@ -44,7 +44,7 @@
     "128": "images/icon-128.png"
   },
   "web_accessible_resources": [{
-    "resources": ["page.js"],
+    "resources": ["page.js", "images/icons/__error__.png"],
     "use_dynamic_url": false,
     "matches": ["file://*/*", "http://*/*", "https://*/*"]
   }],

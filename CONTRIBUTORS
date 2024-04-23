@@ -1,20 +1,20 @@
-    2441	AnhMTV                        	Release version 1.1.56
+    2449	AnhMTV                        	Update development link for static cache
     2334	Nam Phạm                      	[Issue 2937] style: remove logs
     2012	S2kael                        	
      799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
-     292	nguyentiendung                	[Issue-2823] Update debounce when input amount
+     293	nguyentiendung                	[Issue-2823] Update debounce when input amount
      185	quangdo                       	
+     107	bluezdot                      	[Issue-2941] Enable use online data
      105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-     103	bluezdot                      	[Issue-2934] Handle metadata TokenId
      101	lw-cdm                        	
+      84	Automation Bot                	[CI Skip] Auto increase webapp build number
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
-      78	Automation Bot                	[CI Skip] Auto increase webapp build number
       63	Roman                         	fix ui issues
-      58	Thiendekaco                   	
+      59	Thiendekaco                   	
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
       24	S2kael                        	

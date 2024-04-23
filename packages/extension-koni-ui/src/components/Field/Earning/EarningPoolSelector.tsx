@@ -15,7 +15,7 @@ import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@s
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import { Book, CaretLeft, FadersHorizontal, SortAscending } from 'phosphor-react';
+import { Book, CaretLeft, FadersHorizontal, SortAscending, ThumbsUp } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -115,7 +115,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const defaultSelectPool = defaultPoolMap[chain];
 
   const resultList = useMemo((): NominationPoolDataType[] => {
-    return [...items]
+    const recommendedObj: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: 0, idStr: '', isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isTag: true, disabled: true };
+    const othersObj: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: 0, idStr: '', isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Others', isTag: true, disabled: true };
+
+    const filteredItems = [...items]
       .filter((value) => {
         const filters = selectedFilters as NominationPoolDataType['state'][];
 
@@ -148,7 +151,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               return 0;
             }
         }
+      })
+      .map((item) => {
+        if (item.name && item.name.includes('SubWallet')) {
+          return { ...item, isRecommend: true };
+        }
+
+        return item;
       });
+
+    return [recommendedObj, ...filteredItems.filter((item) => item.isRecommend), othersObj, ...filteredItems.filter((item) => !item.isRecommend)];
   }, [items, selectedFilters, sortSelection]);
 
   const isDisabled = useMemo(() =>
@@ -182,6 +194,24 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const renderItem = useCallback((item: NominationPoolDataType) => {
+    if (item.isTag) {
+      return (
+        <div className={'__recommended-tag'}>{item.name?.toUpperCase()}
+          {item.name?.includes('Recommended')
+            ? (
+              <Icon
+                className={'__selected-icon'}
+                iconColor='#4cd9ac'
+                phosphorIcon={ThumbsUp }
+                size='sm'
+                weight='fill'
+              />
+            )
+            : null}
+        </div>
+      );
+    }
+
     return (
       <StakingPoolItem
         {...item}
@@ -367,6 +397,12 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
 
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
+    },
+
+    '.__recommended-tag': {
+      fontSize: token.fontSizeSM,
+      color: token.colorTextSecondary,
+      fontWeight: token.fontWeightStrong
     },
 
     '&.pool-selector-input': {

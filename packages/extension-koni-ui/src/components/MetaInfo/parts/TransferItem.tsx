@@ -79,19 +79,31 @@ const Component: React.FC<TransferInfoItem> = (props: TransferInfoItem) => {
           name={senderName}
         />
 
-        {!!originChain && (
-          <ChainItem
-            chain={originChain.slug}
-            label={t('Origin Chain')}
-          />
-        )}
+        {!!originChain && !!destinationChain && originChain.slug === destinationChain.slug
+          ? (
+            <ChainItem
+              chain={originChain.slug}
+              label={t('Network')}
+            />
+          )
+          : (
+            <>
+              {!!originChain && (
+                <ChainItem
+                  chain={originChain.slug}
+                  label={t('Origin Chain')}
+                />
+              )}
 
-        {!!destinationChain && (
-          <ChainItem
-            chain={destinationChain.slug}
-            label={t('Destination Chain')}
-          />
-        )}
+              {!!destinationChain && (
+                <ChainItem
+                  chain={destinationChain.slug}
+                  label={t('Destination Chain')}
+                />
+              )}
+            </>
+          )}
+
       </>
     );
   }

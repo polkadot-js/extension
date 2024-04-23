@@ -32,8 +32,8 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude', 'continuum_network'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'hydradx_rococo', 'pendulum', 'amplitude', 'continuum_network'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge'],
   supportBridged: ['rococo_assethub']
@@ -74,7 +74,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shiden: 24,
   shibuya: 24,
   bifrost_testnet: 0.5,
-  bifrost: 2,
+  bifrost: 13 * 600 / 3600, // real blocktime of bifros ksm = 13s
   bifrost_dot: 24,
   ternoa: 24,
   calamari: 6,
@@ -90,7 +90,9 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   vara_network: 12,
   goldberg_testnet: 24,
   manta_network: 6,
-  krest_network: 4
+  krest_network: 4,
+  polimec: 6,
+  enjin_relaychain: 24
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -106,7 +108,19 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   edgeware: 6,
   creditcoin: 12,
   vara_network: 3,
-  goldberg_testnet: 20
+  goldberg_testnet: 20,
+  polimec: 12,
+  bifrost: 13, // expect 12 but actual 13
+  moonbeam: 12,
+  moonriver: 12,
+  moonbase: 6,
+  turing: 12,
+  turingStaging: 12,
+  bifrost_testnet: 3,
+  calamari: 12,
+  calamari_test: 12,
+  manta_network: 12,
+  enjin_relaychain: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -199,7 +213,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   acala: ['karura', 'acala', 'acala_testnet'],
   kintsugi: ['kintsugi', 'kintsugi_test', 'interlay', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
-  crab: ['crab', 'pangolin'],
+  // crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
   statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet'],
   riochain: ['riochain'],
@@ -207,7 +221,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   avail: ['kate', 'goldberg_testnet'],
   pendulum: ['pendulum', 'amplitude', 'amplitude_test', 'hydradx_main'],
   centrifuge: ['centrifuge'],
-  disable_transfer: ['invarch']
+  disable_transfer: ['invarch', 'crab', 'pangolin']
 };
 
 export const _BALANCE_PARSING_CHAIN_GROUP = {
@@ -241,7 +255,9 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 
 export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
   arbitrum_one: ['*'],
-  okxTest: ['*']
+  okxTest: ['*'],
+  astarZkEvm: ['*'],
+  xlayer: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

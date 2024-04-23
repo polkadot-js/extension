@@ -53,8 +53,10 @@ export interface AbstractAddressJson extends KeyringPair$Meta {
  * @prop {boolean} [isMasterAccount] - Is master account - account has seed
  * @prop {boolean} [isMasterPassword] - Account has migrated with wallet password
  * @prop {boolean} [isReadOnly] - Is readonly account
+ * @prop {boolean} [isReadOnly] - Is readonly account
+ * @prop {boolean} [isSubWallet] - Import from SubWallet
+ * @prop {boolean} [pendingMigrate] - Pending migrate password
  * @prop {string|null} [originGenesisHash] - Ledger's originGenesisHash
- * @prop {string} [parentAddress] - Parent's address
  * @prop {string} [source] - Account's source
  * @prop {string} [suri] - Derivate path
  * */
@@ -83,6 +85,10 @@ export interface AccountJson extends AbstractAddressJson {
   isMasterPassword?: boolean;
   /** Is readonly account */
   isReadOnly?: boolean;
+  /** Import from SubWallet */
+  isSubWallet?: boolean;
+  /** Pending migrate password */
+  pendingMigrate?: boolean;
   /** Ledger's originGenesisHash */
   originGenesisHash?: string | null;
   /** Parent's address */

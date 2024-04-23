@@ -6,7 +6,7 @@ import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Mo
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
 import { TokenGroupBalanceItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenGroupBalanceItem';
-import { DEFAULT_TRANSFER_PARAMS, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SWAP_PARAMS, DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
@@ -36,6 +36,7 @@ const Component = (): React.ReactElement => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
+  const accounts = useSelector((state: RootState) => state.accountState.accounts);
   const { accountBalance: { tokenGroupBalanceMap,
     totalBalanceInfo }, tokenGroupStructure: { sortedTokenGroups } } = useContext(HomeContext);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
@@ -51,6 +52,11 @@ const Component = (): React.ReactElement => {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const zkModeSyncProgress = useSelector((state: RootState) => state.mantaPay.progress);
   const [, setStorage] = useLocalStorage<TransferParams>(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
+  const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
 
   const handleScroll = useCallback((event: React.UIEvent<HTMLElement>) => {
     const topPosition = event.currentTarget.scrollTop;
@@ -164,6 +170,38 @@ const Component = (): React.ReactElement => {
   [navigate]
   );
 
+  const onOpenSwap = useCallback(() => {
+    if (currentAccount && currentAccount.isReadOnly) {
+      notify({
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
+        type: 'info',
+        duration: 3
+      });
+
+      return;
+    }
+
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
+
+    const isAllLedger = (filteredAccounts.length > 0 && filteredAccounts.every((account) => account.isHardware)) || (currentAccount && !isAccountAll(currentAccount.address) && (currentAccount.isHardware));
+
+    if ((currentAccount && currentAccount.isHardware) || (isAllLedger)) {
+      notify({
+        message: 'The account you are using is Ledger account, you cannot use this feature with it',
+        type: 'error',
+        duration: 3
+      });
+
+      return;
+    }
+
+    setSwapStorage({
+      ...DEFAULT_SWAP_PARAMS,
+      from: transactionFromValue
+    });
+    navigate('/transaction/swap');
+  }, [accounts, currentAccount, navigate, notify, setSwapStorage, t, transactionFromValue]);
+
   const tokenGroupBalanceItems = useMemo<TokenBalanceItemType[]>(() => {
     const result: TokenBalanceItemType[] = [];
 
@@ -203,6 +241,7 @@ const Component = (): React.ReactElement => {
           onOpenBuyTokens={onOpenBuyTokens}
           onOpenReceive={onOpenReceive}
           onOpenSendFund={onOpenSendFund}
+          onOpenSwap={onOpenSwap}
           totalChangePercent={totalBalanceInfo.change.percent}
           totalChangeValue={totalBalanceInfo.change.value}
           totalValue={totalBalanceInfo.convertedValue}

@@ -69,7 +69,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         }
 
         if (ALL_STAKING_ACTIONS.includes(action)) {
-          defaultMessage = detectTranslate('You are using a {{accountTitle}}. Staking is not supported with this account type');
+          defaultMessage = detectTranslate('You are using a {{accountTitle}}. Earning is not supported with this account type');
         }
 
         if (mode === AccountSignMode.LEDGER) {
@@ -96,7 +96,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
                   { replace: { network: networkName } }
                 ),
                 type: 'info',
-                duration: 1.5
+                duration: 8
               });
 
               return;
@@ -113,7 +113,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
               { replace: { accountTitle: accountTitle } }
             ),
             type: 'info',
-            duration: 1.5
+            duration: 8
           });
         }
       }

@@ -61,7 +61,6 @@ export default class ConnectWCRequestHandler {
     };
 
     this.updateIconConnectWC();
-    this.#requestService.popupOpen();
   }
 
   public resetWallet () {

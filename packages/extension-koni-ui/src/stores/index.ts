@@ -18,9 +18,11 @@ import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
 import EarningReducer from './feature/Earning';
 import MantaPayReducer from './feature/MantaPay';
+import MissionPoolReducer from './feature/MissionPool';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
+import SwapReducer from './feature/Swap';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
 
@@ -50,6 +52,7 @@ const rootReducers = combineReducers({
   campaign: CampaignReducer,
   buyService: BuyServiceReducer,
   earning: EarningReducer,
+  swap: SwapReducer,
 
   // common
   chainStore: ChainStoreReducer,
@@ -62,7 +65,10 @@ const rootReducers = combineReducers({
   uiViewState: UIViewStateReducer,
 
   // wallet connect
-  walletConnect: WalletConnectReducer
+  walletConnect: WalletConnectReducer,
+
+  // mission pool
+  missionPool: MissionPoolReducer
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducers);

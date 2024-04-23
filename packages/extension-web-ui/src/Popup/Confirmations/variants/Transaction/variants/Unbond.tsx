@@ -33,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Unbond amount')}
+          label={t('Unstake amount')}
           suffix={symbol}
           value={data.amount}
         />

@@ -4,17 +4,19 @@
 import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { PageWrapper, WalletConnect } from '@subwallet/extension-koni-ui/components';
 import { EXTENSION_VERSION, SUPPORT_MAIL, TERMS_OF_SERVICE_URL, TWITTER_URL, WEBSITE_URL, WIKI_URL } from '@subwallet/extension-koni-ui/constants/common';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { computeStatus, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, Parachute, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -78,6 +80,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const [locking, setLocking] = useState(false);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
+
+  const liveMissionsCount = useMemo(() => {
+    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
+  }, [missions]);
 
   const { isUILocked, lock, unlock } = useUILock();
 
@@ -136,6 +143,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           title: t('Security settings'),
           onClick: () => {
             navigate('/settings/security', { state: true });
+          }
+        },
+        {
+          key: 'mission-pools',
+          leftIcon: Parachute,
+          leftIconBgColor: token['cyan-5'],
+          rightIcon: CaretRight,
+          title: t('Mission pools'),
+          onClick: () => {
+            navigate('/settings/mission-pools', { state: true });
           }
         }
       ]
@@ -218,7 +235,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           rightIcon: ArrowSquareOut,
           title: t('Contact support'),
           onClick: () => {
-            window.open(`${SUPPORT_MAIL}?subject=[In-app Support]`, '_self');
+            window.open(`${SUPPORT_MAIL}?subject=[Extension - In-app support]`, '_self');
           }
         },
         {
@@ -351,7 +368,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                           leftItemIcon={generateLeftIcon(item.leftIconBgColor, item.leftIcon)}
                           name={item.title}
                           onPressItem={item.onClick}
-                          rightItem={generateRightIcon(item.rightIcon)}
+                          rightItem={
+                            <>
+                              {(item.key === 'mission-pools' && !!liveMissionsCount) && (
+                                <div className={'__active-count'}>{liveMissionsCount}</div>
+                              )}
+                              {generateRightIcon(item.rightIcon)}
+                            </>
+                          }
                         />
                       ))}
                   </div>
@@ -418,6 +442,19 @@ export const Settings = styled(Component)<Props>(({ theme: { token } }: Props) =
       display: 'flex',
       flexDirection: 'column',
       overflow: 'hidden',
+      '.__active-count': {
+        borderRadius: '50%',
+        color: token.colorWhite,
+        fontSize: token.fontSizeSM,
+        fontWeight: token.bodyFontWeight,
+        lineHeight: token.lineHeightSM,
+        paddingTop: 0,
+        paddingRight: token.paddingXS,
+        paddingLeft: token.paddingXS,
+        paddingBottom: 0,
+        backgroundColor: token.colorError,
+        marginRight: 14
+      },
 
       '.ant-sw-header-container': {
         paddingTop: token.padding,

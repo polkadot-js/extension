@@ -4,6 +4,8 @@
 export interface SubscanRequest<T> {
   id: number,
   retry: number, // retry < 1 not start, retry === 0 start, retry > 0 number of retry
+  /** Serve smaller first  */
+  ordinal: number,
   status: 'pending' | 'running',
   run: () => Promise<any>;
   resolve: (value: any) => T;
@@ -59,9 +61,13 @@ export interface ExtrinsicItem {
   block_timestamp: number,
   extrinsic_index: string,
   call_module_function: string,
+  /** Need be called from another api */
   params: string,
+  /** Deprecated */
   account_id: string,
+  /** Deprecated */
   account_index: string,
+  /** Deprecated */
   signature: string,
   call_module: string,
   nonce: number,
@@ -69,6 +75,7 @@ export interface ExtrinsicItem {
   success: boolean,
   fee: string,
   fee_used: string,
+  /** Deprecated */
   from_hex: string,
   tip: string,
   finalized: boolean,

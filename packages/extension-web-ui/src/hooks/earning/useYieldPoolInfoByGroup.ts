@@ -6,7 +6,7 @@ import { useGetChainSlugsByAccountType, useSelector } from '@subwallet/extension
 import { useMemo } from 'react';
 
 const useYieldPoolInfoByGroup = (group: string): YieldPoolInfo[] => {
-  const { poolInfoMap } = useSelector((state) => state.earning);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const chainsByAccountType = useGetChainSlugsByAccountType();
 
   return useMemo(() => {

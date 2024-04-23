@@ -1,22 +1,22 @@
-    2316	AnhMTV                        	Release version 1.1.42
-    2169	Nam Phạm                      	[Issue 2698] fix eslint
-    1949	S2kael                        	[Issue-2698] Update stable chain-list version
-     619	lw-cdm                        	Fix issue related to undefined object
+    2441	AnhMTV                        	Release version 1.1.56
+    2334	Nam Phạm                      	[Issue 2937] style: remove logs
+    2012	S2kael                        	
+     799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
+     292	nguyentiendung                	[Issue-2823] Update debounce when input amount
      185	quangdo                       	
+     105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      99	lw-cdm                        	
-      88	dominhquang                   	[Issue-2649] Add send crash log feature
+     103	bluezdot                      	[Issue-2934] Handle metadata TokenId
+     101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      80	leewong                       	Update account filter for earn transaction
+      81	leewong                       	Swap - Change idle time to 300s
+      78	Automation Bot                	[CI Skip] Auto increase webapp build number
       63	Roman                         	fix ui issues
-      62	nguyentiendung                	
-      53	bluezdot                      	fix eslint
+      58	Thiendekaco                   	
       53	Dominhquangdev                	update Bridge code
-      47	bluedot                       	update priceId for EWT on Energy Web X
-      29	Automation Bot                	[CI Skip] Auto increase webapp build number
-      27	Thiendekaco                   	update locate of file
+      48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

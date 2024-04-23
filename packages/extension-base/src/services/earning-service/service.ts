@@ -342,7 +342,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
     for (const handler of Object.values(this.handlers)) {
       // Force subscribe onchain data
-      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING;
+      const forceSubscribe = handler.type === YieldPoolType.LIQUID_STAKING || handler.type === YieldPoolType.LENDING || !onlineData[handler.slug];
 
       if (!this.useOnlineCacheOnly || forceSubscribe) {
         handler.subscribePoolInfo(callback)
@@ -502,8 +502,6 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const removeKeys: string[] = [];
 
     chains && chains.length > 0 && Object.entries(this.yieldPositionSubject.getValue()).forEach(([key, value]) => {
-      console.log('removeYieldPositions', key, value.chain, chains.indexOf(value.chain) > -1);
-
       if (chains.indexOf(value.chain) > -1 && !removeKeys.includes(key)) {
         removeKeys.push(key);
       }

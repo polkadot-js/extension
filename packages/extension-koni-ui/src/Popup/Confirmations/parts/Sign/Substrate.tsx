@@ -10,7 +10,7 @@ import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequest
 import { useLedger } from '@subwallet/extension-koni-ui/hooks/ledger/useLedger';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
+import { getShortMetadata, isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-koni-ui/utils';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils/account/account';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -21,7 +21,7 @@ import styled from 'styled-components';
 
 import { SignerResult } from '@polkadot/types/types';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
-import { u8aToU8a } from '@polkadot/util';
+import { hexToU8a, u8aToHex, u8aToU8a } from '@polkadot/util';
 
 import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
@@ -85,15 +85,15 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account.originGenesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
 
-  const chain = useGetChainInfoByGenesisHash(genesisHash);
+  const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
 
   const chainSlug = useMemo(() => {
     if (signMode === AccountSignMode.GENERIC_LEDGER) {
       return SUBSTRATE_GENERIC_KEY;
     } else {
-      return chain?.slug || '';
+      return chainInfo?.slug || '';
     }
-  }, [chain?.slug, signMode]);
+  }, [chainInfo?.slug, signMode]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -163,7 +163,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setLoading(true);
 
-    setTimeout(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async () => {
       if (typeof payload === 'string') {
         ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset)
           .then(({ signature }) => {
@@ -176,7 +177,10 @@ const Component: React.FC<Props> = (props: Props) => {
       } else {
         const payloadU8a = payload.toU8a(true);
 
-        ledgerSignTransaction(payloadU8a, new Uint8Array(0), account.accountIndex, account.addressOffset)
+        const blob = u8aToHex(payloadU8a);
+        const shortener = await getShortMetadata(chainInfo?.slug || '', blob);
+
+        ledgerSignTransaction(payloadU8a, hexToU8a(shortener), account.accountIndex, account.addressOffset)
           .then(({ signature }) => {
             onApproveSignature({ signature });
           })
@@ -185,18 +189,8 @@ const Component: React.FC<Props> = (props: Props) => {
             setLoading(false);
           });
       }
-    });
-  }, [
-    account.accountIndex,
-    account.addressOffset,
-    isLedgerConnected,
-    ledger,
-    ledgerSignMessage,
-    ledgerSignTransaction,
-    onApproveSignature,
-    payload,
-    refreshLedger
-  ]);
+    }, 100);
+  }, [account, isLedgerConnected, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, payload, refreshLedger, chainInfo]);
 
   const onConfirmInject = useCallback(() => {
     if (substrateWallet) {

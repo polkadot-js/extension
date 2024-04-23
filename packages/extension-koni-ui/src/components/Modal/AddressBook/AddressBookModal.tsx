@@ -14,7 +14,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'reac
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { isAddress } from '@polkadot/util-crypto';
+import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { AccountItemWithName } from '../../Account';
 import { GeneralEmptyList } from '../../EmptyList';

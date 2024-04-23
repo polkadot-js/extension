@@ -83,6 +83,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
 
             return;
           }
+
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
           const isEthereumAccount = isEthereumAddress(account.address);
 

@@ -18,13 +18,13 @@
     "./packageDetect.cjs"
   ],
   "type": "module",
-  "version": "0.47.1",
+  "version": "0.47.2-0-x",
   "main": "index.js",
   "dependencies": {
     "@polkadot/api": "^10.13.1",
-    "@polkadot/extension-chains": "0.47.1",
-    "@polkadot/extension-dapp": "0.47.1",
-    "@polkadot/extension-inject": "0.47.1",
+    "@polkadot/extension-chains": "0.47.2-0-x",
+    "@polkadot/extension-dapp": "0.47.2-0-x",
+    "@polkadot/extension-inject": "0.47.2-0-x",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/networks": "^12.6.2",
     "@polkadot/phishing": "^0.22.5",
@@ -39,6 +39,6 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/extension-mocks": "0.47.1"
+    "@polkadot/extension-mocks": "0.47.2-0-x"
   }
 }

@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.57
+Build date: Apl 23, 2024.
+
+Bugs fixed:
+- Fix bug related to Aleph Zero transfer and staking (#2655)
+- Fix issue related to earning status (#2941)
+
 ## 1.1.56
 Build date: Apl 19, 2024.
 

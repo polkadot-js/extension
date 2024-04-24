@@ -12,7 +12,7 @@ export const API_MAX_RETRY = 2;
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
-  avail: ['kate'],
+  avail: ['kate', 'availTuringTest'],
   goldberg: ['goldberg_testnet']
 };
 
@@ -33,7 +33,7 @@ export const _BALANCE_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
   bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'hydradx_rococo', 'pendulum', 'amplitude', 'continuum_network'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya', 'dbcchain'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge'],
   supportBridged: ['rococo_assethub']
@@ -217,7 +217,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   // crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
-  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet'],
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet', 'dbcchain'],
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],

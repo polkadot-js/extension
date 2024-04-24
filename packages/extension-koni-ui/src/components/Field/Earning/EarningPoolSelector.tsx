@@ -115,8 +115,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const defaultSelectPool = defaultPoolMap[chain];
 
   const resultList = useMemo((): NominationPoolDataType[] => {
-    const recommendedObj: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: 0, idStr: '', isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isTag: true, disabled: true };
-    const othersObj: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: 0, idStr: '', isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Others', isTag: true, disabled: true };
+    const idBase = Date.now();
+    const recommendedSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase, idStr: `${idBase}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isSessionHeader: true, disabled: true };
+    const othersSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase + 1, idStr: `${idBase + 1}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Others', isSessionHeader: true, disabled: true };
 
     const filteredItems = [...items]
       .filter((value) => {
@@ -160,7 +161,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         return item;
       });
 
-    return [recommendedObj, ...filteredItems.filter((item) => item.isRecommend), othersObj, ...filteredItems.filter((item) => !item.isRecommend)];
+    return [recommendedSessionHeader, ...filteredItems.filter((item) => item.isRecommend), othersSessionHeader, ...filteredItems.filter((item) => !item.isRecommend)];
   }, [items, selectedFilters, sortSelection]);
 
   const isDisabled = useMemo(() =>
@@ -194,16 +195,19 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const renderItem = useCallback((item: NominationPoolDataType) => {
-    if (item.isTag) {
+    if (item.isSessionHeader) {
       return (
-        <div className={'__recommended-tag'}>{item.name?.toUpperCase()}
+        <div
+          className={'__session-header'}
+          key={item.name}
+        >{item.name?.toUpperCase()}
           {item.name?.includes('Recommended')
             ? (
               <Icon
                 className={'__selected-icon'}
                 iconColor='#4cd9ac'
                 phosphorIcon={ThumbsUp }
-                size='sm'
+                size='xs'
                 weight='fill'
               />
             )
@@ -216,6 +220,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       <StakingPoolItem
         {...item}
         className={'pool-item'}
+        key={item.id}
         onClickMoreBtn={onClickMore(item)}
       />
     );
@@ -399,10 +404,21 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
       paddingBottom: token.padding
     },
 
-    '.__recommended-tag': {
+    '.__session-header': {
       fontSize: token.fontSizeSM,
       color: token.colorTextSecondary,
-      fontWeight: token.fontWeightStrong
+      fontWeight: token.fontWeightStrong,
+      marginBottom: -token.marginXXS,
+      marginTop: token.marginXXS,
+      lineHeight: token.lineHeightSM
+    },
+
+    '.__selected-icon': {
+      paddingLeft: token.paddingXXS
+    },
+
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
     },
 
     '&.pool-selector-input': {

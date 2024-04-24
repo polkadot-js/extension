@@ -321,7 +321,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     <>
       <SelectValidatorInput
         chain={chain}
-        disabled={!!items.length}
+        disabled={items.length < 1}
         label={t('Select') + ' ' + t(handleValidatorLabel)}
         loading={false}
         onClick={onActiveValidatorSelector}

@@ -44,6 +44,12 @@ const Component: React.FC<Props> = (props: Props) => {
                 </span>)
               </span>
             )}
+            {isTestnet && <div className={'__item-tag-wrapper'}>
+              <NetworkTag
+                className={'__item-tag'}
+                type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />
+            </div>}
           </div>
 
           {
@@ -62,12 +68,6 @@ const Component: React.FC<Props> = (props: Props) => {
               </div>
             )
           }
-          <div>
-            <NetworkTag
-              className={'__item-tag'}
-              type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
-            />
-          </div>
         </div>
 
         <div className={'__item-apy'}>
@@ -156,7 +156,10 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
       color: token.colorTextLight1,
-      textAlign: 'center'
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
     },
 
     '.__item-available-balance-wrapper': {
@@ -274,6 +277,10 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       justifyContent: 'center',
       paddingTop: token.paddingLG,
       paddingBottom: token.padding
+    },
+    '.__item-tag-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__item-button-icon': {

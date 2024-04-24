@@ -2594,6 +2594,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gear-js/api@npm:^0.37.2":
+  version: 0.37.2
+  resolution: "@gear-js/api@npm:0.37.2"
+  peerDependencies:
+    "@polkadot/api": 10.12.3
+    "@polkadot/wasm-crypto": 7.3.2
+    rxjs: 7.8.1
+  checksum: 02fda26f390381b28cd1f2078b4061a3c1acc3738757c3a91823d2e8ad8c11be37b5e0c45ac3f91cdbc20e1f467e157178668900c5a3f3c6c61d95dbf5fcf0c9
+  languageName: node
+  linkType: hard
+
 "@google/model-viewer@npm:3.1.1":
   version: 3.1.1
   resolution: "@google/model-viewer@npm:3.1.1"
@@ -6225,6 +6236,7 @@ __metadata:
     "@ethereumjs/tx": ^5.1.0
     "@ethersproject/abi": ^5.7.0
     "@galacticcouncil/sdk": ^2.1.0
+    "@gear-js/api": ^0.37.2
     "@json-rpc-tools/utils": ^1.7.6
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13

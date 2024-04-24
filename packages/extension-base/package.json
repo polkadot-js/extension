@@ -29,6 +29,7 @@
     "@ethereumjs/tx": "^5.1.0",
     "@ethersproject/abi": "^5.7.0",
     "@galacticcouncil/sdk": "^2.1.0",
+    "@gear-js/api": "^0.37.2",
     "@json-rpc-tools/utils": "^1.7.6",
     "@metamask/safe-event-emitter": "^2.0.0",
     "@metaverse-network-sdk/type-definitions": "^0.0.1-13",

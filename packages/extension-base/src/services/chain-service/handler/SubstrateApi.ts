@@ -4,6 +4,7 @@
 import '@polkadot/types-augment';
 
 import { options as acalaOptions } from '@acala-network/api';
+import { GearApi } from '@gear-js/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } from '@subwallet/extension-base/services/chain-service/constants';
@@ -30,6 +31,7 @@ import goldbergSpec from './chain-spec/goldberg';
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;
   api: ApiPromise;
+  gearApi?: GearApi;
   providerName?: string;
   provider: ProviderInterface;
   apiUrl: string;
@@ -132,6 +134,12 @@ export class SubstrateApi implements _SubstrateApi {
         rpc: goldbergSpec.rpc,
         types: goldbergSpec.types,
         signedExtensions: goldbergSpec.signedExtensions,
+        noInitWarn: true
+      });
+    } else if (_API_OPTIONS_CHAIN_GROUP.gear.includes(this.chainSlug)) {
+      api = new ApiPromise(apiOption);
+      this.gearApi = new GearApi({
+        provider,
         noInitWarn: true
       });
     } else {

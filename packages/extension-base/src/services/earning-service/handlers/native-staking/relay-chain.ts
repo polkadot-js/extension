@@ -10,7 +10,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP, MaxEraRewardPointsEras } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, SpStakingExposurePage, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -66,8 +66,13 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         return;
       }
 
+      let maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+      const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
+      const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
+
+      maxNominations = maxNominationsByNominationQuota ?? maxNominations;
+
       const currentEra = _currentEra.toString();
-      const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16'; // TODO
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
@@ -181,12 +186,30 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       await Promise.all(validatorList.map(async (validatorAddress) => {
         let nominationStatus = EarningStatus.NOT_EARNING;
-        const [[identity], _eraStaker] = await Promise.all([
-          parseIdentity(substrateApi, validatorAddress),
-          substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress)
-        ]);
-        const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-        const sortedNominators = eraStaker.others
+        let eraStakerOtherList: PalletStakingExposureItem[] = [];
+        let identity;
+
+        if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+          const [[_identity], _eraStaker] = await Promise.all([
+            parseIdentity(substrateApi, validatorAddress),
+            substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
+          ]);
+
+          identity = _identity;
+          eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);
+        } else {
+          const [[_identity], _eraStaker] = await Promise.all([
+            parseIdentity(substrateApi, validatorAddress),
+            substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress)
+          ]);
+
+          identity = _identity;
+          const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+
+          eraStakerOtherList = eraStaker.others;
+        }
+
+        const sortedNominators = eraStakerOtherList
           .sort((a, b) => {
             return new BigN(b.value).minus(a.value).toNumber();
           })
@@ -358,9 +381,17 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const endEraForPoints = parseInt(activeEra) - 1;
     let startEraForPoints = endEraForPoints - maxEraRewardPointsEras + 1;
 
+    let _eraStakersPromise;
+
+    if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+      _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
+    } else {
+      _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
+    }
+
     const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators, ..._eraRewardPoints] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
-      chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra)),
+      _eraStakersPromise,
       chainApi.api.query.staking.minNominatorBond(),
       chainApi.api.query.stakingRewards?.data && chainApi.api.query.stakingRewards.data(),
       chainApi.api.query.staking.validators.entries(),
@@ -399,13 +430,14 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
-    const eraStakers = _eraStakers as any[];
 
     const rawMinBond = _minBond.toHuman() as string;
     const minBond = rawMinBond.replaceAll(',', '');
 
     const totalStakeMap: Record<string, BN> = {};
     const bnDecimals = new BN((10 ** decimals).toString());
+
+    const eraStakers = _eraStakers as unknown as any[];
 
     for (const item of eraStakers) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

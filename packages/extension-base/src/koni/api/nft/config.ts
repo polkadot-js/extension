@@ -172,15 +172,7 @@ if (!RuntimeInfo.protocol ||
     weight: 1 // Rate limit too low
   },
   {
-    provider: NFT_STORAGE_GATEWAY,
-    weight: 50
-  },
-  {
     provider: GATEWAY_IPFS_IO,
-    weight: 5
-  },
-  {
-    provider: DWEB_LINK,
     weight: 5
   },
   {
@@ -188,6 +180,15 @@ if (!RuntimeInfo.protocol ||
     weight: 5
   }
   );
+} else if (!RuntimeInfo.protocol.startsWith('https')) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: NFT_STORAGE_GATEWAY,
+    weight: 50
+  },
+  {
+    provider: DWEB_LINK,
+    weight: 5
+  });
 }
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);

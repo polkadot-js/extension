@@ -94,8 +94,8 @@ export default class KoniExtension {
   readonly #koniState: KoniState;
   #timeAutoLock: number = DEFAULT_AUTO_LOCK_TIME;
   #skipAutoLock = false;
-  #alwaysLock = false;
   #firstTime = true;
+  #alwaysLock = false;
 
   constructor (state: KoniState) {
     this.#koniState = state;

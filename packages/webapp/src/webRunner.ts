@@ -48,8 +48,8 @@ cryptoWaitReady()
     // wake webapp up
     SWHandler.instance.state.wakeup().catch((err) => console.warn(err));
 
-    console.log('[WebApp] initialization completed.');
+    console.log('[WebApp] initialization completed');
   })
   .catch((error): void => {
-    console.error('[WebApp] initialization failed.', error);
+    console.error('[WebApp] initialization failed', error);
   });

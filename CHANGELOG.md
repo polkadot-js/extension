@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.47.2 Apr 23, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- chore: upgrade web3 dep (Thanks to https://github.com/gdethier)
+
+Changes:
+
+- Update polkadot/api and polkadot/phishing
+
+
 ## 0.47.1 Apr 18, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.

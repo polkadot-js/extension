@@ -88,8 +88,12 @@ export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
 
+export function _isNativeTokenTransferredByEvm (tokenInfo: _ChainAsset) {
+  return !tokenInfo.metadata?.disableEvmTransfer;
+}
+
 export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
-  return !!tokenInfo.metadata?.contractAddress || _isNativeToken(tokenInfo);
+  return !!tokenInfo.metadata?.contractAddress || (_isNativeToken(tokenInfo) && _isNativeTokenTransferredByEvm(tokenInfo));
 }
 
 export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {

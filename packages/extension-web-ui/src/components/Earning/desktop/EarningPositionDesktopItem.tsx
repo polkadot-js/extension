@@ -233,10 +233,10 @@ const Component: React.FC<Props> = (props: Props) => {
               className={'__item-tag'}
               type={poolInfo.type}
             />
-            {isTestNet && <NetworkTag
+            <NetworkTag
               className={'__item-tag'}
               type={isTestNet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
-            />}
+            />
           </div>
 
           <div className='__item-total-balance-value'>

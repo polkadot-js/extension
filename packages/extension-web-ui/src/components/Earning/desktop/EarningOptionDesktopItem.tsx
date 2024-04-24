@@ -62,12 +62,12 @@ const Component: React.FC<Props> = (props: Props) => {
               </div>
             )
           }
-          {isTestnet && <div>
+          <div>
             <NetworkTag
               className={'__item-tag'}
               type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
             />
-          </div>}
+          </div>
         </div>
 
         <div className={'__item-apy'}>

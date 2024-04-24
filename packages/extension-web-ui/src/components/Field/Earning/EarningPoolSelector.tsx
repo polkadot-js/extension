@@ -13,7 +13,7 @@ import { FilterModal } from '@subwallet/extension-web-ui/components/Modal/Filter
 import { SortingModal } from '@subwallet/extension-web-ui/components/Modal/SortingModal';
 import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
+import { Badge, Button, Icon, InputRef, ModalContext, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import { Book, CaretLeft, FadersHorizontal, SortAscending } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -56,7 +56,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', defaultValue, disabled,
     from,
     id = 'pool-selector',
-    label, loading, onChange,
+    label, onChange,
     onClickBookButton,
     setForceFetchValidator,
     slug, statusHelp,
@@ -277,7 +277,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         itemKey={'idStr'}
         items={resultList}
         label={label}
-        loading={loading}
+        loading={false}
         onClickActionBtn={onClickActionBtn}
         onSelect={_onSelectItem}
         placeholder={t('Select pool')}
@@ -307,28 +307,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         selected={value || ''}
         showActionBtn
         statusHelp={statusHelp}
-        suffix={loading
-          ? (
-            <div>
-              <ActivityIndicator size={20} />
-            </div>
-          )
-          : (
-            <div className='select-pool-suffix'>
-              <Button
-                disabled={isDisabled}
-                icon={(
-                  <Icon
-                    phosphorIcon={Book}
-                    size='sm'
-                  />
-                )}
-                onClick={onClickBookButton}
-                size='xs'
-                type='ghost'
-              />
-            </div>
-          )}
+        suffix={(
+          <div className='select-pool-suffix'>
+            <Button
+              disabled={isDisabled}
+              icon={(
+                <Icon
+                  phosphorIcon={Book}
+                  size='sm'
+                />
+              )}
+              onClick={onClickBookButton}
+              size='xs'
+              type='ghost'
+            />
+          </div>
+        )}
         title={t('Select pool')}
       />
 

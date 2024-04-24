@@ -1,8 +1,6 @@
 // Copyright 2017-2022 @polkadot/react-components authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import fetch from 'cross-fetch';
-
 import languageCache from './cache';
 
 type Callback = (error: string | null, data: unknown) => void;

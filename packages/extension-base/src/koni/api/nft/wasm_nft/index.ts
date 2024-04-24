@@ -11,7 +11,6 @@ import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wa
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';

@@ -6,7 +6,6 @@ import { BIT_AVATAR_API, BIT_COUNTRY_IPFS_SERVER, BIT_COUNTRY_LAND_ESTATE_METADA
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { BN_ZERO, hexToBn } from '@polkadot/util';
 

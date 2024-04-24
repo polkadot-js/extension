@@ -4,7 +4,6 @@
 import { NftCollection, NftItem, RMRK_VER } from '@subwallet/extension-base/background/KoniTypes';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { isUrl, reformatAddress } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { SINGULAR_V1_COLLECTION_ENDPOINT, SINGULAR_V2_COLLECTION_ENDPOINT, SINGULAR_V2_ENDPOINT } from '../config';
 

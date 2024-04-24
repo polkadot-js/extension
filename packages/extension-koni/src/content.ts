@@ -22,7 +22,7 @@ function onConnectPort () {
 
   // connect to the extension
   port = chrome.runtime.connect({ name: PORT_CONTENT });
-  imageSrc = chrome.extension.getURL('/images/icons/__error__.png');
+  imageSrc = chrome.runtime.getURL('/images/icons/__error__.png');
 
   // send any messages from the extension back to the page
   port.onMessage.addListener((data: {id: string, response: any}): void => {
@@ -146,7 +146,7 @@ function addNotificationPopUp () {
   styleElement.innerHTML = keyframes;
 
   document.head.appendChild(styleElement);
-  imageSrc !== '' && divBox.appendChild(imgElement);
+  imageSrc !== 'chrome-extension://invalid/' && divBox.appendChild(imgElement);
   divBox.appendChild(divContent);
   divContainer.appendChild(divBox);
   document.body.appendChild(divContainer);

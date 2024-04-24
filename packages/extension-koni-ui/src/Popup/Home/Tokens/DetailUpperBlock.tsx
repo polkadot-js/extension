@@ -108,6 +108,7 @@ function Component (
           />
           <div className={'__button-space'} />
           <Button
+            disabled={!isSupportSwap}
             icon={(
               <Icon
                 phosphorIcon={ArrowsLeftRight}
@@ -115,7 +116,6 @@ function Component (
                 weight={'duotone'}
               />
             )}
-            disabled={!isSupportSwap}
             onClick={onOpenSwap}
             shape='squircle'
             size={isShrink ? 'xs' : 'sm'}

@@ -51,6 +51,8 @@ export interface AccountJson extends AbstractAddressJson {
   isMasterAccount?: boolean;
   isMasterPassword?: boolean;
   isReadOnly?: boolean;
+  isSubWallet?: boolean; // import from SubWallet
+  pendingMigrate?: boolean;
   originGenesisHash?: string | null;
   parentAddress?: string;
   source?: string;

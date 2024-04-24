@@ -13,11 +13,9 @@ import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { PageStatus, responseMessage, setupHandlers } from './messageHandle';
 
-const koniState = SWHandler.instance.state;
+setupHandlers();
 
 responseMessage({ id: '0', response: { status: 'load' } } as PageStatus);
-
-setupHandlers();
 
 // initial setup
 cryptoWaitReady()
@@ -28,30 +26,30 @@ cryptoWaitReady()
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });
 
     keyring.restoreKeyringPassword().finally(() => {
-      koniState.updateKeyringState();
+      SWHandler.instance.state.updateKeyringState();
     });
 
     const injectedExtension = !!(localStorage.getItem(ENABLE_INJECT) || null);
 
     if (injectedExtension) {
       const timeout = setTimeout(() => {
-        koniState.eventService.emit('inject.ready', true);
+        SWHandler.instance.state.eventService.emit('inject.ready', true);
       }, 1000);
 
-      koniState.eventService.waitInjectReady.then(() => clearTimeout(timeout)).catch(console.error);
+      SWHandler.instance.state.eventService.waitInjectReady.then(() => clearTimeout(timeout)).catch(console.error);
     } else {
-      koniState.eventService.emit('inject.ready', true);
+      SWHandler.instance.state.eventService.emit('inject.ready', true);
     }
 
-    koniState.eventService.emit('crypto.ready', true);
+    SWHandler.instance.state.eventService.emit('crypto.ready', true);
 
     responseMessage({ id: '0', response: { status: 'crypto_ready' } } as PageStatus);
 
     // wake webapp up
-    koniState.wakeup().catch((err) => console.warn(err));
+    SWHandler.instance.state.wakeup().catch((err) => console.warn(err));
 
-    console.log('[WebApp] initialization completed');
+    console.log('[WebApp] initialization completed.');
   })
   .catch((error): void => {
-    console.error('[WebApp] initialization failed', error);
+    console.error('[WebApp] initialization failed.', error);
   });

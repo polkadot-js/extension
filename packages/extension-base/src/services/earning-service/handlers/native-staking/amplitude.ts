@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, BlockHeader, EarningRewardItem, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningRewardItem, EarningStatus, NativeYieldPoolInfo, ParachainStakingStakeOption, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -186,10 +186,13 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
       }
 
       if (hasUnstakingInfo) {
-        const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
+        const [_currentBlock, _currentTimestamp] = await Promise.all([
+          substrateApi.api.query.system.number(),
+          substrateApi.api.query.timestamp.now()
+        ]);
 
-        const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
-        const currentBlockNumber = currentBlockInfo.number;
+        const currentBlock = _currentBlock.toPrimitive() as number;
+        const currentTimestamp = _currentTimestamp.toPrimitive() as number;
 
         const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
         const blockPerRound = parseFloat(_blockPerRound);
@@ -197,11 +200,11 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         for (const [unstakingBlock, unstakingAmount] of Object.entries(unstakingInfo)) {
           const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
 
-          const isClaimable = parseInt(unstakingBlock) - currentBlockNumber < 0;
-          const remainingBlock = parseInt(unstakingBlock) - currentBlockNumber;
+          const isClaimable = parseInt(unstakingBlock) - currentBlock <= 0;
+          const remainingBlock = parseInt(unstakingBlock) - currentBlock;
           const waitingTime = remainingBlock * blockDuration;
-          // const currentTimestampMs = Date.now();
-          // const targetTimestampMs = currentTimestampMs + waitingTime * 60 * 60 * 1000;
+
+          const targetTimestampMs = remainingBlock * blockDuration * 3600 * 1000 + currentTimestamp;
 
           unstakingBalance = unstakingAmount.toString();
 
@@ -210,7 +213,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
             status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
             claimable: unstakingAmount.toString(),
             waitingTime,
-            // targetTimestampMs: targetTimestampMs,
+            targetTimestampMs: targetTimestampMs,
             validatorAddress: undefined
           });
         }

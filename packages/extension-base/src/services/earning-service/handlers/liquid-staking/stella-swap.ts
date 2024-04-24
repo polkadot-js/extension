@@ -9,7 +9,6 @@ import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types'
 import { _getAssetDecimals, _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, SubmitYieldJoinData, TokenApproveData, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
-import fetch from 'cross-fetch';
 import { TransactionConfig } from 'web3-core';
 import { Contract } from 'web3-eth-contract';
 
@@ -241,7 +240,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
-    const inputTokenContract = getERC20Contract(this.chain, _getContractAddressOfToken(inputTokenInfo), this.state.getEvmApiMap());
+    const inputTokenContract = getERC20Contract(_getContractAddressOfToken(inputTokenInfo), evmApi);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const allowanceCall = inputTokenContract.methods.allowance(params.address, _getContractAddressOfToken(derivativeTokenInfo));
 
@@ -317,7 +316,7 @@ export default class StellaSwapLiquidStakingPoolHandler extends BaseLiquidStakin
     const derivativeTokenInfo = this.state.getAssetBySlug(this.derivativeAssets[0]);
     const derivativeTokenContractAddress = _getContractAddressOfToken(derivativeTokenInfo);
     const evmApi = this.evmApi;
-    const inputTokenContract = getERC20Contract(this.chain, _getContractAddressOfToken(inputTokenInfo), this.state.getEvmApiMap());
+    const inputTokenContract = getERC20Contract(_getContractAddressOfToken(inputTokenInfo), evmApi);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     const approveCall = inputTokenContract.methods.approve(derivativeTokenContractAddress, MAX_INT); // TODO: need test

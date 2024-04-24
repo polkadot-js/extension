@@ -22,6 +22,7 @@ import MissionPoolReducer from './feature/MissionPool';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
+import SwapReducer from './feature/Swap';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
 
@@ -51,6 +52,7 @@ const rootReducers = combineReducers({
   campaign: CampaignReducer,
   buyService: BuyServiceReducer,
   earning: EarningReducer,
+  swap: SwapReducer,
 
   // common
   chainStore: ChainStoreReducer,

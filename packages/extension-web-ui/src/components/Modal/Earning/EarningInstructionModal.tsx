@@ -1,33 +1,39 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { balanceFormatter, detectTranslate, formatNumber } from '@subwallet/extension-base/utils';
-import InstructionItem from '@subwallet/extension-web-ui/components/Common/InstructionItem';
+import { BaseModal, InstructionItem } from '@subwallet/extension-web-ui/components';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EARNING_DATA_RAW, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
-import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { earlyValidateJoin } from '@subwallet/extension-web-ui/messaging';
 import { AlertDialogProps, PhosphorIcon, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getBannerButtonIcon } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Button, Icon, Logo, ModalContext, SwModal, Tag } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, ModalContext } from '@subwallet/react-ui';
 import { getAlphaColor } from '@subwallet/react-ui/lib/theme/themes/default/colorAlgorithm';
 import CN from 'classnames';
-import { CaretDown, PlusCircle } from 'phosphor-react';
+import { CaretCircleLeft, CaretDown, CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-interface Props extends ThemeProps{
-  slug: string;
+interface Props extends ThemeProps {
+  poolInfo: YieldPoolInfo | undefined;
   onCancel?: VoidFunction;
-  onStakeMore?: (value: string) => void;
+  onStakeMore?: (slug: string, chain: string) => void;
   isShowStakeMoreButton?: boolean;
   openAlert: (alertProps: AlertDialogProps) => void;
   closeAlert: VoidFunction;
+  assetRegistry: Record<string, _ChainAsset>;
+  address?: string;
+  bypassEarlyValidate?: boolean;
+  customButtonTitle?: string;
 }
 
 export interface BoxProps {
@@ -41,19 +47,17 @@ export interface BoxProps {
 const modalId = EARNING_INSTRUCTION_MODAL;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, closeAlert, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, slug } = props;
+  const { address, assetRegistry, bypassEarlyValidate, className, closeAlert, customButtonTitle, isShowStakeMoreButton = true, onCancel, onStakeMore, openAlert, poolInfo } = props;
   const checkRef = useRef<number>(Date.now());
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
+  const { isWebUI } = useContext(ScreenContext);
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
-  const { poolInfoMap } = useSelector((state) => state.earning);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { currentAccount } = useSelector((state) => state.accountState);
   const [loading, setLoading] = useState(false);
   const [isScrollEnd, setIsScrollEnd] = useState(false);
-  const poolInfo = useMemo(() => poolInfoMap[slug], [poolInfoMap, slug]);
+  const [isDisableEarnButton, setDisableEarnButton] = useState(true);
   const title = useMemo(() => {
     if (!poolInfo) {
       return '';
@@ -145,34 +149,6 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [poolInfo]);
 
-  const tags = useMemo(() => {
-    const asset = assetRegistry[poolInfo.metadata.inputAsset];
-    const symbol = asset.symbol;
-
-    if (poolInfo.statistic && 'assetEarning' in poolInfo.statistic && poolInfo.statistic?.assetEarning) {
-      const assetEarning = poolInfo.statistic?.assetEarning;
-      const data = assetEarning.map((item) => {
-        const result: { slug: string; apy: number; symbol: string } = { slug: item.slug, apy: 0, symbol: symbol };
-
-        result.slug = item.slug;
-
-        if (!item.apy) {
-          const rs = calculateReward(item?.apr || 0);
-
-          result.apy = rs.apy || 0;
-        } else {
-          result.apy = item.apy;
-        }
-
-        return result;
-      });
-
-      return data.filter((item) => item.apy);
-    }
-
-    return [];
-  }, [assetRegistry, poolInfo.metadata.inputAsset, poolInfo.statistic]);
-
   const setVisible = useCallback(
     (show: boolean) => {
       checkRef.current = Date.now();
@@ -209,6 +185,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, []);
 
   const unBondedTime = useMemo((): string => {
+    if (!poolInfo) {
+      return '';
+    }
+
     let time: number | undefined;
 
     if (poolInfo.statistic && 'unstakingPeriod' in poolInfo.statistic) {
@@ -216,7 +196,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return convertTime(time);
-  }, [poolInfo.statistic, convertTime]);
+  }, [poolInfo, convertTime]);
 
   const data: BoxProps[] = useMemo(() => {
     if (!poolInfo) {
@@ -226,8 +206,8 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (poolInfo.type) {
       case YieldPoolType.NOMINATION_POOL: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -250,6 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -261,8 +242,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case YieldPoolType.NATIVE_STAKING: {
         const _label = getValidatorLabel(poolInfo.chain);
-        const label = _label.slice(0, 1).toLowerCase().concat(_label.slice(1)).concat('s');
         const maxCandidatePerFarmer = poolInfo.statistic?.maxCandidatePerFarmer || 0;
+        const label = `${_label.charAt(0).toLowerCase() + _label.substr(1)}${maxCandidatePerFarmer > 1 ? 's' : ''}`;
         const inputAsset = assetRegistry[poolInfo.metadata.inputAsset];
         const maintainAsset = assetRegistry[poolInfo.metadata.maintainAsset];
         const paidOut = poolInfo.statistic?.eraTime;
@@ -279,12 +260,14 @@ const Component: React.FC<Props> = (props: Props) => {
               const _item: BoxProps = { ...item, id: item.icon, icon: getBannerButtonIcon(item.icon) as PhosphorIcon };
 
               replaceEarningValue(_item, '{validatorNumber}', maxCandidatePerFarmer.toString());
+              replaceEarningValue(_item, '{dAppString}', maxCandidatePerFarmer > 1 ? 'dApps' : 'dApp');
               replaceEarningValue(_item, '{periodNumb}', unBondedTime);
               replaceEarningValue(_item, '{maintainBalance}', maintainBalance);
               replaceEarningValue(_item, '{maintainSymbol}', maintainSymbol);
 
               if (paidOut !== undefined) {
                 replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+                replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
               }
 
               return _item;
@@ -302,6 +285,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (paidOut !== undefined) {
               replaceEarningValue(_item, '{paidOut}', paidOut.toString());
+              replaceEarningValue(_item, '{paidOutTimeUnit}', paidOut > 1 ? 'hours' : 'hour');
             }
 
             return _item;
@@ -371,6 +355,10 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [assetRegistry, poolInfo, replaceEarningValue, unBondedTime]);
 
   const onClickFaq = useCallback(() => {
+    if (!poolInfo) {
+      return;
+    }
+
     let urlParam = '';
 
     switch (poolInfo.metadata.shortName) {
@@ -386,6 +374,11 @@ const Component: React.FC<Props> = (props: Props) => {
 
       case 'Bifrost Polkadot': {
         urlParam = '#bifrost';
+
+        if (poolInfo.slug === 'MANTA___liquid_staking___bifrost_dot') {
+          urlParam = '#vmanta-on-bifrost';
+        }
+
         break;
       }
 
@@ -399,6 +392,11 @@ const Component: React.FC<Props> = (props: Props) => {
         break;
       }
 
+      case 'Parallel': {
+        urlParam = '#parallel';
+        break;
+      }
+
       case 'Stellaswap': {
         urlParam = '#stellaswap';
         break;
@@ -408,9 +406,19 @@ const Component: React.FC<Props> = (props: Props) => {
     const url = `https://docs.subwallet.app/main/web-dashboard-user-guide/earning/faqs${urlParam}`;
 
     open(url);
-  }, [poolInfo.metadata.shortName]);
+  }, [poolInfo]);
 
   const onClickButton = useCallback(() => {
+    if (!poolInfo) {
+      return;
+    }
+
+    if (bypassEarlyValidate) {
+      onStakeMore?.(poolInfo.slug, poolInfo.chain);
+
+      return;
+    }
+
     const time = Date.now();
 
     checkRef.current = time;
@@ -423,26 +431,26 @@ const Component: React.FC<Props> = (props: Props) => {
     const onError = (message: string) => {
       openAlert({
         title: t('Pay attention!'),
+        type: NotificationType.ERROR,
         content: message,
         okButton: {
           text: t('I understand'),
-          onClick: () => {
-            closeAlert();
-          }
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     };
 
     earlyValidateJoin({
-      slug: slug,
-      address: currentAccount?.address || ''
+      slug: poolInfo.slug,
+      address: address || ''
     })
       .then((rs) => {
         if (isValid()) {
           if (rs.passed) {
             setVisible(false);
             setTimeout(() => {
-              onStakeMore?.(slug);
+              onStakeMore?.(poolInfo.slug, poolInfo.chain);
             }, 300);
           } else {
             const message = rs.errorMessage || '';
@@ -463,7 +471,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         }
       });
-  }, [closeAlert, currentAccount?.address, onStakeMore, openAlert, setVisible, slug, t]);
+  }, [address, bypassEarlyValidate, closeAlert, onStakeMore, openAlert, poolInfo, setVisible, t]);
 
   const onScrollContent = useCallback(() => {
     scrollRef?.current?.scroll({ top: scrollRef?.current?.scrollHeight, left: 0 });
@@ -474,10 +482,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    if (!isScrollEnd && scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500) {
-      setIsScrollEnd(true);
-    }
-  }, [isScrollEnd]);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500);
+  }, []);
 
   const closeModal = useCallback(() => {
     setVisible(false);
@@ -491,88 +497,102 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [inactiveModal, poolInfo]);
 
-  const footerNode = (
-    <>
-      <div className='__footer-more-information-text'>
-        <Trans
-          components={{
-            highlight: (
-              <a
-                className='__link'
-                onClick={onClickFaq}
-                rel='noopener noreferrer'
-                target='_blank'
-              />
-            )
-          }}
-          i18nKey={detectTranslate('Scroll down to continue. For more information and staking instructions, read <highlight>this FAQ</highlight>')}
-        />
-      </div>
-      {isShowStakeMoreButton && (
-        <Button
-          block={true}
-          className={'__stake-more-button'}
-          disabled={!isScrollEnd}
-          icon={
-            <Icon
-              phosphorIcon={PlusCircle}
-              weight='fill'
-            />
-          }
-          loading={loading}
-          onClick={onClickButton}
-        >
-          {buttonTitle}
-        </Button>
-      )}
-    </>
-  );
+  useEffect(() => {
+    if (isScrollEnd) {
+      setDisableEarnButton(false);
+    }
+  }, [isScrollEnd]);
 
   if (!poolInfo) {
     return null;
   }
 
+  const footerNode = (
+    <>
+      <div className='__footer-more-information-text-wrapper'>
+        <div className='__footer-more-information-text'>
+          <Trans
+            components={{
+              highlight: (
+                <a
+                  className='__link'
+                  onClick={onClickFaq}
+                  rel='noopener noreferrer'
+                  target='_blank'
+                />
+              )
+            }}
+            i18nKey={detectTranslate('For more information and staking instructions, read <highlight>this FAQ</highlight>')}
+          />
+        </div>
+
+        <Button
+          className={'__scroll-to-end-button'}
+          disabled={isScrollEnd}
+          icon={<Icon phosphorIcon={CaretDown} />}
+          onClick={onScrollContent}
+          shape={'circle'}
+          size={'xs'}
+        />
+      </div>
+
+      <div className={'__buttons'}>
+        { !isWebUI &&
+          <Button
+            block={true}
+            className={'__cancel-button'}
+            icon={
+              <Icon
+                phosphorIcon={isShowStakeMoreButton ? CaretCircleLeft : XCircle}
+                weight='fill'
+              />
+            }
+            onClick={closeModal}
+            schema={'secondary'}
+          >
+            {isShowStakeMoreButton ? t('Back') : t('Close')}
+          </Button>
+        }
+        {isShowStakeMoreButton && (
+          <Button
+            block={true}
+            className={'__stake-more-button'}
+            disabled={!isWebUI && isDisableEarnButton}
+            icon={
+              <Icon
+                phosphorIcon={PlusCircle}
+                weight='fill'
+              />
+            }
+            loading={loading}
+            onClick={onClickButton}
+          >
+            {customButtonTitle || buttonTitle}
+          </Button>
+        )}
+      </div>
+    </>
+  );
+
   return (
-    <SwModal
-      className={CN(className)}
+    <BaseModal
+      center={true}
+      className={CN(className, { '-desktop-instruction': isWebUI })}
+      closable={isWebUI}
       destroyOnClose={true}
       footer={footerNode}
+      fullSizeOnMobile={true}
       id={modalId}
+      maskClosable={false}
       onCancel={closeModal}
-      title={t('Instruction')}
+      title={title}
+      width={isWebUI ? 642 : undefined}
     >
       <div
         className={'__scroll-container'}
         onScroll={onScrollToAcceptButton}
         ref={scrollRef}
       >
-        <div className={'__main-title-area'}>
-          <div className={'__main-title'}>{title}</div>
-
-          {!!(tags && tags.length) && (
-            <div
-              className={'__tags-container'}
-            >
-              {tags.map(({ apy, slug: tagSlug, symbol }) => (
-                <Tag
-                  bgType={'gray'}
-                  className={'__tag-item'}
-                  icon={(
-                    <Logo
-                      size={16}
-                      token={tagSlug.toLowerCase()}
-                    />
-                  )}
-                  key={tagSlug}
-                  shape={'round'}
-                >
-                  {`${formatNumber(apy, 0, balanceFormatter)}% ${symbol}`}
-                </Tag>
-              ))}
-            </div>
-          )}
-        </div>
-
         <div className={'__instruction-items-container'}>
           {data.map((item, index) => {
             return (
@@ -597,28 +617,20 @@ const Component: React.FC<Props> = (props: Props) => {
           })}
         </div>
       </div>
-
-      <div className={'__scroll-to-end-button-wrapper'}>
-        {!isScrollEnd && <Button
-          className={'__scroll-to-end-button'}
-          icon={<Icon phosphorIcon={CaretDown} />}
-          onClick={onScrollContent}
-          shape={'circle'}
-          size={'xs'}
-        />}
-      </div>
-    </SwModal>
+    </BaseModal>
   );
 };
 
 const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    height: '100%',
+    justifyContent: 'normal',
+    '.ant-sw-modal-content': {
+      maxHeight: 584,
+      height: 584
+    },
 
     '.ant-sw-modal-content.ant-sw-modal-content': {
-      maxHeight: 'none',
-      height: '100%',
-      borderRadius: 0
+
     },
 
     '.ant-sw-modal-body.ant-sw-modal-body': {
@@ -629,28 +641,22 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
       borderTop: 0
     },
 
-    '.__main-title': {
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
-      color: token.colorTextLight1,
-      fontWeight: token.headingFontWeight,
-      textAlign: 'center'
+    '.__footer-more-information-text-wrapper': {
+      justifyContent: 'space-between',
+      display: 'flex',
+      gap: token.size
     },
 
     '.__footer-more-information-text': {
       color: token.colorTextLight4,
       fontSize: token.fontSize,
       lineHeight: token.lineHeight,
-      textAlign: 'center',
+      textAlign: 'left',
 
       '.__link': {
         textDecoration: 'underline',
         color: token.colorPrimary
       }
-    },
-
-    '.__stake-more-button': {
-      marginTop: token.margin
     },
 
     '.__instruction-item': {
@@ -673,39 +679,61 @@ const EarningInstructionModal = styled(Component)<Props>(({ theme: { token } }: 
       scrollBehavior: 'smooth'
     },
 
-    '.__main-title-area': {
-      marginBottom: token.margin
+    '.ant-sw-sub-header-title-content': {
+      'white-space': 'normal',
+      paddingLeft: token.padding,
+      paddingRight: token.padding
     },
 
-    '.__tags-container': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      justifyContent: 'center',
-      gap: token.sizeXS,
-      marginTop: token.marginXS,
+    '.ant-sw-header-container-center .ant-sw-header-center-part': {
+      position: 'relative',
+      maxWidth: 445,
+      marginLeft: 'auto',
+      marginRight: 'auto'
+    },
 
-      '.ant-image-img, .ant-logo, .ant-image': {
-        display: 'block'
+    '.__buttons': {
+      marginTop: token.margin,
+      display: 'flex',
+      gap: token.sizeXXS
+    },
+
+    '&.-desktop-instruction': {
+      '&:before, &:after': {
+        content: '""',
+        display: 'block',
+        minHeight: 80,
+        width: '100%',
+        flex: 1
       }
     },
 
-    '.__tag-item': {
-      display: 'inline-flex',
-      alignItems: 'center',
-      marginRight: 0,
-      gap: token.sizeXXS,
-      color: token.colorSecondary
+    '&.-desktop-instruction .ant-sw-modal-content': {
+      width: '100%',
+      maxHeight: 'none',
+      height: 'auto',
+      overflow: 'hidden',
+      '.ant-sw-modal-footer': {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center'
+      },
+      '.__scroll-to-end-button': {
+        display: 'none'
+      },
+      '.__buttons': {
+        width: 390,
+        paddingLeft: token.padding,
+        paddingRight: token.padding
+      }
     },
-
-    '.__scroll-to-end-button-wrapper': {
-      position: 'relative'
-    },
-
-    '.__scroll-to-end-button': {
-      position: 'absolute',
-      bottom: token.sizeXXS,
-      right: token.size
+    '@media (max-height: 600px)': {
+      '&.-desktop-instruction .ant-sw-modal-content': {
+        maxHeight: 584,
+        minHeight: 445
+      }
     }
+
   });
 });
 

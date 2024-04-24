@@ -1,187 +1,132 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Avatar, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { EarningStatusUi, TRANSACTION_YIELD_UNSTAKE_MODAL } from '@subwallet/extension-web-ui/constants';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
+import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CheckCircle, MinusCircle, PlusCircle } from 'phosphor-react';
-import React, { useCallback } from 'react';
+import { MinusCircle, PlusCircle } from 'phosphor-react';
+import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
+type Props = ThemeProps & {
+  poolInfo: YieldPoolInfo;
+  compound: YieldPositionInfo;
+  onLeavePool: VoidFunction;
+  onEarnMore: VoidFunction;
+};
 
-type Props = ThemeProps;
-
-function Component ({ className }: Props) {
+function Component ({ className, compound, onEarnMore, onLeavePool,
+  poolInfo }: Props) {
   const { t } = useTranslation();
-  const onClaimReward = useCallback(() => {
-    alert('Dung Nguyen');
-  }, []);
+  const { inactiveModal } = useContext(ModalContext);
+  const { isWebUI } = useContext(ScreenContext);
 
-  const value = '0xD8EeBEc6dBBb9d761b660aA386F64bE5E3340872';
+  const handleCloseUnstake = useCallback(() => {
+    inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
+  }, [inactiveModal]);
 
   return (
-    <div
-      className={CN(className, 'earning-info-desktop')}
-    >
-      <div className={'__claim-reward-area'}>
-        <div className={'earning-info-title'}>
-          <div className={'__earning-status-title'}>{t('Earning status')}</div>
-          <div className={'__earning-status-tag'}>
-            <MetaInfo>
-              <MetaInfo.Status
-                className={'earning-status-item'}
-                statusIcon={CheckCircle}
-                statusName={('Earning rewards')}
-                valueColorSchema={'success'}
-              />
-            </MetaInfo>
-          </div>
-        </div>
-        <div className={'claim-reward-action'}>
-          <div className={'__network-label'}>Network</div>
-          <div className={'__network-item'}>
-            <div className={'__logo-network'}>
-              <Avatar
-                size={20}
-                theme={value ? isEthereumAddress(value) ? 'ethereum' : 'polkadot' : undefined}
-                value={value}
-              />
-            </div>
-            <div className={'__network-text'}>Polkadot</div>
-          </div>
-        </div>
-        <div className='__block-divider' />
-        <div className={'earning-status-action'}>
+    <>
+      <div
+        className={CN(className, '__earning-info-desktop-part')}
+      >
+        <MetaInfo
+          labelColorScheme='gray'
+          labelFontWeight='regular'
+          spaceSize='sm'
+        >
+          <MetaInfo.Status
+            label={t('Earning status')}
+            statusIcon={EarningStatusUi[compound.status].icon}
+            statusName={EarningStatusUi[compound.status].name}
+            valueColorSchema={EarningStatusUi[compound.status].schema}
+          />
+          <MetaInfo.Chain
+            chain={poolInfo.chain}
+            label={t('Network')}
+            valueColorSchema='gray'
+          />
+        </MetaInfo>
+        <div className='__separator' />
+        <div className={'__earning-actions'}>
           <Button
-            icon={
+            block={true}
+            className={'__left-item -ghost-type-3'}
+            icon={(
               <Icon
-                className={'earning-item-stake-btn'}
                 phosphorIcon={MinusCircle}
-                size='sm'
                 weight='fill'
               />
-            }
-            onClick={onClaimReward}
-            size='xs'
+            )}
+            onClick={onLeavePool}
             type={'ghost'}
           >
-            {t('Unstaked')}
+            {poolInfo.type === YieldPoolType.LENDING ? t('Withdraw') : t('Unstake')}
           </Button>
+
           <Button
-            icon={
+            block={true}
+            className={'__right-item -ghost-type-3'}
+            icon={(
               <Icon
-                className={'earning-item-stake-btn'}
                 phosphorIcon={PlusCircle}
-                size='sm'
                 weight='fill'
               />
-            }
-            onClick={onClaimReward}
-            size='xs'
+            )}
+            onClick={onEarnMore}
             type={'ghost'}
           >
-            {t('Stake more')}
+            {poolInfo.type === YieldPoolType.LENDING ? t('Supply more') : t('Stake more')}
           </Button>
         </div>
       </div>
-    </div>
+      <BaseModal
+        className={'right-side-modal'}
+        destroyOnClose={true}
+        id={TRANSACTION_YIELD_UNSTAKE_MODAL}
+        onCancel={handleCloseUnstake}
+        title={t('Unstake')}
+      >
+        <Transaction
+          modalContent={isWebUI}
+          modalId={TRANSACTION_YIELD_UNSTAKE_MODAL}
+        >
+          <Unbond />
+        </Transaction>
+      </BaseModal>
+    </>
   );
 }
 
 export const EarningInfoDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
   borderRadius: token.borderRadiusLG,
   backgroundColor: token.colorBgSecondary,
-  minHeight: 54,
-  width: 384,
   paddingTop: token.padding,
-  paddingBottom: token.padding,
-  paddingLeft: token.paddingLG,
-  paddingRight: token.paddingLG,
-  '&:hover': {
-    backgroundColor: token.colorBgInput
-  },
-
-  '.__part-title': {
-    paddingTop: token.padding,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.earning-info-title': {
-    display: 'flex',
-    fontSize: token.fontSize,
-    lineHeight: token.lineHeight,
-    color: token.colorWhite,
-    width: '100%',
-    justifyContent: 'space-between'
-  },
-  '.__block-divider': {
-    height: 2,
-    width: 336,
-    backgroundColor: token.colorBgDivider,
-    marginTop: token.marginSM
-  },
+  paddingLeft: 24,
+  paddingRight: 24,
+  flex: 1,
+  flexBasis: 384,
 
   '.__separator': {
     height: 2,
     backgroundColor: 'rgba(33, 33, 33, 0.80)',
     marginTop: token.marginSM,
-    marginBottom: token.marginSM,
-    marginLeft: token.margin,
-    marginRight: token.margin
+    marginBottom: token.marginSM
   },
 
-  '.__claim-reward-area': {
+  '.__label.__label': {
+    color: token.colorWhite
+  },
+
+  '.__earning-actions': {
     display: 'flex',
-    flexDirection: 'column',
-    gap: token.sizeSM,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingBottom: token.paddingSM,
-    paddingLeft: token.padding,
-    paddingRight: token.padding
-  },
-  '.claim-reward-action': {
-    display: 'flex',
-    width: '100%',
-    justifyContent: 'space-between'
-  },
-  '.__network-item': {
-    display: 'flex'
-  },
-
-  '.__claim-reward-value': {
-    fontSize: token.fontSizeHeading4,
-    lineHeight: token.lineHeightHeading4,
-    fontWeight: token.headingFontWeight,
-    color: token.colorTextLight1,
-
-    '.ant-number-integer': {
-      color: 'inherit !important',
-      fontSize: 'inherit !important',
-      fontWeight: 'inherit !important',
-      lineHeight: 'inherit'
-    },
-
-    '.ant-number-decimal, .ant-number-suffix': {
-      color: `${token.colorTextLight3} !important`,
-      fontSize: `${token.fontSizeHeading5}px !important`,
-      fontWeight: 'inherit !important',
-      lineHeight: token.lineHeightHeading5
-    }
-  },
-
-  '.__claim-reward-area + .__separator': {
-    marginTop: 0
-  },
-
-  '.__separator + .__reward-history-panel': {
-    marginTop: -13
-  },
-
-  '.__view-explorer-button': {
-    marginTop: token.marginSM
+    gap: token.sizeSM
   }
 }));

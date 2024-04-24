@@ -347,7 +347,7 @@ export const getEvmNativeInfo = async (api: _EvmApi): Promise<AssetSpec> => {
 
 export const getErc20AssetInfo = async (asset: _ChainAsset, api: _EvmApi): Promise<AssetSpec> => {
   const contractAddress = _getContractAddressOfToken(asset);
-  const tokenContract = getERC20Contract('chain', contractAddress, { chain: api });
+  const tokenContract = getERC20Contract(contractAddress, api);
 
   const [_decimals, _symbol, _name] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access

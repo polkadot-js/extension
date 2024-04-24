@@ -264,6 +264,18 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
           flexBasis: 'auto'
         }
       }
+    },
+    '.ant-btn-ghost.-ghost-type-3': {
+      color: token.colorWhite,
+      '&:hover': {
+        color: token.colorSuccess
+      },
+      '&:active': {
+        color: token['cyan-2']
+      },
+      '&:disabled': {
+        color: token.colorTextLight6
+      }
     }
   });
 });

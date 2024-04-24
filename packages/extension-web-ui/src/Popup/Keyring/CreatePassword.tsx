@@ -98,7 +98,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     if (previousInfo?.prevPathname) {
       navigate(previousInfo.prevPathname, { state: previousInfo.prevState as unknown });
     } else {
-      navigate(returnPath);
+      navigate(returnPath, { state: { from: returnPath } });
       setReturnStorage(DEFAULT_ROUTER_PATH);
     }
   }, [navigate, previousInfo.prevPathname, previousInfo.prevState, returnPath, setReturnStorage]);

@@ -4,13 +4,13 @@
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AcalaNftApi } from '@subwallet/extension-base/koni/api/nft/acala_nft';
+import AssetHubUniquesPalletApi from '@subwallet/extension-base/koni/api/nft/assethub_unique';
 import { BitCountryNftApi } from '@subwallet/extension-base/koni/api/nft/bit.country';
 import { EvmNftApi } from '@subwallet/extension-base/koni/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-base/koni/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
 import OrdinalNftApi from '@subwallet/extension-base/koni/api/nft/ordinal_nft';
 import { RmrkNftApi } from '@subwallet/extension-base/koni/api/nft/rmrk_nft';
-import StatemineNftApi from '@subwallet/extension-base/koni/api/nft/statemine_nft';
 import { UniqueNftApi } from '@subwallet/extension-base/koni/api/nft/unique_network_nft';
 // import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
 import { VaraNftApi } from '@subwallet/extension-base/koni/api/nft/vara_nft';
@@ -20,27 +20,27 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft, _isSupportOrdinal } from '@subwallet/extension-base/services/chain-service/utils';
 import { categoryAddresses, targetIsWeb } from '@subwallet/extension-base/utils';
 
-import StatemintNftApi from './statemint_nft';
+import AssetHubNftsPalletApi from './assethub_nft';
 
-function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | null, addresses: string[]): BaseNftApi | null {
+function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | null, addresses: string[]): BaseNftApi[] | null {
   const [substrateAddresses] = categoryAddresses(addresses);
 
   if (_NFT_CHAIN_GROUP.acala.includes(chain)) {
-    return new AcalaNftApi(substrateApi, substrateAddresses, chain);
+    return [new AcalaNftApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.karura.includes(chain)) {
-    return new KaruraNftApi(substrateApi, substrateAddresses, chain);
+    return [new KaruraNftApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.rmrk.includes(chain)) {
-    return new RmrkNftApi(substrateAddresses, chain);
+    return [new RmrkNftApi(substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.statemine.includes(chain)) {
-    return new StatemineNftApi(substrateApi, substrateAddresses, chain);
+    return [new AssetHubUniquesPalletApi(substrateApi, substrateAddresses, chain), new AssetHubNftsPalletApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.statemint.includes(chain)) {
-    return new StatemintNftApi(substrateApi, substrateAddresses, chain);
+    return [new AssetHubUniquesPalletApi(substrateApi, substrateAddresses, chain), new AssetHubNftsPalletApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
-    return new UniqueNftApi(chain, substrateAddresses);
+    return [new UniqueNftApi(chain, substrateAddresses)];
   } else if (_NFT_CHAIN_GROUP.bitcountry.includes(chain)) {
-    return new BitCountryNftApi(substrateApi, substrateAddresses, chain);
+    return [new BitCountryNftApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {
-    return new VaraNftApi(chain, substrateAddresses);
+    return [new VaraNftApi(chain, substrateAddresses)];
   }
 
   return null;
@@ -131,10 +131,10 @@ export class NftHandler {
         Object.entries(this.chainInfoMap).forEach(([chain, chainInfo]) => {
           if (_isChainSupportNativeNft(chainInfo)) {
             if (this.substrateApiMap[chain]) {
-              const handler = createSubstrateNftApi(chain, this.substrateApiMap[chain], substrateAddresses);
+              const handlers = createSubstrateNftApi(chain, this.substrateApiMap[chain], substrateAddresses);
 
-              if (handler) {
-                this.handlers.push(handler);
+              if (handlers && !!handlers.length) {
+                this.handlers.push(...handlers);
               }
             }
           }

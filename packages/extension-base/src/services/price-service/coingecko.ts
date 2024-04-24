@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import fetch from 'cross-fetch';
 
 interface GeckoItem {
   id: string,

@@ -44,16 +44,15 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
   return {
     display: 'flex',
     flexDirection: 'row',
-    color: token.colorWhite,
+    color: token.colorTextLight3,
     fontFamily: token.fontFamily,
-    paddingBottom: token.paddingXS,
+    paddingBottom: token.padding,
+    paddingLeft: token.paddingXXS,
+    paddingRight: token.paddingXXS,
+    gap: token.sizeXS,
 
     '.__th': {
       flex: 1
-    },
-
-    '.__th.-sortable': {
-      cursor: 'pointer'
     },
 
     '.__th-inner': {
@@ -66,22 +65,6 @@ const TableHead = styled(Component)<Props<any>>(({ theme: { token } }: ThemeProp
       height: '100%',
       justifyContent: 'center',
       flexDirection: 'column'
-    },
-
-    '.__sort-icon': {
-      color: token.colorTextLight4
-    },
-
-    '.__th:hover .__sort-icon': {
-      color: token.colorTextLight3
-    },
-
-    '.__sort-icon.-is-asc .__up': {
-      color: token.colorTextLight1
-    },
-
-    '.__sort-icon.-is-desc  .__down': {
-      color: token.colorTextLight1
     },
 
     '.__th-content': {

@@ -17,6 +17,28 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
+    accountName: 'Statemint',
+    appName: 'Statemint',
+    networkName: 'Polkadot Assets Hub (Statemint) network',
+    genesisHash: ChainInfoMap.statemint.substrateInfo?.genesisHash || '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
+    icon: 'substrate',
+    network: 'statemint',
+    slug: ChainInfoMap.statemint.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Statemine',
+    appName: 'Statemine',
+    networkName: 'Kusama Assets Hub (Statemine) network',
+    genesisHash: ChainInfoMap.statemine.substrateInfo?.genesisHash || '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
+    icon: 'substrate',
+    network: 'statemine',
+    slug: ChainInfoMap.statemine.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
     accountName: 'Kusama',
     appName: 'Kusama',
     networkName: 'Kusama network',
@@ -187,15 +209,15 @@ export const BLOCK_JOIN_YIELD_POOL_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_MINT_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS: string[] = ['*'];
@@ -210,8 +232,10 @@ export const BLOCK_APPROVE_LEDGER_NETWORKS: string[] = [];
 
 /// OTHER
 export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
+
+export const BLOCK_SWAP_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   /* TRANSFER */
@@ -262,6 +286,8 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
 
   [ExtrinsicType.TOKEN_APPROVE]: BLOCK_APPROVE_LEDGER_NETWORKS,
   /* STAKING */
+
+  [ExtrinsicType.SWAP]: BLOCK_SWAP_LEDGER_NETWORKS,
 
   [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,
   [ExtrinsicType.EVM_EXECUTE]: BLOCK_EVM_EXECUTE_LEDGER_NETWORKS,

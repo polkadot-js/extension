@@ -17,6 +17,7 @@ type Props = ThemeProps & {
   balanceValue: SwNumberProps['value'];
   symbol: string;
   isSupportBuyTokens: boolean;
+  isSupportSwap: boolean;
   isShrink: boolean;
   onClickBack: () => void;
   onOpenSendFund: () => void;
@@ -30,6 +31,7 @@ function Component (
     className = '',
     isShrink,
     isSupportBuyTokens,
+    isSupportSwap,
     onClickBack,
     onOpenBuyTokens,
     onOpenReceive,
@@ -106,6 +108,7 @@ function Component (
           />
           <div className={'__button-space'} />
           <Button
+            disabled={!isSupportSwap}
             icon={(
               <Icon
                 phosphorIcon={ArrowsLeftRight}

@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { NetworkTag } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { ThemeProps, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
+import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-koni-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-koni-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -22,7 +23,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
 
-  const { balance, group, maxApy, symbol, token } = poolGroup;
+  const { balance, group, isTestnet, maxApy, symbol, token } = poolGroup;
 
   const _isRelatedToAstar = isRelatedToAstar(group);
 
@@ -52,6 +53,10 @@ const Component: React.FC<Props> = (props: Props) => {
                   </span>)
                 </span>
               )}
+              {isTestnet && <NetworkTag
+                className={'__item-tag'}
+                type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />}
             </div>
 
             {

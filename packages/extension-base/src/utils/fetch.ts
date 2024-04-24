@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import fetch from 'cross-fetch';
-
 export type fetchJsonOptions = RequestInit & {
   params?: Record<string, string>;
   data?: Record<string, unknown>;

@@ -175,7 +175,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               rules={passwordRules}
               statusHelpAsTooltip={true}
             >
-              <Input
+              <Input.Password
                 onChange={onChangePassword}
                 placeholder={t('Enter password')}
                 type='password'
@@ -186,7 +186,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               rules={confirmPasswordRules}
               statusHelpAsTooltip={true}
             >
-              <Input
+              <Input.Password
                 placeholder={t('Confirm password')}
                 type='password'
               />

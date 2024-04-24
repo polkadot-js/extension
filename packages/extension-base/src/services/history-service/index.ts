@@ -133,7 +133,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
         Object.keys(rsMap).forEach((hash) => {
           // only push item that does not have same hash with another item
           if (!excludeTransferExtrinsicHash.includes(hash) && rsMap[hash].length === 1) {
-            result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+            const item = parseSubscanTransferData(address, rsMap[hash][0], chainInfo);
+
+            if (item) {
+              result.push(item);
+            }
           }
         });
 
@@ -153,7 +157,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       Object.keys(rsMap).forEach((hash) => {
         // only push item that does not have same hash with another item
         if (rsMap[hash].length === 1) {
-          result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+          const item = parseSubscanTransferData(address, rsMap[hash][0], chainInfo);
+
+          if (item) {
+            result.push(item);
+          }
         }
       });
 

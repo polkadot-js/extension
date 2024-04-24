@@ -172,10 +172,6 @@ if (!RuntimeInfo.protocol ||
     weight: 1 // Rate limit too low
   },
   {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
-  },
-  {
     provider: IPFS_IO,
     weight: 5
   }
@@ -188,7 +184,12 @@ if (!RuntimeInfo.protocol ||
   {
     provider: DWEB_LINK,
     weight: 5
-  });
+  },
+  {
+    provider: GATEWAY_IPFS_IO,
+    weight: 5
+  }
+  );
 }
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);

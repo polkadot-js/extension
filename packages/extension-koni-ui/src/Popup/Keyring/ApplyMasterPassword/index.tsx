@@ -368,7 +368,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 ]}
                 statusHelpAsTooltip={true}
               >
-                <Input
+                <Input.Password
                   label={t('Current password')}
                   type='password'
                 />

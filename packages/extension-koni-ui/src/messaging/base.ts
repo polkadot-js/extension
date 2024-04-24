@@ -34,7 +34,7 @@ function onConnectPort () {
     const handler = handlers[data.id];
 
     if (!handler) {
-      console.error(`Unknown response: ${JSON.stringify(data)}`);
+      console.error(`Unknown response: ${JSON.stringify(data)}.`);
 
       return;
     }

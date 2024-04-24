@@ -1,11 +1,11 @@
-    2450	AnhMTV                        	Release version 1.1.57
-    2334	Nam Phạm                      	[Issue 2937] style: remove logs
-    2012	S2kael                        	
+    2454	AnhMTV                        	
+    2335	Nam Phạm                      	[Issue 2947] chore: update dependency to support Avail Turing
+    2015	S2kael                        	[Issue-2947] Update stable version for chain-list
      799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
-     293	nguyentiendung                	[Issue-2823] Update debounce when input amount
+     296	nguyentiendung                	[Issue: 2555] Update Add show/hide password for case input password
      185	quangdo                       	
-     107	bluezdot                      	[Issue-2941] Enable use online data
+     113	bluezdot                      	[Issue-2947] update priceId, chainBalanceSlug
      105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	

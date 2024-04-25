@@ -44,7 +44,8 @@ function Component ({ className = '' }: Props) {
 
   return (
     <PageWrapper className={CN('main-page-container', className)}>
-      <div className={'__header-area'}>{t('Unknown error')}</div>
+      <div className={'web-layout-background'}></div>
+      {isWebUI ? (<div className={'__header-area'}>{t('Unknown error')}</div>) : (undefined)}
       <div className={CN('container', {
         '__web-ui': isWebUI
       })}
@@ -105,21 +106,26 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
     display: 'flex',
     flexDirection: 'column',
     '.__header-area': {
-      height: 180,
-      background: 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 16.47%, rgba(217, 217, 217, 0.00) 94.17%)',
       display: 'flex',
       width: '100%',
       justifyContent: 'center',
       fontSize: token.fontSizeHeading2,
       fontWeight: token.fontWeightStrong,
       lineHeight: token.lineHeightHeading2,
-      paddingTop: 30
+      paddingTop: 24,
+      paddingRight: 24,
+      paddingBottom: 48,
+      paddingLeft: 24
     },
-
     '.container': {
       display: 'flex',
       flexDirection: 'column',
-      height: '100%',
+      '.__body-area': {
+        flex: 0,
+        padding: 0,
+        marginBottom: 44,
+        paddingTop: 128
+      },
       '&.__web-ui': {
         justifyContent: 'center',
         alignItems: 'center',
@@ -127,12 +133,24 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
         '.__body-area': {
           flex: 0,
           padding: 0,
-          marginBottom: 50
+          marginBottom: 44,
+          paddingTop: 112
         },
         '.__footer-area': {
-          minWidth: '50%'
+          width: 682
         }
       }
+    },
+
+    '.web-layout-background': {
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 1,
+      transitionDuration: 'background-color 0.3s ease',
+      background: 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)'
     },
 
     '.__body-area': {
@@ -140,8 +158,7 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      textAlign: 'center',
-      paddingTop: 128
+      textAlign: 'center'
     },
 
     '.__title': {

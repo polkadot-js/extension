@@ -164,19 +164,21 @@ if (!RuntimeInfo.protocol ||
     weight: 1 // Rate limit too low
   },
   {
+    provider: IPFS_IO,
+    weight: 5
+  }
+  );
+} else if (!RuntimeInfo.protocol.startsWith('https')) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: NFT_STORAGE_GATEWAY,
     weight: 50
-  },
-  {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
   },
   {
     provider: DWEB_LINK,
     weight: 5
   },
   {
-    provider: IPFS_IO,
+    provider: GATEWAY_IPFS_IO,
     weight: 5
   }
   );

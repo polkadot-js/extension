@@ -7,7 +7,7 @@ export const _STAKING_CHAIN_GROUP = {
   astar: ['astar', 'shiden', 'shibuya'],
   amplitude: ['amplitude', 'amplitude_test', 'kilt', 'kilt_peregrine', 'pendulum', 'krest_network'], // amplitude and kilt only share some common logic
   kilt: ['kilt', 'kilt_peregrine'],
-  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network', 'goldberg_testnet'],
+  nominationPool: ['polkadot', 'kusama', 'westend', 'alephTest', 'aleph', 'kate', 'vara_network', 'goldberg_testnet', 'availTuringTest'],
   bifrost: ['bifrost', 'bifrost_testnet'],
   aleph: ['aleph', 'alephTest'], // A0 has distinct tokenomics
   ternoa: ['ternoa'],

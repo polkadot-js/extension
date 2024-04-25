@@ -70,3 +70,19 @@ export const swapCustomFormatter: NumberFormatter = (
 
   return int;
 };
+
+export const formatNumberString = (numberString: string): string => {
+  const number = parseFloat(numberString);
+
+  const exponentNotation = number.toExponential();
+  let [coefficient, exponent] = exponentNotation.split('e');
+
+  if (parseInt(exponent) < 0) {
+    coefficient = coefficient.replace(/^0+|\./g, '');
+    coefficient = '0.' + '0'.repeat(Math.abs(parseInt(exponent)) - 1) + coefficient;
+  } else {
+    coefficient += '0'.repeat(parseInt(exponent) - coefficient.length + 1);
+  }
+
+  return coefficient;
+};

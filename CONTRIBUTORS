@@ -1,22 +1,22 @@
-    2356	AnhMTV                        	Release version 1.1.50
-    2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
-    1978	S2kael                        	[Issue-2805] Update chain-list stable version
-     620	lw-cdm                        	Fix eslint issues
+    2455	AnhMTV                        	Release version 1.1.58
+    2335	Nam Phạm                      	[Issue 2947] chore: update dependency to support Avail Turing
+    2015	S2kael                        	[Issue-2947] Update stable version for chain-list
+     799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
+     296	nguyentiendung                	[Issue: 2555] Update Add show/hide password for case input password
      185	quangdo                       	
+     113	bluezdot                      	[Issue-2947] update priceId, chainBalanceSlug
+     105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      99	lw-cdm                        	
-      88	dominhquang                   	[Issue-2649] Add send crash log feature
+     101	lw-cdm                        	
+      84	Automation Bot                	[CI Skip] Auto increase webapp build number
       83	Hieu Dao                      	Update README.md
-      82	nguyentiendung                	[Issue-2784] Update url for redirect swap extension
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      80	leewong                       	Update account filter for earn transaction
-      77	bluezdot                      	[Issue-2805] Update chainlist
+      81	leewong                       	Swap - Change idle time to 300s
       63	Roman                         	fix ui issues
+      59	Thiendekaco                   	
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
-      34	Thiendekaco                   	[Issue 2785] Extension - Support connect Ledger device for Asset Hub
-      29	Automation Bot                	[CI Skip] Auto increase webapp build number
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

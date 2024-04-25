@@ -6,6 +6,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -14,6 +15,7 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { findNetworkJsonByGenesisHash, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/utils/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
@@ -26,7 +28,8 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { u8aToString } from '@polkadot/util';
+import { hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { ethereumEncode, keccakAsU8a, secp256k1Expand } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -71,6 +74,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const [form] = Form.useForm();
 
@@ -134,8 +138,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
           if (isKeyringPairs$Json(json)) {
             const accounts: ResponseJsonGetAccountInfo[] = json.accounts.map((account) => {
+              const genesisHash: string = account.meta.originGenesisHash as string;
+
+              let addressPrefix: number | undefined;
+
+              if (account.meta.originGenesisHash) {
+                addressPrefix = findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.substrateInfo?.addressPrefix;
+              }
+
+              let address = account.address;
+
+              if (addressPrefix !== undefined) {
+                address = reformatAddress(account.address, addressPrefix);
+              }
+
+              if (isHex(account.address) && hexToU8a(account.address).length !== 20) {
+                address = ethereumEncode(keccakAsU8a(secp256k1Expand(hexToU8a(account.address))));
+              }
+
               return {
-                address: account.address,
+                address: address,
                 genesisHash: account.meta.genesisHash,
                 name: account.meta.name
               } as ResponseJsonGetAccountInfo;
@@ -148,6 +170,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           } else {
             jsonGetAccountInfo(json)
               .then((accountInfo) => {
+                let address = accountInfo.address;
+
+                if (isHex(accountInfo.address) && hexToU8a(accountInfo.address).length !== 20) {
+                  address = u8aToHex(keccakAsU8a(secp256k1Expand(hexToU8a(accountInfo.address))));
+                }
+
+                accountInfo.address = address;
                 setRequirePassword(true);
                 setAccountsInfo([accountInfo]);
                 setFileValidateState({});
@@ -178,7 +207,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         });
         setValidating(false);
       });
-  }, [t, jsonFile, validating]);
+  }, [validating, jsonFile, chainInfoMap, t]);
 
   const onSubmit = useCallback(() => {
     if (!jsonFile) {
@@ -234,10 +263,9 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <AccountCard
         accountName={account.name}
         address={account.address}
-        addressPreLength={4}
-        addressSufLength={5}
+        addressPreLength={9}
+        addressSufLength={9}
         avatarIdentPrefix={42}
-        avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
         key={account.address}
       />
@@ -345,7 +373,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                   <div className='input-label'>
                     {t('Please enter the password you have used when creating your Polkadot.{js} account')}
                   </div>
-                  <Input
+                  <Input.Password
                     id={`${formName}_${passwordField}`}
                     onChange={onChangePassword}
                     placeholder={t('Password')}

@@ -216,7 +216,7 @@ export enum CrowdloanParaState {
   FAILED = 'failed'
 }
 
-export interface NftItem {
+export interface NftItem extends NftItemExtraInfo {
   // must-have
   id: string;
   chain: string;
@@ -230,9 +230,18 @@ export interface NftItem {
   rarity?: string;
   description?: string;
   properties?: Record<any, any> | null;
+}
+
+interface NftItemExtraInfo {
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
+  assetHubType?: AssetHubNftType // for sending assetHub nft. There're 2 types nft
+}
+
+export enum AssetHubNftType {
+  NFTS = 'nfts',
+  UNIQUES = 'uniques'
 }
 
 export interface NftCollection {
@@ -445,6 +454,8 @@ export type RequestChangeLanguage = { language: LanguageType };
 
 export type RequestChangeShowBalance = { enable: boolean };
 
+export type DetectBalanceCache = Record<string, number>;
+
 export interface RandomTestRequest {
   start: number;
   end: number;
@@ -504,6 +515,8 @@ export enum ExtrinsicType {
   TOKEN_APPROVE = 'evm.token_approve',
 
   SWAP = 'swap',
+
+  // SET_FEE_TOKEN = 'set_fee-token',
 
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
@@ -791,6 +804,17 @@ export interface RequestAccountExportPrivateKey {
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
   publicKey: string;
+}
+
+// Export batch accounts
+
+export interface RequestAccountBatchExportV2 {
+  password: string;
+  addresses?: string[];
+}
+
+export interface ResponseAccountBatchExportV2 {
+  exportedJson: KeyringPairs$Json;
 }
 
 // Get account info with private key
@@ -1543,6 +1567,11 @@ export interface ResponseQrSignEvm {
   signature: string;
 }
 
+export interface RequestChangeFeeToken {
+  currentFeeToken?: string;
+  selectedFeeToken: string;
+}
+
 /// Transfer
 
 export interface RequestCheckTransfer extends BaseRequestSign {
@@ -2288,6 +2317,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
 
   // Export account
+  'pri(accounts.batchExportV2)': [RequestAccountBatchExportV2, ResponseAccountBatchExportV2];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
 
   // Current account

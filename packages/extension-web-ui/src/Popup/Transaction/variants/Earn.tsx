@@ -14,7 +14,7 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
-import { BN_ZERO, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
+import { BN_ZERO, CREATE_RETURN, DEFAULT_ROUTER_PATH, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetSelectedAccountTypes, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
@@ -31,9 +31,10 @@ import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Divider } from 'semantic-ui-react';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -62,13 +63,18 @@ const earningTypeLabelMap = {
   [YieldPoolType.SINGLE_FARMING]: 'single farming'
 };
 
+type LocationStateRW = {
+  from?: string
+}
+
 const Component = ({ className }: ComponentProps) => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
+  const stateLocation = useLocation().state as LocationStateRW;
   const navigate = useNavigate();
 
   const { closeAlert, defaultData, goBack, onDone,
@@ -81,6 +87,7 @@ const Component = ({ className }: ComponentProps) => {
   const autoCheckCompoundRef = useRef<boolean>(true);
   const isReadyToShowAlertRef = useRef<boolean>(true);
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const [, setReturnPath] = useLocalStorage(CREATE_RETURN, DEFAULT_ROUTER_PATH);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const poolTargetsMap = useSelector((state) => state.earning.poolTargetsMap);
@@ -88,6 +95,7 @@ const Component = ({ className }: ComponentProps) => {
   const priceMap = useSelector((state) => state.price.priceMap);
 
   const [form] = Form.useForm<EarnParams>();
+  const [isFromStakingRW, setIsFromStakingRW] = useState(false);
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
 
   const fromValue = useWatchTransaction('from', form, defaultData);
@@ -593,7 +601,7 @@ const Component = ({ className }: ComponentProps) => {
         if ('minBond' in targeted) {
           const minTargetJoin = new BigN(targeted.minBond || '0');
 
-          minJoinPool = minTargetJoin.gt(minJoinPool || '0') ? minTargetJoin.toString() : minJoinPool;
+          minJoinPool = minTargetJoin.gt(minPoolJoin || '0') ? minTargetJoin.toString() : (minPoolJoin || '0');
         } else {
           minJoinPool = minPoolJoin;
         }
@@ -714,7 +722,15 @@ const Component = ({ className }: ComponentProps) => {
     if (!isClickInfoButtonRef.current) {
       goBack();
     }
+
+    setIsFromStakingRW(false);
   }, [goBack]);
+
+  const onStakeMore = useCallback((slug: string, chain: string) => {
+    inactiveModal(instructionModalId);
+
+    setIsFromStakingRW(false);
+  }, [inactiveModal]);
 
   const altChain = useMemo(() => {
     if (poolInfo && (isLiquidPool(poolInfo) || isLendingPool(poolInfo))) {
@@ -824,7 +840,7 @@ const Component = ({ className }: ComponentProps) => {
   }, [compound]);
 
   useEffect(() => {
-    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading) {
+    if (hasPreSelectTarget && !targetLoading && !screenLoading && !checkCompoundLoading && !isFromStakingRW) {
       if (compound) {
         if (autoCheckCompoundRef.current) {
           autoCheckCompoundRef.current = false;
@@ -919,7 +935,7 @@ const Component = ({ className }: ComponentProps) => {
         }
       }
     }
-  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading]);
+  }, [isUnstakeAll, checkUnrecommendedValidator, className, closeAlert, compound, form, goBack, openAlert, poolType, hasPreSelectTarget, t, targetLoading, chainValue, screenLoading, checkCompoundLoading, isFromStakingRW]);
 
   useEffect(() => {
     if (poolChain) {
@@ -941,6 +957,16 @@ const Component = ({ className }: ComponentProps) => {
       }
     }
   }, [altChain, poolChain, checkChainConnected, turnOnChain]);
+
+  useEffect(() => {
+    if (stateLocation?.from && stateLocation.from === '/transaction/earn') {
+      setIsFromStakingRW(true);
+      activeModal(instructionModalId);
+      setReturnPath(DEFAULT_ROUTER_PATH);
+    } else {
+      setIsFromStakingRW(false);
+    }
+  }, [activeModal, setReturnPath, stateLocation]);
 
   const { altChainName, poolChainName } = useMemo(() => ({
     poolChainName: poolChain ? chainInfoMap[poolChain]?.name : '',
@@ -1377,13 +1403,14 @@ const Component = ({ className }: ComponentProps) => {
       }
 
       {
-        !isWebUI && (
+        (!isWebUI || isFromStakingRW) && (
           <EarningInstructionModal
             address={currentAccount?.address}
             assetRegistry={chainAsset}
             closeAlert={closeAlert}
             isShowStakeMoreButton={!isClickInfoButtonRef.current}
             onCancel={onCancelInstructionModal}
+            onStakeMore={onStakeMore}
             openAlert={openAlert}
             poolInfo={poolInfo}
           />

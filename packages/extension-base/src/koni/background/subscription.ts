@@ -2,13 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { StakingRewardItem } from '@subwallet/extension-base/background/KoniTypes';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
-import { getNominationStakingRewardData } from '@subwallet/extension-base/koni/api/staking';
 import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
-import { subscribeBalance } from '@subwallet/extension-base/services/balance-service/helpers/subscribe/balance';
-import { _ChainState, _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isChainEnabled, _isChainSupportSubstrateStaking } from '@subwallet/extension-base/services/chain-service/utils';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { waitTimeout } from '@subwallet/extension-base/utils';
@@ -71,7 +67,6 @@ export class KoniSubscription {
     const currentAddress = this.state.keyringService.currentAccount?.address;
 
     if (currentAddress) {
-      this.subscribeBalances(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
       this.subscribeCrowdloans(currentAddress, this.state.getSubstrateApiMap());
     }
 
@@ -89,7 +84,6 @@ export class KoniSubscription {
         return;
       }
 
-      this.subscribeBalances(address, serviceInfo.chainInfoMap, serviceInfo.chainStateMap, serviceInfo.chainApiMap.substrate, serviceInfo.chainApiMap.evm);
       this.subscribeCrowdloans(address, serviceInfo.chainApiMap.substrate);
     };
 
@@ -107,18 +101,6 @@ export class KoniSubscription {
     return Promise.resolve();
   }
 
-  subscribeBalances (address: string, chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, web3ApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    const addresses = this.state.getDecodedAddresses(address);
-
-    if (!addresses.length) {
-      return;
-    }
-
-    this.state.handleResetBalance(address).then(() => {
-      this.updateSubscription('balance', this.initBalanceSubscription(addresses, chainInfoMap, chainStateMap, substrateApiMap, web3ApiMap, onlyRunOnFirstTime));
-    }).catch((err) => this.logger.warn(err));
-  }
-
   subscribeCrowdloans (address: string, substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
     const addresses = this.state.getDecodedAddresses(address);
 
@@ -129,34 +111,6 @@ export class KoniSubscription {
     this.state.resetCrowdloanMap(address).then(() => {
       this.updateSubscription('crowdloan', this.initCrowdloanSubscription(addresses, substrateApiMap, onlyRunOnFirstTime));
     }).catch(console.error);
-  }
-
-  initBalanceSubscription (addresses: string[], chainInfoMap: Record<string, _ChainInfo>, chainStateMap: Record<string, _ChainState>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, onlyRunOnFirstTime?: boolean) {
-    const filteredChainInfoMap: Record<string, _ChainInfo> = {};
-
-    Object.values(chainStateMap).forEach((chainState) => {
-      if (chainState.active) {
-        filteredChainInfoMap[chainState.slug] = chainInfoMap[chainState.slug];
-      }
-    });
-
-    const unsub = subscribeBalance(addresses, filteredChainInfoMap, substrateApiMap, evmApiMap, (result) => {
-      this.state.setBalanceItem(result);
-    });
-
-    const unsub2 = this.state.subscribeMantaPayBalance();
-
-    if (onlyRunOnFirstTime) {
-      unsub && unsub();
-      unsub2 && unsub2();
-
-      return;
-    }
-
-    return () => {
-      unsub && unsub();
-      unsub2 && unsub2();
-    };
   }
 
   initCrowdloanSubscription (addresses: string[], substrateApiMap: Record<string, _SubstrateApi>, onlyRunOnFirstTime?: boolean) {
@@ -196,38 +150,6 @@ export class KoniSubscription {
       (...args) => this.state.updateNftData(...args),
       (...args) => this.state.setNftCollection(...args)
     ).catch(this.logger.log);
-  }
-
-  async subscribeStakingReward (address: string) {
-    const addresses = this.state.getDecodedAddresses(address);
-
-    if (!addresses.length) {
-      return;
-    }
-
-    const chainInfoMap = this.state.getChainInfoMap();
-    const targetNetworkMap: Record<string, _ChainInfo> = {};
-
-    Object.entries(chainInfoMap).forEach(([key, network]) => {
-      const chainState = this.state.getChainStateByKey(key);
-
-      if (_isChainEnabled(chainState) && _isChainSupportSubstrateStaking(network)) {
-        targetNetworkMap[key] = network;
-      }
-    });
-
-    await getNominationStakingRewardData(addresses, targetNetworkMap, (rewardItem: StakingRewardItem) => {
-      this.state.updateStakingReward(rewardItem);
-    });
-  }
-
-  async reloadBalance () {
-    const currentAddress = this.state.keyringService.currentAccount?.address;
-
-    await this.state.handleResetBalance(currentAddress, true);
-    this.subscribeBalances(currentAddress, this.state.getChainInfoMap(), this.state.getChainStateMap(), this.state.getSubstrateApiMap(), this.state.getEvmApiMap());
-
-    await waitTimeout(1800);
   }
 
   async reloadCrowdloan () {

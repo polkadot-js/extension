@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapTxData } from '@subwallet/extension-base/types/swap';
+import { SwapStepType, SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox, MetaInfo, SwapRoute, SwapTransactionBlock } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { useGetAccountByAddress, useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-web-ui/hooks';
@@ -25,8 +25,8 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   // @ts-ignore
   const data = transaction.data as SwapTxData;
-
-  const account = useGetAccountByAddress(data.recipient);
+  const recipientAddress = data.recipient || data.address;
+  const account = useGetAccountByAddress(recipientAddress);
   const networkPrefix = useGetChainPrefixBySlug(transaction.chain);
 
   const toAssetInfo = useMemo(() => {
@@ -70,6 +70,14 @@ const Component: React.FC<Props> = (props: Props) => {
       </div>
     );
   };
+
+  const isSwapXCM = useMemo(() => {
+    return data.process.steps.some((item) => item.type === SwapStepType.XCM);
+  }, [data.process.steps]);
+
+  const getWaitingTime = useMemo(() => {
+    return Math.ceil((data.quote.estimatedArrivalTime || 0) / 60);
+  }, [data.quote.estimatedArrivalTime]);
 
   useEffect(() => {
     let timer: NodeJS.Timer;
@@ -123,12 +131,20 @@ const Component: React.FC<Props> = (props: Props) => {
         >
         </MetaInfo.Default>
         <SwapRoute swapRoute={data.quote.route} />
-        {!showQuoteExpired && <AlertBox
+        {!showQuoteExpired && getWaitingTime > 0 && <AlertBox
           className={'__swap-arrival-time'}
-          description={t(`Swapping via ${data.provider.name} can take up to ${Math.ceil((data.quote.estimatedArrivalTime || 0) / 60)} minutes. Make sure you review all information carefully before submitting.`)}
+          description={t(`Swapping via ${data.provider.name} can take up to ${getWaitingTime} minutes. Make sure you review all information carefully before submitting.`)}
           title={t('Pay attention!')}
           type='warning'
         />}
+        {!showQuoteExpired && isSwapXCM && (
+          <AlertBox
+            className={'__swap-quote-expired'}
+            description={t('The swap quote has been updated. Make sure to double-check all information before confirming the transaction.')}
+            title={t('Pay attention!')}
+            type='warning'
+          />
+        )}
         {showQuoteExpired &&
           (
             <AlertBox

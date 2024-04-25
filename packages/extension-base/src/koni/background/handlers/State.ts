@@ -9,7 +9,6 @@ import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMa
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
-import { BalanceMapImpl } from '@subwallet/extension-base/services/balance-service/BalanceMapImpl';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
 import CampaignService from '@subwallet/extension-base/services/campaign-service';
@@ -32,14 +31,14 @@ import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/se
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_API_CHAIN_MAP, SUBSCAN_BALANCE_CHAIN_MAP_REVERSE } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import { SwapService } from '@subwallet/extension-base/services/swap-service';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceItem, BalanceJson, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
-import { addLazy, isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
+import { BalanceItem, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
+import { isAccountAll, stripUrl, TARGET_ENV, wait } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -94,7 +93,6 @@ export default class KoniState {
   private readonly unsubscriptionMap: Record<string, () => void> = {};
   private readonly accountRefStore = new AccountRefStore();
   private externalRequest: Record<string, ExternalRequestPromise> = {};
-  private balanceMap = new BalanceMapImpl();
 
   private crowdloanMap: Record<string, CrowdloanItem> = generateDefaultCrowdloanMap();
   private crowdloanSubject = new Subject<CrowdloanJson>();
@@ -322,6 +320,7 @@ export default class KoniState {
     this.campaignService.init();
     this.eventService.emit('chain.ready', true);
 
+    await this.balanceService.init();
     await this.earningService.init();
     await this.swapService.init();
 
@@ -864,43 +863,6 @@ export default class KoniState {
     return keyring.getAccounts().map((account) => account.address);
   }
 
-  public async removeInactiveChainBalances () {
-    const assetSettings = await this.chainService.getAssetSettings();
-
-    this.balanceMap.removeBalanceItemByFilter((item) => {
-      return !assetSettings[item.tokenSlug];
-    });
-  }
-
-  public async getBalance (reset?: boolean) {
-    await this.removeInactiveChainBalances();
-
-    return { details: this.balanceMap.map, reset } as BalanceJson;
-  }
-
-  public async getStoredBalance (address: string) {
-    return await this.dbService.stores.balance.getBalanceMapByAddresses(address);
-  }
-
-  private isFirstLoad = true;
-
-  public async handleResetBalance (newAddress: string, forceRefresh?: boolean) {
-    if (this.isFirstLoad) {
-      const backupBalanceData = await this.dbService.getStoredBalance();
-
-      this.balanceMap.updateBalanceItems(backupBalanceData, isAccountAll(newAddress));
-
-      this.isFirstLoad = false;
-    }
-
-    if (forceRefresh) {
-      this.balanceMap.setData({});
-      await this.dbService.stores.balance.clear();
-    }
-
-    await Promise.all([this.removeInactiveChainBalances()]);
-  }
-
   public async resetCrowdloanMap (newAddress: string) {
     const defaultData = generateDefaultCrowdloanMap();
     const storedData = await this.getStoredCrowdloan(newAddress);
@@ -924,42 +886,6 @@ export default class KoniState {
         details: stakings
       });
     });
-  }
-
-  private balanceUpdateCache: BalanceItem[] = [];
-
-  /** Note: items must be same tokenSlug */
-  public setBalanceItem (items: BalanceItem[]) {
-    if (items.length) {
-      const nowTime = new Date().getTime();
-
-      for (const item of items) {
-        const balance: BalanceItem = { timestamp: nowTime, ...item };
-
-        this.balanceUpdateCache.push(balance);
-      }
-
-      addLazy('updateBalanceStore', () => {
-        const isAllAccount = isAccountAll(this.keyringService.currentAccount.address);
-
-        this.balanceMap.updateBalanceItems(this.balanceUpdateCache, isAllAccount);
-
-        if (isAllAccount) {
-          this.balanceUpdateCache = [...this.balanceUpdateCache, ...Object.values(this.balanceMap.map[ALL_ACCOUNT_KEY])];
-        }
-
-        this.updateBalanceStore(this.balanceUpdateCache);
-        this.balanceUpdateCache = [];
-      }, 300, 1800);
-    }
-  }
-
-  private updateBalanceStore (items: BalanceItem[]) {
-    this.dbService.updateBulkBalanceStore(items).catch((e) => this.logger.warn(e));
-  }
-
-  public subscribeBalance () {
-    return this.balanceMap.mapSubject;
   }
 
   public getCrowdloan (reset?: boolean): CrowdloanJson {
@@ -1554,13 +1480,35 @@ export default class KoniState {
       data: transactionParams.data
     };
 
+    const getTransactionGas = async () => {
+      try {
+        transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      } catch (e) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+      }
+    };
+
     // Calculate transaction data
     try {
-      transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      await Promise.race([
+        getTransactionGas(),
+        wait(3000).then(async () => {
+          if (!transaction.gas) {
+            await this.chainService.initSingleApi(networkKey);
+            await getTransactionGas();
+          }
+        })
+      ]);
     } catch (e) {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+    }
+
+    if (!transaction.gas) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS);
     }
 
     let estimateGas: string;
@@ -1771,7 +1719,7 @@ export default class KoniState {
     // Stopping services
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.earningService.stop(), this.swapService.stop()]);
+    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop(), this.swapService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1807,7 +1755,7 @@ export default class KoniState {
     }
 
     // Start services
-    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.earningService.start(), this.swapService.start()]);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.balanceService.start(), this.earningService.start(), this.swapService.start()]);
 
     // Complete starting
     starting.resolve();
@@ -1837,55 +1785,24 @@ export default class KoniState {
     this.unsubscriptionMap[id] = unsubscribe;
   }
 
-  public async autoEnableChains (addresses: string[]) {
-    const assetMap = this.chainService.getAssetRegistry();
-    const promiseList = addresses.map((address) => {
-      return this.subscanService.getMultiChainBalance(address)
-        .catch((e) => {
-          console.error(e);
+  public get detectBalanceChainSlugMap () {
+    const result: Record<string, string> = {};
+    const chainInfoMap = this.getChainInfoMap();
 
-          return null;
-        });
-    });
+    for (const [key, chainInfo] of Object.entries(chainInfoMap)) {
+      const chainBalanceSlug = chainInfo.extraInfo?.chainBalanceSlug || '';
 
-    const needEnableChains: string[] = [];
-    const needActiveTokens: string[] = [];
-    const currentAssetSettings = await this.chainService.getAssetSettings();
-    const chainMap = this.chainService.getChainInfoMap();
-    const balanceDataList = await Promise.all(promiseList);
-
-    balanceDataList.forEach((balanceData) => {
-      balanceData && balanceData.forEach(({ balance, bonded, category, locked, network, symbol }) => {
-        const chain = SUBSCAN_BALANCE_CHAIN_MAP_REVERSE[network];
-        const chainInfo = chain ? chainMap[chain] : null;
-        const balanceIsEmpty = (!balance || balance === '0') && (!locked || locked === '0') && (!bonded || bonded === '0');
-
-        // Cancel if chain is not supported or is testnet or balance is 0
-        if (!chainInfo || chainInfo.isTestnet || balanceIsEmpty) {
-          return;
-        }
-
-        const tokenKey = `${chain}-${category === 'native' ? 'NATIVE' : 'LOCAL'}-${symbol.toUpperCase()}`;
-
-        const existedKey = Object.keys(assetMap).find((v) => v.toLowerCase() === tokenKey.toLowerCase());
-
-        if (existedKey && !currentAssetSettings[existedKey]?.visible) {
-          needEnableChains.push(chain);
-          needActiveTokens.push(existedKey);
-          currentAssetSettings[existedKey] = { visible: true };
-        }
-      });
-    });
-
-    if (needActiveTokens.length) {
-      await this.chainService.enableChains(needEnableChains);
-      this.chainService.setAssetSettings({ ...currentAssetSettings });
+      if (chainBalanceSlug) {
+        result[chainBalanceSlug] = key;
+      }
     }
+
+    return result;
   }
 
   public onAccountAdd () {
     this.eventService.on('account.add', (address) => {
-      this.autoEnableChains([address]).catch(this.logger.error);
+      this.balanceService.autoEnableChains([address]).catch(this.logger.error);
     });
   }
 
@@ -1894,11 +1811,6 @@ export default class KoniState {
       // Some separate service like historyService will listen to this event and remove inside that service
 
       const stores = this.dbService.stores;
-
-      // Remove Balance
-      stores.balance.removeAllByAddress(address).catch(console.error);
-      stores.balance.removeAllByAddress(ALL_ACCOUNT_KEY).catch(console.error);
-      this.balanceMap.removeBalanceItems([address, ALL_ACCOUNT_KEY]);
 
       // Remove NFT
       stores.nft.deleteNftByAddress([address]).catch(console.error);
@@ -1923,7 +1835,7 @@ export default class KoniState {
   }
 
   public async reloadBalance () {
-    await this.subscription.reloadBalance();
+    await this.balanceService.reloadBalance();
 
     return true;
   }
@@ -1951,9 +1863,11 @@ export default class KoniState {
 
   public async resetWallet (resetAll: boolean) {
     await this.keyringService.resetWallet(resetAll);
+    await this.earningService.resetYieldPosition();
+    await this.balanceService.handleResetBalance(true);
     this.requestService.resetWallet();
     this.transactionService.resetWallet();
-    await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
+    // await this.handleResetBalance(ALL_ACCOUNT_KEY, true);
     await this.earningService.resetWallet();
     await this.dbService.resetWallet(resetAll);
     this.accountRefStore.set('refList', []);
@@ -2090,7 +2004,7 @@ export default class KoniState {
 
           balanceItem.free = zkBalances[i]?.toString() || '0';
           balanceItem.state = APIItemState.READY;
-          this.setBalanceItem([balanceItem]);
+          this.balanceService.setBalanceItem([balanceItem]);
         }
       })
       .catch(console.warn);

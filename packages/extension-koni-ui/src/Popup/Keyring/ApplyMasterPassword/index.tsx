@@ -82,11 +82,11 @@ const intersectionArray = (array1: AccountJson[], array2: AccountJson[]): Accoun
 };
 
 const filterAccountMigrated = (acc: AccountJson) => {
-  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword && !acc.isInjected;
+  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && acc.isMasterPassword && !acc.isInjected && !acc.pendingMigrate;
 };
 
 const filterAccountCanMigrate = (acc: AccountJson) => {
-  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected;
+  return acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected && !acc.pendingMigrate;
 };
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -368,7 +368,7 @@ const Component: React.FC<Props> = (props: Props) => {
                 ]}
                 statusHelpAsTooltip={true}
               >
-                <Input
+                <Input.Password
                   label={t('Current password')}
                   type='password'
                 />

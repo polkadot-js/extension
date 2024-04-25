@@ -41,6 +41,10 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
   NOT_ENOUGH_LIQUIDITY: {
     message: detectTranslate('There is not enough liquidity to complete the swap. Lower your amount and try again'),
     code: undefined
+  },
+  AMOUNT_CANNOT_BE_ZERO: {
+    message: detectTranslate('Amount must be greater than 0'),
+    code: undefined
   }
 };
 

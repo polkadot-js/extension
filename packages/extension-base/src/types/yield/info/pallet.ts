@@ -15,6 +15,11 @@ export interface PalletStakingExposureItem {
   value: number
 }
 
+export interface SpStakingExposurePage {
+  pageTotal: number,
+  others: PalletStakingExposureItem[]
+}
+
 export interface PalletStakingExposure {
   total: number,
   own: number,

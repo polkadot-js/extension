@@ -4,16 +4,21 @@
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
 import { useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
+import { enableChain } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage } from '@subwallet/extension-koni-ui/utils';
+import { isSubstrateMessage, noop } from '@subwallet/extension-koni-ui/utils';
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 
+import useGetChainInfoByGenesisHash from '../../../hooks/chain/useGetChainInfoByGenesisHash';
 import { BaseDetailModal, SubstrateExtrinsic, SubstrateMessageDetail, SubstrateSignArea } from '../parts';
 
 interface Props extends ThemeProps {
@@ -22,13 +27,23 @@ interface Props extends ThemeProps {
 
 function Component ({ className, request }: Props) {
   const { account } = request;
-
   const { t } = useTranslation();
   const payload = useParseSubstrateRequestPayload(request.request);
-
+  const chainInfo = useGetChainInfoByGenesisHash(((payload as ExtrinsicPayload).genesisHash || '').toString());
+  const { chainStateMap } = useSelector((root: RootState) => root.chainStore);
   const onClickDetail = useOpenDetailModal();
 
-  const isMessage = isSubstrateMessage(payload);
+  const isMessage = useMemo(() => isSubstrateMessage(payload), [payload]);
+
+  useEffect(() => {
+    if (!isMessage && chainInfo) {
+      const chainState = chainStateMap[chainInfo.slug];
+
+      !chainState.active && enableChain(chainInfo.slug, false)
+        .then(noop)
+        .catch(console.error);
+    }
+  }, [chainStateMap, chainInfo, isMessage]);
 
   return (
     <>
@@ -68,12 +83,12 @@ function Component ({ className, request }: Props) {
       >
         {isMessage
           ? (
-            <SubstrateMessageDetail bytes={payload} />
+            <SubstrateMessageDetail bytes={payload as string} />
           )
           : (
             <SubstrateExtrinsic
               account={account}
-              payload={payload}
+              payload={payload as ExtrinsicPayload}
               request={request.request.payload as SignerPayloadJSON}
             />
           )

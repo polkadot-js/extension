@@ -475,16 +475,21 @@ export function randomizeProvider (providers: Record<string, string>, excludedKe
   };
 }
 
+export function _isAssetCanPayTxFee (chainAsset: _ChainAsset): boolean {
+  return chainAsset.metadata?.canPayTxFee as boolean ?? false;
+}
+
 export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfoList: _ChainInfo[]) {
   const currentChainInfoMap = currentDataMap.chainInfoMap;
   const currentChainStateMap = currentDataMap.chainStateMap;
   const storedChainInfoList: IChain[] = [];
   const needUpdateChainApiList: _ChainInfo[] = [];
 
-  latestChainInfoList.forEach((latestChainInfo) => {
+  for (const latestChainInfo of latestChainInfoList) {
     const currentChainInfo = currentChainInfoMap[latestChainInfo.slug];
     const currentChainState = currentChainStateMap[latestChainInfo.slug];
     const currentChainProviderValue = currentChainInfo?.providers[currentChainState?.currentProvider];
+    let needUpdate = false;
 
     if (currentChainInfo && currentChainState) {
       const preservedProvider: Record<string, string> = {};
@@ -508,12 +513,21 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
         needUpdateChainApiList.push(currentChainInfo);
       }
 
+      needUpdate = true;
+    }
+
+    if (currentChainInfo) {
+      needUpdate = true;
+      currentChainInfo.extraInfo = latestChainInfo.extraInfo;
+    }
+
+    if (needUpdate) {
       storedChainInfoList.push({
         ...currentChainInfo,
         ...currentChainState
       });
     }
-  });
+  }
 
   return {
     storedChainInfoList,

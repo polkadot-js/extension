@@ -103,7 +103,7 @@ const Component = function ({ className }: Props) {
       }
     }
 
-    if (confirmation.item.isInternal) {
+    if (confirmation.item.isInternal && confirmation.type !== 'connectWCRequest') {
       return (
         <TransactionConfirmation
           closeAlert={closeAlert}
@@ -230,7 +230,7 @@ const Component = function ({ className }: Props) {
         case ExtrinsicType.TOKEN_APPROVE:
           return t('Token approve');
         case ExtrinsicType.SWAP:
-          return t('Swap confirm');
+          return t('Swap confirmation');
         case ExtrinsicType.CROWDLOAN:
         case ExtrinsicType.EVM_EXECUTE:
         case ExtrinsicType.UNKNOWN:

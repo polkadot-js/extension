@@ -422,6 +422,7 @@ export function wait (milliseconds: number) {
 
 export * from './account';
 export * from './array';
+export * from './asset';
 export * from './environment';
 export * from './eth';
 export * from './number';

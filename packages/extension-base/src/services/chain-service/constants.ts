@@ -12,7 +12,7 @@ export const API_MAX_RETRY = 2;
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
-  avail: ['kate'],
+  avail: ['kate', 'availTuringTest'],
   goldberg: ['goldberg_testnet']
 };
 
@@ -32,8 +32,8 @@ export const _BALANCE_CHAIN_GROUP = {
   kintsugi: ['kintsugi', 'interlay', 'kintsugi_test', 'mangatax_para'],
   genshiro: ['genshiro_testnet', 'genshiro'],
   equilibrium_parachain: ['equilibrium_parachain'],
-  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'pendulum', 'amplitude', 'continuum_network'],
-  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya'],
+  bifrost: ['bifrost', 'acala', 'karura', 'acala_testnet', 'pioneer', 'bitcountry', 'bifrost_dot', 'hydradx_main', 'hydradx_rococo', 'pendulum', 'amplitude', 'continuum_network'],
+  statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya', 'dbcchain'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge'],
   supportBridged: ['rococo_assethub']
@@ -74,7 +74,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   shiden: 24,
   shibuya: 24,
   bifrost_testnet: 0.5,
-  bifrost: 2,
+  bifrost: 13 * 600 / 3600, // real blocktime of bifros ksm = 13s
   bifrost_dot: 24,
   ternoa: 24,
   calamari: 6,
@@ -91,7 +91,8 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   goldberg_testnet: 24,
   manta_network: 6,
   krest_network: 4,
-  polimec: 6
+  polimec: 6,
+  enjin_relaychain: 24
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -108,7 +109,18 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   creditcoin: 12,
   vara_network: 3,
   goldberg_testnet: 20,
-  polimec: 12
+  polimec: 12,
+  bifrost: 13, // expect 12 but actual 13
+  moonbeam: 12,
+  moonriver: 12,
+  moonbase: 6,
+  turing: 12,
+  turingStaging: 12,
+  bifrost_testnet: 3,
+  calamari: 12,
+  calamari_test: 12,
+  manta_network: 12,
+  enjin_relaychain: 6
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -203,7 +215,7 @@ export const _TRANSFER_CHAIN_GROUP = {
   genshiro: ['genshiro_testnet', 'genshiro', 'equilibrium_parachain'],
   // crab: ['crab', 'pangolin'],
   bitcountry: ['pioneer', 'bitcountry', 'bifrost', 'bifrost_dot'],
-  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet'],
+  statemine: ['statemint', 'statemine', 'darwinia2', 'astar', 'shiden', 'shibuya', 'parallel', 'liberland', 'liberlandTest', 'dentnet', 'dbcchain'],
   riochain: ['riochain'],
   sora_substrate: ['sora_substrate'],
   avail: ['kate', 'goldberg_testnet'],
@@ -244,7 +256,8 @@ export const _DEFAULT_ACTIVE_CHAINS = [
 export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
   arbitrum_one: ['*'],
   okxTest: ['*'],
-  astarZkEvm: ['*']
+  astarZkEvm: ['*'],
+  xlayer: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

@@ -92,6 +92,12 @@ const settingsSlice = createSlice({
         language: action.payload
       };
     },
+    updateCurrency (state, action: PayloadAction<AppSettings['currency']>) {
+      return {
+        ...state,
+        currency: action.payload
+      };
+    },
     updateBrowserConfirmationType (state, action: PayloadAction<AppSettings['browserConfirmationType']>) {
       return {
         ...state,

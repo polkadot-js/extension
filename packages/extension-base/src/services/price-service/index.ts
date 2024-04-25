@@ -1,28 +1,32 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_PRICE_INTERVAL } from '@subwallet/extension-base/constants';
+import { CurrencyType, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CRON_REFRESH_PRICE_INTERVAL, CURRENCY } from '@subwallet/extension-base/constants';
 import { CronServiceInterface, PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
 import { getTokenPrice } from '@subwallet/extension-base/services/price-service/coingecko';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { BehaviorSubject } from 'rxjs';
 
-const DEFAULT_PRICE_SUBJECT: PriceJson = { ready: false, currency: 'usd', priceMap: {}, price24hMap: {} };
+const DEFAULT_PRICE_SUBJECT: PriceJson = { currencyCode: 'USD', ready: false, currency: { label: 'United States Dollar', symbol: '$', isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
 
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
   private dbService: DatabaseService;
   private eventService: EventService;
   private chainService: ChainService;
-  private priceSubject: BehaviorSubject<PriceJson> = new BehaviorSubject(DEFAULT_PRICE_SUBJECT);
+  private priceSubject: BehaviorSubject<PriceJson>;
   private refreshTimeout: NodeJS.Timeout | undefined;
   private priceIds = new Set<string>();
 
   constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
+    const currencyCode: CurrencyType = SWStorage.instance.getItem(CURRENCY) as CurrencyType || 'USD';
+
+    this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currencyCode });
     this.status = ServiceStatus.NOT_INITIALIZED;
     this.dbService = dbService;
     this.eventService = eventService;
@@ -47,17 +51,40 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     return new Set(priceIdList);
   }
 
-  public refreshPriceData (priceIds?: Set<string>) {
+  public setPriceCurrency (currency: CurrencyType, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
+    const { currencyCode, exchangeRateMap } = this.getPriceSubject().value;
+
+    if (currencyCode === currency) {
+      reject(false);
+
+      return;
+    }
+
+    if (!exchangeRateMap[currency]) {
+      reject(false);
+
+      return;
+    }
+
+    this.refreshPriceData(undefined, currency, resolve, reject);
+  }
+
+  public refreshPriceData (priceIds?: Set<string>, currency?: CurrencyType, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
     clearTimeout(this.refreshTimeout);
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
-    getTokenPrice(this.priceIds)
+    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currencyCode)
       .then((rs) => {
         this.priceSubject.next({ ...rs, ready: true });
         this.dbService.updatePriceStore(rs).catch(console.error);
+        SWStorage.instance.setItem(CURRENCY, rs.currencyCode);
+        resolve && resolve(true);
       })
-      .catch(console.error);
+      .catch((e) => {
+        console.error(e);
+        reject && reject(false);
+      });
 
     this.refreshTimeout = setTimeout(this.refreshPriceData.bind(this), CRON_REFRESH_PRICE_INTERVAL);
   }
@@ -83,7 +110,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   async loadData (): Promise<void> {
-    const data = await this.dbService.getPriceStore();
+    const data = await this.dbService.getPriceStore(this.priceSubject.value.currencyCode);
 
     this.priceSubject.next(data || DEFAULT_PRICE_SUBJECT);
   }

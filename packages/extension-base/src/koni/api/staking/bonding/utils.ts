@@ -567,11 +567,17 @@ export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistor
   return sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
 }
 
-export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number) {
-  if (maxSupportedEras / erasPerDay > 30) {
+export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number, liveDay?: number) {
+  const maxSupportDay = maxSupportedEras / erasPerDay;
+
+  if (liveDay && liveDay <= 30) {
+    return Math.min(liveDay - 1, maxSupportDay);
+  }
+
+  if (maxSupportDay > 30) {
     return 30;
   } else {
-    return 15;
+    return maxSupportDay;
   }
 }
 

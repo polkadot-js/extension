@@ -88,10 +88,22 @@ export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
 
+/**
+ * @function _isNativeTokenTransferredByEvm
+ * @description Check if the native token is transferred by EVM, some token is only transferred by Substrate, need to check disableEvmTransfer flag
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the native token can transfer by EVM
+ * */
 export function _isNativeTokenTransferredByEvm (tokenInfo: _ChainAsset) {
   return !tokenInfo.metadata?.disableEvmTransfer;
 }
 
+/**
+ * @function _isTokenTransferredByEvm
+ * @description Check if the token is transferred by EVM
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the token can transfer by EVM
+ * */
 export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
   return !!tokenInfo.metadata?.contractAddress || (_isNativeToken(tokenInfo) && _isNativeTokenTransferredByEvm(tokenInfo));
 }

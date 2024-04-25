@@ -68,6 +68,10 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
       unsubBridgedToken = await subscribeBridgedBalance(substrateParams);
     }
 
+    /**
+     * Some substrate chain use evm account format but not have evm connection and support ERC20 contract,
+     * so we need to check if the chain is compatible with EVM and support ERC20
+     * */
     if (_isChainEvmCompatible(chainInfo) && _getTokenTypesSupportedByChain(chainInfo).includes(_AssetType.ERC20)) { // Get sub-token for EVM-compatible chains
       unsubEvmContractToken = subscribeERC20Interval({
         ...baseParams,

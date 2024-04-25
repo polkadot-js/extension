@@ -7,7 +7,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
-import { AlertModal, HiddenInput } from '@subwallet/extension-web-ui/components';
+import { AlertBox, AlertModal, HiddenInput } from '@subwallet/extension-web-ui/components';
 import { AccountSelector } from '@subwallet/extension-web-ui/components/Field/AccountSelector';
 import { AddressInput } from '@subwallet/extension-web-ui/components/Field/AddressInput';
 import AmountInput from '@subwallet/extension-web-ui/components/Field/AmountInput';
@@ -797,6 +797,17 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               modalId={alertModalId}
               {...alertProps}
             />
+          )
+        }
+        {
+          chain !== destChain && (
+            <div className={'__warning_message_cross_chain'}>
+              <AlertBox
+                description={t('Cross-chain transfer to an exchange (CEX) will result in loss of funds. Make sure the receiving address is not an exchange address.')}
+                title={t('Pay attention!')}
+                type={'warning'}
+              />
+            </div>
           )
         }
       </TransactionContent>

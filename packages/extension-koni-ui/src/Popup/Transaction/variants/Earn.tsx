@@ -15,7 +15,6 @@ import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
-import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -97,9 +96,9 @@ const Component = () => {
   const [screenLoading, setScreenLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
-  const [, setCanMint] = useState(false);
+  // const [, setCanMint] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  // const [checkMintLoading, setCheckMintLoading] = useState(false);
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
   const chainState = useFetchChainState(poolInfo?.chain || '');
@@ -140,7 +139,7 @@ const Component = () => {
 
   const isDisabledButton = useMemo(
     () =>
-      checkMintLoading ||
+      // checkMintLoading ||
       stepLoading ||
       !!connectionError ||
       !amountValue ||
@@ -149,7 +148,7 @@ const Component = () => {
       submitLoading ||
       targetLoading ||
       (mustChooseTarget && !poolTargetValue),
-    [checkMintLoading, stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
+    [stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
   );
 
   const inputAsset = useMemo(
@@ -791,25 +790,25 @@ const Component = () => {
     }
   }, [submitString, currentStep, chainInfoMap, slug, fromValue, amountValue, notify, poolTargetValue, poolTargets]);
 
-  useEffect(() => {
-    setCheckMintLoading(true);
-
-    unlockDotCheckCanMint({
-      slug: poolInfo?.slug || '',
-      address: fromValue,
-      network: poolInfo?.chain || ''
-    })
-      .then((value) => {
-        setCanMint(value);
-      })
-      .finally(() => {
-        setCheckMintLoading(false);
-      });
-
-    return () => {
-      setCanMint(false);
-    };
-  }, [fromValue, poolInfo?.chain, poolInfo?.slug]);
+  // useEffect(() => {
+  //   setCheckMintLoading(true);
+  //
+  //   unlockDotCheckCanMint({
+  //     slug: poolInfo?.slug || '',
+  //     address: fromValue,
+  //     network: poolInfo?.chain || ''
+  //   })
+  //     .then((value) => {
+  //       setCanMint(value);
+  //     })
+  //     .finally(() => {
+  //       setCheckMintLoading(false);
+  //     });
+  //
+  //   return () => {
+  //     setCanMint(false);
+  //   };
+  // }, [fromValue, poolInfo?.chain, poolInfo?.slug]);
 
   useEffect(() => {
     let unmount = false;

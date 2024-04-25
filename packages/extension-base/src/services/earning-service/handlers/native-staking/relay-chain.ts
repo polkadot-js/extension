@@ -79,11 +79,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
       const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
 
-      let supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
-
-      if (this.chain === 'availTuringTest') {
-        supportedDays = 15;
-      }
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras), parseInt(currentEra) / erasPerDay);
 
       const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
 

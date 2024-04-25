@@ -125,8 +125,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
         if (filters.length) {
           return filters.includes(value.state);
-        } else {
-          return true;
+        } else { // @ts-ignore
+          if (value.state === 'Blocked') {
+            return false;
+          } else {
+            return true;
+          }
         }
       })
       .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {

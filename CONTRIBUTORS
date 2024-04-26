@@ -1,20 +1,20 @@
-    2441	AnhMTV                        	Release version 1.1.56
-    2334	Nam Phạm                      	[Issue 2937] style: remove logs
-    2012	S2kael                        	
+    2462	AnhMTV                        	Release version 1.1.59
+    2341	Nam Phạm                      	[Issue 2963] fix: update parsing history depth
+    2015	S2kael                        	[Issue-2947] Update stable version for chain-list
      799	lw-cdm                        	Update slippage logic
      465	Jaco                          	0.42.5 (#969)
-     292	nguyentiendung                	[Issue-2823] Update debounce when input amount
+     302	nguyentiendung                	[Issue-2954] Remove GATEWAY_IPFS_IO to display nft on webapp
      185	quangdo                       	
+     115	bluezdot                      	[Issue-2963] enable online data
      105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-     103	bluezdot                      	[Issue-2934] Handle metadata TokenId
      101	lw-cdm                        	
+      88	Automation Bot                	[CI Skip] Auto increase webapp build number
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
-      78	Automation Bot                	[CI Skip] Auto increase webapp build number
       63	Roman                         	fix ui issues
-      58	Thiendekaco                   	
+      59	Thiendekaco                   	
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
       24	S2kael                        	

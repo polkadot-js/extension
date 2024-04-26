@@ -157,7 +157,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               ]}
               statusHelpAsTooltip={true}
             >
-              <Input
+              <Input.Password
                 disabled={loading}
                 placeholder={t('Current password')}
                 type='password'
@@ -168,7 +168,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               rules={newPasswordRules}
               statusHelpAsTooltip={true}
             >
-              <Input
+              <Input.Password
                 disabled={loading}
                 onChange={onChangePassword}
                 placeholder={t('New password')}
@@ -180,7 +180,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
               rules={confirmPasswordRules}
               statusHelpAsTooltip={true}
             >
-              <Input
+              <Input.Password
                 disabled={loading}
                 placeholder={t('Confirm new password')}
                 type='password'

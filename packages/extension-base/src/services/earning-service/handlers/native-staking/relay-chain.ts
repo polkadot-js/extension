@@ -77,9 +77,10 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
       const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
-      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from epochDuration, blockTime, sessionsPerEra
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
 
-      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras), parseInt(currentEra) / erasPerDay);
+
       const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
 
       const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minNominatorBond, _counterForNominators, _minimumActiveStake, ..._eraReward] = await Promise.all([
@@ -189,7 +190,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         let eraStakerOtherList: PalletStakingExposureItem[] = [];
         let identity;
 
-        if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+        if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
           const [[_identity], _eraStaker] = await Promise.all([
             parseIdentity(substrateApi, validatorAddress),
             substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
@@ -383,7 +384,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     let _eraStakersPromise;
 
-    if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+    if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
       _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
     } else {
       _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));

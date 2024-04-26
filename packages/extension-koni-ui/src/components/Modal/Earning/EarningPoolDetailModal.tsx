@@ -18,7 +18,7 @@ type Props = ThemeProps & {
 
 export const EarningPoolDetailModalId = 'earningPoolDetailModalId';
 
-function Component ({ className, detailItem, maxPoolMembersValue = 100, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
@@ -86,21 +86,13 @@ function Component ({ className, detailItem, maxPoolMembersValue = 100, onCancel
           valueColorSchema={'even-odd'}
         />
 
-        <MetaInfo.Number
-          label={t('Total members')}
-          value={memberCounter}
-          valueColorSchema={'even-odd'}
-        />
-
-        {
-          maxPoolMembersValue && (
+        {!maxPoolMembersValue &&
             <MetaInfo.Number
-              label={t('Members')}
-              value={maxPoolMembersValue}
-              valueColorSchema={'even-odd'}
-            />
-          )
-        }
+            label={t('Total members')}
+            value={memberCounter}
+            valueColorSchema={'even-odd'}
+        />}
+
 
         {maxPoolMembersValue && ratePercent && <MetaInfo.Default
           label={'Members'}

@@ -16,7 +16,7 @@ import { useFilterModal, useGetPoolTargetList, useSelector, useYieldPositionDeta
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ActivityIndicator, Badge, Button, Icon, InputRef, ModalContext, SelectModal, Tooltip, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
-import { Book, CaretLeft, FadersHorizontal, SortAscending } from 'phosphor-react';
+import { Book, CaretLeft, FadersHorizontal, SortAscending, ThumbsUp } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -127,14 +127,22 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const defaultSelectPool = defaultPoolMap[chain];
 
   const resultList = useMemo((): NominationPoolDataType[] => {
-    return [...items]
+    const idBase = Date.now();
+    const recommendedSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase, idStr: `${idBase}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isSessionHeader: true, disabled: true };
+    const othersSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase + 1, idStr: `${idBase + 1}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Others', isSessionHeader: true, disabled: true };
+
+    const filteredItems = [...items]
       .filter((value) => {
         const filters = selectedFilters as NominationPoolDataType['state'][];
 
         if (filters.length) {
           return filters.includes(value.state);
-        } else {
-          return true;
+        } else { // @ts-ignore
+          if (value.state === 'Blocked') {
+            return false;
+          } else {
+            return true;
+          }
         }
       })
       .map((item) => {
@@ -176,6 +184,13 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               return 0;
             }
         }
+      })
+      .map((item) => {
+        if (item.name && item.name.includes('SubWallet')) {
+          return { ...item, isRecommend: true };
+        }
+
+        return item;
       });
   }, [chain, items, selectedFilters, sortSelection]);
 
@@ -210,14 +225,36 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal]);
 
   const renderItem = useCallback((item: NominationPoolDataType) => {
+    if (item.isSessionHeader) {
+      return (
+        <div
+          className={'__session-header'}
+          key={item.name}
+        >{item.name?.toUpperCase()}
+          {item.name?.includes('Recommended')
+            ? (
+              <Icon
+                className={'__selected-icon'}
+                iconColor='#4cd9ac'
+                phosphorIcon={ThumbsUp }
+                size='xs'
+                weight='fill'
+              />
+            )
+            : null}
+        </div>
+      );
+    }
+
     return (
       item.isCrowded
         ? (
           <Tooltip
             placement={'top'}
+            key={item.id}
             title={t('This pool has reached the maximum number of members. Select another to continue')}
           >
-            <div className={'__pool-item-wrapper'}>
+            <div className={'__pool-item-wrapper'}         key={item.id}>
               <StakingPoolItem
                 {...item}
                 className={'pool-item'}
@@ -229,6 +266,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         : (
           <StakingPoolItem
             {...item}
+            key={item.id}
             className={'pool-item'}
             onClickMoreBtn={onClickMore(item)}
           />
@@ -413,6 +451,23 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
 
     '.ant-sw-modal-content': {
       paddingBottom: token.padding
+    },
+
+    '.__session-header': {
+      fontSize: token.fontSizeSM,
+      color: token.colorTextSecondary,
+      fontWeight: token.fontWeightStrong,
+      marginBottom: -token.marginXXS,
+      marginTop: token.marginXXS,
+      lineHeight: token.lineHeightSM
+    },
+
+    '.__selected-icon': {
+      paddingLeft: token.paddingXXS
+    },
+
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
     },
 
     '&.pool-selector-input': {

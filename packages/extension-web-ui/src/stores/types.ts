@@ -80,6 +80,7 @@ export interface BaseReduxStore {
 export interface LocalUiSettings {
   language: LanguageType,
   isShowZeroBalance: boolean,
+  currency: string
 }
 
 export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsStruct, 'camera' | 'notification'>, BaseReduxStore {

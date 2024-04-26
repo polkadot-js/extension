@@ -81,7 +81,7 @@ export default class KoniDatabase extends Dexie {
       // Primary key is always the first entry
       chain: 'slug',
       asset: 'slug',
-      price: 'currency',
+      price: 'currencyCode',
       balances: '[tokenSlug+address], tokenSlug, address',
       nfts: '[chain+address+collectionId+id], [address+chain], chain, id, address, collectionId, name',
       nftCollections: '[chain+collectionId], chain, collectionId, collectionName',

@@ -76,7 +76,8 @@ const Component: React.FC<Props> = (props: Props) => {
             <Number
               decimal={0}
               hide={hideBalance}
-              prefix={'$'}
+              prefix={(item.contribution.currency?.isPrefix && item.contribution.currency.symbol) || ''}
+              suffix={(!item.contribution.currency?.isPrefix && item.contribution.currency?.symbol) || ''}
               value={item.contribution.convertedValue}
             />
           </div>

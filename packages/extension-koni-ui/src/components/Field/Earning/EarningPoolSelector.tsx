@@ -128,7 +128,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const resultList = useMemo((): NominationPoolDataType[] => {
     const idBase = Date.now();
+    // @ts-ignore
     const recommendedSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase, idStr: `${idBase}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isSessionHeader: true, disabled: true };
+    // @ts-ignore
     const othersSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: idBase + 1, idStr: `${idBase + 1}`, isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Others', isSessionHeader: true, disabled: true };
 
     const filteredItems = [...items]
@@ -192,6 +194,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
         return item;
       });
+
+    return filteredItems;
   }, [chain, items, selectedFilters, sortSelection]);
 
   const isDisabled = useMemo(() =>
@@ -250,11 +254,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       item.isCrowded
         ? (
           <Tooltip
-            placement={'top'}
             key={item.id}
+            placement={'top'}
             title={t('This pool has reached the maximum number of members. Select another to continue')}
           >
-            <div className={'__pool-item-wrapper'}         key={item.id}>
+            <div
+              className={'__pool-item-wrapper'}
+              key={item.id}
+            >
               <StakingPoolItem
                 {...item}
                 className={'pool-item'}
@@ -266,8 +273,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         : (
           <StakingPoolItem
             {...item}
-            key={item.id}
             className={'pool-item'}
+            key={item.id}
             onClickMoreBtn={onClickMore(item)}
           />
         )

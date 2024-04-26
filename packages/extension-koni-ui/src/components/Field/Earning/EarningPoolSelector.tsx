@@ -154,6 +154,17 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               const isSubwalletA = a.name && a.name.includes('SubWallet');
               const isSubwalletB = b.name && b.name.includes('SubWallet');
 
+              if (chain === 'availTuringTest') {
+                const hasAvailSpaceIdA = a.id === 11;
+                const hasAvailSpaceIdB = b.id === 11;
+
+                if (hasAvailSpaceIdA && !hasAvailSpaceIdB) {
+                  return -1;
+                } else if (!hasAvailSpaceIdA && hasAvailSpaceIdB) {
+                  return 1;
+                }
+              }
+
               if (isSubwalletA && !isSubwalletB) {
                 return -1;
               } else if (!isSubwalletA && isSubwalletB) {
@@ -166,7 +177,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             }
         }
       });
-  }, [items, selectedFilters, sortSelection]);
+  }, [chain, items, selectedFilters, sortSelection]);
 
   const isDisabled = useMemo(() =>
     disabled ||
@@ -236,7 +247,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [chain, items.length, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
-    const isCheckRecommend = item.name?.includes('SubWallet') || false;
+    const isCheckRecommend = (item.name?.includes('SubWallet') || (chain === 'availTuringTest' && item.id === 11)) || false;
 
     return (
       <div className={'__selected-item'}>
@@ -254,7 +265,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         </div>
       </div>
     );
-  }, []);
+  }, [chain]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);

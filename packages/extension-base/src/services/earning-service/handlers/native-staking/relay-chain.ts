@@ -67,6 +67,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       }
 
       let maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+      const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
+      const maxNominatorRewarded = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator?.toString();
       const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
       const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
 
@@ -145,7 +147,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
           inflation: inflation
-        }
+        },
+        maxPoolMembers: unlimitedNominatorRewarded ? undefined : maxNominatorRewarded ? parseInt(maxNominatorRewarded) : undefined
       };
 
       callback(data);

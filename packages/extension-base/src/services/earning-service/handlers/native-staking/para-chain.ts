@@ -111,6 +111,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       const round = parseRawNumber(roundObj.current);
       const maxDelegations = chainApi.api.consts?.parachainStaking?.maxDelegationsPerDelegator?.toString();
       const unstakingDelay = chainApi.api.consts.parachainStaking.delegationBondLessDelay.toString();
+      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxTopDelegationsPerCandidate?.toString();
 
       let _unvestedAllocation;
 
@@ -173,7 +174,8 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
           tvl: totalStake.toString(),
           unstakingPeriod: unstakingPeriod,
           inflation
-        }
+        },
+        maxPoolMembers: maxDelegatorsPerCollator ? parseInt(maxDelegatorsPerCollator) : undefined
       };
 
       callback(data);

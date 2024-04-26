@@ -43,13 +43,10 @@ function Component ({ className = '' }: Props) {
   }, [error, goHome, location.pathname, notify]);
 
   return (
-    <PageWrapper className={CN('main-page-container', className)}>
+    <PageWrapper className={CN('main-page-container', className, { '__mobile-mode': !isWebUI })}>
       <div className={'web-layout-background'}></div>
-      {isWebUI ? (<div className={'__header-area'}>{t('Unknown error')}</div>) : (undefined)}
-      <div className={CN('container', {
-        '__web-ui': isWebUI
-      })}
-      >
+      <div className={'__header-area'}>{t('Unknown error')}</div>
+      <div className={'container'}>
         <div className={'__body-area'}>
           <PageIcon
             color={token.colorError}
@@ -57,7 +54,7 @@ function Component ({ className = '' }: Props) {
               phosphorIcon: Robot
             }}
           />
-          <div className={'__title'}>{t('Opps! An Error Occurred')}</div>
+          <div className={'__title'}>{t('Oops, an error occurred!')}</div>
           <div className={'__content'}>
             <span>{t('Something went wrong. Help us fix the problem by sending a report anonymously!')}</span>
           </div>
@@ -120,26 +117,37 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
     '.container': {
       display: 'flex',
       flexDirection: 'column',
-      '.__body-area': {
-        flex: 0,
-        padding: 0,
-        marginBottom: 44,
-        paddingTop: 128
-      },
-      '&.__web-ui': {
-        justifyContent: 'center',
-        alignItems: 'center',
+      alignItems: 'center',
+      zIndex: 2,
+      flex: 1
+    },
+    '.__body-area': {
+      flex: 0,
+      padding: 0,
+      marginBottom: 44,
+      paddingTop: 112,
+      display: 'flex',
+      alignItems: 'center',
+      flexDirection: 'column',
+      maxWidth: 326
+    },
 
-        '.__body-area': {
-          flex: 0,
-          padding: 0,
-          marginBottom: 44,
-          paddingTop: 112
-        },
-        '.__footer-area': {
-          width: 682
-        }
-      }
+    '.__content': {
+      color: token.colorTextLight3,
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      textAlign: 'center'
+    },
+
+    '.__footer-area': {
+      display: 'flex',
+      paddingTop: token.padding,
+      paddingBottom: token.paddingXL,
+      flexDirection: 'column',
+      gap: token.paddingSM,
+      width: 358
     },
 
     '.web-layout-background': {
@@ -153,39 +161,28 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
       background: 'linear-gradient(180deg, rgba(234, 76, 76, 0.10) 5%, rgba(217, 217, 217, 0.00) 33%)'
     },
 
-    '.__body-area': {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      textAlign: 'center'
-    },
-
     '.__title': {
       color: token.colorError,
-      fontSize: token.fontSizeHeading4,
-      lineHeight: token.lineHeightHeading4,
+      fontSize: token.fontSizeHeading3,
+      lineHeight: token.lineHeightHeading3,
       fontWeight: token.headingFontWeight,
       marginTop: token.marginXL,
       marginBottom: token.margin
     },
 
-    '.__content': {
-      color: token.colorTextLight3,
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      paddingLeft: token.padding,
-      paddingRight: token.padding
-    },
-
-    '.__footer-area': {
-      display: 'flex',
-      paddingTop: token.padding,
-      paddingBottom: token.paddingXL,
-      flexDirection: 'column',
-      gap: token.paddingSM,
-      paddingRight: token.padding,
-      paddingLeft: token.padding
+    '&.__mobile-mode': {
+      '.__header-area': {
+        fontSize: token.fontSizeHeading3,
+        lineHeight: token.lineHeightHeading3
+      },
+      '.__body-area': {
+        paddingTop: 60,
+        flex: 1
+      },
+      '.__title': {
+        fontSize: token.fontSizeHeading4,
+        lineHeight: token.lineHeightHeading4
+      }
     }
   });
 });

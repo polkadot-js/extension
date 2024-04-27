@@ -331,7 +331,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [inactiveModal]);
 
   useEffect(() => {
-    const defaultSelectedPool = defaultValue || nominationPoolValueList[0] || `${defaultSelectPool[0] || ''}`;
+    const defaultSelectedPool = defaultValue || nominationPoolValueList[0] || `${defaultSelectPool?.[0] || ''}`;
 
     onChange && onChange({ target: { value: defaultSelectedPool } });
     // eslint-disable-next-line react-hooks/exhaustive-deps

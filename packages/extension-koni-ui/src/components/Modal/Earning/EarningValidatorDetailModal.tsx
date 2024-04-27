@@ -27,10 +27,10 @@ function Component (props: Props): React.ReactElement<Props> {
     expectedReturn: earningEstimated = '',
     identity: validatorName = '',
     minBond: minStake,
+    nominatorCount,
     otherStake,
     ownStake,
     symbol,
-    nominatorCount,
     totalStake } = validatorItem;
   const { t } = useTranslation();
 
@@ -63,7 +63,6 @@ function Component (props: Props): React.ReactElement<Props> {
 
     onCancel && onCancel();
   }, [inactiveModal, onCancel]);
-
 
   const ratePercent = useMemo(() => {
     const rate = maxPoolMembersValue && (nominatorCount / maxPoolMembersValue);
@@ -125,13 +124,13 @@ function Component (props: Props): React.ReactElement<Props> {
           />
         }
 
-          <MetaInfo.Number
-            decimals={decimals}
-            label={t('Own stake')}
-            suffix={symbol}
-            value={ownStake}
-            valueColorSchema={'even-odd'}
-          />
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Own stake')}
+          suffix={symbol}
+          value={ownStake}
+          valueColorSchema={'even-odd'}
+        />
 
         {
           otherStake !== '0' && <MetaInfo.Number

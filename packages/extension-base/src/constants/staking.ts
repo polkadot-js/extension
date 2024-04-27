@@ -5,7 +5,8 @@ export const PREDEFINED_STAKING_POOL: Record<string, number> = {
   kusama: 80,
   polkadot: 39,
   vara_network: 62,
-  aleph: 82
+  aleph: 82,
+  availTuringTest: 11
 };
 
 export const MAX_NOMINATIONS = '16';

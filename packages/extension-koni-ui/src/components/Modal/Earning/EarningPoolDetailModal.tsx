@@ -6,7 +6,7 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo'
 import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import {Number, SwModal} from '@subwallet/react-ui';
+import { Number, SwModal } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -93,20 +93,22 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
               valueColorSchema={'even-odd'}
             />}
 
-        {maxPoolMembersValue && ratePercent && <MetaInfo.Default
-          label={'Members'}
-          labelAlign='top'
-          className={'__maximum-member'}
-          valueColorSchema={`${ratePercent}`}
-        >
-          <Number
-            decimal={0}
-            value={memberCounter}
-          /> &nbsp;/&nbsp; <Number
-            decimal={0}
-            value={maxPoolMembersValue}
-          />
-        </MetaInfo.Default>}
+        {!!maxPoolMembersValue && !!ratePercent && (
+          <MetaInfo.Default
+            className={'__maximum-member'}
+            label={'Members'}
+            labelAlign='top'
+            valueColorSchema={`${ratePercent}`}
+          >
+            <Number
+              decimal={0}
+              value={memberCounter}
+            /> &nbsp;/&nbsp; <Number
+              decimal={0}
+              value={maxPoolMembersValue}
+            />
+          </MetaInfo.Default>
+        )}
       </MetaInfo>
     </SwModal>
   );

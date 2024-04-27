@@ -194,7 +194,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   return (
     <PageWrapper className={`general-setting ${className}`}>
-      <Layout.WithSubHeaderOnlys
+      <Layout.WithSubHeaderOnly
         onBack={goBack}
         title={t('General settings')}
       >
@@ -267,7 +267,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             )
           }
         </div>
-      </Layout.WithSubHeaderOnlys>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

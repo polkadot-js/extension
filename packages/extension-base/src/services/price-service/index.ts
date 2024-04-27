@@ -71,7 +71,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
           exchangeRateMap: exchangeRateMapValue,
           currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
         this.dbService.updatePriceStore({ ...priceSubjectValue, exchangeRateMap: exchangeRateMapValue }).catch(console.error);
-      });
+      }, 600, 1800, false);
     };
 
     mergeDataSubject.subscribe(onUpdate);

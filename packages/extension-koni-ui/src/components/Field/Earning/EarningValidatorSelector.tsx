@@ -99,7 +99,8 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
 
   const maxPoolMembersValue = useMemo(() => {
-    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+    console.log('here', poolInfo);
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) { // todo: should also check chain group for pool
       return poolInfo.maxPoolMembers;
     }
 

@@ -143,6 +143,8 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         maxPoolMembers: maxDelegatorsPerCollator ? parseInt(maxDelegatorsPerCollator) : undefined
       };
 
+      console.log('chain', this.chain, maxDelegatorsPerCollator);
+
       callback(data);
     }) as unknown as UnsubscribePromise);
 

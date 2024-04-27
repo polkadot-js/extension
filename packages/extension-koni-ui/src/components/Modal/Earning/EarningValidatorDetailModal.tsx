@@ -8,7 +8,7 @@ import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwModal } from '@subwallet/react-ui';
+import {ModalContext, Number, SwModal} from '@subwallet/react-ui';
 import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -169,9 +169,16 @@ function Component (props: Props): React.ReactElement<Props> {
           maxPoolMembersValue && ratePercent && (isParaChain || isRelayChain) && <MetaInfo.Default
             label={t(isParaChain ? 'Delegators' : 'Nominator')}
             labelAlign='top'
+            className={'__maximum-validator'}
             valueColorSchema={`${ratePercent}`}
           >
-            {`${nominatorCount} / ${maxPoolMembersValue}`}
+            <Number
+              decimal={0}
+              value={nominatorCount}
+            /> &nbsp;/&nbsp; <Number
+            decimal={0}
+            value={maxPoolMembersValue}
+          />
           </MetaInfo.Default>
         }
       </MetaInfo>
@@ -180,7 +187,11 @@ function Component (props: Props): React.ReactElement<Props> {
 }
 
 const EarningValidatorDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return ({});
+  return ({
+    '.__maximum-validator .__value': {
+      display: 'flex'
+    }
+  });
 });
 
 export default EarningValidatorDetailModal;

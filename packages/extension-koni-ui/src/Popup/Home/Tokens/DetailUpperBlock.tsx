@@ -42,7 +42,7 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
   }, [isShowBalance]);
@@ -70,7 +70,7 @@ function Component (
             'ant-tooltip-hidden': !isShowBalance
           })}
           placement={'top'}
-          title={formatNumber(balanceValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
+          title={formatNumber(balanceValue, 0, balanceNoPrefixFormater) + ' ' + currencyData.symbol}
         >
           <div
             className='__balance-value-wrapper'
@@ -89,7 +89,7 @@ function Component (
               '-not-show-balance': isShrink && formatBalance(balanceValue, 0).length > 10
             })}
             >
-              {currency.symbol}
+              {currencyData.symbol}
             </div>}
           </div>
         </Tooltip>

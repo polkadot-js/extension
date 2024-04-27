@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrencyJson, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrencyJson, CurrencyType, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import axios, { AxiosResponse } from 'axios';
 
@@ -25,65 +25,72 @@ interface ExchangeRateItem {
 
 let useBackupApi = false;
 
-export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD'): Promise<PriceJson> => {
+export const getTokenPrice = async (priceIds: Set<string>, currencyCode: CurrencyType = 'USD'): Promise<PriceJson> => {
   try {
     const idStr = Array.from(priceIds).join(',');
-    const res: AxiosResponse<any, any>[] = [];
 
     const getPriceMap = async () => {
+      let rs: AxiosResponse<any, any> | undefined;
+
       if (!useBackupApi) {
         try {
-          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyCode.toLowerCase()}&per_page=250&ids=${idStr}`);
+          rs = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyCode.toLowerCase()}&per_page=250&ids=${idStr}`);
         } catch (err) {
           useBackupApi = true;
         }
       }
 
-      if (useBackupApi || res[0]?.status !== 200) {
+      if (useBackupApi || rs?.status !== 200) {
         useBackupApi = true;
-        res[0] = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
+        rs = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
       }
 
-      if (res[0].status !== 200) {
+      if (rs?.status !== 200) {
         console.warn('Failed to get token price');
       }
+
+      return rs;
     };
 
     const getExchangeRate = async () => {
+      let rs: AxiosResponse<any, any> | undefined;
+
       try {
-        res[1] = await axios.get('https://api-cache.subwallet.app/exchange-rate');
+        rs = await axios.get('https://api-cache.subwallet.app/exchange-rate');
       } catch (e) {
         console.warn('Failed to get exchange rate');
       }
 
-      if (res[1].status !== 200) {
+      if (rs?.status !== 200) {
         console.warn('Failed to get exchange rate');
       }
+
+      return rs;
     };
 
-    await Promise.all([
+    const resMultiPromise = await Promise.all([
       getPriceMap(),
       getExchangeRate()
     ]);
 
-    const responseDataPrice = res[0].data as Array<GeckoItem> || [];
-    const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
+    const responseDataPrice = resMultiPromise[0]?.data as Array<GeckoItem> || [];
+    const responseDataExchangeRate = resMultiPromise[1]?.data as ExchangeRateItem || {};
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
-    const exchangeRateMap: Record<string, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
+    const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
       .reduce((map, exchangeKey) => {
         if (!staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey]) {
           return map;
         }
 
-        map[exchangeKey] = {
+        map[exchangeKey as CurrencyType] = {
           exchange: responseDataExchangeRate.conversion_rates[exchangeKey],
           label: (staticData[StaticKey.CURRENCY_SYMBOL][exchangeKey] as CurrencyJson).label
         };
 
         return map;
-      }, {} as Record<string, ExchangeRateJSON>);
-    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
+      }, {} as Record<CurrencyType, ExchangeRateJSON>);
+    const currencyData = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
 
     responseDataPrice.forEach((val) => {
       const currentPrice = val.current_price || 0;
@@ -95,8 +102,8 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyCode = 'USD')
     });
 
     return {
-      currencyCode,
-      currency,
+      currency: currencyCode,
+      currencyData,
       exchangeRateMap,
       priceMap,
       price24hMap

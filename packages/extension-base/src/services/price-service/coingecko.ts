@@ -28,46 +28,53 @@ let useBackupApi = false;
 export const getTokenPrice = async (priceIds: Set<string>, currencyCode: CurrencyType = 'USD'): Promise<PriceJson> => {
   try {
     const idStr = Array.from(priceIds).join(',');
-    const res: AxiosResponse<any, any>[] = [];
 
     const getPriceMap = async () => {
+      let rs: AxiosResponse<any, any> | undefined;
+
       if (!useBackupApi) {
         try {
-          res[0] = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyCode.toLowerCase()}&per_page=250&ids=${idStr}`);
+          rs = await axios.get(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currencyCode.toLowerCase()}&per_page=250&ids=${idStr}`);
         } catch (err) {
           useBackupApi = true;
         }
       }
 
-      if (useBackupApi || res[0]?.status !== 200) {
+      if (useBackupApi || rs?.status !== 200) {
         useBackupApi = true;
-        res[0] = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
+        rs = await axios.get(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
       }
 
-      if (res[0].status !== 200) {
+      if (rs?.status !== 200) {
         console.warn('Failed to get token price');
       }
+
+      return rs;
     };
 
     const getExchangeRate = async () => {
+      let rs: AxiosResponse<any, any> | undefined;
+
       try {
-        res[1] = await axios.get('https://api-cache.subwallet.app/exchange-rate');
+        rs = await axios.get('https://api-cache.subwallet.app/exchange-rate');
       } catch (e) {
         console.warn('Failed to get exchange rate');
       }
 
-      if (res[1].status !== 200) {
+      if (rs?.status !== 200) {
         console.warn('Failed to get exchange rate');
       }
+
+      return rs;
     };
 
-    await Promise.all([
+    const resMultiPromise = await Promise.all([
       getPriceMap(),
       getExchangeRate()
     ]);
 
-    const responseDataPrice = res[0].data as Array<GeckoItem> || [];
-    const responseDataExchangeRate = res[1].data as ExchangeRateItem || {};
+    const responseDataPrice = resMultiPromise[0]?.data as Array<GeckoItem> || [];
+    const responseDataExchangeRate = resMultiPromise[1]?.data as ExchangeRateItem || {};
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};
     const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
@@ -83,7 +90,7 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyCode: Currenc
 
         return map;
       }, {} as Record<CurrencyType, ExchangeRateJSON>);
-    const currency = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
+    const currencyData = staticData[StaticKey.CURRENCY_SYMBOL][currencyCode];
 
     responseDataPrice.forEach((val) => {
       const currentPrice = val.current_price || 0;
@@ -95,8 +102,8 @@ export const getTokenPrice = async (priceIds: Set<string>, currencyCode: Currenc
     });
 
     return {
-      currencyCode,
-      currency,
+      currency: currencyCode,
+      currencyData,
       exchangeRateMap,
       priceMap,
       price24hMap

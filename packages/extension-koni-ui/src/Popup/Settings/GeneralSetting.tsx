@@ -105,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const { currencyCode, exchangeRateMap } = useSelector((state: RootState) => state.price);
+  const { currency, exchangeRateMap } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false,
@@ -275,7 +275,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               leftIcon: CurrencyCircleDollar,
               leftIconBgColor: token['gold-6'],
               title: t('Currency'),
-              subTitle: currencyCode
+              subTitle: currency
             })}
             disabled={loadingMap.currency}
             id='currency-select-modal'
@@ -288,7 +288,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
             searchPlaceholder={t<string>('Search Currency')}
-            selected={currencyCode}
+            selected={currency}
             shape='round'
             size='small'
             title={t('Select a currency')}

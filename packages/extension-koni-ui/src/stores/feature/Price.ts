@@ -6,7 +6,8 @@ import { PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState = {
-  currency: { label: 'USD', symbol: 'USD', isPrefix: true },
+  currencyData: { label: 'United States Dollar', symbol: 'USD', isPrefix: false },
+  currency: 'USD',
   priceMap: {},
   price24hMap: {},
   exchangeRateMap: {},

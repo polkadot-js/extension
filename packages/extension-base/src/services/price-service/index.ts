@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CurrencyType, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
+import { CurrencyJson, CurrencyType, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
 import { CRON_REFRESH_PRICE_INTERVAL, CURRENCY } from '@subwallet/extension-base/constants';
 import { CronServiceInterface, PersistDataServiceInterface, ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -10,9 +10,10 @@ import { getTokenPrice } from '@subwallet/extension-base/services/price-service/
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import { BehaviorSubject } from 'rxjs';
 
-const DEFAULT_PRICE_SUBJECT: PriceJson = { currencyCode: 'USD', ready: false, currency: { label: 'United States Dollar', symbol: '$', isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
+const DEFAULT_PRICE_SUBJECT: PriceJson = { currency: 'USD', ready: false, currencyData: { label: 'United States Dollar', symbol: '$', isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
 
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
@@ -24,9 +25,9 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   private priceIds = new Set<string>();
 
   constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
-    const currencyCode: CurrencyType = SWStorage.instance.getItem(CURRENCY) as CurrencyType || 'USD';
+    const currency: CurrencyType = SWStorage.instance.getItem(CURRENCY) as CurrencyType || 'USD';
 
-    this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currencyCode });
+    this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currency });
     this.status = ServiceStatus.NOT_INITIALIZED;
     this.dbService = dbService;
     this.eventService = eventService;
@@ -51,22 +52,34 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     return new Set(priceIdList);
   }
 
-  public setPriceCurrency (currency: CurrencyType, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
-    const { currencyCode, exchangeRateMap } = this.getPriceSubject().value;
+  public setPriceCurrency (newCurrencyCode: CurrencyType, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
+    let priceDataSb = this.getPriceSubject().value;
+    const { currency, exchangeRateMap } = priceDataSb;
 
-    if (currencyCode === currency) {
+    if (currency === newCurrencyCode && priceDataSb.ready) {
       reject(false);
 
       return;
     }
 
-    if (!exchangeRateMap[currency]) {
+    if (!exchangeRateMap[newCurrencyCode]) {
       reject(false);
 
       return;
     }
 
-    this.refreshPriceData(undefined, currency, resolve, reject);
+    const exchangeRate = exchangeRateMap[newCurrencyCode].exchange / exchangeRateMap[currency].exchange;
+
+    priceDataSb = { ...priceDataSb, currency: newCurrencyCode, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][newCurrencyCode] as CurrencyJson };
+    Object.keys(priceDataSb.priceMap).forEach((id) => {
+      priceDataSb.priceMap[id] *= exchangeRate;
+      priceDataSb.price24hMap[id] *= exchangeRate;
+    });
+
+    this.priceSubject.next(priceDataSb);
+    this.dbService.updatePriceStore(priceDataSb).catch(console.error);
+    SWStorage.instance.setItem(CURRENCY, priceDataSb.currency);
+    resolve(true);
   }
 
   public refreshPriceData (priceIds?: Set<string>, currency?: CurrencyType, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
@@ -74,11 +87,11 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
-    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currencyCode)
+    getTokenPrice(this.priceIds, currency || this.priceSubject.value.currency)
       .then((rs) => {
         this.priceSubject.next({ ...rs, ready: true });
         this.dbService.updatePriceStore(rs).catch(console.error);
-        SWStorage.instance.setItem(CURRENCY, rs.currencyCode);
+        SWStorage.instance.setItem(CURRENCY, rs.currency);
         resolve && resolve(true);
       })
       .catch((e) => {
@@ -110,7 +123,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   async loadData (): Promise<void> {
-    const data = await this.dbService.getPriceStore(this.priceSubject.value.currencyCode);
+    const data = await this.dbService.getPriceStore(this.priceSubject.value.currency);
 
     this.priceSubject.next(data || DEFAULT_PRICE_SUBJECT);
   }

@@ -30,6 +30,7 @@ function Component (props: Props): React.ReactElement<Props> {
     otherStake,
     ownStake,
     symbol,
+    nominatorCount,
     totalStake } = validatorItem;
   const { t } = useTranslation();
 
@@ -62,6 +63,23 @@ function Component (props: Props): React.ReactElement<Props> {
 
     onCancel && onCancel();
   }, [inactiveModal, onCancel]);
+
+
+  const ratePercent = useMemo(() => {
+    const rate = maxPoolMembersValue && (nominatorCount / maxPoolMembersValue);
+
+    if (rate) {
+      if (rate < 0.9) {
+        return 'default';
+      } else if (rate >= 0.9 && rate < 1) {
+        return 'gold';
+      } else {
+        return 'danger';
+      }
+    }
+
+    return undefined;
+  }, [maxPoolMembersValue, nominatorCount]);
 
   return (
     <SwModal
@@ -107,15 +125,13 @@ function Component (props: Props): React.ReactElement<Props> {
           />
         }
 
-        {
-          ownStake !== '0' && <MetaInfo.Number
+          <MetaInfo.Number
             decimals={decimals}
             label={t('Own stake')}
             suffix={symbol}
             value={ownStake}
             valueColorSchema={'even-odd'}
           />
-        }
 
         {
           otherStake !== '0' && <MetaInfo.Number
@@ -143,12 +159,21 @@ function Component (props: Props): React.ReactElement<Props> {
           valueColorSchema={'even-odd'}
         />
 
-        {
-          maxPoolMembersValue && (isParaChain || isRelayChain) && <MetaInfo.Number
+        {!maxPoolMembersValue && (isParaChain || isRelayChain) &&
+          <MetaInfo.Number
             label={t(isParaChain ? 'Delegators' : 'Nominator')}
-            value={maxPoolMembersValue}
+            value={nominatorCount}
             valueColorSchema={'even-odd'}
-          />
+          />}
+
+        {
+          maxPoolMembersValue && ratePercent && (isParaChain || isRelayChain) && <MetaInfo.Default
+            label={t(isParaChain ? 'Delegators' : 'Nominator')}
+            labelAlign='top'
+            valueColorSchema={`${ratePercent}`}
+          >
+            {`${nominatorCount} / ${maxPoolMembersValue}`}
+          </MetaInfo.Default>
         }
       </MetaInfo>
     </SwModal>

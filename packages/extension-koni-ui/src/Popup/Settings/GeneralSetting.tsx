@@ -13,7 +13,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -233,6 +233,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSelectTheme = useCallback((value: string) => {
     saveTheme(value as ThemeNames).finally(noop);
   }, []);
+
+  useEffect(() => {
+    console.log(loadingMap.currency);
+  }, [loadingMap.currency]);
 
   return (
     <PageWrapper

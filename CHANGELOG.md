@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.47.3 Apr 27, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump polkadot/api to 11.0.2
+
+
 ## 0.47.2 Apr 23, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.

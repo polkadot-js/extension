@@ -114,6 +114,9 @@ const ErrorFallback = styled(Component)<Props>(({ theme: { extendToken, token } 
       paddingBottom: 48,
       paddingLeft: 24
     },
+    '&.main-page-container': {
+      height: 'auto'
+    },
     '.container': {
       display: 'flex',
       flexDirection: 'column',

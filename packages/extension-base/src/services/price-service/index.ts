@@ -84,16 +84,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     });
   }
 
-  private async getExchangeRateMapItem () {
-    try {
-      const rs = await getExchangeRateMap();
-
-      this.rawExchangeRateMap.next(rs);
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
   async getPrice () {
     return Promise.resolve(this.priceSubject.value);
   }

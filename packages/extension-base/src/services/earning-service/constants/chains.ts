@@ -17,6 +17,8 @@ export const _STAKING_CHAIN_GROUP = {
   manta: ['manta_network']
 };
 
+export const _UPDATED_RUNTIME_STAKING_GROUP = ['kusama', 'polkadot', 'westend', 'availTuringTest'];
+
 export const MaxEraRewardPointsEras = 14;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment

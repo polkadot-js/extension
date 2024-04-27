@@ -184,3 +184,10 @@ export interface RuntimeDispatchInfo {
   class: string,
   partialFee: number
 }
+
+export interface SpStakingPagedExposureMetadata {
+  total: number,
+  own: number,
+  nominatorCount: number,
+  pageCount: number
+}

@@ -9,6 +9,7 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { getExchangeRateMap, getPriceMap } from '@subwallet/extension-base/services/price-service/coingecko';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SWStorage } from '@subwallet/extension-base/storage';
+import { addLazy } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import { BehaviorSubject, merge } from 'rxjs';
@@ -26,11 +27,12 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   private rawExchangeRateMap: BehaviorSubject<Record<CurrencyType, ExchangeRateJSON>>;
   private refreshTimeout: NodeJS.Timeout | undefined;
   private priceIds = new Set<string>();
-  private currency: BehaviorSubject<CurrencyType> = new BehaviorSubject(DEFAULT_CURRENCY);
+  private currency: BehaviorSubject<CurrencyType>;
 
   constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
-    this.currency.next(SWStorage.instance.getItem(CURRENCY) as CurrencyType || DEFAULT_CURRENCY);
+    const currency = SWStorage.instance.getItem(CURRENCY) as CurrencyType;
 
+    this.currency = new BehaviorSubject(currency || DEFAULT_CURRENCY);
     this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currency: this.currency.value });
     this.rawPriceSubject = new BehaviorSubject({} as Omit<PriceJson, 'exchangeRateMap'>);
     this.rawExchangeRateMap = new BehaviorSubject({} as Record<CurrencyType, ExchangeRateJSON>);
@@ -41,35 +43,38 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
     const mergeDataSubject = merge(this.rawPriceSubject, this.rawExchangeRateMap, this.currency);
 
-    mergeDataSubject.subscribe(() => {
-      const priceSubjectValue = JSON.parse(JSON.stringify(this.rawPriceSubject.value)) as Omit<PriceJson, 'exchangeRateMap'>;
-      const exchangeRateMapValue = this.rawExchangeRateMap.value;
-      const currencyKey = this.currency.value;
+    const onUpdate = () => {
+      addLazy('updatePriceData', () => {
+        const priceSubjectValue = JSON.parse(JSON.stringify(this.rawPriceSubject.value)) as Omit<PriceJson, 'exchangeRateMap'>;
+        const exchangeRateMapValue = JSON.parse(JSON.stringify(this.rawExchangeRateMap.value)) as Record<CurrencyType, ExchangeRateJSON>;
+        const currencyKey = this.currency.value;
 
-      if (Object.keys(priceSubjectValue).length === 0) {
-        return;
-      }
+        if (Object.keys(priceSubjectValue).length === 0) {
+          return;
+        }
 
-      if (currencyKey === DEFAULT_CURRENCY) {
-        this.priceSubject.next({ ...priceSubjectValue, currency: currencyKey, exchangeRateMap: exchangeRateMapValue, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
-      }
+        if (Object.keys(exchangeRateMapValue).length === 0) {
+          return;
+        }
 
-      if (Object.keys(exchangeRateMapValue).length === 0) {
-        return;
-      }
+        if (currencyKey === DEFAULT_CURRENCY) {
+          this.priceSubject.next({ ...priceSubjectValue, currency: currencyKey, exchangeRateMap: exchangeRateMapValue, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
+        }
 
-      Object.keys(priceSubjectValue.price24hMap).forEach((key: string) => {
-        priceSubjectValue.price24hMap[key] *= exchangeRateMapValue[currencyKey].exchange;
-        priceSubjectValue.priceMap[key] *= exchangeRateMapValue[currencyKey].exchange;
+        Object.keys(priceSubjectValue.price24hMap).forEach((key: string) => {
+          priceSubjectValue.price24hMap[key] *= exchangeRateMapValue[currencyKey].exchange;
+          priceSubjectValue.priceMap[key] *= exchangeRateMapValue[currencyKey].exchange;
+        });
+
+        this.priceSubject.next({ ...priceSubjectValue,
+          currency: currencyKey,
+          exchangeRateMap: exchangeRateMapValue,
+          currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
+        this.dbService.updatePriceStore({ ...priceSubjectValue, exchangeRateMap: exchangeRateMapValue }).catch(console.error);
       });
+    };
 
-      this.priceSubject.next({ ...priceSubjectValue,
-        currency: currencyKey,
-        exchangeRateMap: exchangeRateMapValue,
-        currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
-      this.rawPriceSubject.next({} as Omit<PriceJson, 'exchangeRateMap'>);
-      this.dbService.updatePriceStore({ ...priceSubjectValue, exchangeRateMap: exchangeRateMapValue }).catch(console.error);
-    });
+    mergeDataSubject.subscribe(onUpdate);
 
     this.init().catch(console.error);
   }
@@ -109,6 +114,8 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
     // Await 1s to get the latest exchange rate
     await new Promise((resolve) => setTimeout(resolve, 300));
+
+    SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
 
     return true;
   }

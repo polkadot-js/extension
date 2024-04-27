@@ -42,12 +42,16 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     const mergeDataSubject = merge(this.rawPriceSubject, this.rawExchangeRateMap, this.currency);
 
     mergeDataSubject.subscribe(() => {
-      const priceSubjectValue = this.rawPriceSubject.value;
+      const priceSubjectValue = JSON.parse(JSON.stringify(this.rawPriceSubject.value)) as Omit<PriceJson, 'exchangeRateMap'>;
       const exchangeRateMapValue = this.rawExchangeRateMap.value;
       const currencyKey = this.currency.value;
 
       if (Object.keys(priceSubjectValue).length === 0) {
         return;
+      }
+
+      if (currencyKey === DEFAULT_CURRENCY) {
+        this.priceSubject.next({ ...priceSubjectValue, currency: currencyKey, exchangeRateMap: exchangeRateMapValue, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
       }
 
       if (Object.keys(exchangeRateMapValue).length === 0) {
@@ -106,23 +110,17 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     return new Set(priceIdList);
   }
 
-  public setPriceCurrency (newCurrencyCode: CurrencyType, resolve: (rs: boolean) => void, reject: (e: boolean) => void) {
-    const currency = this.currency.value;
-
-    if (currency === newCurrencyCode) {
-      reject(false);
+  public async setPriceCurrency (newCurrencyCode: CurrencyType) {
+    if (newCurrencyCode === this.currency.value) {
+      return false;
     }
 
-    this.getExchangeRateMapItem().then(() => {
-      this.currency.next(newCurrencyCode);
-      SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
-    }).catch(() => reject(false));
+    this.currency.next(newCurrencyCode);
 
-    this.priceSubject.subscribe((rs) => {
-      if (rs.currency === newCurrencyCode) {
-        resolve(true);
-      }
-    });
+    // Await 1s to get the latest exchange rate
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    return true;
   }
 
   public refreshPriceData (priceIds?: Set<string>, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {

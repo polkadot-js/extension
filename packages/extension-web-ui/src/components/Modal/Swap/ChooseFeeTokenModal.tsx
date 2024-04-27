@@ -10,6 +10,8 @@ import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
+import {useSelector} from "@subwallet/extension-web-ui/hooks";
+import {RootState} from "@subwallet/extension-web-ui/stores";
 
 type Props = ThemeProps & {
   modalId: string,
@@ -22,6 +24,7 @@ const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, estimatedFee, items, modalId, onSelectItem, selectedItem } = props;
+  const { currency } = useSelector((state: RootState) => state.price);
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -49,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
               decimalOpacity={0.45}
               formatType={'custom'}
               metadata={numberMetadata}
-              prefix={'$'}
+              prefix={(currency.isPrefix && currency.symbol) || ''}
               size={30}
               value={estimatedFee}
             />

@@ -19,6 +19,7 @@ function Component (
   { chain,
     chainDisplayName = '',
     className = '',
+    currency,
     isReady,
     logoKey,
     onClick,
@@ -70,8 +71,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix='$'
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />

@@ -74,6 +74,7 @@ const Component = ({ className }: ComponentProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
+  const { currency } = useSelector((state) => state.price);
   const stateLocation = useLocation().state as LocationStateRW;
   const navigate = useNavigate();
 
@@ -653,7 +654,8 @@ const Component = ({ className }: ComponentProps) => {
           <MetaInfo.Number
             decimals={0}
             label={t('Estimated fee')}
-            prefix={'$'}
+            prefix={(currency?.isPrefix && currency.symbol) || ''}
+            suffix={(!currency?.isPrefix && currency?.symbol) || ''}
             value={estimatedFee}
           />
         )}
@@ -1298,7 +1300,8 @@ const Component = ({ className }: ComponentProps) => {
                   <div className={'__transformed-amount-value'}>
                     <Number
                       decimal={0}
-                      prefix={'$'}
+                      prefix={(currency?.isPrefix && currency.symbol) || ''}
+                      suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                       value={transformAmount}
                     />
                   </div>

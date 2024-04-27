@@ -1,10 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
+import { formatBalance } from '@subwallet/extension-web-ui/utils';
+import { Button, Icon, Number, SwNumberProps, Tag, Tooltip } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -35,6 +38,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
   const [reloading, setReloading] = useState(false);
+  const { currency } = useSelector((state) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -52,21 +56,34 @@ function Component (
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <div className='__total-balance-value-container'>
-        <div
-          className='__total-balance-value-content'
-          onClick={isShrink ? onChangeShowBalance : undefined}
+        <Tooltip
+          overlayClassName={CN('__currency-value-detail-tooltip', {
+            'ant-tooltip-hidden': !isShowBalance
+          })}
+          placement='top'
+          title={formatNumber(totalValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
         >
-          <Number
-            className={'__total-balance-value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix='$'
-            size={38}
-            subFloatNumber
-            value={totalValue}
-          />
-        </div>
+          <div
+            className='__total-balance-value-content'
+            onClick={isShrink ? onChangeShowBalance : undefined}
+          >
+            <Number
+              className={'__total-balance-value'}
+              decimal={0}
+              decimalOpacity={0.45}
+              hide={!isShowBalance}
+              size={38}
+              subFloatNumber
+              value={totalValue}
+            />
+            {isShowBalance && <div className={CN('__total-balance-symbol', {
+              '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
+            })}
+            >
+              {currency.symbol}
+            </div>}
+          </div>
+        </Tooltip>
       </div>
       {!isShrink && (
         <div className={'__balance-change-container'}>
@@ -87,7 +104,8 @@ function Component (
             decimal={0}
             decimalOpacity={1}
             hide={!isShowBalance}
-            prefix={isPriceDecrease ? '- $' : '+ $'}
+            prefix={isPriceDecrease ? `- ${(currency.isPrefix && currency.symbol) || ''}` : `+ ${(currency.isPrefix && currency.symbol) || ''}`}
+            suffix={(!currency.isPrefix && currency.symbol) || ''}
             value={totalChangeValue}
           />
           <Tag
@@ -254,6 +272,25 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
       width: token.size
     },
 
+    '.__total-balance-value-content': {
+      display: 'flex',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      width: 'fit-content',
+      margin: 'auto'
+    },
+
+    '.__total-balance-symbol': {
+      marginLeft: -2,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightHeading6,
+
+      '&.-not-show-balance': {
+        display: 'none'
+      }
+
+    },
+
     '&.-shrink': {
       paddingBottom: 32,
       flexDirection: 'row',
@@ -264,7 +301,8 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
 
       '.__total-balance-value-content': {
         cursor: 'pointer',
-        width: 'fit-content'
+        width: 'fit-content',
+        margin: 0
       },
 
       '.__total-balance-value': {

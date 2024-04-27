@@ -1,13 +1,16 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Number } from '@subwallet/react-ui';
+import { formatBalance } from '@subwallet/extension-web-ui/utils';
+import { Button, Icon, Number, Tooltip } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
+import CN from 'classnames';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
@@ -36,6 +39,7 @@ function Component (
     symbol }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
+  const { currency } = useSelector((state: RootState) => state.price);
   const { isWebUI } = useContext(ScreenContext);
 
   const onChangeShowBalance = useCallback(() => {
@@ -60,21 +64,34 @@ function Component (
         <div className={'__token-display'}>{t('Token')}: {symbol}</div>
       </div>
       <div className='__bottom'>
-        <div
-          className='__balance-value-wrapper'
-          onClick={isShrink ? onChangeShowBalance : undefined}
+        <Tooltip
+          overlayClassName={CN('__currency-value-detail-tooltip', {
+            'ant-tooltip-hidden': !isShowBalance
+          })}
+          placement={'top'}
+          title={formatNumber(balanceValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
         >
-          <Number
-            className={'__balance-value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix='$'
-            size={38}
-            subFloatNumber
-            value={balanceValue}
-          />
-        </div>
+          <div
+            className='__balance-value-wrapper'
+            onClick={isShrink ? onChangeShowBalance : undefined}
+          >
+            <Number
+              className={'__balance-value'}
+              decimal={0}
+              decimalOpacity={0.45}
+              hide={!isShowBalance}
+              size={38}
+              subFloatNumber
+              value={balanceValue}
+            />
+            {isShowBalance && <div className={CN('__total-balance-symbol', {
+              '-not-show-balance': isShrink && formatBalance(balanceValue, 0).length > 10
+            })}
+            >
+              {currency.symbol}
+            </div>}
+          </div>
+        </Tooltip>
         <div className={'__action-button-container'}>
           <Button
             icon={(
@@ -183,13 +200,36 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
       width: token.size
     },
 
+    '.__total-balance-symbol': {
+      marginLeft: -2,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightHeading6,
+
+      '&.-not-show-balance': {
+        display: 'none'
+      }
+
+    },
+
+    '.__balance-value-wrapper': {
+      display: 'flex',
+      justifyContent: 'center',
+      cursor: 'pointer',
+      width: 'fit-content',
+      margin: 'auto'
+    },
+
     '&.-shrink': {
       '.__bottom': {
         display: 'flex'
       },
 
       '.__balance-value-wrapper': {
-        flex: 1
+        flex: 1,
+        margin: 0,
+        cursor: 'pointer',
+        justifyContent: 'flex-start',
+        width: 'fit-content'
       },
 
       '.__balance-value': {

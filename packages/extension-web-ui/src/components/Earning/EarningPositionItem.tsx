@@ -24,7 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, isShowBalance,
     onClick,
     positionInfo } = props;
-  const { asset, balanceToken, chain, group, price, slug, totalStake, type } = positionInfo;
+  const { asset, balanceToken, chain, currency, group, price, slug, totalStake, type } = positionInfo;
 
   const { poolInfoMap } = useSelector((state) => state.earning);
   const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
@@ -90,7 +90,8 @@ const Component: React.FC<Props> = (props: Props) => {
                   <Number
                     decimal={0}
                     hide={!isShowBalance}
-                    prefix={'$'}
+                    prefix={(currency?.isPrefix && currency.symbol) || ''}
+                    suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                     value={convertedBalanceValue}
                   />
                 </div>

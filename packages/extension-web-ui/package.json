@@ -41,7 +41,7 @@
     "@subwallet/extension-dapp": "^1.1.59-0",
     "@subwallet/extension-inject": "^1.1.59-0",
     "@subwallet/keyring": "^0.1.5",
-    "@subwallet/react-ui": "5.1.2-b74",
+    "@subwallet/react-ui": "^5.1.2-b77",
     "@subwallet/ui-keyring": "^0.1.5",
     "@walletconnect/types": "^2.8.4",
     "axios": "^1.2.1",

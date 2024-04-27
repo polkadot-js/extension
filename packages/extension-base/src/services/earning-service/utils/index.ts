@@ -90,7 +90,7 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
       const web = identityInfo.info?.web?.Raw;
       const riot = identityInfo.info?.riot?.Raw;
       const twitter = identityInfo.info?.twitter?.Raw;
-      const isReasonable = identityInfo.judgements.length > 0;
+      const isReasonable = identityInfo.judgements?.length > 0;
 
       if (displayName) {
         identity = isHex(displayName) ? hexToString(displayName) : displayName;

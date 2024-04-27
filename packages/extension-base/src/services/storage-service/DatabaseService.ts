@@ -72,11 +72,9 @@ export default class DatabaseService {
     await this.stores.price.table.put(priceData);
   }
 
-  async getPriceStore () {
+  async getPriceStore (keyData?: string) {
     try {
-      const rs = await this.stores.price.table.get('usd');
-
-      return rs;
+      return await this.stores.price.table.get(keyData || 'USD');
     } catch (e) {
       this.logger.error(e);
 

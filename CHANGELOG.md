@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## 1.1.59
+Build date: Apl 25, 2024.
+
+Features & Update:
+- Support staking for Avail Turing (#2963)
+
+## 1.1.58
+Build date: Apl 24, 2024.
+
+Features & Update:
+- Add show/hide password for case input password (#2555)
+- Update chain-list (#2947)
+  - Set "SubWallet Official 3" as the default pool for Vara
+  - Add support for Commune AI blockchain and COMAI token (Mainnet)
+  - Add Block Explorer for Enjin Relaychain, Enjin Matrix
+  - Add support for DBC network
+  - Add support Avail Turing
+
+Bugs fixed:
+- Fixed bug Do not show transaction history in case sender account is null (#2955)
+
+## 1.1.57
+Build date: Apl 23, 2024.
+
+Bugs fixed:
+- Fix bug related to Aleph Zero transfer and staking (#2655)
+- Fix issue related to earning status (#2941)
+
 ## 1.1.56
 Build date: Apl 19, 2024.
 

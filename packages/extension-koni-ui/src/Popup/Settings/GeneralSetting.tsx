@@ -13,7 +13,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -105,7 +105,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const { currencyCode, exchangeRateMap } = useSelector((state: RootState) => state.price);
+  const { currency, exchangeRateMap } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false,
@@ -234,6 +234,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     saveTheme(value as ThemeNames).finally(noop);
   }, []);
 
+  useEffect(() => {
+    console.log(loadingMap.currency);
+  }, [loadingMap.currency]);
+
   return (
     <PageWrapper
       className={`general-setting ${className}`}
@@ -275,7 +279,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               leftIcon: CurrencyCircleDollar,
               leftIconBgColor: token['gold-6'],
               title: t('Currency'),
-              subTitle: currencyCode
+              subTitle: currency
             })}
             disabled={loadingMap.currency}
             id='currency-select-modal'
@@ -288,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
             searchPlaceholder={t<string>('Search Currency')}
-            selected={currencyCode}
+            selected={currency}
             shape='round'
             size='small'
             title={t('Select a currency')}

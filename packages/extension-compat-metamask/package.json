@@ -18,11 +18,11 @@
     "./packageDetect.cjs"
   ],
   "type": "module",
-  "version": "0.47.3-0-x",
+  "version": "0.47.3",
   "main": "index.js",
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
-    "@polkadot/extension-inject": "0.47.3-0-x",
+    "@polkadot/extension-inject": "0.47.3",
     "@polkadot/types": "^11.0.2",
     "@polkadot/util": "^12.6.2",
     "tslib": "^2.6.2",

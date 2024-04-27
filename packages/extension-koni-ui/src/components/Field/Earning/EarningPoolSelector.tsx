@@ -498,12 +498,14 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
         paddingBottom: token.paddingXXS
       }
     },
+
     '.__title-suffix': {
       fontSize: token.fontSizeSM,
       fontWeight: token.bodyFontWeight,
       lineHeight: token.lineHeightSM,
       color: token.colorTextTertiary
     },
+
     '.__selected-item-name.common-text': {
       display: 'flex',
       alignItems: 'baseline'

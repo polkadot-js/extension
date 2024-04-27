@@ -45,6 +45,7 @@ function Component (
         name={symbol}
         networkMainLogoShape={'squircle'}
         onPressItem={onPressItem}
+        prefix={(currency?.isPrefix && currency.symbol) || ''}
         price={priceValue}
         rightItem={
           (
@@ -90,6 +91,7 @@ function Component (
             </>
           )
         }
+        suffix={(!currency?.isPrefix && currency?.symbol) || ''}
         symbol={logoKey}
       />
     </div>

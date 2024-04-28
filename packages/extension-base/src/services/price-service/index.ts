@@ -9,7 +9,6 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { getExchangeRateMap, getPriceMap } from '@subwallet/extension-base/services/price-service/coingecko';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SWStorage } from '@subwallet/extension-base/storage';
-import { addLazy } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import { BehaviorSubject, merge } from 'rxjs';
@@ -43,38 +42,44 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
 
     const mergeDataSubject = merge(this.rawPriceSubject, this.rawExchangeRateMap, this.currency);
 
-    const onUpdate = () => {
-      addLazy('updatePriceData', () => {
-        const priceSubjectValue = JSON.parse(JSON.stringify(this.rawPriceSubject.value)) as Omit<PriceJson, 'exchangeRateMap'>;
-        const exchangeRateMapValue = JSON.parse(JSON.stringify(this.rawExchangeRateMap.value)) as Record<CurrencyType, ExchangeRateJSON>;
-        const currencyKey = this.currency.value;
+    const onUpdate = async () => {
+      const rawPrice = this.rawPriceSubject.value;
+      const priceMapResult = JSON.parse(JSON.stringify(rawPrice)) as Omit<PriceJson, 'exchangeRateMap'>;
+      const exchangeRateData = this.rawExchangeRateMap.value;
+      const currencyKey = this.currency.value;
 
-        if (Object.keys(priceSubjectValue).length === 0) {
-          return;
-        }
+      if (Object.keys(priceMapResult).length === 0) {
+        return;
+      }
 
-        if (Object.keys(exchangeRateMapValue).length === 0) {
-          return;
-        }
+      if (Object.keys(exchangeRateData).length === 0) {
+        return;
+      }
 
-        if (currencyKey === DEFAULT_CURRENCY) {
-          this.priceSubject.next({ ...priceSubjectValue, currency: currencyKey, exchangeRateMap: exchangeRateMapValue, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
-        }
+      if (currencyKey === DEFAULT_CURRENCY) {
+        this.priceSubject.next({ ...priceMapResult, currency: currencyKey, exchangeRateMap: exchangeRateData, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
+      }
 
-        Object.keys(priceSubjectValue.price24hMap).forEach((key: string) => {
-          priceSubjectValue.price24hMap[key] *= exchangeRateMapValue[currencyKey].exchange;
-          priceSubjectValue.priceMap[key] *= exchangeRateMapValue[currencyKey].exchange;
-        });
+      Object.keys(priceMapResult.price24hMap).forEach((key: string) => {
+        priceMapResult.price24hMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
+        priceMapResult.priceMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
+      });
 
-        this.priceSubject.next({ ...priceSubjectValue,
-          currency: currencyKey,
-          exchangeRateMap: exchangeRateMapValue,
-          currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
-        this.dbService.updatePriceStore({ ...priceSubjectValue, exchangeRateMap: exchangeRateMapValue }).catch(console.error);
-      }, 600, 1800, false);
+      this.priceSubject.next({ ...priceMapResult,
+        currency: currencyKey,
+        exchangeRateMap: exchangeRateData,
+        currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
+      await this.dbService.updatePriceStore({ ...priceMapResult, exchangeRateMap: exchangeRateData });
     };
 
-    mergeDataSubject.subscribe(onUpdate);
+    let lockHandler = createPromiseHandler<void>();
+
+    mergeDataSubject.subscribe(() => {
+      lockHandler.promise.then(() => {
+        lockHandler = createPromiseHandler<void>();
+        onUpdate().finally(() => lockHandler.resolve());
+      }).catch(console.error);
+    });
 
     this.init().catch(console.error);
   }

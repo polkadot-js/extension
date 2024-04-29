@@ -271,7 +271,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               title={t('Wallet theme')}
             />}
 
-          <SelectModal
+          {false && <SelectModal
             background={'default'}
             className={`__modal ${className}`}
             customInput={renderModalTrigger({
@@ -296,7 +296,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             shape='round'
             size='small'
             title={t('Select a currency')}
-          />
+          />}
 
           <SelectModal
             background={'default'}

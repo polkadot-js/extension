@@ -11,10 +11,17 @@ import DatabaseService from '@subwallet/extension-base/services/storage-service/
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
-import { BehaviorSubject, merge } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 const DEFAULT_CURRENCY: CurrencyType = 'USD';
-const DEFAULT_PRICE_SUBJECT: PriceJson = { currency: DEFAULT_CURRENCY, ready: false, currencyData: { label: 'United States Dollar', symbol: DEFAULT_CURRENCY, isPrefix: true }, priceMap: {}, price24hMap: {}, exchangeRateMap: {} };
+const DEFAULT_PRICE_SUBJECT: PriceJson = {
+  currency: DEFAULT_CURRENCY,
+  ready: false,
+  currencyData: { label: 'United States Dollar', symbol: DEFAULT_CURRENCY, isPrefix: true },
+  priceMap: {},
+  price24hMap: {},
+  exchangeRateMap: {}
+};
 
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
@@ -40,47 +47,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.eventService = eventService;
     this.chainService = chainService;
 
-    const mergeDataSubject = merge(this.rawPriceSubject, this.rawExchangeRateMap, this.currency);
-
-    const onUpdate = async () => {
-      const rawPrice = this.rawPriceSubject.value;
-      const priceMapResult = JSON.parse(JSON.stringify(rawPrice)) as Omit<PriceJson, 'exchangeRateMap'>;
-      const exchangeRateData = this.rawExchangeRateMap.value;
-      const currencyKey = this.currency.value;
-
-      if (Object.keys(priceMapResult).length === 0) {
-        return;
-      }
-
-      if (Object.keys(exchangeRateData).length === 0) {
-        return;
-      }
-
-      if (currencyKey === DEFAULT_CURRENCY) {
-        this.priceSubject.next({ ...priceMapResult, currency: currencyKey, exchangeRateMap: exchangeRateData, currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey] as CurrencyJson });
-      }
-
-      Object.keys(priceMapResult.price24hMap).forEach((key: string) => {
-        priceMapResult.price24hMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
-        priceMapResult.priceMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
-      });
-
-      this.priceSubject.next({ ...priceMapResult,
-        currency: currencyKey,
-        exchangeRateMap: exchangeRateData,
-        currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson });
-      await this.dbService.updatePriceStore({ ...priceMapResult, exchangeRateMap: exchangeRateData });
-    };
-
-    let lockHandler = createPromiseHandler<void>();
-
-    mergeDataSubject.subscribe(() => {
-      lockHandler.promise.then(() => {
-        lockHandler = createPromiseHandler<void>();
-        onUpdate().finally(() => lockHandler.resolve());
-      }).catch(console.error);
-    });
-
     this.init().catch(console.error);
   }
 
@@ -92,6 +58,59 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       this.rawExchangeRateMap.next(exchangeRateMap);
       this.rawPriceSubject.next(priceMap);
     });
+  }
+
+  private refreshPromise: Promise<void> | null = null;
+  private refreshPriceMapByAction () {
+    this.refreshPromise = (async () => {
+      try {
+        await this.refreshPromise;
+
+        const newPriceMap = await this.calculatePriceMap();
+
+        if (newPriceMap) {
+          this.priceSubject.next(newPriceMap);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        this.refreshPromise = null;
+      }
+    })();
+  }
+
+  private async calculatePriceMap () {
+    const rawPrice = this.rawPriceSubject.value;
+    const exchangeRateData = this.rawExchangeRateMap.value;
+    const currencyKey = this.currency.value;
+
+    if (Object.keys(rawPrice).length === 0) {
+      return;
+    }
+
+    if (Object.keys(exchangeRateData).length === 0) {
+      return;
+    }
+
+    const finalPriceMap = {
+      ...JSON.parse(JSON.stringify(rawPrice)) as Omit<PriceJson, 'exchangeRateMap'>,
+      currency: currencyKey,
+      exchangeRateMap: exchangeRateData,
+      currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson
+    };
+
+    if (currencyKey === DEFAULT_CURRENCY) {
+      return finalPriceMap;
+    }
+
+    Object.keys(finalPriceMap.price24hMap).forEach((key: string) => {
+      finalPriceMap.price24hMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
+      finalPriceMap.priceMap[key] = rawPrice.priceMap[key] * exchangeRateData[currencyKey].exchange;
+    });
+
+    await this.dbService.updatePriceStore(finalPriceMap);
+
+    return finalPriceMap;
   }
 
   async getPrice () {
@@ -125,18 +144,17 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     return true;
   }
 
-  public refreshPriceData (priceIds?: Set<string>, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
+  public refreshPriceData (priceIds?: Set<string>) {
     clearTimeout(this.refreshTimeout);
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
     this.getTokenPrice(this.priceIds, this.priceSubject.value.currency)
       .then(() => {
-        resolve && resolve(true);
+        this.refreshPriceMapByAction();
       })
       .catch((e) => {
         console.error(e);
-        reject && reject(false);
       });
 
     this.refreshTimeout = setTimeout(this.refreshPriceData.bind(this), CRON_REFRESH_PRICE_INTERVAL);
@@ -153,9 +171,18 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       // Compare two set newPriceIds and this.priceIds
       if (newPriceIds.size !== this.priceIds.size || !Array.from(newPriceIds).every((v) => this.priceIds.has(v))) {
         this.priceIds = newPriceIds;
-        this.refreshPriceData(this.priceIds);
+        this.refreshPriceMapByAction();
       }
     };
+
+    this.currency.subscribe((currency) => {
+      console.log('Currency changed', currency);
+      this.calculatePriceMap().then((data) => {
+        if (data) {
+          this.priceSubject.next(data);
+        }
+      }).catch(console.error);
+    });
 
     this.status = ServiceStatus.INITIALIZED;
 
@@ -173,6 +200,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   startPromiseHandler = createPromiseHandler<void>();
+
   async start (): Promise<void> {
     if (this.status === ServiceStatus.STARTED) {
       return;
@@ -197,6 +225,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   stopPromiseHandler = createPromiseHandler<void>();
+
   async stop (): Promise<void> {
     try {
       this.status = ServiceStatus.STOPPING;

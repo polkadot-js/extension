@@ -67,6 +67,10 @@ export const balanceFormatter: NumberFormatter = (
       return int;
     }
 
+    if (!decimal) {
+      return int;
+    }
+
     // Get only minNumberFormat number at decimal
     if (decimal.length <= minNumberFormat) {
       _decimal = decimal;
@@ -163,6 +167,10 @@ export const balanceNoPrefixFormater: NumberFormatter = (
   let _decimal = '';
 
   if (absGteOne) {
+    if (!decimal) {
+      return intToLocaleString(int, thousandSeparator);
+    }
+
     // Get only minNumberFormat number at decimal
     if (decimal.length <= minNumberFormat) {
       _decimal = decimal;

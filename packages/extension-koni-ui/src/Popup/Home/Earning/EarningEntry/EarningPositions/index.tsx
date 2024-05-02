@@ -147,38 +147,26 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const renderItem = useCallback(
     (item: ExtraYieldPositionInfo) => {
-      if (item.slug === lastItem.slug) {
-        return (
-          <>
-            <EarningPositionItem
-              className={'earning-position-item'}
-              isShowBalance={isShowBalance}
-              key={item.slug}
-              onClick={onClickItem(item)}
-              positionInfo={item}
-            />
-            <div className={'__scroll-footer'}>
-              <Button
-                icon={<Icon phosphorIcon={Plus} />}
-                onClick={onClickExploreEarning}
-                size={'xs'}
-                type={'ghost'}
-              >
-                {t('Explore earning options')}
-              </Button>
-            </div>
-          </>
-        );
-      }
-
       return (
-        <EarningPositionItem
-          className={'earning-position-item'}
-          isShowBalance={isShowBalance}
-          key={item.slug}
-          onClick={onClickItem(item)}
-          positionInfo={item}
-        />
+        <>
+          <EarningPositionItem
+            className={'earning-position-item'}
+            isShowBalance={isShowBalance}
+            key={item.slug}
+            onClick={onClickItem(item)}
+            positionInfo={item}
+          />
+          {item.slug === lastItem.slug && <div className={'__footer-button'}>
+            <Button
+              icon={<Icon phosphorIcon={Plus} />}
+              onClick={onClickExploreEarning}
+              size={'xs'}
+              type={'ghost'}
+            >
+              {t('Explore earning options')}
+            </Button>
+          </div>}
+        </>
       );
     },
     [lastItem.slug, isShowBalance, onClickItem, onClickExploreEarning, t]
@@ -327,7 +315,7 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     flex: 1
   },
 
-  '.__scroll-footer': {
+  '.__footer-button': {
     display: 'flex',
     justifyContent: 'center',
     marginBottom: token.size,

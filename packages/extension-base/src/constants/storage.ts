@@ -3,3 +3,5 @@
 
 export const LANGUAGE = 'current-language';
 export const DEFAULT_LANGUAGE = 'en';
+
+export const CURRENCY = 'current-currency';

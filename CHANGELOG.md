@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.1.60
+Build date: Apl 30, 2024.
+
+Features & Update:
+- Add support Mythos chain (#2966)
+- Set default pool for Avail Turing (#2971)
+
+## 1.1.59
+Build date: Apl 25, 2024.
+
+Features & Update:
+- Support staking for Avail Turing (#2963)
+
 ## 1.1.58
 Build date: Apl 24, 2024.
 

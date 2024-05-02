@@ -109,7 +109,8 @@ export default class NominationPoolHandler extends BasePoolHandler {
       const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
       const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from epochDuration, blockTime, sessionsPerEra
 
-      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras));
+      const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras), parseInt(currentEra) / erasPerDay);
+
       const startEra = parseInt(currentEra) - supportedDays * erasPerDay;
 
       const [_EraStakeInfo, _totalIssuance, _auctionCounter, _minPoolJoin, ..._eraReward] = await Promise.all([
@@ -208,7 +209,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
       await Promise.all(validatorList.map(async (validatorAddress) => {
         let eraStakerOtherList: PalletStakingExposureItem[] = [];
 
-        if (['kusama', 'polkadot', 'westend'].includes(this.chain)) { // todo: review all relaychains later
+        if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
           const _eraStaker = await substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress);
 
           eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);

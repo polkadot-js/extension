@@ -23,7 +23,7 @@ const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, estimatedFee, items, modalId, onSelectItem, selectedItem } = props;
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const { inactiveModal } = useContext(ModalContext);
 
   const onCancel = useCallback(() => {
@@ -50,9 +50,9 @@ const Component: React.FC<Props> = (props: Props) => {
               decimalOpacity={0.45}
               formatType={'custom'}
               metadata={numberMetadata}
-              prefix={(currency.isPrefix && currency.symbol) || ''}
+              prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
               size={30}
-              suffix={(!currency.isPrefix && currency.symbol) || ''}
+              suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
               value={estimatedFee}
             />
             <span className={'__pay-with'}>Pay with token:</span>

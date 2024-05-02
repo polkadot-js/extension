@@ -209,7 +209,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
       await Promise.all(validatorList.map(async (validatorAddress) => {
         let eraStakerOtherList: PalletStakingExposureItem[] = [];
 
-        if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
+        if (['kusama', 'polkadot', 'westend', 'availTuringTest', 'avail_mainnet'].includes(this.chain)) { // todo: review all relaychains later
           const _eraStaker = await substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress);
 
           eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);

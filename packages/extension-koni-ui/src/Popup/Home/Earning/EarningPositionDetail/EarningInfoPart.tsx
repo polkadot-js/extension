@@ -64,7 +64,7 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
 
         <MetaInfo.Number
           decimals={inputAsset?.decimals || 0}
-          label={t('Minimum staked')}
+          label={t('Minimum active stake')}
           suffix={inputAsset?.symbol}
           value={poolInfo.statistic?.earningThreshold.join || '0'}
           valueColorSchema='even-odd'

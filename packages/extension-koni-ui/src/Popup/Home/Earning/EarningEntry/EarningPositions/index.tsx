@@ -9,7 +9,7 @@ import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwalle
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
@@ -69,6 +69,10 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return getValue(secondItem) - getValue(firstItem);
       });
   }, [assetInfoMap, currencyData, earningPositions, priceMap]);
+
+  const lastItem = useMemo(() => {
+    return items[items.length - 1];
+  }, [items]);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
@@ -137,9 +141,36 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       }
     };
   }, [closeAlert, navigate, openAlert, t]);
+  const onClickExploreEarning = useCallback(() => {
+    setEntryView(EarningEntryView.OPTIONS);
+  }, [setEntryView]);
 
   const renderItem = useCallback(
     (item: ExtraYieldPositionInfo) => {
+      if (item.slug === lastItem.slug) {
+        return (
+          <>
+            <EarningPositionItem
+              className={'earning-position-item'}
+              isShowBalance={isShowBalance}
+              key={item.slug}
+              onClick={onClickItem(item)}
+              positionInfo={item}
+            />
+            <div className={'__scroll-footer'}>
+              <Button
+                icon={<Icon phosphorIcon={Plus} />}
+                onClick={onClickExploreEarning}
+                size={'xs'}
+                type={'ghost'}
+              >
+                {t('Explore earning options')}
+              </Button>
+            </div>
+          </>
+        );
+      }
+
       return (
         <EarningPositionItem
           className={'earning-position-item'}
@@ -150,7 +181,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         />
       );
     },
-    [isShowBalance, onClickItem]
+    [lastItem.slug, isShowBalance, onClickItem, onClickExploreEarning, t]
   );
 
   const emptyList = useCallback(() => {
@@ -294,6 +325,13 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   '.__section-list-container': {
     height: '100%',
     flex: 1
+  },
+
+  '.__scroll-footer': {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: token.size,
+    marginTop: token.marginXS
   },
 
   '.earning-position-item': {

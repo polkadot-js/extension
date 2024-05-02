@@ -172,7 +172,7 @@ function Component ({ compound,
         subHeaderCenter={false}
         subHeaderIcons={subHeaderButtons}
         subHeaderPaddingVertical={true}
-        title={t<string>('Earning position detail')}
+        title={t<string>('Earning position details')}
       >
         <div className={'__active-stake-info-area'}>
           <div className={'__active-stake-title'}>{t('Active stake')}</div>

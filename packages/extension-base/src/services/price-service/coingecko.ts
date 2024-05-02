@@ -27,7 +27,8 @@ let useBackupApi = false;
 
 export const getExchangeRateMap = async (): Promise<Record<CurrencyType, ExchangeRateJSON>> => {
   try {
-    const responseDataExchangeRate = (await fetch('https://api-cache.subwallet.app/exchange-rate')).json() as ExchangeRateItem || {};
+    const response = await fetch('https://api-cache.subwallet.app/exchange-rate');
+    const responseDataExchangeRate = (await response.json()) as ExchangeRateItem || {};
 
     const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
       .reduce((map, exchangeKey) => {
@@ -53,7 +54,7 @@ export const getExchangeRateMap = async (): Promise<Record<CurrencyType, Exchang
 
 export const getPriceMap = async (priceIds: Set<string>, currency: CurrencyType = 'USD'): Promise<Omit<PriceJson, 'exchangeRateMap'>> => {
   const idStr = Array.from(priceIds).join(',');
-  let rs: AxiosResponse<any, any> | undefined;
+  let rs: Response | undefined;
 
   if (!useBackupApi) {
     try {
@@ -72,7 +73,7 @@ export const getPriceMap = async (priceIds: Set<string>, currency: CurrencyType 
     console.warn('Failed to get token price');
   }
 
-  const responseDataPrice = rs.json() as Array<GeckoItem> || [];
+  const responseDataPrice = (await rs.json()) as Array<GeckoItem> || [];
   const currencyData = staticData[StaticKey.CURRENCY_SYMBOL][currency || DEFAULT_CURRENCY] as CurrencyJson;
   const priceMap: Record<string, number> = {};
   const price24hMap: Record<string, number> = {};

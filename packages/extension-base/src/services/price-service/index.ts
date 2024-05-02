@@ -36,9 +36,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   private currency: BehaviorSubject<CurrencyType>;
 
   constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
-    const currency = SWStorage.instance.getItem(CURRENCY) as CurrencyType;
-
-    this.currency = new BehaviorSubject(currency || DEFAULT_CURRENCY);
+    this.currency = new BehaviorSubject(DEFAULT_CURRENCY);
     this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currency: this.currency.value });
     this.rawPriceSubject = new BehaviorSubject({} as Omit<PriceJson, 'exchangeRateMap'>);
     this.rawExchangeRateMap = new BehaviorSubject({} as Record<CurrencyType, ExchangeRateJSON>);
@@ -48,6 +46,9 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.chainService = chainService;
 
     this.init().catch(console.error);
+    SWStorage.instance.getItem(CURRENCY)
+      .then((currency) => currency && this.currency.next(currency as CurrencyType))
+      .catch((error) => console.error(error));
   }
 
   private async getTokenPrice (priceIds: Set<string>, currency?: CurrencyType, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
@@ -139,7 +140,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     // Await 1s to get the latest exchange rate
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
+    await SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
 
     return true;
   }

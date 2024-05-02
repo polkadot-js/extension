@@ -78,8 +78,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
-      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
+      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString(); // todo: handle case historyDepth undefined
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
 
       const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras), parseInt(currentEra) / erasPerDay);
 

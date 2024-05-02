@@ -181,8 +181,6 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
         maxPoolMembers
       };
 
-      console.log('chain', this.chain, maxPoolMembers);
-
       callback(data);
     }) as unknown as UnsubscribePromise);
 

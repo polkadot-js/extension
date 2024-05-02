@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
@@ -36,6 +36,16 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
       return undefined;
     }
   }, [poolInfo.statistic]);
+
+  const unStakePeriodLiquidStaking = useMemo(() => {
+    if (poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      const value = getUnstakingPeriod(t, unstakePeriod);
+
+      return t(`Up to ${value}`);
+    }
+
+    return unstakePeriod;
+  }, [poolInfo.type, t, unstakePeriod]);
 
   return (
     <CollapsiblePanel
@@ -71,7 +81,7 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
         />
         {unstakePeriod !== undefined && (
           <MetaInfo.Default label={t('Unstaking period')}>
-            {getUnstakingPeriod(t, unstakePeriod)}
+            {unStakePeriodLiquidStaking || getUnstakingPeriod(t, unstakePeriod)}
           </MetaInfo.Default>
         )}
       </MetaInfo>

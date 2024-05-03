@@ -403,7 +403,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   ]}
                   statusHelpAsTooltip={isWebUI}
                 >
-                  <Input
+                  <Input.Password
                     label={t('Current password')}
                     type='password'
                   />

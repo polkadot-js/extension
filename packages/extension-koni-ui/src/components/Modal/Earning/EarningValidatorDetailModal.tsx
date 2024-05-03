@@ -43,7 +43,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [chain]);
 
   const isParaChain = useMemo(() => {
-    return _STAKING_CHAIN_GROUP.para.includes(chain);
+    return _STAKING_CHAIN_GROUP.para.includes(chain) || _STAKING_CHAIN_GROUP.amplitude.includes(chain);
   }, [chain]);
   const title = useMemo(() => {
     const label = getValidatorLabel(chain);

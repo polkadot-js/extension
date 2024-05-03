@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Checkbox, Icon } from '@subwallet/react-ui';
+import { Button, Checkbox, Icon, SwModal } from '@subwallet/react-ui';
 import { CheckboxChangeEvent } from '@subwallet/react-ui/es/checkbox';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -54,7 +53,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [t, onApplyFilter, applyFilterButtonTitle]);
 
   return (
-    <BaseModal
+    <SwModal
       className={className}
       closeIcon={closeIcon}
       footer={filterModalFooter}
@@ -80,7 +79,7 @@ function Component (props: Props): React.ReactElement<Props> {
           ))
         }
       </div>
-    </BaseModal>
+    </SwModal>
   );
 }
 

@@ -8,10 +8,11 @@ on:
     branches:
       - webapp
       - webapp-dev
+      - webapp-demo
 
 jobs:
   master:
-    if: "! startsWith(github.event.head_commit.message, '[CI Skip]')"
+    if: "! startsWith(github.event.head_commit.message, '[CI Skip]') || github.ref == 'refs/heads/webapp'"
     name: Deploy WebApp Preview
     runs-on: ubuntu-22.04
     steps:
@@ -30,8 +31,12 @@ jobs:
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}
         COINBASE_PAY_ID: ${{ secrets.COINBASE_PAY_ID }}
         NFT_MINTING_HOST: ${{ secrets.NFT_MINTING_HOST }}
+        BRANCH_NAME: ${{ github.ref_name }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
+        if [ ${{ github.ref_name }} == 'webapp-dev' ]; then
+            yarn run webapp:change-build-number
+        fi
         yarn webapp:build
     - name: Publish to Cloudflare Pages
       id: cloudflare_deployment
@@ -44,6 +49,13 @@ jobs:
         branch: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || github.ref_name }}
         directory: './packages/webapp/build'
         wranglerVersion: '3'
+    - if: "github.ref_name == 'webapp-dev' && github.event_name == 'push'"
+      name: Automation Bot
+      uses: EndBug/add-and-commit@v9
+      with:
+        author_name: Automation Bot
+        author_email: bot@subwallet.app
+        message: '[CI Skip] Auto increase webapp build number'
     - name: Notify to Discord
       uses: sarisia/actions-status-discord@v1
       if: always()

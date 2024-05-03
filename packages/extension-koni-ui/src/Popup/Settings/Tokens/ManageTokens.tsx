@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { _isAssetFungibleToken, _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isCustomAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import { FilterModal, Layout, OptionType, PageWrapper, TokenEmptyList, TokenToggleItem } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useDefaultNavigate, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
@@ -34,18 +35,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
 
-  const { assetRegistry, assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
-  const assetItems = useMemo(() => {
-    const allFungibleTokens: _ChainAsset[] = [];
+  const { assetSettingMap } = useSelector((state: RootState) => state.assetRegistry);
 
-    Object.values(assetRegistry).forEach((asset) => {
-      if (_isAssetFungibleToken(asset)) {
-        allFungibleTokens.push(asset);
-      }
-    });
-
-    return allFungibleTokens;
-  }, [assetRegistry]);
+  const assetItems = useChainAssets({ isFungible: true }).chainAssets;
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const filterFunction = useMemo<(item: _ChainAsset) => boolean>(() => {
     return (chainAsset) => {
@@ -110,11 +102,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         onClick: () => {
           navigate('/settings/tokens/import-token', { state: { isExternalRequest: false } });
-        },
-        tooltip: t('Import token')
+        }
       }
     ];
-  }, [navigate, t]);
+  }, [navigate]);
 
   const openFilterModal = useCallback((e?: SyntheticEvent) => {
     e && e.stopPropagation();

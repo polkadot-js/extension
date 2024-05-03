@@ -46,6 +46,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
+
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -428,7 +429,7 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
       width: '100%',
       textAlign: 'center',
       marginBottom: token.margin,
-      marginTop: 24
+      marginTop: 22
     },
 
     '.chain_import__container': {
@@ -464,19 +465,6 @@ const ChainImport = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-input-container .ant-input-suffix': {
       marginRight: 0
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      },
-
-      '.chain_import__header_info': {
-        maxWidth: 384,
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }
     }
   });
 });

@@ -10,6 +10,7 @@ export const DEFAULT_AUTO_LOCK_TIME = 15;
 export const DEFAULT_UNLOCK_TYPE: WalletUnlockType = TARGET_ENV === 'extension' ? WalletUnlockType.ALWAYS_REQUIRED : WalletUnlockType.WHEN_NEEDED;
 export const DEFAULT_CHAIN_PATROL_ENABLE = false;
 export const DEFAULT_LANGUAGE: LanguageType = 'en';
+export const DEFAULT_CURRENCY = 'usd';
 export const DEFAULT_SHOW_ZERO_BALANCE = true;
 export const DEFAULT_SHOW_BALANCE = false;
 export const DEFAULT_ALL_LOGO = '';
@@ -17,6 +18,7 @@ export const DEFAULT_CAMERA_ENABLE = false;
 
 export const DEFAULT_SETTING: UiSettings = {
   language: DEFAULT_LANGUAGE,
+  currency: DEFAULT_CURRENCY,
   browserConfirmationType: DEFAULT_NOTIFICATION_TYPE,
   isShowZeroBalance: DEFAULT_SHOW_ZERO_BALANCE,
   isShowBalance: DEFAULT_SHOW_BALANCE,

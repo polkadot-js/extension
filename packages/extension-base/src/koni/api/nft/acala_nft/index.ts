@@ -189,7 +189,7 @@ const getMetadata = (metadataUrl: string) => {
     return null;
   }
 
-  url = getRandomIpfsGateway() + metadataUrl + '/azero_domain_registry_abi.json';
+  url = getRandomIpfsGateway() + metadataUrl + '/metadata.json';
 
   return fetch(url, {
     method: 'GET',

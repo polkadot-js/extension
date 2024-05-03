@@ -395,23 +395,6 @@ const AddProvider = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.ant-form-item-with-help .ant-form-item-explain': {
       paddingBottom: 0
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto'
-      },
-
-      '.add_provider__container': {
-        paddingTop: 24,
-        paddingBottom: 8
-      },
-
-      '.description': {
-        maxWidth: 416,
-        marginLeft: 'auto',
-        marginRight: 'auto'
-      }
     }
   });
 });

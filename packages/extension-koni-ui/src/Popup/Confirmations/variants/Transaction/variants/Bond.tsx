@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestBondingSubmit, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
+import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -16,6 +18,9 @@ type Props = BaseTransactionConfirmationProps;
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const data = transaction.data as RequestBondingSubmit;
+  const handleValidatorLabel = useMemo(() => {
+    return getValidatorLabel(transaction.chain);
+  }, [transaction.chain]);
 
   const { t } = useTranslation();
 
@@ -31,16 +36,10 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'meta-info'}
         hasBackgroundWrapper
       >
-        {/* <MetaInfo.Account */}
-        {/*   address={'5DnokDpMdNEH8cApsZoWQnjsggADXQmGWUb6q8ZhHeEwvncL'} */}
-        {/*   label={t('Validator')} */}
-        {/*   networkPrefix={42} */}
-        {/* /> */}
-
         <MetaInfo.AccountGroup
           accounts={data.selectedValidators}
-          content={t('{{number}} selected validators', { replace: { number: data.selectedValidators.length } })}
-          label={t(data.type === StakingType.POOLED ? 'Pool' : 'Validators')}
+          content={t(`{{number}} selected ${handleValidatorLabel.toLowerCase()}`, { replace: { number: data.selectedValidators.length } })}
+          label={t(data.type === StakingType.POOLED ? 'Pool' : handleValidatorLabel)}
         />
 
         <MetaInfo.Number

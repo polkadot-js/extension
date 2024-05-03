@@ -3,16 +3,13 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_NFT_INTERVAL, CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL, CRON_REFRESH_STAKING_REWARD_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
+import { CRON_REFRESH_NFT_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { waitTimeout } from '@subwallet/extension-base/utils';
 import { Subject, Subscription } from 'rxjs';
-
-import { logger as createLogger } from '@polkadot/util';
-import { Logger } from '@polkadot/util/types';
 
 import KoniState from './handlers/State';
 
@@ -22,13 +19,11 @@ export class KoniCron {
   private serviceSubscription: Subscription | undefined;
   public dbService: DatabaseService;
   private state: KoniState;
-  private logger: Logger;
 
   constructor (state: KoniState, subscriptions: KoniSubscription, dbService: DatabaseService) {
     this.subscriptions = subscriptions;
     this.dbService = dbService;
     this.state = state;
-    this.logger = createLogger('Cron');
     // this.init();
   }
 
@@ -132,14 +127,12 @@ export class KoniCron {
       // NFT
       (commonReload || needUpdateNft) && this.resetNft(address);
       (commonReload || needUpdateNft) && this.removeCron('refreshNft');
+      commonReload && this.removeCron('refreshPoolingStakingReward');
 
       // Chains
-      if (this.checkNetworkAvailable(serviceInfo)) { // only add cron job if there's at least 1 active network
+      if (this.checkNetworkAvailable(serviceInfo)) { // only add cron jobs if there's at least 1 active network
         (commonReload || needUpdateNft) && this.addCron('refreshNft', this.refreshNft(address, serviceInfo.chainApiMap, this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
         reloadMantaPay && this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
-        commonReload && this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
-      } else {
-        this.setStakingRewardReady();
       }
     };
 
@@ -152,11 +145,8 @@ export class KoniCron {
     if (Object.keys(this.state.getSubstrateApiMap()).length !== 0 || Object.keys(this.state.getEvmApiMap()).length !== 0) {
       this.resetNft(currentAccountInfo.address);
       this.addCron('refreshNft', this.refreshNft(currentAccountInfo.address, this.state.getApiMap(), this.state.getSmartContractNfts(), this.state.getActiveChainInfoMap()), CRON_REFRESH_NFT_INTERVAL);
-      this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
-      this.addCron('refreshPoolingStakingReward', this.refreshStakingRewardFastInterval(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_FAST_INTERVAL);
+      // this.addCron('refreshStakingReward', this.refreshStakingReward(currentAccountInfo.address), CRON_REFRESH_STAKING_REWARD_INTERVAL);
       this.addCron('syncMantaPay', this.syncMantaPay, CRON_SYNC_MANTA_PAY);
-    } else {
-      this.setStakingRewardReady();
     }
 
     this.status = 'running';
@@ -199,24 +189,6 @@ export class KoniCron {
 
   resetNft = (newAddress: string) => {
     this.state.resetNft(newAddress);
-  };
-
-  refreshStakingReward = (address: string) => {
-    return () => {
-      this.subscriptions.subscribeStakingReward(address)
-        .catch(this.logger.error);
-    };
-  };
-
-  refreshStakingRewardFastInterval = (address: string) => {
-    return () => {
-      this.subscriptions.subscribeStakingRewardFastInterval(address)
-        .catch(this.logger.error);
-    };
-  };
-
-  setStakingRewardReady = () => {
-    this.state.updateStakingRewardReady(true);
   };
 
   checkNetworkAvailable = (serviceInfo: ServiceInfo): boolean => {

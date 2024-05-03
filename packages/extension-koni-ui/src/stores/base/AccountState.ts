@@ -5,13 +5,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AddressBookInfo, KeyringState } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext } from '@subwallet/extension-base/background/types';
 import { AccountState, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
-import { isAccountAll, isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 
 const initialState: AccountState = {
   // CurrentAccount
   currentAccount: null,
   isAllAccount: false,
-  isNoAccount: true,
 
   // KeyringState
   isReady: false,
@@ -47,7 +46,6 @@ const accountStateSlice = createSlice({
       return {
         ...state,
         ...payload,
-        isNoAccount: isNoAccount(payload.accounts),
         reduxStatus: ReduxStatus.READY
       };
     },

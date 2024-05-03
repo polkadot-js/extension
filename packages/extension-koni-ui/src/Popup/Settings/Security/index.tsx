@@ -3,10 +3,8 @@
 
 import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { EDIT_AUTO_LOCK_TIME_MODAL, EDIT_UNLOCK_TYPE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
-import { WebUIContext } from '@subwallet/extension-koni-ui/contexts/WebUIContext';
 import useIsPopup from '@subwallet/extension-koni-ui/hooks/dom/useIsPopup';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveAutoLockTime, saveCameraSetting, saveEnableChainPatrol, saveUnlockType, windowOpen } from '@subwallet/extension-koni-ui/messaging';
@@ -14,9 +12,9 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
 import { isNoAccount } from '@subwallet/extension-koni-ui/utils/account/account';
-import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch } from '@subwallet/react-ui';
+import { BackgroundIcon, Icon, ModalContext, SettingItem, Switch, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Camera, CaretRight, CheckCircle, GlobeHemisphereEast, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
+import { Camera, CaretRight, CheckCircle, Key, LockKeyOpen, LockLaminated, ShieldStar } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -63,7 +61,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const isPopup = useIsPopup();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { setOnBack } = useContext(WebUIContext);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
   const { camera, enableChainPatrol, timeAutoLock, unlockType } = useSelector((state: RootState) => state.settings);
@@ -100,7 +97,7 @@ const Component: React.FC<Props> = (props: Props) => {
     {
       icon: LockLaminated,
       key: SecurityType.AUTO_LOCK,
-      title: t('Wallet auto-lock'),
+      title: t('Extension auto lock'),
       url: '',
       disabled: false
     },
@@ -112,14 +109,6 @@ const Component: React.FC<Props> = (props: Props) => {
       disabled: false
     }
   ], [noAccount, t]);
-
-  const websiteAccessItem = useMemo((): SecurityItem => ({
-    icon: GlobeHemisphereEast,
-    key: SecurityType.WEBSITE_ACCESS,
-    title: t('Manage website access'),
-    url: '/settings/dapp-access',
-    disabled: noAccount
-  }), [noAccount, t]);
 
   const [loadingCamera, setLoadingCamera] = useState(false);
   const [loadingChainPatrol, setLoadingChainPatrol] = useState(false);
@@ -225,7 +214,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return (
       <SettingItem
         className={CN(
-          'security-item',
+          'security-item', 'setting-item',
           `security-type-${item.key}`,
           {
             disabled: item.disabled
@@ -268,14 +257,6 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [camera]);
 
-  useEffect(() => {
-    setOnBack(onBack);
-
-    return () => {
-      setOnBack(undefined);
-    };
-  }, [onBack, setOnBack]);
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
@@ -286,12 +267,8 @@ const Component: React.FC<Props> = (props: Props) => {
           <div className='items-container'>
             {items.map(onRenderItem)}
           </div>
-          <div className='setting-config-container hidden'>
-            <div className='label'>
-              {t('Website access')}
-            </div>
+          <div className='setting-config-container'>
             <div className='items-container'>
-              {onRenderItem(websiteAccessItem)}
               <SettingItem
                 className={CN('security-item', `security-type-${SecurityType.CHAIN_PATROL_SERVICE}`)}
                 leftItemIcon={(
@@ -312,11 +289,6 @@ const Component: React.FC<Props> = (props: Props) => {
                   />
                 )}
               />
-            </div>
-          </div>
-          <div className='setting-config-container'>
-            <div className='label'>
-              {t('Camera access')}
             </div>
             <SettingItem
               className={CN('security-item', `security-type-${SecurityType.CAMERA_ACCESS}`)}
@@ -340,11 +312,11 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           </div>
         </div>
-        <BaseModal
+        <SwModal
           className={className}
           id={editAutoLockTimeModalId}
           onCancel={onCloseAutoLockTimeModal}
-          title={t('Wallet auto-lock')}
+          title={t('Auto lock')}
         >
           <div className='modal-body-container'>
             {
@@ -376,8 +348,8 @@ const Component: React.FC<Props> = (props: Props) => {
               })
             }
           </div>
-        </BaseModal>
-        <BaseModal
+        </SwModal>
+        <SwModal
           className={className}
           id={editUnlockTypeModalId}
           onCancel={onCloseUnlockTypeModal}
@@ -425,7 +397,7 @@ const Component: React.FC<Props> = (props: Props) => {
               }
             />
           </div>
-        </BaseModal>
+        </SwModal>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
@@ -493,7 +465,7 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.security-item': {
       '.ant-web3-block-right-item': {
-        marginRight: token.sizeXXS,
+        marginRight: 0,
         color: token['gray-4']
       },
 
@@ -513,10 +485,10 @@ const SecurityList = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.setting-config-container': {
-      marginTop: token.margin,
+      marginTop: token.marginXS,
       display: 'flex',
       flexDirection: 'column',
-      gap: token.size,
+      gap: token.sizeXS,
 
       '.label': {
         fontWeight: token.fontWeightStrong,

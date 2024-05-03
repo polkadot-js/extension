@@ -17,6 +17,28 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: false
   },
   {
+    accountName: 'Statemint',
+    appName: 'Statemint',
+    networkName: 'Polkadot Assets Hub (Statemint) network',
+    genesisHash: ChainInfoMap.statemint.substrateInfo?.genesisHash || '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
+    icon: 'substrate',
+    network: 'statemint',
+    slug: ChainInfoMap.statemint.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Statemine',
+    appName: 'Statemine',
+    networkName: 'Kusama Assets Hub (Statemine) network',
+    genesisHash: ChainInfoMap.statemine.substrateInfo?.genesisHash || '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
+    icon: 'substrate',
+    network: 'statemine',
+    slug: ChainInfoMap.statemine.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
     accountName: 'Kusama',
     appName: 'Kusama',
     networkName: 'Kusama network',
@@ -70,6 +92,50 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.ethereum.slug,
     isDevMode: false,
     isEthereum: true
+  },
+  {
+    accountName: 'Karura',
+    appName: 'Karura',
+    networkName: 'Karura network',
+    genesisHash: ChainInfoMap.karura.substrateInfo?.genesisHash || '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
+    icon: 'substrate',
+    network: 'karura',
+    slug: ChainInfoMap.karura.slug,
+    isDevMode: false,
+    isEthereum: false
+  },
+  {
+    accountName: 'Edgeware',
+    appName: 'Edgeware',
+    networkName: 'Edgeware network',
+    genesisHash: ChainInfoMap.edgeware.substrateInfo?.genesisHash || '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
+    icon: 'substrate',
+    network: 'edgeware',
+    slug: ChainInfoMap.edgeware.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'XX Network',
+    appName: 'XX Network',
+    networkName: 'XX network',
+    genesisHash: ChainInfoMap.xx_network.substrateInfo?.genesisHash || '0x50dd5d206917bf10502c68fb4d18a59fc8aa31586f4e8856b493e43544aa82aa',
+    icon: 'substrate',
+    network: 'xxnetwork',
+    slug: ChainInfoMap.xx_network.slug,
+    isDevMode: true,
+    isEthereum: false
+  },
+  {
+    accountName: 'Polymesh',
+    appName: 'Polymesh',
+    networkName: 'Polymesh network',
+    genesisHash: ChainInfoMap.polymesh.substrateInfo?.genesisHash || '0x6fbd74e5e1d0a61d52ccfe9d4adaed16dd3a7caa37c6bc4d0c2fa12e8b2f4063',
+    icon: 'substrate',
+    network: 'polymesh',
+    slug: ChainInfoMap.polymesh.slug,
+    isDevMode: true,
+    isEthereum: false
   }
   // {
   //   displayName: 'Centrifuge',
@@ -79,24 +145,10 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   //   isDevMode: false
   // },
   // {
-  //   displayName: 'Edgeware',
-  //   genesisHash: '0x742a2ca70c2fda6cee4f8df98d64c4c670a052d9568058982dad9d5a7a135c5b',
-  //   icon: 'substrate',
-  //   network: 'edgeware',
-  //   isDevMode: true
-  // },
-  // {
   //   displayName: 'Genshiro',
   //   genesisHash: '0x9b8cefc0eb5c568b527998bdd76c184e2b76ae561be76e4667072230217ea243',
   //   icon: 'substrate',
   //   network: 'genshiro',
-  //   isDevMode: true
-  // },
-  // {
-  //   displayName: 'Karura',
-  //   genesisHash: '0xbaf5aabe40646d11f0ee8abbdc64f4a4b7674925cba08e4a05ff9ebed6e2126b',
-  //   icon: 'substrate',
-  //   network: 'karura',
   //   isDevMode: true
   // },
   // {
@@ -116,6 +168,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   // }
 ];
 
+export const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
+
 /*
   BLOCK
   *: All network,
@@ -127,25 +181,25 @@ export const BLOCK_DEFAULT_LEDGER_NETWORKS: string[] = ['*'];
 
 /* TRANSFER */
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
-export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = ['aleph'];
+export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['aleph', 'astar'];
+export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar'];
 /* TRANSFER */
 
 /* STAKING */
 // NOMINATE
-export const BLOCK_STAKING_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_BONDING_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_UN_BONDING_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm'];
 
 // POOL
-export const BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_JOIN_POOL_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_LEAVE_POOL_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_POOL_WITHDRAW_LEDGER_NETWORKS: string[] = ['evm'];
 
 // COMMON
-export const BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
-export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm', 'aleph'];
+export const BLOCK_STAKING_CANCEL_UNSTAKE_LEDGER_NETWORKS: string[] = ['evm'];
+export const BLOCK_STAKING_CLAIM_REWARD_LEDGER_NETWORKS: string[] = ['evm'];
 
 // OTHER
 export const BLOCK_STAKING_COMPOUNDING_LEDGER_NETWORKS: string[] = ['*'];
@@ -158,17 +212,32 @@ export const BLOCK_MINT_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_MINT_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_MINT_STDOT_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_REDEEM_LDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_QDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_SDOT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_REDEEM_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_REDEEM_STDOT_LEDGER_NETWORKS: string[] = [];
+
+export const BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_VDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_VMANTA_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS: string[] = [];
+
+export const BLOCK_APPROVE_LEDGER_NETWORKS: string[] = [];
 /* EARNING */
 
 /// OTHER
 export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['*'];
+export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
+
+export const BLOCK_SWAP_LEDGER_NETWORKS: string[] = [];
 
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   /* TRANSFER */
@@ -194,18 +263,33 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: BLOCK_STAKING_CANCEL_COMPOUNDING_LEDGER_NETWORKS,
   /* STAKING */
 
-  /* STAKING */
+  /* EARNING */
   [ExtrinsicType.JOIN_YIELD_POOL]: BLOCK_JOIN_YIELD_POOL_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_LDOT]: BLOCK_MINT_LDOT_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_QDOT]: BLOCK_MINT_QDOT_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_SDOT]: BLOCK_MINT_SDOT_LEDGER_NETWORKS,
   [ExtrinsicType.MINT_VDOT]: BLOCK_MINT_VDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.MINT_VMANTA]: BLOCK_MINT_VMANTA_LEDGER_NETWORKS,
+  [ExtrinsicType.MINT_STDOT]: BLOCK_MINT_STDOT_LEDGER_NETWORKS,
 
   [ExtrinsicType.REDEEM_LDOT]: BLOCK_REDEEM_LDOT_LEDGER_NETWORKS,
   [ExtrinsicType.REDEEM_QDOT]: BLOCK_REDEEM_QDOT_LEDGER_NETWORKS,
   [ExtrinsicType.REDEEM_SDOT]: BLOCK_REDEEM_SDOT_LEDGER_NETWORKS,
   [ExtrinsicType.REDEEM_VDOT]: BLOCK_REDEEM_VDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.REDEEM_VMANTA]: BLOCK_REDEEM_VMANTA_LEDGER_NETWORKS,
+  [ExtrinsicType.REDEEM_STDOT]: BLOCK_REDEEM_STDOT_LEDGER_NETWORKS,
+
+  [ExtrinsicType.UNSTAKE_QDOT]: BLOCK_UNSTAKE_QDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_VDOT]: BLOCK_UNSTAKE_VDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_VMANTA]: BLOCK_UNSTAKE_VMANTA_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_LDOT]: BLOCK_UNSTAKE_LDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_SDOT]: BLOCK_UNSTAKE_SDOT_LEDGER_NETWORKS,
+  [ExtrinsicType.UNSTAKE_STDOT]: BLOCK_UNSTAKE_STDOT_LEDGER_NETWORKS,
+
+  [ExtrinsicType.TOKEN_APPROVE]: BLOCK_APPROVE_LEDGER_NETWORKS,
   /* STAKING */
+
+  [ExtrinsicType.SWAP]: BLOCK_SWAP_LEDGER_NETWORKS,
 
   [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,
   [ExtrinsicType.EVM_EXECUTE]: BLOCK_EVM_EXECUTE_LEDGER_NETWORKS,

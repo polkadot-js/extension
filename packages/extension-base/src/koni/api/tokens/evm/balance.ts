@@ -3,10 +3,12 @@
 
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
-export async function getEVMBalance (networkKey: string, addresses: string[], evmApiMap: Record<string, _EvmApi>): Promise<string[]> {
-  const web3Api = evmApiMap[networkKey];
-
+export async function getEVMBalance (networkKey: string, addresses: string[], web3Api: _EvmApi): Promise<string[]> {
   return await Promise.all(addresses.map(async (address) => {
-    return await web3Api.api.eth.getBalance(address);
+    try {
+      return await web3Api.api.eth.getBalance(address);
+    } catch (e) {
+      return '0';
+    }
   }));
 }

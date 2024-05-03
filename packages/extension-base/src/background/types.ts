@@ -51,6 +51,8 @@ export interface AccountJson extends AbstractAddressJson {
   isMasterAccount?: boolean;
   isMasterPassword?: boolean;
   isReadOnly?: boolean;
+  isSubWallet?: boolean; // import from SubWallet
+  pendingMigrate?: boolean;
   originGenesisHash?: string | null;
   parentAddress?: string;
   source?: string;
@@ -59,6 +61,7 @@ export interface AccountJson extends AbstractAddressJson {
 
 export interface AddressJson extends AbstractAddressJson {
   isRecent?: boolean;
+  recentChainSlugs?: string[];
 }
 
 // all Accounts and the address of the current Account
@@ -143,7 +146,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
-  'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
+  'pri(metadata.requests)': [RequestMetadataSubscribe, MetadataRequest[], MetadataRequest[]];
   'pri(metadata.list)': [null, MetadataDef[]];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
   'pri(seed.validate)': [RequestSeedValidate, ResponseSeedValidate];
@@ -152,7 +155,7 @@ export interface RequestSignatures extends KoniRequestSignatures {
   'pri(signing.approve.signature)': [RequestSigningApproveSignature, boolean];
   'pri(signing.cancel)': [RequestSigningCancel, boolean];
   'pri(signing.isLocked)': [RequestSigningIsLocked, ResponseSigningIsLocked];
-  'pri(signing.requests)': [RequestSigningSubscribe, boolean, SigningRequest[]];
+  'pri(signing.requests)': [RequestSigningSubscribe, SigningRequest[], SigningRequest[]];
   'pri(window.open)': [WindowOpenParams, boolean];
   // public/external requests, i.e. from a page
   'pub(accounts.list)': [RequestAccountList, InjectedAccount[]];

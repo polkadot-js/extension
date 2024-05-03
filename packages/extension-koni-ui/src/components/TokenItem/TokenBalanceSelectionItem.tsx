@@ -13,18 +13,21 @@ import styled from 'styled-components';
 
 type Props = TokenBalanceItemType & ThemeProps & {
   onPressItem?: BalanceItemProps['onPressItem'],
+  tokenName: string;
 };
 
 function Component (
   { chain,
     chainDisplayName = '',
     className = '',
+    currency,
     isReady,
     logoKey,
     onPressItem,
     priceValue,
     slug,
     symbol,
+    tokenName,
     total }: Props) {
   // todo: Create new Web3block item in react-ui lib
   // - loading
@@ -42,7 +45,18 @@ function Component (
         middleItem={
           (
             <>
-              <div className={'ant-balance-item-name'}>{symbol}</div>
+              <div className='token-info'>
+                <span>{symbol}</span>
+                {
+                  tokenName && (
+                    <span className='__token-name'>
+                    &nbsp;(
+                      <span className='name'>{tokenName}</span>
+                    )
+                    </span>
+                  )
+                }
+              </div>
               <div className={'__chain-name'}>
                 {chainDisplayName?.replace(' Relay Chain', '')}
               </div>
@@ -52,6 +66,7 @@ function Component (
         name={symbol}
         networkMainLogoShape={'squircle'}
         onPressItem={onPressItem}
+        prefix={(currency?.isPrefix && currency.symbol) || ''}
         price={priceValue}
         rightItem={
           (
@@ -70,9 +85,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix='$'
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
-
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />
@@ -98,6 +113,7 @@ function Component (
           )
         }
         subNetworkKey={chain}
+        suffix={(!currency?.isPrefix && currency?.symbol) || ''}
         symbol={logoKey}
       />
     </div>
@@ -127,6 +143,31 @@ export const TokenBalanceSelectionItem = styled(Component)<Props>(({ theme: { to
 
     '.ant-web3-block-middle-item': {
       overflow: 'hidden'
+    },
+
+    '.token-info': {
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+      paddingRight: token.paddingXS,
+
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+      'white-space': 'nowrap',
+      '.__token-name': {
+        color: token.colorTextTertiary,
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+
+        '.name': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap'
+        }
+      }
     },
 
     '.__chain-name': {

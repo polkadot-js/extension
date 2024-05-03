@@ -1,51 +1,54 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { TransactionContext } from '@subwallet/extension-koni-ui/contexts/TransactionContext';
-import { useGetChainStakingMetadata, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
-import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Number } from '@subwallet/react-ui';
-import BigN from 'bignumber.js';
-import CN from 'classnames';
-import { Info } from 'phosphor-react';
-import React, { useContext, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
-import styled, { useTheme } from 'styled-components';
+import { AmountData, StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { getUnstakingPeriod } from '@subwallet/extension-koni-ui/Popup/Transaction/helper/staking/stakingHandler';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ModalContext, Number, SwModal, SwNumberProps } from '@subwallet/react-ui';
+import { BigNumber } from 'bignumber.js';
+import React, { useCallback, useContext } from 'react';
+import styled from 'styled-components';
 
-import { MetaInfo } from '../MetaInfo';
+type Props = ThemeProps & {
+  activeNominators?: SwNumberProps['value'];
+  estimatedEarning?: SwNumberProps['value'];
+  inflation?: SwNumberProps['value'];
+  minimumActive: AmountData;
+  unstakingPeriod?: number;
+  maxValidatorPerNominator: SwNumberProps['value'];
+  stakingType: StakingType;
+};
 
-interface Props extends ThemeProps {
-  stakingType?: StakingType
-}
+export const StakingNetworkDetailModalId = 'stakingNetworkDetailModalId';
 
-function Component (props: Props): React.ReactElement<Props> {
-  const { className = '', stakingType } = props;
+function Component ({ activeNominators,
+  className,
+  estimatedEarning,
+  inflation,
+  maxValidatorPerNominator,
+  minimumActive,
+  stakingType,
+  unstakingPeriod }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { defaultData: { chain } } = useContext(TransactionContext);
-  const { token } = useTheme() as Theme;
+  const { inactiveModal } = useContext(ModalContext);
 
-  const chainStakingMetadata = useGetChainStakingMetadata(chain);
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(chain);
+  const onCancel = useCallback(() => {
+    inactiveModal(StakingNetworkDetailModalId);
+  }, [inactiveModal]);
 
-  const minStake = useMemo(() =>
-    stakingType === StakingType.POOLED ? chainStakingMetadata?.minJoinNominationPool || '0' : chainStakingMetadata?.minStake || '0'
-  , [chainStakingMetadata?.minJoinNominationPool, chainStakingMetadata?.minStake, stakingType]
-  );
-
-  const contentBlock = (() => {
-    if (!chainStakingMetadata) {
-      return null;
-    }
-
-    const { expectedReturn: estimatedEarning,
-      inflation,
-      maxValidatorPerNominator,
-      nominatorCount: activeNominators,
-      unstakingPeriod } = chainStakingMetadata;
-
-    return (
+  return (
+    <SwModal
+      className={className}
+      id={StakingNetworkDetailModalId}
+      onCancel={onCancel}
+      rightIconProps={{
+        icon: <InfoIcon />
+      }}
+      title={t('Network details')}
+    >
       <MetaInfo
         hasBackgroundWrapper
         spaceSize={'xs'}
@@ -104,7 +107,7 @@ function Component (props: Props): React.ReactElement<Props> {
                 intOpacity={1}
                 suffix={'%'}
                 unitOpacity={1}
-                value={new BigN(estimatedEarning).minus(inflation)}
+                value={new BigNumber(estimatedEarning).minus(inflation)}
               />
               <span className={'__inflation'}>{t('after inflation')}</span>
             </div>
@@ -112,10 +115,10 @@ function Component (props: Props): React.ReactElement<Props> {
         }
 
         <MetaInfo.Number
-          decimals={decimals}
+          decimals={minimumActive.decimals}
           label={t('Minimum active')}
-          suffix={symbol}
-          value={minStake}
+          suffix={minimumActive.symbol}
+          value={minimumActive.value}
           valueColorSchema={'success'}
         />
 
@@ -123,46 +126,15 @@ function Component (props: Props): React.ReactElement<Props> {
           <span>{getUnstakingPeriod(t, unstakingPeriod)}</span>
         </MetaInfo.Default>}
       </MetaInfo>
-    );
-  })();
-
-  return (
-    <div className={CN('network-information-container', className)}>
-      <div className='title-wrapper'>
-        <BackgroundIcon
-          backgroundColor={token.colorPrimary}
-          iconColor={token.colorWhite}
-          phosphorIcon={Info}
-          size='sm'
-          weight='fill'
-        />
-        <div className='__title'>{t('Network Information')}</div>
-      </div>
-      {contentBlock}
-    </div>
+    </SwModal>
   );
 }
 
-const NetworkInformation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+export const StakingNetworkDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    '.title-wrapper': {
-      display: 'flex',
-      justifyContent: 'start',
-      alignItems: 'center',
-      gap: token.marginXS,
-      marginBottom: token.marginMD + 4,
-      minHeight: 40
+    '.__active-nominators-value': {
     },
 
-    '.__title': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG,
-      fontWeight: token.headingFontWeight
-    },
-
-    '.__current-nominator-count, .__total-nominator-count': {
-      display: 'inline-flex'
-    },
     '.__slash': {
       marginLeft: token.marginXXS,
       marginRight: token.marginXXS
@@ -171,6 +143,10 @@ const NetworkInformation = styled(Component)<Props>(({ theme: { token } }: Props
     '.__inflation': {
       marginLeft: token.marginXXS,
       color: token.colorTextLight4
+    },
+
+    '.__current-nominator-count, .__total-nominator-count': {
+      display: 'inline-flex'
     },
 
     '.__total-nominator-count': {
@@ -182,5 +158,3 @@ const NetworkInformation = styled(Component)<Props>(({ theme: { token } }: Props
     }
   });
 });
-
-export default NetworkInformation;

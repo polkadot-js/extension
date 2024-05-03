@@ -3,14 +3,16 @@
 
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { useGetNativeTokenBasicInfo, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { AlertDialogProps, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import CN from 'classnames';
-import React, { useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 export interface BaseTransactionConfirmationProps extends ThemeProps {
   transaction: SWTransactionResult;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
 }
 
 const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransactionConfirmationProps) => {
@@ -18,9 +20,7 @@ const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransa
 
   const { t } = useTranslation();
 
-  useEffect(() => {
-    console.debug(transaction);
-  }, [transaction]);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 
   return (
     <div className={CN(className)}>
@@ -28,22 +28,17 @@ const Component: React.FC<BaseTransactionConfirmationProps> = (props: BaseTransa
         address={transaction.address}
         network={transaction.chain}
       />
-      {
-        transaction.estimateFee &&
-        (
-          <MetaInfo
-            className={'meta-info'}
-            hasBackgroundWrapper
-          >
-            <MetaInfo.Number
-              decimals={transaction.estimateFee.decimals}
-              label={t('Estimated fee')}
-              suffix={transaction.estimateFee.symbol}
-              value={transaction.estimateFee.value}
-            />
-          </MetaInfo>
-        )
-      }
+      <MetaInfo
+        className={'meta-info'}
+        hasBackgroundWrapper
+      >
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Estimated fee')}
+          suffix={symbol}
+          value={transaction.estimateFee?.value || 0}
+        />
+      </MetaInfo>
     </div>
   );
 };

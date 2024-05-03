@@ -157,7 +157,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         type='phosphor'
         weight={'light'}
       />,
-      tooltip: t('Delete network'),
       onClick: handleDeleteCustomChain,
       disabled: !(_isCustomChain(chainInfo.slug) && !chainState.active)
     }
@@ -442,7 +441,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     '.chain_detail__container': {
-      marginTop: 24,
+      marginTop: 22,
       marginRight: token.margin,
       marginLeft: token.margin
     },
@@ -471,13 +470,6 @@ const ChainDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
     '.chain_detail__provider_url .ant-field-wrapper .ant-field-content-wrapper .ant-field-content': {
       color: token.colorTextLight1
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      }
     }
   });
 });

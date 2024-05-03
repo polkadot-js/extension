@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicDataTypeMap, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { MetaInfo } from '@subwallet/extension-koni-ui/components';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import { useGetChainPrefixBySlug, useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React from 'react';
@@ -34,6 +34,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Account
           address={data.recipientAddress}
           label={t('Send to')}
+          networkPrefix={networkPrefix}
         />
 
         <MetaInfo.Chain

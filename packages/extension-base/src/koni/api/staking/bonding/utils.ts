@@ -2,23 +2,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
-import { _KNOWN_CHAIN_INFLATION_PARAMS, _STAKING_CHAIN_GROUP, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { EarningStatus, PalletStakingEraRewardPoints, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
+import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
 import { ApiPromise } from '@polkadot/api';
+import { Codec } from '@polkadot/types/types';
 import { BN, BN_BILLION, BN_HUNDRED, BN_MILLION, BN_THOUSAND, BN_ZERO, bnToU8a, stringToU8a, u8aConcat } from '@polkadot/util';
-
-export interface PalletNominationPoolsPoolMember {
-  poolId: number,
-  points: number,
-  lasRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
-}
 
 export interface PalletDappsStakingDappInfo {
   address: string,
@@ -51,6 +48,11 @@ export interface BlockHeader {
 export interface ParachainStakingStakeOption {
   owner: string,
   amount: number
+}
+
+export interface KrestDelegateState {
+  delegations: ParachainStakingStakeOption[],
+  total: string
 }
 
 export interface ParachainStakingCandidateMetadata {
@@ -86,17 +88,6 @@ export interface PalletParachainStakingDelegator {
   status: number
 }
 
-export interface PalletStakingExposureItem {
-  who: string,
-  value: number
-}
-
-export interface PalletStakingExposure {
-  total: number,
-  own: number,
-  others: PalletStakingExposureItem[]
-}
-
 export interface PalletIdentityRegistration {
   judgements: any[],
   deposit: number,
@@ -116,21 +107,11 @@ export interface PalletIdentityRegistration {
   }
 }
 
-export interface ValidatorExtraInfo {
-  commission: string,
-  blocked: false,
-  identity?: string,
-  isVerified: boolean
-}
+export type PalletIdentitySuper = [string, { Raw: string }]
 
 export interface Unlocking {
   remainingEras: BN;
   value: BN;
-}
-
-export interface TernoaStakingRewardsStakingRewardsData {
-  sessionEraPayout: string,
-  sessionExtraRewardPayout: string
 }
 
 export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: number, poolsPalletId: string) {
@@ -154,26 +135,6 @@ export function parsePoolStashAddress (api: ApiPromise, index: number, poolId: n
 
 export function transformPoolName (input: string): string {
   return input.replace(/[^\x20-\x7E]/g, '');
-}
-
-export function parseIdentity (identityInfo: PalletIdentityRegistration | null): string | undefined {
-  let identity;
-
-  if (identityInfo) {
-    const displayName = identityInfo?.info?.display?.Raw;
-    const web = identityInfo?.info?.web?.Raw;
-    const riot = identityInfo?.info?.riot?.Raw;
-    const twitter = identityInfo?.info?.twitter?.Raw;
-
-    if (displayName && !displayName.startsWith('0x')) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      identity = displayName;
-    } else {
-      identity = twitter || web || riot;
-    }
-  }
-
-  return identity;
 }
 
 export function getInflationParams (networkKey: string): _SubstrateInflationParams {
@@ -226,6 +187,32 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   }
 
   return stakedReturn;
+}
+
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
+  const DAYS_PER_YEAR = 365;
+  // @ts-ignore
+  const DECIMAL = chainInfo.substrateInfo.decimals;
+
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
+
+  const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
+
+  let inflationToStakers: BigNumber = new BigNumber(0);
+
+  if (!isCompound) {
+    inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
+  } else {
+    const multiplier = dayRewardRate.dividedBy(100).plus(1).exponentiatedBy(365);
+
+    inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
+  }
+
+  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+
+  return averageRewardRate.toNumber();
 }
 
 export function calculateAlephZeroValidatorReturn (chainStakedReturn: number, commission: number) {
@@ -372,8 +359,10 @@ export function getYieldAvailableActionsByType (yieldPoolInfo: YieldPoolInfo): Y
     }
   }
 
-  if ([YieldPoolType.LIQUID_STAKING, YieldPoolType.LENDING].includes(yieldPoolInfo.type)) {
+  if (yieldPoolInfo.type === YieldPoolType.LENDING) {
     return [YieldAction.START_EARNING, YieldAction.WITHDRAW_EARNING];
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    return [YieldAction.START_EARNING, YieldAction.UNSTAKE, YieldAction.WITHDRAW];
   }
 
   return [YieldAction.STAKE, YieldAction.UNSTAKE, YieldAction.WITHDRAW, YieldAction.CANCEL_UNSTAKE];
@@ -383,35 +372,49 @@ export function getYieldAvailableActionsByPosition (yieldPosition: YieldPosition
   const result: YieldAction[] = [];
 
   if ([YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(yieldPoolInfo.type)) {
-    const nominatorMetadata = yieldPosition.metadata as NominatorMetadata;
-
     result.push(YieldAction.STAKE);
 
-    const bnActiveStake = new BN(nominatorMetadata.activeStake);
+    const bnActiveStake = new BigNumber(yieldPosition.activeStake);
 
-    if (nominatorMetadata.activeStake && bnActiveStake.gt(BN_ZERO)) {
+    if (yieldPosition.activeStake && bnActiveStake.gt('0')) {
       result.push(YieldAction.UNSTAKE);
 
-      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(nominatorMetadata.chain);
-      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(nominatorMetadata.chain);
-      const bnUnclaimedReward = new BN(unclaimedReward || '0');
+      const isAstarNetwork = _STAKING_CHAIN_GROUP.astar.includes(yieldPosition.chain);
+      const isAmplitudeNetwork = _STAKING_CHAIN_GROUP.amplitude.includes(yieldPosition.chain);
+      const bnUnclaimedReward = new BigNumber(unclaimedReward || '0');
 
       if (
-        ((nominatorMetadata.type === StakingType.POOLED || isAmplitudeNetwork) && bnUnclaimedReward.gt(BN_ZERO)) ||
+        ((yieldPosition.type === YieldPoolType.NOMINATION_POOL || isAmplitudeNetwork) && bnUnclaimedReward.gt('0')) ||
         isAstarNetwork
       ) {
         result.push(YieldAction.CLAIM_REWARD);
       }
     }
 
-    if (nominatorMetadata.unstakings.length > 0) {
+    if (yieldPosition.unstakings.length > 0) {
       result.push(YieldAction.CANCEL_UNSTAKE);
-      const hasClaimable = nominatorMetadata.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
+      const hasClaimable = yieldPosition.unstakings.some((unstaking) => unstaking.status === UnstakingStatus.CLAIMABLE);
 
       if (hasClaimable) {
         result.push(YieldAction.WITHDRAW);
       }
     }
+  } else if (yieldPoolInfo.type === YieldPoolType.LIQUID_STAKING) {
+    result.push(YieldAction.START_EARNING);
+
+    const activeBalance = new BigNumber(yieldPosition.activeStake);
+
+    if (activeBalance.gt('0')) {
+      result.push(YieldAction.UNSTAKE);
+    }
+
+    const hasWithdrawal = yieldPosition.unstakings.some((unstakingInfo) => unstakingInfo.status === UnstakingStatus.CLAIMABLE);
+
+    if (hasWithdrawal) {
+      result.push(YieldAction.WITHDRAW);
+    }
+
+    // TODO: check has unstakings to withdraw
   } else {
     result.push(YieldAction.START_EARNING);
     result.push(YieldAction.WITHDRAW_EARNING); // TODO
@@ -477,7 +480,7 @@ export function getStakingAvailableActionsByNominator (nominatorMetadata: Nomina
 }
 
 export function isActionFromValidator (stakingType: StakingType, chain: string) {
-  if (stakingType === StakingType.POOLED) {
+  if (stakingType === StakingType.POOLED || stakingType === StakingType.LIQUID_STAKING) {
     return false;
   }
 
@@ -511,24 +514,24 @@ export function getWithdrawalInfo (nominatorMetadata: NominatorMetadata) {
   return result;
 }
 
-export function getStakingStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): StakingStatus {
-  let stakingStatus: StakingStatus = StakingStatus.EARNING_REWARD;
+export function getEarningStatusByNominations (bnTotalActiveStake: BN, nominationList: NominationInfo[]): EarningStatus {
+  let stakingStatus: EarningStatus = EarningStatus.EARNING_REWARD;
 
   if (bnTotalActiveStake.isZero()) {
-    stakingStatus = StakingStatus.NOT_EARNING;
+    stakingStatus = EarningStatus.NOT_EARNING;
   } else {
     let invalidDelegationCount = 0;
 
     for (const nomination of nominationList) {
-      if (nomination.status === StakingStatus.NOT_EARNING) {
+      if (nomination.status === EarningStatus.NOT_EARNING) {
         invalidDelegationCount += 1;
       }
     }
 
     if (invalidDelegationCount > 0 && invalidDelegationCount < nominationList.length) {
-      stakingStatus = StakingStatus.PARTIALLY_EARNING;
+      stakingStatus = EarningStatus.PARTIALLY_EARNING;
     } else if (invalidDelegationCount === nominationList.length) {
-      stakingStatus = StakingStatus.NOT_EARNING;
+      stakingStatus = EarningStatus.NOT_EARNING;
     }
   }
 
@@ -543,6 +546,81 @@ export function getValidatorLabel (chain: string) {
   }
 
   return 'Collator';
+}
+
+export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistory: Codec[]) {
+  let sumEraReward = new BigNumber(0);
+  let failEra = 0;
+
+  for (const _item of eraRewardHistory) {
+    const item = _item.toString();
+
+    if (!item) {
+      failEra += 1;
+    } else {
+      const eraReward = new BigNumber(item);
+
+      sumEraReward = sumEraReward.plus(eraReward);
+    }
+  }
+
+  return sumEraReward.dividedBy(new BigNumber(supportedDays - failEra));
+}
+
+export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number, liveDay?: number) {
+  const maxSupportDay = maxSupportedEras / erasPerDay;
+
+  if (liveDay && liveDay <= 30) {
+    return Math.min(liveDay - 1, maxSupportDay);
+  }
+
+  if (maxSupportDay > 30) {
+    return 30;
+  } else {
+    return maxSupportDay;
+  }
+}
+
+export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+  // mapping store validator and totalPoints
+  const validatorTotalPointsMap: Record<string, BigNumber> = {};
+
+  Object.values(eraRewardMap).forEach((info) => {
+    const individual = info.individual;
+
+    Object.entries(individual).forEach(([validator, rawPoints]) => {
+      const points = rawPoints.replaceAll(',', '');
+
+      if (!validatorTotalPointsMap[validator]) {
+        validatorTotalPointsMap[validator] = new BigNumber(points);
+      } else {
+        validatorTotalPointsMap[validator] = validatorTotalPointsMap[validator].plus(points);
+      }
+    });
+  });
+
+  return validatorTotalPointsMap;
+}
+
+export function getTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
+  const sortValidatorPointsList = Object.fromEntries(
+    Object.entries(validatorPointsList)
+      .sort(
+        (
+          a: [string, BigNumber],
+          b: [string, BigNumber]
+        ) => a[1].minus(b[1]).toNumber()
+      )
+      .reverse()
+  );
+
+  // keep 50% first validator
+  const entries = Object.entries(sortValidatorPointsList);
+  const endIndex = Math.ceil(entries.length / 2);
+  const top50PercentEntries = entries.slice(0, endIndex);
+  const top50PercentRecord = Object.fromEntries(top50PercentEntries);
+
+  return Object.keys(top50PercentRecord);
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {
@@ -585,7 +663,7 @@ export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number):
   return t(message, { replace: { number: max } });
 };
 
-export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean): string => {
+export const getExistUnstakeErrorMessage = (chain: string, type?: StakingType, isStakeMore?: boolean): string => {
   const label = getValidatorLabel(chain);
 
   if (!isStakeMore) {
@@ -594,8 +672,14 @@ export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean
         return t('You can unstake from a dApp once');
       case 'Collator':
         return t('You can unstake from a collator once');
-      case 'Validator':
+
+      case 'Validator': {
+        if (type === StakingType.POOLED) {
+          return t('You can unstake from a pool once');
+        }
+
         return t('You can unstake from a validator once');
+      }
     }
   } else {
     switch (label) {
@@ -603,8 +687,14 @@ export const getExistUnstakeErrorMessage = (chain: string, isStakeMore?: boolean
         return t('You cannot stake more for a dApp you are unstaking from');
       case 'Collator':
         return t('You cannot stake more for a collator you are unstaking from');
-      case 'Validator':
+
+      case 'Validator': {
+        if (type === StakingType.POOLED) {
+          return t('You cannot stake more for a pool you are unstaking from');
+        }
+
         return t('You cannot stake more for a validator you are unstaking from');
+      }
     }
   }
 };

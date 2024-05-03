@@ -2,17 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { ExtrinsicType, YieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-
-export interface RuntimeDispatchInfo {
-  weight: {
-    refTime: number,
-    proofSize: number
-  },
-  class: string,
-  partialFee: number
-}
+import { RuntimeDispatchInfo, SpecialYieldPoolInfo, YieldStepDetail, YieldStepType } from '@subwallet/extension-base/types';
+import { BN_TEN } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 
 export const syntheticSelectedValidators = [
   '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6',
@@ -33,8 +27,6 @@ export const syntheticSelectedValidators = [
   '12RXTLiaYh59PokjZVhQvKzcfBEB5CvDnjKKUmDUotzcTH3S'
 ];
 
-export const fakeAddress = '15MLn9YQaHZ4GMkhK3qXqR5iGGSdULyJ995ctjeBgFRseyi6';
-
 export function calculateAlternativeFee (feeInfo: RuntimeDispatchInfo) {
   return feeInfo.partialFee;
 }
@@ -50,25 +42,34 @@ export const YIELD_EXTRINSIC_TYPES = [
   ExtrinsicType.MINT_LDOT,
   ExtrinsicType.MINT_SDOT,
   ExtrinsicType.MINT_QDOT,
+  ExtrinsicType.MINT_STDOT,
   ExtrinsicType.REDEEM_QDOT,
   ExtrinsicType.REDEEM_SDOT,
   ExtrinsicType.REDEEM_VDOT,
   ExtrinsicType.REDEEM_LDOT,
+  ExtrinsicType.REDEEM_STDOT,
   ExtrinsicType.STAKING_JOIN_POOL,
   ExtrinsicType.STAKING_CLAIM_REWARD,
   ExtrinsicType.STAKING_LEAVE_POOL,
   ExtrinsicType.STAKING_POOL_WITHDRAW
 ];
 
-export const YIELD_POOL_STAT_REFRESH_INTERVAL = 300000;
+export const YIELD_POOL_STAT_REFRESH_INTERVAL = 90000;
 
-export function convertDerivativeToOriginToken (amount: string, poolInfo: YieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
+export const YIELD_POOL_MIN_AMOUNT_PERCENT: Record<string, number> = {
+  DOT___acala_liquid_staking: 0.98,
+  DOT___bifrost_liquid_staking: 0.99,
+  DOT___parallel_liquid_staking: 0.97,
+  default: 0.98
+};
+
+export function convertDerivativeToOriginToken (amount: string, poolInfo: SpecialYieldPoolInfo, derivativeTokenInfo: _ChainAsset, originTokenInfo: _ChainAsset) {
   const derivativeDecimals = _getAssetDecimals(derivativeTokenInfo);
   const originDecimals = _getAssetDecimals(originTokenInfo);
 
-  const exchangeRate = poolInfo.stats?.assetEarning?.[0].exchangeRate || 1;
-  const formattedAmount = parseInt(amount) / (10 ** derivativeDecimals); // TODO: decimals
-  const minAmount = formattedAmount * exchangeRate * 0.95;
+  const exchangeRate = poolInfo.statistic?.assetEarning?.[0].exchangeRate || 1;
+  const formattedAmount = new BigN(amount).dividedBy(BN_TEN.pow(derivativeDecimals)); // TODO: decimals
+  const minAmount = formattedAmount.multipliedBy(exchangeRate);
 
-  return Math.floor(minAmount * (10 ** originDecimals));
+  return minAmount.multipliedBy(BN_TEN.pow(originDecimals)).toFixed(0);
 }

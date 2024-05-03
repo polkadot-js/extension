@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, PageWrapper, PrivateKeyInput } from '@subwallet/extension-koni-ui/components';
-import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useFocusFormItem, useGetDefaultAccountName, useGoBackFromCreateAccount, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, validateMetamaskPrivateKeyV2 } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { Eye, EyeSlash, FileArrowDown } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps;
@@ -31,17 +29,6 @@ interface FormState {
   [fieldName]: string;
 }
 
-const instructionContents: InstructionContentType[] = [
-  {
-    title: 'What is a private key?',
-    description: 'A private key is like a password — a string of letters and numbers — that can be used to restore your wallet.'
-  },
-  {
-    title: 'Is it safe to enter it into SubWallet?',
-    description: 'Yes. It will be stored locally and never leave your device without your explicit permission.'
-  }
-];
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
@@ -49,7 +36,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { goHome } = useDefaultNavigate();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
-  const { isWebUI } = useContext(ScreenContext);
 
   const timeOutRef = useRef<NodeJS.Timer>();
 
@@ -169,15 +155,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={!isWebUI
-          ? {
-            children: validating ? t('Validating') : t('Import account'),
-            icon: FooterIcon,
-            onClick: form.submit,
-            disabled: !privateKey || !!validateState.status,
-            loading: validating || loading
-          }
-          : undefined}
+        rightFooterButton={{
+          children: validating ? t('Validating') : t('Import account'),
+          icon: FooterIcon,
+          onClick: form.submit,
+          disabled: !privateKey || !!validateState.status,
+          loading: validating || loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -186,63 +170,46 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t<string>('Import by private key')}
       >
-        <div className={'container'}>
-          <div className='import-container'>
-            <div className='description'>
-              {t('To import an existing wallet, please enter the private key here')}
-            </div>
-            <Form
-              className='form-container'
-              form={form}
-              name={formName}
-              onFinish={onSubmit}
-              onValuesChange={onValuesChange}
-            >
-              <Form.Item
-                name={fieldName}
-                validateStatus={validateState.status}
-              >
-                <PrivateKeyInput
-                  className='private-key-input'
-                  hideText={!show}
-                  label={t('Private key')}
-                  placeholder={t('Enter or paste private key')}
-                  statusHelp={validateState.message}
-                />
-              </Form.Item>
-              <div className='button-container'>
-                <Button
-                  icon={(
-                    <Icon
-                      customSize={isWebUI ? '28px' : undefined}
-                      phosphorIcon={show ? EyeSlash : Eye}
-                      size='sm'
-                    />
-                  )}
-                  onClick={toggleShow}
-                  size='xs'
-                  type='ghost'
-                >
-                  {show ? t('Hide private key') : t('Show private key')}
-                </Button>
-              </div>
-              <Form.Item hidden={!isWebUI}>
-                <Button
-                  block
-                  disabled={!privateKey || !!validateState.status}
-                  icon={FooterIcon}
-                  loading={validating || loading}
-                  onClick={form.submit}
-                >
-                  {validating ? t('Validating') : t('Import account')}
-                </Button>
-              </Form.Item>
-            </Form>
+        <div className='container'>
+          <div className='description'>
+            {t('To import an existing wallet, please enter private key')}
           </div>
-
-          {isWebUI && (
-            <InstructionContainer contents={instructionContents} />
-          )}
+          <Form
+            className='form-container'
+            form={form}
+            initialValues={{ [fieldName]: '' }}
+            name={formName}
+            onFinish={onSubmit}
+            onValuesChange={onValuesChange}
+          >
+            <Form.Item
+              name={fieldName}
+              validateStatus={validateState.status}
+            >
+              <PrivateKeyInput
+                className='private-key-input'
+                hideText={!show}
+                label={t('Private key')}
+                placeholder={t('Enter private key')}
+                statusHelp={validateState.message}
+              />
+            </Form.Item>
+            <div className='button-container'>
+              <Button
+                icon={(
+                  <Icon
+                    phosphorIcon={show ? EyeSlash : Eye}
+                    size='sm'
+                  />
+                )}
+                onClick={toggleShow}
+                size='xs'
+                type='ghost'
+              >
+                {show ? t('Hide private key') : t('Show private key')}
+              </Button>
+            </div>
+          </Form>
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
@@ -252,67 +219,26 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const ImportPrivateKey = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      '.import-container': {
-        padding: token.padding
-      },
-
-      '.description': {
-        padding: `0 ${token.padding}px`,
-        fontSize: token.fontSizeHeading6,
-        lineHeight: token.lineHeightHeading6,
-        color: token.colorTextDescription,
-        textAlign: 'center'
-      },
-
-      '.form-container': {
-        marginTop: token.margin
-      },
-
-      '.private-key-input': {
-
-        textarea: {
-          resize: 'none',
-          height: `${token.sizeLG * 6}px !important`
-        }
-      }
+      padding: token.padding
     },
 
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-header': {
-        marginBottom: token.marginXL
-      },
+    '.description': {
+      padding: `0 ${token.padding}px`,
+      fontSize: token.fontSizeHeading6,
+      lineHeight: token.lineHeightHeading6,
+      color: token.colorTextDescription,
+      textAlign: 'center'
+    },
 
-      '.container': {
-        display: 'flex',
-        justifyContent: 'center',
-        width: '100%',
-        maxWidth: 820,
-        margin: '0 auto',
-        paddingLeft: token.padding,
-        paddingRight: token.padding,
-        gap: token.size
-      },
+    '.form-container': {
+      marginTop: token.margin
+    },
 
-      '.description': {
-        paddingLeft: 0,
-        paddingRight: 0,
-        textAlign: 'left'
-      },
-
-      '.import-container': {
-        padding: 0,
-        flex: 1
-      },
-
-      '.instruction-container': {
-        flex: 1
-      },
-
-      '.button-container': {
-        display: 'flex',
-        justifyContent: 'center',
-        marginBottom: token.marginLG
-      }
+    '.button-container': {
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center'
     }
   };
 });

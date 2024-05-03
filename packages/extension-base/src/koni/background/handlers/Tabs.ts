@@ -20,7 +20,7 @@ import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-s
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
-import { canDerive, stripUrl } from '@subwallet/extension-base/utils';
+import { canDerive, getEVMChainInfo, stripUrl } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
 import keyring from '@subwallet/ui-keyring';
@@ -345,7 +345,7 @@ export default class KoniTabs {
     }
   }
 
-  private async getEvmCurrentAccount (url: string, getAll = false): Promise<string[]> {
+  private async getEvmCurrentAccount (url: string): Promise<string[]> {
     return await new Promise((resolve) => {
       this.getAuthInfo(url).then((authInfo) => {
         const allAccounts = this.#koniState.keyringService.accounts;
@@ -354,10 +354,17 @@ export default class KoniTabs {
 
         const address = this.#koniState.keyringService.currentAccount.address;
 
-        if (address === ALL_ACCOUNT_KEY || !accountList.includes(address) || getAll) {
+        if (address === ALL_ACCOUNT_KEY || !address) {
           accounts = accountList;
-        } else if (address && accountList.includes(address)) {
-          accounts = ([address]);
+        } else {
+          if (accountList.includes(address)) {
+            const result = accountList.filter((adr) => adr !== address);
+
+            result.unshift(address);
+            accounts = result;
+          } else {
+            accounts = accountList;
+          }
         }
 
         resolve(accounts);
@@ -432,7 +439,7 @@ export default class KoniTabs {
   }
 
   private async getEvmPermission (url: string, id: string) {
-    const accounts = await this.getEvmCurrentAccount(url, true);
+    const accounts = await this.getEvmCurrentAccount(url);
 
     return [{
       id: id,
@@ -446,6 +453,7 @@ export default class KoniTabs {
   private async switchEvmChain (id: string, url: string, { params }: RequestArguments) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const chainId = params[0].chainId as string;
+    const chainIdDec = parseInt(chainId, 16);
 
     const evmState = await this.getEvmState(url);
 
@@ -453,12 +461,27 @@ export default class KoniTabs {
       return null;
     }
 
-    const [networkKey] = this.#koniState.findNetworkKeyByChainId(parseInt(chainId, 16));
+    const [networkKey] = this.#koniState.findNetworkKeyByChainId(chainIdDec);
 
     if (networkKey) {
       await this.#koniState.switchEvmNetworkByUrl(stripUrl(url), networkKey);
     } else {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'This network is currently not supported');
+      const onlineData = await getEVMChainInfo(chainIdDec);
+
+      if (onlineData) {
+        const chainData: AddNetworkRequestExternal = {
+          chainId: chainId,
+          rpcUrls: onlineData.rpc.filter((url) => (url.startsWith('https://'))),
+          chainName: onlineData.name,
+          blockExplorerUrls: onlineData.explorers.map((explorer) => explorer.url),
+          nativeCurrency: onlineData.nativeCurrency,
+          requestId: id
+        };
+
+        await this.addEvmChain(id, url, { method: 'wallet_addEthereumChain', params: [chainData] });
+      } else {
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'This network is currently not supported');
+      }
     }
 
     return null;
@@ -844,13 +867,13 @@ export default class KoniTabs {
   }
 
   public async canUseAccount (address: string, url: string) {
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = await this.getEvmCurrentAccount(url);
 
     return !!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()));
   }
 
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const allowedAccounts = (await this.getEvmCurrentAccount(url, true));
+    const allowedAccounts = (await this.getEvmCurrentAccount(url));
     const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
 
     if (signResult) {
@@ -874,7 +897,7 @@ export default class KoniTabs {
       throw new Error('Network unavailable. Please switch network or manually add network to wallet');
     }
 
-    const allowedAccounts = await this.getEvmCurrentAccount(url, true);
+    const allowedAccounts = await this.getEvmCurrentAccount(url);
     const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
 
     if (!transactionHash) {

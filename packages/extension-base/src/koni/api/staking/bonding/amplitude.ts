@@ -2,10 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { BlockHeader, getBondedValidators, getStakingStatusByNominations, isUnstakeAll, PalletIdentityRegistration, ParachainStakingStakeOption, parseIdentity } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { BlockHeader, getBondedValidators, getEarningStatusByNominations, isUnstakeAll, ParachainStakingStakeOption } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { Codec } from '@polkadot/types/types';
@@ -47,7 +50,7 @@ export function subscribeAmplitudeStakingMetadata (chain: string, substrateApi: 
     const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
     const blockPerRound = parseFloat(_blockPerRound);
 
-    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chain] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound;
     const unstakingPeriod = blockDuration * parseInt(unstakingDelay);
 
     callback(chain, {
@@ -89,64 +92,69 @@ export async function getAmplitudeStakingMetadata (chain: string, substrateApi: 
   } as ChainStakingMetadata;
 }
 
-export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption, unstakingInfo: Record<string, number>) {
+export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi, delegatorState: ParachainStakingStakeOption[], unstakingInfo: Record<string, number>) {
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
   const minDelegatorStake = substrateApi.api.consts.parachainStaking.minDelegatorStake.toString();
+  const hasUnstakingInfo = unstakingInfo && Object.values(unstakingInfo).length > 0;
 
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = substrateApi.api.query.identity ? (await substrateApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
-    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
+    const identityPromises = delegatorState.map((delegate) => parseIdentity(substrateApi, delegate.owner));
+    const identities = await Promise.all(identityPromises);
 
-    activeStake = delegatorState.amount.toString();
-    const bnActiveStake = new BN(activeStake);
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    for (let i = 0; i < delegatorState.length; i++) {
+      const delegate = delegatorState[i];
+      const [identity] = identities[i];
 
-    if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      activeStake = delegate.amount.toString();
+      const bnActiveStake = new BN(activeStake);
+      let delegationStatus = EarningStatus.NOT_EARNING;
+
+      if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
+        delegationStatus = EarningStatus.EARNING_REWARD;
+      }
+
+      nominationList.push({
+        status: delegationStatus,
+        chain: chainInfo.slug,
+        validatorAddress: delegate.owner,
+        activeStake: delegate.amount.toString(),
+        validatorMinStake: '0',
+        hasUnstaking: hasUnstakingInfo,
+        validatorIdentity: identity
+      });
     }
 
-    nominationList.push({
-      status: delegationStatus,
-      chain: chainInfo.slug,
-      validatorAddress: delegatorState.owner,
-      activeStake: delegatorState.amount.toString(),
-      validatorMinStake: '0',
-      hasUnstaking: !!unstakingInfo && Object.values(unstakingInfo).length > 0,
-      validatorIdentity: identity
-    });
+    if (hasUnstakingInfo) {
+      const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
+
+      const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
+      const currentBlockNumber = currentBlockInfo.number;
+
+      const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
+      const blockPerRound = parseFloat(_blockPerRound);
+
+      for (const [unstakingBlock, unstakingAmount] of Object.entries(unstakingInfo)) {
+        const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
+
+        const isClaimable = parseInt(unstakingBlock) - currentBlockNumber < 0;
+        const remainingBlock = parseInt(unstakingBlock) - currentBlockNumber;
+        const waitingTime = remainingBlock * blockDuration;
+
+        unstakingList.push({
+          chain: chainInfo.slug,
+          status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+          claimable: unstakingAmount.toString(),
+          waitingTime,
+          validatorAddress: undefined
+        });
+      }
+    }
   }
 
-  if (unstakingInfo && Object.values(unstakingInfo).length > 0) {
-    const _currentBlockInfo = await substrateApi.api.rpc.chain.getHeader();
-
-    const currentBlockInfo = _currentBlockInfo.toPrimitive() as unknown as BlockHeader;
-    const currentBlockNumber = currentBlockInfo.number;
-
-    const _blockPerRound = substrateApi.api.consts.parachainStaking.defaultBlocksPerRound.toString();
-    const blockPerRound = parseFloat(_blockPerRound);
-
-    const nearestUnstakingBlock = Object.keys(unstakingInfo)[0];
-    const nearestUnstakingAmount = Object.values(unstakingInfo)[0];
-
-    const blockDuration = (_STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default) / blockPerRound; // in hours
-
-    const isClaimable = parseInt(nearestUnstakingBlock) - currentBlockNumber < 0;
-    const remainingBlock = parseInt(nearestUnstakingBlock) - currentBlockNumber;
-    const waitingTime = remainingBlock * blockDuration;
-
-    unstakingList.push({
-      chain: chainInfo.slug,
-      status: isClaimable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-      claimable: nearestUnstakingAmount.toString(),
-      waitingTime,
-      validatorAddress: delegatorState?.owner || undefined
-    });
-  }
-
-  const stakingStatus = getStakingStatusByNominations(new BN(activeStake), nominationList);
+  const stakingStatus = getEarningStatusByNominations(new BN(activeStake), nominationList);
 
   return {
     chain: chainInfo.slug,
@@ -159,6 +167,9 @@ export async function subscribeAmplitudeNominatorMetadata (chainInfo: _ChainInfo
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;
@@ -184,7 +195,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
@@ -194,15 +205,14 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
   let activeStake = '0';
 
   if (delegatorState) { // delegatorState can be null while unstaking all
-    const identityInfo = chainApi.api.query.identity ? (await chainApi.api.query.identity.identityOf(delegatorState.owner)).toPrimitive() as unknown as PalletIdentityRegistration : undefined;
-    const identity = identityInfo ? parseIdentity(identityInfo) : undefined;
+    const [identity] = await parseIdentity(substrateApi, delegatorState.owner);
 
     activeStake = delegatorState.amount.toString();
     const bnActiveStake = new BN(activeStake);
-    let delegationStatus: StakingStatus = StakingStatus.NOT_EARNING;
+    let delegationStatus: EarningStatus = EarningStatus.NOT_EARNING;
 
     if (bnActiveStake.gt(BN_ZERO) && bnActiveStake.gte(new BN(minDelegatorStake))) {
-      delegationStatus = StakingStatus.EARNING_REWARD;
+      delegationStatus = EarningStatus.EARNING_REWARD;
     }
 
     nominationList.push({
@@ -247,7 +257,7 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
     return;
   }
 
-  const stakingStatus = getStakingStatusByNominations(new BN(activeStake), nominationList);
+  const stakingStatus = getEarningStatusByNominations(new BN(activeStake), nominationList);
 
   return {
     chain,
@@ -263,42 +273,72 @@ export async function getAmplitudeNominatorMetadata (chainInfo: _ChainInfo, addr
 export async function getAmplitudeCollatorsInfo (chain: string, substrateApi: _SubstrateApi): Promise<ValidatorInfo[]> {
   const chainApi = await substrateApi.isReady;
 
-  const [_allCollators, _inflationConfig] = await Promise.all([
-    chainApi.api.query.parachainStaking.candidatePool.entries(),
-    chainApi.api.query.parachainStaking.inflationConfig()
-  ]);
+  // Noted: Krest do not have reward
+  if (_STAKING_CHAIN_GROUP.krest_network.includes(chain)) {
+    const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+    const allCollators: ValidatorInfo[] = [];
 
-  const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
-  const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
-  const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
-  const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+    for (const _collator of _allCollators) {
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
-  const allCollators: ValidatorInfo[] = [];
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
 
-  for (const _collator of _allCollators) {
-    const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+      allCollators.push({
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        blocked: false,
+        isVerified: false,
+        minBond: '0',
+        chain,
+        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+      });
+    }
 
-    const bnTotalStake = new BN(collatorInfo.total);
-    const bnOwnStake = new BN(collatorInfo.stake);
-    const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+    return allCollators;
+  } else {
+    const [_allCollators, _inflationConfig] = await Promise.all([
+      chainApi.api.query.parachainStaking.candidatePool.entries(),
+      chainApi.api.query.parachainStaking.inflationConfig()
+    ]);
 
-    allCollators.push({
-      address: collatorInfo.id,
-      totalStake: bnTotalStake.toString(),
-      ownStake: bnOwnStake.toString(),
-      otherStake: bnOtherStake.toString(),
-      nominatorCount: collatorInfo.delegators.length,
-      commission: 0,
-      expectedReturn: delegatorReturn,
-      blocked: false,
-      isVerified: false,
-      minBond: '0',
-      chain,
-      isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
-    });
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+    const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
+    const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
+    const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+    const allCollators: ValidatorInfo[] = [];
+
+    for (const _collator of _allCollators) {
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+      allCollators.push({
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        expectedReturn: delegatorReturn,
+        blocked: false,
+        isVerified: false,
+        minBond: '0',
+        chain,
+        isCrowded: collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator)
+      });
+    }
+
+    return allCollators;
   }
-
-  return allCollators;
 }
 
 export async function getAmplitudeBondingExtrinsic (substrateApi: _SubstrateApi, amount: string, selectedValidatorInfo: ValidatorInfo, nominatorMetadata?: NominatorMetadata) {

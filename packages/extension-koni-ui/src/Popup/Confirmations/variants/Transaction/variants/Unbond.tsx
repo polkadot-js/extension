@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { RequestBondingSubmit } from '@subwallet/extension-base/background/KoniTypes';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
+import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -32,7 +33,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Unbond amount')}
+          label={t('Unstake amount')}
           suffix={symbol}
           value={data.amount}
         />

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { _AZERO_DOMAIN_REGISTRY_ABI, _PINK_PSP34_ABI, _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { _AZERO_DOMAIN_REGISTRY_ABI, _NEUROGUNS_PSP34_ABI, _PINK_PSP34_ABI, _PSP22_ABI, _PSP34_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -16,6 +16,10 @@ export function isPinkRoboNft (contractAddress: string) {
   return ['XoywUxTTtNKPRrRN7V5KXCqz2QLMFeK7DxhpSniqZHps5Xq'].includes(contractAddress);
 }
 
+export function isNeurogunNft (contractAddress: string) {
+  return ['aZ9bd2tHeGKrs3FnJv5oe7kgVrP5GQvdJMhC2GxjXA2Yqbd'].includes(contractAddress);
+}
+
 export function isAzeroDomainNft (contractAddress: string) {
   return ['5FsB91tXSEuMj6akzdPczAtmBaVKToqHmtAwSUzXh49AYzaD', '5CTQBfBC9SfdrCDBJdfLiyW2pg9z5W6C6Es8sK313BLnFgDf'].includes(contractAddress);
 }
@@ -25,11 +29,27 @@ export function getPSP34ContractPromise (apiPromise: ApiPromise, contractAddress
     return new ContractPromise(apiPromise, _PINK_PSP34_ABI, contractAddress);
   }
 
+  if (isNeurogunNft(contractAddress)) {
+    return new ContractPromise(apiPromise, _NEUROGUNS_PSP34_ABI, contractAddress);
+  }
+
   if (isAzeroDomainNft(contractAddress)) {
     return new ContractPromise(apiPromise, _AZERO_DOMAIN_REGISTRY_ABI, contractAddress);
   }
 
   return new ContractPromise(apiPromise, _PSP34_ABI, contractAddress);
+}
+
+export function getTokenUriMethod (contractAddress: string): string {
+  if (isPinkRoboNft(contractAddress)) {
+    return 'pinkMint::tokenUri';
+  }
+
+  if (isNeurogunNft(contractAddress)) {
+    return 'tokenUri';
+  }
+
+  return 'psp34Traits::tokenUri';
 }
 
 const mustFormatNumberReg = /^-?[0-9][0-9,.]+$/;

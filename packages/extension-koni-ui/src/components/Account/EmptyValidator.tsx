@@ -50,7 +50,7 @@ const Component: React.FC<Props> = ({ className, isDataEmpty, onClickReload, val
           ? (
             <div className={'data-empty-msg'}>
               <div className='description'>
-                {t('Unable to fetch {{value}} information', { replace: { value: validatorTitle } })}
+                {t('Reload to fetch {{value}} information', { replace: { value: validatorTitle } })}
               </div>
               <div className={'description'}>
                 <Trans
@@ -82,8 +82,6 @@ const EmptyValidator = styled(Component)<Props>(({ theme: { token } }: Props) =>
     '--icon-color': token['gray-4'],
     paddingTop: token.padding,
     marginTop: token.margin * 3,
-    paddingBottom: token.padding,
-    marginBottom: token.margin * 3,
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',

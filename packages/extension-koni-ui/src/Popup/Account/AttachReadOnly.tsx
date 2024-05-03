@@ -141,7 +141,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
-        className='web-single-column web-cancel-fill-height'
         onBack={onBack}
         rightFooterButton={{
           children: t('Attach watch-only account'),
@@ -207,13 +206,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const AttachReadOnly = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      padding: token.padding,
-
-      '.web-ui-enable &': {
-        paddingTop: 0,
-        paddingBottom: 0,
-        marginBottom: -16
-      }
+      padding: token.padding
     },
 
     '.description': {

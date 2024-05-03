@@ -12,7 +12,7 @@ import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/ha
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
-import { spec as availSpec } from 'avail-js-sdk';
+import { goldbergRpc, goldbergTypes, spec as availSpec } from 'avail-js-sdk';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -89,7 +89,8 @@ export class SubstrateApi implements _SubstrateApi {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
-      registry: this.registry
+      registry: this.registry,
+      noInitWarn: true
     };
 
     if (this.metadata) {
@@ -107,19 +108,29 @@ export class SubstrateApi implements _SubstrateApi {
     if (externalApiPromise) {
       api = externalApiPromise;
     } else if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
-      api = new ApiPromise(acalaOptions({ provider }));
+      api = new ApiPromise(acalaOptions({ provider, noInitWarn: true }));
     } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: oakRpc,
-        types: oakTypes
+        types: oakTypes,
+        noInitWarn: true
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
         rpc: availSpec.rpc,
         types: availSpec.types,
-        signedExtensions: availSpec.signedExtensions
+        signedExtensions: availSpec.signedExtensions,
+        noInitWarn: true
+      });
+    } else if (_API_OPTIONS_CHAIN_GROUP.goldberg.includes(this.chainSlug)) {
+      api = new ApiPromise({
+        provider,
+        rpc: goldbergRpc,
+        types: goldbergTypes,
+        signedExtensions: availSpec.signedExtensions,
+        noInitWarn: true
       });
     } else {
       api = new ApiPromise(apiOption);

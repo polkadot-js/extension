@@ -11,18 +11,20 @@ import SettingsReducer from './base/Settings';
 import UIViewStateReducer from './base/UIViewState';
 import BalanceReducer from './feature/Balance';
 import BondingReducer from './feature/Bonding';
+import BuyServiceReducer from './feature/Buy';
+import CampaignReducer from './feature/Campaign';
 import AssetRegistryReducer from './feature/common/AssetRegistry';
 import ChainStoreReducer from './feature/common/ChainStore';
 import CrowdloanReducer from './feature/Crowdloan';
-import DAppReducer from './feature/DApp';
+import EarningReducer from './feature/Earning';
 import MantaPayReducer from './feature/MantaPay';
 import MissionPoolReducer from './feature/MissionPool';
 import NftReducer from './feature/Nft';
 import PriceReducer from './feature/Price';
 import StakingReducer from './feature/Staking';
+import SwapReducer from './feature/Swap';
 import TransactionHistoryReducer from './feature/TransactionHistory';
 import WalletConnectReducer from './feature/WalletConnect';
-import YieldPoolInfoReducer from './feature/YieldPoolInfo';
 
 const persistConfig = {
   key: 'root',
@@ -31,7 +33,9 @@ const persistConfig = {
   whitelist: [
     'settings',
     'uiViewState',
-    'staking'
+    'staking',
+    'campaign',
+    'buyService'
   ]
 };
 
@@ -45,13 +49,14 @@ const rootReducers = combineReducers({
   balance: BalanceReducer,
   bonding: BondingReducer,
   mantaPay: MantaPayReducer,
+  campaign: CampaignReducer,
+  buyService: BuyServiceReducer,
+  earning: EarningReducer,
+  swap: SwapReducer,
 
   // common
   chainStore: ChainStoreReducer,
   assetRegistry: AssetRegistryReducer,
-
-  // yield
-  yieldPool: YieldPoolInfoReducer,
 
   // base
   requestState: RequestStateReducer,
@@ -61,9 +66,6 @@ const rootReducers = combineReducers({
 
   // wallet connect
   walletConnect: WalletConnectReducer,
-
-  // dApp
-  dApp: DAppReducer,
 
   // mission pool
   missionPool: MissionPoolReducer

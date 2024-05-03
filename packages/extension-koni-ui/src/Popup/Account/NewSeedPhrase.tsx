@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CloseIcon, InstructionContainer, InstructionContentType, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
-import { DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { CloseIcon, Layout, PageWrapper, WordPhrase } from '@subwallet/extension-koni-ui/components';
+import { SeedPhraseTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/SeedPhraseTermModal';
+import { CONFIRM_TERM_SEED_PHRASE, DEFAULT_ACCOUNT_TYPES, DEFAULT_ROUTER_PATH, NEW_SEED_MODAL, SEED_PREVENT_MODAL, SELECTED_ACCOUNT_TYPE, TERM_AND_CONDITION_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetDefaultAccountName, useIsPopup, useNotification, useTranslation, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountSuriV2, createSeedV2, windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isFirefox } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon, ModalContext } from '@subwallet/react-ui';
+import { isFirefox, isNoAccount } from '@subwallet/extension-koni-ui/utils';
+import { Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -27,52 +27,44 @@ const FooterIcon = (
   />
 );
 
-const instructionContent: InstructionContentType[] = [
-  {
-    title: 'What is a recovery phrase?',
-    description: 'Recovery phrase is a 12- or 24-word phrase that can be used to restore your wallet. The recovery phrase alone can give anyone full access to your wallet and the funds.',
-    type: 'warning'
-  },
-  {
-    title: 'What if I lose the recovery phrase?',
-    description: 'There is no way to get back your recovery phrase if you lose it. Make sure you store them at someplace safe which is accessible only to you.',
-    type: 'warning'
-  }
-];
-
 const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
   const { t } = useTranslation();
   const notify = useNotification();
   const navigate = useNavigate();
-
+  const [_isConfirmedTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
   const { goHome } = useDefaultNavigate();
   const { activeModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
-  const { isWebUI } = useContext(ScreenContext);
 
   const onComplete = useCompleteCreateAccount();
   const accountName = useGetDefaultAccountName();
   const isPopup = useIsPopup();
 
-  const { hasMasterPassword, isNoAccount } = useSelector((state: RootState) => state.accountState);
+  const { accounts, hasMasterPassword } = useSelector((state: RootState) => state.accountState);
 
   const isOpenWindowRef = useRef(false);
 
-  const [storage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const [typesStorage] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const [preventModalStorage] = useLocalStorage(SEED_PREVENT_MODAL, false);
+  const [preventModal] = useState(preventModalStorage);
 
-  const [accountTypes] = useState(storage);
+  const [accountTypes] = useState(typesStorage);
 
   const [seedPhrase, setSeedPhrase] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
+
   const onBack = useCallback(() => {
     navigate(DEFAULT_ROUTER_PATH);
 
-    if (!isNoAccount) {
-      activeModal(NEW_SEED_MODAL);
+    if (!preventModal) {
+      if (!noAccount) {
+        activeModal(NEW_SEED_MODAL);
+      }
     }
-  }, [navigate, activeModal, isNoAccount]);
+  }, [preventModal, navigate, noAccount, activeModal]);
 
   const _onCreate = useCallback((): void => {
     if (!seedPhrase) {
@@ -106,6 +98,16 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     });
   }, [seedPhrase, checkUnlock, accountName, accountTypes, onComplete, notify]);
 
+  const onConfirmTerms = useCallback(() => {
+    _onCreate();
+  }, [_onCreate]);
+
+  useEffect(() => {
+    if (_isConfirmedTermSeedPhrase === 'nonConfirmed') {
+      activeModal(TERM_AND_CONDITION_SEED_PHRASE_MODAL);
+    }
+  }, [_isConfirmedTermSeedPhrase, activeModal]);
+
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)
       .then((response): void => {
@@ -117,14 +119,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         console.error(e);
       });
   }, []);
-
-  const buttonProps = {
-    children: t('I have saved it somewhere safe'),
-    icon: FooterIcon,
-    onClick: _onCreate,
-    disabled: !seedPhrase,
-    loading: loading
-  };
 
   useEffect(() => {
     if (isPopup && isFirefox() && hasMasterPassword && !isOpenWindowRef.current) {
@@ -138,18 +132,15 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={CN(className)}
       resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
     >
-      <Layout.Base
+      <Layout.WithSubHeaderOnly
         onBack={onBack}
-        {...(!isWebUI
-          ? {
-            rightFooterButton: buttonProps,
-            showBackButton: true,
-            subHeaderPaddingVertical: true,
-            showSubHeader: true,
-            subHeaderCenter: true,
-            subHeaderBackground: 'transparent'
-          }
-          : {})}
+        rightFooterButton={{
+          children: t('I have kept it somewhere safe'),
+          icon: FooterIcon,
+          onClick: onConfirmTerms,
+          disabled: !seedPhrase,
+          loading: loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -158,33 +149,17 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         ]}
         title={t('Your seed phrase')}
       >
-        <div className={CN('container', {
-          '__web-ui': isWebUI
-        })}
-        >
-          <div className={'seed-phrase-container'}>
-            <div className='description'>
-              {t('Keep your recovery phrase in a safe place, and never disclose it. Anyone with this phrase can take control of your assets.')}
-            </div>
-            <WordPhrase
-              enableDownload={true}
-              seedPhrase={seedPhrase}
-            />
-
-            {isWebUI && (
-              <Button
-                {...buttonProps}
-                className='action'
-              />
-            )}
+        <div className={'container'}>
+          <div className='description'>
+            {t('Keep your seed phrase in a safe place and never disclose it. Anyone with this phrase can take control of your assets.')}
           </div>
-
-          {isWebUI && (
-            <InstructionContainer contents={instructionContent} />
-          )}
+          <WordPhrase
+            enableDownload={true}
+            seedPhrase={seedPhrase}
+          />
         </div>
-
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
+      <SeedPhraseTermModal onOk={_onCreate} />
     </PageWrapper>
   );
 };
@@ -192,30 +167,8 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 const NewSeedPhrase = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '.container': {
-      '.seed-phrase-container': {
-        padding: token.padding,
-        textAlign: 'center',
-        flex: 1
-      },
-
-      '&.__web-ui': {
-        display: 'flex',
-        justifyContent: 'center',
-        maxWidth: '60%',
-        margin: '0 auto',
-
-        '.action': {
-          marginTop: 40,
-          width: '100%'
-        },
-
-        '.instruction-container': {
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10
-        }
-      }
+      padding: token.padding,
+      textAlign: 'center'
     },
 
     '.description': {

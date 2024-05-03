@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SWStorage } from '@subwallet/extension-base/storage';
 import { RuntimeInfo } from '@subwallet/extension-base/utils';
+import Bowser from 'bowser';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -21,6 +23,8 @@ export const CLOUDFLARE_PINATA_SERVER = 'https://cloudflare-ipfs.com/ipfs/';
 
 export const BIT_COUNTRY_IPFS_SERVER = 'https://ipfs-cdn.bit.country/';
 
+export const BIT_AVATAR_API = 'https://api.bitavatar.io/v1';
+
 export const BIT_COUNTRY_LAND_ESTATE_METADATA_API = 'https://pioneer-api.bit.country/metadata/landTokenUriPioneer';
 
 export const BIT_COUNTRY_THUMBNAIL_RESOLVER = 'https://res.cloudinary.com/ddftctzph/image/upload/c_scale,q_100,w_250/production-ipfs/asset/';
@@ -31,9 +35,18 @@ export const CF_IPFS_GATEWAY = 'https://cf-ipfs.com/ipfs/';
 // XOrigin
 export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 
-export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+// deprecated
+// export const UNIQUE_SCAN_ENDPOINT = 'https://explorer-api.unique.network/v1/graphql';
+// export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
 
-export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
+export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql';
+
+export const UNIQUE_SCAN_ENDPOINT = 'https://api-unique.uniquescan.io/v1/graphql';
+
+export const QUARTZ_SCAN_ENDPOINT = 'https://api-quartz.uniquescan.io/v1/graphql';
+
+export const OPAL_SCAN_ENDPOINT = 'https://api-opal.uniquescan.io/v1/graphql';
+// GATEWAY
 
 export const UNIQUE_IPFS_GATEWAY = 'https://ipfs.unique.network/ipfs/';
 
@@ -54,6 +67,17 @@ export const DWEB_LINK = 'https://dweb.link/ipfs/';
 export const IPFS_GATEWAY_4EVERLAND = 'https://4everland.io/ipfs/';
 
 export const IPFS_FLEEK = 'https://ipfs.fleek.co/ipfs/';
+
+export const W3S_IPFS = 'https://w3s.link/ipfs/'; // 400
+export const IPFS2_RMRK = 'https://ipfs2.rmrk.link/ipfs/'; // ????
+export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
+export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
+
+const detectFirefox = (): boolean => {
+  return (SWStorage.instance.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
+};
+
+const isFirefox = detectFirefox();
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
@@ -111,6 +135,7 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   pioneer = 'pioneer'
 }
 
+// This is for localhost or http only
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
     provider: CLOUDFLARE_PINATA_SERVER,
@@ -118,42 +143,54 @@ const RANDOM_IPFS_GATEWAY_SETTING = [
   }
 ];
 
-if (!RuntimeInfo.protocol ||
-  (!RuntimeInfo.protocol.startsWith('http') || RuntimeInfo.protocol.startsWith('https'))) {
+if (isFirefox) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: IPFS_FLEEK,
-    weight: 4
-  },
-  {
-    provider: IPFS_GATEWAY_4EVERLAND,
-    weight: 2
-  },
-  {
-    provider: IPFS_W3S_LINK,
-    weight: 1
-  },
-  {
-    provider: CF_IPFS_GATEWAY,
-    weight: 4
-  },
-  {
-    provider: PINATA_IPFS_GATEWAY,
-    weight: 1 // Rate limit too low
-  },
-  {
+    provider: SUBWALLET_IPFS,
+    weight: 5000
+  });
+}
+
+if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
+  // This is for https
+  if (RuntimeInfo.protocol.startsWith('https')) {
+    RANDOM_IPFS_GATEWAY_SETTING.push({
+      provider: IPFS_FLEEK,
+      weight: 4
+    },
+    {
+      provider: IPFS_GATEWAY_4EVERLAND,
+      weight: 2
+    },
+    {
+      provider: IPFS_W3S_LINK,
+      weight: 1
+    },
+    {
+      provider: CF_IPFS_GATEWAY,
+      weight: 4
+    },
+    {
+      provider: PINATA_IPFS_GATEWAY,
+      weight: 1 // Rate limit too low
+    },
+    {
+      provider: IPFS_IO,
+      weight: 5
+    }
+    );
+  }
+} else {
+  // This is for extension env or other
+  RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: NFT_STORAGE_GATEWAY,
     weight: 50
-  },
-  {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
   },
   {
     provider: DWEB_LINK,
     weight: 5
   },
   {
-    provider: IPFS_IO,
+    provider: GATEWAY_IPFS_IO,
     weight: 5
   }
   );

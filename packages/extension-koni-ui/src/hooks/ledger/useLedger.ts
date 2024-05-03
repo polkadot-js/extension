@@ -5,6 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EVMLedger, SubstrateLedger } from '@subwallet/extension-koni-ui/connector';
+import { isLedgerCapable, ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
 import { Ledger } from '@subwallet/extension-koni-ui/types';
@@ -28,12 +29,11 @@ interface Result extends StateBase {
   ledger: Ledger | null;
   refresh: () => void;
   warning: string | null;
-  getAddress: (accountIndex: number) => Promise<LedgerAddress>;
+  getAddress: (accountIndex: number, accountLimit: number) => Promise<LedgerAddress>;
+  getAllAddress: (start: number, end: number) => Promise<LedgerAddress[]>;
   signTransaction: Ledger['signTransaction'];
   signMessage: Ledger['signMessage'];
 }
-
-const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
 const baseState: StateBase = {
   isLedgerCapable,
@@ -49,7 +49,7 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
 const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], chainInfoMap: Record<string, _ChainInfo>): Ledger => {
   const { isLedgerCapable } = baseState;
 
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+  assert(isLedgerCapable, ledgerIncompatible);
 
   const chainInfo = chainInfoMap[slug];
   const isEthereumNetwork = _isChainEvmCompatible(chainInfo);
@@ -79,8 +79,9 @@ export function useLedger (slug?: string, active = true): Result {
   const [refreshLock, setRefreshLock] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [ledger, setLedger] = useState<Ledger| null>(null);
 
-  const ledger = useMemo(() => {
+  const getLedger = useCallback(() => {
     setError(null);
     setIsLocked(false);
     setIsLoading(true);
@@ -142,15 +143,52 @@ export function useLedger (slug?: string, active = true): Result {
     }
   }, [appName, t]);
 
-  const getAddress = useCallback(async (accountIndex: number): Promise<LedgerAddress> => {
-    if (ledger) {
-      return ledger.getAddress(false, accountIndex, 0);
-    } else {
+  const getAllAddress = useCallback(async (start: number, end: number): Promise<LedgerAddress[]> => {
+    const ledger_ = getLedger();
+    const rs: LedgerAddress[] = [];
+
+    if (!ledger_) {
       return new Promise((resolve, reject) => {
         reject(new Error(t("Can't find Ledger device")));
       });
     }
-  }, [ledger, t]);
+
+    for (let i = start; i < end; i++) {
+      const account = await ledger_?.getAddress(false, i, 0);
+
+      if (account) {
+        rs[i - start] = account;
+      } else {
+        break;
+      }
+    }
+
+    setIsLoading(false);
+
+    setLedger(ledger_);
+
+    return rs;
+  }, [getLedger, t]);
+
+  const getAddress = useCallback(async (accountIndex: number, accountLimit = 5): Promise<LedgerAddress> => {
+    const isEndAccountGet = accountIndex % accountLimit === 0;
+    const ledger_ = isEndAccountGet ? getLedger() : ledger;
+
+    if (!ledger_) {
+      return new Promise((resolve, reject) => {
+        reject(new Error(t("Can't find Ledger device")));
+      });
+    }
+
+    isEndAccountGet && setLedger(ledger_);
+
+    return ledger_.getAddress(false, accountIndex, 0)
+      .then((rs) => {
+        setIsLoading(false);
+
+        return rs;
+      });
+  }, [getLedger, ledger, t]);
 
   const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
@@ -195,17 +233,24 @@ export function useLedger (slug?: string, active = true): Result {
   }, [handleError, ledger, t]);
 
   useEffect(() => {
-    if (!ledger || !slug || !active) {
+    if (!slug || !active) {
       return;
     }
 
+    const ledger_ = getLedger();
+
+    if (!ledger_) {
+      return;
+    }
+
+    setLedger(ledger_);
     clearTimeout(timeOutRef.current);
 
     setWarning(null);
     setError(null);
 
     timeOutRef.current = setTimeout(() => {
-      ledger.getAddress(false, 0, 0)
+      ledger_.getAddress(false, 0, 0)
         .then(() => {
           setIsLoading(false);
         })
@@ -216,7 +261,7 @@ export function useLedger (slug?: string, active = true): Result {
           console.error(error);
         });
     }, 300);
-  }, [slug, ledger, ledgerChains, t, active, chainInfoMap, appName, handleError]);
+  }, [slug, ledgerChains, t, active, chainInfoMap, appName, handleError, getLedger]);
 
   useEffect(() => {
     destroyRef.current = () => {
@@ -239,9 +284,10 @@ export function useLedger (slug?: string, active = true): Result {
     refresh,
     warning,
     getAddress,
+    getAllAddress,
     signTransaction,
     signMessage
   }),
-  [error, isLoading, isLocked, ledger, refresh, warning, getAddress, signTransaction, signMessage]
+  [error, isLoading, isLocked, ledger, refresh, warning, getAddress, getAllAddress, signTransaction, signMessage]
   );
 }

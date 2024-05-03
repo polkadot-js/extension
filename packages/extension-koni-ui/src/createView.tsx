@@ -7,7 +7,7 @@ import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
-export default function Root (Entry: React.ComponentType, rootId = 'root'): void {
+export default function createView (Entry: React.ComponentType, rootId = 'root'): void {
   applyPreloadStyle();
   const rootElement = document.getElementById(rootId);
 

@@ -4,12 +4,14 @@
 import { _isChainEvmCompatible, _isCustomChain, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { FilterModal, Layout, NetworkEmptyList, NetworkToggleItem, OptionType, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { ChainInfoWithState, useChainInfoWithState, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ChainInfoWithState, useFilterModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import useChainInfoWithStateAndStatus, { ChainInfoWithStateAndStatus } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithStateAndStatus';
+import { ManageChainsParam, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import { FadersHorizontal, Plus } from 'phosphor-react';
-import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps
@@ -27,11 +29,16 @@ enum FilterValue {
 const renderEmpty = () => <NetworkEmptyList />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const locationState = useLocation().state as ManageChainsParam;
+  const [defaultSearch] = useState<string | undefined>(locationState?.defaultSearch);
+  const sectionRef = useRef<SwListSectionRef>(null);
+  const isFillDefaultSearch = useRef<boolean>(false);
+
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dataContext = useContext(DataContext);
   const { activeModal } = useContext(ModalContext);
-  const chainInfoList = useChainInfoWithState();
+  const chainInfoList = useChainInfoWithStateAndStatus();
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const FILTER_OPTIONS = useMemo((): OptionType[] => ([
@@ -82,14 +89,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return chainInfo.name.toLowerCase().includes(searchTextLowerCase);
   }, []);
 
-  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithStateAndStatus) => {
     return (
       <NetworkToggleItem
         chainInfo={chainInfo}
         isShowSubLogo={true}
         key={chainInfo.slug}
-        showDetailNavigation={true}
-        withDivider={true}
       />
     );
   }, []);
@@ -106,11 +111,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         ),
         onClick: () => {
           navigate('/settings/chains/import', { state: { isExternalRequest: false } });
-        },
-        tooltip: t('Import network')
+        }
       }
     ];
-  }, [navigate, t]);
+  }, [navigate]);
 
   const onBack = useCallback(() => {
     navigate(-1);
@@ -120,6 +124,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     e && e.stopPropagation();
     activeModal(FILTER_MODAL_ID);
   }, [activeModal]);
+
+  const isSectionRefFilled = !!sectionRef.current;
+
+  useEffect(() => {
+    if (defaultSearch && !isFillDefaultSearch.current && isSectionRefFilled) {
+      isFillDefaultSearch.current = true;
+      sectionRef.current?.setSearchValue(defaultSearch);
+    }
+  }, [defaultSearch, isSectionRefFilled]);
 
   return (
     <PageWrapper
@@ -150,6 +163,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           list={chainInfoList}
           mode={'boxed'}
           onClickActionBtn={openFilterModal}
+          ref={sectionRef}
           renderItem={renderChainItem}
           renderWhenEmpty={renderEmpty}
           searchFunction={searchToken}
@@ -218,12 +232,13 @@ const ManageChains = styled(Component)<Props>(({ theme: { token } }: Props) => {
     },
 
     '.ant-web3-block .ant-web3-block-middle-item': {
-      width: 190
+      width: 190,
+      overflow: 'hidden'
     },
 
     '.ant-network-item-name': {
       overflow: 'hidden',
-      textWrap: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       paddingRight: token.paddingXS
     }

@@ -4,11 +4,10 @@
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { isAccountAll } from '@subwallet/extension-base/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useFormatAddress, useSelectModalInputHelper, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { funcSortByName, toShort } from '@subwallet/extension-koni-ui/utils';
-import { InputRef } from '@subwallet/react-ui';
+import { InputRef, SelectModal } from '@subwallet/react-ui';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -21,6 +20,7 @@ import { GeneralEmptyList } from '../EmptyList';
 interface Props extends ThemeProps, BasicInputWrapper {
   externalAccounts?: AccountJson[];
   filter?: (account: AccountJson) => boolean;
+  doFilter?: boolean;
   addressPrefix?: number;
 }
 
@@ -31,12 +31,18 @@ function defaultFiler (account: AccountJson): boolean {
 }
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> => {
-  const { addressPrefix, className = '', disabled, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
-  const _items = useSelector((state) => state.accountState.accounts);
+  const { addressPrefix, className = '', disabled, doFilter = true, externalAccounts, filter, id = 'account-selector', label, placeholder, readOnly, statusHelp, value } = props;
+  const accounts = useSelector((state) => state.accountState.accounts);
 
   const items = useMemo(() => {
-    return (externalAccounts || _items).filter(filter || defaultFiler).sort(funcSortByName);
-  }, [_items, externalAccounts, filter]);
+    let _items = (externalAccounts || accounts);
+
+    if (doFilter) {
+      _items = _items.filter(filter || defaultFiler);
+    }
+
+    return _items.sort(funcSortByName);
+  }, [accounts, doFilter, externalAccounts, filter]);
 
   const { t } = useTranslation();
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -85,7 +91,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
 
   return (
     <>
-      <BaseSelectModal
+      <SelectModal
         className={`${className} account-selector-modal`}
         disabled={disabled || readOnly}
         id={id}

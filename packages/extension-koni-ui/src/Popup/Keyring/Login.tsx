@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
-import SocialGroup from '@subwallet/extension-koni-ui/components/SocialGroup';
 import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
@@ -84,7 +83,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         <div className='body-container'>
           <div className='logo-container'>
             <Image
-              src='/images/subwallet/gradient-logo.png'
+              src='./images/subwallet/gradient-logo.png'
               width={80}
             />
           </div>
@@ -137,14 +136,13 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           </Form>
           <ResetWalletModal />
         </div>
-        <SocialGroup className={'social-group'} />
       </Layout.Base>
     </PageWrapper>
   );
 };
 
 const Login = styled(Component)<Props>(({ theme }: Props) => {
-  const { extendToken, token } = theme;
+  const { token } = theme;
 
   return {
     position: 'relative',
@@ -161,21 +159,13 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
       top: 0
     },
 
-    '.ant-sw-screen-layout-body': {
-      display: 'flex',
-      flexDirection: 'column'
-    },
-
     '.body-container': {
       padding: `0 ${token.padding}px`,
       textAlign: 'center',
       opacity: 0.999,
-      width: extendToken.oneColumnWidth,
-      maxWidth: '100%',
-      margin: 'auto',
 
       '.logo-container': {
-        marginTop: 0,
+        marginTop: 100,
         color: token.colorTextBase
       },
 
@@ -204,26 +194,6 @@ const Login = styled(Component)<Props>(({ theme }: Props) => {
         lineHeight: token.lineHeightHeading5,
         color: token.colorTextLight4,
         marginTop: 27
-      }
-    },
-
-    '.social-group': {
-      marginTop: 0,
-      paddingTop: 40,
-      textAlign: 'center'
-    },
-
-    '.web-ui-enable &': {
-      '.bg-image': {
-        display: 'none'
-      },
-
-      '.password-input': {
-        marginTop: 36
-      },
-
-      '.forgot-password': {
-        marginTop: 0
       }
     }
   };

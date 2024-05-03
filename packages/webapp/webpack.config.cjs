@@ -43,11 +43,21 @@ const packages = [
   'extension-dapp',
   'extension-inject',
   'extension-koni',
-  'extension-koni-ui'
+  'extension-web-ui'
 ];
 
 const polkadotDevOptions = require('@polkadot/dev/config/babel-config-webpack.cjs');
 // Overwrite babel babel config from polkadot dev
+
+const _additionalEnv = {
+  TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
+  COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
+  NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST),
+  TRANSAK_TEST_MODE: JSON.stringify(false),
+  BANXA_TEST_MODE: JSON.stringify(false),
+  INFURA_API_KEY: JSON.stringify(process.env.INFURA_API_KEY),
+  INFURA_API_KEY_SECRET: JSON.stringify(process.env.INFURA_API_KEY_SECRET)
+};
 
 const createConfig = (entry, alias = {}, useSplitChunk = false) => {
   const result = {
@@ -117,13 +127,11 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
           NODE_ENV: JSON.stringify(mode),
           PKG_NAME: JSON.stringify(pkgJson.name),
           PKG_VERSION: JSON.stringify(pkgJson.version),
+          PKG_BUILD_NUMBER: JSON.stringify(pkgJson.buildNumber),
           TARGET_ENV: JSON.stringify('webapp'),
+          BRANCH_NAME: JSON.stringify(process.env.BRANCH_NAME),
           ID_PREFIX: JSON.stringify('sw-app-'),
-          TRANSAK_API_KEY: JSON.stringify(process.env.TRANSAK_API_KEY),
-          COINBASE_PAY_ID: JSON.stringify(process.env.COINBASE_PAY_ID),
-          NFT_MINTING_HOST: JSON.stringify(process.env.NFT_MINTING_HOST),
-          TRANSAK_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true),
-          BANXA_TEST_MODE: mode === 'production' ? JSON.stringify(false) : JSON.stringify(true)
+          ..._additionalEnv
         }
       }),
       new CopyPlugin({
@@ -154,7 +162,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         ...alias,
         'react/jsx-runtime': require.resolve('react/jsx-runtime')
       }),
-      extensions: ['.js', '.jsx', '.ts', '.tsx'],
+      extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx'],
       fallback: {
         crypto: require.resolve('crypto-browserify'),
         path: require.resolve('path-browserify'),
@@ -167,15 +175,34 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
         url: false
       }
     },
-    watch: false
+    watch: false,
+    experiments: {
+      asyncWebAssembly: true
+    }
+  };
+
+  result.optimization = {
+    splitChunks: {
+      chunks: 'all',
+      maxSize: 2000000,
+      cacheGroups: {
+        vendors: {
+          test: /[\\/]node_modules[\\/]/,
+          priority: -10
+        },
+        default: {
+          priority: -20,
+          reuseExistingChunk: true
+        }
+      }
+    }
   };
 
   return result;
 };
 
 module.exports = createConfig({
-  fallback: './src/fallback.ts',
-  webapp: './src/webRunner.ts',
+  webapp: ['./src/fallback.ts', './src/webRunner.ts'],
   main: './src/index.tsx'
 }, {
   'manta-extension-sdk': './manta-extension-sdk-empty.ts'

@@ -3,6 +3,7 @@
 
 import { TokenBalanceSelectionItem, TokenEmptyList } from '@subwallet/extension-koni-ui/components';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { AccountBalanceHookType, ThemeProps, TokenBalanceItemType, TokenGroupHookType } from '@subwallet/extension-koni-ui/types';
 import { sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { SwList, SwModal } from '@subwallet/react-ui';
@@ -36,6 +37,8 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
   const navigate = useNavigate();
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { multiChainAssetMap } = useSelector((state) => state.assetRegistry);
+  const assetRegistry = useChainAssets({ isActive: true }).chainAssetRegistry;
 
   const tokenBalances = useMemo<TokenBalanceItemType[]>(() => {
     return getTokenBalances(tokenBalanceMap, sortedTokenSlugs).sort(sortTokenByValue);
@@ -52,15 +55,19 @@ function Component ({ className = '', id, onCancel, sortedTokenSlugs, tokenBalan
 
   const renderItem = useCallback(
     (tokenBalance: TokenBalanceItemType) => {
+      const slug = tokenBalance.slug;
+      const tokenName = assetRegistry[slug]?.name || multiChainAssetMap[slug]?.name || '';
+
       return (
         <TokenBalanceSelectionItem
-          key={tokenBalance.slug}
+          key={slug}
+          tokenName={tokenName}
           {...tokenBalance}
           onPressItem={onClickItem(tokenBalance)}
         />
       );
     },
-    [onClickItem]
+    [assetRegistry, multiChainAssetMap, onClickItem]
   );
 
   const searchFunc = useCallback((item: TokenBalanceItemType, searchText: string) => {

@@ -42,12 +42,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     },
 
     '.main-page-container': {
-      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`,
-      boxSizing: 'border-box'
-    },
-
-    '.main-page-container.web-ui-enable': {
-      border: 0
+      border: `${token.lineWidth}px ${token.lineType} ${token.colorBgInput}`
     },
 
     '.ant-sw-modal .ant-sw-modal-header': {
@@ -71,19 +66,26 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         }
       }
     },
-    '.web-confirmation': {
-      '.ant-sw-modal-content': {
-        padding: 0,
-        '.ant-sw-modal-header': {
-          borderRadius: 0
-        }
-      }
-    },
+
     '.modal-full': {
       '.ant-sw-modal-content': {
         '.ant-sw-modal-header': {
           borderRadius: 0
         }
+      }
+    },
+    '.__currency-value-detail-tooltip': {
+      paddingBottom: 0,
+
+      '.ant-tooltip-inner': {
+        padding: `${token.paddingXXS}px ${token.paddingXXS + 2}px`,
+        fontSize: token.fontSizeXS,
+        minHeight: 'auto',
+        minWidth: 'auto'
+      },
+
+      '.ant-tooltip-arrow': {
+        transform: 'translateX(-50%) translateY(100%) rotate(180deg) scaleX(0.5)'
       }
     },
 
@@ -113,21 +115,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       lineHeight: token.lineHeightSM
     },
 
-    '.lg-text': {
-      fontSize: token.fontSizeLG,
-      lineHeight: token.lineHeightLG
-    },
-
     '.mono-text': {
       fontFamily: token.monoSpaceFontFamily
     },
 
     '.ml-xs': {
       marginLeft: token.marginXS
-    },
-
-    '.mr-xs': {
-      marginRight: token.marginXS
     },
 
     '.ml-xxs': {
@@ -203,6 +196,23 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         marginInlineEnd: 'auto'
       }
     },
+    '.setting-item': {
+      '.ant-web3-block-left-item': {
+        paddingRight: 0
+      },
+      '.ant-web3-block': {
+        gap: token.sizeSM,
+        paddingLeft: token.paddingSM,
+        paddingRight: token.paddingXXS,
+        paddingTop: 6,
+        paddingBottom: 6,
+        flex: 1
+      },
+      '.ant-web3-block-right-item.ant-web3-block-right-item': {
+        marginRight: 0,
+        padding: 10
+      }
+    },
 
     '.ant-input-affix-wrapper': {
       overflow: 'hidden',
@@ -222,32 +232,12 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
-    '.ant-sw-header-left-part + .ant-sw-header-center-part .ant-sw-sub-header-title': {
-      display: 'block',
-      textAlign: 'center'
-    },
-
-    '.ant-sw-qr-scanner-camera-items-container.ant-select-modal': {
-      maxWidth: 404,
-      width: '100% !important',
-
-      '@media (min-width: 992px)': {
-        left: 'auto',
-        right: token.paddingLG,
-        bottom: token.paddingLG,
-        top: token.paddingLG,
-
-        '.ant-sw-modal-content': {
-          height: '100%',
-          maxHeight: '100%',
-          width: '100%',
-          paddingLeft: token.paddingLG,
-          paddingRight: token.paddingLG
-        },
-
-        '.ant-sw-list-section .ant-sw-list-wrapper': {
-          flexBasis: 'auto'
-        }
+    '.ant-select-modal-input-content': {
+      '.ant-select-modal-input-placeholder': {
+        textOverflow: 'ellipsis',
+        overflow: 'hidden',
+        display: 'block',
+        'white-space': 'nowrap'
       }
     }
   });

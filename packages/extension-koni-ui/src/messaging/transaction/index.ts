@@ -4,5 +4,5 @@
 export * from './base';
 export * from './nft';
 export * from './staking';
+export * from './earning';
 export * from './transfer';
-export * from './yield';

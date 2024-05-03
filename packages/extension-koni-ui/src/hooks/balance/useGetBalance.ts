@@ -26,6 +26,8 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '', isSubscribe = f
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const isChainActive = chainStateMap[chain]?.active;
+  const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
+  const isTokenActive = assetSettingMap[tokenSlug]?.visible;
 
   const refreshBalance = useCallback(() => {
     setIsRefresh({});
@@ -43,10 +45,9 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '', isSubscribe = f
     if (address && chain) {
       timeout = setTimeout(() => {
         const promiseList = [] as Promise<any>[];
-        const nativeTokenActive = nativeTokenSlug && assetSettingMap[nativeTokenSlug]?.visible;
         let childTokenActive = true;
 
-        if (tokenSlug && tokenSlug !== nativeTokenSlug && !assetSettingMap[tokenSlug]?.visible) {
+        if (tokenSlug && tokenSlug !== nativeTokenSlug && !isTokenActive) {
           childTokenActive = false;
         }
 
@@ -160,7 +161,7 @@ const useGetBalance = (chain = '', address = '', tokenSlug = '', isSubscribe = f
         cancelSubscription(id).catch(console.error);
       });
     };
-  }, [address, chain, nativeTokenSlug, tokenSlug, isRefresh, assetSettingMap, t, assetRegistry, chainInfo?.name, isChainActive, isSubscribe]);
+  }, [isRefresh, address, assetRegistry, chain, chainInfo?.name, isChainActive, isSubscribe, isTokenActive, nativeTokenActive, nativeTokenSlug, t, tokenSlug]);
 
   return { refreshBalance, tokenBalance, nativeTokenBalance, nativeTokenSlug, isLoading, error };
 };

@@ -1,7 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Notification, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
+import { Notification, NotificationButton, NotificationParams } from '@subwallet/extension-base/background/KoniTypes';
+import { isFirefox } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
 export default class NotificationService {
@@ -21,24 +22,46 @@ export default class NotificationService {
     this.notificationSubject.next(notifications);
 
     if (notification.notifyViaBrowser) {
-      NotificationService.createBrowserNotification(notification.title, notification.message, notification?.action?.url);
+      NotificationService.createBrowserNotification(notification.title, notification.message, notification.action, notification.buttons);
     }
   }
 
   // Create a new chrome notification with link
-  public static createBrowserNotification (title: string, message: string, link?: string): void {
-    chrome?.notifications?.create({
+  public static createBrowserNotification (title: string, message: string, action?: NotificationParams['action'], buttons?: NotificationButton[]): void {
+    const link = action?.url;
+    const onClick = action?.click;
+    const onButtonClick = action?.buttonClick;
+
+    const options: chrome.notifications.NotificationOptions<true> = {
       type: 'basic',
       title,
       message,
       iconUrl: '/images/icon-128.png',
       priority: 2,
-      isClickable: !!link
-    }, (notificationId: string) => {
-      if (link) {
+      isClickable: !!link || !!onClick
+    };
+
+    if (!isFirefox) {
+      options.buttons = buttons;
+    }
+
+    chrome?.notifications?.create(options, (notificationId: string) => {
+      if (link || onClick) {
         chrome.notifications.onClicked.addListener((nId) => {
           if (nId === notificationId) {
-            window.open(link);
+            if (onClick) {
+              onClick();
+            } else {
+              window.open(link);
+            }
+          }
+        });
+      }
+
+      if (onButtonClick) {
+        chrome.notifications.onButtonClicked.addListener((nId, btnIndex) => {
+          if (nId === notificationId) {
+            onButtonClick(btnIndex);
           }
         });
       }

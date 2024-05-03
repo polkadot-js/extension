@@ -1,11 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
-import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import useFetchChainInfo from '@subwallet/extension-koni-ui/hooks/screen/common/useFetchChainInfo';
+import { useFetchChainInfo, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import reformatAddress from '@subwallet/extension-koni-ui/utils/account/reformatAddress';
 import { Button, Icon } from '@subwallet/react-ui';
@@ -16,16 +15,16 @@ import React, { useCallback, useMemo } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 import styled from 'styled-components';
 
-type Props = TokenItemProps & ThemeProps & {
+interface Props extends ThemeProps, Omit<TokenItemProps, 'name' | 'subName' | 'slug' | 'subNetworkKey' | 'symbol'> {
   address?: string;
-  chain?: string;
-  slug: string;
+  item: _ChainAsset;
   onClickCopyBtn?: () => void;
   onClickQrBtn?: () => void;
-};
+}
 
 const Component = (props: Props) => {
-  const { address, chain, className, name, onClickCopyBtn, onClickQrBtn, onPressItem, slug, symbol, ...restProps } = props;
+  const { address, className, item, onClickCopyBtn, onClickQrBtn, onPressItem, ...restProps } = props;
+  const { name, originChain: chain, slug, symbol } = item;
   const chainInfo = useFetchChainInfo(chain || '');
   const notify = useNotification();
   const { t } = useTranslation();
@@ -57,7 +56,16 @@ const Component = (props: Props) => {
         middleItem={
           (
             <>
-              <div className={'ant-network-item-name'}>{symbol}</div>
+              <div className='token-info'>
+                <span>{symbol}</span>
+                { name && (
+                  <span className='__token-name'>
+                    &nbsp;(
+                    <span className='name'>{name}</span>
+                    )
+                  </span>
+                ) }
+              </div>
               <div className={'__chain-name'}>
                 {chainInfo.name}
               </div>
@@ -102,6 +110,7 @@ const Component = (props: Props) => {
           )
         }
         subName={chainInfo.name}
+        subNetworkKey={chain}
         symbol={slug.toLowerCase()}
       />
     </div>
@@ -118,6 +127,31 @@ export const TokenSelectionItem = styled(Component)<Props>(({ theme: { token } }
       '.ant-number': {
         fontSize: token.fontSizeSM,
         lineHeight: token.lineHeightSM
+      }
+    },
+
+    '.token-info': {
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+      'white-space': 'nowrap',
+
+      fontSize: token.fontSizeHeading5,
+      lineHeight: token.lineHeightHeading5,
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+
+      '.__token-name': {
+        color: token.colorTextTertiary,
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+
+        '.name': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap'
+        }
       }
     },
 

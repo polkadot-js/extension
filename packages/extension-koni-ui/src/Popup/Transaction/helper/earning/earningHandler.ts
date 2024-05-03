@@ -1,95 +1,94 @@
-// Copyright 2019-2022 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { NominationPoolInfo, OptimalYieldPath, SubmitJoinNativeStaking, SubmitJoinNominationPool, SubmitYieldStepData, ValidatorInfo, YieldPoolInfo, YieldPoolType, YieldTokenBaseInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { getYieldNativeStakingValidators, getYieldNominationPools, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
-import { store } from '@subwallet/extension-koni-ui/stores';
+import { SpecialYieldPoolInfo, SubmitYieldStepData, YieldPoolInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+// @ts-ignore
+import humanizeDuration from 'humanize-duration';
+import { TFunction } from 'react-i18next';
 
-export function fetchEarningChainValidators (
-  poolInfo: YieldPoolInfo,
-  unmount: boolean,
-  setPoolLoading: (value: boolean) => void,
-  setValidatorLoading: (value: boolean) => void,
-  setForceFetchValidator: (value: boolean) => void
-) {
-  if (!unmount) {
-    let promise;
+export function getUnstakingPeriod (t: TFunction, unstakingPeriod?: number) {
+  if (unstakingPeriod) {
+    const days = unstakingPeriod / 24;
 
-    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-      promise = getYieldNativeStakingValidators(poolInfo);
+    if (days < 1) {
+      return t('{{time}} hours', { replace: { time: unstakingPeriod } });
     } else {
-      promise = getYieldNominationPools(poolInfo);
+      return t('{{time}} days', { replace: { time: days } });
     }
+  }
 
-    setValidatorLoading(true);
-    promise
-      .then((result) => {
-        if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-          store.dispatch({ type: 'bonding/updateChainValidators', payload: { chain: poolInfo.chain, validators: result as ValidatorInfo[] } });
-        } else {
-          store.dispatch({ type: 'bonding/updateNominationPools', payload: { chain: poolInfo.chain, pools: result as NominationPoolInfo[] } });
-        }
-      })
-      .catch(console.error)
-      .finally(() => {
-        if (!unmount) {
-          if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
-            setValidatorLoading(false);
-          } else {
-            setPoolLoading(false);
-          }
+  return '';
+}
 
-          setForceFetchValidator(false);
+export function getWaitingTime (t: TFunction, currentTimestampMs: number, targetTimestampMs?: number, waitingTime?: number) {
+  let remainingTimestampMs: number;
+
+  if (targetTimestampMs !== undefined) {
+    remainingTimestampMs = targetTimestampMs - currentTimestampMs;
+  } else {
+    if (waitingTime !== undefined) {
+      remainingTimestampMs = waitingTime * 60 * 60 * 1000;
+    } else {
+      return t('Automatic withdrawal');
+    }
+  }
+
+  if (remainingTimestampMs <= 0) {
+    return t('Available for withdrawal');
+  } else {
+    const remainingTimeHr = remainingTimestampMs / 1000 / 60 / 60;
+
+    // Formatted waitting time without round up
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-assignment
+    const _formattedWaitingTime = humanizeDuration(remainingTimestampMs, {
+      units: remainingTimeHr >= 24 ? ['d', 'h'] : ['h', 'm'],
+      round: false,
+      delimiter: ' ',
+      language: 'shortEn',
+      languages: {
+        shortEn: {
+          y: () => 'y',
+          mo: () => 'mo',
+          w: () => 'w',
+          d: () => 'd',
+          h: () => 'hr',
+          m: () => 'm',
+          s: () => 's',
+          ms: () => 'ms'
         }
-      });
+      } // TODO: should not be shorten
+    }) as string;
+
+    // Formatted waitting time with round up
+    const formattedWaitingTime = _formattedWaitingTime.split(' ').map((segment, index) => {
+      if (index % 2 === 0) {
+        return Math.ceil(parseFloat(segment)).toString();
+      }
+
+      return segment;
+    }).join(' ');
+
+    return t('Withdrawable in {{time}}', { replace: { time: formattedWaitingTime } });
   }
 }
 
-export async function handleYieldStep (
+export function getJoinYieldParams (
+  _poolInfo: YieldPoolInfo,
   address: string,
-  yieldPoolInfo: YieldPoolInfo,
-  path: OptimalYieldPath,
-  currentStep: number,
-  data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool
-): Promise<SWTransactionResponse> {
-  return submitJoinYieldPool({
-    address,
-    path: path,
-    yieldPoolInfo,
-    currentStep,
-    data
-  });
-}
-
-export function getJoinYieldParams (yieldPoolInfo: YieldPoolInfo, amount: string, feeStructure: YieldTokenBaseInfo): SubmitYieldStepData {
-  // @ts-ignore
-  const exchangeRate = yieldPoolInfo?.stats?.assetEarning[0]?.exchangeRate || 0;
+  amount: string,
+  feeStructure: YieldTokenBaseInfo
+): SubmitYieldStepData {
+  const poolInfo = _poolInfo as SpecialYieldPoolInfo;
+  const exchangeRate = poolInfo?.statistic?.assetEarning[0]?.exchangeRate || 0;
 
   return {
-    slug: yieldPoolInfo.slug,
+    slug: poolInfo.slug,
     exchangeRate,
-    inputTokenSlug: yieldPoolInfo.inputAssets[0],
-    derivativeTokenSlug: yieldPoolInfo?.derivativeAssets ? yieldPoolInfo.derivativeAssets[0] : undefined, // TODO
-    rewardTokenSlug: yieldPoolInfo.rewardAssets[0],
+    address,
     amount,
+    inputTokenSlug: poolInfo.metadata.inputAsset,
+    derivativeTokenSlug: poolInfo?.metadata?.derivativeAssets?.[0], // TODO
+    rewardTokenSlug: poolInfo?.metadata?.rewardAssets[0] || '',
     feeTokenSlug: feeStructure.slug
   };
-}
-
-export async function handleValidateYield (
-  address: string,
-  yieldPoolInfo: YieldPoolInfo,
-  path: OptimalYieldPath,
-  amount: string,
-  data: SubmitYieldStepData | SubmitJoinNativeStaking | SubmitJoinNominationPool
-): Promise<TransactionError[]> {
-  return validateYieldProcess({
-    address,
-    path: path,
-    yieldPoolInfo,
-    data,
-    amount
-  });
 }

@@ -1,5 +1,649 @@
 # CHANGELOG
 
+## 1.1.61
+Build date: May 02, 2024.
+
+Features & Update:
+- Hide popup Introducing Earning feature (#2948)
+
+Bugs fixed:
+- Fixed bug Cannot read properties of undefined (reading 'length') (#2986)
+- Fixed bug related to earning feature (#2680)
+
+## 1.1.60
+Build date: Apl 30, 2024.
+
+Features & Update:
+- Add support Mythos chain (#2966)
+- Set default pool for Avail Turing (#2971)
+
+## 1.1.59
+Build date: Apl 25, 2024.
+
+Features & Update:
+- Support staking for Avail Turing (#2963)
+
+## 1.1.58
+Build date: Apl 24, 2024.
+
+Features & Update:
+- Add show/hide password for case input password (#2555)
+- Update chain-list (#2947)
+  - Set "SubWallet Official 3" as the default pool for Vara
+  - Add support for Commune AI blockchain and COMAI token (Mainnet)
+  - Add Block Explorer for Enjin Relaychain, Enjin Matrix
+  - Add support for DBC network
+  - Add support Avail Turing
+
+Bugs fixed:
+- Fixed bug Do not show transaction history in case sender account is null (#2955)
+
+## 1.1.57
+Build date: Apl 23, 2024.
+
+Bugs fixed:
+- Fix bug related to Aleph Zero transfer and staking (#2655)
+- Fix issue related to earning status (#2941)
+
+## 1.1.56
+Build date: Apl 19, 2024.
+
+Features & Update:
+- Update chainlist (#2931)
+  - Add rpc  for Liberland: wss://liberland-rpc.dwellir.com
+  - Add support for STINK token
+  - Add support for PINK token on Base network
+  - Support Paseo network
+- Bump Polkadot dependencies (#2853)
+- Support NFTs on Asset Hub (#2934)
+- Update withdraw time for Parachain (#2830)
+
+Bugs fixed:
+- Fixed bug parsing Earning status for Nomination pool (#2937)
+
+## 1.1.55
+Build date: Apl 14, 2024.
+
+Features & Update:
+- Implement Swap feature for extension (#2823)
+- Support Export all accounts feature (#2819)
+- Add warning message for cross chain transfer to an exchange (CEX) (#2873)
+- Update chain-list (#2890)
+  - Add support for Acurast Canary
+  - Add support for token BEEFY for AssetHub and HydraDX
+  - Add support Humanode - HMND (Substrate) / eHMND (EVM)
+  - Update logo for Viction
+  - Add xcDED for Moonbeam
+  - Update ChainAsset
+- Automatically enable network when connecting via Substrate provider (#2899)
+
+Bugs fixed:
+- Fixed bug show minimum active stake (#2889)
+- Fixed bug Error page when sign message with WalletConnect (#2915)
+- Fixed bug displaying 'connection existed' when connecting WalletConnect (#2903)
+
+## 1.1.54
+Build date: Apl 09, 2024.
+
+Bugs fixed:
+- Fix issue in transaction screen (#2891)
+- Fix error in setting screen
+
+## 1.1.53
+Build date: Apl 08, 2024.
+
+Bugs fixed:
+- Fixed bug fetching balance with Enjin Relay Chain (#2885)
+- Fixed bug Wallet Connect not show connection popup (#2407)
+- Fixed bug Some required methods are missing when connecting Dapp to Subwallet via WalletConnect (#2860)
+
+## 1.1.52
+Build date: Apl 05, 2024.
+
+Features & Update:
+- Update balance service (#2416)
+- Improve UX UI for earning feature (#2827)
+- Update message when navigate user to the Astar portal to stake (#2847)
+- Update chain-list (#2851)
+  - Add support for X Layer mainnet, X Layer testnet
+  - Add support for ASTR token on Astar zkEVM
+  - Add support DOTA token on Polkadot Asset Hub
+  - Add support BNCS for Moonbeam
+
+Bugs fixed:
+- Fixed bug show earnings screen although back to home (#2742)
+
+
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
+## 1.1.50
+Build date: Mar 28, 2024.
+
+Features & Update:
+Nội dung release:
+- Integrate asset online (#2790)
+- Add Swap button (#2784)
+- Update chain-list (#2805)
+  - Add support for RMRK token for Astar EVM
+  - Add support for Creditcoin cc3 testnet
+
+Bugs fixed:
+- Fixed bug Do not show balance in case standing on History list to search token (#2791)
+
+## 1.1.49
+Build date: Mar 25, 2024.
+
+Features & Update:
+- Improve UI for Mission Pools (#2796)
+
+Bugs fixed:
+- Check transfer logic that can potentially affect ED (#2798)
+- Handle case slow getting max transferable cause wrong amount when submit max transfer (#2793)
+- Fixed bug when performing XCM transfer on Kusama (#2814)
+- Fixed bug Error parsing token balance for frozen asset on Asset Hub (#2799)
+
+## 1.1.48
+Build date: Mar 25, 2024.
+
+Bugs fixed:
+- Fix send fund error (#2795)
+
+## 1.1.47
+Build date: Mar 23, 2024.
+
+Features & Update:
+- Add support XCM for PINK token (#2786)
+  - Default enable DOT, DED, PINK on Asset Hub and xcPINK on Moonbeam
+
+## 1.1.46
+Build date: Mar 22, 2024.
+
+Features & Update:
+- Merge dApp request from both of interface into one interface (#2722)
+- Support connect Ledger device for Asset Hub (#2785)
+- Support Mission Pool for Extension (#2781)
+
+## 1.1.45
+Build date: Mar 20, 2024.
+
+Features & Update:
+- Update explorer URL for Avail testnet (#2767)
+- Update chain-list 0.2.45 (#2771)
+  - Update symbol, Network name for OriginTrail and Tomochain
+  - Update symbol on history details screen when changing
+  - Update provider, price-id and block explorer for Polimec
+  - Support in-app staking for Polimec
+  - Update Astar and Astar EVM chain logo
+  - Update ASTR token logo on all chain
+  - Add support for DED token
+
+Bugs fixed:
+- Fixed bug connect a Ledger device (#2608)
+
+## 1.1.44
+Build date: Mar 16, 2024.
+
+Features & Update:
+- Update Subscan service (#2731)
+- Add subject email in case select contact support feature (#2729)
+- Update email support (#2759)
+- Update Chain-list (#2694)
+  - Update chain data and Chain assets
+  - Support CreditCoin EVM testnet
+  - Support Astar zkEVM
+  - Update block explorer for Continuum
+  - Support transferring Unique NFTs
+  - Discontinued support transfer local token for Crab Parachain and Pangolin
+
+Bugs fixed:
+- Fixed bug error page on NFT details screen (#2748)
+
+## 1.1.43
+Build date: Mar 11, 2024.
+
+Bugs fixed:
+- Fixed bug not updating blocked XCM channels
+
+## 1.1.42
+Build date: Mar 08, 2024.
+
+Features & Update:
+- Update transaction result screen (#2659)
+- Update Manta staking APY formula (#2513)
+- Update chain-list (#2698)
+  - Inactive Kapex
+  - Add support for more tokens on HydraDX
+  - Add support for DENTNet
+  - Add support for Phyken network (testnet)
+  - Add support for Tangle Network
+  - Support transfer for NUUM
+
+Bugs fixed:
+- Disable auto enable wallet while request "eth_account"
+
+## 1.1.41
+Build date: Mar 02, 2024.
+
+Features & Update:
+- Restructure Settings screen (#2647)
+- Support Send crash log feature (#2649)
+- Optimize Earning Performance Round 2 (Caching most of data) (#2636)
+- Enable price-id online (#2664)
+- Improve EVM network fee (#2670)
+- Optimize performance by separate chain status and chain state (#2550)
+- Update chain-list
+   - Support NFT and Send token on Continuum network (#2585)
+   - Update priceId for Cypress on Moonbeam
+   - Support Rococo asset hub (#2604)
+   - Support X1 OKX Testnet
+   - Support Liberland Testnet and Liberland Mainnet
+   - Disable support staking for Ternoa Testnet.
+
+Bugs fixed:
+- Fixed bug showing withdrawal time on un-staking (#2581)
+- Fixed bug sending AVL on Avail Goldberg testnet (#2538)
+- Re-check case update data after performing actions (unstake, cancel unstake, withdraw) (#2682)
+
+## 1.1.40
+Build date: Feb 29, 2024.
+
+Features & Update:
+- Update pool default for VARA (#2678)
+
+## 1.1.39
+Build date: Feb 24, 2024.
+
+Features & Update:
+- Adjust showing/validating address on Send fund (#2628)
+- Update IPFS domain for NFTs from Unique network (#2609)
+- Update filtering out blocked validators (#2632)
+- Re-check case send token on Acala-EVM with Ledger account (#2625)
+- Turn off popup remind claim rewards for dApp staking (#2622)
+- Update tab bar (#2631)
+- Update validation logic for Chainlist (#2617)
+
+Bugs fixed:
+- Fixed bug related to earning feature (#2598)
+- Fixed bug showing positions (#2612)
+- Fixed bug show incorrect token in case the wallet has only 1 account type (#2616)
+
+## 1.1.38
+Build date: Feb 17, 2024.
+
+Features & Update:
+- Update estimating EVM transaction fee for Energy Web Chain (#2606)
+- Update chain-list (#2570)
+  - Add support more tokens: PINK (Statemint), xcPINK (Moonbeam), INTR (HydraDX)
+  - Update explorer for Subspace Gemini 3g & 3h
+  - Update price_id for Energy Web X
+  - Update hasValue info for some tokens
+
+Bugs fixed:
+- Fixed some UI bug (#2509)
+
+## 1.1.37
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Add popup Introducing Earning feature (#2599)
+
+Bugs fixed:
+- Fixed bug Unable to connect with eip6763 dApp (#2590)
+
+
+## 1.1.36
+Build date: Feb 07, 2024.
+
+Features & Update:
+- Update staking APY formula for relaychain (#2563)
+- Unique Network and Quartz NFTs support (#2580)
+- Migrate to earning feature (#2361, #2558, #2561)
+- Support vManta liquid staking on Bifrost (#2569)
+- Update position and options actions for Astar Staking DApp (#2594)
+- Update chain-list (#2586)
+- Remove explorer on Genshiro network
+- Update chain subspace gemini 3h
+- Check fee estimation on EVM networks (#2336)
+
+## 1.1.35
+Build date: Feb 02, 2024.
+
+Features & Update:
+- Set pool default for Aleph Zero (#2578)
+- Update disabled XCM channels online (#2463)
+
+## 1.1.34
+Build date: Feb 01, 2024.
+
+Features & Update:
+- Update unstaking request info for KREST, AMPE (#2544)
+- Add popup want to user claim reward when Astar update dApp staking v3 (#2545)
+- Change "Claim rewards" to "Check rewards" for dApp staking (#2497)
+- Update RPC online (#2463)
+
+Bugs fixed:
+- Fixed bug Show incorrect tokens on the balance screen in case an account with the type 'ed25519' is imported (#2518)
+- Fixed bug not showing GENS token from Genshiro (#2540)
+
+
+## 1.1.33
+Build date: Jan 23, 2024.
+
+Features & Update:
+- Add "time-out" status for transaction history (#2387)
+- Auto import EVM network with source from online resources (#2472)
+- Add support in-app staking for KREST (#2492)
+- Update chain-list (#2508)
+- Support XCM transfer between Manta Atlantic and other networks
+  - DOT (Polkadot) <-> DOT (Manta Atlantic)
+  - DOT (Manta Atlantic) <-> DOT (Moonbeam)
+  - MANTA (Manta Atlantic) <-> MANTA (Moonbeam)
+  - Update price for MANTA
+- Update Jur default RPC
+
+Bugs fixed:
+- Improve banner campaign in app (#2038)
+
+
+## 1.1.32
+Build date: Jan 15, 2024.
+
+Features & Update:
+- Update chain-list (#2489)
+  - Integrate Manta Atlantic Network
+  - Add new RPCs for Jur Network
+  - Support transferring for BNCS
+  - Add support for in-app Manta staking
+- Support "Request a feature" feature (#2467)
+
+Bugs fixed:
+- Fixed bug Do not show banner on Crowdloans tab (#2487)
+
+## 1.1.31
+Build date: Jan 11, 2024.
+
+Features & Update:
+- Update chain-list (#2465)
+  - Add Manta Pacific chain
+  - Update endpoints for some chain (Parallel, Polkadex, Acala, Moonbeam, Bifrost Polkadot, Interlay)
+  - Update logo for Energy Web X and Energy Web X Rococo
+  - Add Polkadex Parachain
+
+Bugs fixed:
+- Fixed bug Do not detect phishing page in case have no account in wallet (#2390)
+- Fixed bug Show custom network on the token list when nominate (#2452)
+
+## 1.1.30
+Build date: Jan 05, 2024.
+
+Features & Update:
+- Update chain-list (#2447)
+  - Add new provider for Parallel
+  - Add support new network: InvArch
+  - Add support new token: cDOT-7/14 (Parallel)
+- Handle fallback for online content (#2391)
+
+Bugs fixed:
+- Hot fix bug estimating EVM transaction fee (#2412)
+- Fixed bug Do not display the account in the account details tab in case the entire account balance is locked (#2429)
+
+## 1.1.29
+Build date: Dec 29, 2023.
+
+Features & Update:
+- Add T&C (#2330)
+- Add reload balance feature (#2381)
+- Update token details screen (#2340)
+- Remove some RPC on Polkadot and Kusama (#2425)
+
+Bugs fixed:
+- Fixed some UI bug (#2203)
+- Fixed bug can not connect to WalletConnect (#2413)
+
+## 1.1.28
+Build date: Dec 25, 2023.
+
+Features & Update:
+- Add support Polimec (#2404)
+- Allow access extension from iframe (#2406)
+
+## 1.1.27
+Build date: Dec 20, 2023.
+
+Features & Update:
+- Sort the Current account on top in the Account selector (#2318)
+- Update API staking for Astar (#2370)
+- Add Azero Domains is default pool (#2385)
+- Update chain-list (#2368)
+  - Some update for 3DPass (addd new RPC, update logo, update explorer, update price)
+    - Add support Energy Web X
+
+Bugs fixed:
+- Fixed bug dApp detection when connect wallet (#1936)
+- Fixed UI bug show balance in the Token details screen (#2201)
+- Fixed bug show EVM transaction history (#2362)
+- Fixed bug show transfer NFT history details (#2373)
+- Fixed bug phishing detection (#2372)
+
+## 1.1.26
+Build date: Dec 16, 2023.
+
+Features & Update:
+- Support some XCM transfer (#2353)
+- Update chain-list (#2329)
+  - Update USDC on Polygon network
+  - Support Energy Web X testate
+- Update rdns for EIP-6963 (#2328)
+- Show Copy and QR code when hover account (#2114)
+- Update precise start/end time of an era (#2313)
+- Add support for AZERO fiat onramp on Banxa (#2319)
+- Update top nominators getting rewards (#2324)
+
+Bugs fixed:
+- Fixed bug show incorrect balance on All account mode when switch account (#2323)
+- Fixed bug do not navigate when click on hyperlink in attach account (#2316)
+
+## 1.1.25
+Build date: Dec 7, 2023.
+
+Features & Update:
+- Support EIP-6963 (Multi eth provider) (#2021)
+- Update showing estimated withdrawal time on staking (#2304)
+- Update APY for Vara network (#2301)
+- Update chain list (#2302)
+  - Integrate EWX Staging Parachain (testnet)
+  - Integrate EWC EVM chain
+  - Update Avail testate
+
+
+Bugs fixed:
+- Fixed bug display dApp/pool/validator/collator name (#2130)
+
+## 1.1.24
+Build date: Dec 1, 2023.
+
+Features & Update:
+- Support show balance detail by account on All accounts mode (#1997)
+- Support staking for Goldberg (#2181)
+- Add block explorer for Creditcoin (#2287)
+- Update new way to fetch transaction history (#2223)
+- Update the default logo (#1791)
+- Update RPC for some chains (#2293)
+- The default pool setting for Vara is SubWallet Official (#2291)
+- Improve validator/pool selection UX (#2246)
+
+Bugs fixed:
+- Fixed bug error submitting transaction on Astar EVM (#2255)
+- Fixed bug show staking earning status on Creditcoin (#2277)
+- Fixed bug showing staking rewards on Moonbeam (#2213)
+
+
+## 1.1.23
+Build date: Nov 24, 2023.
+
+Features & Update:
+- Support staking AZERO with Ledger (#2219)
+- Update chain-list (#2198)
+  - Add logo for custom network GOS
+  - Add price id for KREST
+- Update XCM for Astar network (#2196)
+
+Bugs fixed:
+- Fixed bug decode dApp address (#2139)
+- Fixed bug automatically activate tokens based on account balance (#1500)
+- Fixed bug missing crowdloan (#2199)
+- Fixed bug browser waste time when load extension (#2207) and add the loading effect when open app (#2228)
+
+## 1.1.22
+Build date: Nov 15, 2023.
+
+Features & Update:
+- Update chain-list (#2178)
+  - Add support for Enjin Relaychain and Enjin Matrixchain
+  - Add support for Vara testnet
+  - Add support for Goldberg testnet
+- Update WalletConnect namespace (#2119)
+
+Bugs fixed:
+- Fixed bug chainStaking Metadata on Kusama (#2162)
+- Fixed bug Can’t get balance of the ENJ token (#2154)
+
+## 1.1.21
+Build date: Nov 08, 2023.
+
+Features & Update:
+- Support nomination pool for Vara network (#2152)
+- Update chain list (#2145)
+  - Add support Subspace Gemini 3g
+  - Update logo and price of the PHA token
+
+Bugs fixed:
+- Fixed bug undefined is not an object when perform transaction (#2146)
+- Fixed bug show error page when opening the app with an invalid URL (#2072)
+- Fixed bug still show token of the inactive network (#2158)
+
+## 1.1.20
+Build date: Oct 26, 2023.
+
+Features & Update:
+- Update online token list in fiat-onramp feature (#2031)
+- Sorting the token list to buy (#2025)
+- Add “Token Name” to the token screens (#1946)
+- Hide the AutoSelect validator/collator/dApp button if this method is not supported (#2020)
+- Update chain list (#2105)
+  - Update RPC for some chains
+  - Update USDC token and add USDC.e token on Arbitrum One
+  - Add support XCM transfer DOT tokens:
+  - Polkadot —> Parallel
+  - Polkadot —> Interlay
+  - Polkadot —> Bifrost Polkadot
+
+Bugs fixed:
+- Fixed UI bug when scrolling on the Token detail screen (#2104)
+- Fixed bug XCM transfer USDT (Parallel —> Statemint) (#2091)
+- Fixed bug decoding dApp staking when unstake (#2129)
+- Fixed bug in case save file when create new account, export account (#2100)
+
+## 1.1.19
+Build date: Oct 26, 2023.
+
+Features & Update:
+- Update chainlist (#2033)
+  - Review and update OnFinality RPC
+  - Remove Bobabeam network
+  - Add support ZetaChain EVM
+  - Add support Xcavate testnet
+
+Bugs fixed:
+- Fixed bug estimating fee on calculating max transferable (#2079)
+- Fixed bug Get Ledger account addresses on incompatible networks (#2075)
+- Fixed bug transfer on Rococo (#2042)
+
+## 1.1.18
+Build date: Oct 20, 2023.
+
+Features & Update:
+- Support notification in browser and banner in app (#2000)
+- Update crowdloan data (#2035)
+- Update message on the Create on account screen (#2039)
+
+Bugs fixed:
+- Fixed bug IPFS in Firefox browser (#1995)
+- Fixed bug Do not show Acala, Karura NFT (#2029)
+- Fixed bug Show apply master password when access via URL (2040)
+
+
+## 1.1.17
+Build date: Oct 17, 2023.
+
+Features & Update:
+The default Vara network is enabled (#2019)
+- Update coinable ID for product environment (#2017)
+- Replace the user feedback form when uninstalling extension (#2010)
+- Update chain list (#1998)
+  - Update RPC for Pioneer network
+  - Add support for Vara NFTs
+- Updated list of tokens supported by Transak (#2026)
+
+## 1.1.16
+Build date: Oct 07, 2023.
+
+Features & Update:
+- Add support for the sub0 2023 Biodiversity NFT Collection (#1982)
+
+Bugs fixed:
+- Fixed bug when connect to dApp via WallectConnect (#1981)
+
+
+## 1.1.15
+Build date: Sep 30, 2023.
+
+Features & Update:
+- Update token’s logo retrieval mechanism (#1947)
+- Support Ledger for more chains (#1942)
+  - Karura
+  - xx network
+  - Polymesh
+  - Edgeware
+- Update chain list (#1941)
+  - Add XCM support for more tokens:
+    - KSM: Kusma —> Amplitude
+    - USDC: Polkadot Asset Hub <—> HydraDX
+  - Integrated Neuroguns NFT Collection on the Astar network
+  - Integrated new networks: Bittensor, Dancebox
+  - Add staking support for Vara network
+  - Update price for some tokens: PANX, VARA
+  - Update RPC for Imbue network
+
+Bugs fixed:
+- Fixed bug Do not scroll the network list in case of connecting dApp via WalletConnect (#1926)
+- Fixed bug Navigate incorrect in case Create one when connect dApp (#1930)
+
+## 1.1.14
+Build date: Sep 26, 2023.
+
+Features & Update:
+- Improve network and asset subscription (#1939)
+- Update transfer function for Pendulum (#1950)
+
+## 1.1.13
+Build date: Sep 21, 2023.
+
+Features & Update:
+- Update empty list screens (#1857)
+- Allow paste Amount to send (#1872)
+- Add injected placeholder to avoid extension cannot load in the first time (#1906)
+
+Bugs fixed:
+- Fixed bug Do not show status of the crowd loans item (Acala) (#1860)
+- Fixed bug Do not auto-lock after imported multiple account (#1910)
+- Fixed bug Do not show selected account (#1919)
+
+
 ## 1.1.12
 Build date: Sep 15, 2023.
 

@@ -142,10 +142,6 @@ export const UnlockModal = styled(Component)<Props>(({ theme: { token } }: Props
   return ({
     '.__action-item + .__action-item': {
       marginTop: token.marginXS
-    },
-
-    '.ant-sw-modal-body': {
-      paddingBottom: 0
     }
   });
 });

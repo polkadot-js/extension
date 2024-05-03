@@ -3,21 +3,19 @@
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-koni-ui/components';
-import SeedPhraseModal from '@subwallet/extension-koni-ui/components/Modal/Account/SeedPhraseModal';
-import WCNetworkSupported from '@subwallet/extension-koni-ui/components/WalletConnect/Network/WCNetworkSupported';
-import { DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants';
-import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-koni-ui/hooks';
+import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
+import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
+import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertKeyTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   request: WalletConnectSessionRequest
@@ -36,25 +34,36 @@ async function handleCancel ({ id }: WalletConnectSessionRequest) {
   });
 }
 
-const createMissingAccountModalId = 'createMissingAccountModalId';
+const timeOutWCMissingKey = 'unsuccessful_connect_wc_modal';
+const wcMissingModalId = 'WALLET_CONNECT_CONFIRM_MODAL';
 
 function Component ({ className, request }: Props) {
   const { params } = request.request;
-
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const notification = useNotification();
-  const { activeModal } = useContext(ModalContext);
-  const [, setMissingAccountTypes] = useLocalStorage(SELECTED_ACCOUNT_TYPE, DEFAULT_ACCOUNT_TYPES);
+  const setSelectedAccountTypes = useSetSelectedAccountTypes(true);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
     [WALLET_CONNECT_POLKADOT_NAMESPACE]: t('Substrate networks')
   }), [t]);
+  const { inactiveModal } = useContext(ModalContext);
+
+  useEffect(() => {
+    const timeOut = JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
+
+    inactiveModal(wcMissingModalId);
+    clearTimeout(timeOut[timeOutWCMissingKey]);
+    delete timeOut[timeOutWCMissingKey];
+    localStorage.setItem(TIME_OUT_RECORD, JSON.stringify(timeOut));
+  }, [inactiveModal]);
 
   const { isExpired,
     isUnSupportCase,
     missingType,
     namespaceAccounts,
+    noNetwork,
     onApplyAccounts,
     onCancelSelectAccounts,
     onSelectAccount,
@@ -79,9 +88,10 @@ function Component ({ className, request }: Props) {
   const onCancel = useCallback(() => {
     setLoading(true);
     handleCancel(request).finally(() => {
+      navigate('/wallet-connect/list');
       setLoading(false);
     });
-  }, [request]);
+  }, [navigate, request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
@@ -96,14 +106,16 @@ function Component ({ className, request }: Props) {
         });
       })
       .finally(() => {
+        navigate('/wallet-connect/list');
         setLoading(false);
       });
-  }, [namespaceAccounts, notification, request]);
+  }, [namespaceAccounts, navigate, notification, request]);
 
   const onAddAccount = useCallback(() => {
-    setMissingAccountTypes(convertKeyTypes(missingType));
-    activeModal(createMissingAccountModalId);
-  }, [setMissingAccountTypes, missingType, activeModal]);
+    setSelectedAccountTypes(convertKeyTypes(missingType));
+    setLoading(true);
+    navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
+  }, [setSelectedAccountTypes, missingType, navigate]);
 
   const onApplyModal = useCallback((namespace: string) => {
     return () => {
@@ -117,7 +129,7 @@ function Component ({ className, request }: Props) {
     };
   }, [onCancelSelectAccounts]);
 
-  const isSupportCase = !isUnSupportCase && !isExpired;
+  const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   return (
     <>
@@ -139,7 +151,18 @@ function Component ({ className, request }: Props) {
           )
         }
         {
-          !isUnSupportCase && isExpired && (
+          noNetwork && (
+            (
+              <AlertBox
+                description={t('We are unable to detect any network from the dApp through WalletConnect')}
+                title={t('Network undetected')}
+                type='warning'
+              />
+            )
+          )
+        }
+        {
+          !isUnSupportCase && !noNetwork && isExpired && (
             <>
               <AlertBox
                 description={t('Connection expired. Please create a new connection from dApp')}
@@ -281,10 +304,6 @@ function Component ({ className, request }: Props) {
               </>
             )
         }
-
-        <SeedPhraseModal
-          modalId={createMissingAccountModalId}
-        />
       </div>
     </>
   );

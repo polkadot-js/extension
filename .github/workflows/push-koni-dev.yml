@@ -4,10 +4,12 @@ on:
     branches:
       - koni-dev
       - upgrade-ui
+      - subwallet-dev
   push:
     branches:
       - koni-dev
       - upgrade-ui
+      - subwallet-dev
 
 jobs:
   master:
@@ -50,6 +52,7 @@ jobs:
         PR_NUMBER: ${{ github.event.number }}
         TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
         CURRENT_BRANCH: ${{ github.event.pull_request.head.ref || github.ref }}
+        BRANCH_NAME: ${{ github.ref_name }}
       run: |
         yarn install --immutable | grep -v 'YN0013'
         yarn build:koni-dev

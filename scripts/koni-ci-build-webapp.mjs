@@ -39,7 +39,7 @@ function npmGetVersion() {
 
 const prNumber = process.env.PR_NUMBER || ''
 const branchName = prNumber ? `${process.env.TARGET_BRANCH}-pr-${prNumber}` : (process.env.CURRENT_BRANCH || 'webapp').replace('refs/heads/', '');
-const refName = process.env.REF_NAME
+const refName = process.env.BRANCH_NAME || 'koni-dev';
 const commitMessage = process.env.COMMIT_MESSAGE
 const buildDateString = new Date().toISOString().slice(0, 19).replaceAll(':', '-')
 

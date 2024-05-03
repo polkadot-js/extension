@@ -1,22 +1,29 @@
-    1860	Nam Phạm                      	[Issue 1821] update nft logic for azero domain
-    1600	AnhMTV                        	Release version 1.1.12
-    1274	S2kael                        	[Issue-1896] Update transfer for acala evm
+    2484	AnhMTV                        	Release version 1.1.61
+    2346	Nam Phạm                      	[Issue 2993] fix: use online cache
+    2022	S2kael                        	[Issue 2993] Update chain list and handle case chain not have providers
+     800	lw-cdm                        	Set pool default value for Avail Turing
      465	Jaco                          	0.42.5 (#969)
-     285	lw-cdm                        	[Issue-1009] Fix issue causes history detail modal sometime displays incorrectly
+     320	nguyentiendung                	[Issue-2680] Update content for Earning Info of Liquid Staking
      185	quangdo                       	
+     115	bluezdot                      	[Issue-2963] enable online data
+     105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      98	lw-cdm                        	
+     101	lw-cdm                        	
+      88	Automation Bot                	[CI Skip] Auto increase webapp build number
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      69	dominhquang                   	Fix bug UI for Staking feature
-      55	leewong                       	#118: update balance logic for Kintsugi testnet
+      81	leewong                       	Swap - Change idle time to 300s
+      69	Thiendekaco                   	[Issue 2867] [fix] [Currency] Extension - Handle logic flow when update version
+      63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
+      48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
+       5	anhnhu                        	[issue-2231]: add condition branch_name webapp-dev auto increase run scripts change build number
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
@@ -30,6 +37,7 @@
        2	Remon Nashid                  	Prevent unauthorized apps from abusing pub(authorize.tab) request (#686)
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
+       2	Yash Mittal                   	Address comment
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
        1	Amit Chauhan                  	Fixed toast flicker effect when multiple show toast method called
        1	Andrei Eres                   	Add extension prefix (#891)

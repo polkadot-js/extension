@@ -11,7 +11,7 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   phosphorIcon?: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<SVGSVGElement>>,
   emptyTitle?: string,
-  emptyMessage?: string | React.ReactNode,
+  emptyMessage?: string,
   buttonProps?: ButtonProps;
 }
 
@@ -51,7 +51,6 @@ const EmptyList = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     overflow: 'hidden',
     marginTop: 48,
-    marginBottom: 48,
     display: 'flex',
     flexWrap: 'wrap',
     gap: token.padding,

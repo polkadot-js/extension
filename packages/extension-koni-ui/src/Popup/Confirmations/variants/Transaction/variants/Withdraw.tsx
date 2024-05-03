@@ -1,11 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestStakeWithdrawal } from '@subwallet/extension-base/background/KoniTypes';
-import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
+import { RequestYieldWithdrawal } from '@subwallet/extension-base/types';
+import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import CommonTransactionInfo from '@subwallet/extension-koni-ui/components/Confirmation/CommonTransactionInfo';
+import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
+import { useGetChainAssetInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import useGetNativeTokenBasicInfo from '@subwallet/extension-koni-ui/hooks/common/useGetNativeTokenBasicInfo';
 import CN from 'classnames';
-import React from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
@@ -14,14 +18,24 @@ import { BaseTransactionConfirmationProps } from './Base';
 type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, transaction } = props;
-  const data = transaction.data as RequestStakeWithdrawal;
-
+  const { transaction } = props;
   const { t } = useTranslation();
-  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.chain);
+
+  const data = transaction.data as RequestYieldWithdrawal;
+
+  const { poolInfoMap } = useSelector((state) => state.earning);
+
+  const poolInfo = useMemo(() => poolInfoMap[data.slug], [poolInfoMap, data.slug]);
+
+  const inputAsset = useGetChainAssetInfo(poolInfo.metadata.inputAsset);
+
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(data.unstakingInfo.chain);
+
+  const amountDecimals = inputAsset?.decimals || 0;
+  const amountSymbol = inputAsset?.symbol || '';
 
   return (
-    <div className={CN(className)}>
+    <>
       <CommonTransactionInfo
         address={transaction.address}
         network={transaction.chain}
@@ -31,9 +45,9 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper
       >
         <MetaInfo.Number
-          decimals={decimals}
+          decimals={amountDecimals}
           label={t('Amount')}
-          suffix={symbol}
+          suffix={amountSymbol}
           value={data.unstakingInfo.claimable}
         />
 
@@ -44,11 +58,25 @@ const Component: React.FC<Props> = (props: Props) => {
           value={transaction.estimateFee?.value || 0}
         />
       </MetaInfo>
-    </div>
+    </>
   );
 };
 
-const WithdrawTransactionConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
+const Wrapper = (props: Props) => {
+  const dataContext = useContext(DataContext);
+
+  return (
+    <PageWrapper
+      className={CN(props.className)}
+      hideLoading={true}
+      resolve={dataContext.awaitStores(['earning'])}
+    >
+      <Component {...props} />
+    </PageWrapper>
+  );
+};
+
+const WithdrawTransactionConfirmation = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
   return {};
 });
 

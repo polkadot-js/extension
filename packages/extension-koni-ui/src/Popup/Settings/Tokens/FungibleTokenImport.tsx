@@ -3,21 +3,18 @@
 
 import { _AssetType, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getTokenTypesSupportedByChain, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
-import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-base/utils';
-import { AddressInput, GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
+import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
+import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-koni-ui/messaging';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Col, Field, Form, Icon, Image, Input, NetworkItem, Row, SettingItem } from '@subwallet/react-ui';
-import { FormInstance } from '@subwallet/react-ui/es/form/hooks/useForm';
+import { FormCallbacks, FormRule, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { convertFieldToError, convertFieldToObject, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { Col, Field, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
-import { CheckCircle, Coin, PlusCircle } from 'phosphor-react';
-import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { PlusCircle } from 'phosphor-react';
+import { FieldData } from 'rc-field-form/lib/interface';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -25,15 +22,13 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 type Props = ThemeProps
 
 interface TokenImportFormType {
-  contractAddress: string,
-  chain: string,
-  type: _AssetType,
-  priceId: string,
-}
-
-interface ValidationInfo {
-  status: ValidateStatus,
-  message?: string
+  contractAddress: string;
+  chain: string;
+  type: _AssetType;
+  priceId: string;
+  tokenName: string;
+  decimals: number;
+  symbol: string;
 }
 
 interface TokenTypeOption {
@@ -59,56 +54,154 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
   return result;
 }
 
-const renderEmpty = () => <GeneralEmptyList />;
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { goBack } = useDefaultNavigate();
   const dataContext = useContext(DataContext);
-  const logosMaps = useSelector((state: RootState) => state.settings.logoMaps.chainLogoMap);
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
 
-  const formRef = useRef<FormInstance<TokenImportFormType>>(null);
   const chainInfoMap = useGetContractSupportedChains();
-  const [selectedChain, setSelectedChain] = useState<string>('');
-  const [selectedTokenType, setSelectedTokenType] = useState<string>('');
-  const [contractValidation, setContractValidation] = useState<ValidationInfo>({ status: '' });
+
+  const [form] = Form.useForm<TokenImportFormType>();
+
+  const formDefault = useMemo((): TokenImportFormType => ({
+    contractAddress: '',
+    chain: '',
+    type: '' as _AssetType,
+    priceId: '',
+    tokenName: '',
+    decimals: -1,
+    symbol: ''
+  }), []);
+
+  const chains = useMemo(() => Object.values(chainInfoMap), [chainInfoMap]);
+
   const [loading, setLoading] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(true);
+  const [fieldDisabled, setFieldDisabled] = useState(true);
+
+  const selectedChain = Form.useWatch('chain', form);
+  const symbol = Form.useWatch('symbol', form);
+  const decimals = Form.useWatch('decimals', form);
+  const tokenName = Form.useWatch('tokenName', form);
+  const selectedTokenType = Form.useWatch('type', form);
 
   const chainChecker = useChainChecker();
-  const [name, setName] = useState('');
-  const [symbol, setSymbol] = useState('');
-  const [decimals, setDecimals] = useState(-1);
   const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
   const tokenTypeOptions = useMemo(() => {
     return getTokenTypeSupported(chainInfoMap[selectedChain]);
   }, [chainInfoMap, selectedChain]);
 
-  const onSubmit = useCallback(() => {
-    const formValues = formRef.current?.getFieldsValue() as TokenImportFormType;
-    const reformattedAddress = reformatAddress(formValues.contractAddress, chainNetworkPrefix);
+  const contractRules = useMemo((): FormRule[] => {
+    return [
+      ({ getFieldValue }) => ({
+        validator: (_, contractAddress: string) => {
+          return new Promise<void>((resolve, reject) => {
+            const selectedTokenType = getFieldValue('type') as _AssetType;
+            const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType) && isEthereumAddress(contractAddress);
+            const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
+            const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
+
+            if (isValidEvmContract || isValidWasmContract) {
+              setLoading(true);
+              validateCustomToken({
+                contractAddress: reformattedAddress,
+                originChain: selectedChain,
+                type: selectedTokenType
+              })
+                .then((validationResult) => {
+                  setLoading(false);
+
+                  if (validationResult.isExist) {
+                    reject(new Error(t('Existed token')));
+                  }
+
+                  if (validationResult.contractError) {
+                    reject(new Error(t('Error validating this token')));
+                  }
+
+                  if (!validationResult.isExist && !validationResult.contractError) {
+                    form.setFieldValue('tokenName', validationResult.name);
+                    form.setFieldsValue({
+                      tokenName: validationResult.name,
+                      decimals: validationResult.decimals,
+                      symbol: validationResult.symbol
+                    });
+                    resolve();
+                  }
+                })
+                .catch(() => {
+                  setLoading(false);
+                  reject(new Error(t('Error validating this token')));
+                });
+            } else {
+              reject(t('Invalid contract address'));
+            }
+          });
+        }
+      })
+    ];
+  }, [chainNetworkPrefix, form, selectedChain, t]);
+
+  const onFieldChange: FormCallbacks<TokenImportFormType>['onFieldsChange'] = useCallback((changedFields: FieldData[], allFields: FieldData[]) => {
+    const { empty, error } = simpleCheckForm(allFields, ['--priceId', '--tokenName']);
+
+    const changes = convertFieldToObject<TokenImportFormType>(changedFields);
+    const all = convertFieldToObject<TokenImportFormType>(allFields);
+    const allError = convertFieldToError<TokenImportFormType>(allFields);
+
+    const { chain, type } = changes;
+
+    const baseResetFields = ['tokenName', 'symbol', 'decimals', 'priceId'];
+
+    if (chain) {
+      const nftTypes = getTokenTypeSupported(chainInfoMap[chain]);
+
+      if (nftTypes.length === 1) {
+        form.setFieldValue('type', nftTypes[0].value);
+      } else {
+        form.resetFields(['type']);
+      }
+
+      form.resetFields(['contractAddress', ...baseResetFields]);
+    }
+
+    if (type) {
+      form.resetFields(['contractAddress', ...baseResetFields]);
+    }
+
+    if (allError.contractAddress.length > 0) {
+      form.resetFields([...baseResetFields]);
+    }
+
+    setFieldDisabled(!all.chain || !all.type || allError.contractAddress.length > 0);
+    setIsDisabled(empty || error);
+  }, [chainInfoMap, form]);
+
+  const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
+    const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
+
+    const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 
     upsertCustomToken({
-      originChain: formValues.chain,
+      originChain: chain,
       slug: '',
-      name,
+      name: tokenName || symbol,
       symbol,
       decimals,
-      priceId: formValues.priceId || null,
+      priceId: priceId || null,
       minAmount: null,
-      assetType: formValues.type,
+      assetType: type,
       metadata: _parseMetadataForSmartContractAsset(reformattedAddress),
       multiChainAsset: null,
       hasValue: _isChainTestNet(chainInfoMap[formValues.chain]),
       icon: 'default.png'
     })
       .then((result) => {
-        setLoading(false);
-
         if (result) {
           showNotification({
             message: t('Imported token successfully')
@@ -119,189 +212,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             message: t('An error occurred, please try again')
           });
         }
-      }).catch(() => {
-        setLoading(false);
+      })
+      .catch(() => {
         showNotification({
           message: t('An error occurred, please try again')
         });
+      })
+      .finally(() => {
+        setLoading(false);
       });
-  }, [chainNetworkPrefix, name, symbol, decimals, chainInfoMap, showNotification, t, goBack]);
-
-  const isSubmitDisabled = useCallback(() => {
-    return contractValidation.status === '' || contractValidation.status === 'error';
-  }, [contractValidation.status]);
-
-  const contractAddressValidator = useCallback((rule: RuleObject, contractAddress: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType as _AssetType) && isEthereumAddress(contractAddress);
-      const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType as _AssetType) && isValidSubstrateAddress(contractAddress);
-      const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
-
-      if (isValidEvmContract || isValidWasmContract) {
-        setLoading(true);
-        validateCustomToken({
-          contractAddress: reformattedAddress,
-          originChain: selectedChain,
-          type: selectedTokenType as _AssetType
-        })
-          .then((validationResult) => {
-            setLoading(false);
-
-            if (validationResult.isExist) {
-              setContractValidation({
-                status: 'error',
-                message: t('Existed token')
-              });
-              resolve();
-            }
-
-            if (validationResult.contractError) {
-              setContractValidation({
-                status: 'error',
-                message: t('Error validating this token')
-              });
-              resolve();
-            }
-
-            if (!validationResult.isExist && !validationResult.contractError) {
-              setContractValidation({
-                status: 'success'
-              });
-              setSymbol(validationResult.symbol);
-              setDecimals(validationResult.decimals);
-              setName(validationResult.name);
-              resolve();
-            }
-          })
-          .catch(() => {
-            setLoading(false);
-            setContractValidation({
-              status: 'error',
-              message: t('Error validating this token')
-            });
-            resolve();
-          });
-      } else {
-        setContractValidation({
-          status: 'error'
-        });
-        reject(t('Invalid contract address'));
-      }
-    });
-  }, [chainNetworkPrefix, selectedChain, selectedTokenType, t]);
-
-  const originChainLogo = useCallback(() => {
-    return (
-      <Image
-        height={token.fontSizeXL}
-        shape={'circle'}
-        src={logosMaps[selectedChain]}
-        width={token.fontSizeXL}
-      />
-    );
-  }, [logosMaps, selectedChain, token.fontSizeXL]);
-
-  const onChangeChain = useCallback((value: string) => {
-    formRef.current?.setFieldValue('chain', value);
-    const tokenTypes = getTokenTypeSupported(chainInfoMap[value]);
-
-    if (tokenTypes.length === 1) {
-      formRef.current?.setFieldValue('type', tokenTypes[0].value);
-      setSelectedTokenType(tokenTypes[0].value);
-    } else {
-      formRef.current?.resetFields(['type']);
-      setSelectedTokenType('');
-    }
-
-    formRef.current?.resetFields(['contractAddress']);
-    setSelectedChain(value);
-    setSymbol('');
-    setDecimals(-1);
-    setName('');
-    setContractValidation({ status: '' });
-  }, [chainInfoMap]);
-
-  const onChangeTokenType = useCallback((value: string) => {
-    if (selectedTokenType !== value) {
-      formRef.current?.resetFields(['contractAddress']);
-      setSymbol('');
-      setDecimals(-1);
-      setName('');
-    }
-
-    formRef.current?.setFieldValue('type', value as _AssetType);
-    setSelectedTokenType(value);
-  }, [selectedTokenType]);
-
-  const searchChain = useCallback((chainInfo: _ChainInfo, searchText: string) => {
-    const searchTextLowerCase = searchText.toLowerCase();
-
-    return (
-      chainInfo.name.toLowerCase().includes(searchTextLowerCase)
-    );
-  }, []);
-
-  const renderChainOption = useCallback((chainInfo: _ChainInfo, selected: boolean) => {
-    return (
-      <NetworkItem
-        name={chainInfo.name}
-        networkKey={chainInfo.slug}
-        networkMainLogoShape={'circle'}
-        networkMainLogoSize={28}
-        rightItem={selected && <Icon
-          customSize={'20px'}
-          iconColor={token.colorSuccess}
-          phosphorIcon={CheckCircle}
-          type='phosphor'
-          weight={'fill'}
-        />}
-      />
-    );
-  }, [token]);
-
-  const renderChainSelected = useCallback((chainInfo: _ChainInfo) => {
-    return (
-      <div className={'import_token__selected_option'}>{chainInfo.name}</div>
-    );
-  }, []);
-
-  const renderTokenTypeOption = useCallback((tokenTypeOption: TokenTypeOption, selected: boolean) => {
-    return (
-      <SettingItem
-        className='token-type-item'
-        leftItemIcon={(
-          <BackgroundIcon
-            backgroundColor='var(--token-type-icon-bg-color)'
-            iconColor='var(--token-type-icon-color)'
-            phosphorIcon={Coin}
-            size='sm'
-            weight='fill'
-          />
-        )}
-        name={tokenTypeOption.label}
-        rightItem={
-          selected &&
-            (
-              <Icon
-                iconColor='var(--token-selected-icon-color)'
-                phosphorIcon={CheckCircle}
-                size='sm'
-                weight='fill'
-              />
-            )
-        }
-      />
-    );
-  }, []);
-
-  const renderNftTypeSelected = useCallback((tokenType: TokenTypeOption) => {
-    return (
-      <div className={'token_import__selected_option'}>{tokenType.label}</div>
-    );
-  }, []);
+  }, [chainNetworkPrefix, chainInfoMap, showNotification, t, goBack]);
 
   const tokenDecimalsPrefix = useCallback(() => {
-    const contractAddress = formRef.current?.getFieldValue('contractAddress') as string;
+    const contractAddress = form.getFieldValue('contractAddress') as string;
 
     const theme = isEthereumAddress(contractAddress) ? 'ethereum' : 'polkadot';
 
@@ -313,7 +236,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         value={contractAddress}
       />
     );
-  }, [token.fontSizeXL]);
+  }, [token.fontSizeXL, form]);
 
   useEffect(() => {
     chainChecker(selectedChain);
@@ -328,7 +251,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         onBack={goBack}
         rightFooterButton={{
           block: true,
-          disabled: isSubmitDisabled(),
+          disabled: isDisabled,
           icon: (
             <Icon
               phosphorIcon={PlusCircle}
@@ -336,41 +259,29 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             />
           ),
           loading,
-          onClick: onSubmit,
+          onClick: form.submit,
           children: t('Import token')
         }}
         title={t<string>('Import token')}
       >
         <div className={'import_token__container'}>
           <Form
-            className={'form-space-sm'}
-            initialValues={{
-              contractAddress: '',
-              chain: '',
-              type: ''
-            }}
+            className='form-space-sm'
+            form={form}
+            initialValues={formDefault}
             name={'token-import'}
-            ref={formRef}
+            onFieldsChange={onFieldChange}
+            onFinish={onSubmit}
           >
             <Form.Item
               name={'chain'}
             >
-              <BaseSelectModal
+              <ChainSelector
                 className={className}
                 id='import-nft-select-chain'
-                itemKey={'slug'}
-                items={Object.values(chainInfoMap)}
+                items={chains}
                 label={t<string>('Network')}
-                onSelect={onChangeChain}
                 placeholder={t('Select network')}
-                prefix={selectedChain !== '' && originChainLogo()}
-                renderItem={renderChainOption}
-                renderSelected={renderChainSelected}
-                renderWhenEmpty={renderEmpty}
-                searchFunction={searchChain}
-                searchMinCharactersCount={2}
-                searchPlaceholder={t('Search network')}
-                selected={selectedChain}
                 title={t('Select network')}
               />
             </Form.Item>
@@ -378,41 +289,23 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             <Form.Item
               name={'type'}
             >
-              <BaseSelectModal
+              <TokenTypeSelector
                 className={className}
-                disabled={selectedChain === ''}
-                id='import-token-select-type'
-                itemKey={'value'}
+                disabled={!selectedChain}
                 items={tokenTypeOptions}
-                label={t<string>('Token type')}
-                onSelect={onChangeTokenType}
                 placeholder={t('Select token type')}
-                renderItem={renderTokenTypeOption}
-                renderSelected={renderNftTypeSelected}
-                selected={selectedTokenType}
                 title={t('Select token type')}
               />
             </Form.Item>
 
             <Form.Item
               name={'contractAddress'}
-              rules={[{ validator: contractAddressValidator }]}
+              rules={contractRules}
               statusHelpAsTooltip={true}
             >
               <AddressInput
-                {
-                  ...
-                  (
-                    (!!contractValidation.status && contractValidation.status !== 'validating')
-                      ? {
-                        statusHelp: contractValidation.message,
-                        status: contractValidation.status
-                      }
-                      : {}
-                  )
-                }
                 addressPrefix={chainNetworkPrefix}
-                disabled={selectedTokenType === ''}
+                disabled={!selectedTokenType}
                 label={t('Contract address')}
                 showScanner={true}
               />
@@ -423,30 +316,56 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               gutter={token.margin}
             >
               <Col span={12}>
-                <Field
-                  content={symbol}
-                  placeholder={t<string>('Symbol')}
-                  prefix={tokenDecimalsPrefix()}
-                  tooltip={t('Symbol')}
-                  tooltipPlacement={'topLeft'}
-                />
+                <Form.Item
+                  name={'symbol'}
+                >
+                  <Field
+                    content={symbol}
+                    placeholder={t<string>('Symbol')}
+                    prefix={tokenDecimalsPrefix()}
+                    tooltip={t('Symbol')}
+                    tooltipPlacement={'topLeft'}
+                  />
+                </Form.Item>
               </Col>
               <Col span={12}>
-                <Field
-                  content={decimals === -1 ? '' : decimals}
-                  placeholder={t<string>('Decimals')}
-                  tooltip={t('Decimals')}
-                  tooltipPlacement={'topLeft'}
-                />
+                <Form.Item
+                  name={'decimals'}
+                >
+                  <Field
+                    content={decimals === -1 ? '' : decimals}
+                    placeholder={t<string>('Decimals')}
+                    tooltip={t('Decimals')}
+                    tooltipPlacement={'topLeft'}
+                  />
+                </Form.Item>
               </Col>
             </Row>
+
+            <Form.Item
+              name={'tokenName'}
+              rules={[
+                {
+                  required: true,
+                  message: t('Token name is required')
+                }
+              ]}
+              statusHelpAsTooltip={true}
+            >
+              <Field
+                content={tokenName}
+                placeholder={t<string>('Token name')}
+                tooltip={t('Token name')}
+                tooltipPlacement={'topLeft'}
+              />
+            </Form.Item>
 
             <Form.Item
               name={'priceId'}
               statusHelpAsTooltip={true}
             >
               <Input
-                disabled={selectedTokenType === ''}
+                disabled={fieldDisabled}
                 placeholder={t('Price ID')}
                 tooltip={t('Price ID')}
               />
@@ -474,36 +393,10 @@ const FungibleTokenImport = styled(Component)<Props>(({ theme: { token } }: Prop
       padding: token.paddingSM
     },
 
-    '.token-symbol-decimals': {
-      marginBottom: token.margin
-    },
-
-    '.token-type-item': {
-      '--token-type-icon-bg-color': token['orange-6'],
-      '--token-type-icon-color': token.colorWhite,
-      '--token-selected-icon-color': token.colorSuccess,
-
-      '.ant-web3-block-right-item': {
-        marginRight: 0
-      }
-    },
-
     '.token_import__selected_option': {
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
       color: token.colorText
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        paddingTop: token.paddingSM,
-        flex: '0 0 auto',
-        marginBottom: token.marginXS
-      },
-
-      '.ant-form .ant-form-item:last-of-type': {
-        marginBottom: 0
-      }
     }
   });
 });

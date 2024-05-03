@@ -79,13 +79,21 @@ describe('test token transfer', () => {
   });
 
   it('xcm check', async () => {
-    const rawSrcChains = Object.values(AssetRefMap).map((value) => value.srcChain);
+    const rawChainsMap: Record<string, string> = {};
+
+    Object.values(AssetRefMap).forEach((value) => {
+      rawChainsMap[value.srcChain] = value.srcChain;
+    });
+    const rawSrcChains = Object.keys(rawChainsMap).map((value) => value);
     const errorList: _AssetRef[] = [];
 
     await Promise.all(rawSrcChains.map(async (srcChain) => {
       const chainInfo = ChainInfoMap[srcChain];
 
-      substrateApiMap[chainInfo.slug] = await substrateChainHandler.initApi(srcChain, chainInfo.providers[Object.keys(chainInfo.providers)[0]]);
+      const providerIndex = chainInfo.slug !== 'astar' ? 0 : 1;
+      const provider = chainInfo.providers[Object.keys(chainInfo.providers)[providerIndex]];
+
+      substrateApiMap[chainInfo.slug] = await substrateChainHandler.initApi(srcChain, provider);
     }));
 
     for (const assetRef of Object.values(AssetRefMap)) {
@@ -96,7 +104,7 @@ describe('test token transfer', () => {
       const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
 
       try {
-        await createXcmExtrinsic({
+        const extrinsic = await createXcmExtrinsic({
           destinationTokenInfo,
           originTokenInfo,
           sendingValue: '0',
@@ -104,6 +112,8 @@ describe('test token transfer', () => {
           chainInfoMap: ChainInfoMap,
           substrateApi
         });
+
+        console.log(assetRef, extrinsic.toHex());
       } catch (e) {
         console.log('error', e);
         errorList.push(assetRef);

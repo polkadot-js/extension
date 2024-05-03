@@ -8,12 +8,16 @@ import { getAmplitudeBondingExtrinsic, getAmplitudeClaimRewardExtrinsic, getAmpl
 import { getAstarBondingExtrinsic, getAstarClaimRewardExtrinsic, getAstarDappsInfo, getAstarNominatorMetadata, getAstarStakingMetadata, getAstarUnbondingExtrinsic, getAstarWithdrawalExtrinsic, subscribeAstarStakingMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { getParaBondingExtrinsic, getParaCancelWithdrawalExtrinsic, getParachainCollatorsInfo, getParaChainNominatorMetadata, getParaChainStakingMetadata, getParaUnbondingExtrinsic, getParaWithdrawalExtrinsic, subscribeParaChainStakingMetadata, validateParaChainBondingCondition, validateParaChainUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
 import { getPoolingClaimRewardExtrinsic, getPoolingWithdrawalExtrinsic, getRelayBondingExtrinsic, getRelayCancelWithdrawalExtrinsic, getRelayChainNominatorMetadata, getRelayChainStakingMetadata, getRelayPoolsInfo, getRelayUnbondingExtrinsic, getRelayValidatorsInfo, getRelayWithdrawalExtrinsic, subscribeRelayChainStakingMetadata, validateRelayBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 
 // all addresses must be converted to its chain format
 
 export function validateUnbondingCondition (nominatorMetadata: NominatorMetadata, amount: string, chain: string, chainStakingMetadata: ChainStakingMetadata, selectedValidator?: string): TransactionError[] {
+  if (nominatorMetadata.type === StakingType.LIQUID_STAKING) {
+    return [];
+  }
+
   if (_STAKING_CHAIN_GROUP.relay.includes(chain)) {
     return validateRelayUnbondingCondition(amount, chainStakingMetadata, nominatorMetadata);
   }
@@ -29,6 +33,7 @@ export function validateBondingCondition (chainInfo: _ChainInfo, amount: string,
   return validateParaChainBondingCondition(chainInfo, amount, selectedValidators, address, chainStakingMetadata, nominatorMetadata);
 }
 
+/** Deprecated */
 export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateApi: _SubstrateApi): Promise<ChainStakingMetadata> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarStakingMetadata(chainInfo.slug, substrateApi);
@@ -41,6 +46,9 @@ export async function getChainStakingMetadata (chainInfo: _ChainInfo, substrateA
   return getRelayChainStakingMetadata(chainInfo, substrateApi);
 }
 
+/**
+ * Deprecated
+ * */
 export async function getNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (_STAKING_CHAIN_GROUP.astar.includes(chainInfo.slug)) {
     return getAstarNominatorMetadata(chainInfo, address, substrateApi);
@@ -130,6 +138,7 @@ export async function getCancelWithdrawalExtrinsic (substrateApi: _SubstrateApi,
 export function subscribeEssentialChainStakingMetadata (substrateApiMap: Record<string, _SubstrateApi>, chainInfoMap: Record<string, _ChainInfo>, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   const unsubList: VoidFunction[] = [];
 
+  // TODO: replace with for of to improve performance
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   Object.values(chainInfoMap).forEach(async (chainInfo: _ChainInfo) => {
     if (!substrateApiMap[chainInfo.slug]) {

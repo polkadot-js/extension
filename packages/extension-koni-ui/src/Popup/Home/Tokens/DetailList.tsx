@@ -1,17 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TokenBalance, TokenItem } from '@subwallet/extension-koni-ui/components';
+import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import PageWrapper from '@subwallet/extension-koni-ui/components/Layout/PageWrapper';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/ReceiveModal/TokensSelectorModal';
-import NoContent, { PAGE_TYPE } from '@subwallet/extension-koni-ui/components/NoContent';
 import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/TokenItem/TokenBalanceDetailItem';
-import { DEFAULT_TRANSFER_PARAMS, MAP_PREDEFINED_BUY_TOKEN, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SWAP_PARAMS, DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
@@ -21,14 +19,14 @@ import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance
 import { getAccountType, isAccountAll, sortTokenByValue } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
-import CN from 'classnames';
+import classNames from 'classnames';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useOutletContext, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
-import DetailTable from './DetailTable';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -43,7 +41,7 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
   return (
     <PageWrapper
       className={`tokens ${className}`}
-      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance'])}
+      resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'swap'])}
     >
       <Component />
     </PageWrapper>
@@ -52,26 +50,8 @@ function WrapperComponent ({ className = '' }: ThemeProps): React.ReactElement<P
 
 const TokenDetailModalId = 'tokenDetailModalId';
 
-const searchFunc = (item: TokenBalanceItemType, searchText: string) => {
-  const searchTextLowerCase = searchText.toLowerCase();
-  const chainName = item.chainDisplayName?.toLowerCase() || '';
-  const symbol = item.symbol.toLowerCase();
-
-  return (
-    symbol.includes(searchTextLowerCase) ||
-    (chainName && chainName.includes(searchTextLowerCase))
-  );
-};
-
 function Component (): React.ReactElement {
   const { slug: tokenGroupSlug } = useParams();
-  const outletContext: {
-    searchInput: string,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
-  } = useOutletContext();
-
-  const searchInput = outletContext?.searchInput;
-  const setDetailTitle = outletContext?.setDetailTitle;
 
   const notify = useNotification();
   const { t } = useTranslation();
@@ -79,14 +59,64 @@ function Component (): React.ReactElement {
   const { goHome } = useDefaultNavigate();
 
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
   const { accountBalance: { tokenBalanceMap, tokenGroupBalanceMap }, tokenGroupStructure: { tokenGroupMap } } = useContext(HomeContext);
 
   const assetRegistryMap = useSelector((root: RootState) => root.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const accounts = useSelector((state: RootState) => state.accountState.accounts);
+  const { tokens } = useSelector((state: RootState) => state.buyService);
+  const swapPairs = useSelector((state) => state.swap.swapPairs);
+  const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
+  const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+
+  const transactionFromValue = useMemo(() => {
+    return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
+  }, [currentAccount?.address]);
+
+  const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
+    const result: Record<string, string[]> = {};
+
+    swapPairs.forEach((pair) => {
+      if (!result[pair.from]) {
+        result[pair.from] = [pair.to];
+      } else {
+        result[pair.from].push(pair.to);
+      }
+    });
+
+    return result;
+  }, [swapPairs]);
+
+  const filterFromAssetInfo = useMemo(() => {
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
+
+    const isAllEthereum = (filteredAccounts.length > 0 && filteredAccounts.every((account) => isEthereumAddress(account.address))) || (currentAccount && !isAccountAll(currentAccount.address) && isEthereumAddress(currentAccount.address));
+    const isAllNonEthereum = (filteredAccounts.length > 0 && filteredAccounts.every((account) => !isEthereumAddress(account.address))) || (currentAccount && !isAccountAll(currentAccount.address) && !isEthereumAddress(currentAccount.address));
+
+    const filteredAssets = Object.keys(fromAndToTokenMap).map((slug) => assetRegistryMap[slug]);
+
+    const filteredAssetsByChain = filteredAssets.filter((chainAsset) => {
+      const chainInfo = chainInfoMap[chainAsset.originChain];
+
+      if (isAllEthereum && _isChainEvmCompatible(chainInfo)) {
+        return true;
+      }
+
+      if (isAllNonEthereum && !_isChainEvmCompatible(chainInfo)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    const filteredAssetsList = ((isAllNonEthereum || isAllEthereum) ? filteredAssetsByChain : filteredAssets);
+
+    const filteredAssetsByTokenGroup = filteredAssetsList.filter((chainAsset) => chainAsset.slug === tokenGroupSlug || chainAsset.multiChainAsset === tokenGroupSlug);
+
+    return filteredAssetsByTokenGroup;
+  }, [accounts, assetRegistryMap, chainInfoMap, currentAccount, fromAndToTokenMap, tokenGroupSlug]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const topBlockRef = useRef<HTMLDivElement>(null);
@@ -120,7 +150,7 @@ function Component (): React.ReactElement {
     const slugs = tokenGroupMap[slug] ? tokenGroupMap[slug] : [slug];
     const result: BuyTokenInfo[] = [];
 
-    for (const [slug, buyInfo] of Object.entries(MAP_PREDEFINED_BUY_TOKEN)) {
+    for (const [slug, buyInfo] of Object.entries(tokens)) {
       if (slugs.includes(slug)) {
         const supportType = buyInfo.support;
 
@@ -139,7 +169,7 @@ function Component (): React.ReactElement {
     }
 
     return result;
-  }, [accounts, currentAccount?.address, tokenGroupMap, tokenGroupSlug]);
+  }, [accounts, currentAccount?.address, tokenGroupMap, tokenGroupSlug, tokens]);
 
   const tokenBalanceValue = useMemo<SwNumberProps['value']>(() => {
     if (tokenGroupSlug) {
@@ -161,18 +191,8 @@ function Component (): React.ReactElement {
         const items: TokenBalanceItemType[] = [];
 
         tokenGroupMap[tokenGroupSlug].forEach((tokenSlug) => {
-          const item = tokenBalanceMap[tokenSlug];
-
-          if (!item) {
-            return;
-          }
-
-          if (searchInput) {
-            if (searchFunc(item, searchInput)) {
-              items.push(item);
-            }
-          } else {
-            items.push(item);
+          if (tokenBalanceMap[tokenSlug]) {
+            items.push(tokenBalanceMap[tokenSlug]);
           }
         });
 
@@ -180,18 +200,12 @@ function Component (): React.ReactElement {
       }
 
       if (tokenBalanceMap[tokenGroupSlug]) {
-        if (searchInput) {
-          if (!searchFunc(tokenBalanceMap[tokenGroupSlug], searchInput)) {
-            return [];
-          }
-        }
-
         return [tokenBalanceMap[tokenGroupSlug]];
       }
     }
 
     return [] as TokenBalanceItemType[];
-  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap, searchInput]);
+  }, [tokenGroupSlug, tokenGroupMap, tokenBalanceMap]);
 
   const [currentTokenInfo, setCurrentTokenInfo] = useState<CurrentSelectToken| undefined>(undefined);
   const [isShrink, setIsShrink] = useState<boolean>(false);
@@ -271,10 +285,14 @@ function Component (): React.ReactElement {
   }, []);
 
   const onClickItem = useCallback((item: TokenBalanceItemType) => {
-    setCurrentTokenInfo({
-      slug: item.slug,
-      symbol: item.symbol
-    });
+    return () => {
+      if (item.isReady) {
+        setCurrentTokenInfo({
+          slug: item.slug,
+          symbol: item.symbol
+        });
+      }
+    };
   }, []);
 
   const onOpenSendFund = useCallback(() => {
@@ -288,17 +306,15 @@ function Component (): React.ReactElement {
       return;
     }
 
-    const address = currentAccount ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
-
     setStorage({
       ...DEFAULT_TRANSFER_PARAMS,
-      from: address,
+      from: transactionFromValue,
       defaultSlug: tokenGroupSlug || ''
     });
 
     navigate('/transaction/send-fund');
   },
-  [currentAccount, navigate, notify, setStorage, t, tokenGroupSlug]
+  [currentAccount, navigate, notify, setStorage, t, tokenGroupSlug, transactionFromValue]
   );
 
   const onOpenBuyTokens = useCallback(() => {
@@ -317,6 +333,39 @@ function Component (): React.ReactElement {
   [buyInfos, navigate]
   );
 
+  const onOpenSwap = useCallback(() => {
+    if (currentAccount && currentAccount.isReadOnly) {
+      notify({
+        message: t('The account you are using is watch-only, you cannot send assets with it'),
+        type: 'info',
+        duration: 3
+      });
+
+      return;
+    }
+
+    const filteredAccounts = accounts.filter((account) => !isAccountAll(account.address));
+
+    const isAllLedger = (filteredAccounts.length > 0 && filteredAccounts.every((account) => account.isHardware)) || (currentAccount && !isAccountAll(currentAccount.address) && (currentAccount.isHardware));
+
+    if ((currentAccount && currentAccount.isHardware) || (isAllLedger)) {
+      notify({
+        message: 'The account you are using is Ledger account, you cannot use this feature with it',
+        type: 'error',
+        duration: 3
+      });
+
+      return;
+    }
+
+    setSwapStorage({
+      ...DEFAULT_SWAP_PARAMS,
+      from: transactionFromValue,
+      defaultSlug: tokenGroupSlug || ''
+    });
+    navigate('/transaction/swap');
+  }, [accounts, currentAccount, navigate, notify, setSwapStorage, t, tokenGroupSlug, transactionFromValue]);
+
   useEffect(() => {
     if (currentTokenInfo) {
       activeModal(TokenDetailModalId);
@@ -330,10 +379,10 @@ function Component (): React.ReactElement {
   }, [tokenGroupSlug]);
 
   useEffect(() => {
-    if (!tokenBalanceItems.length && !searchInput) {
+    if (!tokenBalanceItems.length) {
       goHome();
     }
-  }, [goHome, searchInput, tokenBalanceItems.length]);
+  }, [goHome, tokenBalanceItems.length]);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
@@ -343,136 +392,45 @@ function Component (): React.ReactElement {
     };
   }, [handleResize]);
 
-  const detailTitle = useMemo(() => {
-    return <div className='header-content'>{t('Token')}: {symbol}</div>;
-  }, [symbol, t]);
-
-  useEffect(() => {
-    setDetailTitle?.(detailTitle);
-  }, [detailTitle, setDetailTitle]);
-
-  const itemClickAction = useCallback((item: TokenBalanceItemType) => {
-    return () => {
-      onClickItem(item);
-    };
-  }, [onClickItem]);
-
   return (
     <div
-      className={CN('token-detail-container', {
-        '__web-ui': isWebUI
-      })}
+      className={'token-detail-container'}
       onScroll={handleScroll}
       ref={containerRef}
     >
-      {!isWebUI && (
-        <div
-          className={CN('__upper-block-wrapper', {
-            '-is-shrink': isShrink
-          })}
-          ref={topBlockRef}
-        >
-          <DetailUpperBlock
-            balanceValue={tokenBalanceValue}
-            className={'__static-block'}
-            isShrink={isShrink}
-            isSupportBuyTokens={!!buyInfos.length}
-            onClickBack={goHome}
-            onOpenBuyTokens={onOpenBuyTokens}
-            onOpenReceive={onOpenReceive}
-            onOpenSendFund={onOpenSendFund}
-            symbol={symbol}
-          />
-        </div>
-      )}
-
-      {!tokenBalanceItems.length
-        ? (
-          <NoContent pageType={PAGE_TYPE.TOKEN} />
-        )
-        : !isWebUI
-          ? (
-            <div
-              className={'__scroll-container'}
-            >
-              {
-                tokenBalanceItems.map((item) => (
-                  <TokenBalanceDetailItem
-                    key={item.slug}
-                    {...item}
-                    onClick={itemClickAction(item)}
-                  />
-                ))
-              }
-            </div>
-          )
-          : (
-            <DetailTable
-              className={'__table'}
-              columns={[
-                {
-                  title: 'Token name',
-                  dataIndex: 'name',
-                  key: 'name',
-                  render: (_, row) => {
-                    return (
-                      <TokenItem
-                        chain={row.chain}
-                        logoKey={row.logoKey}
-                        slug={row.slug}
-                        subTitle={row.chainDisplayName?.replace(' Relay Chain', '') || ''}
-                        symbol={row.symbol}
-                      />
-                    );
-                  }
-                },
-                {
-                  title: 'Transferable',
-                  dataIndex: 'percentage',
-                  key: 'percentage',
-                  render: (_, row) => {
-                    return (
-                      <TokenBalance
-                        convertedValue={row.free.convertedValue}
-                        symbol={row.symbol}
-                        value={row.free.value}
-                      />
-                    );
-                  }
-                },
-                {
-                  title: 'Locked',
-                  dataIndex: 'price',
-                  key: 'price',
-                  render: (_, row) => {
-                    return (
-                      <TokenBalance
-                        convertedValue={row.locked.convertedValue}
-                        symbol={row.symbol}
-                        value={row.locked.value}
-                      />
-                    );
-                  }
-                },
-                {
-                  title: 'Balance',
-                  dataIndex: 'balance',
-                  key: 'balance',
-                  render: (_, row) => {
-                    return (
-                      <TokenBalance
-                        convertedValue={row.total.convertedValue}
-                        symbol={row.symbol}
-                        value={row.total.value}
-                      />
-                    );
-                  }
-                }
-              ]}
-              dataSource={tokenBalanceItems}
-              onClick={onClickItem}
+      <div
+        className={classNames('__upper-block-wrapper', {
+          '-is-shrink': isShrink
+        })}
+        ref={topBlockRef}
+      >
+        <DetailUpperBlock
+          balanceValue={tokenBalanceValue}
+          className={'__static-block'}
+          isShrink={isShrink}
+          isSupportBuyTokens={!!buyInfos.length}
+          isSupportSwap={!!filterFromAssetInfo.length}
+          onClickBack={goHome}
+          onOpenBuyTokens={onOpenBuyTokens}
+          onOpenReceive={onOpenReceive}
+          onOpenSendFund={onOpenSendFund}
+          onOpenSwap={onOpenSwap}
+          symbol={symbol}
+        />
+      </div>
+      <div
+        className={'__scroll-container'}
+      >
+        {
+          tokenBalanceItems.map((item) => (
+            <TokenBalanceDetailItem
+              key={item.slug}
+              {...item}
+              onClick={onClickItem(item)}
             />
-          )}
+          ))
+        }
+      </div>
 
       <DetailModal
         currentTokenInfo={currentTokenInfo}
@@ -481,27 +439,21 @@ function Component (): React.ReactElement {
         tokenBalanceMap={tokenBalanceMap}
       />
 
-      {
-        !isWebUI && (
-          <>
-            <AccountSelectorModal
-              items={accountSelectorItems}
-              onSelectItem={openSelectAccount}
-            />
+      <AccountSelectorModal
+        items={accountSelectorItems}
+        onSelectItem={openSelectAccount}
+      />
 
-            <TokensSelectorModal
-              address={selectedAccount}
-              items={tokenSelectorItems}
-              onSelectItem={openSelectToken}
-            />
+      <TokensSelectorModal
+        address={selectedAccount}
+        items={tokenSelectorItems}
+        onSelectItem={openSelectToken}
+      />
 
-            <ReceiveQrModal
-              address={selectedAccount}
-              selectedNetwork={selectedNetwork}
-            />
-          </>
-        )
-      }
+      <ReceiveQrModal
+        address={selectedAccount}
+        selectedNetwork={selectedNetwork}
+      />
     </div>
   );
 }
@@ -509,12 +461,6 @@ function Component (): React.ReactElement {
 const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, token } }: ThemeProps) => {
   return ({
     overflow: 'hidden',
-
-    '.__table': {
-      '.ant-table-row': {
-        cursor: 'pointer'
-      }
-    },
 
     '.token-detail-container': {
       height: '100%',
@@ -524,10 +470,7 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       position: 'relative',
       display: 'flex',
       flexDirection: 'column',
-      paddingTop: 210,
-      '&.__web-ui': {
-        padding: 0
-      }
+      paddingTop: 206
     },
 
     '.__scroll-container': {

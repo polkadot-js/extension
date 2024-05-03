@@ -1,18 +1,26 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { AlertDialogProps, TransactionFormBaseProps } from '@subwallet/extension-koni-ui/types';
+import { ButtonProps } from '@subwallet/react-ui';
 import React, { Dispatch, SetStateAction } from 'react';
 
-export interface TransactionContextProps{
+export interface TransactionContextProps {
   defaultData: TransactionFormBaseProps;
-  persistData: (value: TransactionFormBaseProps) => void;
+  persistData: Dispatch<SetStateAction<TransactionFormBaseProps>>;
   needPersistData: boolean;
   onDone: (extrinsicHash: string) => void;
-  onClickRightBtn: () => void;
-  setShowRightBtn: Dispatch<SetStateAction<boolean>>;
-  setDisabledRightBtn: Dispatch<SetStateAction<boolean>>;
-  modalId?: string;
+  setSubHeaderRightButtons: Dispatch<SetStateAction<ButtonProps[] | undefined>>;
+  setCustomScreenTitle: Dispatch<SetStateAction<string | undefined>>;
+  goBack: () => void;
+  setBackProps: Dispatch<SetStateAction<{
+    disabled: boolean,
+    onClick: null | VoidFunction
+  }>>;
+  openAlert: (alertProps: AlertDialogProps) => void;
+  closeAlert: VoidFunction;
+  openRecheckChainConnectionModal: (chainName: string) => void;
+  closeRecheckChainConnectionModal: VoidFunction;
 }
 
 export const TransactionContext = React.createContext<TransactionContextProps>({
@@ -23,9 +31,19 @@ export const TransactionContext = React.createContext<TransactionContextProps>({
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   onDone: (extrinsicHash) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  onClickRightBtn: () => {},
+  setSubHeaderRightButtons: (value) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setShowRightBtn: (value) => {},
+  setCustomScreenTitle: (title) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  setDisabledRightBtn: (value) => {}
+  goBack: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setBackProps: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  openAlert: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  closeAlert: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  openRecheckChainConnectionModal: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  closeRecheckChainConnectionModal: () => {}
 });

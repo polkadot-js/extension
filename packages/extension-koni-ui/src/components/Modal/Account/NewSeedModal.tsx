@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CREATE_ACCOUNT_MODAL, NEW_SEED_MODAL, SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CREATE_ACCOUNT_MODAL, NEW_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React from 'react';
@@ -19,7 +19,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       className={className}
       id={NEW_SEED_MODAL}
       label={t('Confirm')}
-      nextId={SEED_PHRASE_MODAL}
       previousId={CREATE_ACCOUNT_MODAL}
       url={'/accounts/new-seed-phrase'}
     />

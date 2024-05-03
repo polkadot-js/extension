@@ -10,7 +10,7 @@ import { ButtonProps, Icon, PageIcon, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldSlash, XCircle } from 'phosphor-react';
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'react-router';
 import styled, { useTheme } from 'styled-components';
 
 interface Props {

@@ -72,7 +72,6 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
       headerLeft={'default'}
       headerOnClickLeft={onClickListIcon}
       headerPaddingVertical={true}
-      isSetTitleContext={false}
       showHeader={true}
       showLeftButton={true}
       showTabBar={showTabBar ?? true}

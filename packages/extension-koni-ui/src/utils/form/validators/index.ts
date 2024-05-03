@@ -5,4 +5,3 @@ export * from './base';
 export * from './common';
 export * from './password';
 export * from './staking';
-export * from './yield';

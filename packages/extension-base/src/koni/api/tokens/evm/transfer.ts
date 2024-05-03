@@ -7,9 +7,11 @@ import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/
 import { _BALANCE_PARSING_CHAIN_GROUP, EVM_REFORMAT_DECIMALS } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
+import BigN from 'bignumber.js';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
-import { BN, hexToBn } from '@polkadot/util';
+import { hexToBn } from '@polkadot/util';
 
 interface HandleTransferBalanceResultProps {
   callback: HandleBasicTx;
@@ -51,24 +53,36 @@ export async function getEVMTransactionObject (
   to: string,
   value: string,
   transferAll: boolean,
-  evmApiMap: Record<string, _EvmApi>
+  web3Api: _EvmApi
 ): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
-  const web3Api = evmApiMap[networkKey];
-  const gasPrice = await web3Api.api.eth.getGasPrice();
+
+  const priority = await calculateGasFeeParams(web3Api, networkKey);
+
   const transactionObject = {
-    gasPrice: gasPrice,
     to: to,
     value: value,
-    from: from
+    from: from,
+    gasPrice: priority.gasPrice,
+    maxFeePerGas: priority.maxFeePerGas?.toString(),
+    maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
   } as TransactionConfig;
+
   const gasLimit = await web3Api.api.eth.estimateGas(transactionObject);
 
   transactionObject.gas = gasLimit;
 
-  const estimateFee = new BN(gasLimit).mul(new BN(gasPrice));
+  let estimateFee: BigN;
 
-  transactionObject.value = transferAll ? new BN(value).sub(estimateFee).toString() : value;
+  if (priority.baseGasFee) {
+    const maxFee = priority.maxFeePerGas;
+
+    estimateFee = maxFee.multipliedBy(gasLimit);
+  } else {
+    estimateFee = new BigN(priority.gasPrice).multipliedBy(gasLimit);
+  }
+
+  transactionObject.value = transferAll ? new BigN(value).minus(estimateFee).toString() : value;
 
   if (EVM_REFORMAT_DECIMALS.acala.includes(networkKey)) {
     const numberReplace = 18 - 12;
@@ -86,21 +100,20 @@ export async function getERC20TransactionObject (
   to: string,
   value: string,
   transferAll: boolean,
-  evmApiMap: Record<string, _EvmApi>
+  evmApi: _EvmApi
 ): Promise<[TransactionConfig, string]> {
   const networkKey = chainInfo.slug;
-  const evmApi = evmApiMap[networkKey];
-  const erc20Contract = getERC20Contract(networkKey, assetAddress, evmApiMap);
+  const erc20Contract = getERC20Contract(assetAddress, evmApi);
 
-  let freeAmount = new BN(0);
+  let freeAmount = new BigN(0);
   let transferValue = value;
 
   if (transferAll) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const bal = await erc20Contract.methods.balanceOf(from).call() as string;
 
-    freeAmount = new BN(bal || '0');
-    transferValue = freeAmount.toString() || '0';
+    freeAmount = new BigN(bal || '0');
+    transferValue = freeAmount.toFixed(0) || '0';
   }
 
   function generateTransferData (to: string, transferValue: string): string {
@@ -109,22 +122,25 @@ export async function getERC20TransactionObject (
   }
 
   const transferData = generateTransferData(to, transferValue);
-  const [gasLimit, gasPrice] = await Promise.all([
+  const [gasLimit, priority] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     erc20Contract.methods.transfer(to, transferValue).estimateGas({ from }) as number,
-    evmApi.api.eth.getGasPrice()
+    calculateGasFeeParams(evmApi, networkKey)
   ]);
 
   const transactionObject = {
-    gasPrice: gasPrice,
     gas: gasLimit,
     from,
+    value: '0',
     to: assetAddress,
-    data: transferData
+    data: transferData,
+    gasPrice: priority.gasPrice,
+    maxFeePerGas: priority.maxFeePerGas?.toString(),
+    maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
   } as TransactionConfig;
 
   if (transferAll) {
-    transferValue = new BN(freeAmount).toString();
+    transferValue = freeAmount.toFixed(0);
     transactionObject.data = generateTransferData(to, transferValue);
   }
 
@@ -133,6 +149,7 @@ export async function getERC20TransactionObject (
 
 export async function getERC721Transaction (
   web3Api: _EvmApi,
+  chain: string,
   contractAddress: string,
   senderAddress: string,
   recipientAddress: string,
@@ -140,15 +157,17 @@ export async function getERC721Transaction (
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const contract = new web3Api.api.eth.Contract(_ERC721_ABI, contractAddress);
 
-  const [gasLimit, gasPrice] = await Promise.all([
+  const [gasLimit, priority] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     contract.methods.safeTransferFrom(senderAddress, recipientAddress, tokenId).estimateGas({ from: senderAddress }) as number,
-    web3Api.api.eth.getGasPrice()
+    calculateGasFeeParams(web3Api, chain)
   ]);
 
   return {
     from: senderAddress,
-    gasPrice,
+    gasPrice: priority.gasPrice,
+    maxFeePerGas: priority.maxFeePerGas?.toString(),
+    maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString(),
     gas: gasLimit,
     to: contractAddress,
     value: '0x00',

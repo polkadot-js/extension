@@ -10,7 +10,7 @@ import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFocusFormItem, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { evmNftSubmitTransaction, substrateNftSubmitTransaction } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, FormInstance, FormRule, SendNftParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, noop, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, noop, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Image, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowCircleRight } from 'phosphor-react';
@@ -24,10 +24,7 @@ import { isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 import { nftParamsHandler } from '../helper';
 import { FreeBalance, TransactionContent, TransactionFooter } from '../parts';
 
-type Props = ThemeProps & {
-  nftDetail?: NftItem
-  modalContent?: boolean
-};
+type Props = ThemeProps;
 
 const DEFAULT_COLLECTION: NftCollection = {
   collectionId: 'unknown',
@@ -44,12 +41,12 @@ const DEFAULT_ITEM: NftItem = {
 const hiddenFields: Array<keyof SendNftParams> = ['from', 'chain', 'asset', 'itemId', 'collectionId'];
 const validateFields: Array<keyof SendNftParams> = ['to'];
 
-const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ modalContent = false, nftDetail }) => {
+const Component: React.FC = () => {
   useSetCurrentPage('/transaction/send-nft');
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<SendNftParams>();
+  const { defaultData, persistData } = useTransactionContext<SendNftParams>();
 
   const { collectionId, itemId } = defaultData;
 
@@ -90,7 +87,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   const addressPrefix = useGetChainPrefixBySlug(chain);
   const chainGenesisHash = chainInfoMap[chain]?.substrateInfo?.genesisHash || '';
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone);
+  const { onError, onSuccess } = useHandleSubmitTransaction();
 
   const [isDisable, setIsDisable] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -104,6 +101,16 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
 
         if (!isAddress(_recipientAddress)) {
           return Promise.reject(t('Invalid recipient address'));
+        }
+
+        if (!isEthereumAddress(_recipientAddress)) {
+          const chainInfo = chainInfoMap[chain];
+          const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+          const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
+
+          if (_addressOnChain !== _recipientAddress) {
+            return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: chainInfo.name } }));
+          }
         }
 
         if (isSameAddress(_recipientAddress, from)) {
@@ -144,8 +151,11 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
   // Submit transaction
   const onSubmit: FormCallbacks<SendNftParams>['onFinish'] = useCallback(
     (values: SendNftParams) => {
-      const isEthereumInterface = isEthereumAddress(from);
-      const { to } = values;
+      const { chain, from: _from, to } = values;
+      const isEthereumInterface = isEthereumAddress(_from);
+
+      const from = reformatAddress(_from, addressPrefix);
+
       const params = nftParamsHandler(nftItem, chain);
       let sendPromise: Promise<SWTransactionResponse>;
 
@@ -183,7 +193,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
           });
       }, 300);
     },
-    [chain, from, nftItem, onError, onSuccess]
+    [nftItem, onError, onSuccess, addressPrefix]
   );
 
   const checkAction = usePreCheckAction(from);
@@ -213,19 +223,13 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
 
   return (
     <>
-      <TransactionContent className={CN('-transaction-content', {
-        '__web-content': modalContent
-      })}
-      >
-        <div className={CN('nft_item_detail text-center', {
-          '__modal-ui': modalContent
-        })}
-        >
+      <TransactionContent className={CN('-transaction-content')}>
+        <div className={'nft_item_detail text-center'}>
           <Image
-            height={modalContent ? 180 : 120}
+            height={120}
             modelViewerProps={show3DModel ? DEFAULT_MODEL_VIEWER_PROPS : undefined}
             src={nftItem.image}
-            width={modalContent ? 180 : 120}
+            width={120}
           />
           <Typography.Title level={5}>
             {nftItem.name}
@@ -233,9 +237,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         </div>
 
         <Form
-          className={CN('form-container form-space-sm', {
-            '__modal-ui': modalContent
-          })}
+          className={'form-container form-space-sm'}
           form={form}
           initialValues={formDefault}
           onFieldsChange={onFieldsChange}
@@ -253,6 +255,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
               addressPrefix={addressPrefix}
               allowDomain={true}
               chain={chain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={chainGenesisHash}
               placeholder={t('Account address')}
@@ -280,11 +283,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
         />
       </TransactionContent>
       <TransactionFooter
-        className={CN('send-nft-transaction-footer', {
-          '__modal-ui': modalContent
-        })}
-        errors={[]}
-        warnings={[]}
+        className={'send-nft-transaction-footer'}
       >
         <Button
           disabled={isDisable || !isBalanceReady}
@@ -314,10 +313,7 @@ const Wrapper: React.FC<Props> = (props: Props) => {
       className={className}
       resolve={dataContext.awaitStores(['nft'])}
     >
-      <Component
-        modalContent={props.modalContent}
-        nftDetail={props.nftDetail}
-      />
+      <Component />
     </PageWrapper>
   );
 };
@@ -332,25 +328,6 @@ const SendNFT = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.nft_item_detail h5': {
       marginTop: token.marginXS,
       marginBottom: token.margin
-    },
-
-    '.__modal-ui': {
-      '&.form-container': {
-        display: 'flex',
-        flexDirection: 'column-reverse'
-      },
-
-      '&.send-nft-transaction-footer': {
-        '& > .ant-btn': {
-          width: '100%'
-        }
-      },
-
-      '&.nft_item_detail': {
-        img: {
-          aspectRatio: '1'
-        }
-      }
     },
 
     '.nft_item_detail': {

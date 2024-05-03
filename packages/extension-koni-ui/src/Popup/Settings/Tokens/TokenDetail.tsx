@@ -43,9 +43,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [goBack, tokenInfo]);
 
-  const originChainInfo = useFetchChainInfo(tokenInfo?.originChain || '');
+  const originChainInfo = useFetchChainInfo(tokenInfo.originChain);
 
-  const [priceId, setPriceId] = useState(tokenInfo?.priceId || '');
+  const [priceId, setPriceId] = useState(tokenInfo.priceId || '');
   const [loading, setLoading] = useState(false);
 
   const { handleSimpleConfirmModal } = useConfirmModal({
@@ -59,10 +59,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   });
 
   const handleDeleteToken = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     handleSimpleConfirmModal().then(() => {
       deleteCustomAssets(tokenInfo.slug)
         .then((result) => {
@@ -83,7 +79,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           });
         });
     }).catch(console.log);
-  }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo?.slug]);
+  }, [goBack, handleSimpleConfirmModal, showNotification, t, tokenInfo.slug]);
 
   const subHeaderButton: ButtonProps[] = useMemo(() => {
     return [
@@ -95,11 +91,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           weight={'light'}
         />,
         onClick: handleDeleteToken,
-        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo)),
-        tooltip: t('Delete token')
+        disabled: !(_isCustomAsset(tokenInfo.slug) && _isSmartContractToken(tokenInfo))
       }
     ];
-  }, [handleDeleteToken, t, token.fontSizeHeading3, tokenInfo]);
+  }, [handleDeleteToken, token.fontSizeHeading3, tokenInfo]);
 
   const contractAddressIcon = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
@@ -126,7 +121,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleCopyContractAddress = useCallback(() => {
     const contractAddress = _getContractAddressOfToken(tokenInfo);
 
-    navigator?.clipboard?.writeText(contractAddress).then().catch(console.error);
+    navigator.clipboard.writeText(contractAddress).then().catch(console.error);
 
     showNotification({
       message: t('Copied to clipboard')
@@ -155,14 +150,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const isSubmitDisabled = useCallback(() => {
-    return tokenInfo?.priceId === priceId || priceId.length === 0;
-  }, [priceId, tokenInfo?.priceId]);
+    return tokenInfo.priceId === priceId || priceId.length === 0;
+  }, [priceId, tokenInfo.priceId]);
 
   const onSubmit = useCallback(() => {
-    if (!tokenInfo) {
-      return;
-    }
-
     setLoading(true);
 
     upsertCustomToken({
@@ -189,23 +180,15 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [goBack, priceId, showNotification, t, tokenInfo]);
 
   const leftFooterButtonProps = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     return _isCustomAsset(tokenInfo.slug)
       ? {
         onClick: goBack,
         children: t('Cancel')
       }
       : undefined;
-  }, [goBack, tokenInfo?.slug, t]);
+  }, [goBack, tokenInfo.slug, t]);
 
   const rightFooterButtonProps = useCallback(() => {
-    if (!tokenInfo?.slug) {
-      return;
-    }
-
     return _isCustomAsset(tokenInfo.slug)
       ? {
         block: true,
@@ -221,11 +204,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         children: t('Save')
       }
       : undefined;
-  }, [isSubmitDisabled, loading, onSubmit, t, tokenInfo?.slug]);
-
-  if (!tokenInfo || !originChainInfo) {
-    return (<></>);
-  }
+  }, [isSubmitDisabled, loading, onSubmit, t, tokenInfo.slug]);
 
   return (
     <PageWrapper
@@ -301,6 +280,36 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <Col span={12}>
                 <Tooltip
                   placement={'topLeft'}
+                  title={t('Token name')}
+                >
+                  <div>
+                    <Field
+                      content={tokenInfo.name}
+                      placeholder={t<string>('Token name')}
+                    />
+                  </div>
+                </Tooltip>
+              </Col>
+            </Row>
+            <Row gutter={token.marginSM}>
+              <Col span={12}>
+                <Tooltip
+                  placement={'topLeft'}
+                  title={t('Price ID')}
+                >
+                  <div>
+                    <Input
+                      disabled={!_isCustomAsset(tokenInfo.slug)}
+                      onChange={onChangePriceId}
+                      placeholder={t('Price ID')}
+                      value={priceId}
+                    />
+                  </div>
+                </Tooltip>
+              </Col>
+              <Col span={12}>
+                <Tooltip
+                  placement={'topLeft'}
                   title={t('Decimals')}
                 >
                   <div>
@@ -312,20 +321,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
                 </Tooltip>
               </Col>
             </Row>
-
-            <Tooltip
-              placement={'topLeft'}
-              title={t('Price ID')}
-            >
-              <div>
-                <Input
-                  disabled={!_isCustomAsset(tokenInfo.slug)}
-                  onChange={onChangePriceId}
-                  placeholder={t('Price ID')}
-                  value={priceId}
-                />
-              </div>
-            </Tooltip>
           </div>
         </div>
       </Layout.Base>
@@ -371,13 +366,6 @@ const TokenDetail = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.ant-field-wrapper .ant-btn': {
       margin: -token.marginXS,
       height: 'auto'
-    },
-
-    '.web-ui-enable &': {
-      '.ant-sw-screen-layout-body': {
-        flex: '0 0 auto',
-        marginBottom: token.marginSM
-      }
     }
   });
 });

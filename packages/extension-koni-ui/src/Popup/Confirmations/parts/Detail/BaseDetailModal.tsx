@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { CONFIRMATION_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon, ModalContext, SwModalProps } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, SwModal, SwModalProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { XCircle } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
@@ -36,7 +35,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [inactiveModal]);
 
   return (
-    <BaseModal
+    <SwModal
       className={CN(className)}
       destroyOnClose={true}
       footer={(
@@ -53,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
       title={title}
     >
       {children}
-    </BaseModal>
+    </SwModal>
   );
 };
 

@@ -2,11 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ChainItemType, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Logo, NetworkItem } from '@subwallet/react-ui';
+import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -15,21 +14,28 @@ import { GeneralEmptyList } from '../EmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[];
+  loading?: boolean
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'address-input', items, label, placeholder, statusHelp, title, tooltip, value } = props;
+  const { className = '', disabled, id = 'address-input', items, label, loading, placeholder, statusHelp, title, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
 
   const renderChainSelected = useCallback((item: ChainItemType) => {
+    if (loading) {
+      return (
+        <div className={'__loading-text'}>{t('Loading ...')}</div>
+      );
+    }
+
     return (
       <div className={'__selected-item'}>{item.name}</div>
     );
-  }, []);
+  }, [loading, t]);
 
   const searchFunction = useCallback((item: ChainItemType, searchText: string) => {
     const searchTextLowerCase = searchText.toLowerCase();
@@ -71,7 +77,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [token]);
 
   return (
-    <BaseSelectModal
+    <SelectModal
       className={`${className} chain-selector-modal`}
       disabled={disabled}
       id={id}
@@ -79,6 +85,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
       itemKey={'slug'}
       items={items}
       label={label}
+      loading={loading}
       onSelect={onSelect}
       placeholder={placeholder || t('Select chain')}
       prefix={value !== '' && chainLogo}
@@ -103,11 +110,20 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       paddingRight: 12
     },
 
-    '&.chain-selector-input .__selected-item': {
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      color: token.colorText
+    '&.chain-selector-input': {
+      '.__selected-item, .__loading-text': {
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      },
+
+      '.__selected-item': {
+        color: token.colorText
+      },
+
+      '.__loading-text': {
+        color: token.colorTextLight4
+      }
     },
 
     '.chain-logo': {

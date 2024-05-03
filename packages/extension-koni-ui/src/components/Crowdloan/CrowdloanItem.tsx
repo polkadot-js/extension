@@ -4,8 +4,7 @@
 import { _FundStatus } from '@subwallet/chain-list/types';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { customFormatDate } from '@subwallet/extension-koni-ui/utils';
-import { getCrowdloanTagColor, getCrowdloanTagName } from '@subwallet/extension-koni-ui/utils/crowdloan';
+import { customFormatDate, getCrowdloanTagColor, getCrowdloanTagName } from '@subwallet/extension-koni-ui/utils';
 import { Logo, Number, Tag } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
@@ -26,7 +25,11 @@ const Component: React.FC<Props> = (props: Props) => {
     let label;
 
     if (item.fundStatus === _FundStatus.WON) {
-      label = t('Locked until');
+      if (item.unlockTime < Date.now()) {
+        label = t('Dissolved on');
+      } else {
+        label = t('Locked until');
+      }
     } else if (item.fundStatus === _FundStatus.IN_AUCTION) {
       label = t('Crowdloan ends on');
     } else {
@@ -73,7 +76,8 @@ const Component: React.FC<Props> = (props: Props) => {
             <Number
               decimal={0}
               hide={hideBalance}
-              prefix={'$'}
+              prefix={(item.contribution.currency?.isPrefix && item.contribution.currency.symbol) || ''}
+              suffix={(!item.contribution.currency?.isPrefix && item.contribution.currency?.symbol) || ''}
               value={item.contribution.convertedValue}
             />
           </div>

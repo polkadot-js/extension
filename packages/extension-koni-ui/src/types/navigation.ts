@@ -1,13 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// Account
-
-import { AccountJson } from '@subwallet/extension-base/background/types';
-
-export type CreateDoneParam = {
-  accounts: AccountJson[];
-};
+import { EarningEntryView } from '@subwallet/extension-koni-ui/types/earning';
 
 // token
 
@@ -15,6 +9,12 @@ export type TokenDetailParam = {
   symbol: string,
   tokenGroup?: string,
   tokenSlug?: string,
+};
+
+// settings
+
+export type ManageChainsParam = {
+  defaultSearch: string,
 };
 
 // manage website access
@@ -37,6 +37,17 @@ export type BuyTokensParam = {
   symbol: string,
 };
 
-export type CrowdloanContributionsResultParam = {
-  address: string,
+// earning
+
+export type EarningEntryParam = {
+  view: EarningEntryView
+};
+
+export type EarningPoolsParam = {
+  poolGroup: string,
+  symbol: string,
+};
+
+export type EarningPositionDetailParam = {
+  earningSlug: string,
 };

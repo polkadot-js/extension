@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Number } from '@subwallet/react-ui';
+import { Number, SwNumberProps } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React from 'react';
@@ -10,25 +10,37 @@ import styled from 'styled-components';
 import { InfoItemBase } from './types';
 
 export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
-  value: string | number | BigN
-  suffix?: string
-  prefix?: string
-  decimals?: number
-  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd'
-  decimalOpacity?: number
-  size?: number
+  value: string | number | BigN,
+  suffix?: string,
+  prefix?: string,
+  decimals?: number,
+  valueColorSchema?: InfoItemBase['valueColorSchema'] | 'even-odd',
+  onClickValue?: VoidFunction;
+  disableClickValue?: boolean;
+  metadata?: Record<string, number>;
+  customFormatter?: SwNumberProps['customFormatter'];
+  formatType?: SwNumberProps['formatType'];
+  suffixNode?: React.ReactNode;
+  decimalOpacity?: number,
+  size?: number,
   subFloatNumber?: boolean
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
   const { className,
+    customFormatter,
     decimalOpacity = 1,
     decimals = 0,
+    disableClickValue,
+    formatType,
     label,
+    metadata,
+    onClickValue,
     prefix,
-    size = 30,
-    subFloatNumber = false,
+    size,
+    subFloatNumber,
     suffix,
+    suffixNode,
     value,
     valueColorSchema = 'default' } = props;
 
@@ -44,27 +56,40 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
         )
       }
       <div className={'__col __value-col -to-right'}>
-        <Number
-          className={`__number-item __value -schema-${valueColorSchema}`}
-          decimal={decimals}
-          decimalOpacity={decimalOpacity}
-          intOpacity={1}
-          prefix={prefix}
-          size={size}
-          subFloatNumber={subFloatNumber}
-          suffix={suffix}
-          unitOpacity={1}
-          value={value}
-        />
+        <div
+          className={CN(
+            `__number-item __value -is-wrapper -schema-${valueColorSchema}`,
+            {
+              '-disabled': disableClickValue,
+              '-clickable': !!onClickValue
+            }
+          )}
+          onClick={!disableClickValue ? onClickValue : undefined}
+        >
+          <Number
+            className={`__number-item __value -schema-${valueColorSchema}`}
+            customFormatter={customFormatter}
+            decimal={decimals}
+            decimalOpacity={decimalOpacity}
+            formatType={formatType}
+            intOpacity={1}
+            metadata={metadata}
+            prefix={prefix}
+            size={size}
+            subFloatNumber={subFloatNumber}
+            suffix={suffix}
+            unitOpacity={1}
+            value={value}
+          />
+          {suffixNode}
+        </div>
       </div>
     </div>
   );
 };
 
-const NumberItem = styled(Component)<NumberInfoItem>(
-  ({ theme: { token } }: NumberInfoItem) => {
-    return {};
-  }
-);
+const NumberItem = styled(Component)<NumberInfoItem>(({ theme: { token } }: NumberInfoItem) => {
+  return {};
+});
 
 export default NumberItem;

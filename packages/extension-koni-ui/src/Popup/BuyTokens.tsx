@@ -7,10 +7,9 @@ import { baseServiceItems, Layout, PageWrapper, ServiceItem } from '@subwallet/e
 import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
 import { ServiceSelector } from '@subwallet/extension-koni-ui/components/Field/BuyTokens/ServiceSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { BUY_SERVICE_CONTACTS, LIST_PREDEFINED_BUY_TOKEN, MAP_PREDEFINED_BUY_TOKEN } from '@subwallet/extension-koni-ui/constants';
 import { useAssetChecker, useDefaultNavigate, useNotification, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType, BuyServiceInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AccountType, BuyServiceInfo, BuyTokenInfo, CreateBuyOrderFunction, SupportService, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { BuyTokensParam } from '@subwallet/extension-koni-ui/types/navigation';
 import { createBanxaOrder, createCoinbaseOrder, createTransakOrder, findAccountByAddress, noop, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { getAccountType } from '@subwallet/extension-koni-ui/utils/account/account';
@@ -27,10 +26,7 @@ import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-type Props = ThemeProps & {
-  modalContent?: boolean;
-  slug?: string;
-};
+type Props = ThemeProps;
 
 type BuyTokensFormProps = {
   address: string;
@@ -42,22 +38,6 @@ interface LinkUrlProps {
   url: string;
   content: string;
 }
-
-const getServiceItems = (tokenSlug: string): ServiceItem[] => {
-  const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenSlug];
-  const result: ServiceItem[] = [];
-
-  for (const serviceItem of baseServiceItems) {
-    const temp: ServiceItem = {
-      ...serviceItem,
-      disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
-    };
-
-    result.push(temp);
-  }
-
-  return result;
-};
 
 const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
   if (props.url) {
@@ -76,18 +56,9 @@ const LinkUrl: React.FC<LinkUrlProps> = (props: LinkUrlProps) => {
 
 const modalId = 'disclaimer-modal';
 
-function Component ({ className, modalContent, slug }: Props) {
+function Component ({ className }: Props) {
   const locationState = useLocation().state as BuyTokensParam;
-  const [_currentSymbol] = useState<string | undefined>(locationState?.symbol);
-  const currentSymbol = slug || _currentSymbol;
-
-  const fixedTokenKey = useMemo((): string | undefined => {
-    if (currentSymbol) {
-      return LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol)[0]?.slug;
-    } else {
-      return undefined;
-    }
-  }, [currentSymbol]);
+  const [currentSymbol] = useState<string | undefined>(locationState?.symbol);
 
   const notify = useNotification();
 
@@ -95,8 +66,18 @@ function Component ({ className, modalContent, slug }: Props) {
 
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { walletReference } = useSelector((state: RootState) => state.settings);
+  const { services, tokens } = useSelector((state: RootState) => state.buyService);
   const checkAsset = useAssetChecker();
+
+  const fixedTokenKey = useMemo((): string | undefined => {
+    if (currentSymbol) {
+      return Object.values(tokens).filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol)[0]?.slug;
+    } else {
+      return undefined;
+    }
+  }, [currentSymbol, tokens]);
 
   const [currentAddress] = useState<string | undefined>(currentAccount?.address);
   const { t } = useTranslation();
@@ -124,8 +105,24 @@ function Component ({ className, modalContent, slug }: Props) {
   const selectedService = Form.useWatch('service', form);
 
   const { contactUrl, name: serviceName, policyUrl, termUrl, url } = useMemo((): BuyServiceInfo => {
-    return BUY_SERVICE_CONTACTS[selectedService] || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
-  }, [selectedService]);
+    return services[selectedService] || { name: '', url: '', contactUrl: '', policyUrl: '', termUrl: '' };
+  }, [selectedService, services]);
+
+  const getServiceItems = useCallback((tokenSlug: string): ServiceItem[] => {
+    const buyInfo = tokens[tokenSlug];
+    const result: ServiceItem[] = [];
+
+    for (const serviceItem of baseServiceItems) {
+      const temp: ServiceItem = {
+        ...serviceItem,
+        disabled: buyInfo ? !buyInfo.services.includes(serviceItem.key) : true
+      };
+
+      result.push(temp);
+    }
+
+    return result;
+  }, [tokens]);
 
   const onConfirm = useCallback((): Promise<void> => {
     activeModal(modalId);
@@ -166,47 +163,48 @@ function Component ({ className, modalContent, slug }: Props) {
   const tokenItems = useMemo<TokenItemType[]>(() => {
     const result: TokenItemType[] = [];
 
-    const list = [...LIST_PREDEFINED_BUY_TOKEN];
+    const list = [...Object.values(tokens)];
 
     const filtered = currentSymbol ? list.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol) : list;
 
+    const convertToItem = (info: BuyTokenInfo): TokenItemType => {
+      return {
+        name: assetRegistry[info.slug]?.name || info.symbol,
+        slug: info.slug,
+        symbol: info.symbol,
+        originChain: info.network
+      };
+    };
+
     filtered.forEach((info) => {
+      const item = convertToItem(info);
+
       if (ledgerNetwork) {
         if (info.network === ledgerNetwork) {
-          result.push({
-            name: info.symbol,
-            slug: info.slug,
-            symbol: info.symbol,
-            originChain: info.network
-          });
+          result.push(item);
         }
       } else {
         if (accountType === 'ALL' || accountType === info.support) {
-          result.push({
-            name: info.symbol,
-            slug: info.slug,
-            symbol: info.symbol,
-            originChain: info.network
-          });
+          result.push(item);
         }
       }
     });
 
     return result;
-  }, [accountType, currentSymbol, ledgerNetwork]);
+  }, [accountType, assetRegistry, currentSymbol, ledgerNetwork, tokens]);
 
-  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [selectedTokenKey]);
+  const serviceItems = useMemo(() => getServiceItems(selectedTokenKey), [getServiceItems, selectedTokenKey]);
 
   const isSupportBuyTokens = useMemo(() => {
     if (selectedService && selectedAddress && selectedTokenKey) {
-      const buyInfo = MAP_PREDEFINED_BUY_TOKEN[selectedTokenKey];
+      const buyInfo = tokens[selectedTokenKey];
       const accountType = getAccountType(selectedAddress);
 
       return buyInfo && buyInfo.support === accountType && buyInfo.services.includes(selectedService) && tokenItems.find((item) => item.slug === selectedTokenKey);
     }
 
     return false;
-  }, [selectedService, selectedAddress, selectedTokenKey, tokenItems]);
+  }, [selectedService, selectedAddress, selectedTokenKey, tokens, tokenItems]);
 
   const onClickNext = useCallback(() => {
     setLoading(true);
@@ -215,7 +213,7 @@ function Component ({ className, modalContent, slug }: Props) {
 
     let urlPromise: CreateBuyOrderFunction | undefined;
 
-    const buyInfo = MAP_PREDEFINED_BUY_TOKEN[tokenKey];
+    const buyInfo = tokens[tokenKey];
     const { network } = buyInfo;
 
     const serviceInfo = buyInfo.serviceInfo[service];
@@ -273,13 +271,13 @@ function Component ({ className, modalContent, slug }: Props) {
     } else {
       setLoading(false);
     }
-  }, [form, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
+  }, [form, tokens, chainInfoMap, disclaimerAgree, onConfirm, walletReference, notify, t]);
 
   const filterAccountType = useMemo((): AccountType => {
     if (currentSymbol) {
       let result: AccountType = '' as AccountType;
 
-      const list = LIST_PREDEFINED_BUY_TOKEN.filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol);
+      const list = Object.values(tokens).filter((value) => value.slug === currentSymbol || value.symbol === currentSymbol);
 
       list.forEach((info) => {
         if (result) {
@@ -297,7 +295,7 @@ function Component ({ className, modalContent, slug }: Props) {
     } else {
       return 'ALL';
     }
-  }, [currentSymbol]);
+  }, [currentSymbol, tokens]);
 
   const accountsFilter = useCallback((account: AccountJson) => {
     if (isAccountAll(account.address)) {
@@ -356,14 +354,14 @@ function Component ({ className, modalContent, slug }: Props) {
         form.setFieldValue('service', filtered[0]?.key || '');
       }
     }
-  }, [selectedTokenKey, form]);
+  }, [selectedTokenKey, form, getServiceItems]);
 
   return (
-    <PageWrapper className={CN(className, 'transaction-wrapper', {
-      '__web-wrapper': modalContent
-    })}
+    <Layout.Home
+      showFilterIcon
+      showTabBar={false}
     >
-      {!modalContent && (
+      <PageWrapper className={CN(className, 'transaction-wrapper')}>
         <SwSubHeader
           background={'transparent'}
           center
@@ -373,187 +371,150 @@ function Component ({ className, modalContent, slug }: Props) {
           showBackButton
           title={t('Buy token')}
         />
-      )}
-      <div className={'__scroll-container'}>
-        <div className='__buy-icon-wrapper'>
-          <Icon
-            className={'__buy-icon'}
-            phosphorIcon={ShoppingCartSimple}
-            weight={'fill'}
-          />
-        </div>
-
-        <Form
-          className='__form-container form-space-sm'
-          form={form}
-          initialValues={formDefault}
-        >
-          <Form.Item
-            className={CN({
-              hidden: !isAllAccount
-            })}
-            name={'address'}
-          >
-            <AccountSelector
-              disabled={!isAllAccount}
-              filter={accountsFilter}
-              label={t('Select account')}
-            />
-          </Form.Item>
-
-          <div className='form-row'>
-            <Form.Item name={'tokenKey'}>
-              <TokenSelector
-                disabled={tokenItems.length < 2}
-                items={tokenItems}
-                showChainInSelected={false}
-              />
-            </Form.Item>
-
-            <Form.Item name={'service'}>
-              <ServiceSelector
-                disabled={!selectedTokenKey}
-                items={serviceItems}
-                placeholder={t('Select supplier')}
-                title={t('Select supplier')}
-              />
-            </Form.Item>
-          </div>
-        </Form>
-
-        <div className={'common-text __note'}>
-          {t('You will be directed to the chosen supplier to complete this transaction')}
-        </div>
-      </div>
-
-      <div className={'__layout-footer'}>
-        <Button
-          disabled={!isSupportBuyTokens}
-          icon={ (
+        <div className={'__scroll-container'}>
+          <div className='__buy-icon-wrapper'>
             <Icon
+              className={'__buy-icon'}
               phosphorIcon={ShoppingCartSimple}
               weight={'fill'}
             />
+          </div>
+
+          <Form
+            className='__form-container form-space-sm'
+            form={form}
+            initialValues={formDefault}
+          >
+            <Form.Item
+              className={CN({
+                hidden: !isAllAccount
+              })}
+              name={'address'}
+            >
+              <AccountSelector
+                disabled={!isAllAccount}
+                filter={accountsFilter}
+                label={t('Select account')}
+              />
+            </Form.Item>
+
+            <div className='form-row'>
+              <Form.Item name={'tokenKey'}>
+                <TokenSelector
+                  disabled={tokenItems.length < 2}
+                  items={tokenItems}
+                  showChainInSelected={false}
+                />
+              </Form.Item>
+
+              <Form.Item name={'service'}>
+                <ServiceSelector
+                  disabled={!selectedTokenKey}
+                  items={serviceItems}
+                  placeholder={t('Select supplier')}
+                  title={t('Select supplier')}
+                />
+              </Form.Item>
+            </div>
+          </Form>
+
+          <div className={'common-text __note'}>
+            {t('You will be directed to the chosen supplier to complete this transaction')}
+          </div>
+        </div>
+
+        <div className={'__layout-footer'}>
+          <Button
+            disabled={!isSupportBuyTokens}
+            icon={ (
+              <Icon
+                phosphorIcon={ShoppingCartSimple}
+                weight={'fill'}
+              />
+            )}
+            loading={loading}
+            onClick={onClickNext}
+          >
+            {t('Buy now')}
+          </Button>
+        </div>
+        <SwModal
+          className={CN(className)}
+          footer={(
+            <>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={XCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onReject}
+                schema={'secondary'}
+              >
+                {t('Cancel')}
+              </Button>
+              <Button
+                block={true}
+                icon={(
+                  <Icon
+                    phosphorIcon={CheckCircle}
+                    weight='fill'
+                  />
+                )}
+                onClick={onApprove}
+              >
+                {t('Agree')}
+              </Button>
+            </>
           )}
-          loading={loading}
-          onClick={onClickNext}
+          id={modalId}
+          onCancel={onReject}
+          title={t('Disclaimer')}
         >
-          {t('Buy now')}
-        </Button>
-      </div>
-      <SwModal
-        className={CN(className)}
-        footer={(
-          <>
-            <Button
-              block={true}
-              icon={(
-                <Icon
-                  phosphorIcon={XCircle}
-                  weight='fill'
+          <Trans
+            components={{
+              mainUrl: (
+                <LinkUrl
+                  content={serviceName}
+                  url={url}
                 />
-              )}
-              onClick={onReject}
-              schema={'secondary'}
-            >
-              {t('Cancel')}
-            </Button>
-            <Button
-              block={true}
-              icon={(
-                <Icon
-                  phosphorIcon={CheckCircle}
-                  weight='fill'
+              ),
+              termUrl: (
+                <LinkUrl
+                  content={t('Terms of Service')}
+                  url={termUrl}
                 />
-              )}
-              onClick={onApprove}
-            >
-              {t('Agree')}
-            </Button>
-          </>
-        )}
-        id={modalId}
-        onCancel={onReject}
-        title={t('Disclaimer')}
-      >
-        <Trans
-          components={{
-            mainUrl: (
-              <LinkUrl
-                content={serviceName}
-                url={url}
-              />
-            ),
-            termUrl: (
-              <LinkUrl
-                content={t('Terms of Service')}
-                url={termUrl}
-              />
-            ),
-            policyUrl: (
-              <LinkUrl
-                content={t('Privacy Policy')}
-                url={policyUrl}
-              />
-            ),
-            contactUrl: (
-              <LinkUrl
-                content={t('support site')}
-                url={contactUrl}
-              />
-            )
-          }}
-          i18nKey={detectTranslate('You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}\'s <termUrl/> and <policyUrl/>. For any question related to {{service}}\'s services, please visit {{service}}\'s <contactUrl/>.')}
-          values={{
-            service: serviceName
-          }}
-        />
-      </SwModal>
-    </PageWrapper>
-  );
-}
-
-function Wrapper ({ modalContent, ...rest }: Props) {
-  if (modalContent) {
-    return (
-      <Component
-        modalContent={modalContent}
-        {...rest}
-      />
-    );
-  }
-
-  return (
-    <Layout.Home
-      showFilterIcon
-      showTabBar={false}
-    >
-      <Component
-        {...rest}
-      />
+              ),
+              policyUrl: (
+                <LinkUrl
+                  content={t('Privacy Policy')}
+                  url={policyUrl}
+                />
+              ),
+              contactUrl: (
+                <LinkUrl
+                  content={t('support site')}
+                  url={contactUrl}
+                />
+              )
+            }}
+            i18nKey={detectTranslate('You are now leaving SubWallet for <mainUrl/>. Services related to card payments are provided by {{service}}, a separate third-party platform. By proceeding and procuring services from {{service}}, you acknowledge that you have read and agreed to {{service}}\'s <termUrl/> and <policyUrl/>. For any question related to {{service}}\'s services, please visit {{service}}\'s <contactUrl/>.')}
+            values={{
+              service: serviceName
+            }}
+          />
+        </SwModal>
+      </PageWrapper>
     </Layout.Home>
   );
 }
 
-const BuyTokens = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
+const BuyTokens = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
     display: 'flex',
     flexDirection: 'column',
-
-    '&.__web-wrapper': {
-      '.__scroll-container': {
-        padding: 0
-      },
-      '.__layout-footer': {
-        padding: 0,
-        margin: 0,
-
-        '.ant-btn': {
-          width: '100%',
-          margin: '16px 0 0'
-        }
-      }
-    },
 
     '.ant-sw-modal-footer': {
       display: 'flex'

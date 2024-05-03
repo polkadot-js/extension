@@ -5,10 +5,8 @@ import { ResponseJsonGetAccountInfo } from '@subwallet/extension-base/background
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AvatarGroup from '@subwallet/extension-koni-ui/components/Account/Info/AvatarGroup';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
-import InstructionContainer, { InstructionContentType } from '@subwallet/extension-koni-ui/components/InstructionContainer';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { IMPORT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useCompleteCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useCompleteCreateAccount';
 import useGoBackFromCreateAccount from '@subwallet/extension-koni-ui/hooks/account/useGoBackFromCreateAccount';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -17,9 +15,10 @@ import useAutoNavigateToCreatePassword from '@subwallet/extension-koni-ui/hooks/
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { batchRestoreV2, jsonGetAccountInfo, jsonRestoreV2 } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps, ValidateState } from '@subwallet/extension-koni-ui/types';
+import { findNetworkJsonByGenesisHash, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { isKeyringPairs$Json } from '@subwallet/extension-koni-ui/utils/account/typeGuards';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
-import { Button, Form, Icon, Input, ModalContext, SettingItem, SwList, Upload } from '@subwallet/react-ui';
+import { Form, Icon, Input, ModalContext, SettingItem, SwList, SwModal, Upload } from '@subwallet/react-ui';
 import { UploadChangeParam, UploadFile } from '@subwallet/react-ui/es/upload/interface';
 import AccountCard from '@subwallet/react-ui/es/web3-block/account-card';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
@@ -29,7 +28,8 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { u8aToString } from '@polkadot/util';
+import { hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
+import { ethereumEncode, keccakAsU8a, secp256k1Expand } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
 
@@ -65,26 +65,7 @@ const selectPassword = () => {
   }, 10);
 };
 
-const instructionContent: InstructionContentType[] = [
-  {
-    title: 'What is a JSON?',
-    description: "The JSON backup file stores your account's information encrypted with the account's password. It's a second recovery method additionally to the mnemonic phrase. "
-  },
-  {
-    title: 'How to export your JSON backup file',
-    description: (
-      <span>
-        When you create your account directly on Polkadot-JS UI the JSON file is automatically downloaded to your Downloads folder.
-        <br />
-        If you create your account in the Polkadot extension, you need to manually export the JSON file.
-        <br />
-        In <a href='#'>this article</a> you will learn how to manually export your JSON backup file in the Polkadot extension and Polkadot-JS UI.
-      </span>
-    )
-  }
-];
-
-function Component ({ className }: Props): JSX.Element {
+const Component: React.FC<Props> = ({ className }: Props) => {
   useAutoNavigateToCreatePassword();
 
   const { t } = useTranslation();
@@ -93,7 +74,7 @@ function Component ({ className }: Props): JSX.Element {
   const onBack = useGoBackFromCreateAccount(IMPORT_ACCOUNT_MODAL);
   const { goHome } = useDefaultNavigate();
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const [form] = Form.useForm();
 
@@ -157,8 +138,26 @@ function Component ({ className }: Props): JSX.Element {
 
           if (isKeyringPairs$Json(json)) {
             const accounts: ResponseJsonGetAccountInfo[] = json.accounts.map((account) => {
+              const genesisHash: string = account.meta.originGenesisHash as string;
+
+              let addressPrefix: number | undefined;
+
+              if (account.meta.originGenesisHash) {
+                addressPrefix = findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.substrateInfo?.addressPrefix;
+              }
+
+              let address = account.address;
+
+              if (addressPrefix !== undefined) {
+                address = reformatAddress(account.address, addressPrefix);
+              }
+
+              if (isHex(account.address) && hexToU8a(account.address).length !== 20) {
+                address = ethereumEncode(keccakAsU8a(secp256k1Expand(hexToU8a(account.address))));
+              }
+
               return {
-                address: account.address,
+                address: address,
                 genesisHash: account.meta.genesisHash,
                 name: account.meta.name
               } as ResponseJsonGetAccountInfo;
@@ -171,6 +170,13 @@ function Component ({ className }: Props): JSX.Element {
           } else {
             jsonGetAccountInfo(json)
               .then((accountInfo) => {
+                let address = accountInfo.address;
+
+                if (isHex(accountInfo.address) && hexToU8a(accountInfo.address).length !== 20) {
+                  address = u8aToHex(keccakAsU8a(secp256k1Expand(hexToU8a(accountInfo.address))));
+                }
+
+                accountInfo.address = address;
                 setRequirePassword(true);
                 setAccountsInfo([accountInfo]);
                 setFileValidateState({});
@@ -201,7 +207,7 @@ function Component ({ className }: Props): JSX.Element {
         });
         setValidating(false);
       });
-  }, [t, jsonFile, validating]);
+  }, [validating, jsonFile, chainInfoMap, t]);
 
   const onSubmit = useCallback(() => {
     if (!jsonFile) {
@@ -257,10 +263,9 @@ function Component ({ className }: Props): JSX.Element {
       <AccountCard
         accountName={account.name}
         address={account.address}
-        addressPreLength={4}
-        addressSufLength={5}
+        addressPreLength={9}
+        addressSufLength={9}
         avatarIdentPrefix={42}
-        avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
         key={account.address}
       />
@@ -288,27 +293,17 @@ function Component ({ className }: Props): JSX.Element {
     }
   }, [requirePassword]);
 
-  const buttonProps = {
-    children: t('Import account'),
-    icon: FooterIcon,
-    onClick: form.submit,
-    disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
-    loading: validating || loading
-  };
-
   return (
     <PageWrapper className={CN(className)}>
       <Layout.WithSubHeaderOnly
         onBack={onBack}
-        rightFooterButton={!isWebUI
-          ? {
-            children: t('Import by JSON file'),
-            icon: FooterIcon,
-            onClick: form.submit,
-            disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
-            loading: validating || loading
-          }
-          : undefined}
+        rightFooterButton={{
+          children: t('Import by JSON file'),
+          icon: FooterIcon,
+          onClick: form.submit,
+          disabled: !!fileValidateState.status || !!submitValidateState.status || !password,
+          loading: validating || loading
+        }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
@@ -317,147 +312,113 @@ function Component ({ className }: Props): JSX.Element {
         ]}
         title={t<string>('Import from Polkadot.{js}')}
       >
-        <div className={CN('layout-container', {
-          '__web-ui': isWebUI
-        })}
-        >
-          <div className={CN('import-container')}>
-            <div className='description'>
-              {t('Drag and drop the JSON file you exported from Polkadot.{js}')}
-            </div>
-            <Form
-              className='form-container'
-              form={form}
-              name={formName}
-              onFinish={onSubmit}
-            >
-              <Form.Item
-                validateStatus={fileValidateState.status}
-              >
-                <Upload.SingleFileDragger
-                  accept={'application/json'}
-                  className='file-selector'
-                  disabled={validating}
-                  hint={t('Drag and drop the JSON file you exported from Polkadot.{js}')}
-                  onChange={onChange}
-                  statusHelp={fileValidateState.message}
-                  title={t('Import by JSON file')}
-                />
-              </Form.Item>
-              {
-                !!accountsInfo.length && (
-                  <Form.Item>
-                    {
-                      accountsInfo.length > 1
-                        ? (
-                          <SettingItem
-                            className='account-list-item'
-                            leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                            name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
-                            onPressItem={openModal}
-                            rightItem={(
-                              <Icon
-                                phosphorIcon={DotsThree}
-                                size='sm'
-                              />
-                            )}
-                          />
-                        )
-                        : (
-                          <SettingItem
-                            className='account-list-item'
-                            leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
-                            name={accountsInfo[0].name}
-                          />
-                        )
-                    }
-                  </Form.Item>
-                )
-              }
-              {
-                requirePassword && (
-                  <Form.Item
-                    validateStatus={submitValidateState.status}
-                  >
-                    <div className='input-label'>
-                      {t('Please enter the password you have used when creating your Polkadot.{js} account')}
-                    </div>
-                    <Input
-                      id={`${formName}_${passwordField}`}
-                      onChange={onChangePassword}
-                      placeholder={t('Password')}
-                      statusHelp={submitValidateState.message}
-                      type='password'
-                      value={password}
-                    />
-                  </Form.Item>
-                )
-              }
-              {isWebUI && (
-                <Button
-                  {...buttonProps}
-                  className='action'
-                />
-              )}
-            </Form>
-            <BaseModal
-              className={className}
-              id={modalId}
-              onCancel={closeModal}
-              title={t('Import list')}
-            >
-              <SwList.Section
-                displayRow={true}
-                list={accountsInfo}
-                renderItem={renderItem}
-                rowGap='var(--row-gap)'
-              />
-            </BaseModal>
+        <div className={CN('container')}>
+          <div className='description'>
+            {t('Drag and drop the JSON file you exported from Polkadot.{js}')}
           </div>
-
-          {isWebUI && (
-            <InstructionContainer contents={instructionContent} />
-          )}
+          <Form
+            className='form-container'
+            form={form}
+            name={formName}
+            onFinish={onSubmit}
+          >
+            <Form.Item
+              validateStatus={fileValidateState.status}
+            >
+              <Upload.SingleFileDragger
+                accept={'application/json'}
+                className='file-selector'
+                disabled={validating}
+                hint={t('Drag and drop the JSON file you exported from Polkadot.{js}')}
+                onChange={onChange}
+                statusHelp={fileValidateState.message}
+                title={t('Import by JSON file')}
+              />
+            </Form.Item>
+            {
+              !!accountsInfo.length && (
+                <Form.Item>
+                  {
+                    accountsInfo.length > 1
+                      ? (
+                        <SettingItem
+                          className='account-list-item'
+                          leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                          name={t('Import {{number}} accounts', { replace: { number: String(accountsInfo.length).padStart(2, '0') } })}
+                          onPressItem={openModal}
+                          rightItem={(
+                            <Icon
+                              phosphorIcon={DotsThree}
+                              size='sm'
+                            />
+                          )}
+                        />
+                      )
+                      : (
+                        <SettingItem
+                          className='account-list-item'
+                          leftItemIcon={<AvatarGroup accounts={accountsInfo} />}
+                          name={accountsInfo[0].name}
+                        />
+                      )
+                  }
+                </Form.Item>
+              )
+            }
+            {
+              requirePassword && (
+                <Form.Item
+                  validateStatus={submitValidateState.status}
+                >
+                  <div className='input-label'>
+                    {t('Please enter the password you have used when creating your Polkadot.{js} account')}
+                  </div>
+                  <Input.Password
+                    id={`${formName}_${passwordField}`}
+                    onChange={onChangePassword}
+                    placeholder={t('Password')}
+                    statusHelp={submitValidateState.message}
+                    type='password'
+                    value={password}
+                  />
+                </Form.Item>
+              )
+            }
+          </Form>
+          <SwModal
+            className={className}
+            id={modalId}
+            onCancel={closeModal}
+            title={t('Accounts')}
+          >
+            <SwList.Section
+              displayRow={true}
+              list={accountsInfo}
+              renderItem={renderItem}
+              rowGap='var(--row-gap)'
+            />
+          </SwModal>
         </div>
       </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
-}
+};
 
-const ImportJson = styled(Component)<Props>(({ theme: { extendToken, token } }: Props) => {
+const ImportJson = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     '--row-gap': `${token.sizeXS}px`,
 
-    '.layout-container': {
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-
-      '&.__web-ui': {
-        display: 'flex',
-        justifyContent: 'center',
-        width: extendToken.twoColumnWidth,
-        maxWidth: '100%',
-        gap: token.size,
-        margin: '0 auto'
-      },
-
-      '.import-container': {
-        paddingBottom: 0,
-        flex: 1,
-
-        '& .ant-btn': {
-          width: '100%'
-        }
-      },
-
-      '.instruction-container': {
-        flex: 1
-      }
+    '.container': {
+      padding: token.padding,
+      paddingBottom: 0
     },
+
     '.description': {
+      padding: `0 ${token.padding}px`,
       fontSize: token.fontSizeHeading6,
       lineHeight: token.lineHeightHeading6,
-      color: token.colorTextDescription
+      color: token.colorTextDescription,
+      textAlign: 'center'
     },
 
     '.form-container': {

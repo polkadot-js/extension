@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingStatus, StakingType, UnstakingInfo, UnstakingStatus, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { getStakingStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { getEarningStatusByNominations, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
 import fetch from 'cross-fetch';
 
@@ -13,6 +14,20 @@ import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
+
+const convertAddress = (address: string) => {
+  return isEthereumAddress(address) ? address.toLowerCase() : address;
+};
+
+const fetchDApps = async (network: string) => {
+  return new Promise(function (resolve) {
+    fetch(`https://api.astar.network/api/v1/${network}/dapps-staking/dappssimple`, {
+      method: 'GET'
+    }).then((resp) => {
+      resolve(resp.json());
+    }).catch(console.error);
+  });
+};
 
 export function subscribeAstarStakingMetadata (chain: string, substrateApi: _SubstrateApi, callback: (chain: string, rs: ChainStakingMetadata) => void) {
   return substrateApi.api.query.dappsStaking.currentEra((_currentEra: Codec) => {
@@ -29,7 +44,7 @@ export function subscribeAstarStakingMetadata (chain: string, substrateApi: _Sub
       minStake: minDelegatorStake,
       maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
       maxWithdrawalRequestPerValidator: 1, // by default
-      allowCancelUnstaking: true,
+      allowCancelUnstaking: false,
       unstakingPeriod
     });
   });
@@ -75,7 +90,7 @@ export async function getAstarStakingMetadata (chain: string, substrateApi: _Sub
     minStake: minDelegatorStake,
     maxValidatorPerNominator: 100, // temporary fix for Astar, there's no limit for now
     maxWithdrawalRequestPerValidator: 1, // by default
-    allowCancelUnstaking: true,
+    allowCancelUnstaking: false,
     unstakingPeriod
   } as ChainStakingMetadata;
 }
@@ -84,13 +99,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${chainInfo.slug}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(chainInfo.slug);
 
   const [_allDapps, _era, _stakerInfo] = await Promise.all([
     allDappsReq,
@@ -108,7 +117,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
     const dAppInfoMap: Record<string, PalletDappsStakingDappInfo> = {};
 
     allDapps.forEach((dappInfo) => {
-      dAppInfoMap[dappInfo.address.toLowerCase()] = dappInfo;
+      dAppInfoMap[convertAddress(dappInfo.address)] = dappInfo;
     });
 
     for (const item of _stakerInfo) {
@@ -117,13 +126,14 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
       const stakeList = stakeData.stakes;
 
-      const dappAddress = stakedDapp.Evm ? stakedDapp.Evm.toLowerCase() : stakedDapp.Wasm;
+      const _dappAddress = stakedDapp.Evm ? stakedDapp.Evm.toLowerCase() : stakedDapp.Wasm;
+      const dappAddress = convertAddress(_dappAddress);
       const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
 
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
-        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
 
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];
@@ -131,7 +141,7 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
         nominationList.push({
           status: dappStakingStatus,
           chain: chainInfo.slug,
-          validatorAddress: dappAddress.toLowerCase(),
+          validatorAddress: dappAddress,
           activeStake: currentStake,
           validatorMinStake: '0',
           validatorIdentity: dappInfo?.name,
@@ -163,14 +173,14 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
     } as NominatorMetadata;
   }
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain: chainInfo.slug,
@@ -183,6 +193,9 @@ export async function subscribeAstarNominatorMetadata (chainInfo: _ChainInfo, ad
   } as NominatorMetadata;
 }
 
+/**
+ * Deprecated
+ * */
 export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address: string, substrateApi: _SubstrateApi): Promise<NominatorMetadata | undefined> {
   if (isEthereumAddress(address)) {
     return;
@@ -194,13 +207,7 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
   const nominationList: NominationInfo[] = [];
   const unstakingList: UnstakingInfo[] = [];
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${chain}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(chain);
 
   const [_ledger, _era, _stakerInfo] = await Promise.all([
     chainApi.api.query.dappsStaking.ledger(address),
@@ -230,13 +237,13 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       const stakeData = item[1].toPrimitive() as Record<string, Record<string, string>[]>;
       const stakeList = stakeData.stakes;
 
-      const dappAddress = isEthereumAddress(stakedDapp.Evm) ? stakedDapp.Evm.toLowerCase() : stakedDapp.Evm;
+      const dappAddress = convertAddress(stakedDapp.Evm);
       const currentStake = stakeList.slice(-1)[0].staked.toString() || '0';
 
       const bnCurrentStake = new BN(currentStake);
 
       if (bnCurrentStake.gt(BN_ZERO)) {
-        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? StakingStatus.EARNING_REWARD : StakingStatus.NOT_EARNING;
+        const dappStakingStatus = bnCurrentStake.gt(BN_ZERO) && bnCurrentStake.gte(new BN(minDelegatorStake)) ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
 
         bnTotalActiveStake = bnTotalActiveStake.add(bnCurrentStake);
         const dappInfo = dAppInfoMap[dappAddress];
@@ -276,14 +283,14 @@ export async function getAstarNominatorMetadata (chainInfo: _ChainInfo, address:
       chain: chainInfo.slug,
       type: StakingType.NOMINATED,
       address,
-      status: StakingStatus.NOT_STAKING,
+      status: EarningStatus.NOT_STAKING,
       activeStake: '0',
       nominations: [],
       unstakings: []
     } as NominatorMetadata;
   }
 
-  const stakingStatus = getStakingStatusByNominations(bnTotalActiveStake, nominationList);
+  const stakingStatus = getEarningStatusByNominations(bnTotalActiveStake, nominationList);
 
   return {
     chain,
@@ -303,13 +310,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
   const allDappsInfo: ValidatorInfo[] = [];
   const maxStakerPerContract = parseRawNumber(rawMaxStakerPerContract);
 
-  const allDappsReq = new Promise(function (resolve) {
-    fetch(`https://api.astar.network/api/v1/${networkKey}/dapps-staking/dapps`, {
-      method: 'GET'
-    }).then((resp) => {
-      resolve(resp.json());
-    }).catch(console.error);
-  });
+  const allDappsReq = fetchDApps(networkKey);
 
   const [_era, _allDapps] = await Promise.all([
     chainApi.api.query.dappsStaking.currentEra(),
@@ -338,7 +339,7 @@ export async function getAstarDappsInfo (networkKey: string, substrateApi: _Subs
     allDappsInfo.push({
       commission: 0,
       expectedReturn: 0,
-      address: isEthereumAddress(dappAddress) ? dappAddress.toLowerCase() : dappAddress,
+      address: convertAddress(dappAddress),
       totalStake: totalStake,
       ownStake: '0',
       otherStake: totalStake.toString(),

@@ -4,20 +4,20 @@
 import { EarningStepStatus } from '@subwallet/extension-koni-ui/reducer';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertHexColorToRGBA } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Typography } from '@subwallet/react-ui';
+import { BackgroundIcon } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { CheckCircle, PlusCircle, Spinner, XCircle } from 'phosphor-react';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
 
 interface Props extends ThemeProps {
-  isSelected: boolean;
   index: number;
   stepName: string;
   stepStatus?: EarningStepStatus
 }
 
-const Component = ({ className, index, isSelected, stepName, stepStatus }: Props) => {
+const Component = ({ className, index, stepName, stepStatus }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
@@ -80,13 +80,13 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
   const stepTextClassName = useMemo(() => {
     switch (stepStatus) {
       case EarningStepStatus.SUBMITTING:
-        return 'staking-process-loading-text';
+        return '-submitting';
       case EarningStepStatus.ERROR:
-        return 'staking-process-fail-text';
+        return '-error';
       case EarningStepStatus.SUCCESS:
-        return 'staking-process-success-text';
+        return '-success';
       case EarningStepStatus.PROCESSING:
-        return 'staking-process-selected-text';
+        return '-processing';
       case EarningStepStatus.QUEUED:
       default:
         return '';
@@ -96,19 +96,15 @@ const Component = ({ className, index, isSelected, stepName, stepStatus }: Props
   return (
     <div className={className}>
       {stepStatusIcon}
-      <div className={'staking-process-flex-wrapper'}>
-        <Typography.Text
-          className={`staking-process-text ${stepTextClassName}`}
-        >
+      <div className={CN('__step-title', stepTextClassName)}>
+        <span className={'__order'}>
           {t('Step {{stepNumb}}:', { replace: { stepNumb: index + 1 } })}
-        </Typography.Text>
-        <Typography.Text
-          className={`staking-process-text ${stepTextClassName}`}
-        >
-          {stepName}
-        </Typography.Text>
-      </div>
+        </span>
 
+        <span className={'__name'}>
+          {stepName}
+        </span>
+      </div>
     </div>
   );
 };
@@ -119,31 +115,30 @@ const EarningProcessItem = styled(Component)<Props>(({ theme: { token } }: Props
     alignItems: 'center',
     gap: token.paddingSM,
 
-    '.staking-process-text': {
+    '.__step-title': {
+      display: 'flex',
+      alignItems: 'center',
+      gap: token.paddingSM,
       fontWeight: '600',
-      color: token['gray-3']
+      color: token['gray-3'],
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight
     },
 
-    '.staking-process-selected-text': {
+    '.__step-title.-processing': {
       color: token['gray-6']
     },
 
-    '.staking-process-success-text': {
+    '.__step-title.-success': {
       color: token.colorSuccess
     },
 
-    '.staking-process-fail-text': {
+    '.__step-title.-error': {
       color: token.colorError
     },
 
-    '.staking-process-loading-text': {
+    '.__step-title.-submitting': {
       color: token['gold-6']
-    },
-
-    '.staking-process-flex-wrapper': {
-      display: 'flex',
-      alignItems: 'center',
-      gap: token.paddingSM
     }
   };
 });

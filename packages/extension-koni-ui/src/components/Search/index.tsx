@@ -4,8 +4,8 @@
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Input } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { DownloadSimple, MagnifyingGlass } from 'phosphor-react';
-import React, { ChangeEventHandler, useCallback, useMemo } from 'react';
+import { MagnifyingGlass } from 'phosphor-react';
+import React, { ChangeEventHandler, useCallback } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -16,34 +16,15 @@ type Props = ThemeProps & {
   onClickActionBtn?: () => void;
   actionBtnIcon?: JSX.Element;
   showActionBtn?: boolean;
-  extraButton?: JSX.Element
-  showExtraButton?: boolean
 }
 
 const Component: React.FC<Props> = ({ actionBtnIcon,
   className,
-  extraButton,
   onClickActionBtn,
   onSearch,
   placeholder,
   searchValue,
-  showActionBtn,
-  showExtraButton = false }) => {
-  // CONTROLLED STATE
-  // const [value, setValue] = useState<string>(searchValue)
-
-  // const handleKeyDown: KeyboardEventHandler<HTMLInputElement> = useCallback((e) => {
-  //   if (e.key === 'Enter' && value) {
-  //     onSearch(value)
-  //   }
-  // }, [value])
-
-  // const handleInputChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-  //   const value = e?.target?.value;
-  //   setValue(value)
-  // }
-
-  // UNCONTROLLED STATE
+  showActionBtn }) => {
   const handleInputChange: ChangeEventHandler<HTMLInputElement> = useCallback((e) => {
     const value = e?.target?.value;
 
@@ -52,56 +33,36 @@ const Component: React.FC<Props> = ({ actionBtnIcon,
   [onSearch]
   );
 
-  const button = useMemo(() => extraButton || (
-    <Button
-      icon={<Icon
-        phosphorIcon={DownloadSimple}
-        size='sm'
-      />}
-      type='ghost'
-    />
-  ), [extraButton]);
-
   return (
-    <div className={CN('search-container', className)}>
-      <div className='right-section'>
-        {showExtraButton && button}
-        <Input.Search
-          className='search-input'
-          onChange={handleInputChange}
-          placeholder={placeholder}
-          prefix={<Icon phosphorIcon={MagnifyingGlass} />}
-          size='md'
-          value={searchValue}
-          suffix={
-            showActionBtn && (
-              <Button
-                icon={actionBtnIcon}
-                onClick={onClickActionBtn}
-                size='xs'
-                type='ghost'
-              />
-            )
-          }
-          // onKeyDown={handleKeyDown}
-        />
-      </div>
+    <div className={CN(className)}>
+      <Input.Search
+        className='__search-input'
+        onChange={handleInputChange}
+        placeholder={placeholder}
+        prefix={<Icon phosphorIcon={MagnifyingGlass} />}
+        size='md'
+        suffix={
+          showActionBtn && (
+            <Button
+              icon={actionBtnIcon}
+              onClick={onClickActionBtn}
+              size='xs'
+              type='ghost'
+            />
+          )
+        }
+        value={searchValue}
+        // onKeyDown={handleKeyDown}
+      />
     </div>
   );
 };
 
-const Search = styled(Component)<Props>(() => {
+const Search = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    display: 'grid',
-    width: '100%',
-
-    '.right-section': {
-      justifySelf: 'end',
-      display: 'flex',
-      '.search-input': {
-        width: 360,
-        height: 50
-      }
+    '.__search-input': {
+      width: 360,
+      height: 48
     }
   };
 });

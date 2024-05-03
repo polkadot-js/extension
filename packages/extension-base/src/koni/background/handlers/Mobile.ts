@@ -1,9 +1,37 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ActiveCronAndSubscriptionMap, CronServiceType, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
+import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
+import { state } from '@subwallet/extension-base/koni/background/handlers/index';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { SWStorage } from '@subwallet/extension-base/storage';
+import { listMerge } from '@subwallet/extension-base/utils';
+import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { DexieExportJsonStructure } from 'dexie-export-import';
+
+export function isLocalStorageReset (): boolean {
+  if (window?.localStorage) {
+    return !window.localStorage.getItem('keyring:subwallet');
+  } else {
+    return false;
+  }
+}
+
+export async function isIndexedDBReset (): Promise<boolean> {
+  try {
+    return (await state.dbService.stores.migration.table.count()) < 1;
+  } catch (e) {
+    return true;
+  }
+}
+
+// Detect problems on the web-runner
+export async function isWebRunnerDataReset (): Promise<boolean> {
+  return isLocalStorageReset() || await isIndexedDBReset();
+}
+
+const swStorage = SWStorage.instance;
 
 const DEFAULT_SERVICE_MAP = {
   subscription: {
@@ -25,9 +53,21 @@ const DEFAULT_SERVICE_MAP = {
 export default class Mobile {
   // @ts-ignore
   private state: KoniState;
+  private restoreHandler = createPromiseHandler<void>();
+  private lastRestoreData: {storage?: Record<string, string>, indexedDB?: DexieExportJsonStructure} = {};
 
   constructor (state: KoniState) {
     this.state = state;
+
+    if (!isLocalStorageReset()) {
+      this.lastRestoreData.storage = swStorage.copy();
+    }
+
+    (async () => {
+      if (!(await isIndexedDBReset())) {
+        this.lastRestoreData.indexedDB = await state.dbService.getExportJson();
+      }
+    })().catch(console.error);
   }
 
   public ping (): string {
@@ -97,6 +137,76 @@ export default class Mobile {
     console.log('restartSubscriptionServices');
   }
 
+  private async _getLocalStorageExportData (): Promise<string> {
+    return Promise.resolve(JSON.stringify(swStorage.copy()));
+  }
+
+  private async _getDexieExportData (): Promise<string> {
+    const indexedDB = await this.state.dbService.exportDB();
+
+    if (await isIndexedDBReset() && this.lastRestoreData.indexedDB) {
+      // Merge with latest restore DexieData
+      const exportData = await this.state.dbService.getExportJson();
+      const exportTables = exportData?.data.data;
+      const existedData = this.lastRestoreData.indexedDB;
+      const existedTableMap = Object.fromEntries(existedData.data.data.map((table) => [table.tableName, table]));
+
+      if (exportTables?.length > 0) {
+        exportTables.forEach(({ inbound, rows, tableName }) => {
+          const latestTable = existedTableMap[tableName];
+
+          // chain & asset & campaign
+          if (tableName === 'chain' || tableName === 'asset' || tableName === 'campaign') {
+            latestTable.rows = listMerge('slug', latestTable.rows, rows);
+
+            // Todo: Campaign still doesn't work
+          } else if (tableName === 'migrations') {
+            latestTable.rows = listMerge('key', latestTable.rows, rows);
+          } else if (tableName === 'transactions') {
+            latestTable.rows = listMerge(['chain', 'address', 'extrinsicHash'], latestTable.rows, rows);
+          }
+        });
+      }
+
+      return JSON.stringify(existedData);
+    }
+
+    return indexedDB;
+  }
+
+  public async mobileBackup (): Promise<MobileData> {
+    const storage = await this._getLocalStorageExportData();
+    const indexedDB = await this._getDexieExportData();
+
+    return {
+      storage,
+      indexedDB
+    };
+  }
+
+  public async mobileRestore ({ indexedDB, storage }: Partial<MobileData>): Promise<void> {
+    if (storage) {
+      const storageData = JSON.parse(storage) as Record<string, string>;
+
+      for (const key in storageData) {
+        swStorage.setItem(key, storageData[key]);
+      }
+    }
+
+    if (indexedDB) {
+      // Backup the last restore data to memory
+      this.lastRestoreData.indexedDB = JSON.parse(indexedDB) as DexieExportJsonStructure;
+      // Backup the last restore data to memory
+      await this.state.dbService.importDB(indexedDB);
+    }
+
+    this.restoreHandler.resolve();
+  }
+
+  public waitRestore (): Promise<void> {
+    return this.restoreHandler.promise;
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (
     id: string,
@@ -128,6 +238,10 @@ export default class Mobile {
         return this.stopSubscriptionServices(request as SubscriptionServiceType[]);
       case 'mobile(subscription.restart)':
         return this.restartSubscriptionServices(request as SubscriptionServiceType[]);
+      case 'mobile(storage.restore)':
+        return this.mobileRestore(request as MobileData);
+      case 'mobile(storage.backup)':
+        return this.mobileBackup();
       default:
         throw new Error(`Unable to handle message of type ${type}`);
     }

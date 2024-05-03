@@ -4,7 +4,7 @@
 import { RequestSignatures, TransportRequestMessage, TransportResponseMessage } from '@subwallet/extension-base/background/types';
 import { ID_PREFIX, PORT_CONTENT, PORT_EXTENSION, PORT_MOBILE } from '@subwallet/extension-base/defaults';
 import handlers from '@subwallet/extension-base/koni/background/handlers';
-import { VirtualMessageCenter } from '@subwallet/extension-koni-ui/messaging/VirtualMessageCenter';
+import { VirtualMessageCenter } from '@subwallet/extension-web-ui/messaging/VirtualMessageCenter';
 
 export interface CustomResponse<T> {
   id: string,
@@ -50,3 +50,5 @@ export function setupHandlers () {
     }
   });
 }
+
+bgMessage.setReady();

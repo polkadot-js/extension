@@ -6,3 +6,4 @@ export { default as useFetchChainInfo } from './useFetchChainInfo';
 export { default as useFetchChainState } from './useFetchChainState';
 export { default as useGetAccountInfoByAddress } from './useGetAccountInfoByAddress';
 export { default as useGetChainAssetInfo } from './useGetChainAssetInfo';
+export { default as useHandleChainConnection } from './useHandleChainConnection';

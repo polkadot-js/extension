@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RequestYieldStepSubmit, SubmitYieldStepData } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
+import { SubmitYieldStepData } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { BaseTransactionConfirmationProps } from './Base';
@@ -17,16 +16,11 @@ type Props = BaseTransactionConfirmationProps;
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
-
-  const txParams = useMemo((): SubmitYieldStepData => {
-    const txData = transaction.data as RequestYieldStepSubmit;
-
-    return txData.data as SubmitYieldStepData;
-  }, [transaction.data]);
-
-  const tokenInfoMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-
   const { t } = useTranslation();
+
+  const txParams = useMemo((): SubmitYieldStepData => transaction.data as SubmitYieldStepData, [transaction.data]);
+
+  const { assetRegistry: tokenInfoMap } = useSelector((state) => state.assetRegistry);
 
   const { inputTokenDecimals, inputTokenSymbol } = useMemo(() => {
     const inputTokenInfo = tokenInfoMap[txParams.inputTokenSlug];
@@ -80,14 +74,14 @@ const Component: React.FC<Props> = (props: Props) => {
           value={txParams.amount}
         />
 
-        {
-          derivativeTokenBasicInfo && <MetaInfo.Number
+        {!!derivativeTokenBasicInfo && (
+          <MetaInfo.Number
             decimals={derivativeTokenBasicInfo.decimals}
             label={t('Estimated receivables')}
             suffix={derivativeTokenBasicInfo.symbol}
             value={estimatedReceivables.toString()}
           />
-        }
+        )}
 
         <MetaInfo.Number
           decimals={feeTokenDecimals}
@@ -101,7 +95,9 @@ const Component: React.FC<Props> = (props: Props) => {
 };
 
 const JoinYieldPoolConfirmation = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {};
+  return {
+
+  };
 });
 
 export default JoinYieldPoolConfirmation;

@@ -27,6 +27,7 @@ function transform (file, enc, done) {
 module.exports = {
   input: [
     'packages/extension-koni-ui/src/**/*.{ts,tsx}',
+    'packages/extension-web-ui/src/**/*.{ts,tsx}',
     'packages/extension-base/src/**/*.{ts,tsx}',
     // Use ! to filter out files or directories
     '!packages/*/src/**/*.spec.{ts,tsx}',

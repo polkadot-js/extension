@@ -1,9 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
-import { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
+import { ChainInfoWithStateAndStatus } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithStateAndStatus';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NetworkItem } from '@subwallet/react-ui';
 import React from 'react';
@@ -11,14 +10,12 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
-  chainInfo: ChainInfoWithState;
+  chainInfo: ChainInfoWithStateAndStatus;
   isShowSubLogo?: boolean;
-  withDivider?: boolean;
-  showDetailNavigation?: boolean;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { chainInfo, className, isShowSubLogo = false, showDetailNavigation = false, withDivider = false } = props;
+  const { chainInfo, className, isShowSubLogo = false } = props;
   const navigate = useNavigate();
   const connectSymbol = `__${chainInfo.connectionStatus}__`;
 
@@ -31,16 +28,14 @@ const Component: React.FC<Props> = (props: Props) => {
       name={chainInfo.name}
       networkKey={chainInfo.slug}
       networkMainLogoSize={36}
-      rightItem={(
-        <ChainItemFooter
-          chainInfo={chainInfo}
-          className={'__toggle-area'}
-          navigate={navigate}
-          showDetailNavigation={showDetailNavigation}
-        />
-      )}
+      rightItem={<ChainItemFooter
+        chainInfo={chainInfo}
+        className={'__toggle-area'}
+        navigate={navigate}
+        showDetailNavigation={true}
+      />}
       subSymbol={connectSymbol}
-      withDivider={withDivider}
+      withDivider={true}
     />
   );
 };

@@ -3,11 +3,10 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, Icon, InputRef, ModalContext, SettingItem } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, InputRef, ModalContext, SelectModal, SettingItem } from '@subwallet/react-ui';
 import { CheckCircle, PlusCircle, ShareNetwork } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -92,7 +91,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>): React.ReactElemen
   }, [handleAddProvider, t, token.colorTextLight1]);
 
   return (
-    <BaseSelectModal
+    <SelectModal
       className={`${className} provider_selector__modal`}
       disabled={disabled}
       footer={footerButton()}

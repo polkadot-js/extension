@@ -4,12 +4,12 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _isAssetFungibleToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field/Base';
-import { BaseSelectModal } from '@subwallet/extension-koni-ui/components/Modal/BaseSelectModal';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Logo } from '@subwallet/react-ui';
+import { Icon, InputRef, Logo, SelectModal } from '@subwallet/react-ui';
 import TokenItem from '@subwallet/react-ui/es/web3-block/token-item';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useEffect, useMemo } from 'react';
@@ -40,7 +40,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
 
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const assetRegistry = useChainAssets({}).chainAssetRegistry;
   const { chainInfoMap, chainStateMap } = useSelector((state) => state.chainStore);
 
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -102,8 +102,17 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         isShowSubLogo={true}
         middleItem={(
           <div className='token-info-container'>
-            <div className='token-symbol'>
-              {item.symbol}
+            <div className='token-info'>
+              <span>{item.symbol}</span>
+              {
+                item.name && (
+                  <span className='__token-name'>
+                    &nbsp;(
+                    <span className='name'>{item.name}</span>
+                    )
+                  </span>
+                )
+              }
             </div>
             <div className='token-original-chain'>
               {chainInfoMap[item.originChain]?.name || item.originChain}
@@ -150,7 +159,7 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
   }, [value, filteredItems, onSelect]);
 
   return (
-    <BaseSelectModal
+    <SelectModal
       className={`${className} chain-selector-modal`}
       disabled={disabled}
       id={id}
@@ -217,11 +226,28 @@ export const TokenSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       justifyContent: 'center'
     },
 
-    '.token-symbol': {
-      fontWeight: token.fontWeightStrong,
+    '.token-info': {
+      display: 'flex',
+      flexDirection: 'row',
+      overflow: 'hidden',
+
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
-      color: token.colorTextBase
+      fontWeight: token.fontWeightStrong,
+      color: token.colorWhite,
+
+      '.__token-name': {
+        color: token.colorTextTertiary,
+        display: 'flex',
+        flexDirection: 'row',
+        overflow: 'hidden',
+
+        '.name': {
+          textOverflow: 'ellipsis',
+          overflow: 'hidden',
+          whiteSpace: 'nowrap'
+        }
+      }
     },
 
     '.token-original-chain': {

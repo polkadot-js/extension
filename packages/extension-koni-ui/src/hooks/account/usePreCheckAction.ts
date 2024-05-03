@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { ALL_STAKING_ACTIONS } from '@subwallet/extension-koni-ui/constants';
+import { ALL_STAKING_ACTIONS, isLedgerCapable, ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
 import { BLOCK_ACTION_LEDGER_NETWORKS, PredefinedLedgerNetwork } from '@subwallet/extension-koni-ui/constants/ledger';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils';
@@ -69,10 +69,20 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         }
 
         if (ALL_STAKING_ACTIONS.includes(action)) {
-          defaultMessage = detectTranslate('You are using a {{accountTitle}}. Staking is not supported with this account type');
+          defaultMessage = detectTranslate('You are using a {{accountTitle}}. Earning is not supported with this account type');
         }
 
         if (mode === AccountSignMode.LEDGER) {
+          if (!isLedgerCapable) {
+            notify({
+              message: t(ledgerIncompatible),
+              type: 'error',
+              duration: 8
+            });
+
+            return;
+          }
+
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
           const isEthereumAccount = isEthereumAddress(account.address);
 
@@ -96,7 +106,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
                   { replace: { network: networkName } }
                 ),
                 type: 'info',
-                duration: 1.5
+                duration: 8
               });
 
               return;
@@ -113,7 +123,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
               { replace: { accountTitle: accountTitle } }
             ),
             type: 'info',
-            duration: 1.5
+            duration: 8
           });
         }
       }

@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NetworkEmptyList } from '@subwallet/extension-koni-ui/components';
 import ChainItemFooter from '@subwallet/extension-koni-ui/components/ChainItemFooter';
 import { CUSTOMIZE_MODAL } from '@subwallet/extension-koni-ui/constants';
-import useChainInfoWithState, { ChainInfoWithState } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithState';
+import { ChainInfoWithStateAndStatus, useChainInfoWithStateAndStatus } from '@subwallet/extension-koni-ui/hooks/chain/useChainInfoWithStateAndStatus';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { NetworkItem, SwList } from '@subwallet/react-ui';
@@ -20,9 +20,9 @@ const renderEmpty = () => <NetworkEmptyList modalId={CUSTOMIZE_MODAL} />;
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { t } = useTranslation();
-  const chainInfoList = useChainInfoWithState();
+  const chainInfoList = useChainInfoWithStateAndStatus();
 
-  const renderChainItem = useCallback((chainInfo: ChainInfoWithState) => {
+  const renderChainItem = useCallback((chainInfo: ChainInfoWithStateAndStatus) => {
     const connectSymbol = `__${chainInfo.connectionStatus}__`;
 
     return (
@@ -75,7 +75,7 @@ const CustomizeModalContent = styled(Component)<Props>(({ theme: { token } }: Pr
 
     '.ant-network-item-name': {
       overflow: 'hidden',
-      textWrap: 'nowrap',
+      'white-space': 'nowrap',
       textOverflow: 'ellipsis',
       paddingRight: token.paddingXS
     },

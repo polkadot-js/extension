@@ -5,7 +5,7 @@ import { NotificationType } from '@subwallet/extension-base/background/KoniTypes
 import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
-import { updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
+import { enableChain, updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Button } from '@subwallet/react-ui';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 
 export default function useAssetChecker () {
   const { t } = useTranslation();
-  const { chainInfoMap, chainStateMap } = useSelector((root: RootState) => root.chainStore);
+  const { chainInfoMap, chainStateMap, chainStatusMap } = useSelector((root: RootState) => root.chainStore);
   const { assetRegistry, assetSettingMap } = useSelector((root: RootState) => root.assetRegistry);
   const notify = useNotification();
   const [enablingAsset, setEnablingAsset] = useState<string | null>(null);
@@ -39,6 +39,7 @@ export default function useAssetChecker () {
     const assetInfo = assetRegistry[assetSlug];
     const chainState = chainStateMap[assetInfo.originChain];
     const chainInfo = chainInfoMap[assetInfo.originChain];
+    const chainStatus = chainStatusMap[assetInfo.originChain];
 
     if ((assetInfo && !assetSetting) || !assetSetting.visible) {
       const message = t('{{name}} on {{chainName}} is not ready to use, do you want to turn it on?', {
@@ -74,7 +75,9 @@ export default function useAssetChecker () {
         duration: 3,
         btn
       });
-    } else if (chainState && chainState.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
+    } else if (!!assetSetting?.visible && !chainState?.active) {
+      enableChain(assetInfo.originChain, false).catch(console.error);
+    } else if (chainStatus && chainStatus.connectionStatus === _ChainConnectionStatus.DISCONNECTED) {
       const message = t('Chain {{name}} is disconnected', { replace: { name: chainInfo?.name } });
 
       notify({
@@ -83,5 +86,5 @@ export default function useAssetChecker () {
         duration: 3
       });
     }
-  }, [assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, notify, t]);
+  }, [assetRegistry, assetSettingMap, chainInfoMap, chainStateMap, chainStatusMap, notify, t]);
 }

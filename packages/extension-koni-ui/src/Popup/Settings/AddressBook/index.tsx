@@ -121,10 +121,9 @@ const Component: React.FC<Props> = (props: Props) => {
           size='md'
         />
       ),
-      onClick: openAddContact,
-      tooltip: t('Add contact')
+      onClick: openAddContact
     }
-  ], [openAddContact, t]);
+  ], [openAddContact]);
 
   const openFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);

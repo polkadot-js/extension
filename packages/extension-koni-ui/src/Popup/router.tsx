@@ -5,9 +5,9 @@ import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
 import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
-import { i18nPromise } from '@subwallet/extension-koni-ui/utils';
+import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
 import React, { ComponentType } from 'react';
-import { createBrowserRouter, IndexRouteObject, Outlet, useLocation, useOutletContext } from 'react-router-dom';
+import { createHashRouter, IndexRouteObject, Outlet, useLocation } from 'react-router-dom';
 
 export const lazyLoaderMap: Record<string, LazyLoader> = {};
 
@@ -54,7 +54,7 @@ const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwa
 const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
 const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
-const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
+// const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
 
 const Tokens = new LazyLoader('Tokens', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens'));
 const TokenDetailList = new LazyLoader('TokenDetailList', () => import('@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailList'));
@@ -67,10 +67,10 @@ const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension
 const History = new LazyLoader('History', () => import('@subwallet/extension-koni-ui/Popup/Home/History'));
 const Crowdloans = new LazyLoader('Crowdloans', () => import('@subwallet/extension-koni-ui/Popup/Home/Crowdloans'));
 const Home = new LazyLoader('Home', () => import('@subwallet/extension-koni-ui/Popup/Home'));
-const Statistics = new LazyLoader('Statistics', () => import('@subwallet/extension-koni-ui/Popup/Home/Statistics'));
 
 const Settings = new LazyLoader('Settings', () => import('@subwallet/extension-koni-ui/Popup/Settings'));
 const GeneralSetting = new LazyLoader('GeneralSetting', () => import('@subwallet/extension-koni-ui/Popup/Settings/GeneralSetting'));
+const MissionPools = new LazyLoader('MissionPools', () => import('@subwallet/extension-koni-ui/Popup/Settings/MissionPool/index'));
 const ManageAddressBook = new LazyLoader('ManageAddressBook', () => import('@subwallet/extension-koni-ui/Popup/Settings/AddressBook'));
 
 const ManageChains = new LazyLoader('ManageChains', () => import('@subwallet/extension-koni-ui/Popup/Settings/Chains/ManageChains'));
@@ -95,6 +95,7 @@ const AttachReadOnly = new LazyLoader('AttachReadOnly', () => import('@subwallet
 const ConnectPolkadotVault = new LazyLoader('ConnectPolkadotVault', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
 const ConnectKeystone = new LazyLoader('ConnectKeystone', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 const ConnectLedger = new LazyLoader('ConnectLedger', () => import('@subwallet/extension-koni-ui/Popup/Account/ConnectLedger'));
+const ExportAllDone = new LazyLoader('ExportAllDone', () => import('@subwallet/extension-koni-ui/Popup/Account/ExportAllDone'));
 
 const Login = new LazyLoader('Login', () => import('@subwallet/extension-koni-ui/Popup/Keyring/Login'));
 const CreatePassword = new LazyLoader('CreatePassword', () => import('@subwallet/extension-koni-ui/Popup/Keyring/CreatePassword'));
@@ -107,42 +108,26 @@ const AccountExport = new LazyLoader('AccountExport', () => import('@subwallet/e
 const Transaction = new LazyLoader('Transaction', () => import('@subwallet/extension-koni-ui/Popup/Transaction/Transaction'));
 const TransactionDone = new LazyLoader('TransactionDone', () => import('@subwallet/extension-koni-ui/Popup/TransactionDone'));
 const SendFund = new LazyLoader('SendFund', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendFund'));
+const SwapTransaction = new LazyLoader('SwapTransaction', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Swap'));
 const SendNFT = new LazyLoader('SendNFT', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/SendNFT'));
-const Stake = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Stake'));
-const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Unbond'));
-const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/CancelUnstake'));
-const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/ClaimReward'));
-const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Stake/Withdraw'));
-const Earn = new LazyLoader('Earn', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/Earn'));
-const UnYield = new LazyLoader('YieldUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldUnstake'));
-const WithdrawYield = new LazyLoader('YieldWithdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdraw'));
-const CancelUnYield = new LazyLoader('YieldCancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldCancelUnstake'));
-const YieldWithdrawPosition = new LazyLoader('YieldWithdrawPosition', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldWithdrawPosition'));
-const YieldClaimReward = new LazyLoader('YieldClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Yield/YieldClaimReward'));
+const Earn = new LazyLoader('Stake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Earn'));
+const Unstake = new LazyLoader('Unstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Unbond'));
+const CancelUnstake = new LazyLoader('CancelUnstake', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/CancelUnstake'));
+const ClaimReward = new LazyLoader('ClaimReward', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/ClaimReward'));
+const Withdraw = new LazyLoader('Withdraw', () => import('@subwallet/extension-koni-ui/Popup/Transaction/variants/Withdraw'));
+
+// Earning
+
+const EarningEntry = new LazyLoader('EarningEntry', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningEntry'));
+const EarningPools = new LazyLoader('EarningPools', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPools'));
+const EarningPositionDetail = new LazyLoader('EarningPositionDetail', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningPositionDetail'));
 
 // Wallet Connect
 const ConnectWalletConnect = new LazyLoader('ConnectWalletConnect', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectWalletConnect'));
 const ConnectionList = new LazyLoader('ConnectionList', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionList'));
 const ConnectionDetail = new LazyLoader('ConnectionDetail', () => import('@subwallet/extension-koni-ui/Popup/WalletConnect/ConnectionDetail'));
 
-// DApps
-
-const DApps = new LazyLoader('DApps', () => import('@subwallet/extension-koni-ui/Popup/DApps'));
-
-const EarningOutlet = new LazyLoader('EarningOutlet', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/Outlet'));
-const EarningOverview = new LazyLoader('EarningOverview', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningOverview'));
-const EarningDemo = new LazyLoader('EarningDemo', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningDemo'));
-const EarningManagement = new LazyLoader('EarningManagement', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/EarningManagement'));
-const EarningNoRouter = new LazyLoader('EarningNoRouter', () => import('@subwallet/extension-koni-ui/Popup/Home/Earning/NoRouter'));
-
-const EarningDoneOutlet = new LazyLoader('EarningDoneOutlet', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Outlet'));
-const EarningDoneContent = new LazyLoader('EarningDoneContent', () => import('@subwallet/extension-koni-ui/Popup/EarningDone/Content'));
-
-const CrowdloanUnlockCampaign = new LazyLoader('CrowdloanUnlockCampaign', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign'));
-const CheckCrowdloanContributions = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CheckCrowdloanContributions'));
-const CrowdloanContributionsResult = new LazyLoader('CrowdloanContributionsResult', () => import('@subwallet/extension-koni-ui/Popup/CrowdloanUnlockCampaign/CrowdloanContributionsResult'));
-
-const MissionPool = new LazyLoader('MissionPool', () => import('@subwallet/extension-koni-ui/Popup/MissionPool'));
+const NotFound = new LazyLoader('NotFound', () => import('@subwallet/extension-koni-ui/Popup/NotFound'));
 
 // A Placeholder page
 export function Example () {
@@ -153,29 +138,25 @@ export function Example () {
   </PageWrapper>;
 }
 
-export function NestedOutlet () {
-  return <Outlet context={useOutletContext()} />;
-}
-
-export const router = createBrowserRouter([
+// Todo: Create error page
+export const router = createHashRouter([
   {
     path: '/',
     loader: () => i18nPromise,
     element: <Root />,
     errorElement: <ErrorFallback />,
     children: [
-      Welcome.generateRouterObject('/welcome', true),
+      Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
       {
         ...Home.generateRouterObject('/home'),
         children: [
           Tokens.generateRouterObject('tokens'),
-          Statistics.generateRouterObject('statistics'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
             path: 'nfts',
-            element: <NestedOutlet />,
+            element: <Outlet />,
             children: [
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),
@@ -183,37 +164,31 @@ export const router = createBrowserRouter([
             ]
           },
           Crowdloans.generateRouterObject('crowdloans'),
-          Staking.generateRouterObject('staking'),
+          // Staking.generateRouterObject('staking'),
           {
-            ...EarningOutlet.generateRouterObject('earning'),
+            path: 'earning',
+            element: <Outlet />,
             children: [
-              EarningOverview.generateRouterObject('overview'),
-              EarningManagement.generateRouterObject('detail'),
-              EarningNoRouter.generateRouterObject('')
+              EarningEntry.generateRouterObject(''),
+              EarningPools.generateRouterObject('pools'),
+              EarningPositionDetail.generateRouterObject('position-detail')
             ]
           },
-          MissionPool.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
-          History.generateRouterObject('history/:chain/:extrinsicHashOrId'),
-          DApps.generateRouterObject('dapps')
+          History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId')
         ]
       },
       {
         ...Transaction.generateRouterObject('/transaction'),
         children: [
           SendFund.generateRouterObject('send-fund'),
+          SwapTransaction.generateRouterObject('swap'),
           SendNFT.generateRouterObject('send-nft'),
-          Stake.generateRouterObject('stake'),
+          Earn.generateRouterObject('earn'),
           Unstake.generateRouterObject('unstake'),
           CancelUnstake.generateRouterObject('cancel-unstake'),
           ClaimReward.generateRouterObject('claim-reward'),
           Withdraw.generateRouterObject('withdraw'),
-          Earn.generateRouterObject('earn'),
-          UnYield.generateRouterObject('un-yield'),
-          WithdrawYield.generateRouterObject('withdraw-yield'),
-          CancelUnYield.generateRouterObject('cancel-un-yield'),
-          YieldWithdrawPosition.generateRouterObject('yield-withdraw-position'),
-          YieldClaimReward.generateRouterObject('yield-claim'),
           {
             path: 'compound',
             element: <Example />
@@ -221,19 +196,13 @@ export const router = createBrowserRouter([
         ]
       },
       {
-        ...TransactionDone.generateRouterObject('transaction-done/:chainType/:chain/:transactionId')
-      },
-      {
-        ...EarningDoneOutlet.generateRouterObject('earning-done'),
-        children: [
-          EarningDoneContent.generateRouterObject(':chainType/:chain/:transactionId')
-        ]
+        ...TransactionDone.generateRouterObject('transaction-done/:address/:chain/:transactionId')
       },
       {
         path: '/keyring',
         element: <Outlet />,
         children: [
-          Login.generateRouterObject('login', true),
+          Login.generateRouterObject('login'),
           CreatePassword.generateRouterObject('create-password'),
           ChangePassword.generateRouterObject('change-password'),
           ApplyMasterPassword.generateRouterObject('migrate-password')
@@ -241,10 +210,11 @@ export const router = createBrowserRouter([
       },
       {
         path: '/settings',
+        element: <Outlet />,
         children: [
-          Settings.generateRouterObject('/settings'),
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
+          MissionPools.generateRouterObject('mission-pools'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),
           ManageWebsiteAccess.generateRouterObject('dapp-access'),
@@ -285,7 +255,8 @@ export const router = createBrowserRouter([
           ConnectKeystone.generateRouterObject('connect-keystone'),
           ConnectLedger.generateRouterObject('connect-ledger'),
           AccountDetail.generateRouterObject('detail/:accountAddress'),
-          AccountExport.generateRouterObject('export/:accountAddress')
+          AccountExport.generateRouterObject('export/:accountAddress'),
+          ExportAllDone.generateRouterObject('export-all-done')
         ]
       },
       {
@@ -297,20 +268,8 @@ export const router = createBrowserRouter([
           ConnectionDetail.generateRouterObject('detail/:topic')
         ]
       },
-      {
-        ...EarningOutlet.generateRouterObject('earning-demo'),
-        children: [
-          EarningDemo.generateRouterObject('')
-        ]
-      },
-      {
-        ...CrowdloanUnlockCampaign.generateRouterObject('/crowdloan-unlock-campaign'),
-        children: [
-          CheckCrowdloanContributions.generateRouterObject('check-contributions'),
-          CrowdloanContributionsResult.generateRouterObject('contributions-result')
-        ]
-      }
+      NotFound.generateRouterObject('*'),
+      PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
     ]
-  },
-  PhishingDetected.generateRouterObject(`${PHISHING_PAGE_REDIRECT}/:website`)
+  }
 ]);

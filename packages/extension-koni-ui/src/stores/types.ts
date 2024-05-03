@@ -3,13 +3,14 @@
 
 import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State';
-import { AddressBookState, AllLogoMap, AssetSetting, BalanceItem, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominationPoolInfo, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/background/KoniTypes';
+import { AddressBookState, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
-import { _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { DAppCategory, DAppInfo } from '@subwallet/extension-koni-ui/types/dapp';
-import { MissionInfo } from '@subwallet/extension-koni-ui/types/missionPool';
+import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
+import { MissionInfo } from '@subwallet/extension-koni-ui/types';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
@@ -87,9 +88,9 @@ export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsS
 }
 
 export interface AccountState extends AccountsContext, KeyringState, AddressBookState, BaseReduxStore {
-  currentAccount: AccountJson | null;
-  isAllAccount: boolean;
-  isNoAccount: boolean;
+  currentAccount: AccountJson | null
+
+  isAllAccount: boolean
 }
 
 export interface RequestState extends ConfirmationsQueue, BaseReduxStore {
@@ -119,10 +120,20 @@ export interface AssetRegistryStore extends BaseReduxStore {
 export interface ChainStore extends BaseReduxStore {
   chainInfoMap: Record<string, _ChainInfo>,
   chainStateMap: Record<string, _ChainState>
+  chainStatusMap: Record<string, _ChainApiStatus>
 }
 
 export interface BalanceStore extends BaseReduxStore {
-  balanceMap: Record<string, BalanceItem>
+  balanceMap: BalanceMap
+}
+
+export interface CampaignStore extends BaseReduxStore {
+  banners: CampaignBanner[]
+}
+
+export interface BuyServiceStore extends BaseReduxStore {
+  tokens: Record<string, BuyTokenInfo>;
+  services: Record<string, BuyServiceInfo>;
 }
 
 export type PriceStore = PriceJson
@@ -170,17 +181,19 @@ export interface MantaPayStore {
   reduxStatus: ReduxStatus
 }
 
-export interface YieldPoolStore extends BaseReduxStore {
-  poolInfo: Record<string, YieldPoolInfo>,
-  yieldPosition: YieldPositionInfo[]
-}
-
-export interface DAppStore extends BaseReduxStore {
-  categories: DAppCategory[];
-  featureDApps: DAppInfo[];
-  dApps: DAppInfo[];
+export interface EarningStore extends BaseReduxStore {
+  poolInfoMap: Record<string, YieldPoolInfo>;
+  yieldPositions: YieldPositionInfo[];
+  earningRewards: EarningRewardItem[];
+  rewardHistories: EarningRewardHistoryItem[];
+  minAmountPercentMap: Record<string, number>;
+  poolTargetsMap: Record<string, YieldPoolTarget[]>;
 }
 
 export interface MissionPoolStore extends BaseReduxStore {
   missions: MissionInfo[];
+}
+
+export interface SwapStore extends BaseReduxStore {
+  swapPairs: SwapPair[];
 }

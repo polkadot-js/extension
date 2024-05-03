@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
-import { BalanceItem } from '@subwallet/extension-base/background/KoniTypes';
+import { BalanceMap } from '@subwallet/extension-base/types';
 import { BalanceStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
 
 const initialState: BalanceStore = {
@@ -14,11 +14,11 @@ const balanceSlice = createSlice({
   initialState,
   name: 'balance',
   reducers: {
-    update (state, action: PayloadAction<Record<string, BalanceItem>>) {
+    update (state, action: PayloadAction<BalanceMap>) {
       const payload = action.payload;
 
       return {
-        balanceMap: payload,
+        balanceMap: { ...payload },
         reduxStatus: ReduxStatus.READY
       };
     }

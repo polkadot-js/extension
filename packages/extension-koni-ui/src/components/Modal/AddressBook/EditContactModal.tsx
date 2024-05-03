@@ -3,13 +3,12 @@
 
 import { AddressJson } from '@subwallet/extension-base/background/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
 import { DELETE_ADDRESS_BOOK_MODAL, EDIT_ADDRESS_BOOK_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useCopy, useNotification, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { editContactAddress, removeContactAddress } from '@subwallet/extension-koni-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop, simpleCheckForm, toShort } from '@subwallet/extension-koni-ui/utils';
-import { Button, Field, Form, Icon, Input, ModalContext, SwModalFuncProps, useExcludeModal } from '@subwallet/react-ui';
+import { Button, Field, Form, Icon, Input, ModalContext, SwModal, SwModalFuncProps, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CopySimple, Trash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
@@ -147,7 +146,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [form, isActive]);
 
   return (
-    <BaseModal
+    <SwModal
       className={CN(className)}
       id={modalId}
       onCancel={(!loading && !deleting) ? onCancel : undefined}
@@ -235,7 +234,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </Button>
         </Form.Item>
       </Form>
-    </BaseModal>
+    </SwModal>
   );
 };
 
@@ -253,10 +252,6 @@ const EditContactModal = styled(Component)<Props>(({ theme: { token } }: Props) 
         flexDirection: 'row',
         gap: token.sizeSM
       }
-    },
-
-    '.button-container': {
-      marginTop: token.margin
     }
   };
 });

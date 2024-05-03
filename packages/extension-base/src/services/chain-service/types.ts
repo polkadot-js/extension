@@ -3,7 +3,7 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
-import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _CrowdloanFund } from '@subwallet/chain-list/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
@@ -28,10 +28,16 @@ export enum _ChainConnectionStatus {
 }
 
 export interface _ChainState {
+  slug: string;
+  active: boolean;
+  currentProvider: string;
+  manualTurnOff: boolean;
+}
+
+export interface _ChainApiStatus {
   slug: string,
-  active: boolean,
-  currentProvider: string,
-  connectionStatus: _ChainConnectionStatus
+  connectionStatus: _ChainConnectionStatus,
+  lastUpdated: number,
 }
 
 export interface _SubstrateDefaultFormatBalance {
@@ -110,6 +116,8 @@ export type _NetworkUpsertParams = {
     genesisHash: string,
     paraId: number | null,
     addressPrefix: number,
+    crowdloanFunds?: _CrowdloanFund[] | null,
+    crowdloanParaId?: number | null,
 
     // EVM
     evmChainId: number | null,

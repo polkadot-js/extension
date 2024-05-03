@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
-import { getDAppsData, getLogoMaps, getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeChainInfoMap, subscribeChainStateMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeSigningRequests, subscribeStakingReward, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldPoolInfo, subscribeYieldPositionInfo } from '@subwallet/extension-koni-ui/stores/utils';
+import { getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetLogoMaps, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeBuyServices, subscribeBuyTokens, subscribeChainInfoMap, subscribeChainLogoMaps, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeChainStatusMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeProcessingCampaign, subscribeRewardHistory, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeSwapPairs, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldMinAmountPercent, subscribeYieldPoolInfo, subscribeYieldPositionInfo, subscribeYieldReward } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -122,7 +122,6 @@ const _DataContext: DataContextType = {
         // Start the handler if it's not started or it's not a subscription and we want to renew
         if (!handler.isStarted || (!handler.isSubscription && renew)) {
           handler.start();
-
           handler.isStarted = true;
         }
 
@@ -195,6 +194,7 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeAddressBook, name: 'subscribeAddressBook', relatedStores: ['accountState'], isStartImmediately: true });
 
   _DataContext.addHandler({ ...subscribeChainStateMap, name: 'subscribeChainStateMap', relatedStores: ['chainStore'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeChainStatusMap, name: 'subscribeChainStatusMap', relatedStores: ['chainStore'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeChainInfoMap, name: 'subscribeChainInfoMap', relatedStores: ['chainStore'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeAssetRegistry, name: 'subscribeAssetRegistry', relatedStores: ['assetRegistry'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeMultiChainAssetMap, name: 'subscribeMultiChainAssetMap', relatedStores: ['assetRegistry'], isStartImmediately: true });
@@ -204,9 +204,15 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeMantaPayConfig, name: 'subscribeMantaPayConfig', relatedStores: ['mantaPay'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeMantaPaySyncingState, name: 'subscribeMantaPaySyncingState', relatedStores: ['mantaPay'], isStartImmediately: true });
 
+  _DataContext.addHandler({ ...subscribeProcessingCampaign, name: 'subscribeProcessingCampaign', relatedStores: ['campaign'], isStartImmediately: true });
+
+  _DataContext.addHandler({ ...subscribeBuyTokens, name: 'subscribeBuyTokens', relatedStores: ['buyService'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeBuyServices, name: 'subscribeBuyServices', relatedStores: ['buyService'], isStartImmediately: true });
+
   // Settings
   _DataContext.addHandler({ ...subscribeUiSettings, name: 'subscribeUiSettings', relatedStores: ['settings'], isStartImmediately: true });
-  _DataContext.addHandler({ ...getLogoMaps, name: 'getLogoMaps', relatedStores: ['settings'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeChainLogoMaps, name: 'subscribeChainLogoMaps', relatedStores: ['settings'], isStartImmediately: true });
+  _DataContext.addHandler({ ...subscribeAssetLogoMaps, name: 'subscribeAssetLogoMaps', relatedStores: ['settings'], isStartImmediately: true });
   _DataContext.addHandler({ ...subscribeAuthUrls, name: 'subscribeAuthUrls', relatedStores: ['settings'], isStartImmediately: true });
 
   // Confirmations
@@ -224,16 +230,24 @@ export const DataContextProvider = ({ children }: DataContextProviderProps) => {
   _DataContext.addHandler({ ...subscribeCrowdloan, name: 'subscribeCrowdloan', relatedStores: ['crowdloan'] });
   _DataContext.addHandler({ ...subscribeNftItems, name: 'subscribeNftItems', relatedStores: ['nft'] });
   _DataContext.addHandler({ ...subscribeNftCollections, name: 'subscribeNftCollections', relatedStores: ['nft'] });
-  // _DataContext.addHandler({ ...subscribeStaking, name: 'subscribeStaking', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeStaking, name: 'subscribeStaking', relatedStores: ['staking'] });
   _DataContext.addHandler({ ...subscribeStakingReward, name: 'subscribeStakingReward', relatedStores: ['staking'] });
-  // _DataContext.addHandler({ ...subscribeChainStakingMetadata, name: 'subscribeChainStakingMetadata', relatedStores: ['staking'] });
-  // _DataContext.addHandler({ ...subscribeStakingNominatorMetadata, name: 'subscribeStakingNominatorMetadata', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeChainStakingMetadata, name: 'subscribeChainStakingMetadata', relatedStores: ['staking'] });
+  _DataContext.addHandler({ ...subscribeStakingNominatorMetadata, name: 'subscribeStakingNominatorMetadata', relatedStores: ['staking'] });
   _DataContext.addHandler({ ...subscribeTxHistory, name: 'subscribeTxHistory', relatedStores: ['transactionHistory'] });
   _DataContext.addHandler({ ...subscribeWalletConnectSessions, name: 'subscribeWalletConnectSessions', relatedStores: ['walletConnect'] });
-  _DataContext.addHandler({ ...getDAppsData, name: 'getDAppsData', relatedStores: ['dApp'], isStartImmediately: true });
   _DataContext.addHandler({ ...getMissionPoolData, name: 'getMissionPoolData', relatedStores: ['missionPool'], isStartImmediately: true });
-  _DataContext.addHandler({ ...subscribeYieldPoolInfo, name: 'subscribeYieldPoolInfo', relatedStores: ['yieldPool'] });
-  _DataContext.addHandler({ ...subscribeYieldPositionInfo, name: 'subscribeYieldPositionInfo', relatedStores: ['yieldPool'] });
+
+  // Earning
+
+  _DataContext.addHandler({ ...subscribeYieldPoolInfo, name: 'subscribeYieldPoolInfo', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldPositionInfo, name: 'subscribeYieldPositionInfo', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldReward, name: 'subscribeYieldReward', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeRewardHistory, name: 'subscribeRewardHistory', relatedStores: ['earning'] });
+  _DataContext.addHandler({ ...subscribeYieldMinAmountPercent, name: 'subscribeYieldMinAmountPercent', relatedStores: ['earning'] });
+
+  // Swap
+  _DataContext.addHandler({ ...subscribeSwapPairs, name: 'subscribeSwapPairs', relatedStores: ['swap'] });
 
   return <Provider store={store}>
     <PersistGate persistor={persistor}>

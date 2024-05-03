@@ -1,16 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { MantaPayConfig } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getMultiChainAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
 import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AccountType } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, getAccountType, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -23,51 +23,34 @@ type ReceiveSelectedResult = {
   selectedNetwork?: string;
 };
 
-function getAccountTypeByTokenGroup (
+// Return array of chain which have token in multi chain asset
+const getChainsByTokenGroup = (
   tokenGroupSlug: string,
-  assetRegistryMap: Record<string, _ChainAsset>,
-  chainInfoMap: Record<string, _ChainInfo>): AccountType {
+  assetRegistryMap: Record<string, _ChainAsset>
+): string[] => {
   // case tokenGroupSlug is token slug
   if (assetRegistryMap[tokenGroupSlug]) {
-    const chainSlug = assetRegistryMap[tokenGroupSlug].originChain;
-
-    if (_isChainEvmCompatible(chainInfoMap[chainSlug])) {
-      return 'ETHEREUM';
-    } else {
-      return 'SUBSTRATE';
-    }
+    return [assetRegistryMap[tokenGroupSlug].originChain];
   }
 
   // case tokenGroupSlug is multiChainAsset slug
 
-  const assetRegistryItems: _ChainAsset[] = Object.values(assetRegistryMap);
+  const assetRegistryItems: _ChainAsset[] = Object.values(assetRegistryMap)
+    .filter((assetItem) => {
+      return _isAssetFungibleToken(assetItem) &&
+        _getMultiChainAsset(assetItem) === tokenGroupSlug;
+    });
 
-  const typesCheck: AccountType[] = [];
+  const map: Record<string, boolean> = {};
 
   for (const assetItem of assetRegistryItems) {
-    if (!_isAssetFungibleToken(assetItem) || (_getMultiChainAsset(assetItem) !== tokenGroupSlug)) {
-      continue;
-    }
-
     const chainSlug = assetRegistryMap[assetItem.slug].originChain;
 
-    const currentType = _isChainEvmCompatible(chainInfoMap[chainSlug]) ? 'ETHEREUM' : 'SUBSTRATE';
-
-    if (!typesCheck.includes(currentType)) {
-      typesCheck.push(currentType);
-    }
-
-    if (typesCheck.length === 2) {
-      break;
-    }
+    map[chainSlug] = true;
   }
 
-  if (!typesCheck.length || typesCheck.length === 2) {
-    return 'ALL';
-  }
-
-  return typesCheck[0];
-}
+  return Object.keys(map);
+};
 
 function isMantaPayEnabled (account: AccountJson | null, configs: MantaPayConfig[]) {
   for (const config of configs) {
@@ -82,7 +65,7 @@ function isMantaPayEnabled (account: AccountJson | null, configs: MantaPayConfig
 export default function useReceiveQR (tokenGroupSlug?: string) {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
-  const { assetRegistry: assetRegistryMap } = useSelector((root: RootState) => root.assetRegistry);
+  const assetRegistryMap = useChainAssets().chainAssetRegistry;
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const [tokenSelectorItems, setTokenSelectorItems] = useState<_ChainAsset[]>([]);
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
@@ -96,13 +79,49 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
     }
 
     if (tokenGroupSlug) {
-      const targetAccountType = getAccountTypeByTokenGroup(tokenGroupSlug, assetRegistryMap, chainInfoMap);
+      const chains = getChainsByTokenGroup(tokenGroupSlug, assetRegistryMap);
 
-      if (targetAccountType === 'ALL') {
-        return accounts.filter((a) => !checkIsAccountAll(a.address));
-      }
+      return accounts.filter((account) => {
+        const isEvm = isEthereumAddress(account.address);
+        const isAll = checkIsAccountAll(account.address);
 
-      return accounts.filter((a) => getAccountType(a.address) === targetAccountType);
+        if (isAll) {
+          return false;
+        }
+
+        if (account.isHardware) {
+          if (!isEvm) {
+            const availableGen: string[] = account.availableGenesisHashes || [];
+            const networks = availableGen
+              .map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug)
+              .filter((slug) => slug) as string[];
+
+            return networks.some((n) => chains.includes(n));
+          } else {
+            return chains.some((chain) => {
+              const info = chainInfoMap[chain];
+
+              if (info) {
+                return _isChainEvmCompatible(info);
+              } else {
+                return false;
+              }
+            });
+          }
+        } else {
+          for (const chain of chains) {
+            const info = chainInfoMap[chain];
+
+            if (info) {
+              if (isEvm === _isChainEvmCompatible(info)) {
+                return true;
+              }
+            }
+          }
+
+          return false;
+        }
+      });
     }
 
     return accounts.filter((a) => !checkIsAccountAll(a.address));

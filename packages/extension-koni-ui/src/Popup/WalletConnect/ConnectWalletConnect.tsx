@@ -2,32 +2,23 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CloseIcon, Layout, QrScannerErrorNotice, WalletConnect } from '@subwallet/extension-koni-ui/components';
-import { BaseModal } from '@subwallet/extension-koni-ui/components/Modal/BaseModal';
-import { WALLET_CONNECT_CREATE_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { ScreenContext } from '@subwallet/extension-koni-ui/contexts/ScreenContext';
-import { useDefaultNavigate, useNotification, useOpenQrScanner } from '@subwallet/extension-koni-ui/hooks';
+import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
+import { useDefaultNavigate, useOpenQrScanner } from '@subwallet/extension-koni-ui/hooks';
 import { addConnection } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
-import { validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
-import { Button, Form, Icon, Input, ModalContext, PageIcon, SwQrScanner } from '@subwallet/react-ui';
-import { SwModalProps } from '@subwallet/react-ui/es/sw-modal/SwModal';
+import { noop, validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
+import { Button, Form, Icon, Input, ModalContext, PageIcon, SwModal, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Scan } from 'phosphor-react';
+import { Scan, XCircle } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { SyntheticEvent, useCallback, useContext, useState } from 'react';
+import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
-type Props = ThemeProps & {
-  isModal?: boolean;
-  modalProps?: {
-    closeIcon?: SwModalProps['closeIcon'],
-    onCancel?: SwModalProps['onCancel'],
-  };
-  onAfterConnect?: () => void;
-};
+type Props = ThemeProps;
 
 interface AddConnectionFormState {
   uri: string;
@@ -37,30 +28,79 @@ const DEFAULT_FORM_VALUES: AddConnectionFormState = {
   uri: ''
 };
 
+const faqUrl = 'https://docs.subwallet.app/main/extension-user-guide/faqs#i-see-connection-unsuccessful-pop-up-when-connecting-to-dapp-via-walletconnect';
+const modalId = 'WALLET_CONNECT_CONFIRM_MODAL';
 const scannerId = 'connect-connection-scanner-modal';
 const showScanner = true;
+const keyRecords = 'unsuccessful_connect_wc_modal';
+let idTimeOut: NodeJS.Timeout;
+
+const getTimeOutRecords = () => {
+  return JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
+};
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, isModal, modalProps = {}, onAfterConnect } = props;
-
+  const { className } = props;
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const notification = useNotification();
   const { goHome } = useDefaultNavigate();
+  const { token } = useTheme() as Theme;
 
-  const { inactiveModal } = useContext(ModalContext);
-  const { isWebUI } = useContext(ScreenContext);
-
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const [, setTimeOutRecords] = useLocalStorage(TIME_OUT_RECORD, {});
   const [form] = Form.useForm<AddConnectionFormState>();
 
   const [loading, setLoading] = useState(false);
   const [scanError, setScanError] = useState('');
 
-  const goBack = useCallback(() => {
-    navigate('/wallet-connect/list');
-  }, [navigate]);
+  const reOpenModalWhenTimeOut = useCallback(() => {
+    const timeOutRecord = getTimeOutRecords();
 
-  const _onAfterConnect = onAfterConnect || goBack;
+    if (timeOutRecord[keyRecords]) {
+      setLoading(false);
+      activeModal(modalId);
+    }
+  }, [activeModal]);
+
+  useEffect(() => {
+    const timeOutRecord = getTimeOutRecords();
+
+    if (loading && !checkActive(modalId) && !timeOutRecord[keyRecords]) {
+      idTimeOut = setTimeout(reOpenModalWhenTimeOut, 20000);
+      setTimeOutRecords({ ...timeOutRecord, [keyRecords]: idTimeOut });
+    } else if (timeOutRecord[keyRecords]) {
+      setLoading(false);
+    }
+  }, [checkActive, loading, reOpenModalWhenTimeOut, setTimeOutRecords]);
+
+  const onClickToFAQ = useCallback((isDismiss: boolean) => {
+    return () => {
+      const timeOutRecord = getTimeOutRecords();
+
+      clearTimeout(idTimeOut);
+      delete timeOutRecord[keyRecords];
+      !isDismiss && window.open(faqUrl, '_blank');
+      inactiveModal(modalId);
+      form.setFieldValue('uri', DEFAULT_FORM_VALUES.uri);
+      setTimeOutRecords(timeOutRecord);
+    };
+  }, [form, inactiveModal, setTimeOutRecords]);
+
+  const footerModalWC = useMemo(() => {
+    return (
+      <div className={'__footer-wc-modal'}>
+        <Button
+          block={true}
+          onClick={onClickToFAQ(true)}
+          schema={'secondary'}
+        >{t('Dismiss')}</Button>
+        <Button
+          block={true}
+          onClick={onClickToFAQ(false)}
+        >{t('Review guide')}</Button>
+      </div>
+    );
+  }, [onClickToFAQ, t]);
 
   const onConnect = useCallback((uri: string) => {
     setLoading(true);
@@ -68,26 +108,13 @@ const Component: React.FC<Props> = (props: Props) => {
     addConnection({
       uri
     })
-      .then(() => {
-        setLoading(false);
-        _onAfterConnect();
-        form.resetFields();
-      })
+      .then(noop)
       .catch((e) => {
         console.error(e);
-        const errMessage = (e as Error).message;
-        const message = errMessage.includes('Pairing already exists') ? t('Connection already exists') : t('Fail to add connection');
-
-        notification({
-          type: 'error',
-          message: message
-        });
         setLoading(false);
-      })
-      .finally(() => {
-        setLoading(false);
+        activeModal(modalId);
       });
-  }, [_onAfterConnect, form, notification, t]);
+  }, [activeModal]);
 
   const onFinish: FormCallbacks<AddConnectionFormState>['onFinish'] = useCallback((values: AddConnectionFormState) => {
     const { uri } = values;
@@ -126,6 +153,10 @@ const Component: React.FC<Props> = (props: Props) => {
     setScanError(error);
   }, []);
 
+  const goBack = useCallback(() => {
+    navigate('/wallet-connect/list');
+  }, [navigate]);
+
   const uriValidator = useCallback((rule: RuleObject, uri: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       const error = validWalletConnectUri(uri, t);
@@ -138,130 +169,9 @@ const Component: React.FC<Props> = (props: Props) => {
     });
   }, [t]);
 
-  const onCloseModal = useCallback(() => {
-    modalProps?.onCancel?.();
-    form.resetFields();
-  }, [form, modalProps]);
-
-  const contentNode = (
-    <div className='body-container'>
-      <div className='description'>
-        {t('By clicking "Connect", you allow this dapp to view your public address')}
-      </div>
-      <div className='page-icon'>
-        <PageIcon
-          color='var(--page-icon-color)'
-          iconProps={{
-            customIcon: (
-              <WalletConnect
-                height='1em'
-                width='1em'
-              />
-            ),
-            type: 'customIcon'
-          }}
-        />
-      </div>
-      <Form
-        form={form}
-        initialValues={DEFAULT_FORM_VALUES}
-        onFinish={onFinish}
-      >
-        <Form.Item
-          name={'uri'}
-          rules={[
-            {
-              required: true,
-              message: t('URI is required')
-            },
-            {
-              validator: uriValidator
-            }
-          ]}
-          statusHelpAsTooltip={true}
-        >
-          <Input
-            disabled={loading}
-            label={t('URI')}
-            placeholder={t('Please type or paste or scan URI')}
-            suffix={(
-              <>
-                {
-                  showScanner && (
-                    <Button
-                      disabled={loading}
-                      icon={(
-                        <Icon
-                          phosphorIcon={Scan}
-                          size='sm'
-                        />
-                      )}
-                      onClick={onOpenScan}
-                      size='xs'
-                      type='ghost'
-                    />
-                  )
-                }
-              </>
-            )}
-          />
-        </Form.Item>
-      </Form>
-      {
-        showScanner && (
-          <SwQrScanner
-            className={className}
-            id={scannerId}
-            isError={!!scanError}
-            onClose={onCloseScan}
-            onError={onScanError}
-            onSuccess={onSuccess}
-            overlay={scanError && <QrScannerErrorNotice message={scanError} />}
-            selectCameraMotion={isWebUI ? 'move-right' : undefined}
-          />
-        )
-      }
-    </div>
-  );
-
-  if (isModal) {
-    return (
-      <BaseModal
-        className={CN(className, '-modal')}
-        closeIcon={modalProps?.closeIcon}
-        id={WALLET_CONNECT_CREATE_MODAL}
-        onCancel={onCloseModal}
-        title={t('WalletConnect')}
-      >
-        {contentNode}
-
-        <div className='__footer'>
-          <Button
-            block={true}
-            icon={
-              <Icon
-                customIcon={(
-                  <WalletConnect
-                    height='1em'
-                    width='1em'
-                  />
-                )}
-                type='customIcon'
-              />
-            }
-            loading={loading}
-            onClick={form.submit}
-          >
-            {t('Connect')}
-          </Button>
-        </div>
-      </BaseModal>
-    );
-  }
-
   return (
     <Layout.WithSubHeaderOnly
-      className={CN(className, 'setting-pages')}
+      className={CN(className)}
       onBack={goBack}
       rightFooterButton={{
         children: t('Connect'),
@@ -285,7 +195,106 @@ const Component: React.FC<Props> = (props: Props) => {
       }]}
       title={t('WalletConnect')}
     >
-      {contentNode}
+      <div className='body-container'>
+        <div className='description'>
+          {t('By clicking "Connect", you allow this dapp to view your public address')}
+        </div>
+        <div className='page-icon'>
+          <PageIcon
+            color='var(--page-icon-color)'
+            iconProps={{
+              customIcon: (
+                <WalletConnect
+                  height='1em'
+                  width='1em'
+                />
+              ),
+              type: 'customIcon'
+            }}
+          />
+        </div>
+        <Form
+          form={form}
+          initialValues={DEFAULT_FORM_VALUES}
+          onFinish={onFinish}
+        >
+          <Form.Item
+            name={'uri'}
+            rules={[
+              {
+                required: true,
+                message: t('URI is required')
+              },
+              {
+                validator: uriValidator
+              }
+            ]}
+            statusHelpAsTooltip={true}
+          >
+            <Input
+              disabled={loading}
+              label={t('URI')}
+              placeholder={t('Please type or paste or scan URI')}
+              suffix={(
+                <>
+                  {
+                    showScanner && (
+                      <Button
+                        disabled={loading}
+                        icon={(
+                          <Icon
+                            phosphorIcon={Scan}
+                            size='sm'
+                          />
+                        )}
+                        onClick={onOpenScan}
+                        size='xs'
+                        type='ghost'
+                      />
+                    )
+                  }
+                </>
+              )}
+            />
+          </Form.Item>
+        </Form>
+        {
+          showScanner && (
+            <SwQrScanner
+              className={className}
+              id={scannerId}
+              isError={!!scanError}
+              onClose={onCloseScan}
+              onError={onScanError}
+              onSuccess={onSuccess}
+              overlay={scanError && <QrScannerErrorNotice message={scanError} />}
+            />
+          )
+        }
+      </div>
+      <SwModal
+        className={className}
+        closable={true}
+        footer={footerModalWC}
+        id={modalId}
+        onCancel={onClickToFAQ(true)}
+        title={t('Connection unsuccessful')}
+      >
+        <div className='__wc-modal-container'>
+          <div className='page-icon'>
+            <PageIcon
+              color={token.colorError}
+              iconProps={{
+                weight: 'fill',
+                phosphorIcon: XCircle
+              }}
+            />
+          </div>
+          <div className={'__wc-modal-content'}>
+            {t('Connection unsuccessful. Review our user guide and try connecting again.')}
+          </div>
+        </div>
+      </SwModal>
     </Layout.WithSubHeaderOnly>
   );
 };
@@ -315,22 +324,27 @@ const ConnectWalletConnect = styled(Component)<Props>(({ theme: { token } }: Pro
         minWidth: token.sizeXS
       }
     },
+    '.__wc-modal-container': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      marginBottom: -token.margin
+    },
 
-    '&.-modal': {
-      '.body-container': {
-        paddingLeft: 0,
-        paddingRight: 0
-      },
+    '.__wc-modal-content': {
+      color: token.colorTextTertiary,
+      padding: '0 16px',
+      textAlign: 'center',
+      marginTop: token.marginMD
+    },
 
-      '.page-icon': {
-        marginTop: token.marginXL,
-        marginBottom: token.marginXL
-      },
-
-      '.__footer': {
-        paddingTop: token.paddingXS
+    '.ant-sw-modal-footer': {
+      borderTop: 0,
+      '.__footer-wc-modal': {
+        display: 'flex'
       }
     }
+
   };
 });
 

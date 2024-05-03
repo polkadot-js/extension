@@ -100,9 +100,9 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   ) {
     result.supportTransfer = false;
     result.supportTransferAll = false;
-  } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
+  // } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
+  //   result.supportTransfer = true;
+  //   result.supportTransferAll = true;
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
     result.supportTransfer = true;
     result.supportTransferAll = true;
@@ -119,8 +119,11 @@ export async function checkSupportTransfer (networkKey: string, tokenInfo: _Chai
   //   result.supportTransfer = true;
   //   result.supportTransferAll = true;
   } else if (_TRANSFER_CHAIN_GROUP.avail.includes(networkKey)) {
-    result.supportTransfer = false;
-    result.supportTransferAll = false;
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
+  } else if (_TRANSFER_CHAIN_GROUP.centrifuge.includes(networkKey)) {
+    result.supportTransfer = true;
+    result.supportTransferAll = true;
   }
 
   return result;
@@ -156,19 +159,29 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     // @ts-ignore
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
-  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
-    transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+  } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey)) {
+    if (!_isNativeToken(tokenInfo)) {
+      if (isTxCurrenciesSupported) {
+        transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
+      }
+    } else {
+      if (transferAll) {
+        transfer = api.tx.balances.transferAll(to, false);
+      } else if (value) {
+        transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+      }
+    }
   } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && isTxTokensSupported) {
     if (transferAll) {
       transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
-  } else if (_TRANSFER_CHAIN_GROUP.pendulum.includes(networkKey) && isTxTokensSupported) {
+  } else if (_TRANSFER_CHAIN_GROUP.pendulum.includes(networkKey) && isTxTokensSupported && !_isNativeToken(tokenInfo)) {
     if (transferAll) {
-      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo), false);
+      transfer = api.tx.tokens.transferAll(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), false);
     } else if (value) {
-      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo), new BN(value));
+      transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
   } else if (
     _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
@@ -176,12 +189,12 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   ) {
     // transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
     /* empty */
-  } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
-    if (transferAll) {
-      transfer = api.tx.kton.transferAll(to, false);
-    } else if (value) {
-      transfer = api.tx.kton.transfer(to, new BN(value));
-    }
+  // } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
+  //   if (transferAll) {
+  //     transfer = api.tx.kton.transferAll(to, false);
+  //   } else if (value) {
+  //     transfer = api.tx.kton.transfer(to, new BN(value));
+  //   }
   } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
@@ -193,10 +206,18 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
+    if (_TRANSFER_CHAIN_GROUP.disable_transfer.includes(networkKey)) {
+      return [null, transferAmount || value];
+    }
+
     if (transferAll) {
       transfer = api.tx.balances.transferAll(to, false);
     } else if (value) {
-      transfer = api.tx.balances.transfer(to, new BN(value));
+      if (api.tx.balances.transferKeepAlive) {
+        transfer = api.tx.balances.transferKeepAlive(to, new BN(value));
+      } else {
+        transfer = api.tx.balances.transfer(to, new BN(value));
+      }
     }
   }
 

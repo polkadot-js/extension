@@ -87,6 +87,12 @@ export class SubWalletEvmProvider extends SafeEventEmitter implements EvmProvide
   }
 
   request<T> ({ method, params }: RequestArguments): Promise<T> {
+    // if (!this._isEnable) {
+    //   if (method === 'eth_accounts') {
+    //     return this.request<T>({ method: 'eth_requestAccounts' });
+    //   }
+    // }
+
     // Subscribe events
     switch (method) {
       case 'eth_requestAccounts':

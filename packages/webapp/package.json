@@ -1,7 +1,7 @@
 {
   "author": "Koni Studio",
   "bugs": "https://github.com/Koniverse/Subwallet-V2/issues",
-  "buildNumber": "1158002",
+  "buildNumber": "1160001",
   "contributors": [],
   "description": "A web runner simulate background.js can be use on mobile or environment support web view",
   "homepage": "https://github.com/Koniverse/Subwallet-V2/tree/master/packages/webapp#readme",
@@ -15,7 +15,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "1.1.61-1",
+  "version": "1.1.61",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@subwallet/extension-base": "^1.1.61-1",

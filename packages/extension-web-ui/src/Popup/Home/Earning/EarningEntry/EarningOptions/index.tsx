@@ -1,16 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
-import { YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { BN_ZERO } from '@subwallet/extension-base/utils';
 import { EarningInstructionModal, EarningOptionDesktopItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
 import { EarningOptionItem } from '@subwallet/extension-web-ui/components/Earning';
 import { ASTAR_PORTAL_URL, DEFAULT_EARN_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-web-ui/constants';
+import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useFilterModal, useHandleChainConnection, useSelector, useTranslation, useYieldGroupInfo } from '@subwallet/extension-web-ui/hooks';
+import { getBalanceValue } from '@subwallet/extension-web-ui/hooks/screen/home/useAccountBalance';
 import { ChainConnectionWrapper } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/ChainConnectionWrapper';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
-import { EarningEntryView, EarningPoolsParam, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { EarningEntryView, EarningPoolsParam, NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -53,11 +58,6 @@ const alertModalId = 'earning-options-alert-modal';
 
 const FILTER_MODAL_ID = 'earning-options-filter-modal';
 
-enum FilterOptionType {
-  MAIN_NETWORK = 'MAIN_NETWORK',
-  TEST_NETWORK = 'TEST_NETWORK',
-}
-
 const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 function Component ({ className, earningPositions, setEntryView }: Props) {
@@ -74,13 +74,14 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
+  const { accountBalance: { tokenBalanceMap } } = useContext(HomeContext);
 
   const [, setEarnStorage] = useLocalStorage(EARN_TRANSACTION, DEFAULT_EARN_PARAMS);
-
   const [selectedPoolGroup, setSelectedPoolGroup] = React.useState<YieldGroupInfo | undefined>(undefined);
   const [searchInput, setSearchInput] = useState<string>('');
+  const [poolSlug, setPoolSlug] = useState<string>('');
 
-  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID, [FilterOptionType.MAIN_NETWORK]);
+  const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const { activeModal } = useContext(ModalContext);
 
@@ -100,8 +101,8 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
   }, [data]);
 
   const filterOptions = useMemo(() => [
-    { label: t('Mainnet'), value: FilterOptionType.MAIN_NETWORK },
-    { label: t('Testnet'), value: FilterOptionType.TEST_NETWORK }
+    { label: t('Mainnet'), value: NetworkType.MAIN_NETWORK },
+    { label: t('Testnet'), value: NetworkType.TEST_NETWORK }
   ], [t]);
 
   const filterFunction = useMemo<(item: YieldGroupInfo) => boolean>(() => {
@@ -115,11 +116,11 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
       }
 
       if (selectedFilters.length === 1) {
-        if (selectedFilters.includes(FilterOptionType.MAIN_NETWORK)) {
+        if (selectedFilters.includes(NetworkType.MAIN_NETWORK)) {
           return !item.isTestnet;
         }
 
-        if (selectedFilters.includes(FilterOptionType.TEST_NETWORK)) {
+        if (selectedFilters.includes(NetworkType.TEST_NETWORK)) {
           return item.isTestnet;
         }
       }
@@ -202,19 +203,14 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
 
       setSelectedPoolGroup(item);
 
-      if (item.poolListLength > 1) {
-        navigate('/home/earning/pools', { state: {
-          poolGroup: item.group,
-          symbol: item.symbol
-        } as EarningPoolsParam });
-      } else if (item.poolListLength === 1) {
-        const poolInfo = poolInfoMap[item.poolSlugs[0]];
-
+      const processPoolOptions = (poolInfo: YieldPoolInfo, item: YieldGroupInfo) => {
         if (!poolInfo) {
           // will not happen
 
           return;
         }
+
+        setPoolSlug(poolInfo.slug);
 
         const altChain = getAltChain(poolInfo);
 
@@ -234,14 +230,70 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
           return;
         }
 
-        if (positionSlugs.includes(item.poolSlugs[0])) {
-          navigateToEarnTransaction(item.poolSlugs[0], item.chain);
+        if (positionSlugs.includes(poolInfo.slug)) {
+          navigateToEarnTransaction(poolInfo.slug, item.chain);
         } else {
           activeModal(instructionModalId);
         }
+      };
+
+      if (item.poolListLength > 1) {
+        let isHiddenPool = false;
+
+        if (item.poolListLength === 2) {
+          item.poolSlugs.forEach((poolSlug) => {
+            const poolInfo = poolInfoMap[poolSlug];
+
+            if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
+              let minJoinPool: string;
+
+              if (poolInfo.statistic && !positionSlugs.includes(poolSlug)) {
+                minJoinPool = poolInfo.statistic.earningThreshold.join;
+              } else {
+                minJoinPool = '0';
+              }
+
+              let nativeSlug: string | undefined;
+
+              const nativeAsset = poolInfo && poolInfo?.statistic?.assetEarning.find((item) => item.slug.toLowerCase().includes('native'));
+
+              if (nativeAsset) {
+                nativeSlug = nativeAsset.slug;
+              }
+
+              const assetInfo = nativeSlug && assetRegistry[nativeSlug];
+              const minJoinPoolBalanceValue = (assetInfo && getBalanceValue(minJoinPool, _getAssetDecimals(assetInfo))) || BN_ZERO;
+
+              const availableBalance = (nativeSlug && tokenBalanceMap[nativeSlug] && tokenBalanceMap[nativeSlug].free.value) || BN_ZERO;
+
+              if (_STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain) && minJoinPoolBalanceValue.isGreaterThan(availableBalance)) {
+                isHiddenPool = true;
+              }
+            }
+          });
+        }
+
+        if (isHiddenPool && item.poolListLength === 2) {
+          const index = item.poolSlugs.findIndex((item) => item.includes(YieldPoolType.NOMINATION_POOL.toLowerCase()));
+
+          const poolInfo = poolInfoMap[item.poolSlugs[index]];
+
+          processPoolOptions(poolInfo, item);
+        } else {
+          navigate('/home/earning/pools', {
+            state: {
+              poolGroup: item.group,
+              symbol: item.symbol
+            } as EarningPoolsParam
+          });
+        }
+      } else {
+        const poolInfo = poolInfoMap[item.poolSlugs[0]];
+
+        processPoolOptions(poolInfo, item);
       }
     };
-  }, [activeModal, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t]);
+  }, [activeModal, assetRegistry, checkChainConnected, closeAlert, getAltChain, navigate, navigateToEarnTransaction, onConnectChain, openAlert, openConnectChainModal, poolInfoMap, positionSlugs, t, tokenBalanceMap]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {
@@ -403,7 +455,7 @@ function Component ({ className, earningPositions, setEntryView }: Props) {
             isShowStakeMoreButton={true}
             onStakeMore={navigateToEarnTransaction}
             openAlert={openAlert}
-            poolInfo={poolInfoMap[selectedPoolGroup.poolSlugs[0]]}
+            poolInfo={poolInfoMap[poolSlug]}
           />
         )
       }

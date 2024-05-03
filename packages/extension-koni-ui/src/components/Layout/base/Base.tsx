@@ -152,7 +152,7 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
     }
   },
 
-  '&.disable-header .ant-sw-screen-layout-header': {
+  '&.disable-header > .ant-sw-screen-layout-header': {
     opacity: '0.4',
     pointerEvents: 'none'
 

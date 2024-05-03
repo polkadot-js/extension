@@ -378,7 +378,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const activeEraInfo = _activeEraInfo.toPrimitive() as unknown as PalletStakingActiveEraInfo;
     const activeEra = activeEraInfo.index;
 
-    const allValidators: string[] = [];
+    const allValidatorAddresses: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
 
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
@@ -429,8 +429,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       }
     }
 
-    const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
-
     const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
@@ -477,7 +475,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           }
         }
 
-        allValidators.push(validatorAddress);
+        allValidatorAddresses.push(validatorAddress);
 
         validatorInfoList.push({
           address: validatorAddress,
@@ -500,7 +498,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
 
-    await Promise.all(allValidators.map(async (address) => {
+    await Promise.all(allValidatorAddresses.map(async (address) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const [_commissionInfo, [identity, isVerified]] = await Promise.all([
         chainApi.api.query.staking.validators(address),
@@ -524,17 +522,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
 
-      if (_STAKING_CHAIN_GROUP.aleph.includes(this.chain)) {
-        validator.expectedReturn = calculateAlephZeroValidatorReturn(poolInfo.statistic.totalApy as number, getCommission(commission));
-      } else if (_STAKING_CHAIN_GROUP.ternoa.includes(this.chain)) {
-        const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidators.length).div(bnDecimals);
-        const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
-
-        validator.expectedReturn = calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
-      } else {
-        validator.expectedReturn = calculateValidatorStakedReturn(poolInfo.statistic.totalApy as number, bnValidatorStake, bnAvgStake, getCommission(commission));
-      }
-
+      validator.expectedReturn = this.getValidatorExpectedReturn(this.chain, validator, poolInfo.statistic.totalApy as number, commission, _stakingRewards, allValidatorAddresses, bnDecimals, totalStakeMap, bnValidatorStake, bnAvgStake);
       validator.commission = parseFloat(commission.split('%')[0]);
       validator.blocked = extraInfoMap[validator.address].blocked;
       validator.identity = extraInfoMap[validator.address].identity;
@@ -542,6 +530,20 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     return validatorInfoList;
+  }
+
+  private getValidatorExpectedReturn(chain: string, validator: ValidatorInfo, totalApy: number, commission: string, _stakingRewards: Codec, allValidatorAddresses: string[], bnDecimals: BN, totalStakeMap: Record<string, BN>, bnValidatorStake: BN, bnAvgStake: BN) {
+    if (_STAKING_CHAIN_GROUP.aleph.includes(chain)) {
+      return calculateAlephZeroValidatorReturn(totalApy, getCommission(commission));
+    } else if (_STAKING_CHAIN_GROUP.ternoa.includes(chain)) {
+      const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
+      const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidatorAddresses.length).div(bnDecimals);
+      const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
+
+      return calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
+    } else {
+      return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, getCommission(commission));
+    }
   }
 
   /* Get pool targets */

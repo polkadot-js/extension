@@ -7,7 +7,7 @@ import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, PalletStakingEraRewardPoints, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, PalletStakingEraRewardPoints, PalletStakingValidatorPrefs, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import BigNumber from 'bignumber.js';
@@ -621,6 +621,23 @@ export function getTopValidatorByPoints (validatorPointsList: Record<string, Big
   const top50PercentRecord = Object.fromEntries(top50PercentEntries);
 
   return Object.keys(top50PercentRecord);
+}
+
+export function getBlockedValidatorList (validators: any[]) {
+  const blockValidatorList: string[] = [];
+
+  for (const validator of validators) {
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (isBlocked) {
+      blockValidatorList.push(validatorAddress);
+    }
+  }
+
+  return blockValidatorList
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
 import { MissionCategoryType } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -10,7 +11,7 @@ import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
 import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, TwitterLogo, User } from 'phosphor-react';
+import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, User } from 'phosphor-react';
 import { IconWeight } from 'phosphor-react/src/lib';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -283,10 +284,11 @@ function Component (props: Props): React.ReactElement<Props> {
           <Button
             className={'__item-icon-button'}
             icon={(
-              <Icon
-                phosphorIcon={TwitterLogo}
-                size={'sm'}
-                weight={'fill'}
+              <Image
+                height={20}
+                shape='squircle'
+                src={DefaultLogosMap.xtwitter}
+                width={20}
               />
             )}
             onClick={onClickTwitterIcon}
@@ -321,6 +323,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
     borderRadius: token.borderRadiusLG,
     position: 'relative',
     cursor: 'pointer',
+    overflow: 'hidden',
 
     '.ant-number .ant-typography': {
       fontSize: 'inherit !important',
@@ -336,7 +339,7 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       position: 'absolute',
       top: 0,
       left: 0,
-      filter: 'blur(7.5px)',
+      filter: 'blur(8px)',
       right: 0
     },
     '.__separator': {

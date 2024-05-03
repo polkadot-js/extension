@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
 import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
 import NetworkGroup from '@subwallet/extension-web-ui/components/MetaInfo/parts/NetworkGroup';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
@@ -10,7 +11,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
-import { GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
+import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -57,6 +58,13 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
     inactiveModal(modalId);
   }, [inactiveModal]);
 
+  const modalCloseButton = <Icon
+    customSize={'24px'}
+    phosphorIcon={CaretLeft}
+    type='phosphor'
+    weight={'light'}
+  />;
+
   const status = useMemo(() => {
     if (
       data?.status && missionCategoryMap[data?.status]
@@ -74,9 +82,10 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
   return (
     <BaseModal
       className={`${className}`}
+      closeIcon={modalCloseButton}
       id={modalId}
       onCancel={onCancel}
-      title={t('Mission details')}
+      title={t(data?.name || 'Mission details')}
     >
       {
         data && (
@@ -185,10 +194,11 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 <Button
                   className={'__modal-icon-button'}
                   icon={(
-                    <Icon
-                      phosphorIcon={TwitterLogo}
-                      size={'sm'}
-                      weight={'fill'}
+                    <Image
+                      height={20}
+                      shape='squircle'
+                      src={DefaultLogosMap.xtwitter}
+                      width={20}
                     />
                   )}
                   onClick={onClickTwitterIcon}
@@ -232,8 +242,6 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     '.__modal-separator': {
       height: 2,
       marginBottom: token.marginLG,
-      marginLeft: -token.margin,
-      marginRight: -token.margin,
       backgroundColor: 'rgba(33, 33, 33, 0.80)'
     },
 
@@ -289,7 +297,7 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     },
 
     '.__modal-footer': {
-      marginTop: token.paddingLG,
+      paddingTop: token.paddingMD,
       paddingBottom: token.padding,
       paddingLeft: token.padding,
       paddingRight: token.padding,

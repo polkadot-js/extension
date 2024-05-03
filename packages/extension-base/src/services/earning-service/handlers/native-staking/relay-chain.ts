@@ -9,7 +9,7 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP, _UPDATED_RUNTIME_STAKING_GROUP, MaxEraRewardPointsEras } from '@subwallet/extension-base/services/earning-service/constants';
-import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
+import { applyDecimal, parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, SpStakingExposurePage, SpStakingPagedExposureMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -360,8 +360,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   /* Get pool targets */
 
   async getPoolTargets (): Promise<ValidatorInfo[]> {
-    const decimals = this.nativeToken.decimals || 0;
-
     const chainApi = await this.substrateApi.isReady;
     const poolInfo = await this.getPoolInfo();
 
@@ -437,7 +435,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const minBond = rawMinBond.replaceAll(',', '');
 
     const totalStakeMap: Record<string, BN> = {};
-    const bnDecimals = new BN((10 ** decimals).toString());
 
     const eraStakers = _eraStakers as unknown as any[];
 
@@ -515,15 +512,15 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       } as ValidatorExtraInfo;
     }));
 
-    const bnAvgStake = bnTotalEraStake.divn(validatorInfoList.length).div(bnDecimals);
+    const decimals = this.nativeToken.decimals || 0;
+    const bnAvgStake = applyDecimal(bnTotalEraStake.divn(validatorInfoList.length), decimals);
 
     for (const validator of validatorInfoList) {
-      const commission = extraInfoMap[validator.address].commission;
+      const commissionString = extraInfoMap[validator.address].commission;
+      const commission = getCommission(commissionString);
 
-      const bnValidatorStake = totalStakeMap[validator.address].div(bnDecimals);
-
-      validator.expectedReturn = this.getValidatorExpectedReturn(this.chain, validator, poolInfo.statistic.totalApy as number, commission, _stakingRewards, allValidatorAddresses, bnDecimals, totalStakeMap, bnValidatorStake, bnAvgStake);
-      validator.commission = parseFloat(commission.split('%')[0]);
+      validator.expectedReturn = this.getValidatorExpectedReturn(this.chain, validator, poolInfo.statistic.totalApy as number, commission, _stakingRewards, allValidatorAddresses, decimals, totalStakeMap, bnAvgStake);
+      validator.commission = commission;
       validator.blocked = extraInfoMap[validator.address].blocked;
       validator.identity = extraInfoMap[validator.address].identity;
       validator.isVerified = extraInfoMap[validator.address].isVerified;
@@ -532,17 +529,18 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     return validatorInfoList;
   }
 
-  private getValidatorExpectedReturn(chain: string, validator: ValidatorInfo, totalApy: number, commission: string, _stakingRewards: Codec, allValidatorAddresses: string[], bnDecimals: BN, totalStakeMap: Record<string, BN>, bnValidatorStake: BN, bnAvgStake: BN) {
+  private getValidatorExpectedReturn(chain: string, validator: ValidatorInfo, totalApy: number, commission: number, _stakingRewards: Codec, allValidatorAddresses: string[], decimals: number, totalStakeMap: Record<string, BN>, bnAvgStake: BN) {
     if (_STAKING_CHAIN_GROUP.aleph.includes(chain)) {
-      return calculateAlephZeroValidatorReturn(totalApy, getCommission(commission));
+      return calculateAlephZeroValidatorReturn(totalApy, commission);
     } else if (_STAKING_CHAIN_GROUP.ternoa.includes(chain)) {
       const stakingRewards = _stakingRewards?.toPrimitive() as unknown as TernoaStakingRewardsStakingRewardsData;
-      const rewardPerValidator = new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidatorAddresses.length).div(bnDecimals);
-      const validatorStake = totalStakeMap[validator.address].div(bnDecimals).toNumber();
+      const rewardPerValidator = applyDecimal(new BN(stakingRewards.sessionExtraRewardPayout).divn(allValidatorAddresses.length), decimals);
+      const validatorStake = applyDecimal(totalStakeMap[validator.address], decimals).toNumber();
 
-      return calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, getCommission(commission));
+      return calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, commission);
     } else {
-      return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, getCommission(commission));
+      const bnValidatorStake = applyDecimal(totalStakeMap[validator.address], decimals);
+      return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, commission);
     }
   }
 

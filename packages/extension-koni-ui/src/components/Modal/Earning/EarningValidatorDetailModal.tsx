@@ -67,7 +67,7 @@ function Component (props: Props): React.ReactElement<Props> {
   const ratePercent = useMemo(() => {
     const rate = maxPoolMembersValue && (nominatorCount / maxPoolMembersValue);
 
-    if (rate) {
+    if (rate !== undefined) {
       if (rate < 0.9) {
         return 'default';
       } else if (rate >= 0.9 && rate < 1) {

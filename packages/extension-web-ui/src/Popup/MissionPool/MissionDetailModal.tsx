@@ -195,9 +195,9 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   className={'__modal-icon-button'}
                   icon={(
                     <Image
-                      height={20}
-                      shape='squircle'
-                      src={DefaultLogosMap.xtwitter}
+                      height={18}
+                      shape='circle'
+                      src={DefaultLogosMap.xtwitter_transparent}
                       width={20}
                     />
                   )}
@@ -232,6 +232,20 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
 
 export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    '&.-mobile': {
+      '.ant-sw-modal-content': {
+        minHeight: '100%'
+      },
+      '.ant-sw-modal-header': {
+        borderBottom: 0
+      },
+      '.__modal-separator': {
+        marginBottom: token.margin,
+        marginLeft: 0,
+        marginRight: 0
+      }
+    },
+
     '.__modal-background': {
       height: 70,
       backgroundPosition: 'center',
@@ -241,6 +255,8 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
 
     '.__modal-separator': {
       height: 2,
+      marginLeft: -token.margin,
+      marginRight: -token.margin,
       marginBottom: token.marginLG,
       backgroundColor: 'rgba(33, 33, 33, 0.80)'
     },

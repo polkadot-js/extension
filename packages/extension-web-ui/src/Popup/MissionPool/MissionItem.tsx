@@ -204,15 +204,11 @@ function Component (props: Props): React.ReactElement<Props> {
                 {data.name || ''}
               </div>
             </div>
-            <div className={'__compact-item-content-part-2'}>
-              <div className={'__compact-item-value-row'}>
-                <div className='__compact-item-date-time'>{timeline}</div>
-              </div>
-              <div className={'__compact-item-value-row'}>
-                <div className='__compact-item-label'>{t('Rewards')}:</div>
-                <div className='__compact-item-value'>
-                  {data.reward}
-                </div>
+            <div className='__compact-item-date-time'>{timeline}</div>
+            <div className={'__compact-item-value-row'}>
+              <div className='__compact-item-label'>{t('Rewards')}:&nbsp;</div>
+              <div className='__compact-item-value'>
+                {data.reward}
               </div>
             </div>
             <div className={'__separator'}></div>
@@ -285,9 +281,9 @@ function Component (props: Props): React.ReactElement<Props> {
             className={'__item-icon-button'}
             icon={(
               <Image
-                height={20}
-                shape='squircle'
-                src={DefaultLogosMap.xtwitter}
+                height={18}
+                shape='circle'
+                src={DefaultLogosMap.xtwitter_transparent}
                 width={20}
               />
             )}
@@ -486,17 +482,26 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         gap: token.size
       },
 
-      '.__compact-item-content-part-2': {
-        overflow: 'hidden'
-      },
-      '.__compact-item-content-part-2 .__compact-item-value-row': {
+      '.__compact-item-value-row': {
+        display: 'flex',
         color: token.colorTextTertiary,
         fontSize: token.fontSize,
         lineHeight: token.lineHeight,
         fontWeight: token.fontWeightStrong
       },
-      '.__compact-item-content-part-2 .__compact-item-date-time': {
-        color: token.colorTextTertiary
+
+      '.__compact-item-value-row .__compact-item-value': {
+        color: token.colorSuccess,
+        fontWeight: token.headingFontWeight,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
+      },
+      '.__compact-item-date-time, .__compact-item-value-row': {
+        fontSize: token.fontSizeSM,
+        lineHeight: token.lineHeightSM,
+        color: token.colorTextTertiary,
+        fontWeight: token.bodyFontWeight
       },
 
       '.__compact-item-name': {
@@ -517,24 +522,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         gap: token.sizeXXS
       },
 
-      '.__compact-item-value-row': {
-        display: 'flex',
-        fontSize: token.fontSizeSM,
-        lineHeight: token.lineHeightSM,
-        fontWeight: token.bodyFontWeight,
-        gap: token.sizeXXS,
-        overflow: 'hidden'
-      },
-
       '.__compact-item-label': {
         color: token.colorTextLight4
-      },
-
-      '.__compact-item-date-time': {
-        color: token.colorTextLight4,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap'
       },
 
       '.__compact-item-value': {

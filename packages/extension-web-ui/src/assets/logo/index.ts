@@ -35,6 +35,7 @@ export const DefaultLogosMap: Record<string, string> = {
   nova: '/images/projects/nova-wallet.png',
   nova_mc: '/images/projects/nova-wallet-monochrome.svg',
   xtwitter: '/images/projects/xtwitter.png',
+  xtwitter_transparent: '/images/projects/xtwitter_transparent.png',
   chain_flip: '/images/projects/chainflip-mainnet.png',
   hydradx: '/images/projects/hydradx.png'
 };

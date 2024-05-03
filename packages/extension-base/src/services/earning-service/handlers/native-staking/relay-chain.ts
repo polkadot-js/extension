@@ -383,7 +383,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
     const endEraForPoints = parseInt(activeEra) - 1;
-    let startEraForPoints = endEraForPoints - maxEraRewardPointsEras + 1;
+    let startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
 
     let _eraStakersPromise;
 

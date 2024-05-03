@@ -376,9 +376,6 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const activeEraInfo = _activeEraInfo.toPrimitive() as unknown as PalletStakingActiveEraInfo;
     const activeEra = activeEraInfo.index;
 
-    const allValidatorAddresses: string[] = [];
-    const validatorInfoList: ValidatorInfo[] = [];
-
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
     const endEraForPoints = parseInt(activeEra) - 1;
     let startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
@@ -434,64 +431,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const rawMinBond = _minBond.toHuman() as string;
     const minBond = rawMinBond.replaceAll(',', '');
 
-    const totalStakeMap: Record<string, BN> = {};
-
-    const eraStakers = _eraStakers as unknown as any[];
-
-    for (const item of eraStakers) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const rawValidatorInfo = item[0].toHuman() as any[];
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const rawValidatorStat = item[1].toPrimitive() as SpStakingPagedExposureMetadata;
-
-      const validatorAddress = rawValidatorInfo[1] as string;
-
-      if (!blockValidatorList.includes(validatorAddress)) {
-        let isTopQuartile = false;
-
-        if (topValidatorList.includes(validatorAddress)) {
-          isTopQuartile = true;
-        }
-
-        const bnTotalStake = new BN(rawValidatorStat.total);
-        const bnOwnStake = new BN(rawValidatorStat.own);
-        const otherStake = bnTotalStake.sub(bnOwnStake);
-
-        totalStakeMap[validatorAddress] = bnTotalStake;
-
-        let nominatorCount = 0;
-
-        if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) {
-          nominatorCount = rawValidatorStat.nominatorCount;
-        } else {
-          if ('others' in rawValidatorStat) { // todo: handle interfaces and types better
-            // @ts-ignore
-            const others = rawValidatorStat.others as Record<string, any>[];
-
-            nominatorCount = others.length;
-          }
-        }
-
-        allValidatorAddresses.push(validatorAddress);
-
-        validatorInfoList.push({
-          address: validatorAddress,
-          totalStake: bnTotalStake.toString(),
-          ownStake: bnOwnStake.toString(),
-          otherStake: otherStake.toString(),
-          nominatorCount,
-          // to be added later
-          commission: 0,
-          expectedReturn: 0,
-          blocked: false,
-          isVerified: false,
-          minBond,
-          isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded),
-          eraRewardPoint: (validatorPointsMap[validatorAddress] ?? BN_ZERO).toString(),
-          topQuartile: isTopQuartile
-        } as ValidatorInfo);
-      }
-    }
+    const [totalStakeMap, allValidatorAddresses, validatorInfoList] = this.parseEraStakerData(_eraStakers, blockValidatorList, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded)
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
 
@@ -544,6 +484,67 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
   }
 
+  private parseEraStakerData(_eraStakers: unknown, blockValidatorList: string[], topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: string, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
+    const totalStakeMap: Record<string, BN> = {};
+    const allValidatorAddresses: string[] = [];
+    const validatorInfoList: ValidatorInfo[] = [];
+
+    const eraStakers = _eraStakers as any[];
+
+    for (const item of eraStakers) {
+      const rawValidatorInfo = item[0].toHuman() as any[];
+      const rawValidatorStat = item[1].toPrimitive() as SpStakingPagedExposureMetadata;
+      const validatorAddress = rawValidatorInfo[1] as string;
+
+      if (!blockValidatorList.includes(validatorAddress)) {
+        let isTopQuartile = false;
+
+        if (topValidatorList.includes(validatorAddress)) {
+          isTopQuartile = true;
+        }
+
+        const bnTotalStake = new BN(rawValidatorStat.total);
+        const bnOwnStake = new BN(rawValidatorStat.own);
+        const otherStake = bnTotalStake.sub(bnOwnStake);
+
+        totalStakeMap[validatorAddress] = bnTotalStake;
+
+        let nominatorCount = 0;
+
+        if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) {
+          nominatorCount = rawValidatorStat.nominatorCount;
+        } else {
+          if ('others' in rawValidatorStat) { // todo: handle interfaces and types better
+            // @ts-ignore
+            const others = rawValidatorStat.others as Record<string, any>[];
+
+            nominatorCount = others.length;
+          }
+        }
+
+        allValidatorAddresses.push(validatorAddress);
+
+        validatorInfoList.push({
+          address: validatorAddress,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: otherStake.toString(),
+          nominatorCount,
+          // to be added later
+          commission: 0,
+          expectedReturn: 0,
+          blocked: false,
+          isVerified: false,
+          minBond,
+          isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded),
+          eraRewardPoint: (validatorPointsMap[validatorAddress] ?? BN_ZERO).toString(),
+          topQuartile: isTopQuartile
+        } as ValidatorInfo);
+      }
+    }
+
+    return [totalStakeMap, allValidatorAddresses, validatorInfoList];
+  }
   /* Get pool targets */
 
   /* Join pool action */

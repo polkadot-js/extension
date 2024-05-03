@@ -160,7 +160,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
         {!maxPoolMembersValue && (isParaChain || isRelayChain) &&
           <MetaInfo.Number
-            label={t(isParaChain ? 'Delegators' : 'Nominator')}
+            label={t(isParaChain ? 'Delegator' : 'Nominator')}
             value={nominatorCount}
             valueColorSchema={'even-odd'}
           />}
@@ -169,7 +169,7 @@ function Component (props: Props): React.ReactElement<Props> {
           !!maxPoolMembersValue && !!ratePercent && (isParaChain || isRelayChain) && (
             <MetaInfo.Default
               className={'__maximum-validator'}
-              label={t(isParaChain ? 'Delegators' : 'Nominator')}
+              label={t(isParaChain ? 'Delegator' : 'Nominator')}
               labelAlign='top'
               valueColorSchema={`${ratePercent}`}
             >

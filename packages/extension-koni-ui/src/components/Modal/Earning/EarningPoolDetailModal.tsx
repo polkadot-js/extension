@@ -88,7 +88,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
 
         {!maxPoolMembersValue &&
             <MetaInfo.Number
-              label={t('Members')}
+              label={t('Member')}
               value={memberCounter}
               valueColorSchema={'even-odd'}
             />}
@@ -96,7 +96,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
         {!!maxPoolMembersValue && !!ratePercent && (
           <MetaInfo.Default
             className={'__maximum-member'}
-            label={'Members'}
+            label={'Member'}
             labelAlign='top'
             valueColorSchema={`${ratePercent}`}
           >

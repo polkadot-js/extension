@@ -4,6 +4,7 @@
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
+import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { SwScreenLayout } from '@subwallet/react-ui';
@@ -16,7 +17,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import Footer from '../parts/Footer';
-import SelectAccount from '../parts/SelectAccount';
 
 export interface LayoutBaseProps extends Omit<
 SwScreenLayoutProps,
@@ -24,11 +24,12 @@ SwScreenLayoutProps,
 >, ThemeProps {
   children: React.ReactNode | React.ReactNode[];
   showFooter?: boolean;
+  isDisableHeader?: boolean;
 }
 
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
-const Component = ({ children, className, headerIcons, onBack, showFooter, ...props }: LayoutBaseProps) => {
+const Component = ({ children, className, headerIcons, isDisableHeader, onBack, showFooter, ...props }: LayoutBaseProps) => {
   const navigate = useNavigate();
   const { goHome } = useDefaultNavigate();
   const { pathname } = useLocation();
@@ -125,7 +126,7 @@ const Component = ({ children, className, headerIcons, onBack, showFooter, ...pr
   return (
     <SwScreenLayout
       {...props}
-      className={CN(className, { 'special-language': specialLanguages.includes(language) })}
+      className={CN(className, { 'special-language': specialLanguages.includes(language), 'disable-header': isDisableHeader })}
       footer={showFooter && <Footer />}
       headerContent={props.showHeader && <SelectAccount />}
       headerIcons={headerIcons}
@@ -149,6 +150,12 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
     }
+  },
+
+  '&.disable-header .ant-sw-screen-layout-header': {
+    opacity: '0.4',
+    pointerEvents: 'none'
+
   },
 
   '&.special-language': {

@@ -15,10 +15,12 @@ type Props = {
   showSearchIcon?: boolean;
   onClickFilterIcon?: () => void;
   onClickSearchIcon?: () => void;
-  showTabBar?: boolean
+  showTabBar?: boolean;
+  isDisableHeader?: boolean;
+
 };
 
-const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
+const Home = ({ children, isDisableHeader, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { activeModal } = useContext(ModalContext);
@@ -67,6 +69,7 @@ const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, 
 
   return (
     <Layout.Base
+      isDisableHeader={isDisableHeader}
       headerCenter={false}
       headerIcons={headerIcons}
       headerLeft={'default'}

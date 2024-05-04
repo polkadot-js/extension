@@ -54,7 +54,7 @@ const Component = ({ className, onOk }: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 110);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 115);
   }, []);
 
   return (

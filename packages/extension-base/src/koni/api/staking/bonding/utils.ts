@@ -581,16 +581,14 @@ export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupported
   }
 }
 
-export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+export function getRelayValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
   // mapping store validator and totalPoints
   const validatorTotalPointsMap: Record<string, BigNumber> = {};
 
   Object.values(eraRewardMap).forEach((info) => {
     const individual = info.individual;
 
-    Object.entries(individual).forEach(([validator, rawPoints]) => {
-      const points = rawPoints.replaceAll(',', '');
-
+    Object.entries(individual).forEach(([validator, points]) => {
       if (!validatorTotalPointsMap[validator]) {
         validatorTotalPointsMap[validator] = new BigNumber(points);
       } else {
@@ -602,7 +600,7 @@ export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakin
   return validatorTotalPointsMap;
 }
 
-export function getTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
+export function getRelayTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
   const sortValidatorPointsList = Object.fromEntries(
     Object.entries(validatorPointsList)
       .sort(
@@ -623,11 +621,13 @@ export function getTopValidatorByPoints (validatorPointsList: Record<string, Big
   return Object.keys(top50PercentRecord);
 }
 
-export function getBlockedValidatorList (validators: any[]) {
+export function getRelayBlockedValidatorList (validators: any[]) {
   const blockValidatorList: string[] = [];
 
   for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
     const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
 
     const isBlocked = validatorPrefs.blocked;
@@ -637,7 +637,18 @@ export function getBlockedValidatorList (validators: any[]) {
     }
   }
 
-  return blockValidatorList
+  return blockValidatorList;
+}
+
+export function getRelayEraRewardMap (eraRewardPointArray: Codec[], startEraForPoints: number) {
+  const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
+
+  for (const item of eraRewardPointArray) {
+    eraRewardMap[startEraForPoints] = item.toPrimitive() as unknown as PalletStakingEraRewardPoints;
+    startEraForPoints++;
+  }
+
+  return eraRewardMap;
 }
 
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {

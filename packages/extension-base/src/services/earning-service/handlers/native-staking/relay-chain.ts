@@ -4,13 +4,13 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getBlockedValidatorList, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth, getTopValidatorByPoints, getValidatorPointsMap } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getRelayBlockedValidatorList, getRelayEraRewardMap, getRelayTopValidatorByPoints, getRelayValidatorPointsMap, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP, _UPDATED_RUNTIME_STAKING_GROUP, MaxEraRewardPointsEras } from '@subwallet/extension-base/services/earning-service/constants';
 import { applyDecimal, parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, SpStakingExposurePage, SpStakingPagedExposureMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, SpStakingExposurePage, SpStakingPagedExposureMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -378,7 +378,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
     const endEraForPoints = parseInt(activeEra) - 1;
-    let startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
+    const startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
 
     let _eraStakersPromise;
 
@@ -397,27 +397,20 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       chainApi.api.query.staking.erasRewardPoints.multi([...Array(maxEraRewardPointsEras).keys()].map((i) => i + startEraForPoints))
     ]);
 
-    const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
-
-    for (const item of _eraRewardPoints[0]) {
-      eraRewardMap[startEraForPoints] = item.toHuman() as unknown as PalletStakingEraRewardPoints;
-      startEraForPoints++;
-    }
-
-    const validatorPointsMap = getValidatorPointsMap(eraRewardMap);
-    const topValidatorList = getTopValidatorByPoints(validatorPointsMap);
+    const eraRewardMap = getRelayEraRewardMap(_eraRewardPoints[0], startEraForPoints);
+    const validatorPointsMap = getRelayValidatorPointsMap(eraRewardMap);
+    const topValidatorList = getRelayTopValidatorByPoints(validatorPointsMap);
 
     const validators = _validators as any[];
-    const blockedValidatorList = getBlockedValidatorList(validators);
+    const blockedValidatorList = getRelayBlockedValidatorList(validators);
 
     const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
 
-    const rawMinBond = _minBond.toHuman() as string;
-    const minBond = rawMinBond.replaceAll(',', '');
+    const minBond = _minBond.toPrimitive() as number;
 
-    const [totalStakeMap, allValidatorAddresses, validatorInfoList] = this.parseEraStakerData(_eraStakers, blockedValidatorList, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded)
+    const [totalStakeMap, allValidatorAddresses, validatorInfoList] = this.parseEraStakerData(_eraStakers, blockedValidatorList, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded);
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
 
@@ -452,11 +445,10 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       validator.isVerified = extraInfoMap[validator.address].isVerified;
     }
 
-    console.log('validatorInfo', validatorInfoList);
     return validatorInfoList;
   }
 
-  private getValidatorExpectedReturn(chain: string, validator: ValidatorInfo, totalApy: number, commission: number, _stakingRewards: Codec, allValidatorAddresses: string[], decimals: number, totalStakeMap: Record<string, BN>, bnAvgStake: BN) {
+  private getValidatorExpectedReturn (chain: string, validator: ValidatorInfo, totalApy: number, commission: number, _stakingRewards: Codec, allValidatorAddresses: string[], decimals: number, totalStakeMap: Record<string, BN>, bnAvgStake: BN) {
     if (_STAKING_CHAIN_GROUP.aleph.includes(chain)) {
       return calculateAlephZeroValidatorReturn(totalApy, commission);
     } else if (_STAKING_CHAIN_GROUP.ternoa.includes(chain)) {
@@ -467,19 +459,20 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       return calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, commission);
     } else {
       const bnValidatorStake = applyDecimal(totalStakeMap[validator.address], decimals);
+
       return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, commission);
     }
   }
 
-  private parseEraStakerData(_eraStakers: unknown, blockedValidatorList: string[], topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: string, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
+  private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
     const totalStakeMap: Record<string, BN> = {};
     const allValidatorAddresses: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
 
-    const eraStakers = _eraStakers as any[];
-
-    for (const item of eraStakers) {
+    for (const item of _eraStakers) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const rawValidatorInfo = item[0].toHuman() as any[];
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const rawValidatorStat = item[1].toPrimitive() as SpStakingPagedExposureMetadata;
       const validatorAddress = rawValidatorInfo[1] as string;
 
@@ -522,7 +515,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           expectedReturn: 0,
           blocked: false,
           isVerified: false,
-          minBond,
+          minBond: minBond.toString(),
           isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded),
           eraRewardPoint: (validatorPointsMap[validatorAddress] ?? BN_ZERO).toString(),
           topQuartile: isTopQuartile

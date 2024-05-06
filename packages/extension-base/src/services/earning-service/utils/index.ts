@@ -6,8 +6,7 @@ import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { LendingYieldPoolInfo, LiquidYieldPoolInfo, NativeYieldPoolInfo, NominationYieldPoolInfo, YieldAssetExpectedEarning, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 
-import { hexToString, isHex } from '@polkadot/util';
-import { BN } from '@polkadot/util';
+import { BN, hexToString, isHex } from '@polkadot/util';
 
 export function calculateReward (apr: number, amount = 0, compoundingPeriod = YieldCompoundingPeriod.YEARLY, isApy = false): YieldAssetExpectedEarning {
   if (!apr) {
@@ -140,5 +139,6 @@ export const isLendingPool = (pool: YieldPoolInfo): pool is LendingYieldPoolInfo
 
 export function applyDecimal (bnNumber: BN, decimals: number) {
   const bnDecimals = new BN((10 ** decimals).toString());
+
   return bnNumber.div(bnDecimals);
 }

@@ -170,9 +170,10 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     ]);
     const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
     const _maxNominatorRewardedPerValidator = (substrateApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
-    const maxNominatorRewardedPerValidator = parseInt(_maxNominatorRewardedPerValidator);
+    const maxNominatorRewardedPerValidator = unlimitedNominatorRewarded ? undefined : parseInt(_maxNominatorRewardedPerValidator);
     const nominations = _nominations.toPrimitive() as unknown as PalletStakingNominations;
     const bonded = _bonded.toHuman();
+    const addressFormatted = reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo));
 
     const activeStake = ledger.active.toString();
     const totalStake = ledger.total.toString();
@@ -219,9 +220,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           })
         ;
 
-        if (!topNominators.includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if nominator has target but not in nominator list
+        if (!topNominators.includes(addressFormatted)) { // if nominator has target but not in nominator list
           nominationStatus = EarningStatus.WAITING;
-        } else if (topNominators.slice(0, unlimitedNominatorRewarded ? undefined : maxNominatorRewardedPerValidator).includes(reformatAddress(address, _getChainSubstrateAddressPrefix(chainInfo)))) { // if address in top nominators
+        } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(addressFormatted)) { // if address in top nominators
           nominationStatus = EarningStatus.EARNING_REWARD;
         }
 

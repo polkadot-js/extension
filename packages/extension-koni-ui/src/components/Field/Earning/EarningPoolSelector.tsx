@@ -270,6 +270,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 {...item}
                 className={'pool-item'}
                 onClickMoreBtn={onClickMore(item)}
+                prefixAddress={networkPrefix}
               />
             </div>
           </Tooltip>
@@ -280,10 +281,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             className={'pool-item'}
             key={item.id}
             onClickMoreBtn={onClickMore(item)}
+            prefixAddress={networkPrefix}
           />
         )
     );
-  }, [onClickMore, t]);
+  }, [networkPrefix, onClickMore, t]);
 
   const renderEmpty = useCallback(() => {
     return (

@@ -128,23 +128,27 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
       })
       .sort((a: NominationPoolDataType, b: NominationPoolDataType) => {
-        const isSubwalletA = a.name && a.name.includes('SubWallet');
-        const isSubwalletB = b.name && b.name.includes('SubWallet');
-
-        if (isSubwalletA && !isSubwalletB) {
-          return -1;
-        } else if (!isSubwalletA && isSubwalletB) {
-          return 1;
-        }
-
         switch (sortSelection) {
           case SortKey.MEMBER:
             return a.memberCounter - b.memberCounter;
           case SortKey.TOTAL_POOLED:
             return new BigN(b.bondedAmount).minus(a.bondedAmount).toNumber();
-          case SortKey.DEFAULT:
+
           default:
-            return 0;
+            if (sortSelection === SortKey.DEFAULT) {
+              const isSubwalletA = a.name && a.name.includes('SubWallet');
+              const isSubwalletB = b.name && b.name.includes('SubWallet');
+
+              if (isSubwalletA && !isSubwalletB) {
+                return -1;
+              } else if (!isSubwalletA && isSubwalletB) {
+                return 1;
+              }
+
+              return 0;
+            } else {
+              return 0;
+            }
         }
       });
   }, [items, selectedFilters, sortSelection]);
@@ -329,7 +333,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
               />
             </div>
           )}
-        title={label || placeholder || t('Select pool')}
+        title={t('Select pool')}
       />
 
       <FilterModal

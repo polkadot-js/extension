@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+export { default as AccountExportPasswordModal } from './AccountExportPasswordModal';
 export { default as AccountTypeModal } from './AccountTypeModal';
 export { default as AttachAccountModal } from './AttachAccountModal';
 export { default as CreateAccountModal } from './CreateAccountModal';

@@ -83,7 +83,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
   const liveMissionsCount = useMemo(() => {
-    return missions.filter((item) => computeStatus(item) === 'live').length;
+    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
   }, [missions]);
 
   const { isUILocked, lock, unlock } = useUILock();

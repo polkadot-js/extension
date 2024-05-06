@@ -48,7 +48,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <div className={'middle-item__info'}>
               <div className={'middle-item__active-stake'}>
                 <span>
-                  {t('Bonded:')}
+                  {t('Staked:')}
                 </span>
                 <span>
                   &nbsp;{formatBalance(nominationInfo.activeStake, decimals)}&nbsp;

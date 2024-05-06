@@ -11,6 +11,7 @@ import { CrowdloanContributionsResponse } from '@subwallet/extension-base/servic
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { SwapErrorType, SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, SwapTxData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
 import { KeyringOptions } from '@subwallet/ui-keyring/options/types';
@@ -190,10 +191,23 @@ export interface StakingRewardJson {
 }
 
 export interface PriceJson {
+  currency: CurrencyType;
   ready?: boolean,
-  currency: string,
+  currencyData: CurrencyJson,
+  exchangeRateMap: Record<string, ExchangeRateJSON>,
   priceMap: Record<string, number>,
   price24hMap: Record<string, number>
+}
+
+export interface ExchangeRateJSON {
+  exchange: number;
+  label: string;
+}
+
+export interface CurrencyJson {
+  label: string;
+  isPrefix: boolean;
+  symbol: string;
 }
 
 export enum APIItemState {
@@ -215,7 +229,7 @@ export enum CrowdloanParaState {
   FAILED = 'failed'
 }
 
-export interface NftItem {
+export interface NftItem extends NftItemExtraInfo {
   // must-have
   id: string;
   chain: string;
@@ -229,9 +243,18 @@ export interface NftItem {
   rarity?: string;
   description?: string;
   properties?: Record<any, any> | null;
+}
+
+interface NftItemExtraInfo {
   type?: _AssetType.ERC721 | _AssetType.PSP34 | RMRK_VER; // for sending
   rmrk_ver?: RMRK_VER;
   onChainOption?: any; // for sending PSP-34 tokens, should be done better
+  assetHubType?: AssetHubNftType // for sending assetHub nft. There're 2 types nft
+}
+
+export enum AssetHubNftType {
+  NFTS = 'nfts',
+  UNIQUES = 'uniques'
 }
 
 export interface NftCollection {
@@ -401,6 +424,16 @@ export type LanguageType = 'en'
 | 'ja'
 | 'ru';
 
+export type CurrencyType = 'USD'
+| 'BRL'
+| 'CNY'
+| 'EUR'
+| 'GBP'
+| 'HKD'
+| 'JPY'
+| 'RUB'
+| 'VND'
+
 export type LanguageOptionType = {
   text: string;
   value: LanguageType;
@@ -415,6 +448,7 @@ export enum WalletUnlockType {
 
 export interface UiSettings {
   language: LanguageType,
+  currency: string,
   browserConfirmationType: BrowserConfirmationType;
   isShowZeroBalance: boolean;
   isShowBalance: boolean;
@@ -441,6 +475,8 @@ export type RequestChangeEnableChainPatrol = { enable: boolean };
 export type RequestChangeShowZeroBalance = { show: boolean };
 
 export type RequestChangeLanguage = { language: LanguageType };
+
+export type RequestChangePriceCurrency = { currency: CurrencyType }
 
 export type RequestChangeShowBalance = { enable: boolean };
 
@@ -504,6 +540,10 @@ export enum ExtrinsicType {
 
   TOKEN_APPROVE = 'evm.token_approve',
 
+  SWAP = 'swap',
+
+  // SET_FEE_TOKEN = 'set_fee-token',
+
   EVM_EXECUTE = 'evm.execute',
   UNKNOWN = 'unknown'
 }
@@ -557,6 +597,7 @@ export interface ExtrinsicDataTypeMap {
 
   [ExtrinsicType.EVM_EXECUTE]: TransactionConfig,
   [ExtrinsicType.CROWDLOAN]: any,
+  [ExtrinsicType.SWAP]: SwapTxData
   [ExtrinsicType.UNKNOWN]: any
 }
 
@@ -727,7 +768,7 @@ export enum TransferTxErrorType {
   RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
 }
 
-export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType | YieldValidationStatus
+export type TransactionErrorType = BasicTxErrorType | TransferTxErrorType | StakingTxErrorType | YieldValidationStatus | SwapErrorType
 
 export enum BasicTxWarningCode {
   NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'notEnoughExistentialDeposit'
@@ -789,6 +830,17 @@ export interface RequestAccountExportPrivateKey {
 export interface ResponseAccountExportPrivateKey {
   privateKey: string;
   publicKey: string;
+}
+
+// Export batch accounts
+
+export interface RequestAccountBatchExportV2 {
+  password: string;
+  addresses?: string[];
+}
+
+export interface ResponseAccountBatchExportV2 {
+  exportedJson: KeyringPairs$Json;
 }
 
 // Get account info with private key
@@ -1541,6 +1593,11 @@ export interface ResponseQrSignEvm {
   signature: string;
 }
 
+export interface RequestChangeFeeToken {
+  currentFeeToken?: string;
+  selectedFeeToken: string;
+}
+
 /// Transfer
 
 export interface RequestCheckTransfer extends BaseRequestSign {
@@ -2286,6 +2343,7 @@ export interface KoniRequestSignatures {
   'pri(json.batchRestoreV2)': [RequestBatchRestoreV2, void];
 
   // Export account
+  'pri(accounts.batchExportV2)': [RequestAccountBatchExportV2, ResponseAccountBatchExportV2];
   'pri(accounts.exportPrivateKey)': [RequestAccountExportPrivateKey, ResponseAccountExportPrivateKey];
 
   // Current account
@@ -2321,6 +2379,7 @@ export interface KoniRequestSignatures {
   'pri(settings.saveUnlockType)': [RequestUnlockType, boolean];
   'pri(settings.saveEnableChainPatrol)': [RequestChangeEnableChainPatrol, boolean];
   'pri(settings.saveLanguage)': [RequestChangeLanguage, boolean];
+  'pri(settings.savePriceCurrency)': [RequestChangePriceCurrency, boolean];
   'pri(settings.saveShowZeroBalance)': [RequestChangeShowZeroBalance, boolean];
   'pri(settings.saveShowBalance)': [RequestChangeShowBalance, boolean];
   'pri(settings.logo.assets.subscribe)': [null, Record<string, string>, Record<string, string>];
@@ -2512,6 +2571,14 @@ export interface KoniRequestSignatures {
   'pri(database.import)': [string, boolean];
   'pri(database.exportJson)': [null, DexieExportJsonStructure];
   /* Database Service */
+
+  /* Swap */
+  'pri(swapService.subscribePairs)': [null, SwapPair[], SwapPair[]];
+  'pri(swapService.handleSwapRequest)': [SwapRequest, SwapRequestResult];
+  'pri(swapService.handleSwapStep)': [SwapSubmitParams, SWTransactionResponse];
+  'pri(swapService.getLatestQuote)': [SwapRequest, SwapQuoteResponse];
+  'pri(swapService.validateSwapProcess)': [ValidateSwapProcessParams, TransactionError[]];
+  /* Swap */
 }
 
 export interface ApplicationMetadataType {

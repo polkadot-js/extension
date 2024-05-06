@@ -15,6 +15,11 @@ export interface PalletStakingExposureItem {
   value: number
 }
 
+export interface SpStakingExposurePage {
+  pageTotal: number,
+  others: PalletStakingExposureItem[]
+}
+
 export interface PalletStakingExposure {
   total: number,
   own: number,
@@ -164,6 +169,11 @@ export interface PalletStakingStakingLedger {
 export interface PalletStakingActiveEraInfo {
   index: string,
   start: string
+}
+
+export interface PalletStakingEraRewardPoints {
+  total: string,
+  individual: Record<string, string>
 }
 
 export interface RuntimeDispatchInfo {

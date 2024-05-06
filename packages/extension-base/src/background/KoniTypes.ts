@@ -191,9 +191,9 @@ export interface StakingRewardJson {
 }
 
 export interface PriceJson {
-  currencyCode: CurrencyType;
+  currency: CurrencyType;
   ready?: boolean,
-  currency: CurrencyJson,
+  currencyData: CurrencyJson,
   exchangeRateMap: Record<string, ExchangeRateJSON>,
   priceMap: Record<string, number>,
   price24hMap: Record<string, number>

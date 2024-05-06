@@ -3,8 +3,9 @@
 
 import { BN_TEN } from '@subwallet/extension-base/utils';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { ExtraYieldPositionInfo, NetworkType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -27,6 +28,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { asset, balanceToken, chain, group, price, slug, totalStake, type } = positionInfo;
 
   const { poolInfoMap } = useSelector((state) => state.earning);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
   const poolInfo = poolInfoMap[slug];
 
@@ -41,6 +43,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const convertedBalanceValue = useMemo(() => {
     return new BigN(balanceValue).div(BN_TEN.pow(asset.decimals || 0)).multipliedBy(price);
   }, [asset.decimals, balanceValue, price]);
+
+  const isTestNet = useMemo(() => {
+    return chainInfoMap[positionInfo.chain].isTestnet;
+  }, [chainInfoMap, positionInfo.chain]);
 
   const _isRelatedToAstar = isRelatedToAstar(slug);
 
@@ -82,6 +88,10 @@ const Component: React.FC<Props> = (props: Props) => {
                 className={'__item-tag'}
                 type={type}
               />
+              {isTestNet && <NetworkTag
+                className={'__item-tag'}
+                type={isTestNet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />}
             </div>
 
             {

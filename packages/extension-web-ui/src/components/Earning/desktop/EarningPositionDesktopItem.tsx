@@ -6,9 +6,10 @@ import { YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { BN_TEN } from '@subwallet/extension-base/utils';
 import { MetaInfo } from '@subwallet/extension-web-ui/components';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { ExtraYieldPositionInfo, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { ExtraYieldPositionInfo, NetworkType, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -48,6 +49,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { asset, price, totalStake } = positionInfo;
 
   const { t } = useTranslation();
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { token } = useTheme() as Theme;
 
   const line3Ref = useRef<HTMLDivElement | null>(null);
@@ -71,6 +73,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const actionListByChain = useMemo(() => {
     return getYieldAvailableActionsByType(poolInfo);
   }, [poolInfo]);
+
+  const isTestNet = useMemo(() => {
+    return chainInfoMap[positionInfo.chain].isTestnet;
+  }, [chainInfoMap, positionInfo.chain]);
 
   useEffect(() => {
     const updateCompactButtons = () => {
@@ -221,11 +227,17 @@ const Component: React.FC<Props> = (props: Props) => {
         </div>
 
         <div className='__item-line-2 __item-line-common'>
-          <EarningTypeTag
-            chain={poolInfo.chain}
-            className={'__item-tag'}
-            type={poolInfo.type}
-          />
+          <div className={'__item-tag-wrapper'}>
+            <EarningTypeTag
+              chain={poolInfo.chain}
+              className={'__item-tag'}
+              type={poolInfo.type}
+            />
+            {isTestNet && <NetworkTag
+              className={'__item-tag'}
+              type={isTestNet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+            />}
+          </div>
 
           <div className='__item-total-balance-value'>
             <Number
@@ -307,10 +319,6 @@ const Component: React.FC<Props> = (props: Props) => {
             ref={line3RightPartRef}
           >
             <div className={'__item-equivalent'}>
-              <div className={'__item-equivalent-label'}>
-                {t('Balance')}:
-              </div>
-
               <div className={'__item-equivalent-value'}>
                 <Number
                   decimal={0}
@@ -343,6 +351,10 @@ const EarningPositionDesktopItem = styled(Component)<Props>(({ theme: { token } 
     '.__item-logo': {
       marginRight: token.size,
       alignSelf: 'flex-start'
+    },
+    '.__item-tag-wrapper': {
+      display: 'flex',
+      gap: token.sizeXS
     },
     '.__item-token-name': {
       color: token.colorTextTertiary,

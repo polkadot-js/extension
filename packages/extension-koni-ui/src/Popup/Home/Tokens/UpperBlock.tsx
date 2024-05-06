@@ -38,7 +38,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
   const [reloading, setReloading] = useState(false);
-  const { currency } = useSelector((state) => state.price);
+  const { currencyData } = useSelector((state) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -61,7 +61,7 @@ function Component (
             'ant-tooltip-hidden': !isShowBalance
           })}
           placement='top'
-          title={formatNumber(totalValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
+          title={formatNumber(totalValue, 0, balanceNoPrefixFormater) + ' ' + currencyData.symbol}
         >
           <div
             className='__total-balance-value-content'
@@ -80,7 +80,7 @@ function Component (
               '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
             })}
             >
-              {currency.symbol}
+              {currencyData.symbol}
             </div>}
           </div>
         </Tooltip>
@@ -104,8 +104,8 @@ function Component (
             decimal={0}
             decimalOpacity={1}
             hide={!isShowBalance}
-            prefix={isPriceDecrease ? `- ${(currency.isPrefix && currency.symbol) || ''}` : `+ ${(currency.isPrefix && currency.symbol) || ''}`}
-            suffix={(!currency.isPrefix && currency.symbol) || ''}
+            prefix={isPriceDecrease ? `- ${(currencyData.isPrefix && currencyData.symbol) || ''}` : `+ ${(currencyData.isPrefix && currencyData.symbol) || ''}`}
+            suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
             value={totalChangeValue}
           />
           <Tag

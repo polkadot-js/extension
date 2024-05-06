@@ -12,7 +12,7 @@ export const API_MAX_RETRY = 2;
 export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
-  avail: ['kate', 'availTuringTest'],
+  avail: ['kate', 'availTuringTest', 'avail_mainnet'],
   goldberg: ['goldberg_testnet']
 };
 
@@ -93,7 +93,9 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   krest_network: 4,
   polimec: 6,
   enjin_relaychain: 24,
-  availTuringTest: 24
+  availTuringTest: 24,
+  polkadex: 24,
+  avail_mainnet: 24
 };
 
 export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
@@ -122,7 +124,8 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   calamari_test: 12,
   manta_network: 12,
   enjin_relaychain: 6,
-  availTuringTest: 20
+  availTuringTest: 20,
+  avail_mainnet: 20
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

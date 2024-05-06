@@ -1144,9 +1144,7 @@ export default class KoniExtension {
   }
 
   private async setPriceCurrency ({ currency }: RequestChangePriceCurrency): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      this.#koniState.priceService.setPriceCurrency(currency, resolve, reject);
-    });
+    return await this.#koniState.priceService.setPriceCurrency(currency);
   }
 
   private subscribePrice (id: string, port: chrome.runtime.Port): Promise<PriceJson> {

@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getRelayBlockedValidatorList, getRelayEraRewardMap, getRelayTopValidatorByPoints, getRelayValidatorPointsMap, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getRelayBlockedValidatorList, getRelayEraRewardMap, getRelayMaxNominations, getRelayTopValidatorByPoints, getRelayValidatorPointsMap, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -66,14 +66,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         return;
       }
 
-      let maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
       const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
       const maxNominatorRewarded = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator?.toString();
-      const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
-      const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
-
-      maxNominations = maxNominationsByNominationQuota ?? maxNominations;
-
+      const maxNominations = await getRelayMaxNominations(substrateApi);
       const currentEra = _currentEra.toString();
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();

@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { NetworkGroup } from '@subwallet/extension-koni-ui/components/MetaInfo/parts';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -11,8 +13,6 @@ import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwal
 import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
-import {NetworkGroup} from "@subwallet/extension-koni-ui/components/MetaInfo/parts";
-import DefaultLogosMap from "@subwallet/extension-koni-ui/assets/logo";
 
 type Props = ThemeProps & {
   data: MissionInfo | null,
@@ -120,7 +120,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   <MetaInfo.Default
                     label={t('Network')}
                   >
-                     <NetworkGroup chains={data.chains} />
+                    <NetworkGroup chains={data.chains} />
                   </MetaInfo.Default>
                 )
               }
@@ -194,12 +194,12 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 <Button
                   className={'__modal-icon-button'}
                   icon={(
-                      <Image
-                          height={18}
-                          shape='squircle'
-                          src={DefaultLogosMap.xtwitter_transparent}
-                          width={20}
-                      />
+                    <Image
+                      height={18}
+                      shape='squircle'
+                      src={DefaultLogosMap.xtwitter_transparent}
+                      width={20}
+                    />
                   )}
                   onClick={onClickTwitterIcon}
                   size={'xs'}

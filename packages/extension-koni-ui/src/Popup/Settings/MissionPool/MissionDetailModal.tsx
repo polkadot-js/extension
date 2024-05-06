@@ -196,7 +196,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   icon={(
                     <Image
                       height={18}
-                      shape='squircle'
+                      shape='square'
                       src={DefaultLogosMap.xtwitter_transparent}
                       width={20}
                     />
@@ -239,6 +239,10 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     },
     '.ant-sw-modal-header': {
       borderBottom: 0
+    },
+    '.__modal-icon-button .ant-image': {
+      display: 'flex',
+      alignItems: 'end'
     },
     '.__total-token-supply .__value': {
       fontWeight: token.fontWeightStrong

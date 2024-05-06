@@ -8,9 +8,11 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
-import { CaretLeft, GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
+import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
+import {NetworkGroup} from "@subwallet/extension-koni-ui/components/MetaInfo/parts";
+import DefaultLogosMap from "@subwallet/extension-koni-ui/assets/logo";
 
 type Props = ThemeProps & {
   data: MissionInfo | null,
@@ -118,7 +120,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   <MetaInfo.Default
                     label={t('Network')}
                   >
-                    {/* <NetworkGroup chains={data.chains} /> */}
+                     <NetworkGroup chains={data.chains} />
                   </MetaInfo.Default>
                 )
               }
@@ -192,11 +194,12 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 <Button
                   className={'__modal-icon-button'}
                   icon={(
-                    <Icon
-                      phosphorIcon={TwitterLogo}
-                      size={'sm'}
-                      weight={'fill'}
-                    />
+                      <Image
+                          height={18}
+                          shape='squircle'
+                          src={DefaultLogosMap.xtwitter_transparent}
+                          width={20}
+                      />
                   )}
                   onClick={onClickTwitterIcon}
                   size={'xs'}

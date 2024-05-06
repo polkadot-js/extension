@@ -85,7 +85,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
       closeIcon={modalCloseButton}
       id={modalId}
       onCancel={onCancel}
-      title={t(data?.name || 'Mission details')}
+      title={data?.name || t('Mission details')}
     >
       {
         data && (

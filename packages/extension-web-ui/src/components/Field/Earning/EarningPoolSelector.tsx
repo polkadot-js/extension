@@ -182,9 +182,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     if (recommendedExistedLength > 0 && otherExistedLength > 0) {
       return [recommendedSessionHeader, ...filteredItems.filter((item) => item.isRecommend), othersSessionHeader, ...filteredItems.filter((item) => !item.isRecommend)];
     } else if (recommendedExistedLength > 0) {
-      return [...filteredItems.filter((item) => item.isRecommend)];
+      return [recommendedSessionHeader, ...filteredItems.filter((item) => item.isRecommend)];
     } else if (otherExistedLength > 0) {
-      return [...filteredItems.filter((item) => !item.isRecommend)];
+      return [othersSessionHeader, ...filteredItems.filter((item) => !item.isRecommend)];
     } else {
       return [];
     }
@@ -455,6 +455,22 @@ const EarningPoolSelector = styled(forwardRef(Component))<Props>(({ theme: { tok
         paddingTop: 0,
         paddingBottom: token.paddingXXS
       }
+    },
+    '.__session-header': {
+      fontSize: token.fontSizeSM,
+      color: token.colorTextSecondary,
+      fontWeight: token.fontWeightStrong,
+      marginBottom: -token.marginXXS,
+      marginTop: token.marginXXS,
+      lineHeight: token.lineHeightSM
+    },
+
+    '.__selected-icon': {
+      paddingLeft: token.paddingXXS
+    },
+
+    '.ant-sw-list-search-input': {
+      paddingBottom: token.paddingXS
     },
     '.__title-suffix': {
       fontSize: token.fontSizeSM,

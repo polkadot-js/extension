@@ -196,7 +196,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   icon={(
                     <Image
                       height={18}
-                      shape='circle'
+                      shape={'square'}
                       src={DefaultLogosMap.xtwitter_transparent}
                       width={20}
                     />
@@ -259,6 +259,10 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       marginRight: -token.margin,
       marginBottom: token.marginLG,
       backgroundColor: 'rgba(33, 33, 33, 0.80)'
+    },
+    '.__modal-icon-button .ant-image': {
+      alignItems: 'end',
+      display: 'flex'
     },
 
     '.__modal-logo': {

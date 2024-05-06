@@ -282,7 +282,7 @@ function Component (props: Props): React.ReactElement<Props> {
             icon={(
               <Image
                 height={18}
-                shape='circle'
+                shape={'square'}
                 src={DefaultLogosMap.xtwitter_transparent}
                 width={20}
               />
@@ -337,6 +337,10 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       left: 0,
       filter: 'blur(8px)',
       right: 0
+    },
+    '.__item-icon-button .ant-image': {
+      alignItems: 'end',
+      display: 'flex'
     },
     '.__separator': {
       height: 2,

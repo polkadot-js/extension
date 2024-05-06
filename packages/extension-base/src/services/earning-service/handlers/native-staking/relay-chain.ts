@@ -178,63 +178,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const activeStake = ledger.active.toString();
     const totalStake = ledger.total.toString();
     const unstakingBalance = (ledger.total - ledger.active).toString();
-    const nominationList: NominationInfo[] = [];
     const unstakingList: UnstakingInfo[] = [];
-
-    if (nominations) {
-      const validatorList = nominations.targets;
-
-      await Promise.all(validatorList.map(async (validatorAddress) => {
-        let nominationStatus = EarningStatus.NOT_EARNING;
-        let eraStakerOtherList: PalletStakingExposureItem[] = [];
-        let identity;
-
-        if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) { // todo: review all relaychains later
-          const [[_identity], _eraStaker] = await Promise.all([
-            parseIdentity(substrateApi, validatorAddress),
-            substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
-          ]);
-
-          identity = _identity;
-          eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);
-        } else {
-          const [[_identity], _eraStaker] = await Promise.all([
-            parseIdentity(substrateApi, validatorAddress),
-            substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress)
-          ]);
-
-          identity = _identity;
-          const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
-
-          eraStakerOtherList = eraStaker.others;
-        }
-
-        const sortedNominators = eraStakerOtherList
-          .sort((a, b) => {
-            return new BigN(b.value).minus(a.value).toNumber();
-          })
-        ;
-        const topNominators = sortedNominators
-          .map((nominator) => {
-            return nominator.who;
-          })
-        ;
-
-        if (!topNominators.includes(addressFormatted)) { // if nominator has target but not in nominator list
-          nominationStatus = EarningStatus.WAITING;
-        } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(addressFormatted)) { // if address in top nominators
-          nominationStatus = EarningStatus.EARNING_REWARD;
-        }
-
-        nominationList.push({
-          chain,
-          validatorAddress,
-          status: nominationStatus,
-          validatorIdentity: identity,
-          activeStake: '0' // relaychain allocates stake accordingly
-        } as NominationInfo);
-      }));
-    }
+    const nominationList = await this.handleNominationsList(substrateApi, chain, nominations, currentEra, addressFormatted, maxNominatorRewardedPerValidator) || [];
 
     let stakingStatus = EarningStatus.NOT_EARNING;
     const bnActiveStake = new BN(activeStake);
@@ -283,6 +228,64 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       nominations: nominationList,
       unstakings: unstakingList
     };
+  }
+
+  async handleNominationsList (substrateApi: _SubstrateApi, chain: string, nominations: PalletStakingNominations, currentEra: string, address: string, maxNominatorRewardedPerValidator: number | undefined) {
+    const nominationList: NominationInfo[] = [];
+    const validatorList = nominations.targets;
+
+    await Promise.all(validatorList.map(async (validatorAddress) => {
+      let nominationStatus = EarningStatus.NOT_EARNING;
+      let eraStakerOtherList: PalletStakingExposureItem[] = [];
+      let identity;
+
+      if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) { // todo: review all relaychains later
+        const [[_identity], _eraStaker] = await Promise.all([
+          parseIdentity(substrateApi, validatorAddress),
+          substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
+        ]);
+
+        identity = _identity;
+        eraStakerOtherList = _eraStaker.flatMap((paged) => (paged[1].toPrimitive() as unknown as SpStakingExposurePage).others);
+      } else {
+        const [[_identity], _eraStaker] = await Promise.all([
+          parseIdentity(substrateApi, validatorAddress),
+          substrateApi.api.query.staking.erasStakers(currentEra, validatorAddress)
+        ]);
+
+        identity = _identity;
+        const eraStaker = _eraStaker.toPrimitive() as unknown as PalletStakingExposure;
+
+        eraStakerOtherList = eraStaker.others;
+      }
+
+      const sortedNominators = eraStakerOtherList
+        .sort((a, b) => {
+          return new BigN(b.value).minus(a.value).toNumber();
+        })
+      ;
+      const topNominators = sortedNominators
+        .map((nominator) => {
+          return nominator.who;
+        })
+      ;
+
+      if (!topNominators.includes(address)) { // if nominator has target but not in nominator list
+        nominationStatus = EarningStatus.WAITING;
+      } else if (topNominators.slice(0, maxNominatorRewardedPerValidator).includes(address)) { // if address in top nominators
+        nominationStatus = EarningStatus.EARNING_REWARD;
+      }
+
+      nominationList.push({
+        chain,
+        validatorAddress,
+        status: nominationStatus,
+        validatorIdentity: identity,
+        activeStake: '0' // relaychain allocates stake accordingly
+      } as NominationInfo);
+    }));
+
+    return nominationList;
   }
 
   async subscribePoolPosition (useAddresses: string[], resultCallback: (rs: YieldPositionInfo) => void): Promise<VoidFunction> {

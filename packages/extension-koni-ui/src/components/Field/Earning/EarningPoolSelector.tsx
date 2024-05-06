@@ -450,6 +450,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         detailItem={viewDetailItem}
         maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}
+        chain={chain}
       />
     </>
   );

@@ -1,15 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { DotsThree, ThumbsUp } from 'phosphor-react';
-import React, { Context, SyntheticEvent, useContext } from 'react';
+import { DotsThree } from 'phosphor-react';
+import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import styled, { ThemeContext } from 'styled-components';
+import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -19,13 +18,14 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
+  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, symbol } = props;
   const { address, bondedAmount, className, decimals, id, isProfitable, name, onClickMoreBtn, prefixAddress, symbol } = props;
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
   const { t } = useTranslation();
 
   return (
     <Web3Block
-      className={className}
+      className={CN(className, { 'is-crowded': isCrowded })}
       leftItem={
         <SwAvatar
           identPrefix={prefixAddress}
@@ -37,24 +37,7 @@ const Component: React.FC<Props> = (props: Props) => {
       middleItem={
         <div className={'middle-item'}>
           <div className={'middle-item__name'}>
-            {name?.includes('SubWallet')
-              ? (
-                <>
-                  {name}
-                  <div className={'__tag-wrapper'}>
-                    <Icon
-                      customSize={'12px'}
-                      iconColor={token.colorSuccess}
-                      phosphorIcon={ThumbsUp}
-                      weight={'fill'}
-                    />
-                    <div className={'__tag-title'}>Recommended</div>
-                  </div>
-                </>
-              )
-              : (
-                <span>{name || `Pool #${id}`}</span>
-              )}
+            <span>{name || `Pool #${id}`}</span>
           </div>
           <div className={'middle-item__bond-amount'}>
             <span className={'middle-item__bond-amount-label'}>{t('Staked:')}</span>
@@ -100,34 +83,14 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
 
+    '&.is-crowded': {
+      '.ant-web3-block-left-item, .ant-web3-block-middle-item, .right-item__select-icon': {
+        opacity: 0.4
+      }
+    },
+
     '.ant-web3-block-middle-item': {
       paddingRight: token.paddingXXS
-    },
-    '.__title-suffix': {
-      fontSize: token.fontSizeSM,
-      fontWeight: token.bodyFontWeight,
-      lineHeight: token.lineHeightSM,
-      color: token.colorTextTertiary
-    },
-    '.__tag-wrapper': {
-      textAlign: 'center',
-      backgroundColor: 'rgba(76, 234, 172, 0.1)',
-      display: 'flex',
-      gap: 4,
-      borderRadius: token.borderRadiusLG,
-      paddingLeft: token.paddingXS,
-      paddingRight: token.paddingXS,
-      paddingBottom: 2,
-      paddingTop: 2,
-      overflow: 'hidden'
-    },
-    '.__tag-title': {
-      fontSize: token.fontSizeXS,
-      fontWeight: 700,
-      lineHeight: token.lineHeightXS,
-      color: token.colorSuccess,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis'
     },
 
     '.middle-item__name': {
@@ -135,10 +98,7 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       lineHeight: token.lineHeightLG,
       textOverflow: 'ellipsis',
       overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 4
+      whiteSpace: 'nowrap'
     },
 
     '.middle-item__bond-amount-label, .middle-item__bond-amount-number, .middle-item__pool-earning-status': {

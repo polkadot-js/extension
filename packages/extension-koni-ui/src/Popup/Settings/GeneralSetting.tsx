@@ -155,7 +155,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
-        title: staticDataCurrencySymbol[item].label,
+        title: `${item} - ${staticDataCurrencySymbol[item].label}`,
         subTitle: staticDataCurrencySymbol[item].symbol
       }))
       : [];
@@ -292,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             renderWhenEmpty={renderEmpty}
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
-            searchPlaceholder={t<string>('Search Currency')}
+            searchPlaceholder={t<string>('Search currency')}
             selected={currency}
             shape='round'
             size='small'

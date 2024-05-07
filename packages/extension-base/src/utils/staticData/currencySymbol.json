@@ -1,11 +1,11 @@
 {
-  "USD": {"label": "United States Dollar", "symbol": "USD", "isPrefix": false},
-  "BRL": {"label": "Brazilian Real", "symbol": "BRL", "isPrefix": false},
-  "CNY": {"label": "Chinese Yuan", "symbol": "CNY", "isPrefix": false},
-  "EUR": {"label": "Euro", "symbol": "EUR", "isPrefix": false},
-  "GBP": {"label": "British Pound Sterling", "symbol": "GBP", "isPrefix": false},
-  "HKD": {"label": "Hong Kong Dollar", "symbol": "HKD", "isPrefix": false},
-  "JPY": {"label": "Japanese Yen", "symbol": "JPY", "isPrefix": false},
-  "RUB": {"label": "Russian Ruble", "symbol": "RUB", "isPrefix": false},
-  "VND": {"label": "Vietnamese Dong", "symbol": "VND", "isPrefix": false}
+  "USD": {"label": "United States Dollar", "symbol": "$", "isPrefix": false},
+  "BRL": {"label": "Brazilian Real", "symbol": "R$", "isPrefix": false},
+  "CNY": {"label": "Chinese Yuan", "symbol": "CN¥", "isPrefix": false},
+  "EUR": {"label": "Euro", "symbol": "€", "isPrefix": false},
+  "GBP": {"label": "British Pound Sterling", "symbol": "£", "isPrefix": false},
+  "HKD": {"label": "Hong Kong Dollar", "symbol": "HK$", "isPrefix": false},
+  "JPY": {"label": "Japanese Yen", "symbol": "¥", "isPrefix": false},
+  "RUB": {"label": "Russian Ruble", "symbol": "₽", "isPrefix": false},
+  "VND": {"label": "Vietnamese Dong", "symbol": "₫", "isPrefix": false}
 }

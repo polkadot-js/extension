@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.1.61
+Build date: May 02, 2024.
+
+Features & Update:
+- Hide popup Introducing Earning feature (#2948)
+
+Bugs fixed:
+- Fixed bug Cannot read properties of undefined (reading 'length') (#2986)
+- Fixed bug related to earning feature (#2680)
+
 ## 1.1.60
 Build date: Apl 30, 2024.
 

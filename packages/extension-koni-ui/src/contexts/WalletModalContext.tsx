@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AttachAccountModal, ClaimDappStakingRewardsModal, CreateAccountModal, DeriveAccountModal, EarningMigrationModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
+import { AttachAccountModal, ClaimDappStakingRewardsModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
 import { EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
@@ -111,7 +111,6 @@ export const WalletModalContext = ({ children }: Props) => {
     <ImportSeedModal />
     <DeriveAccountModal />
     <ClaimDappStakingRewardsModal />
-    <EarningMigrationModal />
     <RequestCreatePasswordModal />
     <RequestCameraAccessModal />
     <CustomizeModal />

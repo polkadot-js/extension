@@ -1,9 +1,9 @@
-    2476	AnhMTV                        	
-    2341	Nam Phạm                      	[Issue 2963] fix: update parsing history depth
-    2021	S2kael                        	
+    2484	AnhMTV                        	Release version 1.1.61
+    2346	Nam Phạm                      	[Issue 2993] fix: use online cache
+    2022	S2kael                        	[Issue 2993] Update chain list and handle case chain not have providers
      800	lw-cdm                        	Set pool default value for Avail Turing
      465	Jaco                          	0.42.5 (#969)
-     311	nguyentiendung                	[Issue-2954] Remove GATEWAY_IPFS_IO to display nft on webapp
+     320	nguyentiendung                	[Issue-2680] Update content for Earning Info of Liquid Staking
      185	quangdo                       	
      115	bluezdot                      	[Issue-2963] enable online data
      105	dominhquang                   	[Issue-2774] Fix bug related to the popup Recommended validators

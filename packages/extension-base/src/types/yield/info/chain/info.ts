@@ -307,6 +307,7 @@ export interface NominationYieldPoolInfo extends AbstractYieldPoolInfo {
   type: YieldPoolType.NOMINATION_POOL;
   metadata: NormalYieldPoolMetadata;
   statistic?: NormalYieldPoolStatistic;
+  maxPoolMembers?: number;
 }
 
 /**
@@ -319,6 +320,7 @@ export interface NativeYieldPoolInfo extends AbstractYieldPoolInfo {
   type: YieldPoolType.NATIVE_STAKING;
   metadata: NormalYieldPoolMetadata;
   statistic?: NormalYieldPoolStatistic;
+  maxPoolMembers?: number;
 }
 
 /**

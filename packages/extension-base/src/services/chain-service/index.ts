@@ -791,6 +791,15 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
+    /**
+     * Disable chain if not found provider
+     * */
+    if (!endpoint && !providerName) {
+      this.disableChain(chainInfo.slug);
+
+      return;
+    }
+
     const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const slug = chainInfo.slug;
 

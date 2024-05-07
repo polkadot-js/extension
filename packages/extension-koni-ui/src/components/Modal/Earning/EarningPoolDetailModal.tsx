@@ -6,24 +6,41 @@ import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo'
 import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwModal } from '@subwallet/react-ui';
+import { Number, SwModal } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
   onCancel: () => void,
-  detailItem?: NominationPoolDataType
+  detailItem?: NominationPoolDataType,
+  maxPoolMembersValue?: number
 };
 
 export const EarningPoolDetailModalId = 'earningPoolDetailModalId';
 
-function Component ({ className, detailItem, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
   const earningStatus: EarningStatus = useMemo(() => {
     return isProfitable ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
   }, [isProfitable]);
+
+  const ratePercent = useMemo(() => {
+    const rate = maxPoolMembersValue && (memberCounter / maxPoolMembersValue);
+
+    if (rate !== undefined) {
+      if (rate < 0.9) {
+        return 'default';
+      } else if (rate >= 0.9 && rate < 1) {
+        return 'gold';
+      } else {
+        return 'danger';
+      }
+    }
+
+    return undefined;
+  }, [maxPoolMembersValue, memberCounter]);
 
   return (
     <SwModal
@@ -69,11 +86,29 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
           valueColorSchema={'even-odd'}
         />
 
-        <MetaInfo.Number
-          label={t('Total members')}
-          value={memberCounter}
-          valueColorSchema={'even-odd'}
-        />
+        {!maxPoolMembersValue &&
+            <MetaInfo.Number
+              label={t('Member')}
+              value={memberCounter}
+              valueColorSchema={'even-odd'}
+            />}
+
+        {!!maxPoolMembersValue && !!ratePercent && (
+          <MetaInfo.Default
+            className={'__maximum-member'}
+            label={'Member'}
+            labelAlign='top'
+            valueColorSchema={`${ratePercent}`}
+          >
+            <Number
+              decimal={0}
+              value={memberCounter}
+            /> &nbsp;/&nbsp; <Number
+              decimal={0}
+              value={maxPoolMembersValue}
+            />
+          </MetaInfo.Default>
+        )}
       </MetaInfo>
     </SwModal>
   );
@@ -81,7 +116,9 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
 
 const EarningPoolDetailModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-
+    '.__maximum-member .__value': {
+      display: 'flex'
+    }
   });
 });
 

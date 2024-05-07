@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BrowserConfirmationType, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { BrowserConfirmationType, CurrencyJson, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
+import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -102,6 +103,7 @@ const isShowWalletTheme = false;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
+  const { currencyData } = useSelector((state) => state.price);
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
@@ -143,17 +145,23 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }));
   }, [token]);
 
+  // TODO: 'after will be update data online or refactor this function'
+  const staticDataCurrencySymbol = useMemo<Record<string, CurrencyJson> | undefined>(() => {
+    return staticData[StaticKey.CURRENCY_SYMBOL] as Record<string, CurrencyJson>;
+  }, []);
+
   const currencyItems = useMemo<SelectionItemType[]>(() => {
-    return exchangeRateMap
-      ? Object.keys(exchangeRateMap).map((item) => ({
+    return staticDataCurrencySymbol
+      ? Object.keys(staticDataCurrencySymbol).map((item) => ({
         key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
-        title: exchangeRateMap[item].label,
-        subTitle: item
+        title: staticDataCurrencySymbol[item].label,
+        subTitle: staticDataCurrencySymbol[item].symbol
       }))
       : [];
-  }, [exchangeRateMap, token]);
+  }, [staticDataCurrencySymbol, token]);
+
 
   const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
     return [

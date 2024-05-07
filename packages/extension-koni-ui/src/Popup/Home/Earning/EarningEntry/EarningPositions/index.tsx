@@ -9,7 +9,7 @@ import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwalle
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
@@ -34,7 +34,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { activeModal } = useContext(ModalContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
-  const { currency, priceMap } = useSelector((state) => state.price);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const { assetRegistry: assetInfoMap } = useSelector((state) => state.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
@@ -55,7 +55,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           ...item,
           asset: priceToken,
           price,
-          currency
+          currency: currencyData
         };
       })
       .sort((firstItem, secondItem) => {
@@ -68,7 +68,11 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
         return getValue(secondItem) - getValue(firstItem);
       });
-  }, [assetInfoMap, currency, earningPositions, priceMap]);
+  }, [assetInfoMap, currencyData, earningPositions, priceMap]);
+
+  const lastItem = useMemo(() => {
+    return items[items.length - 1];
+  }, [items]);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
@@ -137,20 +141,35 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       }
     };
   }, [closeAlert, navigate, openAlert, t]);
+  const onClickExploreEarning = useCallback(() => {
+    setEntryView(EarningEntryView.OPTIONS);
+  }, [setEntryView]);
 
   const renderItem = useCallback(
     (item: ExtraYieldPositionInfo) => {
       return (
-        <EarningPositionItem
-          className={'earning-position-item'}
-          isShowBalance={isShowBalance}
-          key={item.slug}
-          onClick={onClickItem(item)}
-          positionInfo={item}
-        />
+        <>
+          <EarningPositionItem
+            className={'earning-position-item'}
+            isShowBalance={isShowBalance}
+            key={item.slug}
+            onClick={onClickItem(item)}
+            positionInfo={item}
+          />
+          {item.slug === lastItem.slug && <div className={'__footer-button'}>
+            <Button
+              icon={<Icon phosphorIcon={Plus} size='sm' />}
+              onClick={onClickExploreEarning}
+              size={'xs'}
+              type={'ghost'}
+            >
+              {t('Explore earning options')}
+            </Button>
+          </div>}
+        </>
       );
     },
-    [isShowBalance, onClickItem]
+    [lastItem.slug, isShowBalance, onClickItem, onClickExploreEarning, t]
   );
 
   const emptyList = useCallback(() => {
@@ -294,6 +313,13 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   '.__section-list-container': {
     height: '100%',
     flex: 1
+  },
+
+  '.__footer-button': {
+    display: 'flex',
+    justifyContent: 'center',
+    marginBottom: token.size,
+    marginTop: token.marginXS
   },
 
   '.earning-position-item': {

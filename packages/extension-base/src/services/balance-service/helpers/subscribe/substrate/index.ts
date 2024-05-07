@@ -8,7 +8,7 @@ import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/toke
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, PalletNominationPoolsPoolMember, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
 import { combineLatest, Observable } from 'rxjs';
@@ -68,7 +68,11 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
       unsubBridgedToken = await subscribeBridgedBalance(substrateParams);
     }
 
-    if (_isChainEvmCompatible(chainInfo)) {
+    /**
+     * Some substrate chain use evm account format but not have evm connection and support ERC20 contract,
+     * so we need to check if the chain is compatible with EVM and support ERC20
+     * */
+    if (_isChainEvmCompatible(chainInfo) && _getTokenTypesSupportedByChain(chainInfo).includes(_AssetType.ERC20)) { // Get sub-token for EVM-compatible chains
       unsubEvmContractToken = subscribeERC20Interval({
         ...baseParams,
         evmApi: evmApi
@@ -146,7 +150,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
       total = total.add(reserved);
 
-      const pooledStakingBalance = pooledStakingBalances[index] || BN_ZERO;
+      const pooledStakingBalance: BN = pooledStakingBalances[index] || BN_ZERO;
 
       if (pooledStakingBalance.gt(BN_ZERO)) {
         total = total.add(pooledStakingBalance);

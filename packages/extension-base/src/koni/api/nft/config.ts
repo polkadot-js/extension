@@ -135,6 +135,7 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   pioneer = 'pioneer'
 }
 
+// This is for localhost or http only
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
     provider: CLOUDFLARE_PINATA_SERVER,
@@ -149,34 +150,37 @@ if (isFirefox) {
   });
 }
 
-if (!RuntimeInfo.protocol ||
-  (!RuntimeInfo.protocol.startsWith('http') || RuntimeInfo.protocol.startsWith('https'))) {
-  RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: IPFS_FLEEK,
-    weight: 4
-  },
-  {
-    provider: IPFS_GATEWAY_4EVERLAND,
-    weight: 2
-  },
-  {
-    provider: IPFS_W3S_LINK,
-    weight: 1
-  },
-  {
-    provider: CF_IPFS_GATEWAY,
-    weight: 4
-  },
-  {
-    provider: PINATA_IPFS_GATEWAY,
-    weight: 1 // Rate limit too low
-  },
-  {
-    provider: IPFS_IO,
-    weight: 5
+if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
+  // This is for https
+  if (RuntimeInfo.protocol.startsWith('https')) {
+    RANDOM_IPFS_GATEWAY_SETTING.push({
+      provider: IPFS_FLEEK,
+      weight: 4
+    },
+    {
+      provider: IPFS_GATEWAY_4EVERLAND,
+      weight: 2
+    },
+    {
+      provider: IPFS_W3S_LINK,
+      weight: 1
+    },
+    {
+      provider: CF_IPFS_GATEWAY,
+      weight: 4
+    },
+    {
+      provider: PINATA_IPFS_GATEWAY,
+      weight: 1 // Rate limit too low
+    },
+    {
+      provider: IPFS_IO,
+      weight: 5
+    }
+    );
   }
-  );
-} else if (!RuntimeInfo.protocol.startsWith('https')) {
+} else {
+  // This is for extension env or other
   RANDOM_IPFS_GATEWAY_SETTING.push({
     provider: NFT_STORAGE_GATEWAY,
     weight: 50

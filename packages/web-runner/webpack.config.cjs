@@ -65,6 +65,7 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       static: {
         directory: path.join(__dirname, 'build')
       },
+      allowedHosts: 'all',
       hot: false,
       liveReload: false,
       webSocketServer: false,

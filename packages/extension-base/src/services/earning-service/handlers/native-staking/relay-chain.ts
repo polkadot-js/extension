@@ -190,7 +190,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         let eraStakerOtherList: PalletStakingExposureItem[] = [];
         let identity;
 
-        if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
+        if (['kusama', 'polkadot', 'westend', 'availTuringTest', 'avail_mainnet'].includes(this.chain)) { // todo: review all relaychains later
           const [[_identity], _eraStaker] = await Promise.all([
             parseIdentity(substrateApi, validatorAddress),
             substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
@@ -380,11 +380,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
     const endEraForPoints = parseInt(activeEra) - 1;
-    let startEraForPoints = endEraForPoints - maxEraRewardPointsEras + 1;
+    let startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
 
     let _eraStakersPromise;
 
-    if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
+    if (['kusama', 'polkadot', 'westend', 'availTuringTest', 'avail_mainnet'].includes(this.chain)) { // todo: review all relaychains later
       _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
     } else {
       _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));

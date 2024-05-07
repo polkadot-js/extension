@@ -182,9 +182,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     if (recommendedExistedLength > 0 && otherExistedLength > 0) {
       return [recommendedSessionHeader, ...filteredItems.filter((item) => item.isRecommend), othersSessionHeader, ...filteredItems.filter((item) => !item.isRecommend)];
     } else if (recommendedExistedLength > 0) {
-      return [recommendedSessionHeader, ...filteredItems.filter((item) => item.isRecommend)];
+      return [...filteredItems.filter((item) => item.isRecommend)];
     } else if (otherExistedLength > 0) {
-      return [othersSessionHeader, ...filteredItems.filter((item) => !item.isRecommend)];
+      return [...filteredItems.filter((item) => !item.isRecommend)];
     } else {
       return [];
     }

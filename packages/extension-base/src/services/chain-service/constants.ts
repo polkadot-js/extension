@@ -94,6 +94,7 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   polimec: 6,
   enjin_relaychain: 24,
   availTuringTest: 24,
+  polkadex: 24,
   avail_mainnet: 24
 };
 

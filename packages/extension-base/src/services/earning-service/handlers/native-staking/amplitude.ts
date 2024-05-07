@@ -95,11 +95,6 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         return;
       }
 
-      const identityOfMetadata = substrateApi.api.query.identity.identityOf.creator.meta;
-      const identityOfReturnType = substrateApi.api.registry.lookup.getName(identityOfMetadata.type.asMap.value);
-
-      console.log('identityOfReturnType', this.chain, identityOfReturnType);
-
       const roundObj = _round.toHuman() as Record<string, string>;
       const round = parseRawNumber(roundObj.current);
       const maxDelegations = substrateApi.api.consts.parachainStaking.maxDelegationsPerRound.toString();
@@ -360,9 +355,17 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
     const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
     const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
     const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
-    const allCollators: ValidatorInfo[] = [];
 
-    for (const _collator of _allCollators) {
+    const identityPromises = _allCollators.map((collator) => {
+      const collatorInfo = collator[1].toPrimitive() as unknown as CollatorInfo;
+      const address = collatorInfo.id;
+
+      return parseIdentity(chainApi, address);
+    });
+    const identities = await Promise.all(identityPromises);
+
+    return _allCollators.map((_collator, i) => {
+      const [identity] = identities[i];
       const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
       const bnTotalStake = new BN(collatorInfo.total);
@@ -382,7 +385,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
       }
 
-      allCollators.push({
+      return {
         address: collatorInfo.id,
         totalStake: bnTotalStake.toString(),
         ownStake: bnOwnStake.toString(),
@@ -393,11 +396,10 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         isVerified: false,
         minBond: minDelegate.toString(),
         chain: this.chain,
-        isCrowded: isFullDelegatorsSet
-      });
-    }
-
-    return allCollators;
+        isCrowded: isFullDelegatorsSet,
+        identity
+      } as ValidatorInfo;
+    });
   }
 
   async getOtherPoolTargets (chainApi: _SubstrateApi): Promise<ValidatorInfo[]> {
@@ -412,9 +414,16 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
     const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
     const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
 
-    const allCollators: ValidatorInfo[] = [];
+    const identityPromises = _allCollators.map((collator) => {
+      const collatorInfo = collator[1].toPrimitive() as unknown as CollatorInfo;
+      const address = collatorInfo.id;
 
-    for (const _collator of _allCollators) {
+      return parseIdentity(chainApi, address);
+    });
+    const identities = await Promise.all(identityPromises);
+
+    return _allCollators.map((_collator, i) => {
+      const [identity] = identities[i];
       const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
 
       const bnTotalStake = new BN(collatorInfo.total);
@@ -434,7 +443,7 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
       }
 
-      allCollators.push({
+      return {
         address: collatorInfo.id,
         totalStake: bnTotalStake.toString(),
         ownStake: bnOwnStake.toString(),
@@ -446,11 +455,10 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
         isVerified: false,
         minBond: minDelegate.toString(),
         chain: this.chain,
-        isCrowded: isFullDelegatorsSet
-      });
-    }
-
-    return allCollators;
+        isCrowded: isFullDelegatorsSet,
+        identity
+      } as ValidatorInfo;
+    });
   }
 
   async getPoolTargets (): Promise<ValidatorInfo[]> {

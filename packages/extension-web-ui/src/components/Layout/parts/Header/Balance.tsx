@@ -45,6 +45,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { currency } = useSelector((state: RootState) => state.price);
   const [reloading, setReloading] = useState(false);
 
+  console.log('currency', currency);
+
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
   }, [isShowBalance]);
@@ -251,35 +253,25 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <div className={'__block-total-content'}>
-            <Number
-              className={'__balance-value'}
-              decimal={0}
-              decimalOpacity={0.45}
-              hide={!isShowBalance}
-              prefix={(currency?.isPrefix && currency.symbol) || ''}
-              subFloatNumber
-              value={totalValue}
-            />
-            {isShowBalance && <div className={CN('__total-balance-symbol')}>
-              {currency.symbol}
-            </div>}
-          </div>
+          <Number
+            className={'__balance-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix={(currency?.isPrefix && currency.symbol) || ''}
+            subFloatNumber
+            value={totalValue}
+          />
 
           <div className={'__balance-change-container'}>
-            <div className={'__balance-change-group'}>
-              <Number
-                className={'__balance-change-value'}
-                decimal={0}
-                decimalOpacity={1}
-                hide={!isShowBalance}
-                prefix={isTotalBalanceDecrease ? '-' : '+'}
-                value={totalChangeValue}
-              />
-              {isShowBalance && <div className={CN('__total-balance-symbol')}>
-                {currency.symbol}
-              </div>}
-            </div>
+            <Number
+              className={'__balance-change-value'}
+              decimal={0}
+              decimalOpacity={1}
+              hide={!isShowBalance}
+              prefix={isTotalBalanceDecrease ? `- ${currency.symbol}` : `+ ${currency.symbol}`}
+              value={totalChangeValue}
+            />
             <Tag
               className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
               shape={'round'}
@@ -288,7 +280,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 decimal={0}
                 decimalOpacity={1}
                 hide={!isShowBalance}
-                prefix={isTotalBalanceDecrease ? '- ' : '+ '}
+                prefix={isTotalBalanceDecrease ? '-' : '+'}
                 suffix={'%'}
                 value={totalChangePercent}
                 weight={700}
@@ -317,9 +309,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             subFloatNumber
             value={totalBalanceInfo.freeValue}
           />
-          {isShowBalance && <div className={CN('__total-balance-symbol')}>
-            {currency.symbol}
-          </div>}
         </div>
       </div>
 
@@ -342,9 +331,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             subFloatNumber
             value={totalBalanceInfo.lockedValue}
           />
-          {isShowBalance && <div className={CN('__total-balance-symbol')}>
-            {currency.symbol}
-          </div>}
         </div>
       </div>
 
@@ -475,35 +461,12 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
     display: 'flex',
     justifyContent: 'start',
     alignItems: 'center',
-    marginTop: token.marginSM,
-    gap: token.sizeXS
+    marginTop: token.marginSM
   },
 
   '.__balance-change-value': {
-    marginRight: token.marginXXS,
+    marginRight: token.sizeXS,
     lineHeight: token.lineHeight
-  },
-  '.__block-total-content': {
-    display: 'flex',
-    marginRight: token.sizeXS
-  },
-  '.__balance-change-group': {
-    display: 'flex'
-  },
-
-  '.__total-balance-symbol': {
-    marginLeft: -2,
-    fontSize: token.fontSizeSM,
-    lineHeight: token.lineHeightHeading6,
-
-    '&.-not-show-balance': {
-      display: 'none'
-    }
-
-  },
-
-  '.__balance-block .__block-content': {
-    display: 'flex'
   },
 
   '.__balance-change-percent': {

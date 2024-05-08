@@ -56,34 +56,21 @@ function Component (
   return (
     <div className={`tokens-upper-block ${className} ${isShrink ? '-shrink' : ''}`}>
       <div className='__total-balance-value-container'>
-        <Tooltip
-          overlayClassName={CN('__currency-value-detail-tooltip', {
-            'ant-tooltip-hidden': !isShowBalance
-          })}
-          placement='top'
-          title={formatNumber(totalValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
+        <div
+          className='__total-balance-value-content'
+          onClick={isShrink ? onChangeShowBalance : undefined}
         >
-          <div
-            className='__total-balance-value-content'
-            onClick={isShrink ? onChangeShowBalance : undefined}
-          >
-            <Number
-              className={'__total-balance-value'}
-              decimal={0}
-              decimalOpacity={0.45}
-              hide={!isShowBalance}
-              size={38}
-              subFloatNumber
-              value={totalValue}
-            />
-            {isShowBalance && <div className={CN('__total-balance-symbol', {
-              '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
-            })}
-            >
-              {currency.symbol}
-            </div>}
-          </div>
-        </Tooltip>
+          <Number
+            className={'__total-balance-value'}
+            decimal={0}
+            decimalOpacity={0.45}
+            hide={!isShowBalance}
+            prefix={(currency?.isPrefix && currency?.symbol) || ''}
+            size={38}
+            subFloatNumber
+            value={totalValue}
+          />
+        </div>
       </div>
       {!isShrink && (
         <div className={'__balance-change-container'}>
@@ -278,17 +265,6 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
       cursor: 'pointer',
       width: 'fit-content',
       margin: 'auto'
-    },
-
-    '.__total-balance-symbol': {
-      marginLeft: -2,
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightHeading6,
-
-      '&.-not-show-balance': {
-        display: 'none'
-      }
-
     },
 
     '&.-shrink': {

@@ -27,7 +27,6 @@ function Component (
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
   const { currency } = useSelector((state: RootState) => state.price);
-  const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
   const priceChangeStatus = (() => {
     if (value > pastValue) {
       return 'increase';
@@ -46,18 +45,13 @@ function Component (
       '-price-decrease': priceChangeStatus === 'decrease'
     })}
     >
-      <div className={'__token-price-wrapper'}>
-        <Number
-          className={'__value'}
-          decimal={0}
-          decimalOpacity={0.45}
-          prefix={(currency?.isPrefix && currency?.symbol) || ''}
-          value={value}
-        />
-        {isShowBalance && <div className={'__total-balance-symbol'}>
-          {currency.symbol}
-        </div>}
-      </div>
+      <Number
+        className={'__value'}
+        decimal={0}
+        decimalOpacity={0.45}
+        prefix={(currency?.isPrefix && currency?.symbol) || ''}
+        value={value}
+      />
       <Number
         className={'__percentage'}
         decimal={0}
@@ -78,11 +72,6 @@ export const TokenPrice = styled(Component)<Props>(({ theme: { token } }: Props)
       fontSize: 'inherit !important',
       lineHeight: 'inherit',
       textAlign: 'end'
-    },
-    '.__token-price-wrapper': {
-      display: 'flex',
-      justifyContent: 'end',
-      gap: 2
     },
 
     '.__value': {

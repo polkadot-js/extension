@@ -36,21 +36,16 @@ function Component (
         suffix={symbol}
         value={value}
       />
-      <div className={'__balance-value-wrapper'}>
-        <Number
-          className={'__converted-value'}
-          decimal={0}
-          decimalOpacity={0.45}
-          hide={hideBalance}
-          intOpacity={0.45}
-          prefix={(currency?.isPrefix && currency?.symbol) || ''}
-          unitOpacity={0.45}
-          value={convertedValue}
-        />
-        {isShowBalance && <div className={'__total-balance-symbol'}>
-          {currency.symbol}
-        </div>}
-      </div>
+      <Number
+        className={'__converted-value'}
+        decimal={0}
+        decimalOpacity={0.45}
+        hide={hideBalance}
+        intOpacity={0.45}
+        prefix={(currency?.isPrefix && currency?.symbol) || ''}
+        unitOpacity={0.45}
+        value={convertedValue}
+      />
     </div>
   );
 }
@@ -62,18 +57,13 @@ export const TokenBalance = styled(Component)<Props>(({ theme: { token } }: Prop
       lineHeight: 'inherit',
       textAlign: 'end'
     },
-    '.__balance-value-wrapper': {
-      display: 'flex',
-      justifyContent: 'end',
-      gap: 2
-    },
 
     '.__value': {
       lineHeight: token.lineHeightLG,
       fontSize: token.fontSizeLG
     },
 
-    '.__converted-value, .__total-balance-symbol': {
+    '.__converted-value': {
       lineHeight: token.lineHeightSM,
       fontSize: token.fontSizeSM
     }

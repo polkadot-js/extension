@@ -52,6 +52,7 @@ function Component (
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const chainAssetMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
+  const { currency } = useSelector((state: RootState) => state.price);
 
   const time = customFormatDate(item.time, '#hhhh#:#mm#');
   const link = getLink(item, chainInfoMap);
@@ -189,7 +190,7 @@ function Component (
           decimalOpacity={0.45}
           hide={!isShowBalance}
           intOpacity={0.45}
-          prefix='$'
+          prefix={(currency?.isPrefix && currency?.symbol) || ''}
           unitOpacity={0.45}
           value={convertedBalanceValue.isNaN() ? '0' : convertedBalanceValue}
         />

@@ -1,7 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BrowserConfirmationType, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  BrowserConfirmationType,
+  CurrencyJson,
+  CurrencyType,
+  LanguageType,
+  ThemeNames
+} from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { BaseSelectModal } from '@subwallet/extension-web-ui/components/Modal/BaseSelectModal';
@@ -18,6 +24,7 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
+import {staticData, StaticKey} from "@subwallet/extension-base/utils/staticData";
 
 type Props = ThemeProps;
 
@@ -167,17 +174,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     ];
   }, [t, token]);
 
+  // TODO: 'after will be update data online or refactor this function'
+  const staticDataCurrencySymbol = useMemo<Record<string, CurrencyJson> | undefined>(() => {
+    return staticData[StaticKey.CURRENCY_SYMBOL] as Record<string, CurrencyJson>;
+  }, []);
+
   const currencyItems = useMemo<SelectionItemType[]>(() => {
-    return exchangeRateMap
-      ? Object.keys(exchangeRateMap).map((item) => ({
+    return staticDataCurrencySymbol
+      ? Object.keys(staticDataCurrencySymbol).map((item) => ({
         key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
-        title: exchangeRateMap[item].label,
-        subTitle: item
+        title: `${item} - ${staticDataCurrencySymbol[item].label}`,
+        subTitle: staticDataCurrencySymbol[item].symbol
       }))
       : [];
-  }, [exchangeRateMap, token]);
+  }, [staticDataCurrencySymbol, token]);
+
+  console.log('currencyItems', currencyItems);
 
   const onSelectLanguage = useCallback((value: string) => {
     setLoadingMap((prev) => ({
@@ -286,7 +300,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             renderWhenEmpty={renderEmpty}
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
-            searchPlaceholder={t<string>('Search Currency')}
+            searchPlaceholder={t<string>('Search currency')}
             selected={currencyCode}
             shape='round'
             size='small'

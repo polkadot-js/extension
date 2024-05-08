@@ -13,7 +13,7 @@ import { noop } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
@@ -234,10 +234,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     saveTheme(value as ThemeNames).finally(noop);
   }, []);
 
-  useEffect(() => {
-    console.log(loadingMap.currency);
-  }, [loadingMap.currency]);
-
   return (
     <PageWrapper
       className={`general-setting ${className}`}
@@ -270,8 +266,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               shape='round'
               title={t('Wallet theme')}
             />}
-
-          {false && <SelectModal
+          <SelectModal
             background={'default'}
             className={`__modal ${className}`}
             customInput={renderModalTrigger({
@@ -296,7 +291,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             shape='round'
             size='small'
             title={t('Select a currency')}
-          />}
+          />
 
           <SelectModal
             background={'default'}

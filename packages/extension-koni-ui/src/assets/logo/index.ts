@@ -18,6 +18,7 @@ export const DefaultLogosMap: Record<string, string> = {
   coinbase: './images/projects/coinbase.png',
   stellaswap: './images/projects/stellaswap.png',
   xtwitter: './images/projects/xtwitter.png',
+  xtwitter_transparent: './images/projects/xtwitter_transparent.png',
   chain_flip: '/images/projects/chainflip-mainnet.png',
   hydradx: '/images/projects/hydradx.png',
   [SUBSTRATE_GENERIC_KEY]: './images/projects/substrate.png'

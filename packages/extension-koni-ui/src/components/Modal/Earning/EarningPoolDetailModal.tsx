@@ -4,6 +4,7 @@
 import { EarningStatus } from '@subwallet/extension-base/types';
 import MetaInfo from '@subwallet/extension-koni-ui/components/MetaInfo/MetaInfo';
 import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-koni-ui/constants';
+import { useGetChainPrefixBySlug } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Number, SwModal } from '@subwallet/react-ui';
@@ -13,18 +14,21 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   onCancel: () => void,
   detailItem?: NominationPoolDataType,
-  maxPoolMembersValue?: number
+  maxPoolMembersValue?: number,
+  chain?: string,
 };
 
 export const EarningPoolDetailModalId = 'earningPoolDetailModalId';
 
-function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ chain, className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
   const earningStatus: EarningStatus = useMemo(() => {
     return isProfitable ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
   }, [isProfitable]);
+
+  const networkPrefix = useGetChainPrefixBySlug(chain);
 
   const ratePercent = useMemo(() => {
     const rate = maxPoolMembersValue && (memberCounter / maxPoolMembersValue);
@@ -58,6 +62,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
           address={address}
           label={t('Pool')}
           name={name}
+          networkPrefix={networkPrefix}
         />
 
         {

@@ -27,7 +27,7 @@
     "@polkadot/extension-inject": "0.47.3",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/networks": "^12.6.2",
-    "@polkadot/phishing": "^0.22.6",
+    "@polkadot/phishing": "^0.22.7",
     "@polkadot/rpc-provider": "^11.0.3",
     "@polkadot/types": "^11.0.3",
     "@polkadot/ui-keyring": "^3.6.6",

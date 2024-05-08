@@ -80,11 +80,11 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   private async calculatePriceMap () {
-    const rawPrice = this.rawPriceSubject.value;
+    const { price24hMap, priceMap } = this.rawPriceSubject.value;
     const exchangeRateData = this.rawExchangeRateMap.value;
     const currencyKey = this.currency.value;
 
-    if (Object.keys(rawPrice).length === 0) {
+    if (Object.keys(this.rawPriceSubject.value).length === 0) {
       return;
     }
 
@@ -93,7 +93,8 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     }
 
     const finalPriceMap = {
-      ...JSON.parse(JSON.stringify(rawPrice)) as Omit<PriceJson, 'exchangeRateMap'>,
+      priceMap: { ...priceMap },
+      price24hMap: { ...price24hMap },
       currency: currencyKey,
       exchangeRateMap: exchangeRateData,
       currencyData: staticData[StaticKey.CURRENCY_SYMBOL][currencyKey || DEFAULT_CURRENCY] as CurrencyJson
@@ -104,8 +105,8 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     }
 
     Object.keys(finalPriceMap.price24hMap).forEach((key: string) => {
-      finalPriceMap.price24hMap[key] = rawPrice.price24hMap[key] * exchangeRateData[currencyKey].exchange;
-      finalPriceMap.priceMap[key] = rawPrice.priceMap[key] * exchangeRateData[currencyKey].exchange;
+      finalPriceMap.price24hMap[key] *= exchangeRateData[currencyKey].exchange;
+      finalPriceMap.priceMap[key] *= exchangeRateData[currencyKey].exchange;
     });
 
     await this.dbService.updatePriceStore(finalPriceMap);
@@ -149,7 +150,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.priceIds = priceIds || this.getPriceIds();
 
     // Update for tokens price
-    this.getTokenPrice(this.priceIds, this.priceSubject.value.currency)
+    this.getTokenPrice(this.priceIds, DEFAULT_CURRENCY)
       .then(() => {
         this.refreshPriceMapByAction();
       })

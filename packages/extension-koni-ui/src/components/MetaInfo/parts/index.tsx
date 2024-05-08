@@ -11,5 +11,6 @@ export { default as NumberItem } from './NumberItem';
 export { default as StatusItem } from './StatusItem';
 export { default as TotalItem } from './TotalItem';
 export { default as TransferItem } from './TransferItem';
+export { default as NetworkGroup } from './NetworkGroup';
 
 export type { InfoItemBase } from './types';

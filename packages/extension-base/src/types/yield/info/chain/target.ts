@@ -11,6 +11,7 @@ export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPool
   name?: string;
   bondedAmount: string;
   isProfitable: boolean;
+  isCrowded?: boolean;
 }
 
 /* Native */

@@ -343,6 +343,12 @@ const Component: React.FC = () => {
     return ExtrinsicType.STAKING_UNBOND;
   }, [poolType, chainValue]);
 
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chainValue);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chainValue]);
+
   return (
     <>
       <TransactionContent>
@@ -382,7 +388,7 @@ const Component: React.FC = () => {
               chain={chainValue}
               defaultValue={persistValidator}
               disabled={!fromValue}
-              label={t(`Select ${getValidatorLabel(chainValue)}`)}
+              label={t(`Select ${handleValidatorLabel}`)}
               nominators={nominators}
             />
           </Form.Item>

@@ -72,8 +72,7 @@ const defaultModalId = 'multi-validator-selector';
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', defaultValue, from
-    , id = defaultModalId, isSingleSelect: _isSingleSelect = false,
-    loading, onChange, slug
+    , id = defaultModalId, isSingleSelect: _isSingleSelect = false, onChange, slug
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
@@ -322,9 +321,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     <>
       <SelectValidatorInput
         chain={chain}
-        disabled={!chain || !from}
+        disabled={items.length < 1}
         label={t('Select') + ' ' + t(handleValidatorLabel)}
-        loading={loading}
+        loading={false}
         onClick={onActiveValidatorSelector}
         value={value || ''}
       />

@@ -4,16 +4,18 @@
 import { BrowserConfirmationType, CurrencyJson, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType, saveLanguage, savePriceCurrency, saveTheme } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import { getCurrencySymbol } from '@subwallet/extension-koni-ui/utils/currency';
+import { BackgroundIcon, Icon, Image, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -23,7 +25,7 @@ type Props = ThemeProps;
 
 type SelectionItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'],
+  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
   title: string,
   subTitle?: string,
@@ -33,6 +35,15 @@ type SelectionItemType = {
 const renderEmpty = () => <GeneralEmptyList />;
 
 function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
+  const getURLSymbol = (() => {
+    if (typeof item.leftIcon === 'string') {
+      return `currency_${item.leftIcon.toLowerCase()}`;
+    }
+
+    return undefined;
+  })();
+  const logoSrc = getURLSymbol ? DefaultLogosMap[getURLSymbol] : undefined;
+
   return (
     <SettingItem
       className={CN('__selection-item', {
@@ -41,18 +52,42 @@ function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
       })}
       key={item.key}
       leftItemIcon={
-        item.subTitle && <div className={'__subTitle-setting-item'}>{item.subTitle}</div>
+        typeof item.leftIcon === 'string'
+          ? (
+            <div className={'__label-item'}>
+              <Image
+                height={20}
+                src={logoSrc}
+                width={20}
+              />
+            </div>
+          )
+          : (
+            <div
+              className={'__label-item'}
+              style={{ backgroundColor: item.leftIconBgColor }}
+            >
+              <Icon
+                customSize={'20px'}
+                phosphorIcon={item.leftIcon as unknown as PhosphorIcon}
+                type='phosphor'
+                weight='fill'
+              />
+            </div>
+          )
       }
       name={item.title}
       rightItem={
         _selected
-          ? <Icon
-            className='__right-icon'
-            customSize={'20px'}
-            phosphorIcon={CheckCircle}
-            type='phosphor'
-            weight='fill'
-          />
+          ? (
+            <Icon
+              className='__right-icon'
+              customSize={'20px'}
+              phosphorIcon={CheckCircle}
+              type='phosphor'
+              weight='fill'
+            />
+          )
           : null
       }
     />
@@ -67,7 +102,7 @@ function renderModalTrigger (item: SelectionItemType) {
       leftItemIcon={
         <BackgroundIcon
           backgroundColor={item.leftIconBgColor}
-          phosphorIcon={item.leftIcon}
+          phosphorIcon={item.leftIcon as unknown as PhosphorIcon}
           size='sm'
           type='phosphor'
           weight='fill'
@@ -153,8 +188,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return staticDataCurrencySymbol
       ? Object.keys(staticDataCurrencySymbol).map((item) => ({
         key: item,
-        leftIcon: Coins,
-        leftIconBgColor: token['yellow-5'],
+        leftIcon: getCurrencySymbol(item).icon,
+        leftIconBgColor: token.colorBgBorder,
         title: `${item} - ${staticDataCurrencySymbol[item].label}`,
         subTitle: staticDataCurrencySymbol[item].symbol
       }))
@@ -257,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               className={`__modal ${className}`}
               customInput={renderModalTrigger({
                 key: 'wallet-theme-trigger',
-                leftIcon: Image,
+                leftIcon: Image as unknown as PhosphorIcon,
                 leftIconBgColor: token.colorPrimary,
                 title: t('Wallet theme')
               })}
@@ -361,6 +396,22 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       height: 52,
       alignItems: 'center',
       display: 'flex'
+    },
+    '.__label-item': {
+      borderRadius: '50%',
+      padding: 4,
+      maxHeight: 28
+    },
+    '.-subTitle-container .__label-item': {
+      backgroundColor: token.colorBgBorder,
+      padding: 4,
+      borderRadius: 8,
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.-subTitle-container .ant-image-img': {
+      display: 'block'
     },
 
     '.item-disabled': {

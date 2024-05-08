@@ -44,10 +44,10 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^11.0.2",
+    "@polkadot/api": "^11.0.3",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/networks": "^12.6.2",
-    "@polkadot/types": "^11.0.2",
+    "@polkadot/types": "^11.0.3",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
     "@polkadot/x-fetch": "^12.6.2",

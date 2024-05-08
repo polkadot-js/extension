@@ -1,14 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { NetworkGroup } from '@subwallet/extension-koni-ui/components/MetaInfo/parts';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
-import { CaretLeft, GlobeHemisphereWest, PlusCircle, TwitterLogo } from 'phosphor-react';
+import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -118,7 +120,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                   <MetaInfo.Default
                     label={t('Network')}
                   >
-                    {/* <NetworkGroup chains={data.chains} /> */}
+                    <NetworkGroup chains={data.chains} />
                   </MetaInfo.Default>
                 )
               }
@@ -192,10 +194,11 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 <Button
                   className={'__modal-icon-button'}
                   icon={(
-                    <Icon
-                      phosphorIcon={TwitterLogo}
-                      size={'sm'}
-                      weight={'fill'}
+                    <Image
+                      height={18}
+                      shape='square'
+                      src={DefaultLogosMap.xtwitter_transparent}
+                      width={20}
                     />
                   )}
                   onClick={onClickTwitterIcon}
@@ -236,6 +239,10 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
     },
     '.ant-sw-modal-header': {
       borderBottom: 0
+    },
+    '.__modal-icon-button .ant-image': {
+      display: 'flex',
+      alignItems: 'end'
     },
     '.__total-token-supply .__value': {
       fontWeight: token.fontWeightStrong

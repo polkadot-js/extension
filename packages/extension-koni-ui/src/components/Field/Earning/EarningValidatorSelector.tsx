@@ -78,6 +78,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     , setForceFetchValidator, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   useExcludeModal(id);
   const isActive = checkActive(id);
@@ -85,6 +86,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const items = useGetPoolTargetList(slug) as ValidatorDataType[];
+  const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
 
   const { compound } = useYieldPositionDetail(slug, from);
 
@@ -281,10 +283,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         key={key}
         onClick={onClickItem}
         onClickMoreBtn={onClickMore(item)}
+        prefixAddress = {networkPrefix}
         validatorInfo={item}
       />
     );
-  }, [changeValidators, nominatorValueList, onClickItem, onClickMore]);
+  }, [changeValidators, networkPrefix, nominatorValueList, onClickItem, onClickMore]);
 
   const onClickActionBtn = useCallback(() => {
     activeModal(FILTER_MODAL_ID);

@@ -5,7 +5,6 @@ import { balanceNoPrefixFormater } from '@subwallet/extension-base/utils';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import { Button, formatNumber, Icon, Number, SwNumberProps, Tag, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
@@ -67,10 +66,7 @@ function Component (
             className='__total-balance-value-content'
             onClick={isShrink ? onChangeShowBalance : undefined}
           >
-            {isShowBalance && <div className={CN('__total-balance-symbol', {
-              '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
-            })}
-            >
+            {isShowBalance && <div className={CN('__total-balance-symbol')}>
               {currencyData.symbol}
             </div>}
             <Number
@@ -283,7 +279,7 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
 
     '.__total-balance-symbol': {
       marginLeft: 8,
-      marginRight: -8,
+      marginRight: -4,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
       fontWeight: token.fontWeightStrong,
@@ -297,6 +293,19 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     '&.-shrink': {
       paddingBottom: 32,
       flexDirection: 'row',
+
+      '.__total-balance-symbol': {
+        marginLeft: 8,
+        marginRight: -4,
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        fontWeight: token.fontWeightStrong,
+
+        '&.-not-show-balance': {
+          display: 'none'
+        }
+
+      },
 
       '.__total-balance-value-container': {
         flex: 1

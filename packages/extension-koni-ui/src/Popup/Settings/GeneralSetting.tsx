@@ -103,11 +103,10 @@ const isShowWalletTheme = false;
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
-  const { currencyData } = useSelector((state) => state.price);
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const { currency, exchangeRateMap } = useSelector((state: RootState) => state.price);
+  const { currency } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false,
@@ -156,12 +155,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         key: item,
         leftIcon: Coins,
         leftIconBgColor: token['yellow-5'],
-        title: staticDataCurrencySymbol[item].label,
+        title: `${item} - ${staticDataCurrencySymbol[item].label}`,
         subTitle: staticDataCurrencySymbol[item].symbol
       }))
       : [];
   }, [staticDataCurrencySymbol, token]);
-
 
   const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
     return [
@@ -294,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             renderWhenEmpty={renderEmpty}
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
-            searchPlaceholder={t<string>('Search Currency')}
+            searchPlaceholder={t<string>('Search currency')}
             selected={currency}
             shape='round'
             size='small'

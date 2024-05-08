@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.47.4 May 8, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump polkadot/api to 11.0.3 and @polkadot/phishing to 0.22.7
+
+
 ## 0.47.3 Apr 27, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.

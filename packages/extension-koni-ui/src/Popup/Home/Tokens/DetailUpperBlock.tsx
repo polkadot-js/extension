@@ -219,6 +219,7 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
 
     '.__total-balance-symbol': {
       marginLeft: 8,
+      marginRight: -8,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
       fontWeight: token.fontWeightStrong,

@@ -79,7 +79,6 @@ function Component (
               decimalOpacity={0.45}
               hide={!isShowBalance}
               size={38}
-              prefix={isShrink ? currencyData?.symbol : ''}
               subFloatNumber
               value={totalValue}
             />
@@ -284,6 +283,7 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
 
     '.__total-balance-symbol': {
       marginLeft: 8,
+      marginRight: -8,
       fontSize: token.fontSizeXL,
       lineHeight: token.lineHeightHeading4,
       fontWeight: token.fontWeightStrong,

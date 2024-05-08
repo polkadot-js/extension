@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { EarningStatus } from '@subwallet/extension-base/types';
+import { BaseModal } from '@subwallet/extension-web-ui/components';
 import MetaInfo from '@subwallet/extension-web-ui/components/MetaInfo/MetaInfo';
-import { NominationPoolsEarningStatusUi, StakingStatusType, StakingStatusUi } from '@subwallet/extension-web-ui/constants/stakingStatusUi';
+import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { SwModal } from '@subwallet/react-ui';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -20,12 +21,12 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
-  const earningStatus: StakingStatusType = useMemo(() => {
-    return isProfitable ? 'active' : 'inactive';
+  const earningStatus: EarningStatus = useMemo(() => {
+    return isProfitable ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
   }, [isProfitable]);
 
   return (
-    <SwModal
+    <BaseModal
       className={className}
       id={EarningPoolDetailModalId}
       onCancel={onCancel}
@@ -46,7 +47,7 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
           state && (
             <MetaInfo.Status
               label={t('State')}
-              statusIcon={NominationPoolsEarningStatusUi[state].icon} // TODO: update icon
+              statusIcon={NominationPoolsEarningStatusUi[state].icon}
               statusName={state || ''}
               valueColorSchema={NominationPoolsEarningStatusUi[state].schema}
             />
@@ -55,14 +56,14 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
 
         <MetaInfo.Status
           label={t('Earning status')}
-          statusIcon={StakingStatusUi[earningStatus].icon} // TODO: update icon
-          statusName={StakingStatusUi[earningStatus].name}
-          valueColorSchema={StakingStatusUi[earningStatus].schema}
+          statusIcon={EarningStatusUi[earningStatus].icon}
+          statusName={EarningStatusUi[earningStatus].name}
+          valueColorSchema={EarningStatusUi[earningStatus].schema}
         />
 
         <MetaInfo.Number
           decimals={decimals}
-          label={t('Total bonded')}
+          label={t('Total staked')}
           suffix={symbol}
           value={bondedAmount || '0'}
           valueColorSchema={'even-odd'}
@@ -74,7 +75,7 @@ function Component ({ className, detailItem, onCancel }: Props): React.ReactElem
           valueColorSchema={'even-odd'}
         />
       </MetaInfo>
-    </SwModal>
+    </BaseModal>
   );
 }
 

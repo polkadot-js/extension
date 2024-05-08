@@ -1,5 +1,125 @@
 # CHANGELOG
 
+## 1.1.61
+Build date: May 02, 2024.
+
+Features & Update:
+- Hide popup Introducing Earning feature (#2948)
+
+Bugs fixed:
+- Fixed bug Cannot read properties of undefined (reading 'length') (#2986)
+- Fixed bug related to earning feature (#2680)
+
+## 1.1.60
+Build date: Apl 30, 2024.
+
+Features & Update:
+- Add support Mythos chain (#2966)
+- Set default pool for Avail Turing (#2971)
+
+## 1.1.59
+Build date: Apl 25, 2024.
+
+Features & Update:
+- Support staking for Avail Turing (#2963)
+
+## 1.1.58
+Build date: Apl 24, 2024.
+
+Features & Update:
+- Add show/hide password for case input password (#2555)
+- Update chain-list (#2947)
+  - Set "SubWallet Official 3" as the default pool for Vara
+  - Add support for Commune AI blockchain and COMAI token (Mainnet)
+  - Add Block Explorer for Enjin Relaychain, Enjin Matrix
+  - Add support for DBC network
+  - Add support Avail Turing
+
+Bugs fixed:
+- Fixed bug Do not show transaction history in case sender account is null (#2955)
+
+## 1.1.57
+Build date: Apl 23, 2024.
+
+Bugs fixed:
+- Fix bug related to Aleph Zero transfer and staking (#2655)
+- Fix issue related to earning status (#2941)
+
+## 1.1.56
+Build date: Apl 19, 2024.
+
+Features & Update:
+- Update chainlist (#2931)
+  - Add rpc  for Liberland: wss://liberland-rpc.dwellir.com
+  - Add support for STINK token
+  - Add support for PINK token on Base network
+  - Support Paseo network
+- Bump Polkadot dependencies (#2853)
+- Support NFTs on Asset Hub (#2934)
+- Update withdraw time for Parachain (#2830)
+
+Bugs fixed:
+- Fixed bug parsing Earning status for Nomination pool (#2937)
+
+## 1.1.55
+Build date: Apl 14, 2024.
+
+Features & Update:
+- Implement Swap feature for extension (#2823)
+- Support Export all accounts feature (#2819)
+- Add warning message for cross chain transfer to an exchange (CEX) (#2873)
+- Update chain-list (#2890)
+  - Add support for Acurast Canary
+  - Add support for token BEEFY for AssetHub and HydraDX
+  - Add support Humanode - HMND (Substrate) / eHMND (EVM)
+  - Update logo for Viction
+  - Add xcDED for Moonbeam
+  - Update ChainAsset
+- Automatically enable network when connecting via Substrate provider (#2899)
+
+Bugs fixed:
+- Fixed bug show minimum active stake (#2889)
+- Fixed bug Error page when sign message with WalletConnect (#2915)
+- Fixed bug displaying 'connection existed' when connecting WalletConnect (#2903)
+
+## 1.1.54
+Build date: Apl 09, 2024.
+
+Bugs fixed:
+- Fix issue in transaction screen (#2891)
+- Fix error in setting screen
+
+## 1.1.53
+Build date: Apl 08, 2024.
+
+Bugs fixed:
+- Fixed bug fetching balance with Enjin Relay Chain (#2885)
+- Fixed bug Wallet Connect not show connection popup (#2407)
+- Fixed bug Some required methods are missing when connecting Dapp to Subwallet via WalletConnect (#2860)
+
+## 1.1.52
+Build date: Apl 05, 2024.
+
+Features & Update:
+- Update balance service (#2416)
+- Improve UX UI for earning feature (#2827)
+- Update message when navigate user to the Astar portal to stake (#2847)
+- Update chain-list (#2851)
+  - Add support for X Layer mainnet, X Layer testnet
+  - Add support for ASTR token on Astar zkEVM
+  - Add support DOTA token on Polkadot Asset Hub
+  - Add support BNCS for Moonbeam
+
+Bugs fixed:
+- Fixed bug show earnings screen although back to home (#2742)
+
+
+## 1.1.51
+Build date: Apl 02, 2024.
+
+Features & Update:
+- Update withdraw time for parachain staking (#2829)
+
 ## 1.1.50
 Build date: Mar 28, 2024.
 

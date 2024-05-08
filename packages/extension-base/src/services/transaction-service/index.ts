@@ -688,6 +688,16 @@ export default class TransactionService {
         break;
       }
 
+      case ExtrinsicType.SWAP: {
+        const data = parseTransactionData<ExtrinsicType.SWAP>(transaction.data); // TODO: switch by provider
+        const inputAsset = this.state.chainService.getAssetBySlug(data.quote.pair.from);
+
+        historyItem.amount = { value: data.quote.fromAmount, symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
+        historyItem.additionalInfo = data;
+
+        break;
+      }
+
       case ExtrinsicType.UNKNOWN:
         break;
     }
@@ -794,6 +804,12 @@ export default class TransactionService {
       }
     } else if ([ExtrinsicType.STAKING_BOND, ExtrinsicType.STAKING_UNBOND, ExtrinsicType.STAKING_WITHDRAW, ExtrinsicType.STAKING_CANCEL_UNSTAKE, ExtrinsicType.STAKING_CLAIM_REWARD, ExtrinsicType.STAKING_JOIN_POOL, ExtrinsicType.STAKING_POOL_WITHDRAW, ExtrinsicType.STAKING_LEAVE_POOL].includes(transaction.extrinsicType)) {
       this.state.eventService.emit('transaction.submitStaking', transaction.chain);
+    } else if (transaction.extrinsicType === ExtrinsicType.SWAP) {
+      const inputData = parseTransactionData<ExtrinsicType.SWAP>(transaction.data);
+      const toAssetSlug = inputData.quote.pair.to;
+
+      // todo: consider async
+      this.state.chainService.updateAssetSetting(toAssetSlug, { visible: true }, true).catch(console.error);
     }
   }
 

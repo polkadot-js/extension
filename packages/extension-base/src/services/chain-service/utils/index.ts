@@ -88,8 +88,24 @@ export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
 
+/**
+ * @function _isNativeTokenTransferredByEvm
+ * @description Check if the native token is transferred by EVM, some token is only transferred by Substrate, need to check disableEvmTransfer flag
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the native token can transfer by EVM
+ * */
+export function _isNativeTokenTransferredByEvm (tokenInfo: _ChainAsset) {
+  return !tokenInfo.metadata?.disableEvmTransfer;
+}
+
+/**
+ * @function _isTokenTransferredByEvm
+ * @description Check if the token is transferred by EVM
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the token can transfer by EVM
+ * */
 export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
-  return !!tokenInfo.metadata?.contractAddress || _isNativeToken(tokenInfo);
+  return !!tokenInfo.metadata?.contractAddress || (_isNativeToken(tokenInfo) && _isNativeTokenTransferredByEvm(tokenInfo));
 }
 
 export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {
@@ -324,19 +340,23 @@ export function _isAssetValuable (assetInfo: _ChainAsset) {
   return assetInfo.hasValue;
 }
 
-export function _getMultiChainAsset (assetInfo: _ChainAsset) {
+export function _getMultiChainAsset (assetInfo?: _ChainAsset) {
   return assetInfo?.multiChainAsset || '';
 }
 
-export function _getAssetPriceId (assetInfo: _ChainAsset) {
+export function _getAssetPriceId (assetInfo?: _ChainAsset) {
   return assetInfo?.priceId || '';
+}
+
+export function _getAssetName (assetInfo?: _ChainAsset) {
+  return assetInfo?.name || '';
 }
 
 export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset?.priceId || '';
 }
 
-export function _getAssetSymbol (assetInfo: _ChainAsset) {
+export function _getAssetSymbol (assetInfo?: _ChainAsset) {
   return assetInfo?.symbol || '';
 }
 
@@ -344,16 +364,16 @@ export function _getMultiChainAssetSymbol (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset.symbol;
 }
 
-export function _getAssetOriginChain (assetInfo: _ChainAsset) {
-  return assetInfo.originChain;
+export function _getAssetOriginChain (assetInfo?: _ChainAsset) {
+  return assetInfo?.originChain || '';
 }
 
 export function _getChainName (chainInfo: _ChainInfo) {
   return chainInfo.name;
 }
 
-export function _getAssetDecimals (assetInfo: _ChainAsset): number {
-  return assetInfo.decimals || 0;
+export function _getAssetDecimals (assetInfo?: _ChainAsset): number {
+  return assetInfo?.decimals || 0;
 }
 
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {
@@ -471,6 +491,10 @@ export function randomizeProvider (providers: Record<string, string>, excludedKe
   };
 }
 
+export function _isAssetCanPayTxFee (chainAsset: _ChainAsset): boolean {
+  return chainAsset.metadata?.canPayTxFee as boolean ?? false;
+}
+
 export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfoList: _ChainInfo[]) {
   const currentChainInfoMap = currentDataMap.chainInfoMap;
   const currentChainStateMap = currentDataMap.chainStateMap;
@@ -511,6 +535,11 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     if (currentChainInfo) {
       needUpdate = true;
       currentChainInfo.extraInfo = latestChainInfo.extraInfo;
+      currentChainInfo.chainStatus = latestChainInfo.chainStatus;
+
+      if (Object.keys(currentChainInfo.providers).length === 0) {
+        currentChainInfo.chainStatus = _ChainStatus.INACTIVE;
+      }
     }
 
     if (needUpdate) {

@@ -188,7 +188,7 @@ function Component ({ className, compound, inputAsset, list, poolInfo }: Props) 
                 />
                 <MetaInfo.Number
                   decimals={inputAsset?.decimals || 0}
-                  label={t('Active staked')}
+                  label={t('Active stake')}
                   suffix={inputAsset?.symbol}
                   value={item.activeStake}
                   valueColorSchema='even-odd'

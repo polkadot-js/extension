@@ -1,0 +1,11 @@
+{
+  "USD": {"label": "United States Dollar", "symbol": "USD", "isPrefix": false},
+  "BRL": {"label": "Brazilian Real", "symbol": "BRL", "isPrefix": false},
+  "CNY": {"label": "Chinese Yuan", "symbol": "CNY", "isPrefix": false},
+  "EUR": {"label": "Euro", "symbol": "EUR", "isPrefix": false},
+  "GBP": {"label": "British Pound Sterling", "symbol": "GBP", "isPrefix": false},
+  "HKD": {"label": "Hong Kong Dollar", "symbol": "HKD", "isPrefix": false},
+  "JPY": {"label": "Japanese Yen", "symbol": "JPY", "isPrefix": false},
+  "RUB": {"label": "Russian Ruble", "symbol": "RUB", "isPrefix": false},
+  "VND": {"label": "Vietnamese Dong", "symbol": "VND", "isPrefix": false}
+}

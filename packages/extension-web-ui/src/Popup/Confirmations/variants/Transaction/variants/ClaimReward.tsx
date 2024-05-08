@@ -1,12 +1,14 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { RequestStakeClaimReward } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo, PageWrapper } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { useGetNativeTokenBasicInfo, useSelector } from '@subwallet/extension-web-ui/hooks';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
+import { CheckCircle } from 'phosphor-react';
 import React, { useContext, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -33,12 +35,14 @@ const Component: React.FC<Props> = (props: Props) => {
       // todo: will convert message to key for i18n later
       openAlert({
         title: t('Pay attention!'),
+        type: NotificationType.WARNING,
         content: t(`The rewards you are about to claim are ${
           isRewardLtFee ? 'smaller than' : 'equal to'
         } the transaction fee. This means that you won’t receive any rewards after claiming. Do you wish to continue?`),
         okButton: {
           text: t('I understand'),
-          onClick: closeAlert
+          onClick: closeAlert,
+          icon: CheckCircle
         }
       });
     }
@@ -74,7 +78,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <span className={CN('text-light-4')}>
         {
           data.bondReward
-            ? t('Your rewards will be bonded back into the pool after claiming')
+            ? t('Your rewards will be staked back into the pool after claiming')
             : t('Your rewards will be added to your transferable balance after claiming')
         }
       </span>

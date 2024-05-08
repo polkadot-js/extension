@@ -21,6 +21,9 @@ type Handlers = Record<string, Handler>;
 const port = VirtualMessageCenter.getInstance().ui;
 const handlers: Handlers = {};
 
+// Set the port as ready
+port.setReady();
+
 // setup a listener for messages, any incoming resolves the promise
 // port.onMessage.addListener((response: Record<string, any>): void => {
 //   console.log('=====response', response);

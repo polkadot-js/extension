@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AssetHubNftType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME } from '@subwallet/extension-base/koni/api/nft/config';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
@@ -72,25 +73,19 @@ export async function uniqueGetExtrinsic (substrateApi: _SubstrateApi, senderAdd
   }
 }
 
-export function statemineGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
+export function assetHubGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
   try {
     const itemId = params.itemId as number;
     const collectionId = params.collectionId as number;
+    const nftType = params.assetHubType as string;
 
-    return substrateApi.api.tx.uniques.transfer(collectionId, itemId, recipientAddress);
-  } catch (e) {
-    console.error(e);
+    if (nftType === AssetHubNftType.NFTS) {
+      return substrateApi.api.tx.nfts.transfer(collectionId, itemId, recipientAddress);
+    } else if (nftType === AssetHubNftType.UNIQUES) {
+      return substrateApi.api.tx.uniques.transfer(collectionId, itemId, recipientAddress);
+    }
 
     return null;
-  }
-}
-
-export function statemintGetExtrinsic (substrateApi: _SubstrateApi, senderAddress: string, recipientAddress: string, params: Record<string, any>) {
-  try {
-    const itemId = params.itemId as number;
-    const collectionId = params.collectionId as number;
-
-    return substrateApi.api.tx.nfts.transfer(collectionId, itemId, recipientAddress);
   } catch (e) {
     console.error(e);
 
@@ -113,9 +108,9 @@ export async function getNftTransferExtrinsic (networkKey: string, substrateApi:
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.opal:
       return await uniqueGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemine:
-      return statemineGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+      return assetHubGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.statemint:
-      return statemintGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
+      return assetHubGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.bitcountry:
       return acalaGetExtrinsic(substrateApi, senderAddress, recipientAddress, params);
     case SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME.pioneer:

@@ -15,7 +15,6 @@ import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
-import { unlockDotCheckCanMint } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
 import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -61,6 +60,7 @@ const Component = () => {
   const poolTargetsMap = useSelector((state) => state.earning.poolTargetsMap);
   const chainAsset = useSelector((state) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData } = useSelector((state) => state.price);
 
   const [form] = Form.useForm<EarnParams>();
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
@@ -97,9 +97,9 @@ const Component = () => {
   const [screenLoading, setScreenLoading] = useState(true);
   const [submitString, setSubmitString] = useState<string | undefined>();
   const [connectionError, setConnectionError] = useState<string>();
-  const [, setCanMint] = useState(false);
+  // const [, setCanMint] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [checkMintLoading, setCheckMintLoading] = useState(false);
+  // const [checkMintLoading, setCheckMintLoading] = useState(false);
   const [isFormInvalid, setIsFormInvalid] = useState(true);
 
   const chainState = useFetchChainState(poolInfo?.chain || '');
@@ -140,7 +140,7 @@ const Component = () => {
 
   const isDisabledButton = useMemo(
     () =>
-      checkMintLoading ||
+      // checkMintLoading ||
       stepLoading ||
       !!connectionError ||
       !amountValue ||
@@ -149,7 +149,7 @@ const Component = () => {
       submitLoading ||
       targetLoading ||
       (mustChooseTarget && !poolTargetValue),
-    [checkMintLoading, stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
+    [stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
   );
 
   const inputAsset = useMemo(
@@ -524,7 +524,7 @@ const Component = () => {
         if ('minBond' in targeted) {
           const minTargetJoin = new BigN(targeted.minBond || '0');
 
-          minJoinPool = minTargetJoin.gt(minJoinPool || '0') ? minTargetJoin.toString() : minJoinPool;
+          minJoinPool = minTargetJoin.gt(minPoolJoin || '0') ? minTargetJoin.toString() : minPoolJoin;
         } else {
           minJoinPool = minPoolJoin;
         }
@@ -558,12 +558,12 @@ const Component = () => {
               />
             );
           })}
-        {minJoinPool && (
+        {(
           <MetaInfo.Number
             decimals={assetDecimals}
             label={t('Minimum active stake')}
             suffix={assetSymbol}
-            value={minJoinPool}
+            value={minJoinPool || 0}
           />
         )}
 
@@ -576,13 +576,14 @@ const Component = () => {
           <MetaInfo.Number
             decimals={0}
             label={t('Estimated fee')}
-            prefix={'$'}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+            suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={estimatedFee}
           />
         )}
       </MetaInfo>
     );
-  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainValue, currencyData?.isPrefix, currencyData.symbol, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -791,25 +792,25 @@ const Component = () => {
     }
   }, [submitString, currentStep, chainInfoMap, slug, fromValue, amountValue, notify, poolTargetValue, poolTargets]);
 
-  useEffect(() => {
-    setCheckMintLoading(true);
-
-    unlockDotCheckCanMint({
-      slug: poolInfo?.slug || '',
-      address: fromValue,
-      network: poolInfo?.chain || ''
-    })
-      .then((value) => {
-        setCanMint(value);
-      })
-      .finally(() => {
-        setCheckMintLoading(false);
-      });
-
-    return () => {
-      setCanMint(false);
-    };
-  }, [fromValue, poolInfo?.chain, poolInfo?.slug]);
+  // useEffect(() => {
+  //   setCheckMintLoading(true);
+  //
+  //   unlockDotCheckCanMint({
+  //     slug: poolInfo?.slug || '',
+  //     address: fromValue,
+  //     network: poolInfo?.chain || ''
+  //   })
+  //     .then((value) => {
+  //       setCanMint(value);
+  //     })
+  //     .finally(() => {
+  //       setCheckMintLoading(false);
+  //     });
+  //
+  //   return () => {
+  //     setCanMint(false);
+  //   };
+  // }, [fromValue, poolInfo?.chain, poolInfo?.slug]);
 
   useEffect(() => {
     let unmount = false;
@@ -965,7 +966,8 @@ const Component = () => {
                 <div className={'__transformed-amount-value'}>
                   <Number
                     decimal={0}
-                    prefix={'$'}
+                    prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                    suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
                     value={transformAmount}
                   />
                 </div>
@@ -978,7 +980,7 @@ const Component = () => {
                       chain={poolChain}
                       disabled={submitLoading}
                       from={fromValue}
-                      label={t('Select pool')}
+                      label={t('Pool')}
                       loading={targetLoading}
                       setForceFetchValidator={setForceFetchValidator}
                       slug={slug}

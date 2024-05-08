@@ -168,6 +168,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   // }
 ];
 
+export const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
+
 /*
   BLOCK
   *: All network,
@@ -235,6 +237,8 @@ export const BLOCK_CROWDLOAN_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_EVM_EXECUTE_LEDGER_NETWORKS: string[] = ['substrate'];
 export const BLOCK_UNKNOWN_LEDGER_NETWORKS: string[] = ['*'];
 
+export const BLOCK_SWAP_LEDGER_NETWORKS: string[] = [];
+
 export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
   /* TRANSFER */
   [ExtrinsicType.TRANSFER_BALANCE]: BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS,
@@ -284,6 +288,8 @@ export const BLOCK_ACTION_LEDGER_NETWORKS: Record<ExtrinsicType, string[]> = {
 
   [ExtrinsicType.TOKEN_APPROVE]: BLOCK_APPROVE_LEDGER_NETWORKS,
   /* STAKING */
+
+  [ExtrinsicType.SWAP]: BLOCK_SWAP_LEDGER_NETWORKS,
 
   [ExtrinsicType.CROWDLOAN]: BLOCK_CROWDLOAN_LEDGER_NETWORKS,
   [ExtrinsicType.EVM_EXECUTE]: BLOCK_EVM_EXECUTE_LEDGER_NETWORKS,

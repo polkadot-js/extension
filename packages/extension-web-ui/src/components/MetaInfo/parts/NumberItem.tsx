@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Number } from '@subwallet/react-ui';
+import { SwNumberProps } from '@subwallet/react-ui/es/number';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React from 'react';
@@ -18,19 +19,29 @@ export interface NumberInfoItem extends Omit<InfoItemBase, 'valueColorSchema'> {
   decimalOpacity?: number
   size?: number
   subFloatNumber?: boolean
+  suffixNode?: React.ReactNode
+  onClickValue?: VoidFunction;
+  disableClickValue?: boolean;
+  metadata?: Record<string, number>;
+  customFormatter?: SwNumberProps['customFormatter'];
+  formatType?: SwNumberProps['formatType'];
 }
 
 const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
   const { className,
+    customFormatter,
     decimalOpacity = 1,
     decimals = 0,
+    disableClickValue,
+    formatType,
     label,
+    metadata,
+    onClickValue,
     prefix,
     size = 30,
     subFloatNumber = false,
     suffix,
-    value,
-    valueColorSchema = 'default' } = props;
+    suffixNode, value, valueColorSchema = 'default' } = props;
 
   return (
     <div className={CN(className, '__row -type-number')}>
@@ -44,18 +55,32 @@ const Component: React.FC<NumberInfoItem> = (props: NumberInfoItem) => {
         )
       }
       <div className={'__col __value-col -to-right'}>
-        <Number
-          className={`__number-item __value -schema-${valueColorSchema}`}
-          decimal={decimals}
-          decimalOpacity={decimalOpacity}
-          intOpacity={1}
-          prefix={prefix}
-          size={size}
-          subFloatNumber={subFloatNumber}
-          suffix={suffix}
-          unitOpacity={1}
-          value={value}
-        />
+        <div
+          className={CN(
+            `__number-item __value -is-wrapper -schema-${valueColorSchema}`,
+            {
+              '-disabled': disableClickValue,
+              '-clickable': !!onClickValue
+            }
+          )}
+          onClick={!disableClickValue ? onClickValue : undefined}
+        >
+          <Number
+            customFormatter={customFormatter}
+            decimal={decimals}
+            decimalOpacity={decimalOpacity}
+            formatType={formatType}
+            intOpacity={1}
+            metadata={metadata}
+            prefix={prefix}
+            size={size}
+            subFloatNumber={subFloatNumber}
+            suffix={suffix}
+            unitOpacity={1}
+            value={value}
+          />
+          {suffixNode}
+        </div>
       </div>
     </div>
   );

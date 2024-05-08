@@ -11,11 +11,14 @@ import styled from 'styled-components';
 import { InfoItemBase } from './types';
 
 export interface ChainInfoItem extends InfoItemBase {
-  chain: string
+  chain: string,
+  suffixNode?: React.ReactNode;
+  onClickValue?: VoidFunction;
+  disableClickValue?: boolean;
 }
 
 const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
-  const { chain, className, label, valueColorSchema = 'default' } = props;
+  const { chain, className, disableClickValue, label, onClickValue, suffixNode, valueColorSchema = 'default' } = props;
   const chainInfoMap = useSelector((root: RootState) => root.chainStore.chainInfoMap);
   const chainInfo = useMemo(() => (chainInfoMap[chain]), [chain, chainInfoMap]);
 
@@ -30,8 +33,17 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
           </div>
         )
       }
-      <div className={'__col __value-col -to-right'}>
-        <div className={`__chain-item __value -is-wrapper -schema-${valueColorSchema}`}>
+      <div className={'__col __value-col -to-right -inline'}>
+        <div
+          className={CN(
+            `__chain-item __value -is-wrapper -schema-${valueColorSchema}`,
+            {
+              '-disabled': disableClickValue,
+              '-clickable': !!onClickValue
+            }
+          )}
+          onClick={!disableClickValue ? onClickValue : undefined}
+        >
           <Logo
             className={'__chain-logo'}
             network={chain}
@@ -41,6 +53,7 @@ const Component: React.FC<ChainInfoItem> = (props: ChainInfoItem) => {
           <div className={'__chain-name ml-xs'}>
             {chainInfo?.name}
           </div>
+          {suffixNode}
         </div>
       </div>
     </div>

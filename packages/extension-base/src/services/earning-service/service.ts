@@ -39,7 +39,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
-  private useOnlineCacheOnly = true;
+  private useOnlineCacheOnly = false;
 
   constructor (state: KoniState) {
     this.state = state;
@@ -502,8 +502,6 @@ export default class EarningService implements StoppableServiceInterface, Persis
     const removeKeys: string[] = [];
 
     chains && chains.length > 0 && Object.entries(this.yieldPositionSubject.getValue()).forEach(([key, value]) => {
-      console.log('removeYieldPositions', key, value.chain, chains.indexOf(value.chain) > -1);
-
       if (chains.indexOf(value.chain) > -1 && !removeKeys.includes(key)) {
         removeKeys.push(key);
       }

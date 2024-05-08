@@ -26,8 +26,8 @@ export interface SubstrateBalance {
  * @property {string} tokenSlug - Slug of token
  * @property {APIItemState} state - State of information
  * @property {number} [timestamp] - Time to get information
- * @property {string} free - Free balance
- * @property {string} locked - Locked balance
+ * @property {string} transferable - Transferable balance
+ * @property {string} locked - Locked balance, cannot be transferred, locked here is only meaningful in the context of token transfer
  * @property {SubstrateBalance} [substrateInfo] - Substrate info of balance
  */
 export interface BalanceItem {
@@ -37,8 +37,8 @@ export interface BalanceItem {
   state: APIItemState;
   timestamp?: number;
 
-  // must-have, total = free + locked
-  free: string;
+  // must-have, total = transferable + locked
+  transferable: string;
   locked: string;
 
   // substrate fields

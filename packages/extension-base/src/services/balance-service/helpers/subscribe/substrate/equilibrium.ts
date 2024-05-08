@@ -40,7 +40,7 @@ export const subscribeEquilibriumTokenBalance = async ({ addresses, assetMap, ca
 
           return {
             address: addresses[index],
-            free: bnFreeTokenBalance.toString(),
+            transferable: bnFreeTokenBalance.toString(),
             locked: '0', // Equilibrium doesn't show locked balance
             state: APIItemState.READY,
             tokenSlug: tokenInfo.slug
@@ -59,7 +59,7 @@ export const subscribeEquilibriumTokenBalance = async ({ addresses, assetMap, ca
       const items: BalanceItem[] = addresses.map((address) => {
         return {
           address: address,
-          free: '0',
+          transferable: '0',
           locked: '0', // Equilibrium doesn't show locked balance
           state: APIItemState.READY,
           tokenSlug: tokenInfo.slug
@@ -88,7 +88,7 @@ export const subscribeEqBalanceAccountPallet = async ({ addresses, assetMap, cal
         const items: BalanceItem[] = balances.map((balance, index) => {
           return {
             address: addresses[index],
-            free: balance.asPositive.toString(),
+            transferable: balance.asPositive.toString(),
             locked: '0', // Equilibrium doesn't show locked balance
             state: APIItemState.READY,
             tokenSlug: tokenInfo.slug
@@ -105,7 +105,7 @@ export const subscribeEqBalanceAccountPallet = async ({ addresses, assetMap, cal
       const items: BalanceItem[] = addresses.map((address) => {
         return {
           address: address,
-          free: '0',
+          transferable: '0',
           locked: '0', // Equilibrium doesn't show locked balance
           state: APIItemState.READY,
           tokenSlug: tokenInfo.slug

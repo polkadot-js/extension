@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { className, item } = props;
 
-  const { address, free, locked, tokenSlug } = item;
+  const { address, transferable, locked, tokenSlug } = item;
 
   const { t } = useTranslation();
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
@@ -29,7 +29,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const account = useGetAccountByAddress(address);
 
   const tokenInfo = useMemo((): _ChainAsset|undefined => assetRegistry[tokenSlug], [assetRegistry, tokenSlug]);
-  const total = useMemo(() => new BigN(free).plus(locked).toString(), [free, locked]);
+  const total = useMemo(() => new BigN(transferable).plus(locked).toString(), [transferable, locked]);
   const addressPrefix = useGetChainPrefixBySlug(tokenInfo?.originChain);
 
   const reformatedAddress = useMemo(() => reformatAddress(address, addressPrefix), [address, addressPrefix]);
@@ -81,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
         decimals={decimals}
         label={t('Transferable')}
         suffix={symbol}
-        value={free}
+        value={transferable}
         valueColorSchema='gray'
       />
       <MetaInfo.Number

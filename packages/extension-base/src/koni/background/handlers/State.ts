@@ -295,7 +295,7 @@ export default class KoniState {
           temp[assetSlug] = {
             address,
             tokenSlug: assetSlug,
-            free: '',
+            transferable: '',
             locked: '',
             state: APIItemState.PENDING
           };
@@ -1998,11 +1998,11 @@ export default class KoniState {
           const balanceItem = {
             tokenSlug: assetList[i].slug,
             state: APIItemState.PENDING,
-            free: '0',
+            transferable: '0',
             locked: '0'
           } as BalanceItem;
 
-          balanceItem.free = zkBalances[i]?.toString() || '0';
+          balanceItem.transferable = zkBalances[i]?.toString() || '0';
           balanceItem.state = APIItemState.READY;
           this.balanceService.setBalanceItem([balanceItem]);
         }

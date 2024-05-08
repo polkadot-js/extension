@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
       91	Thibaut Sardan                	fix typos (#1343)
-      21	Tarik Gul                     	Bump @polkadot/api to 11.0.3 (#1359)
+      22	Tarik Gul                     	0.47.4 (#1360)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

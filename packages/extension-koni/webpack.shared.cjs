@@ -156,7 +156,9 @@ module.exports = (entry, alias = {}, compileWithHtml = false) => {
         [`@subwallet/${p}`]: path.resolve(__dirname, `../${p}/src`)
       }), {
         ...alias,
-        'react/jsx-runtime': require.resolve('react/jsx-runtime')
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        axios_raw: path.resolve(__dirname, '../../node_modules/axios'),
+        axios: path.resolve(__dirname, 'axios.global.js')
       }),
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       fallback: {

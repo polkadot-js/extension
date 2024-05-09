@@ -332,9 +332,6 @@
   "Go to home": "",
   "All done!": "",
   "Follow along with product updates or reach out if you have any questions.": "",
-  "Opps! An Error Occurred": "",
-  "Sorry, something went wrong.": "",
-  "Please try again later.": "",
   "Polkadot parachain": "",
   "Kusama parachain": "",
   "Search project": "",
@@ -1240,5 +1237,7 @@
   "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": "",
   "Currency": "",
   "Select a currency": "",
-  "Search Currency": ""
+  "This pool has reached the maximum number of members. Select another to continue": "",
+  "Member": "",
+  "Search currency": ""
 }

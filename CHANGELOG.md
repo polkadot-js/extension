@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.1.62
+Build date: May 08, 2024.
+
+Features & Update:
+- Add more currency type (#2738, #3011)
+- Disallow staking to collators/pools that maxed out member threshold (#2743, 2754)
+- Display list Recommended by label in Select pool screen (#2940)
+
+Bugs fixed:
+- Fixed bug Don't display network on Mission pool details (#3005)
+- Fixed bug Can't hit the "Confirm" button on ToS of the Swap feature (#3007)
+- Fixed bug Error getting wrong validator address (#2821)
+- Update Validator name/ Collator name (#2998)
+
 ## 1.1.61
 Build date: May 02, 2024.
 

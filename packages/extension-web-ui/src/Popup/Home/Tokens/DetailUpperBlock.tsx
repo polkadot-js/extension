@@ -233,8 +233,7 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
 
       '.__balance-value-wrapper': {
         flex: 1,
-        display: 'flex',
-        justifyContent: 'center'
+        justifyContent: 'flex-start'
       },
 
       '.__balance-value': {

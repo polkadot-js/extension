@@ -252,25 +252,27 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <Tooltip
-            overlayClassName={CN('__currency-value-detail-tooltip', {
-              'ant-tooltip-hidden': !isShowBalance
-            })}
-            placement={'top'}
-            title={currencyData.symbol + ' ' + formatNumber(totalValue, 0, balanceNoPrefixFormater)}
-          >
-            <div className={'__balance-value-wrapper'}>
-              <Number
-                className={'__balance-value'}
-                decimal={0}
-                decimalOpacity={0.45}
-                hide={!isShowBalance}
-                prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-                subFloatNumber
-                value={totalValue}
-              />
-            </div>
-          </Tooltip>
+          <div className={'__balance-value-wrapper'}>
+            <Tooltip
+              overlayClassName={CN({
+                'ant-tooltip-hidden': !isShowBalance
+              })}
+              placement={'top'}
+              title={currencyData.symbol + ' ' + formatNumber(totalValue, 0, balanceNoPrefixFormater)}
+            >
+              <div>
+                <Number
+                  className={'__balance-value'}
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  hide={!isShowBalance}
+                  prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                  subFloatNumber
+                  value={totalValue}
+                />
+              </div>
+            </Tooltip>
+          </div>
 
           <div className={'__balance-change-container'}>
             <Number
@@ -308,7 +310,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           <div className={'__block-title'}>{t('Transferable balance')}</div>
         </div>
         <Tooltip
-          overlayClassName={CN('__currency-value-detail-tooltip', {
+          overlayClassName={CN({
             'ant-tooltip-hidden': !isShowBalance
           })}
           placement={'top'}
@@ -338,7 +340,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           <div className={'__block-title'}>{t('Locked balance')}</div>
         </div>
         <Tooltip
-          overlayClassName={CN('__currency-value-detail-tooltip', {
+          overlayClassName={CN({
             'ant-tooltip-hidden': !isShowBalance
           })}
           placement={'top'}
@@ -468,6 +470,10 @@ const Balance = styled(Component)<Props>(({ theme: { token } }: Props) => ({
       fontSize: '24px !important',
       lineHeight: '32px !important'
     }
+  },
+
+  '.__balance-value-wrapper': {
+    display: 'flex'
   },
 
   '.__block-divider': {

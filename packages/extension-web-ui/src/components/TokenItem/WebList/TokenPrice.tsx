@@ -26,7 +26,7 @@ function Component (
   // - price change status
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const priceChangeStatus = (() => {
     if (value > pastValue) {
       return 'increase';
@@ -49,7 +49,7 @@ function Component (
         className={'__value'}
         decimal={0}
         decimalOpacity={0.45}
-        prefix={(currency?.isPrefix && currency?.symbol) || ''}
+        prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
         value={value}
       />
       <Number

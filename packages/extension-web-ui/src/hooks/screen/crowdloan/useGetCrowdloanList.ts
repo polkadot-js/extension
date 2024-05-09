@@ -77,7 +77,7 @@ export default function useGetCrowdloanList () {
   const crowdloanMap = useSelector((state: RootState) => state.crowdloan.crowdloanMap);
   // chainInfoMap needs to be fetched from online for dynamic usage
   const [chainInfoMap, setChainInfoMap] = useState<Record<string, _ChainInfo>>({});
-  const { currency, priceMap } = useSelector((state: RootState) => state.price);
+  const { currencyData, priceMap } = useSelector((state: RootState) => state.price);
 
   useEffect(() => {
     fetchStaticData<_ChainInfo[]>('chains').then((rs) => {
@@ -100,7 +100,7 @@ export default function useGetCrowdloanList () {
       crowdloanMap,
       chainInfoMap,
       priceMap,
-      currency
+      currencyData
     );
-  }, [crowdloanMap, chainInfoMap, priceMap, currency]);
+  }, [crowdloanMap, chainInfoMap, priceMap, currencyData]);
 }

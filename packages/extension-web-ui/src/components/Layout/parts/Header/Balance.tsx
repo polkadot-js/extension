@@ -42,10 +42,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const locationPathname = useLocation().pathname;
   const tokenGroupSlug = useParams()?.slug;
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const [reloading, setReloading] = useState(false);
-
-  console.log('currency', currency);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -258,7 +256,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
             subFloatNumber
             value={totalValue}
           />
@@ -269,7 +267,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
               decimal={0}
               decimalOpacity={1}
               hide={!isShowBalance}
-              prefix={isTotalBalanceDecrease ? `- ${currency.symbol}` : `+ ${currency.symbol}`}
+              prefix={isTotalBalanceDecrease ? `- ${currencyData?.symbol}` : `+ ${currencyData?.symbol}`}
               value={totalChangeValue}
             />
             <Tag
@@ -305,7 +303,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
             subFloatNumber
             value={totalBalanceInfo.freeValue}
           />
@@ -327,7 +325,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
             subFloatNumber
             value={totalBalanceInfo.lockedValue}
           />

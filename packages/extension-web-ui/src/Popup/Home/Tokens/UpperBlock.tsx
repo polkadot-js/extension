@@ -1,13 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { formatBalance } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, Number, SwNumberProps, Tag, Tooltip } from '@subwallet/react-ui';
-import CN from 'classnames';
+import { Button, Icon, Number, SwNumberProps, Tag } from '@subwallet/react-ui';
 import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
@@ -38,7 +35,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
   const [reloading, setReloading] = useState(false);
-  const { currency } = useSelector((state) => state.price);
+  const { currencyData } = useSelector((state) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -65,7 +62,7 @@ function Component (
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency?.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             size={38}
             subFloatNumber
             value={totalValue}
@@ -91,8 +88,8 @@ function Component (
             decimal={0}
             decimalOpacity={1}
             hide={!isShowBalance}
-            prefix={isPriceDecrease ? `- ${(currency.isPrefix && currency.symbol) || ''}` : `+ ${(currency.isPrefix && currency.symbol) || ''}`}
-            suffix={(!currency.isPrefix && currency.symbol) || ''}
+            prefix={isPriceDecrease ? `- ${(currencyData.isPrefix && currencyData.symbol) || ''}` : `+ ${(currencyData.isPrefix && currencyData.symbol) || ''}`}
+            suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
             value={totalChangeValue}
           />
           <Tag

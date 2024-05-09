@@ -22,7 +22,7 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const { balance, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
@@ -95,7 +95,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Number
             className={'__item-total-stake-value'}
             decimal={0}
-            prefix={(currency?.isPrefix && currency?.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={totalValueStaked}
           />
         </div>

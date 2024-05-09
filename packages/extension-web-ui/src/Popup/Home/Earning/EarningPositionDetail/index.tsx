@@ -50,7 +50,7 @@ function Component ({ compound,
   // @ts-ignore
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
-  const { currency, priceMap } = useSelector((state) => state.price);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const { isWebUI } = useContext(ScreenContext);
 
@@ -254,8 +254,8 @@ function Component ({ compound,
                   className={'__active-stake-converted-value'}
                   decimal={0}
                   hide={!isShowBalance}
-                  prefix={(currency.isPrefix && currency.symbol) || ''}
-                  suffix={(!currency.isPrefix && currency.symbol) || ''}
+                  prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                  suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                   value={convertActiveStake}
                 />
               </div>

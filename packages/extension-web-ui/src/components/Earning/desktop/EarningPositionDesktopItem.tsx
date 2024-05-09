@@ -51,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const { token } = useTheme() as Theme;
 
   const line3Ref = useRef<HTMLDivElement | null>(null);
@@ -326,7 +326,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   decimal={0}
                   decimalColor={token.colorSuccess}
                   intColor={token.colorSuccess}
-                  prefix={(currency?.isPrefix && currency?.symbol) || ''}
+                  prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
                   unitColor={token.colorSuccess}
                   value={convertedBalanceValue}
                 />

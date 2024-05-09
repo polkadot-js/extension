@@ -25,7 +25,7 @@ export type Props = ThemeProps & {
 
 function Component ({ activeStake, className, convertActiveStake, inputAsset, isShowBalance, poolInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const totalApy = useMemo((): number | undefined => {
     return (
@@ -96,7 +96,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
             className={'__active-stake-converted-value'}
             decimal={0}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency?.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={convertActiveStake}
           />
         </div>

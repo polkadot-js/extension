@@ -37,7 +37,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
   const { isWebUI } = useContext(ScreenContext);
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -70,7 +70,7 @@ function Component (
             decimal={0}
             decimalOpacity={0.45}
             hide={!isShowBalance}
-            prefix={(currency?.isPrefix && currency?.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             size={38}
             subFloatNumber
             value={balanceValue}

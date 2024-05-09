@@ -4,14 +4,14 @@
 import { swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
 import ChooseFeeItem from '@subwallet/extension-web-ui/components/Field/Swap/ChooseFeeItem';
+import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import React, { useCallback, useContext } from 'react';
 import styled from 'styled-components';
-import {useSelector} from "@subwallet/extension-web-ui/hooks";
-import {RootState} from "@subwallet/extension-web-ui/stores";
 
 type Props = ThemeProps & {
   modalId: string,
@@ -24,7 +24,7 @@ const numberMetadata = { maxNumberFormat: 8 };
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className, estimatedFee, items, modalId, onSelectItem, selectedItem } = props;
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const { inactiveModal } = useContext(ModalContext);
 
@@ -52,7 +52,7 @@ const Component: React.FC<Props> = (props: Props) => {
               decimalOpacity={0.45}
               formatType={'custom'}
               metadata={numberMetadata}
-              prefix={(currency.isPrefix && currency.symbol) || ''}
+              prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
               size={30}
               value={estimatedFee}
             />

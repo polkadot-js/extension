@@ -23,7 +23,7 @@ function Component (
     convertedValue,
     symbol, value }: Props) {
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
-  const { currency } = useSelector((state: RootState) => state.price);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const hideBalance = autoHideBalance ? !isShowBalance : undefined;
 
   return (
@@ -42,7 +42,7 @@ function Component (
         decimalOpacity={0.45}
         hide={hideBalance}
         intOpacity={0.45}
-        prefix={(currency?.isPrefix && currency?.symbol) || ''}
+        prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
         unitOpacity={0.45}
         value={convertedValue}
       />

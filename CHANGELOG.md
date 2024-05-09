@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.1.63
+Build date: May 09, 2024.
+
+Bugs fixed:
+- Fixed cannot signing with dApp in case network is not publish (#3027)
+- Fixed bug Network's status show incorrect (#3037)
+
 ## 1.1.62
 Build date: May 08, 2024.
 

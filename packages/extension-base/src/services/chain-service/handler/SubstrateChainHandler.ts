@@ -10,6 +10,7 @@ import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/serv
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ContractPromise } from '@polkadot/api-contract';
+import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
@@ -203,6 +204,31 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
+    const metadata = await this.parent?.getMetadata(chainSlug);
+
+    const updateMetadata = (substrateApi: SubstrateApi) => {
+      // Update metadata to database with async methods
+      substrateApi.api.isReady.then(async (api) => {
+        const currentSpecVersion = api.runtimeVersion.specVersion.toString();
+        const genesisHash = api.genesisHash.toHex();
+
+        // Avoid date existed metadata
+        if (metadata && metadata.specVersion === currentSpecVersion && metadata.genesisHash === genesisHash) {
+          return;
+        }
+
+        const systemChain = await api.rpc.system.chain();
+
+        this.parent?.upsertMetadata(chainSlug, {
+          chain: chainSlug,
+          genesisHash: genesisHash,
+          specVersion: currentSpecVersion,
+          hexValue: api.runtimeMetadata.asCallsOnly.toHex(), // Shorten metadata to save space
+          types: getSpecTypes(api.registry, systemChain, api.runtimeVersion.specName, api.runtimeVersion.specVersion) as unknown as Record<string, string>,
+          userExtensions: getSpecExtensions(api.registry, systemChain, api.runtimeVersion.specName)
+        }).catch(console.error);
+      }).catch(console.error);
+    };
 
     // Return existed to avoid re-init metadata
     if (existed) {
@@ -212,29 +238,18 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         await existed.updateApiUrl(apiUrl);
       }
 
+      // Update data in case of existed api (if needed - old provider cannot connect)
+      updateMetadata(existed);
+
       return existed;
     }
 
-    const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata, externalApiPromise });
 
     apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));
     onUpdateStatus && apiObject.connectionStatusSubject.subscribe(onUpdateStatus);
 
-    // Update metadata to database with async methods
-    apiObject.isReady.then((api) => {
-      // Avoid date existed metadata
-      if (metadata && metadata.specVersion === api.specVersion && metadata.genesisHash === api.api.genesisHash.toHex()) {
-        return;
-      }
-
-      this.parent?.upsertMetadata(chainSlug, {
-        chain: chainSlug,
-        genesisHash: api.api.genesisHash.toHex(),
-        specVersion: api.specVersion,
-        hexValue: api.api.runtimeMetadata.toHex()
-      }).catch(console.error);
-    }).catch(console.error);
+    updateMetadata(apiObject);
 
     return apiObject;
   }

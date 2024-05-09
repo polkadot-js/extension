@@ -42,6 +42,7 @@ import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmit
 import { BN_ZERO, convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
+import { metadataExpand } from '@subwallet/extension-chains';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { createPair } from '@subwallet/keyring';
 import { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -57,6 +58,7 @@ import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types';
+import { Registry } from '@polkadot/types/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
@@ -3149,20 +3151,25 @@ export default class KoniExtension {
 
     const { payload } = request;
 
-    let registry = new TypeRegistry();
+    let registry: Registry;
 
     let isEvm = false;
 
     if (isJsonPayload(payload)) {
       // Get the metadata for the genesisHash
-      const currentMetadata = this.#koniState.knownMetadata.find((meta: MetadataDef) =>
+      const metadata = this.#koniState.knownMetadata.find((meta: MetadataDef) =>
         meta.genesisHash === payload.genesisHash);
 
-      // set the registry before calling the sign function
-      registry.setSignedExtensions(payload.signedExtensions, currentMetadata?.userExtensions);
+      if (metadata) {
+        // we have metadata, expand it and extract the info/registry
+        const expanded = metadataExpand(metadata, false);
 
-      if (currentMetadata) {
-        registry.register(currentMetadata?.types);
+        registry = expanded.registry;
+        registry.setSignedExtensions(payload.signedExtensions, expanded.definition.userExtensions);
+      } else {
+        // we have no metadata, create a new registry
+        registry = new TypeRegistry();
+        registry.setSignedExtensions(payload.signedExtensions);
       }
 
       const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
@@ -3182,6 +3189,9 @@ export default class KoniExtension {
       if (chainInfo) {
         isEvm = _isChainEvmCompatible(chainInfo);
       }
+    } else {
+      // for non-payload, just create a registry to use
+      registry = new TypeRegistry();
     }
 
     const result = request.sign(registry as unknown as TypeRegistry, pair);
@@ -3930,11 +3940,13 @@ export default class KoniExtension {
   /// Metadata
 
   private async findRawMetadata ({ genesisHash }: RequestFindRawMetadata): Promise<ResponseFindRawMetadata> {
-    const { metadata, specVersion } = await this.#koniState.findMetadata(genesisHash);
+    const { metadata, specVersion, types, userExtensions } = await this.#koniState.findMetadata(genesisHash);
 
     return {
       rawMetadata: metadata,
-      specVersion
+      specVersion,
+      types,
+      userExtensions
     };
   }
 

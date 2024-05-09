@@ -15,6 +15,7 @@ import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
 import DeleteChain from './DeleteChain';
 import DeleteChainStaking from './DeleteChainStaking';
+import ClearMetadataDatabase from './ClearMetadataDatabase';
 import EnableVaraChain from './EnableVaraChain';
 import MigrateAuthUrls from './MigrateAuthUrls';
 import MigrateAutoLock from './MigrateAutoLock';
@@ -53,7 +54,8 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.41-01': DeleteChainStaking,
   '1.1.46-01': AutoEnableSomeTokens,
   '1.1.53-01': MigrateAssetSetting,
-  '1.1.53-02': MigrateTransactionHistoryBySymbol
+  '1.1.53-02': MigrateTransactionHistoryBySymbol,
+  '1.1.61-01': ClearMetadataDatabase
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

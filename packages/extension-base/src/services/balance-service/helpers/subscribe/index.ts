@@ -98,7 +98,7 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
         const items: BalanceItem[] = notSupportAddresses.map((address): BalanceItem => ({
           address,
           tokenSlug: token.slug,
-          transferable: '0',
+          free: '0',
           locked: '0',
           state: APIItemState.NOT_SUPPORT,
           timestamp: now

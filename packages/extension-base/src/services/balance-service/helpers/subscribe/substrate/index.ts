@@ -13,6 +13,7 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { combineLatest, Observable } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
@@ -21,7 +22,6 @@ import { BN, BN_ZERO } from '@polkadot/util';
 
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';
-import BigN from "bignumber.js";
 
 export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void) => {
   let unsubNativeToken: () => void;
@@ -125,7 +125,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
       const balanceInfo = _balance.toPrimitive() as unknown as FrameSystemAccountInfo;
       const poolMemberInfo = poolMemberInfos[index].toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
-      const nominationPoolBalance = _getActiveStakeInNominationPool(poolMemberInfo);
+      const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo));
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
       const totalLockedFromTransfer = new BigN(totalBalance).minus(transferableBalance).plus(nominationPoolBalance);
@@ -133,16 +133,13 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
       return ({
         address: addresses[index],
         tokenSlug: chainNativeTokenSlug,
-        transferable: transferableBalance,
+        free: transferableBalance,
         locked: totalLockedFromTransfer.toString(),
-        state: APIItemState.READY,
-        substrateInfo: {
-          miscFrozen: miscFrozen.toString(),
-          reserved: reserved.toString(),
-          feeFrozen: feeFrozen.toString()
-        }
+        state: APIItemState.READY
       });
     });
+
+    callback(items);
   });
 
   return () => {
@@ -187,7 +184,7 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
             return {
               address: addresses[index],
               tokenSlug: tokenInfo.slug,
-              transferable: free.toString(),
+              free: free.toString(),
               locked: frozen.toString(),
               state: APIItemState.READY,
               substrateInfo: {
@@ -235,7 +232,7 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
             return {
               address: address,
               tokenSlug: tokenInfo.slug,
-              transferable: _balanceOf.output ? (balanceObj.ok as string ?? balanceObj.Ok as string) : '0',
+              free: _balanceOf.output ? (balanceObj.ok as string ?? balanceObj.Ok as string) : '0',
               locked: '0',
               state: APIItemState.READY
             };
@@ -245,7 +242,7 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
             return {
               address: address,
               tokenSlug: tokenInfo.slug,
-              transferable: '0',
+              free: '0',
               locked: '0',
               state: APIItemState.READY
             };
@@ -295,7 +292,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
-            transferable: freeBalance.toString(),
+            free: freeBalance.toString(),
             locked: lockedBalance.toString(),
             substrateInfo: {
               reserved: tokenBalance.reserved.toString(),
@@ -359,7 +356,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
           return {
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
-            transferable: free.toString(),
+            free: free.toString(),
             locked: frozen.toString(),
             state: APIItemState.READY,
             substrateInfo: {
@@ -414,7 +411,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
-            transferable: freeBalance.toString(),
+            free: freeBalance.toString(),
             locked: lockedBalance.toString(),
             substrateInfo: {
               reserved: tokenBalance.reserved.toString(),

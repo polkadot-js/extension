@@ -19,7 +19,7 @@ export const groupBalance = (items: BalanceItem[], address: string, token: strin
   const result: BalanceItem = {
     address,
     tokenSlug: token,
-    transferable: sumBN(items.map((item) => new BN(item.transferable))).toString(),
+    free: sumBN(items.map((item) => new BN(item.free))).toString(),
     locked: sumBN(items.map((item) => new BN(item.locked))).toString(),
     state: states.every((item) => item === APIItemState.NOT_SUPPORT)
       ? APIItemState.NOT_SUPPORT

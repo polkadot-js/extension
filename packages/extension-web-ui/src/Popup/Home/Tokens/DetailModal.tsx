@@ -131,8 +131,8 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
     }
 
     return result.sort((a, b) => {
-      const aTotal = new BigN(a.transferable).plus(BigN(a.locked));
-      const bTotal = new BigN(b.transferable).plus(BigN(b.locked));
+      const aTotal = new BigN(a.free).plus(BigN(a.locked));
+      const bTotal = new BigN(b.free).plus(BigN(b.locked));
 
       return bTotal.minus(aTotal).toNumber();
     });
@@ -142,7 +142,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
   const filteredItems = useMemo(() => {
     return accountItems.filter((item) => {
-      return new BigN(item.transferable).plus(item.locked).gt(0);
+      return new BigN(item.free).plus(item.locked).gt(0);
     });
   }, [accountItems]);
 

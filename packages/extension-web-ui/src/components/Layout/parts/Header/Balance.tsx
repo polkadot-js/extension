@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
 import { ReceiveQrModal, TokensSelectorModal } from '@subwallet/extension-web-ui/components/Modal';
 import { AccountSelectorModal } from '@subwallet/extension-web-ui/components/Modal/AccountSelectorModal';
 import { BaseModal } from '@subwallet/extension-web-ui/components/Modal/BaseModal';
@@ -17,7 +18,7 @@ import SendFund from '@subwallet/extension-web-ui/Popup/Transaction/variants/Sen
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { BuyTokenInfo, PhosphorIcon, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getAccountType, isAccountAll } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, ModalContext, Number, Tag, Typography } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext, Number, Tag, Tooltip, Typography } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowFatLinesDown, ArrowsClockwise, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -251,15 +252,25 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
         <div className={'__block-content'}>
-          <Number
-            className={'__balance-value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-            subFloatNumber
-            value={totalValue}
-          />
+          <Tooltip
+            overlayClassName={CN('__currency-value-detail-tooltip', {
+              'ant-tooltip-hidden': !isShowBalance
+            })}
+            placement={'top'}
+            title={currencyData.symbol + ' ' + formatNumber(totalValue, 0, balanceNoPrefixFormater)}
+          >
+            <div className={'__balance-value-wrapper'}>
+              <Number
+                className={'__balance-value'}
+                decimal={0}
+                decimalOpacity={0.45}
+                hide={!isShowBalance}
+                prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                subFloatNumber
+                value={totalValue}
+              />
+            </div>
+          </Tooltip>
 
           <div className={'__balance-change-container'}>
             <Number
@@ -296,18 +307,26 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <div className='__block-title-wrapper'>
           <div className={'__block-title'}>{t('Transferable balance')}</div>
         </div>
+        <Tooltip
+          overlayClassName={CN('__currency-value-detail-tooltip', {
+            'ant-tooltip-hidden': !isShowBalance
+          })}
+          placement={'top'}
+          title={currencyData.symbol + ' ' + formatNumber(totalBalanceInfo.freeValue, 0, balanceNoPrefixFormater)}
+        >
+          <div className={'__block-content'}>
+            <Number
+              className='__balance-value'
+              decimal={0}
+              decimalOpacity={0.45}
+              hide={!isShowBalance}
+              prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+              subFloatNumber
+              value={totalBalanceInfo.freeValue}
+            />
+          </div>
+        </Tooltip>
 
-        <div className={'__block-content'}>
-          <Number
-            className='__balance-value'
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-            subFloatNumber
-            value={totalBalanceInfo.freeValue}
-          />
-        </div>
       </div>
 
       <div
@@ -318,18 +337,25 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         <div className='__block-title-wrapper'>
           <div className={'__block-title'}>{t('Locked balance')}</div>
         </div>
-
-        <div className={'__block-content'}>
-          <Number
-            className='__balance-value'
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-            subFloatNumber
-            value={totalBalanceInfo.lockedValue}
-          />
-        </div>
+        <Tooltip
+          overlayClassName={CN('__currency-value-detail-tooltip', {
+            'ant-tooltip-hidden': !isShowBalance
+          })}
+          placement={'top'}
+          title={currencyData.symbol + ' ' + formatNumber(totalBalanceInfo.lockedValue, 0, balanceNoPrefixFormater)}
+        >
+          <div className={'__block-content'}>
+            <Number
+              className='__balance-value'
+              decimal={0}
+              decimalOpacity={0.45}
+              hide={!isShowBalance}
+              prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+              subFloatNumber
+              value={totalBalanceInfo.lockedValue}
+            />
+          </div>
+        </Tooltip>
       </div>
 
       <div

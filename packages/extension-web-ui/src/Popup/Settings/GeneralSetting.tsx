@@ -25,7 +25,7 @@ type Props = ThemeProps;
 
 type SelectionItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
+  leftIcon: SwIconProps['phosphorIcon'] | string,
   leftIconBgColor: string,
   title: string,
   subTitle?: string,
@@ -386,6 +386,9 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       alignItems: 'center',
       marginRight: -token.marginXS
     },
+    '.__selection-item.ant-setting-item': {
+      backgroundColor: token.colorBgDefault
+    },
     '.__trigger-right-item': {
       display: 'flex',
       gap: token.paddingSM + token.paddingMD
@@ -402,6 +405,9 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       borderRadius: 8,
       display: 'flex',
       alignItems: 'center'
+    },
+    '.-subTitle-container .ant-web3-block-left-item': {
+      paddingRight: 12
     },
 
     '.-subTitle-container .ant-image-img': {

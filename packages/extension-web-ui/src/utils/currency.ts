@@ -5,7 +5,7 @@ import { PhosphorIcon } from '@subwallet/extension-web-ui/types';
 import { CurrencyDollar, CurrencyEur, CurrencyGbp, CurrencyJpy, CurrencyRub } from 'phosphor-react';
 
 export interface CurrencySymbol {
-  icon: PhosphorIcon | React.ReactNode;
+  icon: PhosphorIcon | string;
 }
 export enum CurrencyType {
   USD = 'USD',

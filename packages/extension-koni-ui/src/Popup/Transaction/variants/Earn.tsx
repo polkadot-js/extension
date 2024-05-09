@@ -60,7 +60,7 @@ const Component = () => {
   const poolTargetsMap = useSelector((state) => state.earning.poolTargetsMap);
   const chainAsset = useSelector((state) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state) => state.price.priceMap);
-  const { currency } = useSelector((state) => state.price);
+  const { currencyData } = useSelector((state) => state.price);
 
   const [form] = Form.useForm<EarnParams>();
   const formDefault = useMemo((): EarnParams => ({ ...defaultData }), [defaultData]);
@@ -576,14 +576,14 @@ const Component = () => {
           <MetaInfo.Number
             decimals={0}
             label={t('Estimated fee')}
-            prefix={(currency?.isPrefix && currency.symbol) || ''}
-            suffix={(!currency?.isPrefix && currency?.symbol) || ''}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+            suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={estimatedFee}
           />
         )}
       </MetaInfo>
     );
-  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainValue, currency?.isPrefix, currency.symbol, estimatedFee, poolTargets, chainAsset]);
+  }, [amountValue, assetDecimals, inputAsset.symbol, poolInfo.statistic, poolInfo.metadata, poolInfo?.type, t, chainValue, currencyData?.isPrefix, currencyData.symbol, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -966,8 +966,8 @@ const Component = () => {
                 <div className={'__transformed-amount-value'}>
                   <Number
                     decimal={0}
-                    prefix={(currency?.isPrefix && currency.symbol) || ''}
-                    suffix={(!currency?.isPrefix && currency?.symbol) || ''}
+                    prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                    suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
                     value={transformAmount}
                   />
                 </div>

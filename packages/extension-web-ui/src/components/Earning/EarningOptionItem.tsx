@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -23,7 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
 
-  const { balance, group, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const { balance, group, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
   const _isRelatedToAstar = isRelatedToAstar(group);
 
@@ -53,6 +54,13 @@ const Component: React.FC<Props> = (props: Props) => {
                   </span>)
                 </span>
               )}
+
+              {isTestnet && <div className={'__item-tag-wrapper'}>
+                <NetworkTag
+                  className={'__item-tag'}
+                  type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+                />
+              </div>}
             </div>
 
             {
@@ -157,6 +165,11 @@ const EarningOptionItem = styled(Component)<Props>(({ theme: { token } }: Props)
       alignItems: 'center',
       paddingLeft: 10,
       gap: 10
+    },
+
+    '.__item-tag-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__item-logo': {

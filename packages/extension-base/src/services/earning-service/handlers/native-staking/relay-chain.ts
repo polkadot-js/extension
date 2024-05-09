@@ -8,9 +8,9 @@ import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calcul
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
-import { _STAKING_CHAIN_GROUP, MaxEraRewardPointsEras } from '@subwallet/extension-base/services/earning-service/constants';
+import { _STAKING_CHAIN_GROUP, _UPDATED_RUNTIME_STAKING_GROUP, MaxEraRewardPointsEras } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, SpStakingExposurePage, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
+import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, OptimalYieldPath, PalletStakingActiveEraInfo, PalletStakingEraRewardPoints, PalletStakingExposure, PalletStakingExposureItem, PalletStakingNominations, PalletStakingStakingLedger, PalletStakingValidatorPrefs, SpStakingExposurePage, SpStakingPagedExposureMetadata, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, SubmitYieldJoinData, TernoaStakingRewardsStakingRewardsData, TransactionData, UnstakingStatus, ValidatorExtraInfo, ValidatorInfo, YieldPoolInfo, YieldPositionInfo, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -67,6 +67,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       }
 
       let maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+      const unlimitedNominatorRewarded = substrateApi.api.consts.staking.maxExposurePageSize !== undefined;
+      const maxNominatorRewarded = substrateApi.api.consts.staking.maxNominatorRewardedPerValidator?.toString();
       const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
       const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
 
@@ -76,8 +78,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const maxUnlockingChunks = substrateApi.api.consts.staking.maxUnlockingChunks.toString();
       const unlockingEras = substrateApi.api.consts.staking.bondingDuration.toString();
 
-      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString();
-      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug]; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
+      const maxSupportedEras = substrateApi.api.consts.staking.historyDepth.toString(); // todo: handle case historyDepth undefined
+      const erasPerDay = 24 / _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // Can be exactly calculate from babe.epochDuration * blockTime * staking.sessionsPerEra
 
       const supportedDays = getSupportedDaysByHistoryDepth(erasPerDay, parseInt(maxSupportedEras), parseInt(currentEra) / erasPerDay);
 
@@ -146,7 +148,8 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           totalApy: expectedReturn, // TODO recheck
           unstakingPeriod: unlockingPeriod,
           inflation: inflation
-        }
+        },
+        maxPoolMembers: unlimitedNominatorRewarded ? undefined : maxNominatorRewarded ? parseInt(maxNominatorRewarded) : undefined
       };
 
       callback(data);
@@ -190,7 +193,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
         let eraStakerOtherList: PalletStakingExposureItem[] = [];
         let identity;
 
-        if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
+        if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) { // todo: review all relaychains later
           const [[_identity], _eraStaker] = await Promise.all([
             parseIdentity(substrateApi, validatorAddress),
             substrateApi.api.query.staking.erasStakersPaged.entries(currentEra, validatorAddress)
@@ -380,11 +383,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const maxEraRewardPointsEras = MaxEraRewardPointsEras;
     const endEraForPoints = parseInt(activeEra) - 1;
-    let startEraForPoints = endEraForPoints - maxEraRewardPointsEras + 1;
+    let startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
 
     let _eraStakersPromise;
 
-    if (['kusama', 'polkadot', 'westend', 'availTuringTest'].includes(this.chain)) { // todo: review all relaychains later
+    if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) { // todo: review all relaychains later
       _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
     } else {
       _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
@@ -444,7 +447,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       const rawValidatorInfo = item[0].toHuman() as any[];
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-      const rawValidatorStat = item[1].toHuman() as Record<string, any>;
+      const rawValidatorStat = item[1].toPrimitive() as SpStakingPagedExposureMetadata;
 
       const validatorAddress = rawValidatorInfo[1] as string;
 
@@ -455,21 +458,23 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           isTopQuartile = true;
         }
 
-        const rawTotalStake = rawValidatorStat.total as string;
-        const rawOwnStake = rawValidatorStat.own as string;
-
-        const bnTotalStake = new BN(rawTotalStake.replaceAll(',', ''));
-        const bnOwnStake = new BN(rawOwnStake.replaceAll(',', ''));
+        const bnTotalStake = new BN(rawValidatorStat.total);
+        const bnOwnStake = new BN(rawValidatorStat.own);
         const otherStake = bnTotalStake.sub(bnOwnStake);
 
         totalStakeMap[validatorAddress] = bnTotalStake;
 
         let nominatorCount = 0;
 
-        if ('others' in rawValidatorStat) {
-          const others = rawValidatorStat.others as Record<string, any>[];
+        if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) {
+          nominatorCount = rawValidatorStat.nominatorCount;
+        } else {
+          if ('others' in rawValidatorStat) { // todo: handle interfaces and types better
+            // @ts-ignore
+            const others = rawValidatorStat.others as Record<string, any>[];
 
-          nominatorCount = others.length;
+            nominatorCount = others.length;
+          }
         }
 
         allValidators.push(validatorAddress);

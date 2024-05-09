@@ -5,7 +5,6 @@ import { balanceNoPrefixFormater } from '@subwallet/extension-base/utils';
 import { useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron, saveShowBalance } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { formatBalance } from '@subwallet/extension-koni-ui/utils';
 import { Button, formatNumber, Icon, Number, SwNumberProps, Tag, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ArrowsClockwise, ArrowsLeftRight, CopySimple, Eye, EyeSlash, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
@@ -38,7 +37,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state) => state.settings);
   const [reloading, setReloading] = useState(false);
-  const { currency } = useSelector((state) => state.price);
+  const { currencyData } = useSelector((state) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -61,12 +60,15 @@ function Component (
             'ant-tooltip-hidden': !isShowBalance
           })}
           placement='top'
-          title={formatNumber(totalValue, 0, balanceNoPrefixFormater) + ' ' + currency.symbol}
+          title={currencyData.symbol + ' ' + formatNumber(totalValue, 0, balanceNoPrefixFormater)}
         >
           <div
             className='__total-balance-value-content'
             onClick={isShrink ? onChangeShowBalance : undefined}
           >
+            {isShowBalance && <div className={CN('__total-balance-symbol')}>
+              {currencyData.symbol}
+            </div>}
             <Number
               className={'__total-balance-value'}
               decimal={0}
@@ -76,12 +78,6 @@ function Component (
               subFloatNumber
               value={totalValue}
             />
-            {isShowBalance && <div className={CN('__total-balance-symbol', {
-              '-not-show-balance': isShrink && formatBalance(totalValue, 0).length > 10
-            })}
-            >
-              {currency.symbol}
-            </div>}
           </div>
         </Tooltip>
       </div>
@@ -104,8 +100,8 @@ function Component (
             decimal={0}
             decimalOpacity={1}
             hide={!isShowBalance}
-            prefix={isPriceDecrease ? `- ${(currency.isPrefix && currency.symbol) || ''}` : `+ ${(currency.isPrefix && currency.symbol) || ''}`}
-            suffix={(!currency.isPrefix && currency.symbol) || ''}
+            prefix={isPriceDecrease ? `- ${(currencyData.isPrefix && currencyData.symbol) || ''}` : `+ ${(currencyData.isPrefix && currencyData.symbol) || ''}`}
+            suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
             value={totalChangeValue}
           />
           <Tag
@@ -282,9 +278,11 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     },
 
     '.__total-balance-symbol': {
-      marginLeft: -2,
-      fontSize: token.fontSizeSM,
-      lineHeight: token.lineHeightHeading6,
+      marginLeft: 8,
+      marginRight: -4,
+      fontSize: token.fontSizeXL,
+      lineHeight: token.lineHeightHeading4,
+      fontWeight: token.fontWeightStrong,
 
       '&.-not-show-balance': {
         display: 'none'
@@ -295,6 +293,19 @@ export const UpperBlock = styled(Component)<Props>(({ theme: { token } }: Props)
     '&.-shrink': {
       paddingBottom: 32,
       flexDirection: 'row',
+
+      '.__total-balance-symbol': {
+        marginLeft: 8,
+        marginRight: -4,
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        fontWeight: token.fontWeightStrong,
+
+        '&.-not-show-balance': {
+          display: 'none'
+        }
+
+      },
 
       '.__total-balance-value-container': {
         flex: 1

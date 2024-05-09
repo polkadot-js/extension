@@ -16,7 +16,7 @@ import { useSelector } from 'react-redux';
 const BN_0 = new BigN(0);
 const BN_10 = new BigN(10);
 const BN_100 = new BigN(100);
-const defaultCurrency = { label: 'United States Dollar', symbol: 'USD', isPrefix: true };
+const defaultCurrency = { label: 'United States Dollar', symbol: '$', isPrefix: true };
 
 export function getBalanceValue (balance: string, decimals: number): BigN {
   return new BigN(balance).div(BN_10.pow(decimals));
@@ -308,7 +308,7 @@ export default function useAccountBalance (tokenGroupMap: Record<string, string[
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
-  const currency = useSelector((state: RootState) => state.price.currency);
+  const currency = useSelector((state: RootState) => state.price.currencyData);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
   const isShowZeroBalanceSetting = useSelector((state: RootState) => state.settings.isShowZeroBalance);

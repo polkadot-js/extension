@@ -1,18 +1,21 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { BrowserConfirmationType, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
+import { BrowserConfirmationType, CurrencyJson, CurrencyType, LanguageType, ThemeNames } from '@subwallet/extension-base/background/KoniTypes';
 import { ENABLE_LANGUAGES, languageOptions } from '@subwallet/extension-base/constants/i18n';
+import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
+import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
 import { GeneralEmptyList, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { saveBrowserConfirmationType, saveLanguage, savePriceCurrency, saveTheme } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop } from '@subwallet/extension-koni-ui/utils';
-import { BackgroundIcon, Icon, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
+import { getCurrencySymbol } from '@subwallet/extension-koni-ui/utils/currency';
+import { BackgroundIcon, Icon, Image, SelectModal, SettingItem, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, Coins, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Image, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
+import { ArrowSquareUpRight, BellSimpleRinging, CaretRight, CheckCircle, CornersOut, CurrencyCircleDollar, GlobeHemisphereEast, Layout as LayoutIcon, MoonStars, Sun } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
@@ -22,7 +25,7 @@ type Props = ThemeProps;
 
 type SelectionItemType = {
   key: string,
-  leftIcon: SwIconProps['phosphorIcon'],
+  leftIcon: SwIconProps['phosphorIcon'] | React.ReactNode,
   leftIconBgColor: string,
   title: string,
   subTitle?: string,
@@ -32,6 +35,15 @@ type SelectionItemType = {
 const renderEmpty = () => <GeneralEmptyList />;
 
 function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
+  const getURLSymbol = (() => {
+    if (typeof item.leftIcon === 'string') {
+      return `currency_${item.leftIcon.toLowerCase()}`;
+    }
+
+    return undefined;
+  })();
+  const logoSrc = getURLSymbol ? DefaultLogosMap[getURLSymbol] : undefined;
+
   return (
     <SettingItem
       className={CN('__selection-item', {
@@ -40,18 +52,42 @@ function renderSelectionItem (item: SelectionItemType, _selected: boolean) {
       })}
       key={item.key}
       leftItemIcon={
-        item.subTitle && <div className={'__subTitle-setting-item'}>{item.subTitle}</div>
+        typeof item.leftIcon === 'string'
+          ? (
+            <div className={'__label-item'}>
+              <Image
+                height={20}
+                src={logoSrc}
+                width={20}
+              />
+            </div>
+          )
+          : (
+            <div
+              className={'__label-item'}
+              style={{ backgroundColor: item.leftIconBgColor }}
+            >
+              <Icon
+                customSize={'20px'}
+                phosphorIcon={item.leftIcon as unknown as PhosphorIcon}
+                type='phosphor'
+                weight='fill'
+              />
+            </div>
+          )
       }
       name={item.title}
       rightItem={
         _selected
-          ? <Icon
-            className='__right-icon'
-            customSize={'20px'}
-            phosphorIcon={CheckCircle}
-            type='phosphor'
-            weight='fill'
-          />
+          ? (
+            <Icon
+              className='__right-icon'
+              customSize={'20px'}
+              phosphorIcon={CheckCircle}
+              type='phosphor'
+              weight='fill'
+            />
+          )
           : null
       }
     />
@@ -66,7 +102,7 @@ function renderModalTrigger (item: SelectionItemType) {
       leftItemIcon={
         <BackgroundIcon
           backgroundColor={item.leftIconBgColor}
-          phosphorIcon={item.leftIcon}
+          phosphorIcon={item.leftIcon as unknown as PhosphorIcon}
           size='sm'
           type='phosphor'
           weight='fill'
@@ -105,7 +141,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const theme = useSelector((state: RootState) => state.settings.theme);
   const _language = useSelector((state: RootState) => state.settings.language);
   const _browserConfirmationType = useSelector((state: RootState) => state.settings.browserConfirmationType);
-  const { currencyCode, exchangeRateMap } = useSelector((state: RootState) => state.price);
+  const { currency } = useSelector((state: RootState) => state.price);
   const [loadingMap, setLoadingMap] = useState<LoadingMap>({
     browserConfirmationType: false,
     language: false,
@@ -143,17 +179,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }));
   }, [token]);
 
+  // TODO: 'after will be update data online or refactor this function'
+  const staticDataCurrencySymbol = useMemo<Record<string, CurrencyJson> | undefined>(() => {
+    return staticData[StaticKey.CURRENCY_SYMBOL] as Record<string, CurrencyJson>;
+  }, []);
+
   const currencyItems = useMemo<SelectionItemType[]>(() => {
-    return exchangeRateMap
-      ? Object.keys(exchangeRateMap).map((item) => ({
+    return staticDataCurrencySymbol
+      ? Object.keys(staticDataCurrencySymbol).map((item) => ({
         key: item,
-        leftIcon: Coins,
-        leftIconBgColor: token['yellow-5'],
-        title: exchangeRateMap[item].label,
-        subTitle: item
+        leftIcon: getCurrencySymbol(item).icon,
+        leftIconBgColor: token.colorBgBorder,
+        title: `${item} - ${staticDataCurrencySymbol[item].label}`,
+        subTitle: staticDataCurrencySymbol[item].symbol
       }))
       : [];
-  }, [exchangeRateMap, token]);
+  }, [staticDataCurrencySymbol, token]);
 
   const browserConfirmationItems = useMemo<SelectionItemType[]>(() => {
     return [
@@ -251,7 +292,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               className={`__modal ${className}`}
               customInput={renderModalTrigger({
                 key: 'wallet-theme-trigger',
-                leftIcon: Image,
+                leftIcon: Image as unknown as PhosphorIcon,
                 leftIconBgColor: token.colorPrimary,
                 title: t('Wallet theme')
               })}
@@ -266,7 +307,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               shape='round'
               title={t('Wallet theme')}
             />}
-
           <SelectModal
             background={'default'}
             className={`__modal ${className}`}
@@ -275,7 +315,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               leftIcon: CurrencyCircleDollar,
               leftIconBgColor: token['gold-6'],
               title: t('Currency'),
-              subTitle: currencyCode
+              subTitle: currency
             })}
             disabled={loadingMap.currency}
             id='currency-select-modal'
@@ -287,8 +327,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             renderWhenEmpty={renderEmpty}
             searchFunction={searchFunction}
             searchMinCharactersCount={2}
-            searchPlaceholder={t<string>('Search Currency')}
-            selected={currencyCode}
+            searchPlaceholder={t<string>('Search currency')}
+            selected={currency}
             shape='round'
             size='small'
             title={t('Select a currency')}
@@ -356,6 +396,22 @@ export const GeneralSetting = styled(Component)<Props>(({ theme: { token } }: Pr
       height: 52,
       alignItems: 'center',
       display: 'flex'
+    },
+    '.__label-item': {
+      borderRadius: '50%',
+      padding: 4,
+      maxHeight: 28
+    },
+    '.-subTitle-container .__label-item': {
+      backgroundColor: token.colorBgBorder,
+      padding: 4,
+      borderRadius: 8,
+      display: 'flex',
+      alignItems: 'center'
+    },
+
+    '.-subTitle-container .ant-image-img': {
+      display: 'block'
     },
 
     '.item-disabled': {

@@ -1083,7 +1083,6 @@
   "OK": "",
   "Active stake": "",
   "Supply more": "",
-  "Earning position detail": "",
   "Rewards unavailable": "",
   "You don't have any rewards to claim at the moment. Try again later.": "",
   "Visit Astar portal": "",
@@ -1238,5 +1237,8 @@
   "Explore Earning options": "",
   "Change validators": "",
   "Use nomination pool": "",
-  "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": ""
+  "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": "",
+  "Currency": "",
+  "Select a currency": "",
+  "Search Currency": ""
 }

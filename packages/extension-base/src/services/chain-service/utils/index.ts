@@ -535,6 +535,11 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     if (currentChainInfo) {
       needUpdate = true;
       currentChainInfo.extraInfo = latestChainInfo.extraInfo;
+      currentChainInfo.chainStatus = latestChainInfo.chainStatus;
+
+      if (Object.keys(currentChainInfo.providers).length === 0) {
+        currentChainInfo.chainStatus = _ChainStatus.INACTIVE;
+      }
     }
 
     if (needUpdate) {

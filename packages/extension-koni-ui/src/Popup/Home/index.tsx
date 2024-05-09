@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
-import { CampaignBannerModal, Layout, RemindBackupSeedPhraseModal } from '@subwallet/extension-koni-ui/components';
+import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -21,8 +21,6 @@ type Props = ThemeProps;
 
 export const GlobalSearchTokenModalId = 'globalSearchToken';
 
-const SessionDays = 1296000000;
-
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const chainsByAccountType = useGetChainSlugsByAccountType();
@@ -30,11 +28,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
-  const [, setSessionLatest] = useLocalStorage(LATEST_SESSION, Date.now());
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
-
   const banners = useGetBannerByScreen('home');
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
@@ -69,16 +65,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
 
-  useEffect(() => {
-    const infoSession = Date.now();
-
-    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || '0') || infoSession) as number;
-
-    if (infoSession - latestSession >= SessionDays) {
-      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
-    }
-  }, [activeModal, setSessionLatest]);
-
   return (
     <>
       <HomeContext.Provider value={{
@@ -105,7 +91,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         tokenBalanceMap={accountBalance.tokenBalanceMap}
       />
       {firstBanner && <CampaignBannerModal banner={firstBanner} />}
-      <RemindBackupSeedPhraseModal />
     </>
   );
 }

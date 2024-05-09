@@ -3,7 +3,7 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { AccountSelectorModal } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
-import { REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -15,6 +15,7 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
@@ -25,12 +26,14 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [, setSessionLatest] = useLocalStorage(LATEST_SESSION, Date.now());
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
 
   const onCancel = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-  }, [inactiveModal]);
+    setSessionLatest(Date.now());
+  }, [inactiveModal, setSessionLatest]);
 
   const accountFiler = useMemo(() => {
     return accounts.filter(({ address }) => address !== 'ALL');
@@ -40,17 +43,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     if (account?.address) {
       navigate(`/accounts/export/${account.address}`);
       inactiveModal(RemindBackupSeedPhraseModalId);
+      setSessionLatest(Date.now());
     }
-  }, [inactiveModal, navigate]);
+  }, [inactiveModal, navigate, setSessionLatest]);
 
   const onExport = useCallback(() => {
+    inactiveModal(RemindBackupSeedPhraseModalId);
+    setSessionLatest(Date.now());
+
     if (isAllAccount) {
       activeModal(AccountSelectorModalId);
     } else if (currentAccount?.address) {
       navigate(`/accounts/export/${currentAccount.address}`);
-      inactiveModal(RemindBackupSeedPhraseModalId);
     }
-  }, [activeModal, currentAccount, inactiveModal, isAllAccount, navigate]);
+  }, [activeModal, currentAccount, inactiveModal, isAllAccount, navigate, setSessionLatest]);
 
   const footerModal = useMemo(() => {
     return (

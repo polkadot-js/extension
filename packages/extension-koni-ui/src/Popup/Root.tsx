@@ -6,7 +6,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackgroundExpandView } from '@subwallet/extension-koni-ui/components';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
+import { CURRENT_PAGE, TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
@@ -24,6 +24,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -68,10 +69,9 @@ function removeLoadingPlaceholder (animation: boolean): void {
       element.style.transition = 'opacity 0.1s ease-in-out';
       // Set opacity to 0
       element.style.opacity = '0';
-
       // Callback after 1 second
       setTimeout(() => {
-      // Remove element
+        // Remove element
         element.parentNode?.removeChild(element);
       }, 150);
     } else {
@@ -89,6 +89,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const [dataLoaded, setDataLoaded] = useState(false);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
   const currentPage = useGetCurrentPage();
+  const [, setStorage] = useLocalStorage<string>(CURRENT_PAGE, DEFAULT_ROUTER_PATH);
   const firstRender = useRef(true);
 
   useSubscribeLanguage();
@@ -239,6 +240,11 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   }, [currentAccount, initAccount]);
 
   if (rootLoading || redirectPath) {
+    if (currentPage !== redirectPath && redirectPath === welcomeUrl) {
+      setStorage(welcomeUrl);
+      window.location.reload();
+    }
+
     return <>{redirectPath && <Navigate to={redirectPath} />}</>;
   } else {
     return <MainWrapper className={CN('main-page-container')}>

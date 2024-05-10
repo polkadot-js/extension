@@ -881,23 +881,28 @@ export class ChainService {
     this.lockChainInfoMap = true;
 
     const initPromises = chainSlugs.map(async (chainSlug) => {
-      const chainInfo = chainInfoMap[chainSlug];
-      const currentState = chainStateMap[chainSlug]?.active;
+      // Add try catch to prevent one chain error stop the whole process
+      try {
+        const chainInfo = chainInfoMap[chainSlug];
+        const currentState = chainStateMap[chainSlug]?.active;
 
-      if (!currentState) {
-        this.dbService.updateChainStore({
-          ...chainInfo,
-          active: true,
-          currentProvider: chainStateMap[chainSlug].currentProvider,
-          manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
-        }).catch(console.error);
+        if (!currentState) {
+          // Enable chain success then update chain state
+          await this.initApiForChain(chainInfo);
 
-        chainStateMap[chainSlug].active = true;
-        await this.initApiForChain(chainInfo);
+          this.dbService.updateChainStore({
+            ...chainInfo,
+            active: true,
+            currentProvider: chainStateMap[chainSlug].currentProvider,
+            manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
+          }).catch(console.error);
 
-        this.eventService.emit('chain.updateState', chainSlug);
-        needUpdate = true;
-      }
+          chainStateMap[chainSlug].active = true;
+
+          this.eventService.emit('chain.updateState', chainSlug);
+          needUpdate = true;
+        }
+      } catch (e) {}
     });
 
     await Promise.all(initPromises);

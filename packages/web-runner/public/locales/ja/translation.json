@@ -332,9 +332,6 @@
   "Go to home": "ホームへ",
   "All done!": "すべて完了！",
   "Follow along with product updates or reach out if you have any questions.": "製品のアップデートをフォローしたり、ご質問があればご連絡ください。",
-  "Opps! An Error Occurred": "エラーが発生しました！",
-  "Sorry, something went wrong.": "申し訳ありませんが、何か問題が発生しました。",
-  "Please try again later.": "後でもう一度やり直してください。",
   "Polkadot parachain": "Polkadot パラチェーン",
   "Kusama parachain": "Kusama パラチェーン",
   "Search project": "検索をプロジェクト",
@@ -1240,5 +1237,7 @@
   "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": "",
   "Currency": "",
   "Select a currency": "",
-  "Search Currency": ""
+  "This pool has reached the maximum number of members. Select another to continue": "",
+  "Member": "",
+  "Search currency": ""
 }

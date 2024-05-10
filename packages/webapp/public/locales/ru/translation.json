@@ -332,9 +332,6 @@
   "Go to home": "Перейти на главную",
   "All done!": "Все выполнено!",
   "Follow along with product updates or reach out if you have any questions.": "Следите за обновлениями продуктов или обращайтесь, если у вас есть какие-либо вопросы.",
-  "Opps! An Error Occurred": "Ой! Произошла ошибка",
-  "Sorry, something went wrong.": "Извините, что-то пошло не так.",
-  "Please try again later.": "Пожалуйста, повторите попытку позже.",
   "Polkadot parachain": "Polkadot парачейн",
   "Kusama parachain": "Kusama парачейн",
   "Search project": "Поиск проекта",
@@ -1240,5 +1237,7 @@
   "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": "",
   "Currency": "",
   "Select a currency": "",
-  "Search Currency": ""
+  "This pool has reached the maximum number of members. Select another to continue": "",
+  "Member": "",
+  "Search currency": ""
 }

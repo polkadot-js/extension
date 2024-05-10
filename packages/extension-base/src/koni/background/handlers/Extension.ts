@@ -3122,7 +3122,10 @@ export default class KoniExtension {
     let isEvm = false;
 
     if (isJsonPayload(payload)) {
-      // Get the metadata for the genesisHash
+      /**
+       *  Get the metadata for the genesisHash
+       *  @todo: need to handle case metadata store in db
+      */
       const currentMetadata = this.#koniState.knownMetadata.find((meta: MetadataDef) =>
         meta.genesisHash === payload.genesisHash);
 
@@ -3135,14 +3138,30 @@ export default class KoniExtension {
 
       const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
 
-      if (chainInfo && (_API_OPTIONS_CHAIN_GROUP.avail.includes(chainInfo.slug) || _API_OPTIONS_CHAIN_GROUP.goldberg.includes(chainInfo.slug))) {
-        const isChainActive = this.#koniState.getChainStateByKey(chainInfo.slug).active;
+      if (!currentMetadata) {
+        /*
+        * Some networks must have metadata to signing,
+        * so if the chain not active (cannot use metadata from api), it must be rejected
+        *  */
+        if (
+          chainInfo &&
+          (_API_OPTIONS_CHAIN_GROUP.avail.includes(chainInfo.slug) || _API_OPTIONS_CHAIN_GROUP.goldberg.includes(chainInfo.slug)) // The special case for chains that need metadata to signing
+        ) {
+          // For case the chain does not have any provider
+          if (!Object.keys(chainInfo.providers).length) {
+            reject(new Error('{{chain}} network does not have any provider to connect, please update metadata from dApp'.replaceAll('{{chain}}', chainInfo.name)));
 
-        if (!isChainActive) {
-          reject(new Error('Please activate {{chain}} network before signing'.replaceAll('{{chain}}', chainInfo.name)));
+            return false;
+          }
 
-          return false;
-        } else {
+          const isChainActive = this.#koniState.getChainStateByKey(chainInfo.slug).active;
+
+          if (!isChainActive) {
+            reject(new Error('Please activate {{chain}} network before signing'.replaceAll('{{chain}}', chainInfo.name)));
+
+            return false;
+          }
+
           registry = this.#koniState.getSubstrateApi(chainInfo.slug).api.registry as unknown as TypeRegistry;
         }
       }

@@ -3,7 +3,8 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import { PlusCircle } from 'phosphor-react';
@@ -21,6 +22,7 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const { balance, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
@@ -93,7 +95,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Number
             className={'__item-total-stake-value'}
             decimal={0}
-            prefix={'$'}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={totalValueStaked}
           />
         </div>

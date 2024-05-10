@@ -46,7 +46,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { activeModal } = useContext(ModalContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const { assetRegistry: assetInfoMap } = useSelector((state) => state.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
@@ -79,7 +79,8 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return {
           ...item,
           asset: priceToken,
-          price
+          price,
+          currency: currencyData
         };
       })
       .sort((firstItem, secondItem) => {
@@ -92,7 +93,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
         return getValue(secondItem) - getValue(firstItem);
       });
-  }, [assetInfoMap, earningPositions, priceMap]);
+  }, [assetInfoMap, currencyData, earningPositions, priceMap]);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },

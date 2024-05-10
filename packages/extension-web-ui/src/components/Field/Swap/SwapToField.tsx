@@ -28,7 +28,7 @@ const numberMetadata = { maxNumberFormat: 2 };
 const Component = (props: Props) => {
   const { className, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
 
   const getConvertedBalance = useMemo(() => {
     if (toAsset) {
@@ -80,7 +80,8 @@ const Component = (props: Props) => {
                   decimal={0}
                   formatType={'custom'}
                   metadata={numberMetadata}
-                  prefix={'$'}
+                  prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                  suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                   value={getConvertedBalance}
                 />
               </>

@@ -27,9 +27,16 @@ export function _isAccountActive (accountInfo: FrameSystemAccountInfo): boolean 
   return accountInfo.providers === 0 && accountInfo.consumers === 0;
 }
 
-export function _getSystemPalletTransferable (accountInfo: FrameSystemAccountInfo, existentialDeposit: string): string {
+export function _getSystemPalletTransferable (accountInfo: FrameSystemAccountInfo, existentialDeposit: string, strictMode?: boolean): string {
   const canBeReaped = _canAccountBeReaped(accountInfo);
-  const bnAppliedExistentialDeposit = canBeReaped ? new BigN(0) : new BigN(existentialDeposit); // this will go better with max transfer
+  let bnAppliedExistentialDeposit;
+
+  // strict mode will always apply existential deposit to keep account alive
+  if (strictMode) {
+    bnAppliedExistentialDeposit = new BigN(existentialDeposit);
+  } else {
+    bnAppliedExistentialDeposit = canBeReaped ? new BigN(0) : new BigN(existentialDeposit); // this will go better with max transfer
+  }
 
   const bnFree = new BigN(accountInfo.data.free);
   const bnLocked = new BigN(accountInfo.data.frozen).minus(accountInfo.data.reserved); // locked can go below 0 but this shouldn't matter

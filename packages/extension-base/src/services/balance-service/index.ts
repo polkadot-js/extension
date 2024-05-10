@@ -2,12 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import {
-  AmountData,
-  BalanceErrorType,
-  DetectBalanceCache,
-  ExtrinsicType
-} from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BalanceErrorType, DetectBalanceCache, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
@@ -234,7 +229,7 @@ export class BalanceService implements StoppableServiceInterface {
 
           resolve([unsub, balance]);
         }
-      });
+      }, extrinsicType);
 
       setTimeout(() => {
         if (hasError) {

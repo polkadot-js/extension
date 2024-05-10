@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
@@ -79,7 +79,17 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
 };
 
 // main subscription, use for multiple chains, multiple addresses and multiple tokens
-export function subscribeBalance (addresses: string[], chains: string[], tokens: string[], _chainAssetMap: Record<string, _ChainAsset>, _chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
+export function subscribeBalance (
+  addresses: string[],
+  chains: string[],
+  tokens: string[],
+  _chainAssetMap: Record<string, _ChainAsset>,
+  _chainInfoMap: Record<string, _ChainInfo>,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  evmApiMap: Record<string, _EvmApi>,
+  callback: (rs: BalanceItem[]) => void,
+  extrinsicType?: ExtrinsicType
+) {
   // Filter chain and token
   const chainAssetMap: Record<string, _ChainAsset> = Object.fromEntries(Object.entries(_chainAssetMap).filter(([token]) => tokens.includes(token)));
   const chainInfoMap: Record<string, _ChainInfo> = Object.fromEntries(Object.entries(_chainInfoMap).filter(([chain]) => chains.includes(chain)));
@@ -122,7 +132,7 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
 
     const substrateApi = await substrateApiMap[chainSlug].isReady;
 
-    return subscribeSubstrateBalance(useAddresses, chainInfo, chainAssetMap, substrateApi, evmApi, callback);
+    return subscribeSubstrateBalance(useAddresses, chainInfo, chainAssetMap, substrateApi, evmApi, callback, extrinsicType);
   });
 
   return () => {

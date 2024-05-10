@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { _getActiveStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
@@ -23,7 +23,7 @@ import { BN, BN_ZERO } from '@polkadot/util';
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';
 
-export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void) => {
+export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void, extrinsicType?: ExtrinsicType) => {
   let unsubNativeToken: () => void;
   let unsubLocalToken: () => void;
   let unsubEvmContractToken: () => void;
@@ -35,7 +35,8 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
     addresses,
     chainInfo,
     assetMap,
-    callback
+    callback,
+    extrinsicType
   };
 
   const substrateParams: SubscribeSubstratePalletBalance = {
@@ -99,7 +100,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
 
 // handler according to different logic
 // eslint-disable-next-line @typescript-eslint/require-await
-const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
+const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo, extrinsicType, substrateApi }: SubscribeSubstratePalletBalance) => {
   const chainNativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
 
   const balanceSubscribe: Observable<Codec[]> = substrateApi.rx.query.system.account.multi(addresses);
@@ -126,7 +127,9 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
       const poolMemberInfo = poolMemberInfos[index].toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
       const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';
-      const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo));
+
+      const isStrict = !!extrinsicType && ![ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);
+      const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), isStrict);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
       const totalLockedFromTransfer = new BigN(totalBalance).minus(transferableBalance).plus(nominationPoolBalance);
 

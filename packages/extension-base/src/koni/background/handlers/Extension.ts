@@ -2099,7 +2099,7 @@ export default class KoniExtension {
     return bnMaxTransferable.minus(mockTxFee);
   }
 
-  private async subscribeAddressTransferableBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<AmountData> {
+  private async subscribeAddressTransferableBalance ({ address, extrinsicType, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<AmountData> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
     const convertData = (data: AmountData): AmountDataWithId => {
@@ -2111,7 +2111,7 @@ export default class KoniExtension {
       cb(convertData(data));
     };
 
-    const [unsub, currentFreeBalance] = await this.#koniState.balanceService.subscribeTransferableBalance(address, networkKey, token, undefined, _cb);
+    const [unsub, currentFreeBalance] = await this.#koniState.balanceService.subscribeTransferableBalance(address, networkKey, token, extrinsicType, _cb);
 
     this.createUnsubscriptionHandle(
       id,

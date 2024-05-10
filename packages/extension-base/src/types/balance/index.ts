@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import {APIItemState, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -60,6 +60,7 @@ export interface SubscribeBasePalletBalance {
   assetMap: Record<string, _ChainAsset>;
   chainInfo: _ChainInfo;
   callback: (rs: BalanceItem[]) => void;
+  extrinsicType?: ExtrinsicType;
 }
 
 export interface SubscribeSubstratePalletBalance extends SubscribeBasePalletBalance {

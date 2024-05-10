@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import {AmountData, AmountDataWithId, ExtrinsicType} from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, AmountDataWithId, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { cancelSubscription, getFreeBalance, subscribeFreeBalance, updateAssetSetting } from '@subwallet/extension-koni-ui/messaging';

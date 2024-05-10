@@ -13,6 +13,7 @@ import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
 import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
+import ClearMetadataDatabase from './ClearMetadataDatabase';
 import DeleteChain from './DeleteChain';
 import DeleteChainStaking from './DeleteChainStaking';
 import EnableVaraChain from './EnableVaraChain';
@@ -55,7 +56,8 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.41-01': DeleteChainStaking,
   '1.1.46-01': AutoEnableSomeTokens,
   '1.1.53-01': MigrateAssetSetting,
-  '1.1.53-02': MigrateTransactionHistoryBySymbol
+  '1.1.53-02': MigrateTransactionHistoryBySymbol,
+  '1.1.61-01': ClearMetadataDatabase
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

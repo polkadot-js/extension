@@ -10,8 +10,6 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 import { _getKnownHashes, _getKnownNetworks, findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
 
-import { HexString } from '@polkadot/util/types';
-
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 export async function getAllMetadata (): Promise<MetadataDef[]> {
@@ -59,7 +57,9 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     return null;
   }
 
-  const { rawMetadata, specVersion } = await sendMessage('pri(metadata.find)', { genesisHash });
+  const data = await sendMessage('pri(metadata.find)', { genesisHash });
+
+  const { rawMetadata, specVersion } = data;
 
   if (!rawMetadata) {
     return null;
@@ -71,7 +71,7 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     return null;
   }
 
-  const registry = createRegistry(chainInfo, rawMetadata as HexString);
+  const registry = createRegistry(chainInfo, data);
 
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
 
@@ -80,7 +80,10 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     genesisHash,
     name: chainInfo.name,
     hasMetadata: true,
-    definition: {} as MetadataDef,
+    definition: {
+      types: data.types,
+      userExtensions: data.userExtensions
+    } as MetadataDef,
     icon: chainInfo.icon,
     registry: registry,
     isUnknown: false,

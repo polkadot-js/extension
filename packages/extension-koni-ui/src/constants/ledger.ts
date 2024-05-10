@@ -32,6 +32,18 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isEthereum: true
   },
   {
+    accountName: 'Avail',
+    appName: 'Avail',
+    networkName: 'Avail network',
+    genesisHash: ChainInfoMap.availTuringTest.substrateInfo?.genesisHash || '0xd3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70',
+    icon: 'substrate',
+    network: 'avail',
+    slug: ChainInfoMap.availTuringTest.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false
+  },
+  {
     accountName: 'Polkadot',
     appName: 'Polkadot',
     networkName: 'Polkadot network',

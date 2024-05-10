@@ -88,11 +88,11 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const inputAssetInfo = this.state.chainService.getAssetBySlug(this.inputAsset);
 
     const [inputAssetBalance, altInputAssetBalance, feeAssetBalance] = await Promise.all([
-      this.state.balanceService.getTokenFreeBalance(request.address, inputAssetInfo.originChain, inputAssetInfo.slug),
+      this.state.balanceService.getTransferableBalance(request.address, inputAssetInfo.originChain, inputAssetInfo.slug),
       altInputAssetInfo
-        ? this.state.balanceService.getTokenFreeBalance(request.address, altInputAssetInfo.originChain, altInputAssetInfo.slug)
+        ? this.state.balanceService.getTransferableBalance(request.address, altInputAssetInfo.originChain, altInputAssetInfo.slug)
         : Promise.resolve<AmountData>({ symbol: '', decimals: 0, value: '0' }),
-      this.state.balanceService.getTokenFreeBalance(request.address, feeAssetInfo.originChain, feeAssetInfo.slug)
+      this.state.balanceService.getTransferableBalance(request.address, feeAssetInfo.originChain, feeAssetInfo.slug)
     ]);
 
     const bnInputAssetBalance = new BN(inputAssetBalance.value);
@@ -238,7 +238,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const inputTokenSlug = this.inputAsset; // assume that the pool only has 1 input token, will update later
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
 
-    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, inputTokenInfo.originChain, inputTokenSlug);
+    const inputTokenBalance = await this.state.balanceService.getTransferableBalance(address, inputTokenInfo.originChain, inputTokenSlug);
 
     const bnInputTokenBalance = new BN(inputTokenBalance.value);
 
@@ -246,7 +246,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       if (this.altInputAsset) {
         const altInputTokenSlug = this.altInputAsset;
         const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
-        const altInputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, altInputTokenInfo.originChain, altInputTokenSlug);
+        const altInputTokenBalance = await this.state.balanceService.getTransferableBalance(address, altInputTokenInfo.originChain, altInputTokenSlug);
         const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
 
         if (bnAltInputTokenBalance.gt(BN_ZERO)) {
@@ -341,7 +341,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const altInputTokenSlug = this.altInputAsset || '';
     const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
     const inputTokenInfo = this.state.getAssetBySlug(this.inputAsset);
-    const altInputTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug);
+    const altInputTokenBalance = await this.state.balanceService.getTransferableBalance(params.address, altInputTokenInfo.originChain, altInputTokenSlug);
 
     const missingAmount = bnAmount.sub(bnInputTokenBalance); // TODO: what if input token is not LOCAL ??
     const xcmFee = new BN(path.totalFee[1].amount || '0');
@@ -412,7 +412,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     if (this.feeAssets.length === 1 && feeTokenSlug === defaultFeeTokenSlug) {
       const bnFeeAmount = new BN(path.totalFee[id]?.amount || '0');
-      const feeTokenBalance = await this.state.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenSlug);
+      const feeTokenBalance = await this.state.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenSlug);
       const bnFeeTokenBalance = new BN(feeTokenBalance.value || '0');
       const bnFeeTokenMinAmount = new BN(feeTokenInfo?.minAmount || '0');
 
@@ -455,7 +455,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const inputTokenSlug = this.inputAsset;
     const inputTokenInfo = this.state.getAssetBySlug(inputTokenSlug);
     const balanceService = this.state.balanceService;
-    const inputTokenBalance = await balanceService.getTokenFreeBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
+    const inputTokenBalance = await balanceService.getTransferableBalance(params.address, inputTokenInfo.originChain, inputTokenSlug);
     const bnInputTokenBalance = new BN(inputTokenBalance.value || '0');
     const bnAmount = new BN(params.amount);
 
@@ -511,7 +511,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
     const destinationTokenInfo = this.state.getAssetBySlug(destinationTokenSlug);
     const substrateApi = this.state.getSubstrateApi(originChainInfo.slug);
 
-    const inputTokenBalance = await this.state.balanceService.getTokenFreeBalance(address, destinationTokenInfo.originChain, destinationTokenSlug);
+    const inputTokenBalance = await this.state.balanceService.getTransferableBalance(address, destinationTokenInfo.originChain, destinationTokenSlug);
     const bnInputTokenBalance = new BN(inputTokenBalance.value);
 
     const bnXcmFee = new BN(xcmFee);

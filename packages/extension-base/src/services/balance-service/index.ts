@@ -2,7 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import { AmountData, BalanceErrorType, DetectBalanceCache } from '@subwallet/extension-base/background/KoniTypes';
+import {
+  AmountData,
+  BalanceErrorType,
+  DetectBalanceCache,
+  ExtrinsicType
+} from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
@@ -183,8 +188,8 @@ export class BalanceService implements StoppableServiceInterface {
     });
   }
 
-  /** Subscribe token free balance of a address on chain */
-  public async subscribeTokenFreeBalance (address: string, chain: string, tokenSlug: string | undefined, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
+  /** Subscribe token free balance of an address on chain */
+  public async subscribeTransferableBalance (address: string, chain: string, tokenSlug: string | undefined, extrinsicType?: ExtrinsicType, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
     const chainState = this.state.chainService.getChainStateByKey(chain);
 
@@ -243,15 +248,16 @@ export class BalanceService implements StoppableServiceInterface {
   /**
    * @public
    * @async
-   * @function getTokenFreeBalance
+   * @function getTransferableBalance
    * @desc Fetch free balance on chain
    * @param {string} address - Address
    * @param {string} chain - Slug of chain
    * @param {string} [tokenSlug] - Slug of token
+   * @param extrinsicType - Customize transferable based on context
    * @return {Promise<AmountData>} - Free token balance of address on chain
-  */
-  public async getTokenFreeBalance (address: string, chain: string, tokenSlug?: string): Promise<AmountData> {
-    const [, balance] = await this.subscribeTokenFreeBalance(address, chain, tokenSlug);
+   */
+  public async getTransferableBalance (address: string, chain: string, tokenSlug?: string, extrinsicType?: ExtrinsicType): Promise<AmountData> {
+    const [, balance] = await this.subscribeTransferableBalance(address, chain, tokenSlug, extrinsicType);
 
     return balance;
   }

@@ -15,20 +15,19 @@ import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, XCM_FEE_RATIO, XCM_MIN_AMOUNT_RATIO 
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
-import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
+import { checkReferenceCount, checkSupportTransfer, createTransferExtrinsic, getTransferMockTxFee } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
 import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
 import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, validatePoolBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
+import { createXcmExtrinsic, getXcmMockTxFee } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _getTokenMinAmount, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
-import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -58,7 +57,7 @@ import { TransactionConfig } from 'web3-core';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { TypeRegistry } from '@polkadot/types';
 import { assert, BN, hexStripPrefix, hexToU8a, isAscii, isHex, u8aToHex, u8aToString } from '@polkadot/util';
-import { addressToEvm, base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
+import { base64Decode, decodeAddress, isAddress, isEthereumAddress, jsonDecrypt, keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 import { EncryptedJson, KeypairType, Prefix } from '@polkadot/util-crypto/types';
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
@@ -1731,7 +1730,7 @@ export default class KoniExtension {
     let transaction: ValidateTransactionResponseInput['transaction'];
 
     // Get native token amount
-    const freeBalance = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
+    const freeBalance = await this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug });
 
     try {
       if (isEthereumAddress(from) && isEthereumAddress(to) && _isTokenTransferredByEvm(tokenInfo)) { // TODO: review this
@@ -1786,14 +1785,14 @@ export default class KoniExtension {
 
       // Check ed for sender
       if (!isTransferNativeToken) {
-        const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey, token: tokenSlug });
+        const { value: balance } = await this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug });
 
         if (new BigN(balance).minus(transferAmount.value).lt(minAmount)) {
           inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
         }
       }
 
-      const { value: receiverBalance } = await this.getAddressFreeBalance({ address: to, networkKey, token: tokenSlug });
+      const { value: receiverBalance } = await this.getAddressTransferableBalance({ address: to, networkKey, token: tokenSlug });
 
       // Check ed for receiver
       if (new BigN(receiverBalance).plus(transferAmount.value).lt(minAmount)) {
@@ -1882,7 +1881,7 @@ export default class KoniExtension {
 
         // Check ed for sender
         if (!isTransferNativeToken) {
-          const { value: balance } = await this.getAddressFreeBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
+          const { value: balance } = await this.getAddressTransferableBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
 
           if (new BigN(balance).minus(value).lt(srcMinAmount)) {
             inputTransaction.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
@@ -2024,7 +2023,7 @@ export default class KoniExtension {
     return await this.#koniState.validateCustomAsset(data);
   }
 
-  private async getAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance): Promise<AmountData> {
+  private async getAddressTransferableBalance ({ address, extrinsicType, networkKey, token }: RequestFreeBalance): Promise<AmountData> {
     if (token && _MANTA_ZK_CHAIN_GROUP.includes(networkKey)) {
       const tokenInfo = this.#koniState.chainService.getAssetBySlug(token);
 
@@ -2033,105 +2032,74 @@ export default class KoniExtension {
       }
     }
 
-    return await this.#koniState.balanceService.getTokenFreeBalance(address, networkKey, token);
+    return await this.#koniState.balanceService.getTransferableBalance(address, networkKey, token, extrinsicType);
   }
 
-  private async transferGetMaxTransferable ({ address, destChain, isXcmTransfer, networkKey, token }: RequestMaxTransferable): Promise<AmountData> {
-    const freeBalance = await this.getAddressFreeBalance({ address, networkKey, token });
+  private async getMaxTransferable ({ address, destChain, isXcmTransfer, networkKey, token }: RequestMaxTransferable): Promise<AmountData> {
     const tokenInfo = token ? this.#koniState.chainService.getAssetBySlug(token) : this.#koniState.chainService.getNativeTokenInfo(networkKey);
 
     if (!_isNativeToken(tokenInfo)) {
-      return freeBalance;
+      return await this.getAddressTransferableBalance({
+        extrinsicType: ExtrinsicType.TRANSFER_TOKEN,
+        address,
+        networkKey,
+        token
+      });
     } else {
-      const substrateApi = this.#koniState.chainService.getSubstrateApi(networkKey);
-      let estimatedFee: string;
-      let maxTransferable = new BigN(freeBalance.value);
+      let maxTransferable: BigN;
 
-      try {
-        if (isXcmTransfer) {
-          const chainInfoMap = this.#koniState.chainService.getChainInfoMap();
-          const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destChain, tokenInfo.slug);
-
-          if (!destinationTokenInfo) {
-            estimatedFee = '0';
-          } else {
-            maxTransferable = maxTransferable.minus(new BigN(tokenInfo.minAmount || '0').multipliedBy(XCM_MIN_AMOUNT_RATIO));
-            const desChainInfo = chainInfoMap[destChain];
-            const orgChainInfo = chainInfoMap[networkKey];
-            const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(desChainInfo) && !_isChainEvmCompatible(orgChainInfo)
-              ? u8aToHex(addressToEvm(address))
-              : address
-            ;
-
-            const mockTx = await createXcmExtrinsic({
-              chainInfoMap,
-              destinationTokenInfo,
-              originTokenInfo: tokenInfo,
-              recipient: recipient,
-              sendingValue: '1000000000000000000',
-              substrateApi
-            });
-
-            try {
-              const paymentInfo = await mockTx.paymentInfo(address);
-
-              estimatedFee = paymentInfo?.partialFee?.toString() || '0';
-            } catch (e) {
-              estimatedFee = tokenInfo.minAmount || '0';
-            }
-          }
-        } else {
-          const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
-
-          if (_isChainEvmCompatible(chainInfo) && _isTokenTransferredByEvm(tokenInfo)) {
-            const web3 = this.#koniState.chainService.getEvmApi(networkKey);
-
-            const transaction: TransactionConfig = {
-              value: 0,
-              to: '0x0000000000000000000000000000000000000000', // null address
-              from: address
-            };
-            const gasLimit = await web3.api.eth.estimateGas(transaction);
-            const priority = await calculateGasFeeParams(web3, networkKey);
-
-            if (priority.baseGasFee) {
-              const maxFee = priority.maxFeePerGas;
-
-              estimatedFee = maxFee.multipliedBy(gasLimit).toFixed(0);
-            } else {
-              estimatedFee = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
-            }
-          } else {
-            const [mockTx] = await createTransferExtrinsic({
-              from: address,
-              networkKey,
-              substrateApi,
-              to: address,
-              tokenInfo,
-              transferAll: true,
-              value: '1000000000000000000'
-            });
-
-            const paymentInfo = await mockTx?.paymentInfo(address);
-
-            estimatedFee = paymentInfo?.partialFee?.toString() || '0';
-          }
-        }
-      } catch (e) {
-        estimatedFee = '0';
-        console.warn('Unable to estimate fee', e);
+      if (isXcmTransfer) {
+        maxTransferable = await this.getXcmMaxTransferable(tokenInfo, destChain, address);
+      } else {
+        // regular transfer with native token
+        maxTransferable = await this.getNativeTokenMaxTransferable(tokenInfo, networkKey, address);
       }
 
-      maxTransferable = maxTransferable.minus(new BigN(estimatedFee).multipliedBy(isXcmTransfer ? XCM_FEE_RATIO : 1));
-
       return {
-        ...freeBalance,
-        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed(0) || '0') : '0'
+        value: maxTransferable.gt(BN_ZERO) ? (maxTransferable.toFixed(0) || '0') : '0',
+        decimals: tokenInfo.decimals,
+        symbol: tokenInfo.symbol
       } as AmountData;
     }
   }
 
-  private async subscribeAddressFreeBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<AmountData> {
+  private async getXcmMaxTransferable (originTokenInfo: _ChainAsset, destChain: string, address: string): Promise<BigN> {
+    const substrateApi = this.#koniState.chainService.getSubstrateApi(originTokenInfo.originChain);
+    const chainInfoMap = this.#koniState.chainService.getChainInfoMap();
+    const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destChain, originTokenInfo.slug);
+
+    if (destinationTokenInfo) {
+      const [bnMockFee, { value }] = await Promise.all([
+        getXcmMockTxFee(substrateApi, chainInfoMap, address, originTokenInfo, destinationTokenInfo),
+        this.getAddressTransferableBalance({ extrinsicType: ExtrinsicType.TRANSFER_XCM, address, networkKey: originTokenInfo.originChain, token: originTokenInfo.slug })
+      ]);
+
+      const bnMaxTransferable = new BigN(value);
+      const estimatedFee = bnMockFee.multipliedBy(XCM_FEE_RATIO); // multiply by weight to account for destination chain fee
+
+      return bnMaxTransferable.minus(estimatedFee);
+    }
+
+    return new BigN(0);
+  }
+
+  private async getNativeTokenMaxTransferable (tokenInfo: _ChainAsset, networkKey: string, address: string): Promise<BigN> {
+    const chainInfo = this.#koniState.chainService.getChainInfoByKey(networkKey);
+    const api = _isChainEvmCompatible(chainInfo) && _isTokenTransferredByEvm(tokenInfo)
+      ? this.#koniState.chainService.getEvmApi(networkKey)
+      : this.#koniState.chainService.getSubstrateApi(networkKey);
+
+    const [mockTxFee, { value }] = await Promise.all([
+      getTransferMockTxFee(address, chainInfo, tokenInfo, api),
+      this.getAddressTransferableBalance({ extrinsicType: ExtrinsicType.TRANSFER_BALANCE, address, networkKey, token: tokenInfo.slug })
+    ]);
+
+    const bnMaxTransferable = new BigN(value);
+
+    return bnMaxTransferable.minus(mockTxFee);
+  }
+
+  private async subscribeAddressTransferableBalance ({ address, networkKey, token }: RequestFreeBalance, id: string, port: chrome.runtime.Port): Promise<AmountData> {
     const cb = createSubscription<'pri(freeBalance.subscribe)'>(id, port);
 
     const convertData = (data: AmountData): AmountDataWithId => {
@@ -2143,7 +2111,7 @@ export default class KoniExtension {
       cb(convertData(data));
     };
 
-    const [unsub, currentFreeBalance] = await this.#koniState.balanceService.subscribeTokenFreeBalance(address, networkKey, token, _cb);
+    const [unsub, currentFreeBalance] = await this.#koniState.balanceService.subscribeTransferableBalance(address, networkKey, token, undefined, _cb);
 
     this.createUnsubscriptionHandle(
       id,
@@ -4754,13 +4722,13 @@ export default class KoniExtension {
       case 'pri(transfer.getExistentialDeposit)':
         return this.transferGetExistentialDeposit(request as RequestTransferExistentialDeposit);
       case 'pri(transfer.getMaxTransferable)':
-        return this.transferGetMaxTransferable(request as RequestMaxTransferable);
+        return this.getMaxTransferable(request as RequestMaxTransferable);
       case 'pri(transfer.subscribeMaxTransferable)':
-        return this.transferGetMaxTransferable(request as RequestMaxTransferable);
+        return this.getMaxTransferable(request as RequestMaxTransferable);
       case 'pri(freeBalance.get)':
-        return this.getAddressFreeBalance(request as RequestFreeBalance);
+        return this.getAddressTransferableBalance(request as RequestFreeBalance);
       case 'pri(freeBalance.subscribe)':
-        return this.subscribeAddressFreeBalance(request as RequestFreeBalance, id, port);
+        return this.subscribeAddressTransferableBalance(request as RequestFreeBalance, id, port);
       case 'pri(subscription.cancel)':
         return this.cancelSubscription(request as string);
       case 'pri(chainService.recoverSubstrateApi)':

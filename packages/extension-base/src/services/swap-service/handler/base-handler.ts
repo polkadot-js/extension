@@ -92,8 +92,8 @@ export class SwapBaseHandler {
     const fromAsset = this.chainService.getAssetBySlug(swapPair.from);
 
     const [alternativeAssetBalance, fromAssetBalance] = await Promise.all([
-      this.balanceService.getTokenFreeBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug),
-      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+      this.balanceService.getTransferableBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug),
+      this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
     ]);
 
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
@@ -161,7 +161,7 @@ export class SwapBaseHandler {
     const feeAmount = feeInfo.feeComponent[0];
     const feeTokenInfo = this.chainService.getAssetBySlug(feeInfo.defaultFeeToken);
 
-    const feeTokenBalance = await this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug);
+    const feeTokenBalance = await this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug);
     const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
     const bnFeeAmount = new BigNumber(feeAmount.amount);
 
@@ -198,8 +198,8 @@ export class SwapBaseHandler {
     const feeTokenChain = this.chainService.getChainInfoByKey(feeTokenInfo.originChain);
 
     const [feeTokenBalance, fromAssetBalance] = await Promise.all([
-      this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
-      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+      this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
+      this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
     ]);
 
     const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);

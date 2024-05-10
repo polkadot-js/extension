@@ -190,7 +190,7 @@ export default class TransactionService {
     const transferNative = validationResponse.transferNativeAmount || '0';
     const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(chain);
 
-    const balance = await this.state.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
+    const balance = await this.state.balanceService.getTransferableBalance(address, chain, nativeTokenInfo.slug);
 
     const existentialDeposit = nativeTokenInfo.minAmount || '0';
 

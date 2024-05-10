@@ -1222,7 +1222,8 @@ export interface SupportTransferResponse {
 export interface RequestFreeBalance {
   address: string,
   networkKey: string,
-  token?: string
+  token?: string,
+  extrinsicType?: ExtrinsicType
 }
 
 export interface RequestMaxTransferable {

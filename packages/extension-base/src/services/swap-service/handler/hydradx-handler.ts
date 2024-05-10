@@ -94,7 +94,7 @@ export class HydradxHandler implements SwapBaseInterface {
     const bnAmount = new BigNumber(params.request.fromAmount);
     const fromAsset = this.chainService.getAssetBySlug(params.request.pair.from);
 
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
+    const fromAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
 
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
@@ -109,7 +109,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
-    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+    const alternativeAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
 
     if (bnAlternativeAssetBalance.lte(0)) {
@@ -381,7 +381,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const chainApi = await substrateApi.isReady;
 
-    const destinationAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
+    const destinationAssetBalance = await this.balanceService.getTransferableBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
     const xcmFee = params.process.totalFee[params.currentStep];
 
     const bnAmount = new BigNumber(params.quote.fromAmount);

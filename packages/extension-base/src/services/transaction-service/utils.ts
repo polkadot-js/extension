@@ -35,6 +35,10 @@ function getBlockExplorerAccountRoute (explorerLink: string) {
     return 'account';
   }
 
+  if (explorerLink.includes('invarch.statescan.io')) {
+    return '#/accounts';
+  }
+
   return 'address';
 }
 
@@ -45,6 +49,10 @@ function getBlockExplorerTxRoute (chainInfo: _ChainInfo) {
 
   if (['aventus', 'deeper_network'].includes(chainInfo.slug)) {
     return 'transaction';
+  }
+
+  if (['invarch'].includes(chainInfo.slug)) {
+    return '#/extrinsics';
   }
 
   return 'extrinsic';

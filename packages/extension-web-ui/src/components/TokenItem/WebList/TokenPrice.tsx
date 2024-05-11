@@ -1,6 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { BalanceItemProps, Number } from '@subwallet/react-ui';
@@ -24,6 +26,7 @@ function Component (
   // - price change status
 
   const token = useContext<Theme>(ThemeContext as Context<Theme>).token;
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const priceChangeStatus = (() => {
     if (value > pastValue) {
       return 'increase';
@@ -46,7 +49,7 @@ function Component (
         className={'__value'}
         decimal={0}
         decimalOpacity={0.45}
-        prefix={'$'}
+        prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
         value={value}
       />
       <Number

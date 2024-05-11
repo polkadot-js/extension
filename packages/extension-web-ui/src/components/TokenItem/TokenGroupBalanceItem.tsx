@@ -16,6 +16,7 @@ type Props = TokenBalanceItemType & ThemeProps & {
 
 function Component (
   { className = '',
+    currency,
     isReady,
     logoKey,
     onPressItem,
@@ -44,6 +45,7 @@ function Component (
         name={symbol}
         networkMainLogoShape={'squircle'}
         onPressItem={onPressItem}
+        prefix={(currency?.isPrefix && currency.symbol) || ''}
         price={priceValue}
         rightItem={
           (
@@ -62,8 +64,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix='$'
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />
@@ -88,6 +91,7 @@ function Component (
             </>
           )
         }
+        suffix={(!currency?.isPrefix && currency?.symbol) || ''}
         symbol={logoKey}
       />
     </div>

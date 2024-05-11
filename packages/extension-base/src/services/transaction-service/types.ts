@@ -66,3 +66,5 @@ export interface TransactionEventMap {
   success: (response: TransactionEventResponse) => void;
   timeout: (response: TransactionEventResponse) => void;
 }
+
+export type OptionalSWTransaction = SWTransaction['transaction'] | null | undefined;

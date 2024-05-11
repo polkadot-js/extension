@@ -61,6 +61,9 @@ export interface NominationPoolDataType extends NominationPoolInfo {
   symbol: string;
   decimals: number;
   idStr: string;
+  isRecommend?: boolean;
+  disabled?: boolean;
+  isSessionHeader?: boolean;
 }
 
 export interface ValidatorDataType extends ValidatorInfo {

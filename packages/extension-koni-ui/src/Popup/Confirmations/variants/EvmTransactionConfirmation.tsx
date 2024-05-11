@@ -70,12 +70,12 @@ function Component ({ className, request, type }: Props) {
             label={t('From account')}
             name={account.name}
           />
-          <MetaInfo.Account
+          {(recipientAddress || recipient?.address) && <MetaInfo.Account
             address={recipient?.address || recipientAddress || ''}
             className='to-account'
             label={request.payload.isToContract ? t('To contract') : t('To account')}
             name={recipient?.name}
-          />
+          />}
           {request.payload.estimateGas &&
               <MetaInfo.Number
                 decimals={chainInfo?.evmInfo?.decimals}

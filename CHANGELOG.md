@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 1.1.64
+Build date: May 11, 2024.
+
+Features & Update:
+- Update chain-list (#3020)
+  - Add support for Curio Network
+  - Add new blockchain explorer for InvArch
+  - Add explorer for Mythos and Avail Turing
+  - Update ED for Mythos
+  - Update symbol for native token on Commune AI: C -> COMAI
+
+Bugs fixed:
+- Fixed bug enable chains when detect balance (#2882)
+- Fixed bug  Invalid recipient address when Dapp deploy smart contract (#2859)
+
+
+## 1.1.63
+Build date: May 09, 2024.
+
+Bugs fixed:
+- Fixed cannot signing with dApp in case network is not publish (#3027)
+- Fixed bug Network's status show incorrect (#3037)
+
 ## 1.1.62
 Build date: May 08, 2024.
 

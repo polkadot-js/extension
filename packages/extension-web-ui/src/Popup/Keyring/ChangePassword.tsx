@@ -191,7 +191,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 ]}
                 statusHelpAsTooltip={isWebUI}
               >
-                <Input
+                <Input.Password
                   disabled={loading}
                   placeholder={t('Current password')}
                   type='password'
@@ -202,7 +202,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 rules={newPasswordRules}
                 statusHelpAsTooltip={isWebUI}
               >
-                <Input
+                <Input.Password
                   disabled={loading}
                   onChange={onChangePassword}
                   placeholder={t('New password')}
@@ -214,7 +214,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 rules={confirmPasswordRules}
                 statusHelpAsTooltip={isWebUI}
               >
-                <Input
+                <Input.Password
                   disabled={loading}
                   placeholder={t('Confirm new password')}
                   type='password'

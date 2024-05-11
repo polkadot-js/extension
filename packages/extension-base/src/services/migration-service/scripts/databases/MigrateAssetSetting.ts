@@ -8,10 +8,7 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
   public override async run (): Promise<void> {
     try {
       const changeSlugsMap: Record<string, string> = {
-        'moonbeam-LOCAL-xcaUSD': 'moonbeam-LOCAL-xcaSEED',
-        'calamari-LOCAL-AUSD': 'calamari-LOCAL-aSEED',
-        'moonriver-LOCAL-xcaSeed': 'moonriver-LOCAL-xcaSEED',
-        'bifrost-LOCAL-KUSD': 'bifrost-LOCAL-aSEED'
+        'commune-NATIVE-C': 'commune-NATIVE-COMAI'
       };
 
       const assetSetting = await this.state.chainService.getAssetSettings();

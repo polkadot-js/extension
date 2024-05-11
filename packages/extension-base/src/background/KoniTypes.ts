@@ -2228,6 +2228,7 @@ export interface ResponseSubscribeHistory {
 
 /* Core types */
 export type _Address = string;
+export type _BalanceMetadata = unknown;
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {

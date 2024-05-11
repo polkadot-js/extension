@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { _BalanceMetadata, APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -14,12 +14,6 @@ export interface TokenBalanceRaw {
   free: BN
 }
 
-export interface SubstrateBalance {
-  reserved?: string,
-  miscFrozen?: string,
-  feeFrozen?: string
-}
-
 /**
  * Balance info of a token on an address
  * @property {string} address - Address
@@ -28,7 +22,7 @@ export interface SubstrateBalance {
  * @property {number} [timestamp] - Time to get information
  * @property {string} free - Transferable balance
  * @property {string} locked - Locked balance, cannot be transferred, locked here is only meaningful in the context of token transfer
- * @property {SubstrateBalance} [substrateInfo] - Substrate info of balance
+ * @property {metadata} [metadata] - Could be anything, supposed to be generic to handle various contexts
  */
 export interface BalanceItem {
   // metadata
@@ -42,7 +36,7 @@ export interface BalanceItem {
   locked: string;
 
   // substrate fields
-  substrateInfo?: SubstrateBalance;
+  metadata?: _BalanceMetadata;
 }
 
 /** Balance info of all tokens on an address */

@@ -16,18 +16,6 @@ import BN from 'bn.js';
 export const groupBalance = (items: BalanceItem[], address: string, token: string): BalanceItem => {
   const states = items.map((item) => item.state);
 
-  const result: BalanceItem = {
-    address,
-    tokenSlug: token,
-    free: sumBN(items.map((item) => new BN(item.free))).toString(),
-    locked: sumBN(items.map((item) => new BN(item.locked))).toString(),
-    state: states.every((item) => item === APIItemState.NOT_SUPPORT)
-      ? APIItemState.NOT_SUPPORT
-      : states.some((item) => item === APIItemState.READY)
-        ? APIItemState.READY
-        : APIItemState.PENDING
-  };
-
   // for (const item of items) {
   //   if (item.substrateInfo) {
   //     if (!result.substrateInfo) {
@@ -45,5 +33,15 @@ export const groupBalance = (items: BalanceItem[], address: string, token: strin
   //   }
   // }
 
-  return result;
+  return {
+    address,
+    tokenSlug: token,
+    free: sumBN(items.map((item) => new BN(item.free))).toString(),
+    locked: sumBN(items.map((item) => new BN(item.locked))).toString(),
+    state: states.every((item) => item === APIItemState.NOT_SUPPORT)
+      ? APIItemState.NOT_SUPPORT
+      : states.some((item) => item === APIItemState.READY)
+        ? APIItemState.READY
+        : APIItemState.PENDING
+  };
 };

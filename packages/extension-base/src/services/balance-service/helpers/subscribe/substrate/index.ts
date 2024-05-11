@@ -138,7 +138,8 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
         tokenSlug: chainNativeTokenSlug,
         free: transferableBalance,
         locked: totalLockedFromTransfer.toString(),
-        state: APIItemState.READY
+        state: APIItemState.READY,
+        metadata: balanceInfo
       });
     });
 
@@ -189,11 +190,7 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
               tokenSlug: tokenInfo.slug,
               free: free.toString(),
               locked: frozen.toString(),
-              state: APIItemState.READY,
-              substrateInfo: {
-                miscFrozen: frozen.toString(),
-                reserved: '0'
-              }
+              state: APIItemState.READY
             };
           });
 
@@ -296,11 +293,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
             free: freeBalance.toString(),
-            locked: lockedBalance.toString(),
-            substrateInfo: {
-              reserved: tokenBalance.reserved.toString(),
-              miscFrozen: tokenBalance.frozen.toString()
-            }
+            locked: lockedBalance.toString()
           };
         });
 
@@ -361,11 +354,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
             tokenSlug: tokenInfo.slug,
             free: free.toString(),
             locked: frozen.toString(),
-            state: APIItemState.READY,
-            substrateInfo: {
-              miscFrozen: frozen.toString(),
-              reserved: '0'
-            }
+            state: APIItemState.READY
           };
         });
 
@@ -415,11 +404,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
             free: freeBalance.toString(),
-            locked: lockedBalance.toString(),
-            substrateInfo: {
-              reserved: tokenBalance.reserved.toString(),
-              miscFrozen: tokenBalance.frozen.toString()
-            }
+            locked: lockedBalance.toString()
           };
         });
 

@@ -245,6 +245,17 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
   };
 };
 
+function extractOkResponse (response: Record<string, any>): any {
+  if (!!response.ok) {
+    return response.ok;
+  }
+  if (!!response.Ok) {
+    return response.Ok;
+  }
+
+  return undefined;
+}
+
 const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
   const chain = chainInfo.slug;
   const psp22ContractMap = {} as Record<string, ContractPromise>;
@@ -262,11 +273,13 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
           try {
             const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(substrateApi) }, address);
             const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
+            const freeResponse = extractOkResponse(balanceObj);
+            const free = freeResponse ? freeResponse.toString() : '0';
 
             return {
               address: address,
               tokenSlug: tokenInfo.slug,
-              free: _balanceOf.output ? (balanceObj.ok as string ?? balanceObj.Ok as string) : '0',
+              free: free,
               locked: '0',
               state: APIItemState.READY
             };

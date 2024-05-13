@@ -39,7 +39,7 @@ const Component = (props: Props) => {
   const { t } = useTranslation();
   const decimals = _getAssetDecimals(fromAsset);
   const priceId = _getAssetPriceId(fromAsset);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
 
   const _onClickMaxBtn = useCallback(() => {
     //
@@ -100,7 +100,8 @@ const Component = (props: Props) => {
               decimal={0}
               formatType={'custom'}
               metadata={numberMetadata}
-              prefix={'$'}
+              prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+              suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
               value={getConvertedInputValue}
             />
           }

@@ -20,7 +20,7 @@ type Props = BaseTransactionConfirmationProps;
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const {currencyData, priceMap} = useSelector((state) => state.price);
   const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
   const { t } = useTranslation();
   // @ts-ignore
@@ -122,7 +122,8 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'__estimate-transaction-fee'}
           decimals={0}
           label={'Estimated transaction fee'}
-          prefix={'$'}
+          prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+          suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
           value={estimatedFeeValue}
         />
         <MetaInfo.Default

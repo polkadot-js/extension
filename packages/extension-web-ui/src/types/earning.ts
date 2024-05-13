@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletNominationPoolsBondedPoolInner, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/types/yield/info/chain/target';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts';
@@ -30,6 +31,7 @@ export enum NetworkType {
 export type ExtraYieldPositionInfo = YieldPositionInfo & {
   asset: _ChainAsset;
   price: number;
+  currency?: CurrencyJson;
   // exchangeRate: number;
 }
 

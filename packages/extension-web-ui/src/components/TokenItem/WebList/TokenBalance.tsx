@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -22,6 +23,7 @@ function Component (
     convertedValue,
     symbol, value }: Props) {
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const hideBalance = autoHideBalance ? !isShowBalance : undefined;
 
   return (
@@ -40,7 +42,7 @@ function Component (
         decimalOpacity={0.45}
         hide={hideBalance}
         intOpacity={0.45}
-        prefix='$'
+        prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
         unitOpacity={0.45}
         value={convertedValue}
       />

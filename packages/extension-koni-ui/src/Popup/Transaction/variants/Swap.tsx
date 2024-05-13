@@ -13,7 +13,7 @@ import { AccountSelector, AddressInput, AlertBox, HiddenInput, MetaInfo, PageWra
 import { SwapFromField, SwapToField } from '@subwallet/extension-koni-ui/components/Field/Swap';
 import { AddMoreBalanceModal, ChooseFeeTokenModal, SlippageModal, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapTermsOfServiceModal } from '@subwallet/extension-koni-ui/components/Modal/Swap';
 import { QuoteResetTime, SwapRoute } from '@subwallet/extension-koni-ui/components/Swap';
-import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, LATEST_SESSION, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainConnection, useGetChainPrefixBySlug, useNotification, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-koni-ui/messaging/transaction/swap';
@@ -21,7 +21,7 @@ import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter }
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { FormCallbacks, FormFieldData, SwapParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, SessionStorage, SwapParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenSelectorItemType } from '@subwallet/extension-koni-ui/types/field';
 import { convertFieldToObject, findAccountByAddress, isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, BackgroundIcon, Button, Form, Icon, Logo, ModalContext, Number, Tooltip } from '@subwallet/react-ui';
@@ -72,6 +72,11 @@ function getTokenSelectorItem (tokenSlugs: string[], assetRegistryMap: Record<st
 
 const numberMetadata = { maxNumberFormat: 8 };
 
+const DEFAULT_SESSION_VALUE: SessionStorage = {
+  remind: false,
+  timeCalculate: Date.now()
+};
+
 const Component = () => {
   useSetCurrentPage('/transaction/swap');
   const { t } = useTranslation();
@@ -101,6 +106,10 @@ const Component = () => {
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
   // @ts-ignore
+  const sessionLatestInit = useMemo(() => {
+    return (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage;
+  }, []);
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const [showQuoteArea, setShowQuoteArea] = useState<boolean>(false);
   const optimalQuoteRef = useRef<SwapQuote | undefined>(undefined);
@@ -1076,10 +1085,10 @@ const Component = () => {
   }, [currentQuoteRequest, hasInternalConfirmations, quoteAliveUntil, requestUserInteractToContinue]);
 
   useEffect(() => {
-    if (!confirmedTerm) {
+    if (!confirmedTerm && !sessionLatest.remind) {
       activeModal(SWAP_TERMS_OF_SERVICE_MODAL);
     }
-  }, [activeModal, confirmedTerm]);
+  }, [sessionLatest.remind, activeModal, confirmedTerm]);
 
   useEffect(() => {
     if (requestUserInteractToContinue) {

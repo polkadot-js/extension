@@ -1,15 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { WalletUnlockType } from '@subwallet/extension-base/background/KoniTypes';
 import { AttachAccountModal, ClaimDappStakingRewardsModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RemindBackupSeedPhraseModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
-import { EARNING_INSTRUCTION_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { EARNING_INSTRUCTION_MODAL, LATEST_SESSION } from '@subwallet/extension-koni-ui/constants';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
+import { SessionStorage } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
@@ -21,6 +21,10 @@ interface Props {
 }
 
 const SessionDays = 90 * 1000;
+const DEFAULT_SESSION_VALUE: SessionStorage = {
+  remind: false,
+  timeCalculate: Date.now()
+};
 
 export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations'];
 type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
@@ -60,9 +64,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
-  const { unlockType } = useSelector((state: RootState) => state.settings);
-  const [, setSessionLatest] = useLocalStorage(LATEST_SESSION, Date.now());
-  const [isShowedRemindModal, setIsShowedRemind] = useState(false);
+  const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
 
   useExcludeModal('confirmations');
   useExcludeModal(EARNING_INSTRUCTION_MODAL);
@@ -95,17 +97,22 @@ export const WalletModalContext = ({ children }: Props) => {
   useEffect(() => {
     const infoSession = Date.now();
 
-    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || '0') || infoSession) as number;
+    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (unlockType === WalletUnlockType.WHEN_NEEDED || (unlockType === WalletUnlockType.ALWAYS_REQUIRED && !isLocked)) {
-      if (infoSession - latestSession >= SessionDays && !isShowedRemindModal) {
-        activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
-        setIsShowedRemind(true);
-      }
+    if (!latestSession.remind) {
+      setSessionLatest({ timeCalculate: infoSession, remind: false });
 
-      setSessionLatest(infoSession);
+      return;
     }
-  }, [activeModal, isLocked, isShowedRemindModal, setSessionLatest, unlockType]);
+
+    if (infoSession - latestSession.timeCalculate > SessionDays) {
+      setSessionLatest({ ...latestSession, remind: true });
+
+      return;
+    }
+
+    setSessionLatest({ timeCalculate: infoSession, remind: false });
+  }, [activeModal, inactiveAll, setSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3
 

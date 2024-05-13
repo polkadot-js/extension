@@ -7,11 +7,11 @@ import { LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/exte
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldCheck } from 'phosphor-react';
-import React, { useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -20,19 +20,23 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps;
 
 const RemindBackupSeedPhraseModalId = REMIND_BACKUP_SEED_PHRASE_MODAL;
-const AccountSelectorModalId = 'accountSelectorModalId';
+const AccountSelectorModalId = 'account_selector_for_backup_seed_phrase_modal';
+const DEFAULT_SESSION_VALUE: SessionStorage = {
+  remind: false,
+  timeCalculate: Date.now()
+};
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [, setSessionLatest] = useLocalStorage(LATEST_SESSION, Date.now());
+  const [sessionLatest, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
 
   const onCancel = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-    setSessionLatest(Date.now());
+    setSessionLatest({ timeCalculate: Date.now(), remind: false });
   }, [inactiveModal, setSessionLatest]);
 
   const accountFiler = useMemo(() => {
@@ -42,21 +46,28 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const onSelectAccount = useCallback((account: AccountJson) => {
     if (account?.address) {
       navigate(`/accounts/export/${account.address}`);
-      inactiveModal(RemindBackupSeedPhraseModalId);
-      setSessionLatest(Date.now());
+      inactiveModal(AccountSelectorModalId);
+      setSessionLatest({ timeCalculate: Date.now(), remind: false });
     }
   }, [inactiveModal, navigate, setSessionLatest]);
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-    setSessionLatest(Date.now());
 
     if (isAllAccount) {
       activeModal(AccountSelectorModalId);
+      inactiveModal(RemindBackupSeedPhraseModalId);
     } else if (currentAccount?.address) {
       navigate(`/accounts/export/${currentAccount.address}`);
+      setSessionLatest({ timeCalculate: Date.now(), remind: false });
     }
   }, [activeModal, currentAccount, inactiveModal, isAllAccount, navigate, setSessionLatest]);
+
+  useEffect(() => {
+    if (!sessionLatest.remind) {
+      inactiveModal(RemindBackupSeedPhraseModalId);
+    }
+  }, [inactiveModal, sessionLatest.remind]);
 
   const footerModal = useMemo(() => {
     return (
@@ -104,6 +115,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       </SwModal>
       <AccountSelectorModal
+        id={AccountSelectorModalId}
         items={accountFiler}
         onSelectItem={onSelectAccount}
       />

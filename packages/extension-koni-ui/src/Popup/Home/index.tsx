@@ -5,11 +5,11 @@ import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
@@ -20,6 +20,10 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps;
 
 export const GlobalSearchTokenModalId = 'globalSearchToken';
+const DEFAULT_SESSION_VALUE: SessionStorage = {
+  remind: false,
+  timeCalculate: Date.now()
+};
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
@@ -34,6 +38,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const banners = useGetBannerByScreen('home');
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
+
+  const sessionLatestInit = useMemo(() => {
+    return (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage;
+  }, []);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -54,10 +62,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   useEffect(() => {
-    if (firstBanner) {
+    if (firstBanner && !sessionLatestInit.remind) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
+    } else if (sessionLatestInit.remind) {
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, firstBanner]);
+  }, [activeModal, firstBanner, sessionLatestInit]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

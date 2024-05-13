@@ -12,7 +12,7 @@ export const getShortMetadata = async (chain: string, blob: string): Promise<str
     txBlob: blob
   };
 
-  const resp = await fetch('http://localhost:3001/transaction/metadata', {
+  const resp = await fetch('http://192.168.10.12:3001/transaction/metadata', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

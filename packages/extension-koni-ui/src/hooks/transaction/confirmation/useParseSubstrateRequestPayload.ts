@@ -1,20 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import type { Chain } from '@subwallet/extension-chains/types';
+
 import { RequestSign } from '@subwallet/extension-base/background/types';
-import { useMetadata } from '@subwallet/extension-koni-ui/hooks';
-import { isRawPayload } from '@subwallet/extension-koni-ui/utils/confirmation/request/substrate';
+import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
 import { useMemo } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import { SignerPayloadJSON } from '@polkadot/types/types';
 
 const registry = new TypeRegistry();
 
-const useParseSubstrateRequestPayload = (request?: RequestSign): ExtrinsicPayload | string => {
-  const chain = useMetadata((request?.payload as SignerPayloadJSON).genesisHash);
-
+const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestSign): ExtrinsicPayload | string => {
   return useMemo(() => {
     if (!request) {
       return '';

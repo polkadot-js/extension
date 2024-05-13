@@ -152,7 +152,9 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      const signPromise = isMessage ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset) : ledgerSignTransaction(hexToU8a(hashPayload), new Uint8Array(0), account.accountIndex, account.addressOffset);
+      const signPromise = isMessage
+        ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset)
+        : ledgerSignTransaction(hexToU8a(hashPayload), new Uint8Array(0), account.accountIndex, account.addressOffset);
 
       signPromise
         .then(({ signature }) => {

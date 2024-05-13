@@ -10,6 +10,8 @@ import { MetadataDef } from '@subwallet/extension-inject/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 import { _getKnownHashes, _getKnownNetworks, findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
 
+import { base64Encode } from '@polkadot/util-crypto';
+
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
 export async function getAllMetadata (): Promise<MetadataDef[]> {
@@ -82,7 +84,8 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     hasMetadata: true,
     definition: {
       types: data.types,
-      userExtensions: data.userExtensions
+      userExtensions: data.userExtensions,
+      metaCalls: base64Encode(data.rawMetadata)
     } as MetadataDef,
     icon: chainInfo.icon,
     registry: registry,

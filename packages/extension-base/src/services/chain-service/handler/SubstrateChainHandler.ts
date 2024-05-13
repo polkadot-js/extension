@@ -218,6 +218,8 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         }
 
         const systemChain = await api.rpc.system.chain();
+        // const _metadata: Option<OpaqueMetadata> = await api.call.metadata.metadataAtVersion(15);
+        // const metadataHex = _metadata.isSome ? _metadata.unwrap().toHex().slice(2) : ''; // Need unwrap to create metadata object
 
         this.parent?.upsertMetadata(chainSlug, {
           chain: chainSlug,

@@ -208,6 +208,9 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
 
 export const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
+export const PolkadotDerivationPathGens: string[] = ['polkadot'].map((slug) => ChainInfoMap[slug].substrateInfo?.genesisHash || '');
+export const StandardDerivationPathGens: string[] = ['statemint', 'parallel', 'phala', 'pendulum'].map((slug) => ChainInfoMap[slug].substrateInfo?.genesisHash || '');
+
 /*
   BLOCK
   *: All network,

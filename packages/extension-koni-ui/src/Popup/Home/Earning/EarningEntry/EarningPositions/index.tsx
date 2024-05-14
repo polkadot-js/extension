@@ -158,7 +158,12 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           />
           {item.slug === lastItem.slug && <div className={'__footer-button'}>
             <Button
-              icon={<Icon phosphorIcon={Plus} size='sm' />}
+              icon={(
+                <Icon
+                  phosphorIcon={Plus}
+                  size='sm'
+                />
+              )}
               onClick={onClickExploreEarning}
               size={'xs'}
               type={'ghost'}

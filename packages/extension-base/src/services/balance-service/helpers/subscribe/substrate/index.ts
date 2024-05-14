@@ -11,6 +11,7 @@ import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain
 import { _checkSmartContractSupportByChain, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, PalletNominationPoolsPoolMember, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
 import { combineLatest, Observable } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
@@ -245,11 +246,12 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
   };
 };
 
-function extractOkResponse (response: Record<string, any>): any {
-  if (!!response.ok) {
+function extractOkResponse<T> (response: Record<string, T>): T | undefined {
+  if ('ok' in response) {
     return response.ok;
   }
-  if (!!response.Ok) {
+
+  if ('Ok' in response) {
     return response.Ok;
   }
 
@@ -273,13 +275,13 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
           try {
             const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(substrateApi) }, address);
             const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
-            const freeResponse = extractOkResponse(balanceObj);
-            const free = freeResponse ? freeResponse.toString() : '0';
+            const freeResponse = extractOkResponse(balanceObj) as number | string;
+            const free: string = freeResponse ? new BigN(freeResponse).toString() : '0';
 
             return {
               address: address,
               tokenSlug: tokenInfo.slug,
-              free: free,
+              free,
               locked: '0',
               state: APIItemState.READY
             };

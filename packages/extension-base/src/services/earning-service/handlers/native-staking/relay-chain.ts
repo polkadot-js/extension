@@ -232,6 +232,11 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
   async handleNominationsList (substrateApi: _SubstrateApi, chain: string, nominations: PalletStakingNominations, currentEra: string, address: string, maxNominatorRewardedPerValidator: number | undefined) {
     const nominationList: NominationInfo[] = [];
+
+    if (!nominations) {
+      return [];
+    }
+
     const validatorList = nominations.targets;
 
     await Promise.all(validatorList.map(async (validatorAddress) => {

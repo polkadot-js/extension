@@ -21,7 +21,7 @@ import { t } from 'i18next';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 // normal transfer
-export function validateTransfer (tokenInfo: _ChainAsset, from: _Address, to: _Address, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BigN | undefined] {
+export function validateTransferRequest (tokenInfo: _ChainAsset, from: _Address, to: _Address, value: string | undefined, transferAll: boolean | undefined): [TransactionError[], KeyringPair | undefined, BigN | undefined] {
   const errors: TransactionError[] = [];
   const keypair = keyring.getPair(from);
   let transferValue;
@@ -72,7 +72,7 @@ export function additionalValidateTransfer (tokenInfo: _ChainAsset, extrinsicTyp
 }
 
 // xcm transfer
-export function validateXcmTransfer (destTokenInfo: _ChainAsset | undefined, sender: _Address, sendingValue: string): [TransactionError[], KeyringPair | undefined, BigN | undefined] {
+export function validateXcmTransferRequest (destTokenInfo: _ChainAsset | undefined, sender: _Address, sendingValue: string): [TransactionError[], KeyringPair | undefined, BigN | undefined] {
   const errors = [] as TransactionError[];
   const keypair = keyring.getPair(sender);
   const transferValue = new BigN(sendingValue);

@@ -32,7 +32,7 @@ import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/reques
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
 import { SWTransaction, SWTransactionResponse, SWTransactionResult, TransactionEmitter, ValidateTransactionResponseInput } from '@subwallet/extension-base/services/transaction-service/types';
-import { additionalValidateTransfer, additionalValidateXcmTransfer, validateTransfer, validateXcmTransfer } from '@subwallet/extension-base/services/transaction-service/validations/transfer';
+import { additionalValidateTransfer, additionalValidateXcmTransfer, validateTransferRequest, validateXcmTransferRequest } from '@subwallet/extension-base/services/transaction-service/validations/transfer';
 import { WALLET_CONNECT_EIP155_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectNamespace } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
@@ -1675,7 +1675,7 @@ export default class KoniExtension {
   private async makeTransfer (inputData: RequestTransfer): Promise<SWTransactionResponse> {
     const { from, networkKey, to, tokenSlug, transferAll, value } = inputData;
     const transferTokenInfo = this.#koniState.chainService.getAssetBySlug(tokenSlug);
-    const [errors, ,] = validateTransfer(transferTokenInfo, from, to, value, transferAll);
+    const [errors, ,] = validateTransferRequest(transferTokenInfo, from, to, value, transferAll);
 
     const warnings: TransactionWarning[] = [];
     const evmApiMap = this.#koniState.getEvmApiMap();
@@ -1780,7 +1780,7 @@ export default class KoniExtension {
     const originTokenInfo = this.#koniState.getAssetBySlug(tokenSlug);
     const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, tokenSlug);
 
-    const [errors, fromKeyPair] = validateXcmTransfer(destinationTokenInfo, from, value);
+    const [errors, fromKeyPair] = validateXcmTransferRequest(destinationTokenInfo, from, value);
     let extrinsic: SubmittableExtrinsic<'promise'> | null = null;
 
     if (errors.length > 0) {

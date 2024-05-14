@@ -93,6 +93,20 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         width: '100%'
       }
     },
+    '.__currency-value-detail-tooltip': {
+      paddingBottom: 0,
+
+      '.ant-tooltip-inner': {
+        padding: `${token.paddingXXS}px ${token.paddingXXS + 2}px`,
+        fontSize: token.fontSizeXS,
+        minHeight: 'auto',
+        minWidth: 'auto'
+      },
+
+      '.ant-tooltip-arrow': {
+        transform: 'translateX(-50%) translateY(100%) rotate(180deg) scaleX(0.5)'
+      }
+    },
     '.text-secondary': {
       color: token.colorTextSecondary
     },

@@ -332,9 +332,6 @@
   "Go to home": "前往主页",
   "All done!": "完成！",
   "Follow along with product updates or reach out if you have any questions.": "保持关注产品的更新动态，若有问题请随时与我们联系。",
-  "Opps! An Error Occurred": "很抱歉，发生了错误。",
-  "Sorry, something went wrong.": "很抱歉，发生了错误。",
-  "Please try again later.": "请稍后重试。",
   "Polkadot parachain": "Polkadot平行链",
   "Kusama parachain": "KSM平行链",
   "Search project": "搜索项目",
@@ -1083,7 +1080,6 @@
   "OK": "",
   "Active stake": "",
   "Supply more": "",
-  "Earning position detail": "",
   "Rewards unavailable": "",
   "You don't have any rewards to claim at the moment. Try again later.": "",
   "Visit Astar portal": "",
@@ -1238,5 +1234,10 @@
   "Explore Earning options": "",
   "Change validators": "",
   "Use nomination pool": "",
-  "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": ""
+  "All steps in the process are designed based on your available multi-chain assets to optimize fee structure and enhance your overall experience.": "",
+  "Currency": "",
+  "Select a currency": "",
+  "This pool has reached the maximum number of members. Select another to continue": "",
+  "Member": "",
+  "Search currency": ""
 }

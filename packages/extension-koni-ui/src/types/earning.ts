@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { PalletNominationPoolsBondedPoolInner, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { NominationPoolInfo, ValidatorInfo } from '@subwallet/extension-base/types/yield/info/chain/target';
 import { InfoItemBase } from '@subwallet/extension-koni-ui/components';
@@ -24,6 +25,7 @@ export enum EarningEntryView {
 export type ExtraYieldPositionInfo = YieldPositionInfo & {
   asset: _ChainAsset;
   price: number;
+  currency?: CurrencyJson;
   // exchangeRate: number;
 }
 
@@ -51,6 +53,9 @@ export interface NominationPoolDataType extends NominationPoolInfo {
   symbol: string;
   decimals: number;
   idStr: string;
+  isRecommend?: boolean;
+  disabled?: boolean
+  isSessionHeader?: boolean
 }
 
 export interface ValidatorDataType extends ValidatorInfo {

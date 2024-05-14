@@ -24,7 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, data } = props;
   const { t } = useTranslation();
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const swapInfo = data.additionalInfo as SwapTxData | undefined;
   const { accounts } = useSelector((state) => state.accountState);
 
@@ -91,7 +91,8 @@ const Component: React.FC<Props> = (props: Props) => {
           className={'__estimate-transaction-fee'}
           decimals={0}
           label={'Estimated fee'}
-          prefix={'$'}
+          prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+          suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
           value={estimatedFeeValue}
         />
         <AlertBox

@@ -83,7 +83,7 @@ const Component = () => {
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const hasInternalConfirmations = useSelector((state: RootState) => state.requestState.hasInternalConfirmations);
   const { multiChainAssetMap } = useSelector((state) => state.assetRegistry);
@@ -383,8 +383,8 @@ const Component = () => {
   const feeItems = useMemo(() => {
     const result: FeeItem[] = [];
     const feeTypeMap: Record<SwapFeeType, FeeItem> = {
-      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', type: SwapFeeType.NETWORK_FEE },
-      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', type: SwapFeeType.PLATFORM_FEE },
+      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: `${(currencyData.isPrefix && currencyData.symbol) || ''}`, suffix: `${(!currencyData.isPrefix && currencyData.symbol) || ''}`, type: SwapFeeType.NETWORK_FEE },
+      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: `${(currencyData.isPrefix && currencyData.symbol) || ''}`, suffix: `${(!currencyData.isPrefix && currencyData.symbol) || ''}`, type: SwapFeeType.PLATFORM_FEE },
       WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), suffix: '%', type: SwapFeeType.WALLET_FEE }
     };
 
@@ -400,7 +400,7 @@ const Component = () => {
     );
 
     return result;
-  }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
+  }, [currencyData.isPrefix, currencyData.symbol, currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
 
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {
@@ -1325,7 +1325,8 @@ const Component = () => {
                                 : (
                                   <Number
                                     decimal={0}
-                                    prefix={'$'}
+                                    prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                                    suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                                     value={estimatedFeeValue}
                                   />
                                 )
@@ -1517,7 +1518,8 @@ const Component = () => {
                     decimals={0}
                     label={t('Estimated fee')}
                     onClickValue={onToggleFeeDetails}
-                    prefix={'$'}
+                    prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                    suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                     suffixNode={
                       <Icon
                         className={'__estimated-fee-button'}

@@ -18,8 +18,13 @@ export const DefaultLogosMap: Record<string, string> = {
   coinbase: './images/projects/coinbase.png',
   stellaswap: './images/projects/stellaswap.png',
   xtwitter: './images/projects/xtwitter.png',
+  xtwitter_transparent: './images/projects/xtwitter_transparent.png',
   chain_flip: '/images/projects/chainflip-mainnet.png',
-  hydradx: '/images/projects/hydradx.png'
+  hydradx: '/images/projects/hydradx.png',
+  currency_brl: '/images/projects/CurrencyBRL.png',
+  currency_cny: '/images/projects/CurrencyCNY.png',
+  currency_hkd: '/images/projects/CurrencyHKD.png',
+  currency_vnd: '/images/projects/CurrencyVND.png'
 };
 
 export const IconMap = {

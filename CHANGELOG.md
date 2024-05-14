@@ -1,5 +1,87 @@
 # CHANGELOG
 
+## 1.1.64
+Build date: May 11, 2024.
+
+Features & Update:
+- Update chain-list (#3020)
+  - Add support for Curio Network
+  - Add new blockchain explorer for InvArch
+  - Add explorer for Mythos and Avail Turing
+  - Update ED for Mythos
+  - Update symbol for native token on Commune AI: C -> COMAI
+
+Bugs fixed:
+- Fixed bug enable chains when detect balance (#2882)
+- Fixed bug  Invalid recipient address when Dapp deploy smart contract (#2859)
+
+
+## 1.1.63
+Build date: May 09, 2024.
+
+Bugs fixed:
+- Fixed cannot signing with dApp in case network is not publish (#3027)
+- Fixed bug Network's status show incorrect (#3037)
+
+## 1.1.62
+Build date: May 08, 2024.
+
+Features & Update:
+- Add more currency type (#2738, #3011)
+- Disallow staking to collators/pools that maxed out member threshold (#2743, 2754)
+- Display list Recommended by label in Select pool screen (#2940)
+
+Bugs fixed:
+- Fixed bug Don't display network on Mission pool details (#3005)
+- Fixed bug Can't hit the "Confirm" button on ToS of the Swap feature (#3007)
+- Fixed bug Error getting wrong validator address (#2821)
+- Update Validator name/ Collator name (#2998)
+
+## 1.1.61
+Build date: May 02, 2024.
+
+Features & Update:
+- Hide popup Introducing Earning feature (#2948)
+
+Bugs fixed:
+- Fixed bug Cannot read properties of undefined (reading 'length') (#2986)
+- Fixed bug related to earning feature (#2680)
+
+## 1.1.60
+Build date: Apl 30, 2024.
+
+Features & Update:
+- Add support Mythos chain (#2966)
+- Set default pool for Avail Turing (#2971)
+
+## 1.1.59
+Build date: Apl 25, 2024.
+
+Features & Update:
+- Support staking for Avail Turing (#2963)
+
+## 1.1.58
+Build date: Apl 24, 2024.
+
+Features & Update:
+- Add show/hide password for case input password (#2555)
+- Update chain-list (#2947)
+  - Set "SubWallet Official 3" as the default pool for Vara
+  - Add support for Commune AI blockchain and COMAI token (Mainnet)
+  - Add Block Explorer for Enjin Relaychain, Enjin Matrix
+  - Add support for DBC network
+  - Add support Avail Turing
+
+Bugs fixed:
+- Fixed bug Do not show transaction history in case sender account is null (#2955)
+
+## 1.1.57
+Build date: Apl 23, 2024.
+
+Bugs fixed:
+- Fix bug related to Aleph Zero transfer and staking (#2655)
+- Fix issue related to earning status (#2941)
+
 ## 1.1.56
 Build date: Apl 19, 2024.
 

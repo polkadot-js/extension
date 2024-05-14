@@ -791,6 +791,15 @@ export class ChainService {
   private async initApiForChain (chainInfo: _ChainInfo) {
     const { endpoint, providerName } = this.getChainCurrentProviderByKey(chainInfo.slug);
 
+    /**
+     * Disable chain if not found provider
+     * */
+    if (!endpoint && !providerName) {
+      this.disableChain(chainInfo.slug);
+
+      return;
+    }
+
     const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const slug = chainInfo.slug;
 
@@ -810,7 +819,11 @@ export class ChainService {
       }
     }
 
-    if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined) {
+    /**
+     * To check if the chain is EVM chain, we need to check if the chain has evmInfo and evmChainId is not -1
+     * (fake evm chain to connect to substrate chain)
+     * */
+    if (chainInfo.evmInfo !== null && chainInfo.evmInfo !== undefined && chainInfo.evmInfo.evmChainId !== -1) {
       const chainApi = await this.evmChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
       this.evmChainHandler.setEvmApi(chainInfo.slug, chainApi);
@@ -868,23 +881,28 @@ export class ChainService {
     this.lockChainInfoMap = true;
 
     const initPromises = chainSlugs.map(async (chainSlug) => {
-      const chainInfo = chainInfoMap[chainSlug];
-      const currentState = chainStateMap[chainSlug]?.active;
+      // Add try catch to prevent one chain error stop the whole process
+      try {
+        const chainInfo = chainInfoMap[chainSlug];
+        const currentState = chainStateMap[chainSlug]?.active;
 
-      if (!currentState) {
-        this.dbService.updateChainStore({
-          ...chainInfo,
-          active: true,
-          currentProvider: chainStateMap[chainSlug].currentProvider,
-          manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
-        }).catch(console.error);
+        if (!currentState) {
+          // Enable chain success then update chain state
+          await this.initApiForChain(chainInfo);
 
-        chainStateMap[chainSlug].active = true;
-        await this.initApiForChain(chainInfo);
+          this.dbService.updateChainStore({
+            ...chainInfo,
+            active: true,
+            currentProvider: chainStateMap[chainSlug].currentProvider,
+            manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
+          }).catch(console.error);
 
-        this.eventService.emit('chain.updateState', chainSlug);
-        needUpdate = true;
-      }
+          chainStateMap[chainSlug].active = true;
+
+          this.eventService.emit('chain.updateState', chainSlug);
+          needUpdate = true;
+        }
+      } catch (e) {}
     });
 
     await Promise.all(initPromises);

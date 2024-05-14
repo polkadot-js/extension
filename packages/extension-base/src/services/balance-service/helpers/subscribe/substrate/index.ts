@@ -138,8 +138,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
         tokenSlug: chainNativeTokenSlug,
         free: transferableBalance,
         locked: totalLockedFromTransfer.toString(),
-        state: APIItemState.READY,
-        metadata: balanceInfo
+        state: APIItemState.READY
       });
     });
 

@@ -377,7 +377,7 @@ const Component = () => {
     );
 
     return result;
-  }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
+  }, [currencyData.isPrefix, currencyData.symbol, currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
 
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {

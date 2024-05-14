@@ -43,7 +43,7 @@ function Component (props: Props): React.ReactElement<Props> {
   }, [chain]);
 
   const isParaChain = useMemo(() => {
-    return _STAKING_CHAIN_GROUP.para.includes(chain);
+    return _STAKING_CHAIN_GROUP.para.includes(chain) || _STAKING_CHAIN_GROUP.amplitude.includes(chain);
   }, [chain]);
   const title = useMemo(() => {
     const label = getValidatorLabel(chain);
@@ -67,7 +67,7 @@ function Component (props: Props): React.ReactElement<Props> {
   const ratePercent = useMemo(() => {
     const rate = maxPoolMembersValue && (nominatorCount / maxPoolMembersValue);
 
-    if (rate) {
+    if (rate !== undefined) {
       if (rate < 0.9) {
         return 'default';
       } else if (rate >= 0.9 && rate < 1) {
@@ -160,7 +160,7 @@ function Component (props: Props): React.ReactElement<Props> {
 
         {!maxPoolMembersValue && (isParaChain || isRelayChain) &&
           <MetaInfo.Number
-            label={t(isParaChain ? 'Delegators' : 'Nominator')}
+            label={t(isParaChain ? 'Delegator' : 'Nominator')}
             value={nominatorCount}
             valueColorSchema={'even-odd'}
           />}
@@ -169,7 +169,7 @@ function Component (props: Props): React.ReactElement<Props> {
           !!maxPoolMembersValue && !!ratePercent && (isParaChain || isRelayChain) && (
             <MetaInfo.Default
               className={'__maximum-validator'}
-              label={t(isParaChain ? 'Delegators' : 'Nominator')}
+              label={t(isParaChain ? 'Delegator' : 'Nominator')}
               labelAlign='top'
               valueColorSchema={`${ratePercent}`}
             >

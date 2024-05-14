@@ -65,10 +65,9 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
 
   if (substrateApi.api.query.identity) {
     let identity;
-
     const _parent = await substrateApi.api.query.identity.superOf(address);
 
-    const parentInfo = _parent.toHuman() as unknown as PalletIdentitySuper;
+    const parentInfo = _parent?.toHuman() as unknown as PalletIdentitySuper;
 
     if (parentInfo) {
       const [parentAddress, { Raw: data }] = parentInfo;
@@ -82,8 +81,19 @@ export async function parseIdentity (substrateApi: _SubstrateApi, address: strin
       }
     }
 
+    let identityInfo;
+
     const _identity = await substrateApi.api.query.identity.identityOf(address);
-    const identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+    const identityOfMetadata = substrateApi.api.query.identity.identityOf.creator.meta;
+    const identityOfReturnType = substrateApi.api.registry.lookup.getName(identityOfMetadata.type.asMap.value);
+
+    if (identityOfReturnType === 'PalletIdentityRegistration') {
+      identityInfo = _identity.toHuman() as unknown as PalletIdentityRegistration;
+    } else {
+      const _identityInfo = _identity?.toHuman() as unknown as [PalletIdentityRegistration, any];
+
+      identityInfo = _identityInfo ? _identityInfo[0] : undefined;
+    }
 
     if (identityInfo) {
       const displayName = identityInfo.info?.display?.Raw;

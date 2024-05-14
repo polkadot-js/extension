@@ -74,6 +74,7 @@ const Component = ({ className }: ComponentProps) => {
   const { isWebUI } = useContext(ScreenContext);
   const { token } = useTheme() as Theme;
   const { setOnBack } = useContext(WebUIContext);
+  const { currencyData } = useSelector((state) => state.price);
   const stateLocation = useLocation().state as LocationStateRW;
   const navigate = useNavigate();
 
@@ -635,12 +636,12 @@ const Component = ({ className }: ComponentProps) => {
               />
             );
           })}
-        {minJoinPool && (
+        {(
           <MetaInfo.Number
             decimals={assetDecimals}
             label={t('Minimum active stake')}
             suffix={assetSymbol}
-            value={minJoinPool}
+            value={minJoinPool || 0}
           />
         )}
 
@@ -653,13 +654,14 @@ const Component = ({ className }: ComponentProps) => {
           <MetaInfo.Number
             decimals={0}
             label={t('Estimated fee')}
-            prefix={'$'}
+            prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+            suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={estimatedFee}
           />
         )}
       </MetaInfo>
     );
-  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, currencyData?.isPrefix, currencyData.symbol, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -1298,7 +1300,8 @@ const Component = ({ className }: ComponentProps) => {
                   <div className={'__transformed-amount-value'}>
                     <Number
                       decimal={0}
-                      prefix={'$'}
+                      prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                      suffix={(!currencyData?.isPrefix && currencyData?.symbol) || ''}
                       value={transformAmount}
                     />
                   </div>
@@ -1312,7 +1315,7 @@ const Component = ({ className }: ComponentProps) => {
                         defaultValue={defaultData.target === 'not-support' || !!compound ? '' : defaultData.target}
                         disabled={submitLoading}
                         from={fromValue}
-                        label={t('Select pool')}
+                        label={t('Pool')}
                         loading={targetLoading}
                         setForceFetchValidator={setForceFetchValidator}
                         slug={slug}

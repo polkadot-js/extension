@@ -28,6 +28,7 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = ({ className, emptyListFunction, filterFunction, items, onClickRow,
   searchFunction, searchTerm }: Props) => {
   const { t } = useTranslation();
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const assetRegistry = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
 
@@ -108,7 +109,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
                 <Number
                   className={'__row-total-stake-value'}
                   decimal={0}
-                  prefix={'$'}
+                  prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
                   value={total}
                 />
               )
@@ -199,7 +200,7 @@ const Component: React.FC<Props> = ({ className, emptyListFunction, filterFuncti
       rewardsPerYearCol,
       detailActionCol
     ];
-  }, [assetRegistry, priceMap, t]);
+  }, [assetRegistry, currencyData?.isPrefix, currencyData?.symbol, priceMap, t]);
 
   const getRowKey = useCallback((item: YieldPoolInfo) => {
     return item.slug;

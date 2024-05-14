@@ -351,102 +351,123 @@ export default class AmplitudeNativeStakingPoolHandler extends BaseParaNativeSta
 
   /* Get pool targets */
 
+  async getKrestPoolTargets (chainApi: _SubstrateApi): Promise<ValidatorInfo[]> {
+    const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
+    const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
+
+    const identityPromises = _allCollators.map((collator) => {
+      const collatorInfo = collator[1].toPrimitive() as unknown as CollatorInfo;
+      const address = collatorInfo.id;
+
+      return parseIdentity(chainApi, address);
+    });
+    const identities = await Promise.all(identityPromises);
+
+    return _allCollators.map((_collator, i) => {
+      const [identity] = identities[i];
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+      const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
+
+      let minDelegate = new BN(minDelegatorStake);
+
+      if (isFullDelegatorsSet) {
+        const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
+        const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
+
+        const minDelegateInSet = sortedAmounts[0];
+
+        minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
+      }
+
+      return {
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        blocked: false,
+        isVerified: false,
+        minBond: minDelegate.toString(),
+        chain: this.chain,
+        isCrowded: isFullDelegatorsSet,
+        identity
+      } as ValidatorInfo;
+    });
+  }
+
+  async getOtherPoolTargets (chainApi: _SubstrateApi): Promise<ValidatorInfo[]> {
+    const [_allCollators, _inflationConfig] = await Promise.all([
+      chainApi.api.query.parachainStaking.candidatePool.entries(),
+      chainApi.api.query.parachainStaking.inflationConfig()
+    ]);
+
+    const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
+    const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
+    const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
+    const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
+    const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
+
+    const identityPromises = _allCollators.map((collator) => {
+      const collatorInfo = collator[1].toPrimitive() as unknown as CollatorInfo;
+      const address = collatorInfo.id;
+
+      return parseIdentity(chainApi, address);
+    });
+    const identities = await Promise.all(identityPromises);
+
+    return _allCollators.map((_collator, i) => {
+      const [identity] = identities[i];
+      const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
+
+      const bnTotalStake = new BN(collatorInfo.total);
+      const bnOwnStake = new BN(collatorInfo.stake);
+      const bnOtherStake = bnTotalStake.sub(bnOwnStake);
+
+      const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
+
+      let minDelegate = new BN(minDelegatorStake);
+
+      if (isFullDelegatorsSet) {
+        const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
+        const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
+
+        const minDelegateInSet = sortedAmounts[0];
+
+        minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
+      }
+
+      return {
+        address: collatorInfo.id,
+        totalStake: bnTotalStake.toString(),
+        ownStake: bnOwnStake.toString(),
+        otherStake: bnOtherStake.toString(),
+        nominatorCount: collatorInfo.delegators.length,
+        commission: 0,
+        expectedReturn: delegatorReturn,
+        blocked: false,
+        isVerified: false,
+        minBond: minDelegate.toString(),
+        chain: this.chain,
+        isCrowded: isFullDelegatorsSet,
+        identity
+      } as ValidatorInfo;
+    });
+  }
+
   async getPoolTargets (): Promise<ValidatorInfo[]> {
     const chainApi = await this.substrateApi.isReady;
 
     if (_STAKING_CHAIN_GROUP.krest_network.includes(this.chain)) {
-      const _allCollators = await chainApi.api.query.parachainStaking.candidatePool.entries();
-      const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
-      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator?.toString();
-      const allCollators: ValidatorInfo[] = [];
-
-      for (const _collator of _allCollators) {
-        const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
-
-        const bnTotalStake = new BN(collatorInfo.total);
-        const bnOwnStake = new BN(collatorInfo.stake);
-        const bnOtherStake = bnTotalStake.sub(bnOwnStake);
-
-        const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
-
-        let minDelegate = new BN(minDelegatorStake);
-
-        if (isFullDelegatorsSet) {
-          const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
-          const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
-
-          const minDelegateInSet = sortedAmounts[0];
-
-          minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
-        }
-
-        allCollators.push({
-          address: collatorInfo.id,
-          totalStake: bnTotalStake.toString(),
-          ownStake: bnOwnStake.toString(),
-          otherStake: bnOtherStake.toString(),
-          nominatorCount: collatorInfo.delegators.length,
-          commission: 0,
-          blocked: false,
-          isVerified: false,
-          minBond: minDelegate.toString(),
-          chain: this.chain,
-          isCrowded: isFullDelegatorsSet
-        });
-      }
-
-      return allCollators;
+      return this.getKrestPoolTargets(chainApi);
     } else {
-      const [_allCollators, _inflationConfig] = await Promise.all([
-        chainApi.api.query.parachainStaking.candidatePool.entries(),
-        chainApi.api.query.parachainStaking.inflationConfig()
-      ]);
-
-      const minDelegatorStake = chainApi.api.consts.parachainStaking.minDelegatorStake.toString();
-      const maxDelegatorsPerCollator = chainApi.api.consts.parachainStaking.maxDelegatorsPerCollator.toString();
-      const inflationConfig = _inflationConfig.toHuman() as unknown as InflationConfig;
-      const rawDelegatorReturn = inflationConfig.delegator.rewardRate.annual;
-      const delegatorReturn = parseFloat(rawDelegatorReturn.split('%')[0]);
-
-      const allCollators: ValidatorInfo[] = [];
-
-      for (const _collator of _allCollators) {
-        const collatorInfo = _collator[1].toPrimitive() as unknown as CollatorInfo;
-
-        const bnTotalStake = new BN(collatorInfo.total);
-        const bnOwnStake = new BN(collatorInfo.stake);
-        const bnOtherStake = bnTotalStake.sub(bnOwnStake);
-
-        const isFullDelegatorsSet = collatorInfo.delegators.length >= parseInt(maxDelegatorsPerCollator);
-
-        let minDelegate = new BN(minDelegatorStake);
-
-        if (isFullDelegatorsSet) {
-          const delegatorAmounts = collatorInfo.delegators.map((delegator) => new BN(delegator.amount));
-          const sortedAmounts = delegatorAmounts.sort((a, b) => a.cmp(b));
-
-          const minDelegateInSet = sortedAmounts[0];
-
-          minDelegate = minDelegate.lt(minDelegateInSet) ? minDelegateInSet : minDelegate;
-        }
-
-        allCollators.push({
-          address: collatorInfo.id,
-          totalStake: bnTotalStake.toString(),
-          ownStake: bnOwnStake.toString(),
-          otherStake: bnOtherStake.toString(),
-          nominatorCount: collatorInfo.delegators.length,
-          commission: 0,
-          expectedReturn: delegatorReturn,
-          blocked: false,
-          isVerified: false,
-          minBond: minDelegate.toString(),
-          chain: this.chain,
-          isCrowded: isFullDelegatorsSet
-        });
-      }
-
-      return allCollators;
+      return this.getOtherPoolTargets(chainApi);
     }
   }
 

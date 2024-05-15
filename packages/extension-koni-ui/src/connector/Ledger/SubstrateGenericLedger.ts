@@ -36,7 +36,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
     const addressIndex = (accountOptions?.addressIndex || 0) + (addressOffset || 0);
     const change = accountOptions?.change || 0;
 
-    return `m/44'/354'/${account}'/${change}/${addressIndex}`;
+    return `m/44'/354'/${account}'/${change}'/${addressIndex}'`;
   }
 
   getAddress (confirm?: boolean, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerAddress> {

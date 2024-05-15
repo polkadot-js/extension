@@ -64,11 +64,11 @@ function _getSystemPalletTransferableV2 (accountInfo: FrameSystemAccountInfoV2, 
   const bnLocked = new BigN(accountInfo.data.frozen).minus(accountInfo.data.reserved); // locked can go below 0 but this shouldn't matter
   const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(accountInfo, existentialDeposit, strictMode));
 
-  return bnFree.minus(BigN.max(bnLocked, bnAppliedExistentialDeposit)).toString();
+  return bnFree.minus(BigN.max(bnLocked, bnAppliedExistentialDeposit)).toFixed();
 }
 
 function _getSystemPalletTotalBalanceV2 (accountInfo: FrameSystemAccountInfoV2): string {
-  return new BigN(accountInfo.data.free).plus(accountInfo.data.reserved).toString();
+  return new BigN(accountInfo.data.free).plus(accountInfo.data.reserved).toFixed();
 }
 
 function _getSystemPalletTransferableV1 (accountInfo: FrameSystemAccountInfoV1, existentialDeposit: string, strictMode?: boolean): string {
@@ -76,11 +76,11 @@ function _getSystemPalletTransferableV1 (accountInfo: FrameSystemAccountInfoV1, 
   const bnAppliedFrozen = BigN.max(accountInfo.data.feeFrozen, accountInfo.data.miscFrozen);
   const bnTotalBalance = new BigN(_getSystemPalletTotalBalanceV1(accountInfo));
 
-  return bnTotalBalance.minus(BigN.max(bnAppliedFrozen, accountInfo.data.reserved, bnAppliedExistentialDeposit)).toString();
+  return bnTotalBalance.minus(BigN.max(bnAppliedFrozen, accountInfo.data.reserved, bnAppliedExistentialDeposit)).toFixed();
 }
 
 function _getSystemPalletTotalBalanceV1 (accountInfo: FrameSystemAccountInfoV1): string {
-  return new BigN(accountInfo.data.free).toString();
+  return new BigN(accountInfo.data.free).toFixed();
 }
 
 function _getAppliedExistentialDeposit (accountInfo: FrameSystemAccountInfo, existentialDeposit: string, strictMode?: boolean): string {

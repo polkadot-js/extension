@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isProductionMode } from '@subwallet/extension-koni-ui/constants';
 import { QrAccount, ScannerResult, ValidateState } from '@subwallet/extension-koni-ui/types';
 import { useCallback, useMemo } from 'react';
 
@@ -20,7 +21,16 @@ const useScanAccountQr = (
     const result = convertResult(val);
 
     if (result) {
-      return result;
+      if (isProductionMode && result.isEthereum) {
+        setValidateState({
+          message: t('Invalid QR code. EVM networks are not supported'),
+          status: 'error'
+        });
+
+        return null;
+      } else {
+        return result;
+      }
     } else {
       setValidateState({
         message: t('Invalid QR code'),

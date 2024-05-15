@@ -8933,12 +8933,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zondax/ledger-substrate@npm:0.42.2":
-  version: 0.42.2
-  resolution: "@zondax/ledger-substrate@npm:0.42.2"
+"@zondax/ledger-substrate@npm:0.43.0":
+  version: 0.43.0
+  resolution: "@zondax/ledger-substrate@npm:0.43.0"
   dependencies:
     axios: ^1.6.8
-  checksum: a536be6aaf832f9ea9253ea0abdd268a2c60a4f435a2bce618dbd60a17f54e70cc39c7878730d8c641147dbfc096888ddb7f0219f4b823056d808cf9da8ff079
+  checksum: edcdfdbd7237d6b8f54c3ffaa10e1d7c0aa5eecfcb1bb1b9cdd31c1bc71180bf23c24e618ba8eb0cd4961d88135552cb8b2aa0afde40a7581cd86727bad62b7f
   languageName: node
   linkType: hard
 

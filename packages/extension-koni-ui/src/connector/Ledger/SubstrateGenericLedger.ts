@@ -4,7 +4,7 @@
 import type { ResponseSign } from '@zondax/ledger-polkadot/dist/types';
 
 import { wrapBytes } from '@subwallet/extension-dapp';
-import { PolkadotApp } from '@zondax/ledger-polkadot';
+import { PolkadotGenericApp } from '@zondax/ledger-substrate';
 
 import { AccountOptions, LedgerAddress, LedgerSignature, LedgerVersion } from '@polkadot/hw-ledger/types';
 import { transports } from '@polkadot/hw-ledger-transports';
@@ -18,10 +18,10 @@ export async function loadWasm () {
   return await WebAssembly.instantiateStreaming(fetch('./metadata_shortener.wasm'), imports);
 }
 
-export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
+export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
   getVersion (): Promise<LedgerVersion> {
     return this.withApp(async (app): Promise<LedgerVersion> => {
-      const { locked, major, minor, patch, testMode } = await app.getVersion();
+      const { device_locked: locked, major, minor, patch, test_mode: testMode } = await app.getVersion();
 
       return {
         isLocked: locked,
@@ -39,23 +39,35 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
     return `m/44'/354'/${account}'/${change}'/${addressIndex}'`;
   }
 
+  getAccountOption (accountOffset = 0, addressOffset = 0, accountOptions?: Partial<AccountOptions>) {
+    const account = (accountOptions?.account || 0) + (accountOffset || 0);
+    const addressIndex = (accountOptions?.addressIndex || 0) + (addressOffset || 0);
+    const change = accountOptions?.change || 0;
+
+    return {
+      account,
+      change,
+      addressIndex
+    };
+  }
+
   getAddress (confirm?: boolean, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerAddress> {
     return this.withApp(async (app): Promise<LedgerAddress> => {
-      const path = this.serializePath(accountOffset, addressOffset, accountOptions);
+      const options = this.getAccountOption(accountOffset, addressOffset, accountOptions);
 
-      const { address, pubKey } = await this.wrapError(app.getAddress(path, 42, confirm));
+      const { address, pubKey } = await this.wrapError(app.getAddress(options.account, options.change, options.addressIndex, 0, true));
 
       return {
         address,
-        publicKey: hexAddPrefix(u8aToHex(pubKey))
+        publicKey: hexAddPrefix(pubKey)
       };
     });
   }
 
   async signTransaction (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature> {
     return this.withApp(async (app): Promise<LedgerSignature> => {
-      const path = this.serializePath(accountOffset, addressOffset, accountOptions);
-      const rs = await this.wrapError((app.sign(path, Buffer.from(message), Buffer.from(metadata))));
+      const options = this.getAccountOption(accountOffset, addressOffset, accountOptions);
+      const rs = await this.wrapError((app.signAdvanced(options.account, options.change, options.addressIndex, Buffer.from(message), Buffer.from(metadata))));
 
       return {
         signature: hexAddPrefix(u8aToHex(rs.signature))
@@ -65,9 +77,9 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
 
   async signMessage (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature> {
     return this.withApp(async (app): Promise<LedgerSignature> => {
-      const path = this.serializePath(accountOffset, addressOffset, accountOptions);
+      const options = this.getAccountOption(accountOffset, addressOffset, accountOptions);
 
-      const rs = await this.wrapError(app.signRaw(path, Buffer.from(wrapBytes(message))));
+      const rs = await this.wrapError(app.signRaw(options.account, options.change, options.addressIndex, Buffer.from(wrapBytes(message))));
 
       const raw = hexStripPrefix(u8aToHex(rs.signature));
       const firstByte = raw.slice(0, 2);
@@ -82,7 +94,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
     });
   }
 
-  getApp = async (): Promise<PolkadotApp> => {
+  getApp = async (): Promise<PolkadotGenericApp> => {
     if (!this.app) {
       const def = transports.find(({ type }) => type === this.transport);
 
@@ -92,7 +104,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotApp> {
 
       const transport = await def.create();
 
-      this.app = new PolkadotApp(transport);
+      this.app = PolkadotGenericApp.newApp(transport, 'westend', 'http://192.168.10.12:3001/transaction/metadata');
     }
 
     return this.app;

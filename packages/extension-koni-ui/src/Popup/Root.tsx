@@ -6,7 +6,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackgroundExpandView } from '@subwallet/extension-koni-ui/components';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
+import { LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL, TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
@@ -15,15 +15,16 @@ import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotifi
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { subscribeNotifications } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
-import { changeHeaderLogo } from '@subwallet/react-ui';
+import { changeHeaderLogo, ModalContext } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
 import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 changeHeaderLogo(<Logo2D />);
 
@@ -46,6 +47,11 @@ const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
+const SessionDays = 90 * 1000;
+const DEFAULT_SESSION_VALUE: SessionStorage = {
+  remind: false,
+  timeCalculate: Date.now()
+};
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
   display: 'flex',
@@ -96,8 +102,10 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const [initAccount, setInitAccount] = useState(currentAccount);
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
+  const { activeModal } = useContext(ModalContext);
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
 
   const needMigrate = useMemo(
@@ -236,6 +244,16 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       setInitAccount(currentAccount);
     }
   }, [currentAccount, initAccount]);
+
+  useEffect(() => {
+    const infoSession = Date.now();
+    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
+    if (infoSession - latestSession.timeCalculate > SessionDays &&
+      ![...createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
+      sessionLatest.remind && activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+    }
+  }, [activeModal, location.pathname, sessionLatest.remind]);
 
   if (rootLoading || redirectPath) {
     return <>{redirectPath && <Navigate to={redirectPath} />}</>;

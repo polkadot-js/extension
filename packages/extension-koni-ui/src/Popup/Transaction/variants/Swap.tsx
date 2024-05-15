@@ -105,7 +105,7 @@ const Component = () => {
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
   const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
-  // @ts-ignore
+
   const sessionLatestInit = useMemo(() => {
     return (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage;
   }, []);

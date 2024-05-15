@@ -13,7 +13,7 @@ import CN from 'classnames';
 import { ShieldCheck } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -29,6 +29,7 @@ const DEFAULT_SESSION_VALUE: SessionStorage = {
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
+  const location = useLocation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [sessionLatest, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const navigate = useNavigate();
@@ -45,11 +46,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const onSelectAccount = useCallback((account: AccountJson) => {
     if (account?.address) {
-      navigate(`/accounts/export/${account.address}`);
+      navigate(`/accounts/export/${account.address}`, { state: { from: location.pathname } });
       inactiveModal(AccountSelectorModalId);
-      setSessionLatest({ timeCalculate: Date.now(), remind: false });
     }
-  }, [inactiveModal, navigate, setSessionLatest]);
+  }, [inactiveModal, location.pathname, navigate]);
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
@@ -58,10 +58,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       activeModal(AccountSelectorModalId);
       inactiveModal(RemindBackupSeedPhraseModalId);
     } else if (currentAccount?.address) {
-      navigate(`/accounts/export/${currentAccount.address}`);
-      setSessionLatest({ timeCalculate: Date.now(), remind: false });
+      navigate(`/accounts/export/${currentAccount?.address}`, { state: { from: location.pathname } });
     }
-  }, [activeModal, currentAccount, inactiveModal, isAllAccount, navigate, setSessionLatest]);
+
+    setSessionLatest({ timeCalculate: Date.now(), remind: false });
+  }, [activeModal, currentAccount?.address, inactiveModal, isAllAccount, location.pathname, navigate, setSessionLatest]);
 
   useEffect(() => {
     if (!sessionLatest.remind) {

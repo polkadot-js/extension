@@ -11,7 +11,7 @@ import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { UnlockModal } from '../components/Modal/UnlockModal';
@@ -65,6 +65,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
+  const location = useLocation();
 
   useExcludeModal('confirmations');
   useExcludeModal(EARNING_INSTRUCTION_MODAL);
@@ -96,23 +97,14 @@ export const WalletModalContext = ({ children }: Props) => {
 
   useEffect(() => {
     const infoSession = Date.now();
-
     const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (!latestSession.remind) {
+    if (!latestSession.remind || infoSession - latestSession.timeCalculate < SessionDays) {
       setSessionLatest({ timeCalculate: infoSession, remind: false });
-
-      return;
+    } else if (location.pathname) {
+      setSessionLatest(({ remind, timeCalculate }) => ({ remind, timeCalculate: remind ? timeCalculate : infoSession }));
     }
-
-    if (infoSession - latestSession.timeCalculate > SessionDays) {
-      setSessionLatest({ ...latestSession, remind: true });
-
-      return;
-    }
-
-    setSessionLatest({ timeCalculate: infoSession, remind: false });
-  }, [activeModal, inactiveAll, setSessionLatest]);
+  }, [inactiveAll, location.pathname, setSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3
 

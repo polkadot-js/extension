@@ -6167,14 +6167,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.60":
-  version: 0.2.60
-  resolution: "@subwallet/chain-list@npm:0.2.60"
+"@subwallet/chain-list@npm:0.2.61-beta.3":
+  version: 0.2.61-beta.3
+  resolution: "@subwallet/chain-list@npm:0.2.61-beta.3"
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: a8219b16654aaeeaac8e1caeeacdc3e471350a95ee1834589917709b89e51d0e18a5f08598a95b8ad0dc20c12a30e4c411315a59157662463cbdee8e38ca5cd6
+  checksum: 84ca858364b8e0377b599c50fe54c5765e85a0d26d65f92643ee31341f6052411c93eb371ae898bc0e5d67c8943927c96c2038b5885454afff482780d9168cc2
   languageName: node
   linkType: hard
 
@@ -6213,7 +6213,7 @@ __metadata:
     "@reduxjs/toolkit": ^1.9.1
     "@sora-substrate/type-definitions": ^1.17.7
     "@substrate/connect": ^0.8.9
-    "@subwallet/chain-list": 0.2.60
+    "@subwallet/chain-list": 0.2.61-beta.3
     "@subwallet/extension-base": ^1.1.64-0
     "@subwallet/extension-chains": ^1.1.64-0
     "@subwallet/extension-dapp": ^1.1.64-0
@@ -6247,6 +6247,7 @@ __metadata:
     moment: ^2.29.4
     protobufjs: ^7.2.4
     rxjs: ^7.8.1
+    sails-js: ^0.1.3
     uuid: ^9.0.0
     web3: ^1.10.0
     web3-core: ^1.10.0
@@ -6343,7 +6344,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.60
+    "@subwallet/chain-list": 0.2.61-beta.3
     "@subwallet/extension-base": ^1.1.64-0
     "@subwallet/extension-chains": ^1.1.64-0
     "@subwallet/extension-dapp": ^1.1.64-0
@@ -6476,7 +6477,7 @@ __metadata:
     "@polkadot/util-crypto": ^12.6.2
     "@ramonak/react-progress-bar": ^5.0.3
     "@reduxjs/toolkit": ^1.9.1
-    "@subwallet/chain-list": 0.2.60
+    "@subwallet/chain-list": 0.2.61-beta.3
     "@subwallet/extension-base": ^1.1.64-0
     "@subwallet/extension-chains": ^1.1.64-0
     "@subwallet/extension-dapp": ^1.1.64-0
@@ -11714,6 +11715,13 @@ __metadata:
   version: 2.0.3
   resolution: "comma-separated-tokens@npm:2.0.3"
   checksum: e3bf9e0332a5c45f49b90e79bcdb4a7a85f28d6a6f0876a94f1bb9b2bfbdbbb9292aac50e1e742d8c0db1e62a0229a106f57917e2d067fca951d81737651700d
+  languageName: node
+  linkType: hard
+
+"commander@npm:12.0.0":
+  version: 12.0.0
+  resolution: "commander@npm:12.0.0"
+  checksum: bce9e243dc008baba6b8d923f95b251ad115e6e7551a15838d7568abebcca0fc832da1800cf37caf37852f35ce4b7fb794ba7a4824b88c5adb1395f9268642df
   languageName: node
   linkType: hard
 
@@ -24259,6 +24267,21 @@ __metadata:
   version: 2.1.2
   resolution: "safer-buffer@npm:2.1.2"
   checksum: cab8f25ae6f1434abee8d80023d7e72b598cf1327164ddab31003c51215526801e40b66c5e65d658a0af1e9d6478cadcb4c745f4bd6751f97d8644786c0978b0
+  languageName: node
+  linkType: hard
+
+"sails-js@npm:^0.1.3":
+  version: 0.1.3
+  resolution: "sails-js@npm:0.1.3"
+  dependencies:
+    commander: 12.0.0
+  peerDependencies:
+    "@gear-js/api": ^0.38.0
+    "@polkadot/api": ^11.0.1
+    "@polkadot/types": ^11.0.1
+  bin:
+    sails-js: app.js
+  checksum: 35da8cdf969d35ab0e762c125a4fce626b9b57221d66be784e79293aa3f50954df1ac1471865e19806da4967321d515764675372de4855f0f2b73159e846737c
   languageName: node
   linkType: hard
 

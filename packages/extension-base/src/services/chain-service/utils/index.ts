@@ -227,7 +227,7 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
 
   if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
     chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
-      if ([_AssetType.PSP22].includes(assetType)) {
+      if ([_AssetType.PSP22, _AssetType.GRC20].includes(assetType)) {
         result.push(assetType);
       }
     });
@@ -292,6 +292,10 @@ export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
 
 export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
   return [_AssetType.PSP34, _AssetType.ERC721].includes(assetInfo.assetType);
+}
+
+export function _isTokenGearSmartContract (tokenInfo: _ChainAsset) {
+  return [_AssetType.GRC20, _AssetType.GRC721].includes(tokenInfo.assetType);
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {

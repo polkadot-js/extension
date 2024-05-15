@@ -278,7 +278,7 @@ export class ChainService {
   }
 
   public getSupportedSmartContractTypes () {
-    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
+    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721];
   }
 
   public getActiveChainInfoMap () {

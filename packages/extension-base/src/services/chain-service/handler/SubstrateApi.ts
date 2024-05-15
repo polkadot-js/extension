@@ -29,7 +29,6 @@ import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defau
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;
   api: ApiPromise;
-  gearApi?: GearApi;
   providerName?: string;
   provider: ProviderInterface;
   apiUrl: string;
@@ -135,8 +134,7 @@ export class SubstrateApi implements _SubstrateApi {
         noInitWarn: true
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.gear.includes(this.chainSlug)) {
-      api = new ApiPromise(apiOption);
-      this.gearApi = new GearApi({
+      api = new GearApi({
         provider,
         noInitWarn: true
       });

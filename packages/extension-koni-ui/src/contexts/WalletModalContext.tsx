@@ -4,6 +4,7 @@
 import { AttachAccountModal, ClaimDappStakingRewardsModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RemindBackupSeedPhraseModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
 import { EARNING_INSTRUCTION_MODAL, LATEST_SESSION } from '@subwallet/extension-koni-ui/constants';
+import { useGetConfig } from '@subwallet/extension-koni-ui/hooks';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { SessionStorage } from '@subwallet/extension-koni-ui/types';
@@ -20,9 +21,10 @@ interface Props {
   children: React.ReactNode;
 }
 
-const SessionDays = 90 * 1000;
+const timeBackup = 1000 * 60 * 60 * 24 * 15;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
+  timeBackup,
   timeCalculate: Date.now()
 };
 
@@ -65,6 +67,7 @@ export const WalletModalContext = ({ children }: Props) => {
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
+  const { getConfig } = useGetConfig();
   const location = useLocation();
 
   useExcludeModal('confirmations');
@@ -99,12 +102,17 @@ export const WalletModalContext = ({ children }: Props) => {
     const infoSession = Date.now();
     const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (!latestSession.remind || infoSession - latestSession.timeCalculate < SessionDays) {
-      setSessionLatest({ timeCalculate: infoSession, remind: false });
-    } else if (location.pathname) {
-      setSessionLatest(({ remind, timeCalculate }) => ({ remind, timeCalculate: remind ? timeCalculate : infoSession }));
-    }
-  }, [inactiveAll, location.pathname, setSessionLatest]);
+    getConfig()
+      .then((timeBackup) => {
+        if (!latestSession.remind || infoSession - latestSession.timeCalculate < timeBackup) {
+          setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false });
+        } else if (location.pathname) {
+          setSessionLatest(({ remind, timeBackup, timeCalculate }) =>
+            ({ timeBackup, remind, timeCalculate: remind ? timeCalculate : infoSession }));
+        }
+      })
+      .catch(console.error);
+  }, [activeModal, getConfig, location.pathname, setSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3
 

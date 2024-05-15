@@ -3,5 +3,6 @@
 
 export interface SessionStorage {
   timeCalculate: number;
-  remind: boolean
+  remind: boolean;
+  timeBackup: number;
 }

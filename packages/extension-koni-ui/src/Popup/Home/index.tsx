@@ -22,6 +22,7 @@ type Props = ThemeProps;
 export const GlobalSearchTokenModalId = 'globalSearchToken';
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
+  timeBackup: 300000,
   timeCalculate: Date.now()
 };
 

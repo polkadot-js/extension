@@ -47,10 +47,11 @@ const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
 
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
-const SessionDays = 90 * 1000;
+const timeBackup = 300000;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
-  timeCalculate: Date.now()
+  timeCalculate: Date.now(),
+  timeBackup
 };
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -249,11 +250,12 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     const infoSession = Date.now();
     const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (infoSession - latestSession.timeCalculate > SessionDays &&
-      ![...createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
+    if (infoSession - latestSession.timeCalculate > latestSession.timeBackup &&
+      !needUnlock &&
+      ![createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
       sessionLatest.remind && activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, location.pathname, sessionLatest.remind]);
+  }, [activeModal, location.pathname, needUnlock, sessionLatest.remind]);
 
   if (rootLoading || redirectPath) {
     return <>{redirectPath && <Navigate to={redirectPath} />}</>;

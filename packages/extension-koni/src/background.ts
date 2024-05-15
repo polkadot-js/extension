@@ -22,7 +22,8 @@ let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;
 let openCount = 0;
 const keyLatestSession = 'general.latest-session';
-const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now() };
+const timeBackup = 300000;
+const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup };
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));

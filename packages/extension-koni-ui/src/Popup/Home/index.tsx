@@ -23,7 +23,8 @@ export const GlobalSearchTokenModalId = 'globalSearchToken';
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeBackup: 300000,
-  timeCalculate: Date.now()
+  timeCalculate: Date.now(),
+  finishStep: true
 };
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -38,11 +39,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleMantaPaySync = useHandleMantaPaySync();
   const banners = useGetBannerByScreen('home');
 
-  const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
+  const firstBanner = useMemo((): CampaignBanner | undefined => banners[0]
+    , [banners]);
 
-  const sessionLatestInit = useMemo(() => {
-    return (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage;
-  }, []);
+  const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage
+    , []);
+
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -66,13 +69,17 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (firstBanner && !sessionLatestInit.remind) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
-  }, [activeModal, firstBanner, sessionLatestInit]);
+  }, [activeModal, firstBanner, sessionLatestInit.remind, inactiveModal]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {
       activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
     }
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
+
+  useEffect(() => {
+    sessionLatest.remind && inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
+  }, [inactiveModal, sessionLatest.remind]);
 
   return (
     <>

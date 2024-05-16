@@ -23,7 +23,8 @@ const AccountSelectorModalId = SELECT_ACCOUNT_MODAL;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeCalculate: Date.now(),
-  timeBackup: 300000
+  timeBackup: 300000,
+  finishStep: true
 };
 const DomainUserGuide = '/account-management/export-and-backup-accounts';
 
@@ -39,8 +40,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const onCancel = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-    setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false });
-  }, [inactiveModal, sessionLatest, setSessionLatest]);
+    setSessionLatest((prevState) => ({ ...prevState, timeCalculate: Date.now(), remind: false, finishStep: true }));
+  }, [inactiveModal, setSessionLatest]);
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
@@ -48,11 +49,11 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     if (isAllAccount || !!currentAccount?.isExternal) {
       activeModal(AccountSelectorModalId);
       setOpenAccountSelector(true);
+      setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false, finishStep: false });
     } else if (currentAccount?.address) {
       navigate(`/accounts/export/${currentAccount?.address}`, { state: { from: location.pathname } });
+      setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false });
     }
-
-    setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false });
   }, [activeModal, currentAccount, inactiveModal, isAllAccount, location.pathname, navigate, sessionLatest, setSessionLatest]);
 
   useEffect(() => {

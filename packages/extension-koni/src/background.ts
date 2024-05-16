@@ -23,7 +23,7 @@ let waitingToStop = false;
 let openCount = 0;
 const keyLatestSession = 'general.latest-session';
 const timeBackup = 300000;
-const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup };
+const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup, finishStep: true };
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
@@ -61,7 +61,7 @@ chrome.runtime.onConnect.addListener((port): void => {
 
     const latestSession = latestSessionRaw ? JSON.parse(latestSessionRaw) as { remind: boolean, timeCalculate: number } : DEFAULT_LATEST_SESSION;
 
-    localStorage.setItem(keyLatestSession, JSON.stringify({ ...latestSession, remind: true }));
+    localStorage.setItem(keyLatestSession, JSON.stringify({ ...latestSession, remind: true, finishStep: false }));
 
     if (PORT_EXTENSION === port.name) {
       openCount -= 1;

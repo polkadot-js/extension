@@ -50,8 +50,9 @@ const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAcco
 const timeBackup = 300000;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
+  timeBackup,
   timeCalculate: Date.now(),
-  timeBackup
+  finishStep: true
 };
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -247,7 +248,11 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   }, [currentAccount, initAccount]);
 
   useEffect(() => {
-    if (sessionLatest.remind &&
+    const infoSession = Date.now();
+
+    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
+    if (infoSession - latestSession.timeCalculate > latestSession.timeBackup && sessionLatest.remind &&
       !needUnlock &&
       ![createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);

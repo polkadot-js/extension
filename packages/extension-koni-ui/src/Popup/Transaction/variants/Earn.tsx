@@ -46,7 +46,8 @@ export const insufficientXCMMessages = ['You can only enter a maximum'];
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeCalculate: Date.now(),
-  timeBackup: 300000
+  timeBackup: 300000,
+  finishStep: true
 };
 const AccountSelectorModalId = SELECT_ACCOUNT_MODAL;
 
@@ -846,11 +847,11 @@ const Component = () => {
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
   useEffect(() => {
-    if (!compound && !screenLoading && !sessionLatest.remind && !checkActive(AccountSelectorModalId)) {
+    if (!compound && !screenLoading && !sessionLatest.finishStep && !checkActive(AccountSelectorModalId)) {
       isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
-  }, [activeModal, checkActive, compound, screenLoading, sessionLatest.remind]);
+  }, [activeModal, checkActive, compound, screenLoading, sessionLatest.finishStep]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
@@ -863,11 +864,11 @@ const Component = () => {
           }
 
           isClickInfoButtonRef.current = true;
-          !sessionLatest.remind && checkActive(AccountSelectorModalId) && activeModal(instructionModalId);
+          !sessionLatest.finishStep && checkActive(AccountSelectorModalId) && activeModal(instructionModalId);
         }
       }
     ];
-  }, [activeModal, checkActive, screenLoading, sessionLatest.remind, submitLoading]);
+  }, [activeModal, checkActive, screenLoading, sessionLatest.finishStep, submitLoading]);
 
   useEffect(() => {
     setSubHeaderRightButtons(subHeaderButtons);

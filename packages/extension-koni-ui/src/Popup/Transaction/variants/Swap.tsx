@@ -75,7 +75,8 @@ const numberMetadata = { maxNumberFormat: 8 };
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeCalculate: Date.now(),
-  timeBackup: 300000
+  timeBackup: 300000,
+  finishStep: true
 };
 const AccountSelectorModalId = SELECT_ACCOUNT_MODAL;
 
@@ -1084,12 +1085,12 @@ const Component = () => {
   }, [currentQuoteRequest, hasInternalConfirmations, quoteAliveUntil, requestUserInteractToContinue]);
 
   useEffect(() => {
-    if (!confirmedTerm && !sessionLatest.remind && !checkActive(AccountSelectorModalId)) {
+    if (!confirmedTerm && sessionLatest.finishStep && !checkActive(AccountSelectorModalId)) {
       activeModal(SWAP_TERMS_OF_SERVICE_MODAL);
     } else if (confirmedTerm) {
       inactiveModal(SWAP_TERMS_OF_SERVICE_MODAL);
     }
-  }, [sessionLatest.remind, activeModal, confirmedTerm, checkActive, inactiveModal]);
+  }, [sessionLatest.finishStep, activeModal, confirmedTerm, checkActive, inactiveModal]);
 
   useEffect(() => {
     if (requestUserInteractToContinue) {

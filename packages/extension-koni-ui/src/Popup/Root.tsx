@@ -93,6 +93,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const notify = useNotification();
   const [rootLoading, setRootLoading] = useState(true);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const initDataRef = useRef<Promise<boolean>>(dataContext.awaitStores(['accountState', 'chainStore', 'assetRegistry', 'requestState', 'settings', 'mantaPay']));
   const currentPage = useGetCurrentPage();
   const firstRender = useRef(true);
@@ -103,7 +104,6 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const { hasConfirmations, hasInternalConfirmations } = useSelector((state: RootState) => state.requestState);
   const { accounts, currentAccount, hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
   const [initAccount, setInitAccount] = useState(currentAccount);
-  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const { activeModal } = useContext(ModalContext);
@@ -247,13 +247,10 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   }, [currentAccount, initAccount]);
 
   useEffect(() => {
-    const infoSession = Date.now();
-    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
-
-    if (infoSession - latestSession.timeCalculate > latestSession.timeBackup &&
+    if (sessionLatest.remind &&
       !needUnlock &&
       ![createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
-      sessionLatest.remind && activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
   }, [activeModal, location.pathname, needUnlock, sessionLatest.remind]);
 

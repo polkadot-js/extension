@@ -10,7 +10,7 @@ import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { ShieldCheck } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -32,6 +32,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const { currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const location = useLocation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
+  const [openAccountSelector, setOpenAccountSelector] = useState(false);
   const [sessionLatest, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
@@ -44,14 +45,15 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
 
-    if (isAllAccount) {
+    if (isAllAccount || !!currentAccount?.isExternal) {
       activeModal(AccountSelectorModalId);
+      setOpenAccountSelector(true);
     } else if (currentAccount?.address) {
-      navigate(`/accounts/detail/${currentAccount?.address}`, { state: { from: location.pathname } });
+      navigate(`/accounts/export/${currentAccount?.address}`, { state: { from: location.pathname } });
     }
 
     setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false });
-  }, [activeModal, currentAccount?.address, inactiveModal, isAllAccount, location.pathname, navigate, sessionLatest, setSessionLatest]);
+  }, [activeModal, currentAccount, inactiveModal, isAllAccount, location.pathname, navigate, sessionLatest, setSessionLatest]);
 
   useEffect(() => {
     if (!sessionLatest.remind) {
@@ -111,7 +113,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         </div>
 
       </SwModal>
-      <SelectAccount />
+      {openAccountSelector && <SelectAccount />}
     </>
   );
 }

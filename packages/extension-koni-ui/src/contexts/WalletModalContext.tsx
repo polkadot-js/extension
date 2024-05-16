@@ -100,18 +100,20 @@ export const WalletModalContext = ({ children }: Props) => {
 
   useEffect(() => {
     const infoSession = Date.now();
+
     const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
     getConfig()
       .then((timeBackup) => {
-        if (!latestSession.remind || infoSession - latestSession.timeCalculate < timeBackup) {
+        if (infoSession - latestSession.timeCalculate >= timeBackup) {
+          setSessionLatest({ ...latestSession, timeCalculate: infoSession, remind: true });
+        } else if (!latestSession.remind && infoSession - latestSession.timeCalculate < timeBackup) {
           setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false });
         } else if (location.pathname) {
           setSessionLatest(({ remind, timeBackup, timeCalculate }) =>
             ({ timeBackup, remind, timeCalculate: remind ? timeCalculate : infoSession }));
         }
-      })
-      .catch(console.error);
+      }).catch(console.error);
   }, [activeModal, getConfig, location.pathname, setSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3

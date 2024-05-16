@@ -194,6 +194,14 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
+export function _isChainSupportEvmERC20 (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.ERC20) || false;
+}
+
+export function _isChainSupportWasmPSP22 (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.PSP22) || false;
+}
+
 export const _isSupportOrdinal = (chain: string) => {
   const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 

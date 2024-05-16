@@ -4,12 +4,12 @@
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
-import { DISCONNECT_EXTENSION_MODAL, LATEST_SESSION, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ButtonProps, Icon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -18,7 +18,6 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -43,13 +42,6 @@ const iconMap = {
   [ConnectionStatement.PARTIAL_CONNECTED]: PlugsConnected,
   [ConnectionStatement.DISCONNECTED]: Plugs,
   [ConnectionStatement.BLOCKED]: Plugs
-};
-
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeCalculate: Date.now(),
-  timeBackup: 300000,
-  finishStep: true
 };
 
 const ConnectWebsiteId = 'connectWebsiteId';
@@ -77,7 +69,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
   const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
-  const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
 
   const accounts = useMemo((): AccountJson[] => {
     const result = [..._accounts].sort(funcSortByName);
@@ -116,7 +107,6 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const _onSelect = useCallback((address: string) => {
     if (address) {
-      setSessionLatest((prevState) => ({ ...prevState, finishStep: true }));
       const accountByAddress = findAccountByAddress(accounts, address);
 
       if (accountByAddress) {
@@ -150,22 +140,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         console.error('Failed to switch account');
       }
     }
-  }, [setSessionLatest, accounts, location.pathname, navigate, goHome]);
+  }, [accounts, location.pathname, navigate, goHome]);
 
   const onClickDetailAccount = useCallback((address: string) => {
     return () => {
-      setSessionLatest((prevState) => ({ ...prevState, finishStep: true }));
       inactiveModal(modalId);
       setTimeout(() => {
         navigate(`/accounts/detail/${address}`);
       }, 100);
     };
-  }, [setSessionLatest, inactiveModal, navigate]);
+  }, [inactiveModal, navigate]);
 
   const openDisconnectExtensionModal = useCallback(() => {
     activeModal(DISCONNECT_EXTENSION_MODAL);
-    setSessionLatest((prevState) => ({ ...prevState, finishStep: true }));
-  }, [activeModal, setSessionLatest]);
+  }, [activeModal]);
 
   const onClickItemQrButton = useCallback((address: string) => {
     setSelectedQrAddress(address);
@@ -310,9 +298,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const onOpenConnectWebsiteModal = useCallback(() => {
     if (isCurrentTabFetched) {
       activeModal(ConnectWebsiteId);
-      setSessionLatest((prevState) => ({ ...prevState, finishStep: true }));
     }
-  }, [activeModal, isCurrentTabFetched, setSessionLatest]);
+  }, [activeModal, isCurrentTabFetched]);
 
   const onCloseConnectWebsiteModal = useCallback(() => {
     inactiveModal(ConnectWebsiteId);

@@ -5,5 +5,4 @@ export interface SessionStorage {
   timeCalculate: number;
   remind: boolean;
   timeBackup: number;
-  finishStep: boolean;
 }

@@ -6,7 +6,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { BackgroundExpandView } from '@subwallet/extension-koni-ui/components';
 import { Logo2D } from '@subwallet/extension-koni-ui/components/Logo';
-import { LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL, TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
+import { HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL, TRANSACTION_STORAGES } from '@subwallet/extension-koni-ui/constants';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { usePredefinedModal, WalletModalContext } from '@subwallet/extension-koni-ui/contexts/WalletModalContext';
@@ -51,8 +51,7 @@ const timeBackup = 300000;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeBackup,
-  timeCalculate: Date.now(),
-  finishStep: true
+  timeCalculate: Date.now()
 };
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -107,7 +106,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const [initAccount, setInitAccount] = useState(currentAccount);
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
 
   const needMigrate = useMemo(
@@ -255,9 +254,10 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     if (infoSession - latestSession.timeCalculate > latestSession.timeBackup && sessionLatest.remind &&
       !needUnlock &&
       location.pathname.includes('home')) {
+      inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, location.pathname, needUnlock, sessionLatest.remind]);
+  }, [activeModal, inactiveModal, location.pathname, needUnlock, sessionLatest.remind]);
 
   if (rootLoading || redirectPath) {
     return <>{redirectPath && <Navigate to={redirectPath} />}</>;

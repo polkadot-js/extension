@@ -1,10 +1,10 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { EXPORT_ACCOUNTS_PASSWORD_MODAL, LATEST_SESSION, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFocusById, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { exportAccountsV2 } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, FormFieldData, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, SwModal } from '@subwallet/react-ui';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
@@ -13,7 +13,6 @@ import { CaretLeft, CheckCircle, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   addresses?: string[]
@@ -40,17 +39,9 @@ const onExportJson = (jsonData: KeyringPairs$Json): (() => void) => {
   };
 };
 
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeCalculate: Date.now(),
-  timeBackup: 300000,
-  finishStep: true
-};
-
 function Component ({ addresses, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const { inactiveModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
@@ -94,11 +85,10 @@ function Component ({ addresses, className = '' }: Props): React.ReactElement<Pr
           onError(e.message);
         })
         .finally(() => {
-          setSessionLatest((prevState) => ({ ...prevState, finishStep: true }));
           setLoading(false);
         });
     }, 500);
-  }, [addresses, closeModal, inactiveModal, navigate, onError, setSessionLatest]);
+  }, [addresses, closeModal, inactiveModal, navigate, onError]);
 
   useFocusById(passwordInputId);
 

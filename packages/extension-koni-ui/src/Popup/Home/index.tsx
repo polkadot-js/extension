@@ -23,8 +23,7 @@ export const GlobalSearchTokenModalId = 'globalSearchToken';
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeBackup: 300000,
-  timeCalculate: Date.now(),
-  finishStep: true
+  timeCalculate: Date.now()
 };
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -44,8 +43,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage
     , []);
-
-  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -76,10 +73,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       activeModal(GENERAL_TERM_AND_CONDITION_MODAL);
     }
   }, [activeModal, isConfirmedTermGeneral, setIsConfirmedTermGeneral]);
-
-  useEffect(() => {
-    sessionLatest.remind && inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
-  }, [inactiveModal, sessionLatest.remind]);
 
   return (
     <>

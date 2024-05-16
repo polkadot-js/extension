@@ -25,8 +25,7 @@ const timeBackup = 1000 * 60 * 60 * 24 * 15;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeBackup,
-  timeCalculate: Date.now(),
-  finishStep: true
+  timeCalculate: Date.now()
 };
 
 export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations'];
@@ -107,12 +106,12 @@ export const WalletModalContext = ({ children }: Props) => {
     getConfig()
       .then((timeBackup) => {
         if (infoSession - latestSession.timeCalculate >= timeBackup) {
-          setSessionLatest({ ...latestSession, remind: true, finishStep: false });
+          setSessionLatest({ ...latestSession, remind: true });
         } else if (infoSession - latestSession.timeCalculate < timeBackup) {
-          setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false, finishStep: true });
+          setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false });
         } else if (location.pathname) {
-          setSessionLatest(({ finishStep, remind, timeBackup, timeCalculate }) =>
-            ({ timeBackup, remind, timeCalculate: remind ? timeCalculate : infoSession, finishStep }));
+          setSessionLatest(({ remind, timeBackup, timeCalculate }) =>
+            ({ timeBackup, remind, timeCalculate: remind ? timeCalculate : infoSession }));
         }
       }).catch(console.error);
   }, [activeModal, getConfig, location.pathname, setSessionLatest]);

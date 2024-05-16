@@ -10,8 +10,7 @@ const timeBackup = 1000 * 60 * 60 * 24 * 15;
 const DEFAULT_SESSION_VALUE: SessionStorage = {
   remind: false,
   timeBackup,
-  timeCalculate: Date.now(),
-  finishStep: true
+  timeCalculate: Date.now()
 };
 
 interface BackupTimeOutData {

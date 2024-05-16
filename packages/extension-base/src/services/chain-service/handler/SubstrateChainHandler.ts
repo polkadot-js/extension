@@ -109,7 +109,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     return result;
   }
 
-  public async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
+  public async getSubstrateContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
     let tokenContract: ContractPromise;
     let name = '';
     let decimals: number | undefined = -1;

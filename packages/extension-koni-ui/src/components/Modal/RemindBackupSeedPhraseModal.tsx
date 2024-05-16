@@ -140,14 +140,14 @@ const RemindBackupSeedPhraseModal = styled(Component)<Props>(({ theme: { token }
       lineHeight: token.lineHeightHeading6
     },
 
+    '.__modal-user-guide': {
+      marginLeft: token.marginXXS
+    },
+
     '.ant-sw-modal-footer': {
       borderTop: 'none',
       display: 'flex',
       gap: token.sizeSM
-    },
-
-    '.__modal-user-guide': {
-      marginLeft: token.marginXXS
     }
   };
 });

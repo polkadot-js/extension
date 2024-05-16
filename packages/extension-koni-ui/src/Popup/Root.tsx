@@ -254,7 +254,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
 
     if (infoSession - latestSession.timeCalculate > latestSession.timeBackup && sessionLatest.remind &&
       !needUnlock &&
-      ![createPasswordUrl, welcomeUrl, loginUrl, accountNewSeedPhrase, createDoneUrl].includes(location.pathname)) {
+      location.pathname.includes('home')) {
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
   }, [activeModal, location.pathname, needUnlock, sessionLatest.remind]);

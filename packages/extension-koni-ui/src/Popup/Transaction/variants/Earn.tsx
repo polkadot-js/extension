@@ -11,13 +11,13 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
-import { BN_ZERO, EARNING_INSTRUCTION_MODAL, LATEST_SESSION, SELECT_ACCOUNT_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
+import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
-import { EarnParams, FormCallbacks, FormFieldData, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { EarnParams, FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertFieldToObject, isAccountAll, parseNominations, reformatAddress, simpleCheckForm } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Button, ButtonProps, Form, Icon, ModalContext, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -26,7 +26,6 @@ import { CheckCircle, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -43,19 +42,11 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 
 // Not enough balance to xcm;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeCalculate: Date.now(),
-  timeBackup: 300000,
-  finishStep: true
-};
-const AccountSelectorModalId = SELECT_ACCOUNT_MODAL;
 
 const Component = () => {
   const { t } = useTranslation();
   const notify = useNotification();
-  const { activeModal, checkActive } = useContext(ModalContext);
-  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
+  const { activeModal } = useContext(ModalContext);
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
@@ -847,11 +838,11 @@ const Component = () => {
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
   useEffect(() => {
-    if (!compound && !screenLoading && !sessionLatest.finishStep && !checkActive(AccountSelectorModalId)) {
+    if (!compound && !screenLoading) {
       isClickInfoButtonRef.current = false;
       activeModal(instructionModalId);
     }
-  }, [activeModal, checkActive, compound, screenLoading, sessionLatest.finishStep]);
+  }, [activeModal, compound, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
@@ -864,11 +855,11 @@ const Component = () => {
           }
 
           isClickInfoButtonRef.current = true;
-          !sessionLatest.finishStep && checkActive(AccountSelectorModalId) && activeModal(instructionModalId);
+          activeModal(instructionModalId);
         }
       }
     ];
-  }, [activeModal, checkActive, screenLoading, sessionLatest.finishStep, submitLoading]);
+  }, [activeModal, screenLoading, submitLoading]);
 
   useEffect(() => {
     setSubHeaderRightButtons(subHeaderButtons);

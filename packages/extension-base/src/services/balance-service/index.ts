@@ -367,7 +367,7 @@ export class BalanceService implements StoppableServiceInterface {
 
     const unsub = subscribeBalance(addresses, activeChainSlugs, assets, assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
       !cancel && this.setBalanceItem(result);
-    });
+    }, ExtrinsicType.TRANSFER_BALANCE);
 
     const unsub2 = this.state.subscribeMantaPayBalance();
 

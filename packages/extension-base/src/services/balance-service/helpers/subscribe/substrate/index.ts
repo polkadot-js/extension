@@ -105,7 +105,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
   const balanceSubscribe: Observable<Codec[]> = substrateApi.rx.query.system.account.multi(addresses);
 
-  let poolSubscribe: Observable<Codec[]> | undefined;
+  let poolSubscribe: Observable<Codec[]> | undefined; // add points in nomination pool back to user's balance
 
   if ((_isSubstrateRelayChain(chainInfo) && substrateApi.query.nominationPools)) {
     poolSubscribe = substrateApi.rx.query.nominationPools.poolMembers?.multi(addresses);
@@ -128,7 +128,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
       const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';
 
-      const isStrict = !!extrinsicType && ![ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);
+      const isStrict = !extrinsicType || ![ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), isStrict);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
       const totalLockedFromTransfer = new BigN(totalBalance).minus(transferableBalance).plus(nominationPoolBalance);

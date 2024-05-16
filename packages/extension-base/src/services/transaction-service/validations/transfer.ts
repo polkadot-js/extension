@@ -181,7 +181,7 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     return;
   }
 
-  const { edAsWarning, isTransferAll, skipFeeValidation } = transactionInput;
+  const { isTransferAll, skipFeeValidation } = transactionInput;
 
   if (skipFeeValidation) {
     return;
@@ -189,7 +189,6 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
 
   const bnFee = new BigN(validationResponse.estimateFee.value);
   const bnNativeTokenAvailable = new BigN(nativeTokenAvailable);
-  const bnExistentialDeposit = new BigN(_getTokenMinAmount(nativeTokenInfo));
   const bnNativeTokenTransferAmount = new BigN(validationResponse.transferNativeAmount || '0');
 
   if (!bnNativeTokenAvailable.gt(0)) {
@@ -207,9 +206,7 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
   }
 
-  if (!isTransferAll && bnNativeTokenAvailable.minus(bnNativeTokenTransferAmount).minus(bnFee).lt(bnExistentialDeposit)) {
-    edAsWarning
-      ? validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT))
-      : validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+  if (!isTransferAll && bnNativeTokenAvailable.minus(bnNativeTokenTransferAmount).minus(bnFee).lte(0)) {
+    validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
   }
 }

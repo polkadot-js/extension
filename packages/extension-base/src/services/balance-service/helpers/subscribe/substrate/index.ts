@@ -128,8 +128,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
       const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';
 
-      const isStrict = !extrinsicType || ![ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
-      const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), isStrict);
+      const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), extrinsicType);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
       const totalLockedFromTransfer = new BigN(totalBalance).minus(transferableBalance).plus(nominationPoolBalance);
 
@@ -138,7 +137,8 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
         tokenSlug: chainNativeTokenSlug,
         free: transferableBalance,
         locked: totalLockedFromTransfer.toFixed(),
-        state: APIItemState.READY
+        state: APIItemState.READY,
+        metadata: balanceInfo
       });
     });
 

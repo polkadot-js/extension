@@ -224,6 +224,8 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     }
   }
 
+  console.log('transfer', transfer?.toHex());
+
   return [transfer, transferAmount || value];
 };
 

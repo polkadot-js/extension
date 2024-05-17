@@ -640,6 +640,7 @@ export interface BasicTokenInfo {
 
 export interface AmountData extends BasicTokenInfo {
   value: string;
+  metadata?: unknown;
 }
 
 export interface FeeData extends AmountData {

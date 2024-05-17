@@ -128,7 +128,7 @@ export default class TransactionService {
     checkSigningAccountForTransaction(validationResponse);
 
     const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(chain);
-    const { value: nativeTokenAvailable } = await this.state.balanceService.getTransferableBalance(address, chain, nativeTokenInfo.slug, extrinsicType);
+    const nativeTokenAvailable = await this.state.balanceService.getTransferableBalance(address, chain, nativeTokenInfo.slug, extrinsicType);
 
     // Check available balance against transaction fee
     checkBalanceWithTransactionFee(validationResponse, transactionInput, nativeTokenInfo, nativeTokenAvailable);

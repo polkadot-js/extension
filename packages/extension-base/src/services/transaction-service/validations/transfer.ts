@@ -3,9 +3,10 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { _Address, BasicTxErrorType, BasicTxWarningCode, ExtrinsicType, FeeData, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { _Address, AmountData, BasicTxErrorType, BasicTxWarningCode, ExtrinsicType, FeeData, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
+import { _canAccountBeReaped, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
@@ -176,19 +177,25 @@ export function checkSigningAccountForTransaction (validationResponse: SWTransac
   }
 }
 
-export function checkBalanceWithTransactionFee (validationResponse: SWTransactionResponse, transactionInput: SWTransactionInput, nativeTokenInfo: _ChainAsset, nativeTokenAvailable: string) {
+export function checkBalanceWithTransactionFee (validationResponse: SWTransactionResponse, transactionInput: SWTransactionInput, nativeTokenInfo: _ChainAsset, nativeTokenAvailable: AmountData) {
   if (!validationResponse.estimateFee) { // todo: estimateFee should be must-have, need to refactor interface
     return;
   }
 
-  const { isTransferAll, skipFeeValidation } = transactionInput;
+  if (!nativeTokenAvailable.metadata) {
+    validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+
+    return;
+  }
+
+  const { edAsWarning, extrinsicType, isTransferAll, skipFeeValidation } = transactionInput;
 
   if (skipFeeValidation) {
     return;
   }
 
   const bnFee = new BigN(validationResponse.estimateFee.value);
-  const bnNativeTokenAvailable = new BigN(nativeTokenAvailable);
+  const bnNativeTokenAvailable = new BigN(nativeTokenAvailable.value);
   const bnNativeTokenTransferAmount = new BigN(validationResponse.transferNativeAmount || '0');
 
   if (!bnNativeTokenAvailable.gt(0)) {
@@ -206,7 +213,12 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
   }
 
-  if (!isTransferAll && bnNativeTokenAvailable.minus(bnNativeTokenTransferAmount).minus(bnFee).lte(0)) {
-    validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
+  const isNeedCheckRemainingBalance = !isTransferAll && extrinsicType === ExtrinsicType.TRANSFER_BALANCE && _canAccountBeReaped(nativeTokenAvailable.metadata as FrameSystemAccountInfo);
+  const isRemainingBalanceValid = bnNativeTokenAvailable.minus(bnNativeTokenTransferAmount).minus(bnFee).lt(_getTokenMinAmount(nativeTokenInfo));
+
+  if (isNeedCheckRemainingBalance && isRemainingBalanceValid) {
+    edAsWarning
+      ? validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT))
+      : validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
   }
 }

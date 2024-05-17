@@ -214,10 +214,11 @@ export class BalanceService implements StoppableServiceInterface {
 
         if (rs.tokenSlug === tSlug) {
           hasError = false;
-          const balance = {
+          const balance: AmountData = {
             value: rs.free,
             decimals: tokenInfo.decimals || 0,
-            symbol: tokenInfo.symbol
+            symbol: tokenInfo.symbol,
+            metadata: rs.metadata
           };
 
           if (callback) {

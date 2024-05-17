@@ -102,9 +102,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             const selectedTokenType = getFieldValue('type') as _AssetType;
             const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType) && isEthereumAddress(contractAddress);
             const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
-            const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
+            const isValidGrc20Contract = [_AssetType.GRC20].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
+            const reformattedAddress = isValidGrc20Contract ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
-            if (isValidEvmContract || isValidWasmContract) {
+            if (isValidEvmContract || isValidWasmContract || isValidGrc20Contract) {
               setLoading(true);
               validateCustomToken({
                 contractAddress: reformattedAddress,
@@ -183,7 +184,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
     const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
 
-    const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
+    const reformattedAddress = type === _AssetType.GRC20 ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 

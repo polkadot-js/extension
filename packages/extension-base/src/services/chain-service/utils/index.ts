@@ -199,7 +199,11 @@ export function _isChainSupportEvmERC20 (chainInfo: _ChainInfo) {
 }
 
 export function _isChainSupportWasmPSP22 (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.PSP22) || false;
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP22) || false;
+}
+
+export function _isChainSupportGRC20 (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.GRC20) || false;
 }
 
 export const _isSupportOrdinal = (chain: string) => {

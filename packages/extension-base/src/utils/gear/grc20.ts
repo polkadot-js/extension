@@ -13,6 +13,11 @@ export type ActorId = `0x${string}`
 
 export type U256 = bigint
 
+export const DEFAULT_GEAR_ADDRESS = {
+  ALICE: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+  BOB: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty'
+};
+
 export class GRC20 {
   private registry: TypeRegistry;
 

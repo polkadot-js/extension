@@ -224,6 +224,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
   console.log('transfer', transfer?.toHex());
 
   return [transfer, transferAmount || value];

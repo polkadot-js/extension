@@ -439,10 +439,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
+    const infoSession = Date.now();
+
+    const { remind, timeBackup, timeCalculate } = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
     inactiveModal(modalId);
+
+    if (infoSession - timeCalculate >= timeBackup && remind) {
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+    }
+
     setSelectedItem(null);
     setOpenDetailLink(false);
-  }, [inactiveModal]);
+  }, [activeModal, inactiveModal]);
 
   const onClickFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -454,16 +463,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (existed) {
         setSelectedItem(existed);
+        inactiveModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap, inactiveModal]);
 
   useEffect(() => {
-    const infoSession = Date.now();
-
-    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
-
     if (isActive) {
       setSelectedItem((selected) => {
         if (selected) {
@@ -475,10 +481,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         }
       });
       inactiveModal(remindSeedPhraseModalId);
-    } else if (infoSession - latestSession.timeCalculate > latestSession.timeBackup && latestSession.remind) {
-      activeModal(remindSeedPhraseModalId);
     }
-  }, [isActive, historyMap, activeModal, inactiveModal]);
+  }, [isActive, historyMap, inactiveModal]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {

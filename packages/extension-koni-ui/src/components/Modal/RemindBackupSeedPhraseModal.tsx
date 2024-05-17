@@ -44,7 +44,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-    const state = (location.state ? { from: location.pathname, ...location.state } : { from: location.pathname }) as Record<string, string>;
+    const state = (location.state ? { ...location.state, from: location.pathname } : { from: location.pathname }) as Record<string, string>;
 
     if (isAllAccount || !!currentAccount?.isExternal) {
       activeModal(AccountSelectorModalId);
@@ -77,7 +77,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           block={true}
           onClick={onExport}
         >
-          {t('Backup now')}
+          {t('Back up now')}
         </Button>
       </>
     );

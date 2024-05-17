@@ -9,11 +9,12 @@ import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_B
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -25,11 +26,13 @@ const DEFAULT_SESSION_VALUE: SessionStorage = {
   timeBackup: 300000,
   timeCalculate: Date.now()
 };
+const transactionUrl = 'transaction';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
+  const isFromTransaction = useLocation().state as RemindBackUpSeedPhraseParamState;
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
@@ -75,11 +78,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     const infoSession = Date.now();
 
-    if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup && sessionLatest.remind) {
+    if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup &&
+      sessionLatest.remind &&
+      (isFromTransaction?.from !== transactionUrl)) {
       inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, inactiveModal, sessionLatest]);
+  }, [activeModal, inactiveModal, isFromTransaction?.from, sessionLatest]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

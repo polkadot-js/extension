@@ -44,16 +44,17 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
+    const state = (location.state ? { from: location.pathname, ...location.state } : { from: location.pathname }) as Record<string, string>;
 
     if (isAllAccount || !!currentAccount?.isExternal) {
       activeModal(AccountSelectorModalId);
       setOpenAccountSelector(true);
     } else if (currentAccount?.address) {
-      navigate(`/accounts/export/${currentAccount?.address}`, { state: { from: location.pathname } });
+      navigate(`/accounts/export/${currentAccount?.address}`, { state });
     }
 
     setSessionLatest({ ...sessionLatest, timeCalculate: Date.now(), remind: false });
-  }, [activeModal, currentAccount, inactiveModal, isAllAccount, location.pathname, navigate, sessionLatest, setSessionLatest]);
+  }, [activeModal, currentAccount?.address, currentAccount?.isExternal, inactiveModal, isAllAccount, location, navigate, sessionLatest, setSessionLatest]);
 
   useEffect(() => {
     if (!sessionLatest.remind) {

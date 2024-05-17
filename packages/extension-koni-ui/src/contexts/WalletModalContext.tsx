@@ -106,7 +106,7 @@ export const WalletModalContext = ({ children }: Props) => {
     getConfig()
       .then((timeBackup) => {
         if (infoSession - latestSession.timeCalculate >= timeBackup) {
-          setSessionLatest({ ...latestSession, remind: true });
+          setSessionLatest({ ...latestSession, remind: true, timeBackup });
         } else if (infoSession - latestSession.timeCalculate < timeBackup) {
           setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false });
         } else if (location.pathname) {

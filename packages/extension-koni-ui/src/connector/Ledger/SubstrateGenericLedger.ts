@@ -6,6 +6,7 @@ import type { ResponseSign } from '@zondax/ledger-polkadot/dist/types';
 import { wrapBytes } from '@subwallet/extension-dapp';
 import { PolkadotGenericApp } from '@zondax/ledger-substrate';
 
+import { LEDGER_DEFAULT_ACCOUNT, LEDGER_DEFAULT_CHANGE, LEDGER_DEFAULT_INDEX } from '@polkadot/hw-ledger/constants';
 import { AccountOptions, LedgerAddress, LedgerSignature, LedgerVersion } from '@polkadot/hw-ledger/types';
 import { transports } from '@polkadot/hw-ledger-transports';
 import { hexAddPrefix, hexStripPrefix, u8aToHex } from '@polkadot/util';
@@ -31,15 +32,11 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
     });
   }
 
-  serializePath (accountOffset = 0, addressOffset = 0, accountOptions?: Partial<AccountOptions>): string {
-    const account = (accountOptions?.account || 0) + (accountOffset || 0);
-    const addressIndex = (accountOptions?.addressIndex || 0) + (addressOffset || 0);
-    const change = accountOptions?.change || 0;
-
-    return `m/44'/354'/${account}'/${change}'/${addressIndex}'`;
-  }
-
-  getAccountOption (accountOffset = 0, addressOffset = 0, accountOptions?: Partial<AccountOptions>) {
+  getAccountOption (accountOffset = 0, addressOffset = 0, accountOptions: Partial<AccountOptions> = {
+    account: LEDGER_DEFAULT_ACCOUNT,
+    addressIndex: LEDGER_DEFAULT_INDEX,
+    change: LEDGER_DEFAULT_CHANGE
+  }) {
     const account = (accountOptions?.account || 0) + (accountOffset || 0);
     const addressIndex = (accountOptions?.addressIndex || 0) + (addressOffset || 0);
     const change = accountOptions?.change || 0;
@@ -55,7 +52,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
     return this.withApp(async (app): Promise<LedgerAddress> => {
       const options = this.getAccountOption(accountOffset, addressOffset, accountOptions);
 
-      const { address, pubKey } = await this.wrapError(app.getAddress(options.account, options.change, options.addressIndex, 0, true));
+      const { address, pubKey } = await this.wrapError(app.getAddress(options.account, options.change, options.addressIndex, 42, false));
 
       return {
         address,
@@ -104,7 +101,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
 
       const transport = await def.create();
 
-      this.app = PolkadotGenericApp.newApp(transport, 'westend', 'http://192.168.10.12:3001/transaction/metadata');
+      this.app = PolkadotGenericApp.newApp(transport, 'Polkadot', 'http://192.168.10.12:3001/transaction/metadata');
     }
 
     return this.app;

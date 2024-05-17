@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type Transport from '@ledgerhq/hw-transport';
-import type { AccountOptions } from '@polkadot/hw-ledger/types';
 
 import { Ledger, LedgerTypes } from '@subwallet/extension-koni-ui/types';
 
@@ -26,8 +25,6 @@ export abstract class BaseLedger<T extends LedgerApp> extends Ledger {
     // this.#chainId = chainId;
     this.transport = transport;
   }
-
-  protected abstract serializePath (accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): string
 
   protected abstract getApp(): Promise<T>
 

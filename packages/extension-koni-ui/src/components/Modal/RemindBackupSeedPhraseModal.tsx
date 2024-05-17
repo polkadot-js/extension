@@ -76,7 +76,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           block={true}
           onClick={onExport}
         >
-          {t('Back up now')}
+          {t('Backup now')}
         </Button>
       </>
     );

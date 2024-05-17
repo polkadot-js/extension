@@ -5,7 +5,7 @@ import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -39,10 +39,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const banners = useGetBannerByScreen('home');
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0]
+
     , [banners]);
 
   const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage
+
     , []);
+
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -66,7 +70,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (firstBanner && !sessionLatestInit.remind) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
-  }, [activeModal, firstBanner, sessionLatestInit.remind, inactiveModal]);
+  }, [activeModal, firstBanner, sessionLatestInit.remind]);
+
+  useEffect(() => {
+    const infoSession = Date.now();
+
+    if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup && sessionLatest.remind) {
+      inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+    }
+  }, [activeModal, inactiveModal, sessionLatest]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

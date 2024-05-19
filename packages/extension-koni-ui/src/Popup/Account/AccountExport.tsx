@@ -5,6 +5,7 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -75,7 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { goHome } = useDefaultNavigate();
+  const { goBack } = useDefaultNavigate();
   const { accountAddress } = useParams();
   const isBackToHome = useLocation().state as RemindBackUpSeedPhraseParamState;
 
@@ -282,11 +283,15 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [accountAddress, isBackToHome, navigate]);
 
+  const goHomeWithState = useCallback(() => {
+    goBack(DEFAULT_ROUTER_PATH, { from: 'ignoreBanner' });
+  }, [goBack]);
+
   useEffect(() => {
     if (!account) {
-      goHome();
+      goBack(DEFAULT_ROUTER_PATH, { from: 'ignoreBanner' });
     }
-  }, [account, goHome, navigate]);
+  }, [account, goBack, navigate]);
 
   useEffect(() => {
     if (account?.address) {
@@ -310,12 +315,12 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: firstStep ? undefined : FinishIcon,
           disabled: isDisabled || !exportTypes.length,
           loading: loading,
-          onClick: firstStep ? form.submit : goHome
+          onClick: firstStep ? form.submit : goHomeWithState
         }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome,
+            onClick: goHomeWithState,
             disabled: loading
           }
         ]}

@@ -33,7 +33,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
-  const isFromIgnorePage = useLocation().state as RemindBackUpSeedPhraseParamState;
+  const location = useLocation();
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
@@ -44,9 +44,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
 
-  const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage, []);
-
-  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
+  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -67,13 +65,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   useEffect(() => {
+    const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
+    const sessionLatestInit = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
+    console.log(sessionLatestInit);
+
     if (firstBanner && !sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
-  }, [activeModal, firstBanner, sessionLatestInit.remind, isFromIgnorePage?.from]);
+  }, [activeModal, firstBanner, location]);
 
   useEffect(() => {
     const infoSession = Date.now();
+
+    const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
 
     if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup &&
       sessionLatest.remind &&
@@ -81,7 +86,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, inactiveModal, isFromIgnorePage?.from, sessionLatest]);
+  }, [activeModal, inactiveModal, location, sessionLatest]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

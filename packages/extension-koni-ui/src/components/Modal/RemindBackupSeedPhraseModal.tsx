@@ -92,6 +92,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         closable={true}
         footer={footerModal}
         id={RemindBackupSeedPhraseModalId}
+        maskClosable={false}
         onCancel={onCancel}
         title={t('Back up your seed phrase!')}
       >

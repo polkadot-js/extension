@@ -26,6 +26,7 @@ const DEFAULT_SESSION_VALUE: SessionStorage = {
   timeBackup: 300000
 };
 const DomainUserGuide = '/account-management/export-and-backup-accounts';
+const HistoryPageUrl = '/home/history';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -44,7 +45,8 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const onExport = useCallback(() => {
     inactiveModal(RemindBackupSeedPhraseModalId);
-    const state = (location.state ? { ...location.state, from: location.pathname } : { from: location.pathname }) as Record<string, string>;
+    const from = location.pathname.includes(HistoryPageUrl) ? HistoryPageUrl : location.pathname;
+    const state = (location.state ? { ...location.state, from } : { from }) as Record<string, string>;
 
     if (isAllAccount || !!currentAccount?.isExternal) {
       activeModal(AccountSelectorModalId);

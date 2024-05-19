@@ -278,7 +278,7 @@ const Component: React.FC<Props> = (props: Props) => {
     if (accountAddress && !isBackToHome?.from) {
       navigate(`/accounts/detail/${accountAddress}`);
     } else {
-      navigate(isBackToHome.from, { state: isBackToHome });
+      navigate(isBackToHome.from, { state: { ...isBackToHome, from: 'ignoreBanner' } });
     }
   }, [accountAddress, isBackToHome, navigate]);
 

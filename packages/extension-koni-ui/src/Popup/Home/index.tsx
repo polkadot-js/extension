@@ -26,13 +26,14 @@ const DEFAULT_SESSION_VALUE: SessionStorage = {
   timeBackup: 300000,
   timeCalculate: Date.now()
 };
-const transactionUrl = 'transaction';
+const historyPageIgnoreRemind = 'ignoreRemind';
+const historyPageIgnoreBanner = 'ignoreBanner';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const chainsByAccountType = useGetChainSlugsByAccountType();
   const tokenGroupStructure = useTokenGroup(chainsByAccountType);
-  const isFromTransaction = useLocation().state as RemindBackUpSeedPhraseParamState;
+  const isFromIgnorePage = useLocation().state as RemindBackUpSeedPhraseParamState;
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
@@ -41,13 +42,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const handleMantaPaySync = useHandleMantaPaySync();
   const banners = useGetBannerByScreen('home');
 
-  const firstBanner = useMemo((): CampaignBanner | undefined => banners[0]
+  const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
 
-    , [banners]);
-
-  const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage
-
-    , []);
+  const sessionLatestInit = useMemo(() => (JSON.parse(localStorage.getItem(LATEST_SESSION) || '{}') || DEFAULT_SESSION_VALUE) as SessionStorage, []);
 
   const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, sessionLatestInit);
 
@@ -70,21 +67,21 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   useEffect(() => {
-    if (firstBanner && !sessionLatestInit.remind) {
+    if (firstBanner && !sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
-  }, [activeModal, firstBanner, sessionLatestInit.remind]);
+  }, [activeModal, firstBanner, sessionLatestInit.remind, isFromIgnorePage?.from]);
 
   useEffect(() => {
     const infoSession = Date.now();
 
     if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup &&
       sessionLatest.remind &&
-      (isFromTransaction?.from !== transactionUrl)) {
+      (isFromIgnorePage?.from !== historyPageIgnoreRemind)) {
       inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
       activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
     }
-  }, [activeModal, inactiveModal, isFromTransaction?.from, sessionLatest]);
+  }, [activeModal, inactiveModal, isFromIgnorePage?.from, sessionLatest]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

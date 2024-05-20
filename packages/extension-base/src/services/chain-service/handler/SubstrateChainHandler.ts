@@ -177,7 +177,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
     ]);
 
-    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes as number;
+    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
 
     if (!nameRes || !symbolRes) {
       contractError = true;

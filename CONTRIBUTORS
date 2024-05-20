@@ -1,19 +1,19 @@
-    2511	AnhMTV                        	Release version 1.1.64
+    2518	AnhMTV                        	Release version 1.1.65
     2352	Nam Phạm                      	[Issue 2754] fix: fix eslint
-    2027	S2kael                        	[Issue-3020] Update chain-list stable version
-     813	lw-cdm                        	
+    2029	S2kael                        	[Issue-3040] Update stable version for chain-list
+     815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
-     403	nguyentiendung                	[Issue-3011] Update UI code for change symbol
+     416	nguyentiendung                	[Issue-2914] Update yarn.lock
      185	quangdo                       	
-     129	bluezdot                      	[Issue-3020] Update ED for mythos
+     137	bluezdot                      	Update chainlist dev
      106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
+     102	Automation Bot                	[CI Skip] Auto increase webapp build number
      101	lw-cdm                        	
-      99	Automation Bot                	[CI Skip] Auto increase webapp build number
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
-      73	Thiendekaco                   	[Issue 2859] [fix] Extension - deploy smart contract when use ledger
+      74	Thiendekaco                   	[Issue 3062] [fix] Extension - Unable to back screen in case open General settings to Marketing campaign
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR

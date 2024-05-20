@@ -661,7 +661,7 @@ const Component = ({ className }: ComponentProps) => {
         )}
       </MetaInfo>
     );
-  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, currencyData?.isPrefix, currencyData.symbol, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 

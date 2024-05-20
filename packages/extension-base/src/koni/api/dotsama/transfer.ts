@@ -142,6 +142,12 @@ interface CreateTransferExtrinsicProps {
 export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string]> => {
   const api = substrateApi.api;
 
+  const isDisableTransfer = tokenInfo.metadata?.isDisableTransfer as boolean;
+
+  if (isDisableTransfer) {
+    return [null, value];
+  }
+
   // @ts-ignore
   let transfer: SubmittableExtrinsic<'promise'> | null = null;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;

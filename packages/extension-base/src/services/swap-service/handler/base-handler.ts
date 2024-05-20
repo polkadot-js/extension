@@ -106,10 +106,8 @@ export class SwapBaseHandler {
       xcmAmount = xcmAmount.plus(xcmFee);
     }
 
-    const alternativeTokenMinAmount = new BigNumber(alternativeAsset.minAmount || '0');
-
-    if (!bnAlternativeAssetBalance.minus(xcmAmount).gte(alternativeTokenMinAmount)) {
-      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(xcmFee).minus(alternativeTokenMinAmount);
+    if (!bnAlternativeAssetBalance.minus(xcmAmount).gt(0)) {
+      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(xcmFee);
       const maxValue = formatNumber(maxBn.toString(), fromAsset.decimals || 0);
 
       const altInputTokenInfo = this.chainService.getAssetBySlug(alternativeAssetSlug);
@@ -122,7 +120,7 @@ export class SwapBaseHandler {
       const altNetworkName = alternativeChain.name;
 
       const currentValue = formatNumber(bnFromAssetBalance.toString(), fromAsset.decimals || 0);
-      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee).minus(alternativeTokenMinAmount);
+      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee);
       const maxXCMValue = formatNumber(bnMaxXCM.toString(), fromAsset.decimals || 0);
 
       if (maxBn.lte(0) || bnFromAssetBalance.lte(0) || bnMaxXCM.lte(0)) {

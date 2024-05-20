@@ -9,7 +9,7 @@ import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/toke
 import { _BALANCE_TOKEN_GROUP, _MANTA_ZK_CHAIN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
-import { getGRC2ContractPromise } from '@subwallet/extension-base/utils';
+import { getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
@@ -163,7 +163,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
   } else if (_isTokenGearSmartContract(tokenInfo) && (api instanceof GearApi)) {
-    const contractPromise = getGRC2ContractPromise(api, _getContractAddressOfToken(tokenInfo));
+    const contractPromise = getGRC20ContractPromise(api, _getContractAddressOfToken(tokenInfo));
     const transaction = await contractPromise
       .transfer(u8aToHex(decodeAddress(to)), BigInt(value)) // Create transfer transaction
       .withAccount(from) // Set sender account

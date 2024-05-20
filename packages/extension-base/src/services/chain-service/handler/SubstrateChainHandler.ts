@@ -9,7 +9,7 @@ import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-s
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { DEFAULT_GEAR_ADDRESS, getGRC2ContractPromise } from '@subwallet/extension-base/utils';
+import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -112,7 +112,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     return result;
   }
 
-  private async getPsp22TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string) {
+  private async getPsp22TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string): Promise<[string, number, string, boolean]> {
     const tokenContract = new ContractPromise(apiPromise, _PSP22_ABI, contractAddress);
 
     const [nameResp, symbolResp, decimalsResp] = await Promise.all([
@@ -142,7 +142,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
   }
 
-  private async getPsp34TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string) {
+  private async getPsp34TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string): Promise<[string, number, string, boolean]> {
     const tokenContract = new ContractPromise(apiPromise, _PSP34_ABI, contractAddress);
 
     const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(apiPromise) }); // read-only operation so no gas limit
@@ -161,7 +161,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
   }
 
-  private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string) {
+  private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
     if (!(apiPromise instanceof GearApi)) {
       console.warn('Cannot subscribe GRC20 balance without GearApi instance');
 
@@ -169,7 +169,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
 
     let contractError = false;
-    const tokenContract = getGRC2ContractPromise(apiPromise, contractAddress);
+    const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
 
     const [nameRes, symbolRes, decimalsRes] = await Promise.all([
       tokenContract.name(DEFAULT_GEAR_ADDRESS.ALICE),
@@ -177,7 +177,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
     ]);
 
-    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
+    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes as number;
 
     if (!nameRes || !symbolRes) {
       contractError = true;

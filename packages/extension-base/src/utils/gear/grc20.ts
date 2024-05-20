@@ -203,7 +203,7 @@ export class GRC20 {
   }
 }
 
-export function getGRC2ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
+export function getGRC20ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
   const gearApi = apiPromise as GearApi;
 
   return new GRC20(gearApi, contractAddress as ActorId);

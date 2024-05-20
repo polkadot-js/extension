@@ -210,7 +210,7 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
   ].includes(nativeTokenInfo.originChain);
 
   if (bnNativeTokenTransferAmount.plus(bnFee).gt(bnNativeTokenAvailable) && (!isTransferAll || isChainNotSupportTransferAll)) {
-    validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
+    validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE)); // todo: should be generalized and reused in all features
   }
 
   const isNeedCheckRemainingBalance = !isTransferAll && extrinsicType === ExtrinsicType.TRANSFER_BALANCE && _canAccountBeReaped(nativeTokenAvailable.metadata as FrameSystemAccountInfo);

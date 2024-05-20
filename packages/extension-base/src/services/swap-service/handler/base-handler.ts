@@ -4,17 +4,16 @@
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { _validateBalanceToSwap, _validateSwapRecipient } from '@subwallet/extension-base/core/logic-validation/swap';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { DEFAULT_SWAP_FIRST_STEP, getSwapAlternativeAsset, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapFeeType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
-
-import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export interface SwapBaseInterface {
   getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
@@ -173,6 +172,9 @@ export class SwapBaseHandler {
   }
 
   public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean, stepIndex: number): Promise<TransactionError[]> {
+    // check swap quote timestamp
+    // check balance to pay transaction fee
+    // check balance against spending amount
     if (!params.selectedQuote) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -184,9 +186,6 @@ export class SwapBaseHandler {
       return Promise.resolve([new TransactionError(SwapErrorType.QUOTE_TIMEOUT)]);
     }
 
-    const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
-    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
-
     const stepFee = params.process.totalFee[stepIndex].feeComponent;
     const networkFee = stepFee.find((fee) => fee.feeType === SwapFeeType.NETWORK_FEE);
 
@@ -194,61 +193,34 @@ export class SwapBaseHandler {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
+    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
     const feeTokenInfo = this.chainService.getAssetBySlug(networkFee.tokenSlug);
     const feeTokenChain = this.chainService.getChainInfoByKey(feeTokenInfo.originChain);
+
+    const { fromAmount, minSwap } = params.selectedQuote;
 
     const [feeTokenBalance, fromAssetBalance] = await Promise.all([
       this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
       this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
     ]);
 
-    const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
-    const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
-    const bnFeeAmount = new BigNumber(networkFee.amount);
+    const balanceError = _validateBalanceToSwap(fromAsset, feeTokenInfo, feeTokenChain, networkFee.amount, fromAssetBalance.value, feeTokenBalance.value, fromAmount, isXcmOk, minSwap);
 
-    if (bnFeeTokenBalance.lte(bnFeeAmount)) {
-      return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
-        `You don't have enough ${feeTokenInfo.symbol} (${feeTokenChain.name}) to pay transaction fee`)]);
+    if (balanceError) {
+      return Promise.resolve([balanceError]);
     }
 
-    if (fromAsset.slug === feeTokenInfo.slug) {
-      if (bnFromAssetBalance.lte(bnFeeAmount.plus(bnAmount))) {
-        return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
-          `Insufficient balance. Deposit ${fromAsset.symbol} and try again.`)]);
-      }
+    if (!params.recipient) {
+      return Promise.resolve([]);
     }
 
-    if (params.selectedQuote.minSwap) {
-      const minProtocolSwap = new BigNumber(params.selectedQuote.minSwap);
+    const toAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.to);
+    const toAssetChain = this.chainService.getChainInfoByKey(toAsset.originChain);
 
-      if (!isXcmOk && bnFromAssetBalance.lte(minProtocolSwap)) {
-        const parsedMinSwapValue = formatNumber(minProtocolSwap, _getAssetDecimals(fromAsset));
+    const recipientError = _validateSwapRecipient(toAssetChain, params.recipient);
 
-        return Promise.resolve([new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
-          `Insufficient balance. You need more than ${parsedMinSwapValue} ${fromAsset.symbol} to start swapping. Deposit ${fromAsset.symbol} and try again.`)]); // todo: min swap or amount?
-      }
-    }
-
-    const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-    const bnMaxBalanceSwap = bnFromAssetBalance.minus(bnSrcAssetMinAmount);
-
-    if (!isXcmOk && bnAmount.gte(bnMaxBalanceSwap)) {
-      const parsedMaxBalanceSwap = formatNumber(bnMaxBalanceSwap, _getAssetDecimals(fromAsset));
-
-      return Promise.resolve([new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-        `Amount too high. Lower your amount ${bnMaxBalanceSwap.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromAsset.symbol}` : ''} and try again`)]);
-    }
-
-    if (params.recipient) {
-      const toAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.to);
-      const destChainInfo = this.chainService.getChainInfoByKey(toAsset.originChain);
-
-      const isEvmAddress = isEthereumAddress(params.recipient);
-      const isEvmDestChain = _isChainEvmCompatible(destChainInfo);
-
-      if ((isEvmAddress && !isEvmDestChain) || (!isEvmAddress && isEvmDestChain)) {
-        return Promise.resolve([new TransactionError(SwapErrorType.INVALID_RECIPIENT)]);
-      }
+    if (recipientError) {
+      return Promise.resolve([recipientError]);
     }
 
     return Promise.resolve([]);

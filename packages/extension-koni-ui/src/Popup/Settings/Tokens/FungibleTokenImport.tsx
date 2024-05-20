@@ -94,6 +94,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     return getTokenTypeSupported(chainInfoMap[selectedChain]);
   }, [chainInfoMap, selectedChain]);
 
+  const isSelectGRC20 = useMemo(() => {
+    return selectedTokenType === _AssetType.GRC20;
+  }, [selectedTokenType]);
+
   const contractRules = useMemo((): FormRule[] => {
     return [
       ({ getFieldValue }) => ({
@@ -307,7 +311,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
                 disabled={!selectedTokenType}
-                label={t('Contract address')}
+                label={isSelectGRC20 ? t('Program ID') : t('Contract address')}
                 showScanner={true}
               />
             </Form.Item>

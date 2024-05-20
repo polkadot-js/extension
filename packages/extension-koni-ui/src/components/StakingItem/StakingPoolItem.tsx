@@ -18,12 +18,12 @@ type Props = NominationPoolDataType & ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, prefixAddress, symbol } = props;
+  const { address, bondedAmount, className, decimals, disabled, id, isProfitable, name, onClickMoreBtn, prefixAddress, symbol } = props;
   const { t } = useTranslation();
 
   return (
     <Web3Block
-      className={CN(className, { 'is-crowded': isCrowded })}
+      className={CN(className, { 'is-crowded': disabled })}
       leftItem={
         <SwAvatar
           identPrefix={prefixAddress}

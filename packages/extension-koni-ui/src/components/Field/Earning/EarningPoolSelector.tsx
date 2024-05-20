@@ -116,6 +116,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     {
       label: t('Destroying'),
       value: 'Destroying'
+    },
+    {
+      label: t('Blocked'),
+      value: 'Blocked'
     }
   ]), [t]);
 
@@ -138,16 +142,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
         if (filters.length) {
           return filters.includes(value.state);
-        } else { // @ts-ignore
-          if (value.state === 'Blocked') {
-            return false;
-          } else {
-            return true;
-          }
+        } else {
+          return true;
         }
       })
       .map((item) => {
-        const disabled = item.isCrowded;
+        const disabled = item.isCrowded || item.state === 'Blocked';
 
         return { ...item, disabled };
       })

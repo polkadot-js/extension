@@ -134,6 +134,7 @@ type LoadingMap = {
 };
 // "TODO: Will be shown when support for the LIGHT theme is implemented."
 const isShowWalletTheme = false;
+const SettingsListUrl = '/settings/list';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -233,6 +234,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
   }, []);
 
+  const goBackToSettingList = useCallback(() => {
+    goBack(SettingsListUrl);
+  }, [goBack]);
+
   const onSelectCurrency = useCallback((value: string) => {
     setLoadingMap((prev) => ({
       ...prev,
@@ -282,7 +287,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['price'])}
     >
       <Layout.WithSubHeaderOnly
-        onBack={goBack}
+        onBack={goBackToSettingList}
         title={t('General settings')}
       >
         <div className={'__scroll-container'}>

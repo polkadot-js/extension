@@ -9,6 +9,7 @@ import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/Earni
 import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ExtraYieldPositionInfo, NetworkType, PhosphorIcon, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ButtonProps, Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -50,6 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const { currencyData } = useSelector((state: RootState) => state.price);
   const { token } = useTheme() as Theme;
 
   const line3Ref = useRef<HTMLDivElement | null>(null);
@@ -324,7 +326,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   decimal={0}
                   decimalColor={token.colorSuccess}
                   intColor={token.colorSuccess}
-                  prefix={'$'}
+                  prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
                   unitColor={token.colorSuccess}
                   value={convertedBalanceValue}
                 />

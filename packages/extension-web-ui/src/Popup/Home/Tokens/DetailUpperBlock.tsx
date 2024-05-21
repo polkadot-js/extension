@@ -1,13 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Number } from '@subwallet/react-ui';
+import { Button, Icon, Number, Tooltip } from '@subwallet/react-ui';
 import { SwNumberProps } from '@subwallet/react-ui/es/number';
+import CN from 'classnames';
 import { CaretLeft, CopySimple, PaperPlaneTilt, ShoppingCartSimple } from 'phosphor-react';
 import React, { useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
@@ -37,6 +39,7 @@ function Component (
   const { t } = useTranslation();
   const { isShowBalance } = useSelector((state: RootState) => state.settings);
   const { isWebUI } = useContext(ScreenContext);
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const onChangeShowBalance = useCallback(() => {
     saveShowBalance(!isShowBalance).catch(console.error);
@@ -60,21 +63,31 @@ function Component (
         <div className={'__token-display'}>{t('Token')}: {symbol}</div>
       </div>
       <div className='__bottom'>
-        <div
-          className='__balance-value-wrapper'
-          onClick={isShrink ? onChangeShowBalance : undefined}
+        <Tooltip
+          overlayClassName={CN('__currency-value-detail-tooltip', {
+            'ant-tooltip-hidden': !isShowBalance
+          })}
+          placement={'top'}
+          title={currencyData.symbol + ' ' + formatNumber(balanceValue, 0, balanceNoPrefixFormater)}
         >
-          <Number
-            className={'__balance-value'}
-            decimal={0}
-            decimalOpacity={0.45}
-            hide={!isShowBalance}
-            prefix='$'
-            size={38}
-            subFloatNumber
-            value={balanceValue}
-          />
-        </div>
+          <div
+            className='__balance-value-wrapper'
+            onClick={isShrink ? onChangeShowBalance : undefined}
+          >
+            {isShowBalance && <div className={CN('__total-balance-symbol')}>
+              {currencyData.symbol}
+            </div>}
+            <Number
+              className={'__balance-value'}
+              decimal={0}
+              decimalOpacity={0.45}
+              hide={!isShowBalance}
+              size={38}
+              subFloatNumber
+              value={balanceValue}
+            />
+          </div>
+        </Tooltip>
         <div className={'__action-button-container'}>
           <Button
             icon={(
@@ -136,6 +149,19 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
       alignItems: 'center'
     },
 
+    '.__total-balance-symbol': {
+      marginLeft: 8,
+      marginRight: -4,
+      fontSize: token.fontSizeXL,
+      lineHeight: token.lineHeightHeading4,
+      fontWeight: token.fontWeightStrong,
+
+      '&.-not-show-balance': {
+        display: 'none'
+      }
+
+    },
+
     '.__token-display': {
       textAlign: 'center',
       flex: 1,
@@ -183,13 +209,31 @@ export const DetailUpperBlock = styled(Component)<Props>(({ theme: { token } }: 
       width: token.size
     },
 
+    '.__balance-value-wrapper': {
+      display: 'flex',
+      justifyContent: 'center'
+    },
+
     '&.-shrink': {
       '.__bottom': {
         display: 'flex'
       },
+      '.__total-balance-symbol': {
+        marginLeft: 8,
+        marginRight: -4,
+        fontSize: token.fontSizeLG,
+        lineHeight: token.lineHeightLG,
+        fontWeight: token.fontWeightStrong,
+
+        '&.-not-show-balance': {
+          display: 'none'
+        }
+
+      },
 
       '.__balance-value-wrapper': {
-        flex: 1
+        flex: 1,
+        justifyContent: 'flex-start'
       },
 
       '.__balance-value': {

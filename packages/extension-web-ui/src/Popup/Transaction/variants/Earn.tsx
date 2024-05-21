@@ -55,11 +55,11 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
 
 const earningTypeLabelMap = {
-  [YieldPoolType.NATIVE_STAKING]: 'direct nomination',
+  [YieldPoolType.NATIVE_STAKING]: 'Direct nomination',
   [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
-  [YieldPoolType.LENDING]: 'lending',
-  [YieldPoolType.LIQUID_STAKING]: 'liquid staking',
-  [YieldPoolType.PARACHAIN_STAKING]: 'direct nomination',
+  [YieldPoolType.LENDING]: 'Lending',
+  [YieldPoolType.LIQUID_STAKING]: 'Liquid Staking',
+  [YieldPoolType.PARACHAIN_STAKING]: 'Direct nomination',
   [YieldPoolType.SINGLE_FARMING]: 'single farming'
 };
 
@@ -661,7 +661,7 @@ const Component = ({ className }: ComponentProps) => {
         )}
       </MetaInfo>
     );
-  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, estimatedFee, poolTargets, chainAsset]);
+  }, [poolInfo, inputAsset, amountValue, assetDecimals, t, chainValue, currencyData?.isPrefix, currencyData.symbol, estimatedFee, poolTargets, chainAsset]);
 
   const onPreCheck = usePreCheckAction(fromValue);
 
@@ -1139,12 +1139,12 @@ const Component = ({ className }: ComponentProps) => {
     };
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
-  useEffect(() => {
-    if (!redirectFromPreview && !isWebUI && !compound && !screenLoading) {
-      isClickInfoButtonRef.current = false;
-      activeModal(instructionModalId);
-    }
-  }, [activeModal, compound, isWebUI, redirectFromPreview, screenLoading]);
+  // useEffect(() => {
+  //   if (!redirectFromPreview && !isWebUI && !compound && !screenLoading) {
+  //     isClickInfoButtonRef.current = false;
+  //     activeModal(instructionModalId);
+  //   }
+  // }, [activeModal, compound, isWebUI, redirectFromPreview, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [

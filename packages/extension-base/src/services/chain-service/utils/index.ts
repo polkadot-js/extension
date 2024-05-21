@@ -194,6 +194,18 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
+export function _isChainSupportEvmERC20 (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.ERC20) || false;
+}
+
+export function _isChainSupportWasmPSP22 (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP22) || false;
+}
+
+export function _isChainSupportGRC20 (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.GRC20) || false;
+}
+
 export const _isSupportOrdinal = (chain: string) => {
   const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 
@@ -227,7 +239,7 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
 
   if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
     chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
-      if ([_AssetType.PSP22].includes(assetType)) {
+      if ([_AssetType.PSP22, _AssetType.GRC20].includes(assetType)) {
         result.push(assetType);
       }
     });
@@ -292,6 +304,10 @@ export function _isTokenWasmSmartContract (tokenInfo: _ChainAsset) {
 
 export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
   return [_AssetType.PSP34, _AssetType.ERC721].includes(assetInfo.assetType);
+}
+
+export function _isTokenGearSmartContract (tokenInfo: _ChainAsset) {
+  return [_AssetType.GRC20, _AssetType.GRC721].includes(tokenInfo.assetType);
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {

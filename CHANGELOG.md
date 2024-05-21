@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.1.65
+Build date: May 17, 2024.
+
+Features & Update:
+- Update chain-list (#3040)
+  - Update chainBalanceSlug and explorer for some chains
+  - Add support for Hyperbridge (Nexus)
+  - Add support for CESS testnet
+  - Add support for Pendulum, Amplitude assets
+  - Add support for BOB and tokens on BOB
+
+Bugs fixed:
+- Fixed bug Unable to back screen in case open General settings to Marketing campaign (#3062)
+- Fixed bug when transferring PSP22 token (#3041)
+
 ## 1.1.64
 Build date: May 11, 2024.
 

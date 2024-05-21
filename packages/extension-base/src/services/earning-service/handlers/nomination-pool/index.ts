@@ -679,6 +679,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: address }, slashingSpanCount);
     } else {
+      // @ts-ignore
       return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: address });
     }
   }

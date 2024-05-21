@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { GearApi } from '@gear-js/api';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { SupportTransferResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
@@ -14,7 +15,8 @@ import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
-import { BN } from '@polkadot/util';
+import { BN, u8aToHex } from '@polkadot/util';
+import { decodeAddress } from '@polkadot/util-crypto';
 
 function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
   return !!(accountInfo as AccountInfoWithRefCount).refcount;
@@ -145,6 +147,12 @@ interface CreateTransferExtrinsicProps {
 export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, to, tokenInfo, transferAll, value }: CreateTransferExtrinsicProps): Promise<[SubmittableExtrinsic | null, string]> => {
   const api = substrateApi.api;
 
+  const isDisableTransfer = tokenInfo.metadata?.isDisableTransfer as boolean;
+
+  if (isDisableTransfer) {
+    return [null, value];
+  }
+
   // @ts-ignore
   let transfer: SubmittableExtrinsic<'promise'> | null = null;
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
@@ -161,6 +169,15 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
 
     // @ts-ignore
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
+    transferAmount = value;
+  } else if (_isTokenGearSmartContract(tokenInfo) && (api instanceof GearApi)) {
+    const contractPromise = getGRC20ContractPromise(api, _getContractAddressOfToken(tokenInfo));
+    const transaction = await contractPromise
+      .transfer(u8aToHex(decodeAddress(to)), BigInt(value)) // Create transfer transaction
+      .withAccount(from) // Set sender account
+      .calculateGas(); // Add account arg to extrinsic
+
+    transfer = transaction.tx;
     transferAmount = value;
   } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey)) {
     if (!_isNativeToken(tokenInfo)) {
@@ -223,9 +240,6 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
       }
     }
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-  console.log('transfer', transfer?.toHex());
 
   return [transfer, transferAmount || value];
 };

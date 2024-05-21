@@ -755,7 +755,7 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
   const bnTotalEraStake = new BN(_totalEraStake.toString());
   const eraStakers = _eraStakers as any[];
 
-  const rawMinBond = _minBond.toHuman() as string;
+  const rawMinBond = _minBond.toHuman();
   const minBond = rawMinBond.replaceAll(',', '');
 
   const totalStakeMap: Record<string, BN> = {};
@@ -917,6 +917,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     if (paramsCount === 2) {
       bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
     } else {
+      // @ts-ignore
       bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
     }
 
@@ -929,6 +930,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     if (paramsCount === 2) {
       bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
     } else {
+      // @ts-ignore
       bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
     }
 
@@ -951,6 +953,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     return nominateTx;
   }
 
+  // @ts-ignore
   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }
 
@@ -979,6 +982,7 @@ export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, 
 
     return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
+    // @ts-ignore
     return chainApi.api.tx.staking.withdrawUnbonded();
   }
 }
@@ -1027,6 +1031,7 @@ export async function getPoolingWithdrawalExtrinsic (substrateApi: _SubstrateApi
 
     return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address }, slashingSpanCount);
   } else {
+    // @ts-ignore
     return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address });
   }
 }

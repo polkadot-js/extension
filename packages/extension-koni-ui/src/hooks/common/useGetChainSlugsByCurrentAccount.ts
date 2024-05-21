@@ -3,7 +3,7 @@
 
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
+import { _ChainInfo, _ChainStatus } from '@subwallet/chain-list/types';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -18,7 +18,11 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<string, _ChainInfo>, accountNetworks?: string[]): string[] {
   const result: string[] = [];
 
-  Object.keys(chainInfoMap).forEach((chain) => {
+  for (const [chain, { chainStatus }] of Object.entries(chainInfoMap)) {
+    if (chainStatus !== _ChainStatus.ACTIVE) {
+      continue;
+    }
+
     if (accountNetworks) {
       if (accountNetworks.includes(chain)) {
         result.push(chain);
@@ -36,7 +40,7 @@ function getChainsAccountType (accountType: AccountType, chainInfoMap: Record<st
         }
       }
     }
-  });
+  }
 
   return result;
 }

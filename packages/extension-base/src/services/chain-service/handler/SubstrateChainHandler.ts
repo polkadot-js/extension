@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { GearApi } from '@gear-js/api';
 import { _AssetType } from '@subwallet/chain-list/types';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -8,7 +9,9 @@ import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-s
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 
+import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
@@ -109,68 +112,106 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     return result;
   }
 
-  public async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
-    let tokenContract: ContractPromise;
+  private async getPsp22TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string): Promise<[string, number, string, boolean]> {
+    const tokenContract = new ContractPromise(apiPromise, _PSP22_ABI, contractAddress);
+
+    const [nameResp, symbolResp, decimalsResp] = await Promise.all([
+      tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(apiPromise) }), // read-only operation so no gas limit
+      tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(apiPromise) }),
+      tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(apiPromise) })
+    ]);
+
+    if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
+      return ['', 1, '', true];
+    } else {
+      let contractError = false;
+
+      const symbolObj = symbolResp.output?.toHuman() as Record<string, any>;
+      const decimalsObj = decimalsResp.output?.toHuman() as Record<string, any>;
+      const nameObj = nameResp.output?.toHuman() as Record<string, any>;
+
+      const name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
+      const decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
+      const symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
+
+      if (!name || !symbol || typeof name === 'object' || typeof symbol === 'object') {
+        contractError = true;
+      }
+
+      return [name, decimals, symbol, contractError];
+    }
+  }
+
+  private async getPsp34TokenInfo (apiPromise: ApiPromise, contractAddress: string, contractCaller?: string): Promise<[string, number, string, boolean]> {
+    const tokenContract = new ContractPromise(apiPromise, _PSP34_ABI, contractAddress);
+
+    const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(apiPromise) }); // read-only operation so no gas limit
+
+    if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
+      return ['', -1, '', true];
+    } else {
+      let contractError = false;
+      const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
+
+      if (collectionIdDict.Bytes === '') {
+        contractError = true;
+      }
+
+      return ['', -1, '', contractError];
+    }
+  }
+
+  private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
+    if (!(apiPromise instanceof GearApi)) {
+      console.warn('Cannot subscribe GRC20 balance without GearApi instance');
+
+      return ['', -1, '', true];
+    }
+
+    let contractError = false;
+    const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
+
+    const [nameRes, symbolRes, decimalsRes] = await Promise.all([
+      tokenContract.name(DEFAULT_GEAR_ADDRESS.ALICE),
+      tokenContract.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
+      tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
+    ]);
+
+    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
+
+    if (!nameRes || !symbolRes) {
+      contractError = true;
+    }
+
+    return [nameRes, decimals, symbolRes, contractError];
+  }
+
+  public async getSubstrateContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
+    // todo: improve this funtion later
+
     let name = '';
     let decimals: number | undefined = -1;
     let symbol = '';
     let contractError = false;
 
-    const substrateApi = this.getSubstrateApiByChain(originChain);
+    const apiPromise = this.getSubstrateApiByChain(originChain).api;
 
     try {
-      if (tokenType === _AssetType.PSP22) {
-        tokenContract = new ContractPromise(substrateApi.api, _PSP22_ABI, contractAddress);
+      switch (tokenType) {
+        case _AssetType.PSP22:
+          [name, decimals, symbol, contractError] = await this.getPsp22TokenInfo(apiPromise, contractAddress, contractCaller);
 
-        const [nameResp, symbolResp, decimalsResp] = await Promise.all([
-          tokenContract.query['psp22Metadata::tokenName'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }), // read-only operation so no gas limit
-          tokenContract.query['psp22Metadata::tokenSymbol'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }),
-          tokenContract.query['psp22Metadata::tokenDecimals'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) })
-        ]);
+          break;
 
-        if (!(nameResp.result.isOk && symbolResp.result.isOk && decimalsResp.result.isOk) || !nameResp.output || !decimalsResp.output || !symbolResp.output) {
-          return {
-            name: '',
-            decimals: -1,
-            symbol: '',
-            contractError: true
-          };
-        } else {
-          const symbolObj = symbolResp.output?.toHuman() as Record<string, any>;
-          const decimalsObj = decimalsResp.output?.toHuman() as Record<string, any>;
-          const nameObj = nameResp.output?.toHuman() as Record<string, any>;
+        case _AssetType.PSP34:
+          [name, decimals, symbol, contractError] = await this.getPsp34TokenInfo(apiPromise, contractAddress, contractCaller);
 
-          name = nameResp.output ? (nameObj.Ok as string || nameObj.ok as string) : '';
-          decimals = decimalsResp.output ? (new BN((decimalsObj.Ok || decimalsObj.ok) as string | number)).toNumber() : 0;
-          symbol = decimalsResp.output ? (symbolObj.Ok as string || symbolObj.ok as string) : '';
+          break;
 
-          if (!name || !symbol || typeof name === 'object' || typeof symbol === 'object') {
-            contractError = true;
-          }
+        case _AssetType.GRC20:
+          [name, decimals, symbol, contractError] = await this.getGrc20TokenInfo(apiPromise, contractAddress);
 
-          console.log('validate PSP22', name, symbol, decimals);
-        }
-      } else {
-        tokenContract = new ContractPromise(substrateApi.api, _PSP34_ABI, contractAddress);
-
-        const collectionIdResp = await tokenContract.query['psp34::collectionId'](contractCaller || contractAddress, { gasLimit: getDefaultWeightV2(substrateApi.api) }); // read-only operation so no gas limit
-
-        if (!collectionIdResp.result.isOk || !collectionIdResp.output) {
-          return {
-            name: '',
-            decimals: -1,
-            symbol: '',
-            contractError: true
-          };
-        } else {
-          const collectionIdDict = collectionIdResp.output?.toHuman() as Record<string, string>;
-
-          if (collectionIdDict.Bytes === '') {
-            contractError = true;
-          } else {
-            name = ''; // no function to get collection name, let user manually put in the name
-          }
-        }
+          break;
       }
 
       return {

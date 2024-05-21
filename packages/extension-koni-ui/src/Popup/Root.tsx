@@ -46,7 +46,7 @@ const createDoneUrl = '/create-done';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
-
+const allowBlackScreenWS = [welcomeUrl, loginUrl];
 const allowImportAccountUrls = allowImportAccountPaths.map((path) => `${baseAccountPath}/${path}`);
 
 export const MainWrapper = styled('div')<ThemeProps>(({ theme: { token } }: ThemeProps) => ({
@@ -230,6 +230,12 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
 
   // Remove transaction persist state
   useEffect(() => {
+    if (!dataLoaded && initAccount === null && currentAccount !== null) {
+      setInitAccount(currentAccount);
+
+      return;
+    }
+
     if (!isSameAddress(initAccount?.address || '', currentAccount?.address || '')) {
       for (const key of TRANSACTION_STORAGES) {
         removeStorage(key);
@@ -237,12 +243,14 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
 
       setInitAccount(currentAccount);
     }
-  }, [currentAccount, initAccount]);
+  }, [currentAccount, dataLoaded, initAccount]);
 
   if (rootLoading || redirectPath) {
-    if (currentPage !== redirectPath && redirectPath === welcomeUrl) {
-      setStorage(welcomeUrl);
-      window.location.reload();
+    if (redirectPath && currentPage !== redirectPath && allowBlackScreenWS.includes(redirectPath)) {
+      setStorage(redirectPath);
+      window.location.href = `index.html#${redirectPath}`;
+
+      return <></>;
     }
 
     return <>{redirectPath && <Navigate to={redirectPath} />}</>;

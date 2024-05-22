@@ -131,6 +131,15 @@ export interface CampaignStore extends BaseReduxStore {
   banners: CampaignBanner[]
 }
 
+export interface AppOnlineContent {
+  appPopupData: AppPopupData[];
+  appBannerData: AppBannerData[];
+  appConfirmationData: AppConfirmationData[];
+  popupHistoryMap: Record<string, PopupHistoryData>;
+  bannerHistoryMap: Record<string, PopupHistoryData>;
+  confirmationHistoryMap: Record<string, PopupHistoryData>;
+}
+
 export interface BuyServiceStore extends BaseReduxStore {
   tokens: Record<string, BuyTokenInfo>;
   services: Record<string, BuyServiceInfo>;

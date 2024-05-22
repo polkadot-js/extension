@@ -6,6 +6,7 @@ import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/compon
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
 import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { AppOnlineContentContext } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
 import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -14,6 +15,7 @@ import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -28,6 +30,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
+  const { showAppPopup } = useContext(AppOnlineContentContext);
+  const location = useLocation();
 
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
@@ -60,6 +64,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);
     }
   }, [activeModal, firstBanner]);
+
+  useEffect(() => {
+    showAppPopup(location.pathname);
+  }, [location, showAppPopup]);
 
   useEffect(() => {
     if (isConfirmedTermGeneral.includes('nonConfirmed')) {

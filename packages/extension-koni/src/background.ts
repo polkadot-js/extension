@@ -36,6 +36,12 @@ function handleExtensionIdling () { // handle extension being idle since the ini
   }, IDLE_TIME);
 }
 
+function handleRemindUserToExportAccount () {
+  koniState.onCheckToRemindUser();
+}
+
+handleRemindUserToExportAccount();
+
 // listen to all messages and handle appropriately
 chrome.runtime.onConnect.addListener((port): void => {
   // shouldn't happen, however... only listen to what we know about

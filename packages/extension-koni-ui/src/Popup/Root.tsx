@@ -36,6 +36,7 @@ const welcomeUrl = '/welcome';
 const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const phishingUrl = '/phishing-page-detected';
+const remindExportAccountUrl = '/remind-export-account';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const accountNewSeedPhrase = '/accounts/new-seed-phrase';
@@ -167,7 +168,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       // Do nothing
     } else if (needMigrate && hasMasterPassword && !needUnlock) {
       redirectTarget = migratePasswordUrl;
-    } else if (hasMasterPassword && needUnlock) {
+    } else if (hasMasterPassword && needUnlock && pathName !== remindExportAccountUrl) {
       redirectTarget = loginUrl;
     } else if (hasMasterPassword && pathName === createPasswordUrl) {
       redirectTarget = DEFAULT_ROUTER_PATH;

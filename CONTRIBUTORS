@@ -1,14 +1,14 @@
-    2522	AnhMTV                        	Release version 1.1.66
+    2525	AnhMTV                        	
     2352	Nam Phạm                      	[Issue 2754] fix: fix eslint
-    2036	S2kael                        	[Issue-3055] Update stable version for chain-list
+    2045	S2kael                        	[Issue-3081] Update stable version for chain-list
      815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
      416	nguyentiendung                	[Issue-2914] Update yarn.lock
      185	quangdo                       	
      148	bluezdot                      	[Issue-3055] Update chainlist
      106	dominhquang                   	[Issue-2649] Add send crash log feature
+     104	Automation Bot                	[CI Skip] Auto increase webapp build number
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-     102	Automation Bot                	[CI Skip] Auto increase webapp build number
      101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)

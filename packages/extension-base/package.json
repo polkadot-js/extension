@@ -51,7 +51,7 @@
     "@reduxjs/toolkit": "^1.9.1",
     "@sora-substrate/type-definitions": "^1.17.7",
     "@substrate/connect": "^0.8.9",
-    "@subwallet/chain-list": "0.2.62",
+    "@subwallet/chain-list": "0.2.63",
     "@subwallet/extension-base": "^1.1.66-0",
     "@subwallet/extension-chains": "^1.1.66-0",
     "@subwallet/extension-dapp": "^1.1.66-0",

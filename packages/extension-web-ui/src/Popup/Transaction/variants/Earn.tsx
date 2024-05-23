@@ -1139,12 +1139,12 @@ const Component = ({ className }: ComponentProps) => {
     };
   }, [chainState?.active, forceFetchValidator, slug, chainValue, fromValue]);
 
-  // useEffect(() => {
-  //   if (!redirectFromPreview && !isWebUI && !compound && !screenLoading) {
-  //     isClickInfoButtonRef.current = false;
-  //     activeModal(instructionModalId);
-  //   }
-  // }, [activeModal, compound, isWebUI, redirectFromPreview, screenLoading]);
+  useEffect(() => {
+    if (!redirectFromPreview && !isWebUI && !compound && !screenLoading) {
+      isClickInfoButtonRef.current = false;
+      activeModal(instructionModalId);
+    }
+  }, [activeModal, compound, isWebUI, redirectFromPreview, screenLoading]);
 
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [

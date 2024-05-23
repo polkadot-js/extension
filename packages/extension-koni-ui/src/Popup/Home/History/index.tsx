@@ -8,7 +8,7 @@ import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { HISTORY_DETAIL_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SESSION_VALUE, HISTORY_DETAIL_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
@@ -212,11 +212,6 @@ const modalId = HISTORY_DETAIL_MODAL;
 const remindSeedPhraseModalId = REMIND_BACKUP_SEED_PHRASE_MODAL;
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeBackup: 300000,
-  timeCalculate: Date.now()
-};
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');

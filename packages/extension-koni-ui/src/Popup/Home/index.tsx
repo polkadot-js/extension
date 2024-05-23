@@ -5,9 +5,9 @@ import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CampaignBannerModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CONFIRM_GENERAL_TERM, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, DEFAULT_SESSION_VALUE, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
+import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useSetSessionLatest, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
@@ -21,11 +21,6 @@ import { useLocalStorage } from 'usehooks-ts';
 type Props = ThemeProps;
 
 export const GlobalSearchTokenModalId = 'globalSearchToken';
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeBackup: 300000,
-  timeCalculate: Date.now()
-};
 const historyPageIgnoreRemind = 'ignoreRemind';
 const historyPageIgnoreBanner = 'ignoreBanner';
 
@@ -44,7 +39,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
 
-  const [sessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
+  const { sessionLatest } = useSetSessionLatest();
 
   const onOpenGlobalSearchToken = useCallback(() => {
     activeModal(GlobalSearchTokenModalId);
@@ -67,8 +62,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useEffect(() => {
     const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
     const sessionLatestInit = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
-
-    console.log(sessionLatestInit);
 
     if (firstBanner && !sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
       activeModal(HOME_CAMPAIGN_BANNER_MODAL);

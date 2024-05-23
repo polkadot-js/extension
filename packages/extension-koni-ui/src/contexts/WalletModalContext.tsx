@@ -3,30 +3,21 @@
 
 import { AttachAccountModal, ClaimDappStakingRewardsModal, CreateAccountModal, DeriveAccountModal, ImportAccountModal, ImportSeedModal, NewSeedModal, RemindBackupSeedPhraseModal, RequestCameraAccessModal, RequestCreatePasswordModal } from '@subwallet/extension-koni-ui/components';
 import { CustomizeModal } from '@subwallet/extension-koni-ui/components/Modal/Customize/CustomizeModal';
-import { EARNING_INSTRUCTION_MODAL, LATEST_SESSION } from '@subwallet/extension-koni-ui/constants';
-import { useGetConfig } from '@subwallet/extension-koni-ui/hooks';
+import { EARNING_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useGetConfig, useSetSessionLatest } from '@subwallet/extension-koni-ui/hooks';
 import Confirmations from '@subwallet/extension-koni-ui/Popup/Confirmations';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { SessionStorage } from '@subwallet/extension-koni-ui/types';
 import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useSearchParams } from 'react-router-dom';
-import { useLocalStorage } from 'usehooks-ts';
 
 import { UnlockModal } from '../components/Modal/UnlockModal';
 
 interface Props {
   children: React.ReactNode;
 }
-
-const timeBackup = 1000 * 60 * 60 * 24 * 15;
-const DEFAULT_SESSION_VALUE: SessionStorage = {
-  remind: false,
-  timeBackup,
-  timeCalculate: Date.now()
-};
 
 export const PREDEFINED_MODAL_NAMES = ['debugger', 'transaction', 'confirmations'];
 type PredefinedModalName = typeof PREDEFINED_MODAL_NAMES[number];
@@ -66,8 +57,9 @@ export const WalletModalContext = ({ children }: Props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
-  const [, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
+  const { setSessionLatest } = useSetSessionLatest();
   const { getConfig } = useGetConfig();
+  const { onHandleSessionLatest } = useSetSessionLatest();
   const location = useLocation();
 
   useExcludeModal('confirmations');
@@ -99,22 +91,9 @@ export const WalletModalContext = ({ children }: Props) => {
   }, [activeModal, inactiveModals, searchParams]);
 
   useEffect(() => {
-    const infoSession = Date.now();
-
-    const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
-
     getConfig()
-      .then((timeBackup) => {
-        if (infoSession - latestSession.timeCalculate >= timeBackup) {
-          setSessionLatest({ ...latestSession, remind: true, timeBackup });
-        } else if (infoSession - latestSession.timeCalculate < timeBackup) {
-          setSessionLatest({ timeBackup, timeCalculate: infoSession, remind: false });
-        } else if (location.pathname) {
-          setSessionLatest(({ remind, timeBackup, timeCalculate }) =>
-            ({ timeBackup, remind, timeCalculate: remind ? timeCalculate : infoSession }));
-        }
-      }).catch(console.error);
-  }, [activeModal, getConfig, location.pathname, setSessionLatest]);
+      .then(onHandleSessionLatest).catch(console.error);
+  }, [activeModal, getConfig, location.pathname, onHandleSessionLatest, setSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3
 

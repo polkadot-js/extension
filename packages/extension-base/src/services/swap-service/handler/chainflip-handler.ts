@@ -43,6 +43,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
   private swapSdk: SwapSDK;
   private readonly isTestnet: boolean;
   private swapBaseHandler: SwapBaseHandler;
+  providerSlug: SwapProviderId;
 
   constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     this.swapBaseHandler = new SwapBaseHandler({
@@ -52,6 +53,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       providerSlug: isTestnet ? SwapProviderId.CHAIN_FLIP_TESTNET : SwapProviderId.CHAIN_FLIP_MAINNET
     });
     this.isTestnet = isTestnet;
+    this.providerSlug = isTestnet ? SwapProviderId.CHAIN_FLIP_TESTNET : SwapProviderId.CHAIN_FLIP_MAINNET;
 
     this.swapSdk = new SwapSDK({
       network: isTestnet ? 'perseverance' : 'mainnet'

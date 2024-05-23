@@ -51,6 +51,13 @@ export const MOCK_SWAP_FEE: SwapFeeInfo = {
   feeOptions: []
 };
 
+export const _PROVIDER_TO_SUPPORTED_PAIR_MAP: Record<string, string[]> = {
+  [SwapProviderId.HYDRADX_MAINNET]: [COMMON_CHAIN_SLUGS.HYDRADX],
+  [SwapProviderId.HYDRADX_TESTNET]: [COMMON_CHAIN_SLUGS.HYDRADX_TESTNET],
+  [SwapProviderId.CHAIN_FLIP_MAINNET]: [COMMON_CHAIN_SLUGS.POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM],
+  [SwapProviderId.CHAIN_FLIP_TESTNET]: [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM_SEPOLIA]
+};
+
 export function getSwapAlternativeAsset (swapPair: SwapPair): string | undefined {
   return swapPair?.metadata?.alternativeAsset as string;
 }

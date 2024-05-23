@@ -34,6 +34,7 @@ export class HydradxHandler implements SwapBaseInterface {
   private tradeRouter: TradeRouter | undefined;
   private readonly isTestnet: boolean = true;
   public isReady = false;
+  providerSlug: SwapProviderId;
 
   constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     this.swapBaseHandler = new SwapBaseHandler({
@@ -42,6 +43,7 @@ export class HydradxHandler implements SwapBaseInterface {
       providerName: isTestnet ? 'HydraDX Testnet' : 'HydraDX',
       providerSlug: isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET
     });
+    this.providerSlug = isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET;
 
     this.isTestnet = isTestnet;
   }

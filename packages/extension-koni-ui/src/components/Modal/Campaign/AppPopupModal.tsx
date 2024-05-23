@@ -14,6 +14,7 @@ import { useLocalStorage } from 'usehooks-ts';
 
 import OnlineButtonGroups from '../../StaticContent/OnlineButtonGroups';
 import ContentGenerator from "@subwallet/extension-koni-ui/components/StaticContent/ContentGenerator";
+import AppInstructionModal from "@subwallet/extension-koni-ui/components/Modal/Campaign/AppInstructionModal";
 
 interface Props extends ThemeProps {
   message: string;
@@ -93,24 +94,35 @@ const Component: React.FC<Props> = (props: Props) => {
     [currentInstructionData, instructionButton, onAccept, activeModal]
   );
 
-  console.log('title', title);
-
   return (
-    <SwModal
-      className={CN(className)}
-      closable={false}
-      footer={
-        externalButtons || <OnlineButtonGroups
-          buttons={buttons}
-          onClickButton={_onClickButton}
+    <>
+      <SwModal
+        className={CN(className)}
+        closable={false}
+        footer={
+          externalButtons || <OnlineButtonGroups
+            buttons={buttons}
+            onClickButton={_onClickButton}
+          />
+        }
+        id={modalId}
+        maskClosable={false}
+        title={title}
+      >
+        <ContentGenerator content={message} />
+      </SwModal>
+
+      {!!instructionButton && instructionButton.instruction && currentInstructionData && (
+        <AppInstructionModal
+          title={currentInstructionData.title || 'Instruction'}
+          media={currentInstructionData.media || ''}
+          instruction={instructionButton.instruction}
+          data={currentInstructionData.instructions}
+          onPressCancelBtn={() => onAccept()}
+          onPressConfirmBtn={() => onAccept(instructionButton.action?.url)}
         />
-      }
-      id={modalId}
-      maskClosable={false}
-      title={title}
-    >
-      <ContentGenerator content={message} />
-    </SwModal>
+      )}
+    </>
   );
 };
 

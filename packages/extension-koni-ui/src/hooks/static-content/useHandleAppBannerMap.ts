@@ -3,9 +3,21 @@
 
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { updateAppBannerData, updateBannerHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import { AppBannerData, AppBasicInfoData, ConditionBalanceType, ConditionEarningType, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import {
+  AppBannerData,
+  AppBasicInfoData,
+  ConditionBalanceType,
+  ConditionEarningType,
+  PopupHistoryData
+} from '@subwallet/extension-koni-ui/types/staticContent';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+
+export interface AppBannerHookType {
+  setAppBannerData: (data: AppBannerData[]) => void;
+  updateBannerHistoryMap: (ids: string[]) => void;
+  appBannerMap: Record<string, AppBannerData[]>;
+}
 
 export const useHandleAppBannerMap = (
   appBannerData: AppBannerData[],
@@ -14,7 +26,7 @@ export const useHandleAppBannerMap = (
   checkPopupExistTime: (info: AppBasicInfoData) => boolean,
   checkBalanceCondition: (conditionBalance: ConditionBalanceType[]) => boolean,
   checkEarningCondition: (_yieldPositionList: YieldPositionInfo[], conditionEarning: ConditionEarningType[]) => boolean
-) => {
+): AppBannerHookType => {
   const dispatch = useDispatch();
 
   const getFilteredAppBannerByTimeAndPlatform = useCallback(

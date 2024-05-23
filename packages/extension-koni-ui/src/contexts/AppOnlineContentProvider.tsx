@@ -19,6 +19,7 @@ import axios from 'axios';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 
 interface AppOnlineContentContextProviderProps {
   children?: React.ReactElement;
@@ -41,7 +42,7 @@ interface AppOnlineContentContextType {
     showTimes: number,
     customizeRepeatTime: number | null,
   ) => boolean;
-  handleButtonPress: (id: string) => (type: OnlineContentDataType, url?: string) => void;
+  handleButtonClick: (id: string) => (type: OnlineContentDataType, url?: string) => void;
   checkBannerVisible: (showTimes: number) => boolean;
   checkPositionParam: (screen: string, positionParams: { property: string; value: string }[], value: string) => boolean;
   showAppPopup: (currentRoute: string | undefined) => void;
@@ -260,7 +261,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
 
     Promise.all([popupPromise, bannerPromise, confirmationPromise])
       .then((values) => {
-        console.log('values', values);
         setAppPopupData(values[0].data as AppPopupData[]);
         setAppBannerData(values[1].data as AppBannerData[]);
         setAppConfirmationData(values[2].data as AppConfirmationData[]);
@@ -271,7 +271,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleButtonPress = useCallback(
+  const handleButtonClick = useCallback(
     (id: string) => {
       return (type: OnlineContentDataType, url?: string) => {
         if (type === 'popup') {
@@ -281,11 +281,16 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         }
 
         if (url) {
-          const parts = url.split('/');
-          const target = parts[parts.length - 1];
-          const allowPath = getAppTransformRouteName(target);
+          if (url.startsWith('subwallet://')) {
+            const parts = url.split('/');
+            const target = parts[parts.length - 1];
+            const allowPath = getAppTransformRouteName(target);
+            console.log('allowPath', allowPath);
 
-          windowOpen({ allowedPath: allowPath }).catch((e) => console.error(e));
+            windowOpen({ allowedPath: allowPath }).catch((e) => console.error(e));
+          } else {
+            openInNewTab(url)();
+          }
         }
       };
     },
@@ -300,7 +305,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
       if (currentPopupList && currentPopupList.length) {
         const filteredPopupList = currentPopupList.filter((item) => {
           const popupHistory = popupHistoryMap[`${item.position}-${item.id}`] as PopupHistoryData;
-
+          console.log('popupHistory', popupHistory);
           if (popupHistory) {
             return checkPopupVisibleByFrequency(
               item.repeat,
@@ -320,14 +325,14 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
             message: filteredPopupList[0].content || '',
             buttons: filteredPopupList[0].buttons,
             onPressBtn: (url) => {
-              handleButtonPress(`${filteredPopupList[0].position}-${filteredPopupList[0].id}`)('popup', url);
+              handleButtonClick(`${filteredPopupList[0].position}-${filteredPopupList[0].id}`)('popup', url);
             }
           });
           activeModal(APP_POPUP_MODAL);
         }
       }
     },
-    [appPopupMap, checkPopupVisibleByFrequency, handleButtonPress, popupHistoryMap]
+    [appPopupMap, checkPopupVisibleByFrequency, handleButtonClick, popupHistoryMap]
   );
 
   return (
@@ -344,7 +349,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         updateConfirmationHistoryMap,
         checkPopupExistTime,
         checkPopupVisibleByFrequency,
-        handleButtonPress,
+        handleButtonClick,
         checkBannerVisible,
         checkPositionParam,
         showAppPopup

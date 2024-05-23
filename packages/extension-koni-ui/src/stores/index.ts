@@ -36,7 +36,8 @@ const persistConfig = {
     'uiViewState',
     'staking',
     'campaign',
-    'buyService'
+    'buyService',
+    'staticContent'
   ]
 };
 

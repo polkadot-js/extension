@@ -10,7 +10,14 @@ import { TokenBalanceDetailItem } from '@subwallet/extension-koni-ui/components/
 import { DEFAULT_SWAP_PARAMS, DEFAULT_TRANSFER_PARAMS, SWAP_TRANSACTION, TRANSFER_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useDefaultNavigate, useNavigateOnChangeAccount, useNotification, useReceiveQR, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import {
+  useDefaultNavigate,
+  useGetBannerByScreen,
+  useNavigateOnChangeAccount,
+  useNotification,
+  useReceiveQR,
+  useSelector
+} from '@subwallet/extension-koni-ui/hooks';
 import { DetailModal } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailModal';
 import { DetailUpperBlock } from '@subwallet/extension-koni-ui/Popup/Home/Tokens/DetailUpperBlock';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -27,6 +34,7 @@ import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
+import BannerGenerator from '@subwallet/extension-koni-ui/components/StaticContent/BannerGenerator';
 
 type Props = ThemeProps;
 
@@ -70,6 +78,7 @@ function Component (): React.ReactElement {
   const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const [, setStorage] = useLocalStorage(TRANSFER_TRANSACTION, DEFAULT_TRANSFER_PARAMS);
   const [, setSwapStorage] = useLocalStorage(SWAP_TRANSACTION, DEFAULT_SWAP_PARAMS);
+  const { banners, dismissBanner, onClickBanner } = useGetBannerByScreen('token_detail', tokenGroupSlug);
 
   const transactionFromValue = useMemo(() => {
     return currentAccount?.address ? isAccountAll(currentAccount.address) ? '' : currentAccount.address : '';
@@ -430,6 +439,10 @@ function Component (): React.ReactElement {
             />
           ))
         }
+
+        <div className={'token-detail-banner-wrapper'}>
+          {!!banners.length && (<BannerGenerator banners={banners} dismissBanner={dismissBanner} onClickBanner={onClickBanner} />)}
+        </div>
       </div>
 
       <DetailModal
@@ -506,9 +519,9 @@ const Tokens = styled(WrapperComponent)<ThemeProps>(({ theme: { extendToken, tok
       display: 'none'
     },
 
-    '.token-balance-detail-item': {
+    '.token-balance-detail-item, .token-detail-banner-wrapper': {
       marginBottom: token.sizeXS
-    }
+    },
   });
 });
 

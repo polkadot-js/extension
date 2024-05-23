@@ -38,8 +38,6 @@ const Component = ({ buttons, className, onClickButton }: Props) => {
 
 const OnlineButtonGroups = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
-    gap: token.sizeSM,
-    marginTop: token.size
   });
 });
 

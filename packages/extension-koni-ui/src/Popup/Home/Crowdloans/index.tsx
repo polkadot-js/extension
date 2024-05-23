@@ -2,17 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _FundStatus } from '@subwallet/chain-list/types';
-import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanItem, EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Icon, Image, ModalContext, SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
+import BannerGenerator from "@subwallet/extension-koni-ui/components/StaticContent/BannerGenerator";
 
 type Props = ThemeProps;
 
@@ -37,7 +36,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  const banners = useGetBannerByScreen('crowdloan');
+  const { banners, onClickBanner, dismissBanner } = useGetBannerByScreen('crowdloan');
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -120,18 +119,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [t]
   );
 
-  const onClickBanner = useCallback((item: CampaignBanner) => {
-    return () => {
-      if (item.data.action === 'open_url') {
-        const url = item.data.metadata?.url as string | undefined;
-
-        if (url) {
-          openInNewTab(url)();
-        }
-      }
-    };
-  }, []);
-
   return (
     <PageWrapper
       className={CN(`crowdloans ${className}`, {
@@ -147,27 +134,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={t<string>('Crowdloans')}
       >
         <div className='content-container'>
-          {
-            !!banners.length && (
-              <div className='banner-container'>
-                {banners.map((item) => {
-                  return (
-                    <div
-                      className='image-container'
-                      key={item.slug}
-                    >
-                      <Image
-                        className='banner-image'
-                        onClick={onClickBanner(item)}
-                        src={item.data.media}
-                        width='100%'
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          }
+          {!!banners.length && (
+            <div className={'banner-container'}>
+              <BannerGenerator banners={banners} onClickBanner={onClickBanner} dismissBanner={dismissBanner}/>
+            </div>
+          )}
 
           <SwList.Section
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}

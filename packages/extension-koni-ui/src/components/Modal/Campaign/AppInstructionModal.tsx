@@ -6,10 +6,11 @@ import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/
 import { APP_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AppContentButtonInstruction } from '@subwallet/extension-koni-ui/types/staticContent';
-import { Button, Icon, Image, SwModal, Typography } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Image, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
+import { convertHexColorToRGBA, getBannerButtonIcon } from "@subwallet/extension-koni-ui/utils";
 
 const modalId = APP_INSTRUCTION_MODAL;
 
@@ -25,17 +26,17 @@ interface Props extends ThemeProps {
 const Component = ({ className, data, instruction, media, onPressCancelBtn, onPressConfirmBtn, title }: Props) => {
   const footer = useMemo(
     () => (
-      <div style={{ flexDirection: 'row', gap: 12 }}>
+      <div className={'footer-wrapper'}>
         <Button
           block
           onClick={onPressCancelBtn}
+          schema={'secondary'}
         >
           {instruction.cancel_label}
         </Button>
         <Button
           block
           onClick={onPressConfirmBtn}
-          type={'primary'}
         >
           {instruction.confirm_label}
         </Button>
@@ -48,10 +49,11 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
     <SwModal
       className={CN(className)}
       footer={footer}
+      title={title}
       id={modalId}
+      onCancel={onPressCancelBtn}
     >
       <>
-        <Typography.Text>{title}</Typography.Text>
         {media && (
           <Image
             alt={''}
@@ -60,14 +62,16 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
           />
         )}
 
-        {data.map((_props, index) => (
-          <InstructionItem
-            description={_props.description}
-            iconInstruction={<Icon phosphorIcon={_props.icon} />}
-            key={index}
-            title={_props.title}
-          />
-        ))}
+        <div className={'content-wrapper'}>
+          {data.map((_props, index) => (
+            <InstructionItem
+              description={_props.description}
+              iconInstruction={<BackgroundIcon phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)} backgroundColor={convertHexColorToRGBA(_props.icon_color, 0.1)} iconColor={_props.icon_color} size={'lg'} weight={'fill'} />}
+              key={index}
+              title={_props.title}
+            />
+          ))}
+        </div>
       </>
     </SwModal>
   );
@@ -75,7 +79,17 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
 
 const AppInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    display: 'flex'
+    display: 'flex',
+
+    '.content-wrapper': {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: token.sizeXS,
+    },
+    '.footer-wrapper': {
+      display: 'flex',
+      gap: token.sizeSM,
+    }
   };
 });
 

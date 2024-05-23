@@ -90,8 +90,6 @@ export const useHandleAppPopupMap = (
     });
   }, [appPopupData, checkBalanceCondition, checkEarningCondition, yieldPositionList]);
 
-  console.log('appPopupData', appPopupData);
-
   const appPopupMap = useMemo(() => {
     if (filteredAppPopupMap) {
       const result: Record<string, AppPopupData[]> = filteredAppPopupMap.reduce((r, a) => {

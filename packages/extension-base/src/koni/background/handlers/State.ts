@@ -1676,6 +1676,11 @@ export default class KoniState {
 
   private async onMV3Install () {
     await SWStorage.instance.setItem('mv3_migration', 'done');
+
+    // Open expand page
+    const url = `${chrome.runtime.getURL('index.html')}#/welcome`;
+
+    withErrorLog(() => chrome.tabs.create({ url }));
   }
 
   public onInstallOrUpdate (details: chrome.runtime.InstalledDetails) {

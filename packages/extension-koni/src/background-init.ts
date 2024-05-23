@@ -24,20 +24,6 @@ chrome.runtime.onConnect.addListener((port): void => {
 // Open expand page after install
 chrome.runtime.onInstalled.addListener(function (details) {
   actionHandler.onInstalled(details);
-
-  if (details.reason === 'install') {
-    // Add small timeout to avoid unwanted problems with the extension popup in the first time loaded
-    setTimeout(() => {
-      try {
-        // Open expand page
-        const url = `${chrome.runtime.getURL('index.html')}#/`;
-
-        withErrorLog(() => chrome.tabs.create({ url }));
-      } catch (e) {
-        console.error(e);
-      }
-    }, 900);
-  }
 });
 
 // Setup uninstall URL every background start

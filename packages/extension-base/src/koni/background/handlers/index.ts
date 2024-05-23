@@ -53,6 +53,7 @@ export class SWHandler {
     const isMobile = port.name === PORT_MOBILE;
     const isExtension = port.name === PORT_EXTENSION;
     const sender = port.sender;
+    // console.debug('Handle', message);
 
     const from = isExtension
       ? 'extension'

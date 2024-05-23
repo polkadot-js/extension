@@ -4436,6 +4436,8 @@ export default class KoniExtension {
     }
 
     switch (type) {
+      case 'pri(ping)':
+        return 'pong';
       /// Clone from PolkadotJs
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);

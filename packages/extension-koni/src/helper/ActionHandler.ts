@@ -44,9 +44,11 @@ export class ActionHandler {
   }
 
   public onInstalled (details: chrome.runtime.InstalledDetails): void {
-    this.waitMainHandler.promise.then((handler) => {
+    (async () => {
+      const handler = await this.waitMainHandler.promise;
+
       handler.state.onInstallOrUpdate(details);
-    }).catch(console.error);
+    })().catch(console.error);
   }
 
   private _getPortId (port: chrome.runtime.Port): string {
@@ -54,6 +56,7 @@ export class ActionHandler {
   }
 
   private async _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string) {
+    // console.debug(data.message, data.id, portId);
     // message and disconnect handlers
     if (!this.mainHandler) {
       this.mainHandler = await this.waitMainHandler.promise;
@@ -81,7 +84,7 @@ export class ActionHandler {
       }
     }
 
-    this.mainHandler?.handle(data, port);
+    this.mainHandler.handle(data, port);
   }
 
   private _onPortDisconnect (port: chrome.runtime.Port, portId: string) {

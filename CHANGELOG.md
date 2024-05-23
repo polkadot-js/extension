@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 1.1.66
+Build date: May 21, 2024.
+
+Features & Update:
+- Update chain-list (#3055)
+  - Support SQD token on Arbitrum
+  - Support for Common LP Drops and Common Staking Drops
+  - Update price-id for AUDD
+- Update new chain-list interface (#3085)
+- Support GRC-20 token (#2852, #3067)
+
+Bugs fixed:
+- Handle the case of not resetting the wallet to the default state when click Erase all (#3035)
+
+## 1.1.65
+Build date: May 17, 2024.
+
+Features & Update:
+- Update chain-list (#3040)
+  - Update chainBalanceSlug and explorer for some chains
+  - Add support for Hyperbridge (Nexus)
+  - Add support for CESS testnet
+  - Add support for Pendulum, Amplitude assets
+  - Add support for BOB and tokens on BOB
+
+Bugs fixed:
+- Fixed bug Unable to back screen in case open General settings to Marketing campaign (#3062)
+- Fixed bug when transferring PSP22 token (#3041)
+
 ## 1.1.64
 Build date: May 11, 2024.
 

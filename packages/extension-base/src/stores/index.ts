@@ -4,3 +4,4 @@
 export { default as AccountsStore } from './Accounts';
 export { default as MetadataStore } from './Metadata';
 export { default as CurrentAccountStore } from './CurrentAccountStore';
+export { default as CurrentCurrencyStore } from './CurrentCurrencyStore';

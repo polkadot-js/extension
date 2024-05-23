@@ -44,13 +44,16 @@ export async function getWasmContractGasLimit (
     // @ts-ignore
     const { gasLimit, storageDepositLimit, value } = options;
 
-    // @ts-ignore
     const { gasRequired } = await api.call.contractsApi.call(
       callerAddress,
       contract.address,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       value ?? new BN(0),
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       gasLimit ?? null,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       storageDepositLimit ?? null,
+      // @ts-ignore
       abiMessage?.value?.toU8a(args)
     );
 

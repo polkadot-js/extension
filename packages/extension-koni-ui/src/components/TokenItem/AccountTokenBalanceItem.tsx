@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { useGetAccountByAddress, useGetChainPrefixBySlug, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
+import { Button, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import React, { useMemo } from 'react';
+import { ArrowSquareUpRight } from 'phosphor-react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { MetaInfo } from '../MetaInfo';
@@ -25,10 +29,19 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { assetRegistry } = useSelector((state) => state.assetRegistry);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   const account = useGetAccountByAddress(address);
 
   const tokenInfo = useMemo((): _ChainAsset|undefined => assetRegistry[tokenSlug], [assetRegistry, tokenSlug]);
+  const chainInfo = useMemo(() => {
+    if (tokenInfo?.originChain === undefined) {
+      return undefined;
+    }
+
+    return chainInfoMap[tokenInfo.originChain];
+  }, [chainInfoMap, tokenInfo?.originChain]);
+
   const total = useMemo(() => new BigN(free).plus(locked).toString(), [free, locked]);
   const addressPrefix = useGetChainPrefixBySlug(tokenInfo?.originChain);
 
@@ -38,8 +51,18 @@ const Component: React.FC<Props> = (props: Props) => {
     return account?.name;
   }, [account?.name]);
 
+  const openBlockExplorer = useCallback(
+    (link: string) => {
+      return () => {
+        window.open(link, '_blank');
+      };
+    },
+    []
+  );
+
   const decimals = tokenInfo?.decimals || 0;
   const symbol = tokenInfo?.symbol || '';
+  const link = (chainInfo !== undefined) && getExplorerLink(chainInfo, address, 'account');
 
   return (
     <MetaInfo
@@ -92,6 +115,19 @@ const Component: React.FC<Props> = (props: Props) => {
         value={locked}
         valueColorSchema='gray'
       />
+      {!!link && <Button
+        block
+        disabled={!link}
+        icon={
+          <Icon
+            phosphorIcon={ArrowSquareUpRight}
+          />
+        }
+        onClick={openBlockExplorer(link)}
+        type={'ghost'}
+      >
+        {t('View on explorer')}
+      </Button>}
     </MetaInfo>
   );
 };
@@ -100,6 +136,7 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '&.meta-info-block': {
       marginTop: token.marginXS,
+      paddingBottom: 0,
 
       '&:first-child': {
         marginTop: 0

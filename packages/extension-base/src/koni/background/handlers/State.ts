@@ -1775,7 +1775,7 @@ export default class KoniState {
     this.waitSleeping = null;
   }
 
-  private async _start (isWakeup = false) {
+  private async _start () {
     // Wait sleep finish before start to avoid conflict
     this.generalStatus === ServiceStatus.STOPPING && this.waitSleeping && await this.waitSleeping;
 
@@ -1791,6 +1791,7 @@ export default class KoniState {
       return;
     }
 
+    const isWakeup = this.generalStatus === ServiceStatus.STOPPED;
     const starting = createPromiseHandler<void>();
 
     this.generalStatus = ServiceStatus.STARTING;
@@ -1812,7 +1813,7 @@ export default class KoniState {
   }
 
   public async wakeup () {
-    await this._start(true);
+    await this._start();
   }
 
   public cancelSubscription (id: string): boolean {

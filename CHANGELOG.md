@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 1.1.67
+Build date: May 22, 2024.
+
+Features & Update:
+- Update chain-list:
+  - Update price-id for DED
+  - Update ED for Vara
+
+Bugs fixed:
+- Fix bug integrating chain online (#3084)
+
+## 1.1.66
+Build date: May 21, 2024.
+
+Features & Update:
+- Update chain-list (#3055)
+  - Support SQD token on Arbitrum
+  - Support for Common LP Drops and Common Staking Drops
+  - Update price-id for AUDD
+- Update new chain-list interface (#3085)
+- Support GRC-20 token (#2852, #3067)
+
+Bugs fixed:
+- Handle the case of not resetting the wallet to the default state when click Erase all (#3035)
+
 ## 1.1.65
 Build date: May 17, 2024.
 

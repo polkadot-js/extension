@@ -133,7 +133,7 @@ export class EvmChainHandler extends AbstractChainHandler {
     return result;
   }
 
-  public async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string): Promise<_SmartContractTokenInfo> {
+  public async getEvmContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string): Promise<_SmartContractTokenInfo> {
     let tokenContract: Contract;
     let name = '';
     let decimals: number | undefined = -1;

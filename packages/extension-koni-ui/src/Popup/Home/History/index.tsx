@@ -8,11 +8,11 @@ import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SESSION_VALUE, HISTORY_DETAIL_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
-import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
+import { ChainItemType, SessionStorage, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
 import { Aperture, ArrowDownLeft, ArrowsLeftRight, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
@@ -209,6 +209,7 @@ function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHist
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
+const remindSeedPhraseModalId = REMIND_BACKUP_SEED_PHRASE_MODAL;
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
 
@@ -223,7 +224,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { language } = useSelector((root) => root.settings);
   const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
-
   const isActive = checkActive(modalId);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -434,10 +434,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
+    const infoSession = Date.now();
+
+    const { remind, timeBackup, timeCalculate } = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
     inactiveModal(modalId);
+
+    if (infoSession - timeCalculate >= timeBackup && remind) {
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+    }
+
     setSelectedItem(null);
     setOpenDetailLink(false);
-  }, [inactiveModal]);
+  }, [activeModal, inactiveModal]);
 
   const onClickFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -449,10 +458,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (existed) {
         setSelectedItem(existed);
+        inactiveModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap, inactiveModal]);
 
   useEffect(() => {
     if (isActive) {
@@ -465,8 +475,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           return selected;
         }
       });
+      inactiveModal(remindSeedPhraseModalId);
     }
-  }, [isActive, historyMap]);
+  }, [isActive, historyMap, inactiveModal]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {

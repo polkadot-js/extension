@@ -53,6 +53,7 @@ export class LazyLoader {
 const PhishingDetected = new LazyLoader('PhishingDetected', () => import('@subwallet/extension-koni-ui/Popup/PhishingDetected'));
 const Welcome = new LazyLoader('Welcome', () => import('@subwallet/extension-koni-ui/Popup/Welcome'));
 const CreateDone = new LazyLoader('CreateDone', () => import('@subwallet/extension-koni-ui/Popup/CreateDone'));
+const RemindExportAccount = new LazyLoader('RemindExportAccount', () => import('@subwallet/extension-koni-ui/Popup/RemindExportAccount'));
 const BuyTokens = new LazyLoader('BuyTokens', () => import('@subwallet/extension-koni-ui/Popup/BuyTokens'));
 // const Staking = new LazyLoader('Staking', () => import('@subwallet/extension-koni-ui/Popup/Home/Staking'));
 
@@ -149,6 +150,7 @@ export const router = createHashRouter([
       Welcome.generateRouterObject('/welcome'),
       BuyTokens.generateRouterObject('/buy-tokens'),
       CreateDone.generateRouterObject('/create-done'),
+      RemindExportAccount.generateRouterObject('/remind-export-account'),
       {
         ...Home.generateRouterObject('/home'),
         children: [

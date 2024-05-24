@@ -52,7 +52,7 @@ export class ActionHandler {
   }
 
   private _getPortId (port: chrome.runtime.Port): string {
-    return `${port.sender?.documentId || 'extension-popup'}`;
+    return `${port.sender?.documentId || port.sender?.tab?.id || 'extension-popup'}`;
   }
 
   private async _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string) {
@@ -89,6 +89,7 @@ export class ActionHandler {
 
   private _onPortDisconnect (port: chrome.runtime.Port, portId: string) {
     if (this.connectionMap[portId]) {
+      // console.debug(`Disconnecting port ${portId}`);
       delete this.connectionMap[portId];
 
       // Set timeout to sleep
@@ -107,6 +108,7 @@ export class ActionHandler {
   public handlePort (port: chrome.runtime.Port): void {
     assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
     const portId = this._getPortId(port);
+    // console.debug('Handling port', portId);
 
     port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => {
       this._onPortMessage(port, data, portId).catch(console.error);

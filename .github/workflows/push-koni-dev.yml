@@ -66,6 +66,15 @@ jobs:
         nextcloud-url: 'https://file.cdmteck.com'
         nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
         nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
+    - name: Upload to Build Firefox to Nextcloud
+      id: nextcloud_upload_firefox
+      uses: trympet/nextcloud-artifacts-action@v2
+      with:
+        name: '${{ steps.setup_params.outputs.ref }}-build-firefox-${{ steps.setup_params.outputs.time_tag }}'
+        path: 'master-build-firefox.zip'
+        nextcloud-url: 'https://file.cdmteck.com'
+        nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
+        nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
     - name: Deploy Webrunner to Netlify
       id: netlify_deployment
       uses: nwtgck/actions-netlify@v2.0
@@ -91,4 +100,5 @@ jobs:
         description: |
           The Deployment has been completed.
           - Extension: ${{ steps.nextcloud_upload.outputs.SHAREABLE_URL }}
+          - Extension (Firefox): ${{ steps.nextcloud_upload_firefox.outputs.SHAREABLE_URL }}
           - Web-runner: ${{ steps.netlify_deployment.outputs.deploy-url }}

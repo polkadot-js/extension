@@ -717,7 +717,7 @@ const Component = ({ className }: ComponentProps) => {
     const _shortName = poolInfo.metadata.shortName;
     const _type = t(earningTypeLabelMap[poolInfo.type]);
 
-    return t('{{shortName}} {{type}} process:', { replace: { shortName: _shortName, type: _type } });
+    return t('{{type}} process on {{shortName}} :', { replace: { shortName: _shortName, type: _type } });
   })();
 
   const onCancelInstructionModal = useCallback(() => {

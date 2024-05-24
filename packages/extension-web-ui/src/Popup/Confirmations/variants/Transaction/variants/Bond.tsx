@@ -28,6 +28,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 
+  const pluralizedValidators = data.selectedValidators.length > 1 ? `${handleValidatorLabel.toLowerCase()}s` : handleValidatorLabel.toLowerCase();
+
   return (
     <div className={CN(className)}>
       <CommonTransactionInfo
@@ -40,7 +42,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         <MetaInfo.AccountGroup
           accounts={data.selectedValidators}
-          content={t(`{{number}} selected ${handleValidatorLabel.toLowerCase()}`, { replace: { number: data.selectedValidators.length } })}
+          content={t(`{{number}} selected ${pluralizedValidators}`, { replace: { number: data.selectedValidators.length } })}
           label={t(data.type === StakingType.POOLED ? 'Pool' : handleValidatorLabel)}
         />
 

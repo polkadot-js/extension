@@ -4,3 +4,5 @@
 export const LANGUAGE = 'current-language';
 
 export const CURRENCY = 'current-currency';
+
+export const LATEST_SESSION = 'general.latest-session';

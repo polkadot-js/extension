@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { LATEST_SESSION, RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import { resetWallet } from '@subwallet/extension-koni-ui/messaging';
@@ -64,6 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
           })
           .finally(() => {
             _setLoading(false);
+            localStorage.removeItem(LATEST_SESSION);
             onClose();
           });
       }, 300);

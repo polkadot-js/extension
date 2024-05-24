@@ -7,6 +7,7 @@ import AccountItemWithName from '@subwallet/extension-koni-ui/components/Account
 import BackIcon from '@subwallet/extension-koni-ui/components/Icon/BackIcon';
 import { EVM_ACCOUNT_TYPE } from '@subwallet/extension-koni-ui/constants/account';
 import { CREATE_ACCOUNT_MODAL, DERIVE_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useSetSessionLatest } from '@subwallet/extension-koni-ui/hooks';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
@@ -50,6 +51,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const sectionRef = useRef<SwListSectionRef>(null);
 
   const { checkActive, inactiveModal } = useContext(ModalContext);
+  const { setStateSelectAccount } = useSetSessionLatest();
   const checkUnlock = useUnlockChecker();
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
@@ -70,9 +72,10 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, []);
 
   const onCancel = useCallback(() => {
+    setStateSelectAccount(true);
     inactiveModal(modalId);
     clearSearch();
-  }, [clearSearch, inactiveModal]);
+  }, [clearSearch, inactiveModal, setStateSelectAccount]);
 
   useClickOutSide(isActive || !!selected, renderModalSelector(className), onCancel);
 
@@ -85,6 +88,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
             address: account.address
           }).then(() => {
             inactiveModal(modalId);
+            setStateSelectAccount(true);
             clearSearch();
           }).catch((e: Error) => {
             notify({
@@ -99,7 +103,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         // User cancel unlock
       });
     };
-  }, [checkUnlock, clearSearch, inactiveModal, notify]);
+  }, [checkUnlock, clearSearch, inactiveModal, notify, setStateSelectAccount]);
 
   const renderItem = useCallback((account: AccountJson): React.ReactNode => {
     const disabled = !!selected;

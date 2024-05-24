@@ -21,6 +21,9 @@ const IDLE_TIME = 60000 * 2; // 2 minutes
 let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;
 let openCount = 0;
+const keyLatestSession = 'general.latest-session';
+const timeBackup = 300000;
+const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup, isFinished: false };
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
@@ -54,6 +57,12 @@ chrome.runtime.onConnect.addListener((port): void => {
   // message and disconnect handlers
   port.onMessage.addListener((data: TransportRequestMessage<keyof RequestSignatures>) => handlers(data, port));
   port.onDisconnect.addListener(() => {
+    const latestSessionRaw = localStorage.getItem(keyLatestSession);
+
+    const latestSession = latestSessionRaw ? JSON.parse(latestSessionRaw) as { remind: boolean, timeCalculate: number } : DEFAULT_LATEST_SESSION;
+
+    localStorage.setItem(keyLatestSession, JSON.stringify({ ...latestSession, remind: true }));
+
     if (PORT_EXTENSION === port.name) {
       openCount -= 1;
 

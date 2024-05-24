@@ -3,13 +3,7 @@
 
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { updateAppBannerData, updateBannerHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import {
-  AppBannerData,
-  AppBasicInfoData,
-  ConditionBalanceType,
-  ConditionEarningType,
-  PopupHistoryData
-} from '@subwallet/extension-koni-ui/types/staticContent';
+import { AppBannerData, AppBasicInfoData, ConditionBalanceType, ConditionEarningType, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 

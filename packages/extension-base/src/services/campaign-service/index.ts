@@ -16,6 +16,7 @@ export default class CampaignService {
 
   constructor (state: KoniState) {
     this.#state = state;
+    window.localStorage.setItem('static.show-app-popup', 'true');
   }
 
   public init () {

@@ -1,12 +1,15 @@
-import React, { useMemo } from "react";
-import {ThemeProps} from "@subwallet/extension-koni-ui/types";
-import {AppBannerData} from "@subwallet/extension-koni-ui/types/staticContent";
-import {StaticDataProps} from "@subwallet/extension-koni-ui/components/Modal/Campaign/AppPopupModal";
-import { APP_INSTRUCTION_DATA } from "@subwallet/extension-koni-ui/constants";
-import {useLocalStorage} from "usehooks-ts";
-import styled from "styled-components";
-import Banner from "@subwallet/extension-koni-ui/components/StaticContent/Banner";
-import Slider, { Settings } from "react-slick";
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { StaticDataProps } from '@subwallet/extension-koni-ui/components/Modal/Campaign/AppPopupModal';
+import Banner from '@subwallet/extension-koni-ui/components/StaticContent/Banner';
+import { APP_INSTRUCTION_DATA } from '@subwallet/extension-koni-ui/constants';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { AppBannerData } from '@subwallet/extension-koni-ui/types/staticContent';
+import React, { useMemo } from 'react';
+import Slider, { Settings } from 'react-slick';
+import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface Props extends ThemeProps {
   banners: AppBannerData[];
@@ -14,7 +17,7 @@ interface Props extends ThemeProps {
   onClickBanner: (id: string) => (url?: string) => void;
 }
 
-const Component = ({ banners, dismissBanner, onClickBanner, className }: Props) => {
+const Component = ({ banners, className, dismissBanner, onClickBanner }: Props) => {
   const [appInstructionData] = useLocalStorage(APP_INSTRUCTION_DATA, '[]');
   const instructionDataList: StaticDataProps[] = useMemo(() => {
     try {
@@ -34,26 +37,29 @@ const Component = ({ banners, dismissBanner, onClickBanner, className }: Props) 
       slidesToScroll: 1,
       autoplay: true,
       autoplaySpeed: 2000,
-      arrows: false,
+      arrows: false
     };
   }, []);
 
   return (
     <>
-      <Slider {...sliderSettings} className={className}>
-        {banners.map(item => (
+      <Slider
+        {...sliderSettings}
+        className={className}
+      >
+        {banners.map((item) => (
           <Banner
+            data={item}
+            dismissBanner={dismissBanner}
+            instructionDataList={instructionDataList}
             key={item.id}
             onPressBanner={onClickBanner}
-            data={item}
-            instructionDataList={instructionDataList}
-            dismissBanner={dismissBanner}
           />
         ))}
       </Slider>
     </>
-  )
-}
+  );
+};
 
 const BannerGenerator = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
@@ -74,7 +80,7 @@ const BannerGenerator = styled(Component)<Props>(({ theme: { token } }: Props) =
       padding: 0,
       cursor: 'pointer',
       height: 12,
-      width: 6,
+      width: 6
     },
     '.slick-dots li button': {
       border: 0,
@@ -83,12 +89,12 @@ const BannerGenerator = styled(Component)<Props>(({ theme: { token } }: Props) =
       lineHeight: 0,
       padding: token.sizeXXS - 1,
       backgroundColor: token.colorWhite,
-      borderRadius: 10,
+      borderRadius: 10
     },
     '.slick-dots li.slick-active button': {
       opacity: 0.75
     }
-  }
+  };
 });
 
 export default BannerGenerator;

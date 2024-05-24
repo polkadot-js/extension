@@ -31,3 +31,4 @@ export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';
 export const EARNING_MIGRATION_ANNOUNCEMENT = 'announcement.earning-migration';
 export const TIME_OUT_RECORD = 'general.time-out-record';
 export const APP_INSTRUCTION_DATA = 'static.instruction-data';
+export const SHOW_APP_POPUP = 'static.show-app-popup';

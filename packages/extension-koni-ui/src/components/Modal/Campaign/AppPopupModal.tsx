@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { YieldPoolType } from '@subwallet/extension-base/types';
+import AppInstructionModal from '@subwallet/extension-koni-ui/components/Modal/Campaign/AppInstructionModal';
 import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInstructionModal';
+import ContentGenerator from '@subwallet/extension-koni-ui/components/StaticContent/ContentGenerator';
 import { APP_INSTRUCTION_DATA, APP_INSTRUCTION_MODAL, APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AppContentButton } from '@subwallet/extension-koni-ui/types/staticContent';
@@ -13,8 +15,6 @@ import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 import OnlineButtonGroups from '../../StaticContent/OnlineButtonGroups';
-import ContentGenerator from "@subwallet/extension-koni-ui/components/StaticContent/ContentGenerator";
-import AppInstructionModal from "@subwallet/extension-koni-ui/components/Modal/Campaign/AppInstructionModal";
 
 interface Props extends ThemeProps {
   message: string;
@@ -114,12 +114,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
       {!!instructionButton && instructionButton.instruction && currentInstructionData && (
         <AppInstructionModal
-          title={currentInstructionData.title || 'Instruction'}
-          media={currentInstructionData.media || ''}
-          instruction={instructionButton.instruction}
           data={currentInstructionData.instructions}
+          instruction={instructionButton.instruction}
+          media={currentInstructionData.media || ''}
           onPressCancelBtn={() => onAccept()}
           onPressConfirmBtn={() => onAccept(instructionButton.action?.url)}
+          title={currentInstructionData.title || 'Instruction'}
         />
       )}
     </>

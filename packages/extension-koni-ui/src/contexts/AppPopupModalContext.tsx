@@ -1,12 +1,13 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { APP_POPUP_MODAL, SHOW_APP_POPUP } from '@subwallet/extension-koni-ui/constants';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useState } from 'react';
+import React, {useCallback, useContext, useState} from 'react';
 
 import AppPopupModal from '../components/Modal/Campaign/AppPopupModal';
-import { AppContentButton } from '../types/staticContent';
+import {AppContentButton, PopupFrequency} from '../types/staticContent';
+import { useLocalStorage } from 'usehooks-ts';
 
 interface AppPopupModalContextProviderProps {
   children?: React.ReactElement;
@@ -19,10 +20,11 @@ export type AppPopupModalInfo = {
   externalButtons?: React.ReactElement;
   type?: 'popup' | 'banner' | 'confirmation';
   onPressBtn?: (url?: string) => void;
+  repeat?: PopupFrequency;
 };
 
 export interface AppPopupModalType {
-  setAppPopupModal: React.Dispatch<React.SetStateAction<AppPopupModalInfo>>;
+  openAppPopupModal: (data: AppPopupModalInfo) => void;
   hideAppPopupModal: () => void;
 }
 
@@ -30,9 +32,23 @@ export const AppPopupModalContext = React.createContext({} as AppPopupModalType)
 
 export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextProviderProps) => {
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
-  const { inactiveModal } = useContext(ModalContext);
+  const { inactiveModal, activeModal } = useContext(ModalContext);
+  const [showPopup, setShowPopup] = useLocalStorage<boolean>(SHOW_APP_POPUP, true);
+
+  const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
+    if (data.repeat && data.repeat === 'every_time') {
+      if (showPopup) {
+        setAppPopupModal(data);
+        activeModal(APP_POPUP_MODAL);
+      }
+    } else {
+      setAppPopupModal(data);
+      activeModal(APP_POPUP_MODAL);
+    }
+  }, []);
 
   const hideAppPopupModal = useCallback(() => {
+    setShowPopup(false);
     inactiveModal(APP_POPUP_MODAL);
     setTimeout(
       () =>
@@ -48,7 +64,7 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
   }, [inactiveModal]);
 
   return (
-    <AppPopupModalContext.Provider value={{ setAppPopupModal, hideAppPopupModal }}>
+    <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal }}>
       {children}
       <AppPopupModal
         buttons={appPopupModal.buttons || []}

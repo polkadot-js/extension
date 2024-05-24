@@ -3,6 +3,7 @@
 
 import { _FundStatus } from '@subwallet/chain-list/types';
 import { CrowdloanItem, EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import BannerGenerator from '@subwallet/extension-koni-ui/components/StaticContent/BannerGenerator';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -11,7 +12,6 @@ import CN from 'classnames';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
-import BannerGenerator from "@subwallet/extension-koni-ui/components/StaticContent/BannerGenerator";
 
 type Props = ThemeProps;
 
@@ -36,7 +36,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  const { banners, onClickBanner, dismissBanner } = useGetBannerByScreen('crowdloan');
+  const { banners, dismissBanner, onClickBanner } = useGetBannerByScreen('crowdloan');
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -136,7 +136,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         <div className='content-container'>
           {!!banners.length && (
             <div className={'banner-container'}>
-              <BannerGenerator banners={banners} onClickBanner={onClickBanner} dismissBanner={dismissBanner}/>
+              <BannerGenerator
+                banners={banners}
+                dismissBanner={dismissBanner}
+                onClickBanner={onClickBanner}
+              />
             </div>
           )}
 

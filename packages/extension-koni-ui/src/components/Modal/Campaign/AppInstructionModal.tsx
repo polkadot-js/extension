@@ -6,11 +6,11 @@ import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/
 import { APP_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AppContentButtonInstruction } from '@subwallet/extension-koni-ui/types/staticContent';
+import { convertHexColorToRGBA, getBannerButtonIcon } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, Image, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { convertHexColorToRGBA, getBannerButtonIcon } from "@subwallet/extension-koni-ui/utils";
 
 const modalId = APP_INSTRUCTION_MODAL;
 
@@ -49,9 +49,9 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
     <SwModal
       className={CN(className)}
       footer={footer}
-      title={title}
       id={modalId}
       onCancel={onPressCancelBtn}
+      title={title}
     >
       <>
         {media && (
@@ -66,7 +66,13 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
           {data.map((_props, index) => (
             <InstructionItem
               description={_props.description}
-              iconInstruction={<BackgroundIcon phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)} backgroundColor={convertHexColorToRGBA(_props.icon_color, 0.1)} iconColor={_props.icon_color} size={'lg'} weight={'fill'} />}
+              iconInstruction={<BackgroundIcon
+                backgroundColor={convertHexColorToRGBA(_props.icon_color, 0.1)}
+                iconColor={_props.icon_color}
+                phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)}
+                size={'lg'}
+                weight={'fill'}
+              />}
               key={index}
               title={_props.title}
             />
@@ -84,11 +90,11 @@ const AppInstructionModal = styled(Component)<Props>(({ theme: { token } }: Prop
     '.content-wrapper': {
       display: 'flex',
       flexDirection: 'column',
-      gap: token.sizeXS,
+      gap: token.sizeXS
     },
     '.footer-wrapper': {
       display: 'flex',
-      gap: token.sizeSM,
+      gap: token.sizeSM
     }
   };
 });

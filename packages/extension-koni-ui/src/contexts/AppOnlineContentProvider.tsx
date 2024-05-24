@@ -4,7 +4,6 @@
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { getOutputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { AppPopupModalContext } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
@@ -14,12 +13,12 @@ import { useHandleAppPopupMap } from '@subwallet/extension-koni-ui/hooks/static-
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AppBannerData, AppBasicInfoData, AppConfirmationData, AppPopupData, ConditionBalanceType, ConditionEarningType, OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
-import { ModalContext } from '@subwallet/react-ui';
+import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import axios from 'axios';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
+import { AllowedPath } from "@subwallet/extension-base/background/types";
 
 interface AppOnlineContentContextProviderProps {
   children?: React.ReactElement;
@@ -56,7 +55,7 @@ const TIME_MILLI = {
 
 export const AppOnlineContentContext = React.createContext({} as AppOnlineContentContextType);
 
-const getAppTransformRouteName = (currentRoute?: string) => {
+const getPositionByRouteName = (currentRoute?: string) => {
   if (!currentRoute) {
     return '';
   }
@@ -74,6 +73,24 @@ const getAppTransformRouteName = (currentRoute?: string) => {
   }
 };
 
+const getAllowedPathByPosition = (position?: string) => {
+  if (!position) {
+    return '';
+  }
+
+  switch (position) {
+    case 'collections':
+      return '/home/nfts/collections';
+    case 'earning':
+      return '/home/earning';
+    case 'crowdloans':
+      return '/home/crowdloans';
+    case '/':
+    default:
+      return '/home/tokens';
+  }
+};
+
 export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentContextProviderProps) => {
   const appPopupModalContext = useContext(AppPopupModalContext);
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
@@ -82,7 +99,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
   const yieldPositionList = useGroupYieldPosition();
   const language = useSelector((state: RootState) => state.settings.language);
   const { getAppInstructionData } = useGetAppInstructionData(language);
-  const { activeModal } = useContext(ModalContext);
 
   const { appBannerData,
     appConfirmationData,
@@ -284,10 +300,8 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
           if (url.startsWith('subwallet://')) {
             const parts = url.split('/');
             const target = parts[parts.length - 1];
-            const allowPath = getAppTransformRouteName(target);
-            console.log('allowPath', allowPath);
-
-            windowOpen({ allowedPath: allowPath }).catch((e) => console.error(e));
+            const allowedPath = getAllowedPathByPosition(target);
+            windowOpen({ allowedPath: allowedPath as AllowedPath }).catch((e) => console.error(e));
           } else {
             openInNewTab(url)();
           }
@@ -299,13 +313,12 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
 
   const showAppPopup = useCallback(
     (currentRoute: string | undefined) => {
-      const currentTransformRoute = getAppTransformRouteName(currentRoute) || '';
+      const currentTransformRoute = getPositionByRouteName(currentRoute) || '';
       const currentPopupList = appPopupMap[currentTransformRoute];
-
       if (currentPopupList && currentPopupList.length) {
         const filteredPopupList = currentPopupList.filter((item) => {
           const popupHistory = popupHistoryMap[`${item.position}-${item.id}`] as PopupHistoryData;
-          console.log('popupHistory', popupHistory);
+
           if (popupHistory) {
             return checkPopupVisibleByFrequency(
               item.repeat,
@@ -319,8 +332,9 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         });
 
         if (filteredPopupList && filteredPopupList.length) {
-          appPopupModalContext.setAppPopupModal({
+          appPopupModalContext.openAppPopupModal({
             type: 'popup',
+            repeat: filteredPopupList[0].repeat,
             title: filteredPopupList[0].info.name,
             message: filteredPopupList[0].content || '',
             buttons: filteredPopupList[0].buttons,
@@ -328,7 +342,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
               handleButtonClick(`${filteredPopupList[0].position}-${filteredPopupList[0].id}`)('popup', url);
             }
           });
-          activeModal(APP_POPUP_MODAL);
         }
       }
     },

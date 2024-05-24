@@ -604,8 +604,6 @@ export class ChainService {
     await this.initAssetSettings();
     this.initAssetRefMap();
     await this.autoEnableTokens();
-
-    this.checkLatestData();
   }
 
   initAssetRefMap () {
@@ -687,7 +685,7 @@ export class ChainService {
         const latestAssetPatch = JSON.stringify(latestAssetInfo);
 
         if (this.assetMapPatch !== latestAssetPatch) {
-          const assetRegistry = filterAssetInfoMap(this.getChainInfoMap(), { ...ChainAssetMap, ...latestAssetInfo });
+          const assetRegistry = filterAssetInfoMap(this.getChainInfoMap(), Object.assign({}, this.dataMap.assetRegistry, latestAssetInfo));
 
           this.assetMapPatch = latestAssetPatch;
           this.dataMap.assetRegistry = assetRegistry;

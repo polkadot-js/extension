@@ -239,7 +239,10 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   }, [currentAccount, initAccount]);
 
   if (rootLoading || redirectPath) {
-    return <>{redirectPath && <Navigate to={redirectPath} />}</>;
+    return <>{redirectPath && <Navigate
+      state={location.state as unknown}
+      to={redirectPath}
+    />}</>;
   } else {
     return <MainWrapper className={CN('main-page-container')}>
       {children}

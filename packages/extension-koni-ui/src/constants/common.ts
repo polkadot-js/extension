@@ -16,4 +16,6 @@ export const SUPPORT_MAIL = 'mailto:support@subwallet.app';
 export const ALL_KEY = 'all';
 export const ASTAR_PORTAL_URL = 'https://portal.astar.network/astar/dapp-staking/discover';
 
+export const STATIC_DATA_CONTENT_URL = 'https://static-data.subwallet.app/';
+
 export const DEFAULT_CLAIM_DAPP_STAKING_REWARDS_STATE = ClaimDAppStakingRewardsState.NONE;

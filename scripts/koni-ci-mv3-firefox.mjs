@@ -10,9 +10,9 @@ async function updateManifest() {
     const manifest = JSON.parse(data);
 
     // Update the "background" property
-    if (manifest.background && manifest.background['service-worker']) {
+    if (manifest.background && manifest.background['service_worker']) {
       manifest.background = {
-        script: manifest.background['service-worker']
+        scripts: [manifest.background['service_worker']]
       };
     }
 

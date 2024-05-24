@@ -1240,5 +1240,9 @@
   "This pool has reached the maximum number of members. Select another to continue": "",
   "Member": "",
   "Search currency": "",
-  "Program ID": ""
+  "Program ID": "",
+  "Learn more": "",
+  "Update successful": "",
+  "Your SubWallet extension is updated to Manifest V3!": "",
+  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": ""
 }

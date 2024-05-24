@@ -4,12 +4,12 @@
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
 import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
-import { DEFAULT_SESSION_VALUE, DISCONNECT_EXTENSION_MODAL, LATEST_SESSION, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useSetSessionLatest, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
-import { SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ButtonProps, Icon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -56,7 +56,7 @@ const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className, id }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
@@ -73,8 +73,6 @@ function Component ({ className, id }: Props): React.ReactElement<Props> {
   const isPopup = useIsPopup();
   const { token } = useTheme() as Theme;
   const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
-  const [isRemindSeedPhrase, setIsRemindSeedPhrase] = useState<boolean>(false);
-  const isActiveModal = useMemo(() => checkActive(modalId), [checkActive]);
 
   const accounts = useMemo((): AccountJson[] => {
     const result = [..._accounts].sort(funcSortByName);
@@ -212,12 +210,6 @@ function Component ({ className, id }: Props): React.ReactElement<Props> {
   }, []);
 
   useEffect(() => {
-    const { isFinished } = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
-
-    isActiveModal && setIsRemindSeedPhrase(!isFinished);
-  }, [isActiveModal]);
-
-  useEffect(() => {
     if (currentAuth) {
       if (!currentAuth.isAllowed) {
         setCanConnect(0);
@@ -330,15 +322,13 @@ function Component ({ className, id }: Props): React.ReactElement<Props> {
     return ({
       icon: (
         <Icon
-          className={CN({
-            '__export-remind-btn': isRemindSeedPhrase
-          })}
+          className={CN('__export-remind-btn')}
           phosphorIcon={Export}
           weight='fill'
         />
       ),
       children: (
-        isRemindSeedPhrase && <Tooltip
+        <Tooltip
           className={'__icon-export-remind'}
           open={true}
           overlayClassName={CN('__tooltip-overlay-remind')}
@@ -358,10 +348,9 @@ function Component ({ className, id }: Props): React.ReactElement<Props> {
       onClick: exportAllAccounts,
       size: 'xs',
       type: 'ghost',
-      tooltip: !isRemindSeedPhrase && t('Export account'),
       tooltipPlacement: 'topLeft'
     });
-  }, [exportAllAccounts, isRemindSeedPhrase, t, token.colorHighlight]);
+  }, [exportAllAccounts, t, token.colorHighlight]);
 
   return (
     <div className={CN(className, 'container')}>

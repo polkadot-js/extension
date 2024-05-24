@@ -94,6 +94,10 @@ const Component: React.FC<Props> = (props: Props) => {
     [currentInstructionData, instructionButton, onAccept, activeModal]
   );
 
+  const onClickCancelBtn = useCallback(() => onAccept(), [onAccept]);
+
+  const onClickConfirmBtn = useCallback(() => instructionButton && onAccept(instructionButton.action?.url), [instructionButton, onAccept]);
+
   return (
     <>
       <SwModal
@@ -117,8 +121,8 @@ const Component: React.FC<Props> = (props: Props) => {
           data={currentInstructionData.instructions}
           instruction={instructionButton.instruction}
           media={currentInstructionData.media || ''}
-          onPressCancelBtn={() => onAccept()}
-          onPressConfirmBtn={() => onAccept(instructionButton.action?.url)}
+          onPressCancelBtn={onClickCancelBtn}
+          onPressConfirmBtn={onClickConfirmBtn}
           title={currentInstructionData.title || 'Instruction'}
         />
       )}
@@ -128,13 +132,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AppPopupModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.button-container': {
-      display: 'flex',
-      flexDirection: 'row',
-      gap: token.size,
-      paddingTop: token.padding
-    },
-
     '.ant-sw-modal-content': {
       paddingTop: token.paddingXXS,
       borderRadius: `${token.borderRadiusXL}px ${token.borderRadiusXL}px 0 0`

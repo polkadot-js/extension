@@ -92,10 +92,14 @@ export const useHandleAppPopupMap = (
 
   const appPopupMap = useMemo(() => {
     if (filteredAppPopupMap) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: Record<string, AppPopupData[]> = filteredAppPopupMap.reduce((r, a) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         r[a.position] = r[a.position] || [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         r[a.position].push(a);
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return r;
       }, Object.create(null));
 

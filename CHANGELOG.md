@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 1.1.67
+Build date: May 22, 2024.
+
+Features & Update:
+- Update chain-list:
+  - Update price-id for DED
+  - Update ED for Vara
+
+Bugs fixed:
+- Fix bug integrating chain online (#3084)
+
 ## 1.1.66
 Build date: May 21, 2024.
 

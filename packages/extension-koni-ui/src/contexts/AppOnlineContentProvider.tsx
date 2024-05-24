@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AllowedPath } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { getOutputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
@@ -18,7 +19,6 @@ import axios from 'axios';
 import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { AllowedPath } from "@subwallet/extension-base/background/types";
 
 interface AppOnlineContentContextProviderProps {
   children?: React.ReactElement;
@@ -301,6 +301,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
             const parts = url.split('/');
             const target = parts[parts.length - 1];
             const allowedPath = getAllowedPathByPosition(target);
+
             windowOpen({ allowedPath: allowedPath as AllowedPath }).catch((e) => console.error(e));
           } else {
             openInNewTab(url)();
@@ -315,9 +316,10 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     (currentRoute: string | undefined) => {
       const currentTransformRoute = getPositionByRouteName(currentRoute) || '';
       const currentPopupList = appPopupMap[currentTransformRoute];
+
       if (currentPopupList && currentPopupList.length) {
         const filteredPopupList = currentPopupList.filter((item) => {
-          const popupHistory = popupHistoryMap[`${item.position}-${item.id}`] as PopupHistoryData;
+          const popupHistory = popupHistoryMap[`${item.position}-${item.id}`];
 
           if (popupHistory) {
             return checkPopupVisibleByFrequency(
@@ -345,6 +347,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         }
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [appPopupMap, checkPopupVisibleByFrequency, handleButtonClick, popupHistoryMap]
   );
 

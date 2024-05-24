@@ -438,7 +438,7 @@ function Component (): React.ReactElement {
             banners={banners}
             dismissBanner={dismissBanner}
             onClickBanner={onClickBanner}
-                                />)}
+          />)}
         </div>
       </div>
 

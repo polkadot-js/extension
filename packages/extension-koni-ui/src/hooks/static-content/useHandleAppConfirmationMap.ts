@@ -86,10 +86,14 @@ export const useHandleAppConfirmationMap = (
 
   const appConfirmationMap = useMemo(() => {
     if (filteredAppConfirmationMap) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const result: Record<string, AppConfirmationData[]> = filteredAppConfirmationMap.reduce((r, a) => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
         r[a.position] = r[a.position] || [];
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
         r[a.position].push(a);
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return r;
       }, Object.create(null));
 

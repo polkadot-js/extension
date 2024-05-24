@@ -15,6 +15,8 @@ import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
+import { AppBannerData, AppConfirmationData, AppPopupData, PopupHistoryData } from '../types/staticContent';
+
 // todo: move this file to extension-koni-ui/src/types/
 
 export type CurrentAccountType = {

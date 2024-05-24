@@ -3,11 +3,11 @@
 
 import { APP_POPUP_MODAL, SHOW_APP_POPUP } from '@subwallet/extension-koni-ui/constants';
 import { ModalContext } from '@subwallet/react-ui';
-import React, {useCallback, useContext, useState} from 'react';
+import React, { useCallback, useContext, useState } from 'react';
+import { useLocalStorage } from 'usehooks-ts';
 
 import AppPopupModal from '../components/Modal/Campaign/AppPopupModal';
-import {AppContentButton, PopupFrequency} from '../types/staticContent';
-import { useLocalStorage } from 'usehooks-ts';
+import { AppContentButton, PopupFrequency } from '../types/staticContent';
 
 interface AppPopupModalContextProviderProps {
   children?: React.ReactElement;
@@ -32,7 +32,7 @@ export const AppPopupModalContext = React.createContext({} as AppPopupModalType)
 
 export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextProviderProps) => {
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
-  const { inactiveModal, activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const [showPopup, setShowPopup] = useLocalStorage<boolean>(SHOW_APP_POPUP, true);
 
   const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
@@ -45,7 +45,7 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
       setAppPopupModal(data);
       activeModal(APP_POPUP_MODAL);
     }
-  }, []);
+  }, [activeModal, showPopup]);
 
   const hideAppPopupModal = useCallback(() => {
     setShowPopup(false);
@@ -61,7 +61,7 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
         })),
       300
     );
-  }, [inactiveModal]);
+  }, [inactiveModal, setShowPopup]);
 
   return (
     <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal }}>

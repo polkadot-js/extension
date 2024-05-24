@@ -67,7 +67,7 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
             <InstructionItem
               description={_props.description}
               iconInstruction={<BackgroundIcon
-                backgroundColor={convertHexColorToRGBA(_props.icon_color, 0.1)}
+                backgroundColor={_props.icon_color && convertHexColorToRGBA(_props.icon_color, 0.1)}
                 iconColor={_props.icon_color}
                 phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)}
                 size={'lg'}

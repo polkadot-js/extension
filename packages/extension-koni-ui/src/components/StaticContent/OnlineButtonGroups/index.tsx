@@ -13,20 +13,41 @@ interface Props extends ThemeProps {
 }
 
 const Component = ({ buttons, className, onClickButton }: Props) => {
+  const onClickItem = useCallback((button: AppContentButton) => {
+    return () => {
+      onClickButton && onClickButton(button.action?.url, !!button.instruction);
+    };
+  }, [onClickButton]);
+
+  const getButtonSchema = useCallback((type: 'danger' | 'primary' | 'secondary' | 'warning') => {
+    switch (type) {
+      case 'secondary':
+        return 'secondary';
+      case 'warning':
+        return 'warning';
+      case 'danger':
+        return 'danger';
+      case 'primary':
+      default:
+        return 'primary';
+    }
+  }, []);
+
   const renderItem = useCallback(
     (button: AppContentButton) => {
       return (
         <Button
           block
-          color={button.color}
           key={button.id}
-          onClick={() => onClickButton && onClickButton(button.action?.url, !!button.instruction)}
+          onClick={onClickItem(button)}
+          schema={button.color !== 'ghost' ? getButtonSchema(button.color) : 'primary'}
+          type={button.color === 'ghost' ? 'ghost' : undefined}
         >
           {button.label}
         </Button>
       );
     },
-    [onClickButton]
+    [getButtonSchema, onClickItem]
   );
 
   return (
@@ -38,6 +59,8 @@ const Component = ({ buttons, className, onClickButton }: Props) => {
 
 const OnlineButtonGroups = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return ({
+    display: 'flex',
+    alignItems: 'center'
   });
 });
 

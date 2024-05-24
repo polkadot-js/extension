@@ -45,7 +45,16 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
     if (url) {
       onPressBanner(bannerId)(url);
     }
-  }, [bannerId, data.action?.url, data.instruction, onPressBanner]);
+  }, [activeModal, bannerId, data.action?.url, data.instruction, onPressBanner]);
+
+  const _dismissBanner = useCallback(() => dismissBanner && dismissBanner([bannerId]), [bannerId, dismissBanner]);
+
+  const onClickCancelInstructionModal = useCallback(() => inactiveModal(APP_INSTRUCTION_MODAL), [inactiveModal]);
+
+  const onClickConfirmInstructionModal = useCallback(() => {
+    inactiveModal(APP_INSTRUCTION_MODAL);
+    onPressBanner(bannerId)(data.action.url);
+  }, [bannerId, data.action.url, inactiveModal, onPressBanner]);
 
   return (
     <>
@@ -63,8 +72,8 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
               phosphorIcon={X}
               size={'sm'}
               weight={'bold'}
-                  />}
-            onClick={() => dismissBanner([bannerId])}
+            />}
+            onClick={_dismissBanner}
             shape={'round'}
             size={'xs'}
             type={'ghost'}
@@ -76,11 +85,8 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
         <AppInstructionModal
           data={currentInstructionData.instructions}
           instruction={data.instruction}
-          onPressCancelBtn={() => inactiveModal(APP_INSTRUCTION_MODAL)}
-          onPressConfirmBtn={() => {
-            inactiveModal(APP_INSTRUCTION_MODAL);
-            onPressBanner(bannerId)(data.action.url);
-          }}
+          onPressCancelBtn={onClickCancelInstructionModal}
+          onPressConfirmBtn={onClickConfirmInstructionModal}
           title={currentInstructionData.title || 'Instruction'}
         />
       )}
@@ -95,7 +101,7 @@ const Banner = styled(Component)<Props>(({ theme: { token } }: Props) => {
     '.dismiss-button': {
       position: 'absolute',
       right: -3,
-      top: 5
+      top: token.sizeXXS
     }
   };
 });

@@ -12,7 +12,7 @@ import { reformatAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowSquareUpRight } from 'phosphor-react';
+import { ArrowSquareOut } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -120,7 +120,7 @@ const Component: React.FC<Props> = (props: Props) => {
         disabled={!link}
         icon={
           <Icon
-            phosphorIcon={ArrowSquareUpRight}
+            phosphorIcon={ArrowSquareOut}
           />
         }
         onClick={openBlockExplorer(link)}

@@ -16,7 +16,7 @@ import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowCircleLeft, ArrowSquareUpRight, Coins } from 'phosphor-react';
+import { ArrowCircleLeft, ArrowSquareOut, Coins } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
@@ -222,20 +222,22 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
                   </div>
                 ))}
               </div>
-              <div className={'__explorer'}>
-                {!!link && <Button
-                  block
-                  disabled={!link}
-                  icon={
-                    <Icon
-                      phosphorIcon={ArrowSquareUpRight}
-                    />
-                  }
-                  onClick={openBlockExplorer(link)}
-                >
-                  {t('View on explorer')}
-                </Button>}
-              </div>
+              {!isAllAccount && <div className={'__explorer'}>
+                {!!link && (
+                  <Button
+                    block
+                    disabled={!link}
+                    icon={
+                      <Icon
+                        phosphorIcon={ArrowSquareOut}
+                      />
+                    }
+                    onClick={openBlockExplorer(link)}
+                  >
+                    {t('View on explorer')}
+                  </Button>
+                )}
+              </div>}
             </>
           )
         }

@@ -26,6 +26,21 @@ const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
   url: NOTIFICATION_URL
 };
 
+export function openPopup (url: string) {
+  chrome.windows.getCurrent(
+    (win) => {
+      const popupOptions = { ...POPUP_WINDOW_OPTS, url };
+
+      if (win) {
+        popupOptions.left = (win.left || 0) + (win.width || 0) - (popupOptions.width || 0) - 20;
+        popupOptions.top = (win.top || 0) + 110;
+      }
+
+      chrome.windows.create(popupOptions).catch(console.error);
+    }
+  );
+}
+
 export default class PopupHandler {
   readonly #requestService: RequestService;
   #notification: BrowserConfirmationType = DEFAULT_NOTIFICATION_TYPE;

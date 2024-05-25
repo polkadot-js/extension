@@ -8,7 +8,7 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import ExportAllSelectItem from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelectItem';
 import { FilterModal } from '@subwallet/extension-koni-ui/components/Modal/FilterModal';
 import { EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useFilterModal } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGoBackSelectAccount } from '@subwallet/extension-koni-ui/hooks';
 import { useSelectAccount } from '@subwallet/extension-koni-ui/hooks/modal/useSelectAccount';
 import { AccountSignMode, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getSignMode, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
@@ -18,8 +18,6 @@ import { CaretLeft, Export, FadersHorizontal } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
-
-import useGoBackSelectAccount from '../../../../hooks/modal/useGoBackSelectAccount';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: AccountJson[];
@@ -272,6 +270,13 @@ const ExportAllSelector = styled(forwardRef(Component))<Props>(({ theme: { token
     '.ant-sw-list': {
       paddingRight: 0,
       paddingLeft: 0
+    },
+
+    '.all-account-selection': {
+      '.account-item-name': {
+        fontSize: token.fontSizeLG
+      }
+
     }
   };
 });

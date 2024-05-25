@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 1.1.68
+Build date: May 25, 2024.
+
+Features & Update:
+- Update chainlist (#3088)
+  - Add support for STINK token
+  - Add support for WUD token on HydraDX and Polkadot Asset Hub
+  - Add support for WIFD on HydraDX and Polkadot Asset Hub
+  - Add support for Linea
+  - Add support for bridged tokens
+  - Update logo Moonriver, Moonbeam
+  - Add support for Kusama people chain
+- Add popup to remind users to perform backups account (popup hiển thị định kỳ) (#2317)
+- Add popup remind backup account (popup hiển thị ngay khi mở trình duyệt) (#3050)
+- Add highlight button Export multi account when navigate to select account screen (#3090, #3108)
+
+Bugs fixed:
+- Fix bug missing custom tokens on applying online patch (#3101)
+- Fix error when fetching with Avail network (#3115)
+
+## 1.1.67
+Build date: May 22, 2024.
+
+Features & Update:
+- Update chain-list:
+  - Update price-id for DED
+  - Update ED for Vara
+
+Bugs fixed:
+- Fix bug integrating chain online (#3084)
+
 ## 1.1.66
 Build date: May 21, 2024.
 

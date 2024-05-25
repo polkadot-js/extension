@@ -22,7 +22,7 @@ let idleTimer: NodeJS.Timeout;
 let waitingToStop = false;
 let openCount = 0;
 const keyLatestSession = 'general.latest-session';
-const timeBackup = 300000;
+const timeBackup = 1209600000;
 const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup, isFinished: false };
 
 // setup the notification (same a FF default background, white text)

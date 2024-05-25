@@ -11,7 +11,7 @@ import { ModalContext, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 import { UnlockModal } from '../components/Modal/UnlockModal';
 
@@ -57,10 +57,8 @@ export const WalletModalContext = ({ children }: Props) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { hasConfirmations } = useSelector((state: RootState) => state.requestState);
   const { hasMasterPassword, isLocked } = useSelector((state: RootState) => state.accountState);
-  const { setSessionLatest } = useSetSessionLatest();
   const { getConfig } = useGetConfig();
-  const { onHandleSessionLatest } = useSetSessionLatest();
-  const location = useLocation();
+  const { onHandleSessionLatest, setTimeBackUp } = useSetSessionLatest();
 
   useExcludeModal('confirmations');
   useExcludeModal(EARNING_INSTRUCTION_MODAL);
@@ -91,9 +89,12 @@ export const WalletModalContext = ({ children }: Props) => {
   }, [activeModal, inactiveModals, searchParams]);
 
   useEffect(() => {
-    getConfig()
-      .then(onHandleSessionLatest).catch(console.error);
-  }, [activeModal, getConfig, location.pathname, onHandleSessionLatest, setSessionLatest]);
+    getConfig().then(setTimeBackUp).catch(console.error);
+  }, [getConfig, setTimeBackUp]);
+
+  useEffect(() => {
+    onHandleSessionLatest();
+  }, [onHandleSessionLatest]);
 
   // todo: will remove ClaimDappStakingRewardsModal after Astar upgrade to v3
 

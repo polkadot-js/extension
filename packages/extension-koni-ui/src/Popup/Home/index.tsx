@@ -7,7 +7,7 @@ import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/
 import { CONFIRM_GENERAL_TERM, DEFAULT_SESSION_VALUE, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { AppOnlineContentContext } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useAccountBalance, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
+import { useAccountBalance, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useSetSessionLatest, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
@@ -33,7 +33,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
   const { showAppPopup } = useContext(AppOnlineContentContext);
-  const location = useLocation();
 
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
@@ -60,17 +59,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   useEffect(() => {
-    showAppPopup(location.pathname);
-  }, [location, showAppPopup]);
-
-  useEffect(() => {
     const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
     const sessionLatestInit = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (firstBanner && !sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
-      activeModal(HOME_CAMPAIGN_BANNER_MODAL);
+    if (!sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
+      showAppPopup(location.pathname);
     }
-  }, [activeModal, firstBanner, location]);
+  }, [activeModal, location, showAppPopup]);
 
   useEffect(() => {
     const infoSession = Date.now();

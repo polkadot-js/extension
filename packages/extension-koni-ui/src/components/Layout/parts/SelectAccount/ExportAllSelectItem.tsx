@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks';
 import useAccountAvatarInfo from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarInfo';
 import useAccountAvatarTheme from '@subwallet/extension-koni-ui/hooks/account/useAccountAvatarTheme';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -9,7 +8,7 @@ import { AccountSignMode, PhosphorIcon } from '@subwallet/extension-koni-ui/type
 import { Button, Icon, Logo } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
-import { CheckCircle, Eye, PuzzlePiece, QrCode, ShieldCheck, Swatches } from 'phosphor-react';
+import { CheckCircle, Eye, PuzzlePiece, QrCode, Swatches } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
 
@@ -68,7 +67,7 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
   [address, onClick]
   );
   const signMode = useGetAccountSignModeByAddress(address);
-  const isMantaPayEnabled = useIsMantaPayEnabled(address);
+  // const isMantaPayEnabled = useIsMantaPayEnabled(address);
   const iconProps: IconProps | undefined = useMemo((): IconProps | undefined => {
     switch (signMode) {
       case AccountSignMode.LEDGER:
@@ -107,15 +106,8 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
         };
     }
 
-    if (isMantaPayEnabled) {
-      return {
-        type: 'icon',
-        value: ShieldCheck
-      };
-    }
-
     return undefined;
-  }, [isMantaPayEnabled, signMode]);
+  }, [signMode]);
 
   return (
     <>

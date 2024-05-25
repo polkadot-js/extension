@@ -62,7 +62,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const decimals = tokenInfo?.decimals || 0;
   const symbol = tokenInfo?.symbol || '';
-  const link = (chainInfo !== undefined) && getExplorerLink(chainInfo, address, 'account');
+  const link = (chainInfo !== undefined) && getExplorerLink(chainInfo, reformatedAddress, 'account');
 
   return (
     <MetaInfo
@@ -120,10 +120,12 @@ const Component: React.FC<Props> = (props: Props) => {
         disabled={!link}
         icon={
           <Icon
+            className={'__icon-button'}
             phosphorIcon={ArrowSquareOut}
           />
         }
         onClick={openBlockExplorer(link)}
+        size={'xs'}
         type={'ghost'}
       >
         {t('View on explorer')}
@@ -186,6 +188,11 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
         flex: '1',
         'white-space': 'nowrap'
       }
+    },
+    '.anticon.__icon-button': {
+      height: 20,
+      width: 20,
+      fontSize: token.fontSizeXL
     },
 
     '.balance-info': {

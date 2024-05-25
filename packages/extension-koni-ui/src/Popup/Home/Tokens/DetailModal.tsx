@@ -7,12 +7,12 @@ import { getExplorerLink } from '@subwallet/extension-base/services/transaction-
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountTokenBalanceItem, EmptyList, RadioGroup } from '@subwallet/extension-koni-ui/components';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -68,6 +68,8 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
   const view = Form.useWatch('view', form);
 
   const tokenInfo = useMemo((): _ChainAsset|undefined => currentTokenInfo && assetRegistry[currentTokenInfo?.slug], [assetRegistry, currentTokenInfo]);
+  const addressPrefix = useGetChainPrefixBySlug(tokenInfo?.originChain);
+  const reformatedAddress = useMemo(() => currentAccount?.address && reformatAddress(currentAccount?.address, addressPrefix), [currentAccount?.address, addressPrefix]);
 
   const chainInfo = useMemo(() => {
     if (tokenInfo?.originChain === undefined) {
@@ -167,7 +169,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
     });
   }, [accountItems]);
 
-  const link = (chainInfo !== undefined && currentAccount?.address) && getExplorerLink(chainInfo, currentAccount?.address, 'account');
+  const link = (chainInfo !== undefined && reformatedAddress) && getExplorerLink(chainInfo, reformatedAddress, 'account');
 
   useEffect(() => {
     if (!isActive) {

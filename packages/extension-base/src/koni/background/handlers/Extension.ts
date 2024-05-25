@@ -1501,7 +1501,13 @@ export default class KoniExtension {
     if (isPasswordValidated) {
       try {
         this._saveCurrentAccountAddress(address, () => {
-          keyring.restoreAccount(file, password, withMasterPassword);
+          const newAccount = keyring.restoreAccount(file, password, withMasterPassword);
+
+          // genesisHash is not used in SubWallet => reset it to empty string
+          if (newAccount.meta?.genesisHash && newAccount.meta?.genesisHash !== '') {
+            keyring.saveAccountMeta(newAccount, { ...newAccount.meta, genesisHash: '' });
+          }
+
           this._addAddressToAuthList(address, isAllowed);
         });
 
@@ -1524,6 +1530,8 @@ export default class KoniExtension {
       try {
         this._saveCurrentAccountAddress(ALL_ACCOUNT_KEY, () => {
           keyring.restoreAccounts(file, password);
+
+          this.#koniState.keyringService.removeNoneHardwareGenesisHash();
           this._addAddressesToAuthList(addressList, isAllowed);
         });
 

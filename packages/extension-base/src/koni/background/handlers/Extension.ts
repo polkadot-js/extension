@@ -37,7 +37,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { AccountsStore } from '@subwallet/extension-base/stores';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, StorageDataInterface, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { BN_ZERO, convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, MODULE_SUPPORT, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -129,7 +129,7 @@ export default class KoniExtension {
     };
 
     const updateLatestSession = (time: number) => {
-      SWStorage.instance.setItem(LATEST_SESSION, JSON.stringify({ remind: true, timeCalculate: time }));
+      SWStorage.instance.setItem(LATEST_SESSION, JSON.stringify({ remind: true, timeCalculate: time })).catch(console.error);
     };
 
     this.#koniState.settingService.getSettings(updateTimeAutoLock);
@@ -4997,6 +4997,8 @@ export default class KoniExtension {
         return this.#koniState.dbService.getExportJson();
       case 'pri(database.migrateLocalStorage)':
         return this.#koniState.migrateMV3LocalStorage(request as string);
+      case 'pri(database.setLocalStorage)':
+        return this.#koniState.setStorageFromWS(request as StorageDataInterface);
         /* Database */
 
         /* Swap service */

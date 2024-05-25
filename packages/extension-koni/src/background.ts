@@ -21,23 +21,26 @@ const actionHandler = ActionHandler.instance;
 
 actionHandler.setHandler(SWHandler.instance);
 
-
 chrome.runtime.onConnect.addListener((port): void => {
   port.onDisconnect.addListener(() => {
     const latestSessionRaw = localStorage.getItem(keyLatestSession);
 
-    const latestSession = latestSessionRaw ? JSON.parse(latestSessionRaw) as { remind: boolean, timeCalculate: number } : DEFAULT_LATEST_SESSION;
+    const latestSession = latestSessionRaw
+      ? JSON.parse(latestSessionRaw) as {
+        remind: boolean,
+        timeCalculate: number
+      }
+      : DEFAULT_LATEST_SESSION;
 
     localStorage.setItem(keyLatestSession, JSON.stringify({ ...latestSession, remind: true }));
-
+  });
 });
 
 cryptoWaitReady()
   .then((): void => {
     const koniState = SWHandler.instance.state;
 
-
-    koniState.onCheckToRemindUser();
+    setTimeout(() => koniState.onCheckToRemindUser(), 4000);
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });

@@ -38,7 +38,7 @@ import { TransactionEventResponse } from '@subwallet/extension-base/services/tra
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceItem, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
+import { BalanceItem, BalanceMap, EvmFeeInfo, StorageDataInterface } from '@subwallet/extension-base/types';
 import { isAccountAll, stripUrl, targetIsWeb, wait } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
@@ -54,7 +54,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, noop, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -1690,9 +1690,10 @@ export default class KoniState {
     } else if (details.reason === 'update') {
       this.onMV3Update().catch(console.error);
     }
+  }
 
-  private onHandleRemindExportAccount () {
-    const remindStatus = SWStorage.instance.getItem(REMIND_EXPORT_ACCOUNT);
+  private async onHandleRemindExportAccount () {
+    const remindStatus = await SWStorage.instance.getItem(REMIND_EXPORT_ACCOUNT);
 
     if (!remindStatus || !remindStatus.includes('done')) {
       const handleRemind = (account: CurrentAccountInfo) => {
@@ -1700,8 +1701,10 @@ export default class KoniState {
           // Open remind tab
           const url = `${chrome.runtime.getURL('index.html')}#/remind-export-account`;
 
-          openPopup(url);
-          subscription.unsubscribe();
+          openPopup(url)
+            .then(noop)
+            .catch(console.error)
+            .finally(() => subscription.unsubscribe());
         } else {
           setTimeout(() => {
             subscription.unsubscribe();
@@ -1713,8 +1716,23 @@ export default class KoniState {
     }
   }
 
+  public async setStorageFromWS ({ key, value }: StorageDataInterface) {
+    try {
+      const jsonData = JSON.stringify(value);
+
+      await SWStorage.instance.setItem(key, jsonData);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
   public onCheckToRemindUser () {
-    this.onHandleRemindExportAccount();
+    this.onHandleRemindExportAccount()
+      .catch(console.error);
   }
 
   public onInstall () {

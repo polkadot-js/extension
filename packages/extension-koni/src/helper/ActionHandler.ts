@@ -1,10 +1,11 @@
-// Copyright 2019-2022 @polkadot/extension authors & contributors
+// Copyright 2019-2022 @subwallet/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { MessageTypes, RequestSignatures, TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { PORT_CONTENT, PORT_EXTENSION } from '@subwallet/extension-base/defaults';
 import { SWHandler } from '@subwallet/extension-base/koni/background/handlers';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
+import { startHeartbeat, stopHeartbeat } from '@subwallet/extension-koni/helper/HeartBeat';
 
 import { assert } from '@polkadot/util';
 
@@ -73,12 +74,14 @@ export class ActionHandler {
       }
 
       if (this.sleepTimeout) {
+        console.debug('Clearing sleep timeout');
         clearTimeout(this.sleepTimeout);
         this.sleepTimeout = undefined;
       }
 
       if (!this.isActive) {
         this.isActive = true;
+        startHeartbeat();
         this.mainHandler && await this.mainHandler.state.wakeup();
         this.waitActiveHandler.resolve(true);
       }
@@ -94,6 +97,7 @@ export class ActionHandler {
 
       // Set timeout to sleep
       if (Object.keys(this.connectionMap).length === 0) {
+        console.debug('Every port is disconnected, set timeout to sleep');
         this.sleepTimeout && clearTimeout(this.sleepTimeout);
         this.sleepTimeout = setTimeout(() => {
           // Reset active status
@@ -101,6 +105,7 @@ export class ActionHandler {
           this.waitActiveHandler = createPromiseHandler<boolean>();
           this.mainHandler && this.mainHandler.state.sleep().catch(console.error);
         }, SLEEP_TIMEOUT);
+        stopHeartbeat();
       }
     }
   }

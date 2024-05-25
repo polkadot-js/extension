@@ -270,6 +270,13 @@ const ExportAllSelector = styled(forwardRef(Component))<Props>(({ theme: { token
     '.ant-sw-list': {
       paddingRight: 0,
       paddingLeft: 0
+    },
+
+    '.all-account-selection': {
+      '.account-item-name': {
+        fontSize: token.fontSizeLG
+      }
+
     }
   };
 });

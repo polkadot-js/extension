@@ -10,7 +10,8 @@ import { useLocalStorage } from 'usehooks-ts';
 export interface SetSessionLatestInterface {
   sessionLatest: SessionStorage;
   setSessionLatest: Dispatch<SetStateAction<SessionStorage>>;
-  onHandleSessionLatest: (timeBackup: number) => void;
+  onHandleSessionLatest: (timeBackup?: number) => void;
+  setTimeBackUp: (timeBackup: number) => void;
   setStateSelectAccount: (isFinished: boolean) => void;
 }
 
@@ -18,10 +19,11 @@ const useSetSessionLatest = (): SetSessionLatestInterface => {
   const [sessionLatest, setSessionLatest] = useLocalStorage<SessionStorage>(LATEST_SESSION, DEFAULT_SESSION_VALUE);
   const location = useLocation();
 
-  const onHandleSessionLatest = useCallback((timeBackup: number) => {
+  const onHandleSessionLatest = useCallback((timeBackup_?: number) => {
     const infoSession = Date.now();
 
     const latestSession = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+    const timeBackup = timeBackup_ || latestSession.timeBackup;
 
     if (infoSession - latestSession.timeCalculate >= timeBackup) {
       setSessionLatest({ ...latestSession, remind: true, timeBackup, isFinished: false });
@@ -37,11 +39,16 @@ const useSetSessionLatest = (): SetSessionLatestInterface => {
     setSessionLatest((prevState) => ({ ...prevState, isFinished }));
   }, [setSessionLatest]);
 
+  const setTimeBackUp = useCallback((timeBackup: number) => {
+    setSessionLatest((prevState) => ({ ...prevState, timeBackup }));
+  }, [setSessionLatest]);
+
   return {
     sessionLatest,
     onHandleSessionLatest,
     setSessionLatest,
-    setStateSelectAccount
+    setStateSelectAccount,
+    setTimeBackUp
   };
 };
 

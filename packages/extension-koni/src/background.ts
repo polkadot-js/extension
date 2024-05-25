@@ -13,7 +13,7 @@ import keyring from '@subwallet/ui-keyring';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 const keyLatestSession = 'general.latest-session';
-const timeBackup = 300000;
+const timeBackup = 1209600000;
 const DEFAULT_LATEST_SESSION = { remind: false, timeCalculate: Date.now(), timeBackup, isFinished: false };
 
 // Set handler

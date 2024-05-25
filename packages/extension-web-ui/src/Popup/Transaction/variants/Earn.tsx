@@ -56,11 +56,11 @@ export const insufficientXCMMessages = ['You can only enter a maximum'];
 
 const earningTypeLabelMap = {
   [YieldPoolType.NATIVE_STAKING]: 'Direct nomination',
-  [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
+  [YieldPoolType.NOMINATION_POOL]: 'Nomination pool',
   [YieldPoolType.LENDING]: 'Lending',
-  [YieldPoolType.LIQUID_STAKING]: 'Liquid Staking',
+  [YieldPoolType.LIQUID_STAKING]: 'Liquid staking',
   [YieldPoolType.PARACHAIN_STAKING]: 'Direct nomination',
-  [YieldPoolType.SINGLE_FARMING]: 'single farming'
+  [YieldPoolType.SINGLE_FARMING]: 'Single farming'
 };
 
 type LocationStateRW = {

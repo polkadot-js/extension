@@ -162,7 +162,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
         </div>
 
         <div className={'__block-content'}>
-          {unstakePeriodNode}
+          <span className={'__label'}>Up to</span>{unstakePeriodNode}
         </div>
       </div>
     </div>
@@ -376,7 +376,16 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
   },
   '.__action-block .__block-content': {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'baseline'
+  },
+  '.__label': {
+    fontSize: token.fontSizeLG,
+    lineHeight: token.lineHeightLG,
+    color: token.colorTextLight4,
+    paddingBottom: 6,
+    display: 'block',
+    alignItems: 'center'
   },
 
   '.__action-button': {

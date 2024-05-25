@@ -1,6 +1,6 @@
-    2538	AnhMTV                        	
+    2539	AnhMTV                        	
     2354	Nam Phạm                      	[Issue 3101] fix: bug missing custom tokens on applying patch
-    2046	S2kael                        	[Issue-3088] Update stable version for chain-list
+    2048	S2kael                        	[Issue-3115] Update stable version for chain-list
      815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
      416	nguyentiendung                	[Issue-2914] Update yarn.lock

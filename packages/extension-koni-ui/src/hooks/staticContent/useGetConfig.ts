@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { DEFAULT_SESSION_VALUE, LATEST_SESSION, STATIC_DATA_CONTENT_URL } from '@subwallet/extension-koni-ui/constants';
+import { fetchStaticData } from '@subwallet/extension-base/utils';
+import { DEFAULT_SESSION_VALUE, LATEST_SESSION } from '@subwallet/extension-koni-ui/constants';
 import { SessionStorage } from '@subwallet/extension-koni-ui/types';
-import axios from 'axios';
 import { useCallback, useMemo } from 'react';
 
 interface BackupTimeOutData {
   backupTimeout: number
 }
+const SlugDomain = 'config/remind-backup';
 
 const useGetConfig = () => {
   const latestSession = useMemo(() =>
@@ -16,10 +17,9 @@ const useGetConfig = () => {
 
   const getConfig = useCallback(async () => {
     try {
-      const res = await axios
-        .get(`${STATIC_DATA_CONTENT_URL}/config/remind-backup/preview.json`);
+      const res = await fetchStaticData(SlugDomain);
 
-      return (res?.data as BackupTimeOutData).backupTimeout;
+      return (res as BackupTimeOutData).backupTimeout;
     } catch {
       return latestSession.timeBackup;
     }

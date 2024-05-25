@@ -7,7 +7,6 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
 import { osName } from '@subwallet/extension-base/utils';
 
-console.log(chrome.runtime.getURL);
 const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
 const extraHeight = osName === 'Linux' ? 0 : 28;

@@ -7,7 +7,7 @@ import { withErrorLog } from '@subwallet/extension-base/background/handlers/help
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -1691,11 +1691,39 @@ export default class KoniState {
       this.onMV3Update().catch(console.error);
     }
 
+  private onHandleRemindExportAccount () {
+    const remindStatus = SWStorage.instance.getItem(REMIND_EXPORT_ACCOUNT);
+
+    if (!remindStatus || !remindStatus.includes('done')) {
+      const handleRemind = (account: CurrentAccountInfo) => {
+        if (account.address !== '') {
+          // Open remind tab
+          const url = `${chrome.runtime.getURL('index.html')}#/remind-export-account`;
+
+          openPopup(url);
+          subscription.unsubscribe();
+        } else {
+          setTimeout(() => {
+            subscription.unsubscribe();
+          }, 3000);
+        }
+      };
+
+      const subscription = this.keyringService.currentAccountSubject.subscribe(handleRemind);
+    }
+  }
+
+  public onCheckToRemindUser () {
+    this.onHandleRemindExportAccount();
+  }
+
+  public onInstall () {
     // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
+
     // This logic is moved to installation.ts
     // try {
     //   // Open expand page
-    //   const url = `${chrome.runtime.getURL('index.html')}#/`;
+    //   const url = `${chrome.extension.getURL('index.html')}#/`;
     //
     //   withErrorLog(() => chrome.tabs.create({ url }));
     // } catch (e) {

@@ -1953,7 +1953,7 @@ export class ChainService {
     const chainInfoMap = this.getChainInfoMap();
 
     Object.values(chainInfoMap).forEach((i) => {
-      const subscanSlug = i.slug === 'goldberg_testnet' ? 'avail-testnet' : i.extraInfo?.subscanSlug; // Hotfix for Goldberg testnet
+      const subscanSlug = i.extraInfo?.subscanSlug;
 
       if (!subscanSlug) {
         return;

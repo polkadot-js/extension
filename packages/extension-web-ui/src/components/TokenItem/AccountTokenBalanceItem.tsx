@@ -120,6 +120,7 @@ const Component: React.FC<Props> = (props: Props) => {
       />
       {!!link && <Button
         block
+        className={'__explorer'}
         disabled={!link}
         icon={
           <Icon
@@ -161,6 +162,13 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       height: 20,
       width: 20,
       fontSize: token.fontSizeXL
+    },
+
+    '.__explorer.ant-btn-ghost': {
+      color: token.colorTextTertiary
+    },
+    '.__explorer.ant-btn-ghost:hover': {
+      color: token.colorWhite
     },
 
     '.account-info': {

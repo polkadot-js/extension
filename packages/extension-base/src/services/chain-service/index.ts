@@ -626,6 +626,8 @@ export class ChainService {
       if (latestChainInfo && latestChainInfo.length > 0) {
         const { needUpdateChainApiList, storedChainInfoList } = updateLatestChainInfo(this.dataMap, latestChainInfo);
 
+        console.log('here', needUpdateChainApiList, storedChainInfoList);
+
         this.dbService.bulkUpdateChainStore(storedChainInfoList).catch(console.error);
         this.updateChainSubscription();
 
@@ -742,6 +744,10 @@ export class ChainService {
 
       if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
         if (!chainState || !chainState.manualTurnOff) {
+          await this.updateAssetSetting(assetSlug, { visible: true });
+        }
+      } else {
+        if (originChain === 'avail_mainnet') {
           await this.updateAssetSetting(assetSlug, { visible: true });
         }
       }

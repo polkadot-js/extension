@@ -51,3 +51,7 @@ export type EarningPoolsParam = {
 export type EarningPositionDetailParam = {
   earningSlug: string,
 };
+
+export type RemindBackUpSeedPhraseParamState = {
+  from: string;
+}

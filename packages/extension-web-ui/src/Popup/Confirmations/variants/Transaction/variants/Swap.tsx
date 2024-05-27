@@ -20,7 +20,7 @@ type Props = BaseTransactionConfirmationProps;
 const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
-  const {currencyData, priceMap} = useSelector((state) => state.price);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
   const { t } = useTranslation();
   // @ts-ignore

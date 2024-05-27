@@ -179,14 +179,18 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       });
   }, [goBack, priceId, showNotification, t, tokenInfo]);
 
+  const goBackToSettingList = useCallback(() => {
+    goBack();
+  }, [goBack]);
+
   const leftFooterButtonProps = useCallback(() => {
     return _isCustomAsset(tokenInfo.slug)
       ? {
-        onClick: goBack,
+        onClick: goBackToSettingList,
         children: t('Cancel')
       }
       : undefined;
-  }, [goBack, tokenInfo.slug, t]);
+  }, [goBackToSettingList, tokenInfo.slug, t]);
 
   const rightFooterButtonProps = useCallback(() => {
     return _isCustomAsset(tokenInfo.slug)

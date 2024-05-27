@@ -162,7 +162,8 @@ export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
 
 export const _FUNGIBLE_CONTRACT_STANDARDS = [
   _AssetType.ERC20,
-  _AssetType.PSP22
+  _AssetType.PSP22,
+  _AssetType.GRC20
 ];
 
 export const _NFT_CONTRACT_STANDARDS = [

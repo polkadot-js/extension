@@ -38,10 +38,11 @@ const modalCloseButton = <Icon
   type='phosphor'
   weight={'light'}
 />;
+const collectionNFTUrl = '/home/nfts/collection-detail';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const { collectionInfo, nftItem } = location.state as INftItemDetail;
+  const state = useLocation().state as INftItemDetail;
+  const { collectionInfo, nftItem } = state;
 
   const { t } = useTranslation();
   const notify = useNotification();
@@ -183,6 +184,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }
   }, [nftItem.externalUrl]);
 
+  const goBackToNFTCollection = useCallback(() => {
+    goBack(collectionNFTUrl, state);
+  }, [goBack, state]);
+
   const show3DModel = SHOW_3D_MODELS_CHAIN.includes(nftItem.chain);
 
   return (
@@ -191,7 +196,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       resolve={dataContext.awaitStores(['nft', 'accountState', 'chainStore'])}
     >
       <Layout.Base
-        onBack={goBack}
+        onBack={goBackToNFTCollection}
         showBackButton={true}
         showSubHeader={true}
         subHeaderBackground={'transparent'}

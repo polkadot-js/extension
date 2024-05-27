@@ -9,9 +9,10 @@ import { EventService } from '@subwallet/extension-base/services/event-service';
 import { getExchangeRateMap, getPriceMap } from '@subwallet/extension-base/services/price-service/coingecko';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SWStorage } from '@subwallet/extension-base/storage';
+import { CurrentCurrencyStore } from '@subwallet/extension-base/stores';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 const DEFAULT_CURRENCY: CurrencyType = 'USD';
 const DEFAULT_PRICE_SUBJECT: PriceJson = {
@@ -33,13 +34,10 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   private rawExchangeRateMap: BehaviorSubject<Record<CurrencyType, ExchangeRateJSON>>;
   private refreshTimeout: NodeJS.Timeout | undefined;
   private priceIds = new Set<string>();
-  private currency: BehaviorSubject<CurrencyType>;
+  private readonly currency = new CurrentCurrencyStore();
 
   constructor (dbService: DatabaseService, eventService: EventService, chainService: ChainService) {
-    const currency = SWStorage.instance.getItem(CURRENCY) as CurrencyType;
-
-    this.currency = new BehaviorSubject(currency || DEFAULT_CURRENCY);
-    this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT, currency: this.currency.value });
+    this.priceSubject = new BehaviorSubject({ ...DEFAULT_PRICE_SUBJECT });
     this.rawPriceSubject = new BehaviorSubject({} as Omit<PriceJson, 'exchangeRateMap'>);
     this.rawExchangeRateMap = new BehaviorSubject({} as Record<CurrencyType, ExchangeRateJSON>);
     this.status = ServiceStatus.NOT_INITIALIZED;
@@ -47,7 +45,15 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.eventService = eventService;
     this.chainService = chainService;
 
-    this.init().catch(console.error);
+    const updateCurrency = (currentCurrency: CurrencyType) => {
+      const currency = SWStorage.instance.getItem(CURRENCY) as CurrencyType;
+
+      this.setCurrentCurrency(currency || currentCurrency || DEFAULT_CURRENCY);
+    };
+
+    this.init().then(
+      () => this.getCurrentCurrency(updateCurrency)
+    ).catch(console.error);
   }
 
   private async getTokenPrice (priceIds: Set<string>, currency?: CurrencyType, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
@@ -60,13 +66,32 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     });
   }
 
+  private getCurrentCurrencySubject (): Subject<CurrencyType> {
+    return this.currency.getSubject();
+  }
+
+  private setCurrentCurrency (currency: CurrencyType) {
+    this.currency.set('Currency', currency);
+  }
+
+  private getCurrentCurrency (update: (value: CurrencyType) => void): void {
+    this.currency.get('Currency', (value) => {
+      update(value || DEFAULT_CURRENCY);
+    });
+  }
+
   private refreshPromise: Promise<void> | null = null;
   private refreshPriceMapByAction () {
     this.refreshPromise = (async () => {
       try {
         await this.refreshPromise;
+        const { promise, resolve } = createPromiseHandler<CurrencyType>();
 
-        const newPriceMap = await this.calculatePriceMap();
+        this.getCurrentCurrency(resolve);
+
+        const currencyKey = await promise;
+
+        const newPriceMap = await this.calculatePriceMap(currencyKey || DEFAULT_CURRENCY);
 
         if (newPriceMap) {
           this.priceSubject.next(newPriceMap);
@@ -79,14 +104,10 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     })();
   }
 
-  private async calculatePriceMap () {
+  private async calculatePriceMap (currency?: CurrencyType) {
     const { price24hMap, priceMap } = this.rawPriceSubject.value;
     const exchangeRateData = this.rawExchangeRateMap.value;
-    const currencyKey = this.currency.value;
-
-    if (Object.keys(this.rawPriceSubject.value).length === 0) {
-      return;
-    }
+    const currencyKey = currency || DEFAULT_CURRENCY;
 
     if (Object.keys(exchangeRateData).length === 0) {
       return;
@@ -131,11 +152,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   public async setPriceCurrency (newCurrencyCode: CurrencyType) {
-    if (newCurrencyCode === this.currency.value) {
-      return false;
-    }
-
-    this.currency.next(newCurrencyCode);
+    this.setCurrentCurrency(newCurrencyCode);
 
     // Await 1s to get the latest exchange rate
     await new Promise((resolve) => setTimeout(resolve, 300));
@@ -176,9 +193,9 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       }
     };
 
-    this.currency.subscribe((currency) => {
+    this.getCurrentCurrencySubject().subscribe((currency) => {
       console.log('Currency changed', currency);
-      this.calculatePriceMap().then((data) => {
+      this.calculatePriceMap(currency).then((data) => {
         if (data) {
           this.priceSubject.next(data);
         }

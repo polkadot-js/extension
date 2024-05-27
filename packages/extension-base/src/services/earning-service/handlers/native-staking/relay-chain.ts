@@ -435,7 +435,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
     const bnTotalEraStake = new BN(_totalEraStake.toString());
 
-    const rawMinBond = _minBond.toHuman() as string;
+    const rawMinBond = _minBond.toHuman();
     const minBond = rawMinBond.replaceAll(',', '');
 
     const totalStakeMap: Record<string, BN> = {};
@@ -636,6 +636,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       if (paramsCount === 2) {
         bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
       } else {
+        // @ts-ignore
         bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
       }
 
@@ -648,6 +649,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       if (paramsCount === 2) {
         bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
       } else {
+        // @ts-ignore
         bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
       }
 
@@ -768,6 +770,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
     } else {
+      // @ts-ignore
       return chainApi.api.tx.staking.withdrawUnbonded();
     }
   }

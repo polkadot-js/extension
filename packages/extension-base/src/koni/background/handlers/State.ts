@@ -5,9 +5,9 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -27,6 +27,7 @@ import MintCampaignService from '@subwallet/extension-base/services/mint-campaig
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { openPopup } from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -36,6 +37,7 @@ import { SwapService } from '@subwallet/extension-base/services/swap-service';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
 import { isAccountAll, stripUrl, TARGET_ENV, wait } from '@subwallet/extension-base/utils';
@@ -86,6 +88,8 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
 
   return crowdloanMap;
 };
+
+const DEFAULT_CURRENCY: CurrencyType = 'USD';
 
 export default class KoniState {
   private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
@@ -332,6 +336,8 @@ export default class KoniState {
     await this.dbService.stores.crowdloan.removeEndedCrowdloans();
 
     await this.startSubscription();
+
+    this.chainService.checkLatestData();
   }
 
   public async initMantaPay (password: string) {
@@ -1636,6 +1642,32 @@ export default class KoniState {
     return await this.requestService.completeConfirmation(request);
   }
 
+  private onHandleRemindExportAccount () {
+    const remindStatus = SWStorage.instance.getItem(REMIND_EXPORT_ACCOUNT);
+
+    if (!remindStatus || !remindStatus.includes('done')) {
+      const handleRemind = (account: CurrentAccountInfo) => {
+        if (account.address !== '') {
+          // Open remind tab
+          const url = `${chrome.runtime.getURL('index.html')}#/remind-export-account`;
+
+          openPopup(url);
+          subscription.unsubscribe();
+        } else {
+          setTimeout(() => {
+            subscription.unsubscribe();
+          }, 3000);
+        }
+      };
+
+      const subscription = this.keyringService.currentAccountSubject.subscribe(handleRemind);
+    }
+  }
+
+  public onCheckToRemindUser () {
+    this.onHandleRemindExportAccount();
+  }
+
   public onInstall () {
     // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
@@ -1874,6 +1906,7 @@ export default class KoniState {
 
     if (resetAll) {
       this.settingService.resetWallet();
+      await this.priceService.setPriceCurrency(DEFAULT_CURRENCY);
     }
 
     this.chainService.resetWallet(resetAll);
@@ -1881,6 +1914,8 @@ export default class KoniState {
 
     await this.chainService.init();
     this.afterChainServiceInit();
+
+    this.chainService.checkLatestData();
   }
 
   public async enableMantaPay (updateStore: boolean, address: string, password: string, seedPhrase?: string) {

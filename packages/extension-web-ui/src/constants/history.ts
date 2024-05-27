@@ -12,7 +12,7 @@ export const TxTypeNameMap: Record<ExtrinsicType, string> = {
   [ExtrinsicType.TRANSFER_XCM]: detectTranslate('Transfer'),
   [ExtrinsicType.SEND_NFT]: detectTranslate('NFT transaction'),
   [ExtrinsicType.CROWDLOAN]: detectTranslate('Crowdloan contribution'),
-  [ExtrinsicType.STAKING_JOIN_POOL]: detectTranslate('Join pool'),
+  [ExtrinsicType.STAKING_JOIN_POOL]: detectTranslate('Stake'),
   [ExtrinsicType.STAKING_BOND]: detectTranslate('Stake'),
   [ExtrinsicType.MINT_VDOT]: detectTranslate('Mint vDOT'),
   [ExtrinsicType.MINT_VMANTA]: detectTranslate('Mint vMANTA'),

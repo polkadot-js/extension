@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -162,7 +162,8 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
         </div>
 
         <div className={'__block-content'}>
-          <span className={'__label'}>Up to</span>{unstakePeriodNode}
+          {poolInfo.type === YieldPoolType.LIQUID_STAKING && <span className={'__label'}>Up to</span>}
+          {unstakePeriodNode}
         </div>
       </div>
     </div>
@@ -376,16 +377,17 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
   },
   '.__action-block .__block-content': {
     display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'baseline'
+    flexDirection: 'row'
   },
+
   '.__label': {
     fontSize: token.fontSizeLG,
     lineHeight: token.lineHeightLG,
     color: token.colorTextLight4,
     paddingBottom: 6,
     display: 'block',
-    alignItems: 'center'
+    alignItems: 'center',
+    marginRight: -token.marginXXS
   },
 
   '.__action-button': {

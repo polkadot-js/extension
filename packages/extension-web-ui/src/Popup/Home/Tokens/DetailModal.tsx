@@ -324,7 +324,7 @@ export const DetailModal = styled(Component)<Props>(({ theme: { token } }: Props
     },
 
     '.__explorer': {
-      marginTop: token.margin
+      marginTop: token.marginSM
     }
   });
 });

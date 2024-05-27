@@ -69,7 +69,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <MetaInfo
-      className={CN(className, 'account-token-detail')}
+      className={CN(className, 'account-token-detail', { '__show-button': !link })}
       hasBackgroundWrapper={true}
       spaceSize='xxs'
     >
@@ -142,7 +142,6 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '&.meta-info-block': {
       marginTop: token.marginXS,
-      paddingBottom: 0,
 
       '&:first-child': {
         marginTop: 0
@@ -162,6 +161,10 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       height: 20,
       width: 20,
       fontSize: token.fontSizeXL
+    },
+
+    '&.__show-button.-has-background-wrapper': {
+      paddingBottom: 0
     },
 
     '.__explorer.ant-btn-ghost': {

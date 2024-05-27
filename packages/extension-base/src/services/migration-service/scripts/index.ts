@@ -55,8 +55,8 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.33-01': MigrateLedgerAccountV2,
   '1.1.41-01': DeleteChainStaking,
   '1.1.46-01': AutoEnableSomeTokens,
-  '1.1.53-01': MigrateAssetSetting,
-  '1.1.53-02': MigrateTransactionHistoryBySymbol,
+  '1.1.62-01': MigrateAssetSetting,
+  '1.1.62-02': MigrateTransactionHistoryBySymbol,
   '1.1.61-01': ClearMetadataDatabase
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens

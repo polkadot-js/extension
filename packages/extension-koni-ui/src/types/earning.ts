@@ -40,6 +40,7 @@ export interface YieldGroupInfo {
   chain: string;
   poolListLength: number;
   poolSlugs: string[];
+  chains: string[]
 }
 
 export interface EarningTagType {

@@ -185,10 +185,9 @@ const Component = ({ className }: ComponentProps) => {
       !isBalanceReady ||
       isFormInvalid ||
       submitLoading ||
-      !checkChainConnected(poolChain) ||
       targetLoading ||
       (mustChooseTarget && !poolTargetValue),
-    [stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, checkChainConnected, poolChain, targetLoading, mustChooseTarget, poolTargetValue]
+    [stepLoading, connectionError, amountValue, isBalanceReady, isFormInvalid, submitLoading, targetLoading, mustChooseTarget, poolTargetValue]
   );
 
   const inputAsset = useMemo<_ChainAsset | undefined>(

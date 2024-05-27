@@ -233,8 +233,7 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
 
     '.__item-apy-not-available': {
       fontSize: token.fontSizeHeading2,
-      lineHeight: token.lineHeightHeading2,
-      paddingBottom: 6
+      lineHeight: token.lineHeightHeading2
     },
 
     '.__item-apy-sub-text': {

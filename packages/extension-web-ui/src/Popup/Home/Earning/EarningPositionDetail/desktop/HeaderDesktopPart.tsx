@@ -377,17 +377,18 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
   },
   '.__action-block .__block-content': {
     display: 'flex',
-    flexDirection: 'row'
+    flexDirection: 'row',
+    alignItems: 'baseline'
   },
 
   '.__label': {
-    fontSize: token.fontSizeLG,
-    lineHeight: token.lineHeightLG,
     color: token.colorTextLight4,
     paddingTop: 3,
     display: 'block',
     alignItems: 'center',
-    marginRight: -token.marginXS
+    marginRight: -token.marginXS,
+    fontSize: token.fontSizeHeading2,
+    lineHeight: token.lineHeightHeading2
   },
 
   '.__action-button': {

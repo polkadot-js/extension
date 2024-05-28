@@ -384,7 +384,7 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     fontSize: token.fontSizeLG,
     lineHeight: token.lineHeightLG,
     color: token.colorTextLight4,
-    paddingBottom: 6,
+    paddingTop: 2,
     display: 'block',
     alignItems: 'center',
     marginRight: -token.marginXXS

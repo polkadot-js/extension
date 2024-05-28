@@ -85,9 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
               ? <div className={'__item-apy-not-available'}>TBD</div>
               : (
                 <>
-                  <div className={'__item-apy-prefix-wrapper'}>
-                    {!isNotShowPrefix && <span className={'__item-apy-prefix'}>Up to</span>}
-                  </div>
+                  {!isNotShowPrefix && <span className={'__item-apy-prefix'}>Up to</span>}
                   <Number
                     className={'__item-apy-value'}
                     decimal={0}
@@ -248,7 +246,7 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       color: token.colorTextLight4,
-      paddingBottom: 6
+      paddingTop: 2
     },
 
     '.__item-total-stake-wrapper': {

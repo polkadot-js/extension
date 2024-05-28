@@ -246,7 +246,7 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       color: token.colorTextLight4,
-      paddingTop: 2
+      paddingTop: 3
     },
 
     '.__item-total-stake-wrapper': {

@@ -384,10 +384,10 @@ const HeaderDesktopPart = styled(Component)<Props>(({ theme: { token } }: Props)
     fontSize: token.fontSizeLG,
     lineHeight: token.lineHeightLG,
     color: token.colorTextLight4,
-    paddingTop: 2,
+    paddingTop: 3,
     display: 'block',
     alignItems: 'center',
-    marginRight: -token.marginXXS
+    marginRight: -token.marginXS
   },
 
   '.__action-button': {

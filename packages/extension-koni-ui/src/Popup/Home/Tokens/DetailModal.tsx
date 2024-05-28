@@ -224,7 +224,7 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
                   </div>
                 ))}
               </div>
-              {!isAllAccount && <div className={'__explorer'}>
+              {!isAllAccount && <div className={'__explorer-link'}>
                 {!!link && (
                   <Button
                     block
@@ -311,7 +311,7 @@ export const DetailModal = styled(Component)<Props>(({ theme: { token } }: Props
       padding: '12px 12px 4px'
     },
 
-    '.__explorer': {
+    '.__explorer-link': {
       marginTop: token.margin
     },
 

@@ -45,7 +45,20 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
           exists.poolSlugs.push(pool.slug);
-          exists.chains.push(pool.chain);
+
+          const inputAsset = pool.metadata.inputAsset;
+
+          if (!exists.assetSlugs.includes(inputAsset)) {
+            exists.assetSlugs.push(inputAsset);
+
+            const balanceItem = tokenBalanceMap[inputAsset];
+
+            if (balanceItem) {
+              exists.balance.value = exists.balance.value.plus(balanceItem.free.value);
+              exists.balance.convertedValue = exists.balance.convertedValue.plus(balanceItem.free.convertedValue);
+              exists.balance.pastConvertedValue = exists.balance.pastConvertedValue.plus(balanceItem.free.pastConvertedValue);
+            }
+          }
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
 
@@ -69,6 +82,15 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             apy = calculateReward(pool.statistic?.totalApr).apy;
           }
 
+          const inputAsset = pool.metadata.inputAsset;
+          const balanceItem = tokenBalanceMap[inputAsset];
+
+          if (balanceItem) {
+            freeBalance.value = freeBalance.value.plus(balanceItem.free.value);
+            freeBalance.convertedValue = freeBalance.convertedValue.plus(balanceItem.free.convertedValue);
+            freeBalance.pastConvertedValue = freeBalance.pastConvertedValue.plus(balanceItem.free.pastConvertedValue);
+          }
+
           result[group] = {
             group: group,
             token: token.slug,
@@ -80,35 +102,10 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             chain: chain,
             poolListLength: 1,
             poolSlugs: [pool.slug],
-            chains: [pool.chain]
+            assetSlugs: [pool.metadata.inputAsset]
           };
         }
       }
-    }
-
-    for (const value of Object.values(result)) {
-      const { chains, group } = value;
-      const assets = Object.values(assetRegistry).filter((asset) => {
-        return (asset.multiChainAsset ? asset.multiChainAsset === group : asset.slug === group) && chains.includes(asset.originChain);
-      });
-
-      const balanceValue: BalanceValueInfo = {
-        value: BN_ZERO,
-        convertedValue: BN_ZERO,
-        pastConvertedValue: BN_ZERO
-      };
-
-      assets.forEach((asset) => {
-        const balanceItem = tokenBalanceMap[asset.slug];
-
-        if (balanceItem?.total) {
-          balanceValue.value = balanceValue.value.plus(balanceItem?.total.value);
-          balanceValue.convertedValue = balanceValue.convertedValue.plus(balanceItem.total.convertedValue);
-          balanceValue.pastConvertedValue = balanceValue.pastConvertedValue.plus(balanceItem.total.pastConvertedValue);
-        }
-      });
-
-      result[group].balance = balanceValue;
     }
 
     return Object.values(result);

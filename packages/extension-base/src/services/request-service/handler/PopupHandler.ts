@@ -7,7 +7,7 @@ import RequestService from '@subwallet/extension-base/services/request-service';
 import { DEFAULT_NOTIFICATION_TYPE } from '@subwallet/extension-base/services/setting-service/constants';
 import { osName } from '@subwallet/extension-base/utils';
 
-const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
+const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
 const extraHeight = osName === 'Linux' ? 0 : 28;
 const extraWidth = osName === 'Windows' ? 16 : 0;
@@ -26,19 +26,16 @@ const NORMAL_WINDOW_OPTS: chrome.windows.CreateData = {
   url: NOTIFICATION_URL
 };
 
-export function openPopup (url: string) {
-  chrome.windows.getCurrent(
-    (win) => {
-      const popupOptions = { ...POPUP_WINDOW_OPTS, url };
+export async function openPopup (url: string) {
+  const win = await chrome.windows.getCurrent();
+  const popupOptions = { ...POPUP_WINDOW_OPTS, url };
 
-      if (win) {
-        popupOptions.left = (win.left || 0) + (win.width || 0) - (popupOptions.width || 0) - 20;
-        popupOptions.top = (win.top || 0) + 110;
-      }
+  if (win) {
+    popupOptions.left = (win.left || 0) + (win.width || 0) - (popupOptions.width || 0) - 20;
+    popupOptions.top = (win.top || 0) + 110;
+  }
 
-      chrome.windows.create(popupOptions).catch(console.error);
-    }
-  );
+  await chrome.windows.create(popupOptions);
 }
 
 export default class PopupHandler {
@@ -63,7 +60,7 @@ export default class PopupHandler {
     const numRequests = this.#requestService.numRequests;
     const text = numRequests > 0 ? numRequests.toString() : '';
 
-    withErrorLog(() => chrome.browserAction?.setBadgeText({ text }));
+    withErrorLog(() => chrome.action?.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();

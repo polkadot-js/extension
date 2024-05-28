@@ -9,7 +9,6 @@ import { fakeAddress } from '@subwallet/extension-base/services/earning-service/
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, LiquidYieldPositionInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import BigNumber from 'bignumber.js';
-import fetch from 'cross-fetch';
 
 import { BN, BN_ZERO } from '@polkadot/util';
 

@@ -14,7 +14,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "1.1.67-1",
+  "version": "1.1.68-2",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
@@ -26,8 +26,8 @@
     "web3-core": "^1.10.0"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.197",
-    "@types/firefox-webext-browser": "^94.0.1"
+    "@types/chrome": "^0.0.254",
+    "@types/firefox-webext-browser": "^120.0.0"
   },
   "peerDependencies": {
     "@polkadot/api": "*"

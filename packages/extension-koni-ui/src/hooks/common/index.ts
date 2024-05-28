@@ -13,6 +13,7 @@ export { default as useUILock } from './useUILock';
 export { default as useUnlockChecker } from './useUnlockChecker';
 export { default as useAlert } from './useAlert';
 export { default as useGetChainSlugsByCurrentAccount } from './useGetChainSlugsByCurrentAccount';
+export { default as useSetSessionLatest } from './useSetSessionLatest';
 
 export * from './useSelector';
 export * from './useLazyList';

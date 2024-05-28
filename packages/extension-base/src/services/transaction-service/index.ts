@@ -32,10 +32,8 @@ import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
 import { t } from 'i18next';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, interval as rxjsInterval, Subscription } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
-import { Subscription } from 'web3-core-subscriptions';
-import { BlockHeader } from 'web3-eth';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
@@ -1041,10 +1039,10 @@ export default class TransactionService {
 
             this.watchTransactionSubscribes[id] = new Promise<void>((resolve, reject) => {
               // eslint-disable-next-line prefer-const
-              let subscribe: Subscription<BlockHeader>;
+              let subscribe: Subscription;
 
               const onComplete = () => {
-                subscribe?.unsubscribe?.()?.then(console.debug).catch(console.debug);
+                subscribe?.unsubscribe?.();
                 delete this.watchTransactionSubscribes[id];
               };
 
@@ -1073,7 +1071,7 @@ export default class TransactionService {
                 web3Api.eth.getTransactionReceipt(txHash).then(onSuccess).catch(onError);
               };
 
-              subscribe = web3Api.eth.subscribe('newBlockHeaders', onCheck);
+              subscribe = rxjsInterval(3000).subscribe(onCheck);
             });
           } else {
             this.removeTransaction(id);

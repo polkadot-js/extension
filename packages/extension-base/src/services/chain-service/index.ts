@@ -685,7 +685,7 @@ export class ChainService {
         const latestAssetPatch = JSON.stringify(latestAssetInfo);
 
         if (this.assetMapPatch !== latestAssetPatch) {
-          const assetRegistry = filterAssetInfoMap(this.getChainInfoMap(), { ...ChainAssetMap, ...latestAssetInfo });
+          const assetRegistry = filterAssetInfoMap(this.getChainInfoMap(), Object.assign({}, this.dataMap.assetRegistry, latestAssetInfo));
 
           this.assetMapPatch = latestAssetPatch;
           this.dataMap.assetRegistry = assetRegistry;
@@ -1944,7 +1944,7 @@ export class ChainService {
     const chainInfoMap = this.getChainInfoMap();
 
     Object.values(chainInfoMap).forEach((i) => {
-      const subscanSlug = i.slug === 'goldberg_testnet' ? 'avail-testnet' : i.extraInfo?.subscanSlug; // Hotfix for Goldberg testnet
+      const subscanSlug = i.extraInfo?.subscanSlug;
 
       if (!subscanSlug) {
         return;

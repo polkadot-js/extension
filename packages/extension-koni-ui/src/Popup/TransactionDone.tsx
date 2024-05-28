@@ -27,7 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const viewInHistory = useCallback(
     () => {
       if (address && chain && transactionId) {
-        navigate(`/home/history/${reformatAddress(address)}/${chain}/${transactionId}`);
+        navigate(`/home/history/${reformatAddress(address)}/${chain}/${transactionId}`, { state: { from: 'ignoreRemind' } });
       } else {
         navigate('/home/history');
       }

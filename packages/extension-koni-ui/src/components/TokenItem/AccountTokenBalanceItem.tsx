@@ -66,7 +66,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <MetaInfo
-      className={CN(className, 'account-token-detail')}
+      className={CN(className, 'account-token-detail', { '__show-button': !!link })}
       hasBackgroundWrapper={true}
       spaceSize='xxs'
     >
@@ -118,6 +118,7 @@ const Component: React.FC<Props> = (props: Props) => {
       {!!link && <Button
         block
         disabled={!link}
+        className={'__explorer'}
         icon={
           <Icon
             className={'__icon-button'}
@@ -138,7 +139,6 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
   return {
     '&.meta-info-block': {
       marginTop: token.marginXS,
-      paddingBottom: 0,
 
       '&:first-child': {
         marginTop: 0
@@ -155,6 +155,24 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
       }
     },
 
+    '.anticon.__icon-button': {
+      height: 20,
+      width: 20,
+      fontSize: token.fontSizeXL
+    },
+
+    '&.__show-button.-has-background-wrapper': {
+      paddingBottom: 6
+    },
+    '.__explorer.ant-btn-ghost': {
+      color: token.colorTextTertiary
+    },
+    '.__explorer.ant-btn-ghost:hover': {
+      color: token.colorWhite
+    },
+    '.__explorer': {
+      marginTop: 6
+    },
     '.account-info': {
       overflow: 'hidden',
       display: 'flex',
@@ -189,11 +207,7 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
         'white-space': 'nowrap'
       }
     },
-    '.anticon.__icon-button': {
-      height: 20,
-      width: 20,
-      fontSize: token.fontSizeXL
-    },
+
 
     '.balance-info': {
       paddingLeft: token.paddingXL,

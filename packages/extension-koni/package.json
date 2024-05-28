@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@polkadot/dev": "^0.65.23",
+    "@types/chrome": "^0.0.254",
+    "@types/serviceworker": "^0.0.80",
     "assert": "^2.0.0",
     "babel-loader": "^9.1.3",
     "browser-resolve": "^2.0.0",

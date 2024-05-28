@@ -74,8 +74,8 @@ const defaultModalId = 'multi-validator-selector';
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', defaultValue, from
     , id = defaultModalId, isSingleSelect: _isSingleSelect = false,
-    loading, onChange, slug
-    , setForceFetchValidator, value } = props;
+    loading, onChange, setForceFetchValidator
+    , slug, value } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);

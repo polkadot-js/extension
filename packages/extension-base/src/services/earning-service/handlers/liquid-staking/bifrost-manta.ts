@@ -5,7 +5,6 @@ import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/K
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _getAssetDecimals, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, SubmitYieldJoinData, TransactionData, YieldStepType } from '@subwallet/extension-base/types';
-import fetch from 'cross-fetch';
 
 import BifrostLiquidStakingPoolHandler from './bifrost';
 

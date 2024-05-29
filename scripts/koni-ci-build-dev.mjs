@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import path from 'path';
-import axios from 'axios';
 import fs from "fs";
 
 import execSync from '@polkadot/dev/scripts/execSync.mjs';

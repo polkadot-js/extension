@@ -3,6 +3,7 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { USER_GUIDE_URL } from '@subwallet/extension-koni-ui/constants';
+import { setValueLocalStorage } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Icon, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -10,29 +11,30 @@ import { ArrowCircleRight, Export, X, XCircle } from 'phosphor-react';
 import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { useTheme } from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps;
 
 const SUB_DOMAIN_USER_GUIDE = 'account-management/export-and-backup-accounts#export-all-accounts';
 const keyStorage = 'remind_export_account';
+const valueStorage = {
+  value: 'done',
+  key: keyStorage
+};
 
 const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
   const { token } = useTheme() as Theme;
-  const [, setStorage] = useLocalStorage(keyStorage, 'init');
   const learnMore = useCallback(() => {
     window.open(`${USER_GUIDE_URL}/${SUB_DOMAIN_USER_GUIDE}`);
-    setStorage('done');
-    setTimeout(() => {
-      window.close();
-    }, 300);
-  }, [setStorage]);
+    setValueLocalStorage(valueStorage)
+      .catch(console.error);
+  }, []);
 
   const dismiss = useCallback(() => {
-    setStorage('done');
+    setValueLocalStorage(valueStorage)
+      .catch(console.error);
     window.close();
-  }, [setStorage]);
+  }, []);
 
   useEffect(() => {
     const handleCloseTabs = () => {

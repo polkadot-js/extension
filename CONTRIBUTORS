@@ -1,16 +1,16 @@
-    2540	AnhMTV                        	Release version 1.1.68
-    2354	Nam Phạm                      	[Issue 3101] fix: bug missing custom tokens on applying patch
-    2048	S2kael                        	[Issue-3115] Update stable version for chain-list
+    2633	AnhMTV                        	Release version 1.2.1
+    2355	Nam Phạm                      	[Issue 3129] fix: force apply patch
+    2050	S2kael                        	[Issue-3121] Fix HTTP provider error when subscribe tx status
      815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
      416	nguyentiendung                	[Issue-2914] Update yarn.lock
      185	quangdo                       	
      150	bluezdot                      	[Issue-3088] Update logo earning option
-     106	Automation Bot                	[CI Skip] Auto increase webapp build number
+     129	Thiendekaco                   	[Issue 3117] [fix] [mv3] Extension - Still show icon ZK mode on Export account screen in case upgrade version MV2 -> MV3
+     108	Automation Bot                	[CI Skip] Auto increase webapp build number
      106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	
-      99	Thiendekaco                   	[Issue 3090] [fix] Extension - Recheck fetch static data
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
@@ -38,6 +38,7 @@
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
        2	Yash Mittal                   	Address comment
+       1	0_0./                         	
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
        1	Amit Chauhan                  	Fixed toast flicker effect when multiple show toast method called
        1	Andrei Eres                   	Add extension prefix (#891)

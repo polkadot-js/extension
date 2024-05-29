@@ -4,6 +4,7 @@
 import './i18n/i18n';
 
 import applyPreloadStyle from '@subwallet/extension-koni-ui/preloadStyle';
+import { handleRemindBackupTime } from '@subwallet/extension-koni-ui/utils/handleRemindBackupTime';
 import React, { Suspense } from 'react';
 import ReactDOM from 'react-dom/client';
 
@@ -22,4 +23,6 @@ export default function createView (Entry: React.ComponentType, rootId = 'root')
       <Entry />
     </Suspense>
   );
+
+  handleRemindBackupTime();
 }

@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CMD, CRYPTO_SR25519, ETHEREUM_ID, SUBSTRATE_ID } from '@subwallet/extension-koni-ui/constants';
+import { CMD, CRYPTO_ETHEREUM, CRYPTO_SR25519, ETHEREUM_ID, SUBSTRATE_ID } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { numberToU8a, u8aConcat, u8aToU8a } from '@polkadot/util';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { decodeAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import BytesQr from './BytesQr';
 
@@ -45,10 +45,10 @@ const Component = (props: Props) => {
     if (isEthereum) {
       return u8aConcat(ETHEREUM_ID, numberToU8a(cmd), decodeAddress(address), u8aToU8a(payload));
     } else {
-      // EVM genesisHash have _evm or _anyString at end
-      const genesis = genesisHash.split('_')[0];
+      const isEvm = isEthereumAddress(address);
+      const crypto = isEvm ? CRYPTO_ETHEREUM : CRYPTO_SR25519;
 
-      return u8aConcat(SUBSTRATE_ID, CRYPTO_SR25519, new Uint8Array([cmd]), decodeAddress(address), u8aToU8a(payload), u8aToU8a(genesis));
+      return u8aConcat(SUBSTRATE_ID, crypto, new Uint8Array([cmd]), decodeAddress(address), u8aToU8a(payload), u8aToU8a(genesisHash));
     }
   }, [address, cmd, payload, genesisHash, isEthereum]);
 

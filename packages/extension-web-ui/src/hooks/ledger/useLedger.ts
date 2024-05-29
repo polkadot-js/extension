@@ -5,6 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EVMLedger, SubstrateLedger } from '@subwallet/extension-web-ui/connector';
+import { isLedgerCapable } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import useGetSupportedLedger from '@subwallet/extension-web-ui/hooks/ledger/useGetSupportedLedger';
 import { Ledger } from '@subwallet/extension-web-ui/types';
@@ -33,8 +34,6 @@ interface Result extends StateBase {
   signTransaction: Ledger['signTransaction'];
   signMessage: Ledger['signMessage'];
 }
-
-const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
 const baseState: StateBase = {
   isLedgerCapable,

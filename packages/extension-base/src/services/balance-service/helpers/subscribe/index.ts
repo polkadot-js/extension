@@ -100,7 +100,7 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
     const [useAddresses, notSupportAddresses] = filterAddress(addresses, chainInfo);
 
     if (notSupportAddresses.length) {
-      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL]);
+      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL, _AssetType.GRC20]);
 
       const now = new Date().getTime();
 

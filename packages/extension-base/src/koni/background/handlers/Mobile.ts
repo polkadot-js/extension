@@ -3,15 +3,15 @@
 
 import { ActiveCronAndSubscriptionMap, CronServiceType, MobileData, RequestCronAndSubscriptionAction, RequestInitCronAndSubscription, SubscriptionServiceType } from '@subwallet/extension-base/background/KoniTypes';
 import { MessageTypes, RequestTypes, ResponseType } from '@subwallet/extension-base/background/types';
-import { state } from '@subwallet/extension-base/koni/background/handlers/index';
+import { SWHandler } from '@subwallet/extension-base/koni/background/handlers/index';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { SWStorage } from '@subwallet/extension-base/storage';
-import { listMerge } from '@subwallet/extension-base/utils';
+import { isSupportWindow, listMerge } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { DexieExportJsonStructure } from 'dexie-export-import';
 
 export function isLocalStorageReset (): boolean {
-  if (window?.localStorage) {
+  if (isSupportWindow && window?.localStorage) {
     return !window.localStorage.getItem('keyring:subwallet');
   } else {
     return false;
@@ -20,7 +20,7 @@ export function isLocalStorageReset (): boolean {
 
 export async function isIndexedDBReset (): Promise<boolean> {
   try {
-    return (await state.dbService.stores.migration.table.count()) < 1;
+    return (await SWHandler.instance.state.dbService.stores.migration.table.count()) < 1;
   } catch (e) {
     return true;
   }
@@ -60,7 +60,9 @@ export default class Mobile {
     this.state = state;
 
     if (!isLocalStorageReset()) {
-      this.lastRestoreData.storage = swStorage.copy();
+      swStorage.copy().then((data) => {
+        this.lastRestoreData.storage = data;
+      }).catch(console.error);
     }
 
     (async () => {
@@ -138,6 +140,8 @@ export default class Mobile {
   }
 
   private async _getLocalStorageExportData (): Promise<string> {
+    await swStorage.waitReady;
+
     return Promise.resolve(JSON.stringify(swStorage.copy()));
   }
 
@@ -189,7 +193,7 @@ export default class Mobile {
       const storageData = JSON.parse(storage) as Record<string, string>;
 
       for (const key in storageData) {
-        swStorage.setItem(key, storageData[key]);
+        await swStorage.setItem(key, storageData[key]);
       }
     }
 

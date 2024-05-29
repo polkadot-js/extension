@@ -10,7 +10,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, StorageDataInterface, SubmitYieldStepData, TokenApproveData, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { SwapErrorType, SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, SwapTxData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
 import { KeyringPair$Json, KeyringPair$Meta } from '@subwallet/keyring/types';
@@ -2570,6 +2570,8 @@ export interface KoniRequestSignatures {
   'pri(database.export)': [null, string];
   'pri(database.import)': [string, boolean];
   'pri(database.exportJson)': [null, DexieExportJsonStructure];
+  'pri(database.migrateLocalStorage)': [string, boolean];
+  'pri(database.setLocalStorage)': [StorageDataInterface, boolean];
   /* Database Service */
 
   /* Swap */

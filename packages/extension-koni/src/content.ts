@@ -5,8 +5,8 @@ import type { Message } from '@subwallet/extension-base/types';
 
 import { TransportRequestMessage } from '@subwallet/extension-base/background/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@subwallet/extension-base/defaults';
-import {getId} from "@subwallet/extension-base/utils/getId";
-import {addNotificationPopUp} from "@subwallet/extension-koni/helper/PageNotification";
+import { getId } from '@subwallet/extension-base/utils/getId';
+import { addNotificationPopUp } from '@subwallet/extension-koni/helper/PageNotification';
 
 const handleRedirectPhishing: { id: string, resolve?: (value: (boolean | PromiseLike<boolean>)) => void, reject?: (e: Error) => void } = {
   id: 'redirect-phishing-' + getId()
@@ -33,12 +33,13 @@ export class ContentHandler {
     if (!this.port) {
       const port = chrome.runtime.connect({ name: PORT_CONTENT });
       const onMessageHandler = this.onPortMessageHandler.bind(this);
+
       const disconnectHandler = () => {
         this.onDisconnectPort(port, onMessageHandler, disconnectHandler);
       };
 
       this.port = port;
-      this.port.onMessage.addListener(onMessageHandler)
+      this.port.onMessage.addListener(onMessageHandler);
       this.port.onDisconnect.addListener(disconnectHandler);
     }
 
@@ -64,8 +65,8 @@ export class ContentHandler {
       console.warn(`${err.message}, port is disconnected.`);
     }
 
-    port.onMessage.removeListener(onMessage)
-    port.onDisconnect.removeListener(onDisconnect)
+    port.onMessage.removeListener(onMessage);
+    port.onDisconnect.removeListener(onDisconnect);
 
     this.port = undefined;
   }
@@ -82,6 +83,7 @@ export class ContentHandler {
       this.getPort().postMessage(data);
     } catch (e) {
       console.error(e);
+
       if (!this.isShowNotification) {
         console.log('The SubWallet extension is not installed. Please install the extension to use the wallet.');
         addNotificationPopUp();
@@ -95,7 +97,7 @@ export class ContentHandler {
   }
 
   // Detect phishing by URL
-  redirectIfPhishingProm(): void {
+  redirectIfPhishingProm (): void {
     new Promise<boolean>((resolve, reject) => {
       handleRedirectPhishing.resolve = resolve;
       handleRedirectPhishing.reject = reject;
@@ -117,10 +119,11 @@ export class ContentHandler {
     });
   }
 
-  constructor() {
+  constructor () {
     this.redirectIfPhishingProm();
     window.addEventListener('message', this.onPageMessage.bind(this));
   }
 }
 
-new ContentHandler()
+// @ts-ignore
+const contentHandler = new ContentHandler();

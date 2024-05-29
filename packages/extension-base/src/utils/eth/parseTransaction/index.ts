@@ -6,9 +6,9 @@ import { EvmTransactionArg, NestedArray, ParseEvmTransactionData, ResponseParseE
 import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { fetchJson } from '@subwallet/extension-base/utils';
 import { createTransactionFromRLP, Transaction as QrTransaction } from '@subwallet/extension-base/utils/eth';
 import { InputDataDecoder } from '@subwallet/extension-base/utils/eth/parseTransaction/base';
-import axios from 'axios';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
 
@@ -158,17 +158,16 @@ export const parseContractInput = async (input: string, contractAddress: string,
   if (contractAddress && network) {
     if (_getEvmAbiExplorer(network)) {
       try {
-        const res = await axios.get(_getEvmAbiExplorer(network), {
+        const data = await fetchJson<Record<string, any>>(_getEvmAbiExplorer(network), {
           params: {
             address: contractAddress
           },
           timeout: 3000
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (res.status === 200 && res.data.status === '1') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-          const abi = res.data.result;
+        if (data.status === '1') {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const abi = data.result;
           const temp = parseInputWithAbi(input, abi);
 
           if (temp) {
@@ -251,7 +250,7 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
     if (await isContractAddress(tx.to, evmApiMap[network.slug])) {
       if (_getEvmAbiExplorer(network) !== '') {
         try {
-          const res = await axios.get(_getEvmAbiExplorer(network), {
+          const data = await fetchJson<Record<string, any>>(_getEvmAbiExplorer(network), {
             params: {
               address: tx.to
             },
@@ -259,9 +258,9 @@ export const parseEvmRlp = async (data: string, networkMap: Record<string, _Chai
           });
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          if (res.status === 200 && res.data.status === '1') {
+          if (data.status === '1') {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-            const abi = res.data.result;
+            const abi = data.result;
             const temp = parseInputWithAbi(tx.data, abi);
 
             if (temp) {

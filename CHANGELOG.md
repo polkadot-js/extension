@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.2.1
+Build date: May 28, 2024.
+
+Features & Update:
+- Update Extension Manifest V3 (#2205)
+- Handle case displayed account with specific network (#2709)
+
 ## 1.1.68
 Build date: May 25, 2024.
 

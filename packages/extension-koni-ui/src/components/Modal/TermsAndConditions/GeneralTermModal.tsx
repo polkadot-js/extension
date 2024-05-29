@@ -33,8 +33,8 @@ const Component = ({ className, onOk }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchStaticData('term-and-condition', 'index.md')
-      .then((md) => setStaticData({ md: md as string }))
+    fetchStaticData<string>('term-and-condition', 'index.md', false)
+      .then((md) => setStaticData({ md }))
       .catch((e) => console.log('fetch _termAndCondition error:', e));
   }, []);
 

@@ -120,6 +120,7 @@ export interface SigningRequest extends ConfirmationRequestBase {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
+  'pri(ping)': [null, string];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];

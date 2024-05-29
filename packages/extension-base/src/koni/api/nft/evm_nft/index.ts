@@ -9,7 +9,6 @@ import { _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/he
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 

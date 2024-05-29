@@ -53,14 +53,14 @@ const additionalEnvDict = {
   extension: _additionalEnv
 };
 
-module.exports = (entry, alias = {}, useSplitChunk = false) => {
+module.exports = (entry, alias = {}, compileWithHtml = false) => {
   const additionalEnv = {};
 
   Object.keys(entry).forEach((key) => {
     Object.assign(additionalEnv, additionalEnvDict[key] || {});
   });
 
-  const result = {
+  return {
     context: __dirname,
     devtool: false,
     entry,
@@ -148,11 +148,6 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         filename: 'notification.html',
         template: 'public/notification.html',
         chunks: ['extension']
-      }),
-      new HtmlWebpackPlugin({
-        filename: 'background.html',
-        template: 'public/background.html',
-        chunks: ['background']
       })
     ],
     resolve: {
@@ -161,7 +156,9 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         [`@subwallet/${p}`]: path.resolve(__dirname, `../${p}/src`)
       }), {
         ...alias,
-        'react/jsx-runtime': require.resolve('react/jsx-runtime')
+        'react/jsx-runtime': require.resolve('react/jsx-runtime'),
+        axios_raw: path.resolve(__dirname, '../../node_modules/axios'),
+        axios: path.resolve(__dirname, 'axios.global.js')
       }),
       extensions: ['.js', '.jsx', '.ts', '.tsx'],
       fallback: {
@@ -179,17 +176,10 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
         // url: require.resolve("url/")
       }
     },
-    watch: false,
-    experiments: {
-      asyncWebAssembly: true
-    }
-  };
-
-  if (useSplitChunk) {
-    result.optimization = {
+    optimization: {
       splitChunks: {
-        chunks: 'all',
-        maxSize: 2000000,
+        chunks: (chunk) => (chunk.name === 'extension'),
+        maxSize: 3000000,
         cacheGroups: {
           vendors: {
             test: /[\\/]node_modules[\\/]/,
@@ -201,8 +191,10 @@ module.exports = (entry, alias = {}, useSplitChunk = false) => {
           }
         }
       }
-    };
-  }
-
-  return result;
+    },
+    watch: false,
+    experiments: {
+      asyncWebAssembly: true
+    }
+  };
 };

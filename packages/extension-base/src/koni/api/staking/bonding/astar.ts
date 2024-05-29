@@ -8,7 +8,6 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { EarningStatus, UnstakingStatus } from '@subwallet/extension-base/types';
 import { isUrl, parseRawNumber } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Codec } from '@polkadot/types/types';

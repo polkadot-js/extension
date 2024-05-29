@@ -42,7 +42,6 @@ const onExportJson = (jsonData: KeyringPairs$Json): (() => void) => {
 function Component ({ addresses, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
   const { inactiveModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();

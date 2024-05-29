@@ -34,7 +34,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const navigate = useNavigate();
   const [_isConfirmedTermSeedPhrase] = useLocalStorage(CONFIRM_TERM_SEED_PHRASE, 'nonConfirmed');
   const { goHome } = useDefaultNavigate();
-  const { activeModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const checkUnlock = useUnlockChecker();
 
   const onComplete = useCompleteCreateAccount();
@@ -106,7 +106,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     if (_isConfirmedTermSeedPhrase === 'nonConfirmed') {
       activeModal(TERM_AND_CONDITION_SEED_PHRASE_MODAL);
     }
-  }, [_isConfirmedTermSeedPhrase, activeModal]);
+  }, [_isConfirmedTermSeedPhrase, activeModal, inactiveModal]);
 
   useEffect(() => {
     createSeedV2(undefined, undefined, DEFAULT_ACCOUNT_TYPES)

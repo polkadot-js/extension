@@ -75,5 +75,5 @@ export const targetIsWeb = TARGET_ENV === 'webapp';
 export const targetIsMobile = TARGET_ENV === 'mobile';
 
 export const MODULE_SUPPORT: EnvironmentSupport = {
-  MANTA_ZK: targetIsExtension
+  MANTA_ZK: false
 };

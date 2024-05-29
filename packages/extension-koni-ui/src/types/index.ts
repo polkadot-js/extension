@@ -130,3 +130,4 @@ export * from './transaction';
 export * from './walletConnect';
 export * from './earning';
 export * from './missionPool';
+export * from './localStorage';

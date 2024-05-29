@@ -244,7 +244,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     this.status = ServiceStatus.STARTING;
 
     // Start subscribe pools' info
-    await this.runSubscribePoolsInfo();
+    // await this.runSubscribePoolsInfo();
 
     // Start subscribe pools' position
     await this.runSubscribePoolsPosition();
@@ -276,7 +276,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
     await this.persistData();
 
     // Stop subscribe pools' info
-    this.runUnsubscribePoolsInfo();
+    // this.runUnsubscribePoolsInfo();
 
     // Stop subscribe pools' position
     this.runUnsubscribePoolsPosition();

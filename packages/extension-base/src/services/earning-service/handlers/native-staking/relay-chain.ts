@@ -621,6 +621,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       if (paramsCount === 2) {
         bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
       } else {
+        // @ts-ignore
         bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
       }
 
@@ -633,6 +634,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       if (paramsCount === 2) {
         bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
       } else {
+        // @ts-ignore
         bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
       }
 
@@ -753,6 +755,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
     } else {
+      // @ts-ignore
       return chainApi.api.tx.staking.withdrawUnbonded();
     }
   }

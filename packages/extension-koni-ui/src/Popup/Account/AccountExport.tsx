@@ -5,13 +5,13 @@ import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import AlertBox from '@subwallet/extension-koni-ui/components/Alert';
 import CloseIcon from '@subwallet/extension-koni-ui/components/Icon/CloseIcon';
 import WordPhrase from '@subwallet/extension-koni-ui/components/WordPhrase';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants/router';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useCopy from '@subwallet/extension-koni-ui/hooks/common/useCopy';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
 import { exportAccount, exportAccountPrivateKey, keyringExportMnemonic } from '@subwallet/extension-koni-ui/messaging';
-import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { PhosphorIcon, RemindBackUpSeedPhraseParamState, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { FormCallbacks, FormFieldData } from '@subwallet/extension-koni-ui/types/form';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { BackgroundIcon, Button, Field, Form, Icon, Input, PageIcon, SettingItem, SwQRCode } from '@subwallet/react-ui';
@@ -20,7 +20,7 @@ import { saveAs } from 'file-saver';
 import { CheckCircle, CopySimple, DownloadSimple, FileJs, Leaf, QrCode, Wallet } from 'phosphor-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
@@ -76,8 +76,9 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { goHome } = useDefaultNavigate();
+  const { goBack } = useDefaultNavigate();
   const { accountAddress } = useParams();
+  const isBackToHome = useLocation().state as RemindBackUpSeedPhraseParamState;
 
   const account = useGetAccountByAddress(accountAddress);
 
@@ -275,18 +276,22 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [account, t]);
 
   const onBack = useCallback(() => {
-    if (accountAddress) {
+    if (accountAddress && !isBackToHome?.from) {
       navigate(`/accounts/detail/${accountAddress}`);
     } else {
-      navigate(DEFAULT_ROUTER_PATH);
+      navigate(isBackToHome.from, { state: { ...isBackToHome, from: 'ignoreBanner' } });
     }
-  }, [accountAddress, navigate]);
+  }, [accountAddress, isBackToHome, navigate]);
+
+  const goHomeWithState = useCallback(() => {
+    goBack(DEFAULT_ROUTER_PATH, { from: 'ignoreBanner' });
+  }, [goBack]);
 
   useEffect(() => {
     if (!account) {
-      goHome();
+      goBack(DEFAULT_ROUTER_PATH, { from: 'ignoreBanner' });
     }
-  }, [account, goHome, navigate]);
+  }, [account, goBack, navigate]);
 
   useEffect(() => {
     if (account?.address) {
@@ -310,12 +315,12 @@ const Component: React.FC<Props> = (props: Props) => {
           icon: firstStep ? undefined : FinishIcon,
           disabled: isDisabled || !exportTypes.length,
           loading: loading,
-          onClick: firstStep ? form.submit : goHome
+          onClick: firstStep ? form.submit : goHomeWithState
         }}
         subHeaderIcons={[
           {
             icon: <CloseIcon />,
-            onClick: goHome,
+            onClick: goHomeWithState,
             disabled: loading
           }
         ]}

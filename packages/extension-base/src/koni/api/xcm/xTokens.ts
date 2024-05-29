@@ -22,9 +22,11 @@ function getCurrencyId (tokenInfo: _ChainAsset): unknown {
   return _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo);
 }
 
+const V3_SUPPORTED_CHAINS = ['moonbeam', 'moonriver', 'bifrost_dot', 'interlay', 'hydradx_main', 'acala', 'parallel', 'astar', 'shiden', 'centrifuge', 'manta_network', 'pendulum'];
+
 export function getExtrinsicByXtokensPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   const weightParam = ['pioneer'].includes(originChainInfo.slug) ? FOUR_INSTRUCTIONS_WEIGHT : getDestWeight();
-  const destVersion = ['moonbeam', 'moonriver', 'bifrost_dot', 'interlay', 'hydradx_main', 'acala', 'parallel', 'astar', 'shiden', 'centrifuge', 'manta_network'].includes(originChainInfo.slug)
+  const destVersion = V3_SUPPORTED_CHAINS.includes(originChainInfo.slug)
     ? 'V3'
     : undefined;
 

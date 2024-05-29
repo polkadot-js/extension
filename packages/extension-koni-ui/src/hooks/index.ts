@@ -18,3 +18,4 @@ export * from './screen';
 export * from './wallet-connect';
 export * from './history';
 export * from './earning';
+export * from './staticContent';

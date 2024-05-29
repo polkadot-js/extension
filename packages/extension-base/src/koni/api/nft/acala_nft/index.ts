@@ -6,7 +6,6 @@ import { getRandomIpfsGateway } from '@subwallet/extension-base/koni/api/nft/con
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { isUrl } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 interface AssetId {
   classId: string | number,

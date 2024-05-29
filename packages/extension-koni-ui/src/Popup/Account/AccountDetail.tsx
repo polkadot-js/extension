@@ -10,7 +10,6 @@ import useDeleteAccount from '@subwallet/extension-koni-ui/hooks/account/useDele
 import useGetAccountByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountByAddress';
 import useGetAccountSignModeByAddress from '@subwallet/extension-koni-ui/hooks/account/useGetAccountSignModeByAddress';
 import { useGetMantaPayConfig } from '@subwallet/extension-koni-ui/hooks/account/useGetMantaPayConfig';
-import { useIsMantaPayAvailable } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayAvailable';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useUnlockChecker from '@subwallet/extension-koni-ui/hooks/common/useUnlockChecker';
 import useDefaultNavigate from '@subwallet/extension-koni-ui/hooks/router/useDefaultNavigate';
@@ -193,7 +192,8 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [account]);
 
-  const isZkModeAvailable = useIsMantaPayAvailable(account);
+  // const isZkModeAvailable = useIsMantaPayAvailable(account);
+  const isZkModeAvailable = false;
 
   const walletNamePrefixIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {

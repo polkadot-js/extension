@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { IMPORT_ACCOUNT_MODAL, IMPORT_SEED_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useClickOutSide, useGoBackSelectAccount, useIsPopup, useSetSessionLatest, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -33,7 +33,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-
+  const { setStateSelectAccount } = useSetSessionLatest();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const isActive = checkActive(modalId);
 
@@ -41,17 +41,19 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const onBack = useGoBackSelectAccount(modalId);
 
   const onCancel = useCallback(() => {
+    setStateSelectAccount(true);
     inactiveModal(modalId);
-  }, [inactiveModal]);
+  }, [inactiveModal, setStateSelectAccount]);
 
   useClickOutSide(isActive, renderModalSelector(className), onCancel);
 
   const onClickItem = useCallback((path: string) => {
     return () => {
       inactiveModal(modalId);
+      setStateSelectAccount(true);
       navigate(path);
     };
-  }, [navigate, inactiveModal]);
+  }, [inactiveModal, setStateSelectAccount, navigate]);
 
   const onClickJson = useCallback(() => {
     if (isPopup) {

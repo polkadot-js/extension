@@ -5,7 +5,7 @@ import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/backg
 import ExportAllSelector from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { SimpleQrModal } from '@subwallet/extension-koni-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useSetSessionLatest, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { saveCurrentAccountAddress } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
@@ -13,11 +13,11 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, ButtonProps, Icon, ModalContext, SelectModal, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { Export, Plug, Plugs, PlugsConnected } from 'phosphor-react';
+import { Circle, Export, Plug, Plugs, PlugsConnected } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -26,7 +26,9 @@ import { GeneralEmptyList } from '../../../EmptyList';
 import { ConnectWebsiteModal } from '../ConnectWebsiteModal';
 import SelectAccountFooter from '../SelectAccount/Footer';
 
-type Props = ThemeProps
+interface Props extends ThemeProps {
+  id?: string
+}
 
 enum ConnectionStatement {
   NOT_CONNECTED='not-connected',
@@ -52,12 +54,13 @@ const modalId = SELECT_ACCOUNT_MODAL;
 const simpleQrModalId = 'simple-qr-modal-id';
 const multiExportAccountModalId = 'multi-export-account-selector';
 
-function Component ({ className }: Props): React.ReactElement<Props> {
+function Component ({ className, id }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
+  const { setStateSelectAccount } = useSetSessionLatest();
 
   const { accounts: _accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
 
@@ -68,6 +71,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+  const { token } = useTheme() as Theme;
   const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
 
   const accounts = useMemo((): AccountJson[] => {
@@ -149,7 +153,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         navigate(`/accounts/detail/${address}`);
       }, 100);
     };
-  }, [navigate, inactiveModal]);
+  }, [inactiveModal, navigate]);
 
   const openDisconnectExtensionModal = useCallback(() => {
     activeModal(DISCONNECT_EXTENSION_MODAL);
@@ -197,7 +201,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const renderSelectedItem = useCallback((item: AccountJson): React.ReactNode => {
     return (
-      <div className='selected-account'>
+      <div
+        className='selected-account'
+      >
         <AccountBriefInfo account={item} />
       </div>
     );
@@ -307,19 +313,44 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(multiExportAccountModalId);
   }, [activeModal]);
 
-  const rightButton = useMemo((): ButtonProps => ({
-    icon: (
-      <Icon
-        phosphorIcon={Export}
-        weight='fill'
-      />
-    ),
-    onClick: exportAllAccounts,
-    size: 'xs',
-    type: 'ghost',
-    tooltip: t('Export account'),
-    tooltipPlacement: 'topLeft'
-  }), [exportAllAccounts, t]);
+  const onCloseSelectAccountModal = useCallback(() => {
+    inactiveModal(modalId);
+    setStateSelectAccount(true);
+  }, [inactiveModal, setStateSelectAccount]);
+
+  const rightButton = useMemo((): ButtonProps => {
+    return ({
+      icon: (
+        <Icon
+          className={CN('__export-remind-btn')}
+          phosphorIcon={Export}
+          weight='fill'
+        />
+      ),
+      children: (
+        <Tooltip
+          className={'__icon-export-remind'}
+          open={true}
+          overlayClassName={CN('__tooltip-overlay-remind')}
+          placement={'bottomLeft'}
+          title={t('Export and back up accounts')}
+        >
+          <div>
+            <Icon
+              customSize={'7.39px'}
+              iconColor={token.colorHighlight}
+              phosphorIcon={Circle}
+              weight={'fill'}
+            />
+          </div>
+        </Tooltip>
+      ),
+      onClick: exportAllAccounts,
+      size: 'xs',
+      type: 'ghost',
+      tooltipPlacement: 'topLeft'
+    });
+  }, [exportAllAccounts, t, token.colorHighlight]);
 
   return (
     <div className={CN(className, 'container')}>
@@ -353,6 +384,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         inputWidth={'100%'}
         itemKey='address'
         items={accounts}
+        onCancel={onCloseSelectAccountModal}
         onSelect={_onSelect}
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
@@ -518,6 +550,17 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       [`&.-${ConnectionStatement.PARTIAL_CONNECTED}`]: {
         '--bg-color': token.colorWarning
       }
+    },
+
+    '.__icon-export-remind': {
+      position: 'absolute',
+      top: '-35%',
+      left: '40%'
+    },
+
+    '.anticon.__export-remind-btn': {
+      height: 23,
+      width: 24
     }
   });
 });

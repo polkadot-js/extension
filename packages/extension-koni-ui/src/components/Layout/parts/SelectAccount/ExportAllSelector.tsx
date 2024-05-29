@@ -50,9 +50,9 @@ const modalId = SELECT_ACCOUNT_MODAL;
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { className = '',
     id = defaultModalId,
+    isSingleSelect = false,
     items,
-    onChange,
-    isSingleSelect = false } = props;
+    onChange } = props;
   const { t } = useTranslation();
   const { activeModal, checkActive } = useContext(ModalContext);
   const onBack = useGoBackSelectAccount(id);
@@ -270,6 +270,13 @@ const ExportAllSelector = styled(forwardRef(Component))<Props>(({ theme: { token
     '.ant-sw-list': {
       paddingRight: 0,
       paddingLeft: 0
+    },
+
+    '.all-account-selection': {
+      '.account-item-name': {
+        fontSize: token.fontSizeLG
+      }
+
     }
   };
 });

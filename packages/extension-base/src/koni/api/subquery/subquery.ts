@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ApolloClient, createHttpLink, InMemoryCache } from '@apollo/client';
-import fetch from 'cross-fetch';
 
 export function newApolloClient (uri: string) {
   return new ApolloClient({

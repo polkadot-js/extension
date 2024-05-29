@@ -221,7 +221,7 @@ export default class KoniTabs {
   private redirectPhishingLanding (phishingWebsite: string): void {
     const nonFragment = phishingWebsite.split('#')[0];
     const encodedWebsite = encodeURIComponent(nonFragment);
-    const url = `${chrome.extension.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
+    const url = `${chrome.runtime.getURL('index.html')}#${PHISHING_PAGE_REDIRECT}/${encodedWebsite}`;
 
     chrome.tabs.query({ url: nonFragment }, (tabs) => {
       tabs
@@ -1060,6 +1060,13 @@ export default class KoniTabs {
       return this.redirectIfPhishing(url);
     }
 
+    if (type === 'pub(ping)') {
+      return Promise.resolve(true);
+    }
+
+    // Wait for account ready and chain ready
+    await Promise.all([this.#koniState.eventService.waitAccountReady, this.#koniState.eventService.waitChainReady]);
+
     if (type !== 'pub(authorize.tabV2)' && !this.isEvmPublicRequest(type, request as RequestArguments)) {
       await this.#koniState.ensureUrlAuthorizedV2(url)
         .catch((e: Error) => {
@@ -1084,9 +1091,6 @@ export default class KoniTabs {
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
-
-      case 'pub(ping)':
-        return Promise.resolve(true);
 
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();

@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { TARGET_ENV } from '@subwallet/extension-base/utils/environment';
-import fetch from 'cross-fetch';
 
 const EXTENSION_REPORT_ERROR_URL = 'https://extension-feedback.subwallet.app/gelf';
 const WEBAPP_REPORT_ERROR_URL = 'https://web-feedback.subwallet.app/gelf';

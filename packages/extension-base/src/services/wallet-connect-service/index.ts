@@ -6,6 +6,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import RequestService from '@subwallet/extension-base/services/request-service';
 import Eip155RequestHandler from '@subwallet/extension-base/services/wallet-connect-service/handler/Eip155RequestHandler';
 import { SWStorage } from '@subwallet/extension-base/storage';
+import { IKeyValueStorage } from '@walletconnect/keyvaluestorage';
 import SignClient from '@walletconnect/sign-client';
 import { EngineTypes, SessionTypes, SignClientTypes } from '@walletconnect/types';
 import { getInternalError, getSdkError } from '@walletconnect/utils';
@@ -19,6 +20,32 @@ import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, ResultApproveWalletCo
 const storage = SWStorage.instance;
 const methodDOTRequire = [POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_MESSAGE, POLKADOT_SIGNING_METHODS.POLKADOT_SIGN_TRANSACTION];
 const methodEVMRequire = [EIP155_SIGNING_METHODS.PERSONAL_SIGN, EIP155_SIGNING_METHODS.ETH_SIGN, EIP155_SIGNING_METHODS.ETH_SEND_TRANSACTION];
+
+class WCStorage implements IKeyValueStorage {
+  async getEntries<T = any> (): Promise<[string, T][]> {
+    const datas = await storage.getEntries();
+
+    return Promise.resolve(datas.filter(([key]) => key.startsWith('wc@')).map(([key, value]) => [key, JSON.parse(value)] as [string, T]));
+  }
+
+  async getItem<T = any> (key: string) {
+    const data = await storage.getItem(key);
+
+    return data ? JSON.parse(data) as T : undefined;
+  }
+
+  async getKeys (): Promise<string[]> {
+    return (await storage.keys()).filter((key) => key.startsWith('wc@'));
+  }
+
+  async removeItem (key: string): Promise<void> {
+    return await storage.removeItem(key);
+  }
+
+  async setItem<T = any> (key: string, value: T): Promise<void> {
+    return await storage.setItem(key, JSON.stringify(value));
+  }
+}
 
 export default class WalletConnectService {
   readonly #requestService: RequestService;
@@ -34,17 +61,18 @@ export default class WalletConnectService {
   constructor (koniState: KoniState, requestService: RequestService, option: SignClientTypes.Options = DEFAULT_WALLET_CONNECT_OPTIONS) {
     this.#koniState = koniState;
     this.#requestService = requestService;
+    option.storage = new WCStorage();
     this.#option = option;
     this.#polkadotRequestHandler = new PolkadotRequestHandler(this, requestService);
     this.#eip155RequestHandler = new Eip155RequestHandler(this.#koniState, this);
 
-    this.#initClient().catch(console.error);
+    this.initClient().catch(console.error);
   }
 
-  get #haveData (): boolean {
-    const sessionStorage = storage.getItem('wc@2:client:0.3//session');
-    const pairingStorage = storage.getItem('wc@2:core:0.3//pairing');
-    const subscriptionStorage = storage.getItem('wc@2:core:0.3//subscription');
+  private async haveData () {
+    const sessionStorage = await storage.getItem('wc@2:client:0.3//session');
+    const pairingStorage = await storage.getItem('wc@2:core:0.3//pairing');
+    const subscriptionStorage = await storage.getItem('wc@2:core:0.3//subscription');
 
     const sessions: Array<unknown> = sessionStorage ? JSON.parse(sessionStorage) as Array<unknown> : [];
     const pairings: Array<unknown> = pairingStorage ? JSON.parse(pairingStorage) as Array<unknown> : [];
@@ -53,10 +81,10 @@ export default class WalletConnectService {
     return !!sessions.length || !!pairings.length || !!subscriptions.length;
   }
 
-  async #initClient (force?: boolean) {
+  public async initClient (force?: boolean) {
     this.#removeListener();
 
-    if (force || this.#haveData) {
+    if (force || await this.haveData()) {
       this.#client = await SignClient.init(this.#option);
     }
 
@@ -182,12 +210,12 @@ export default class WalletConnectService {
 
   public async changeOption (newOption: Omit<SignClientTypes.Options, 'projectId'>) {
     this.#option = Object.assign({}, this.#option, newOption);
-    await this.#initClient();
+    await this.initClient();
   }
 
   public async connect (uri: string) {
-    if (!this.#haveData) {
-      await this.#initClient(true);
+    if (!(await this.haveData())) {
+      await this.initClient(true);
     }
 
     this.#checkClient();
@@ -270,7 +298,7 @@ export default class WalletConnectService {
       }
     }
 
-    await this.#initClient();
+    await this.initClient();
     this.#updateSessions();
   }
 

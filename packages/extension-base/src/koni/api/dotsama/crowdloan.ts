@@ -7,9 +7,8 @@ import { APIItemState, CrowdloanItem, CrowdloanParaState } from '@subwallet/exte
 import { ACALA_REFRESH_CROWDLOAN_INTERVAL } from '@subwallet/extension-base/constants';
 import registry from '@subwallet/extension-base/koni/api/dotsama/typeRegistry';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { categoryAddresses, reformatAddress } from '@subwallet/extension-base/utils';
+import { categoryAddresses, fetchJson, reformatAddress } from '@subwallet/extension-base/utils';
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
-import axios from 'axios';
 
 import { DeriveOwnContributions } from '@polkadot/api-derive/types';
 import { BN } from '@polkadot/util';
@@ -86,7 +85,7 @@ export const subscribeAcalaContributeInterval = (polkadotAddresses: string[], fu
 
   const getContributeInfo = () => {
     Promise.all(polkadotAddresses.map((polkadotAddress) => {
-      return axios.get(`${acalaContributionApi}${polkadotAddress}`);
+      return fetchJson(`${acalaContributionApi}${polkadotAddress}`);
     })).then((resList) => {
       let contribute = new BN(0);
 

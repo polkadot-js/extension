@@ -1,0 +1,46 @@
+{
+  "author": "SubWallet",
+  "description": "Comprehensive Web3 wallet solution for Polkadot, Substrate & Ethereum ecosystems",
+  "homepage_url": "https://subwallet.app/",
+  "name": "SubWallet - Polkadot Wallet",
+  "short_name": "SubWallet",
+  "manifest_version": 3,
+  "permissions": [
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+  "minimum_chrome_version": "105",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "SubWallet",
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "js": [
+        "content.js"
+      ],
+      "matches": [
+        "http://*/*",
+        "https://*/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "16": "images/icon-16.png",
+    "32": "images/icon-32.png",
+    "48": "images/icon-48.png",
+    "64": "images/icon-64.png",
+    "128": "images/icon-128.png"
+  },
+  "web_accessible_resources": {
+    "resources": ["page.js"],
+    "matches": ["<all_urls>"]
+  },
+  "content_security_policy": "script-src 'self' blob: 'unsafe-eval' 'wasm-eval'; object-src 'self'",
+  "version": "0.0.1"
+}

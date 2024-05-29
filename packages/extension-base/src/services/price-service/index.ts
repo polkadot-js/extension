@@ -46,9 +46,10 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     this.chainService = chainService;
 
     const updateCurrency = (currentCurrency: CurrencyType) => {
-      const currency = SWStorage.instance.getItem(CURRENCY) as CurrencyType;
-
-      this.setCurrentCurrency(currency || currentCurrency || DEFAULT_CURRENCY);
+      SWStorage.instance.getItem(CURRENCY)
+        .then((currency) => {
+          this.setCurrentCurrency(currency as CurrencyType || currentCurrency || DEFAULT_CURRENCY);
+        }).catch(console.error);
     };
 
     this.init().then(
@@ -109,6 +110,10 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     const exchangeRateData = this.rawExchangeRateMap.value;
     const currencyKey = currency || DEFAULT_CURRENCY;
 
+    if (Object.keys(this.rawPriceSubject.value).length === 0) {
+      return;
+    }
+
     if (Object.keys(exchangeRateData).length === 0) {
       return;
     }
@@ -157,7 +162,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     // Await 1s to get the latest exchange rate
     await new Promise((resolve) => setTimeout(resolve, 300));
 
-    SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
+    await SWStorage.instance.setItem(CURRENCY, newCurrencyCode);
 
     return true;
   }

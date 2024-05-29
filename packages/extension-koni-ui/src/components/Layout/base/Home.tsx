@@ -15,7 +15,7 @@ type Props = {
   showSearchIcon?: boolean;
   onClickFilterIcon?: () => void;
   onClickSearchIcon?: () => void;
-  showTabBar?: boolean
+  showTabBar?: boolean;
 };
 
 const Home = ({ children, onClickFilterIcon, onClickSearchIcon, showFilterIcon, showSearchIcon, showTabBar }: Props) => {

@@ -1,7 +1,6 @@
-// [object Object]
+// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// eslint-disable-next-line header/header
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { GENERAL_TERM_AND_CONDITION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
@@ -34,8 +33,8 @@ const Component = ({ className, onOk }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchStaticData('term-and-condition', 'index.md')
-      .then((md) => setStaticData({ md: md as string }))
+    fetchStaticData<string>('term-and-condition', 'index.md', false)
+      .then((md) => setStaticData({ md }))
       .catch((e) => console.log('fetch _termAndCondition error:', e));
   }, []);
 

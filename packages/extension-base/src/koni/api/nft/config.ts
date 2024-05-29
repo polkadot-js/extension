@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SWStorage } from '@subwallet/extension-base/storage';
-import { RuntimeInfo } from '@subwallet/extension-base/utils';
-import Bowser from 'bowser';
+import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -72,12 +70,6 @@ export const W3S_IPFS = 'https://w3s.link/ipfs/'; // 400
 export const IPFS2_RMRK = 'https://ipfs2.rmrk.link/ipfs/'; // ????
 export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
 export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
-
-const detectFirefox = (): boolean => {
-  return (SWStorage.instance.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
-};
-
-const isFirefox = detectFirefox();
 
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',

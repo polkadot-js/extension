@@ -19,31 +19,6 @@ if (!global.chrome.extension) {
 
 const storage = SWStorage.instance;
 
-function setLocalStorageItem (key: string, value: any) {
-  storage.setItem(key, JSON.stringify(value));
-}
-
-function removeLocalStorageItem (key: string) {
-  storage.removeItem(key);
-}
-
-function getLocalStorageItem (key: string, defaultVal: any = undefined) {
-  const value: string | null = storage.getItem(key);
-
-  if (value) {
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return JSON.parse(value);
-    } catch (e) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return defaultVal;
-    }
-  } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return defaultVal;
-  }
-}
-
 // @ts-ignore
 global.chrome.runtime = {
   lastError: undefined
@@ -60,7 +35,8 @@ global.chrome.tabs = {
   // @ts-ignore
   query: () => {
     // void
-  }
+  },
+  getURL: (input: string) => (input)
 };
 
 global.chrome.storage = {
@@ -70,35 +46,51 @@ global.chrome.storage = {
       keys: string[] | string | undefined | null,
       callback: (val: object) => void
     ) => {
-      if (!keys) {
-        keys = storage.keys();
-      }
+      (async () => {
+        if (!keys) {
+          keys = await storage.keys();
+        }
 
-      if (typeof keys === 'string') {
-        keys = [keys];
-      }
+        if (typeof keys === 'string') {
+          keys = [keys];
+        }
 
-      const rs: Record<string, any> = {};
+        const rs = await storage.getMap(keys);
 
-      keys.forEach((k) => {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        rs[k] = getLocalStorageItem(k);
-      });
+        return Object.entries(rs).reduce((result, [key, value]) => {
+          result[key] = value;
 
-      callback(rs);
+          if (typeof value === 'string') {
+            try {
+              result[key] = JSON.parse(value);
+            } catch (e) {
+              // void
+            }
+          }
+
+          return result;
+        }, {} as Record<string, unknown>);
+      })().catch(console.error);
     },
     // @ts-ignore
     set: (input: object, callback?: () => void) => {
-      Object.entries(input).forEach(([k, v]) => {
-        setLocalStorageItem(k, v);
-      });
+      (async () => {
+        const map = Object.entries(input).reduce((map, [key, value]) => {
+          map[key] = JSON.stringify(value);
 
-      callback && callback();
+          return map;
+        }, {} as Record<string, string>);
+
+        await storage.setMap(map);
+        callback && callback();
+      })().catch(console.error);
     },
     // @ts-ignore
-    remove: (key: string, value: any, callback?: () => void) => {
-      removeLocalStorageItem(key);
-      callback && callback();
+    remove: (key: string, callback?: () => void) => {
+      (async () => {
+        await storage.removeItem(key);
+        callback && callback();
+      })().catch(console.error);
     }
   }
 };

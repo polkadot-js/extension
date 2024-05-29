@@ -17,7 +17,7 @@ export const runCampaign = (notificationService: NotificationService, campaign: 
             const url = metadata.url as string | undefined;
 
             if (url) {
-              window.open(url);
+              chrome.tabs.create({ url }).catch(console.error);
             }
           }
 

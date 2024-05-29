@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
+import { UnstakingInfo, UnstakingStatus } from '@subwallet/extension-base/types';
 import { Avatar } from '@subwallet/extension-koni-ui/components';
 import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';

@@ -89,6 +89,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       <div className='body-container'>
         <div className='logo-container'>
           <Image
+            shape={'square'}
             src={'./images/subwallet/welcome-logo.png'}
             width={139}
           />

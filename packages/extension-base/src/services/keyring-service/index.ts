@@ -19,6 +19,7 @@ export class KeyringService {
   readonly addressesSubject = keyring.addresses.subject;
   public readonly accountSubject = keyring.accounts.subject;
   private beforeAccount: SubjectInfo = this.accountSubject.value;
+  private injected: boolean;
 
   readonly keyringStateSubject = new BehaviorSubject<KeyringState>({
     isReady: false,
@@ -27,6 +28,7 @@ export class KeyringService {
   });
 
   constructor (private eventService: EventService) {
+    this.injected = false;
     this.eventService.waitCryptoReady.then(() => {
       this.currentAccountStore.get('CurrentAccountInfo', (rs) => {
         rs && this.currentAccountSubject.next(rs);
@@ -144,9 +146,21 @@ export class KeyringService {
     } else if (Object.keys(afterAccounts).indexOf(currentAddress) === -1) {
       this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
     }
+
+    if (!this.injected) {
+      this.eventService.emit('inject.ready', true);
+      this.injected = true;
+    }
   }
 
-  public removeInjectAccounts (addresses: string[]) {
+  public removeInjectAccounts (_addresses: string[]) {
+    const addresses = _addresses.map((address) => {
+      try {
+        return keyring.getPair(address).address;
+      } catch (error) {
+        return address;
+      }
+    });
     const currentAddress = this.currentAccountSubject.value.address;
     const afterAccounts = Object.keys(this.accounts).filter((address) => (addresses.indexOf(address) < 0));
 
@@ -167,9 +181,22 @@ export class KeyringService {
     await new Promise<void>((resolve) => {
       setTimeout(() => {
         resolve();
-      }, 500);
+      }, 1500);
     });
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }
+  /* Reset */
+
+  /* Others */
+  removeNoneHardwareGenesisHash () {
+    const pairs = keyring.getPairs();
+
+    const needUpdatePairs = pairs.filter(({ meta: { genesisHash, isHardware } }) => !isHardware && genesisHash && genesisHash !== '');
+
+    needUpdatePairs.forEach((pair) => {
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: '' });
+    });
+  }
+  /* Others */
 }

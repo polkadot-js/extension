@@ -26,6 +26,8 @@ export const EDIT_UNLOCK_TYPE_MODAL = 'edit-unlock-type-modal';
 export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
+export const REMIND_BACKUP_SEED_PHRASE_MODAL = 'remind-backup-seed-phrase-modal';
+export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
 
 /* Campaign */
 export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
@@ -35,3 +37,20 @@ export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
 export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phrase-modal';
 /* Terms and Conditions */
+
+export const EARNING_INSTRUCTION_MODAL = 'earning-instruction-modal';
+export const EARNING_NOMINATION_MODAL = 'earning-nomination-modal';
+
+/* Swap */
+export const SWAP_SLIPPAGE_MODAL = 'swap-slippage-modal';
+export const SWAP_ALL_QUOTES_MODAL = 'swap-all-quotes-modal';
+export const SWAP_MORE_BALANCE_MODAL = 'swap-more-balance-modal';
+export const SWAP_CHOOSE_FEE_TOKEN_MODAL = 'swap-choose-fee-token-modal';
+export const SWAP_TERMS_OF_SERVICE_MODAL = 'swap-terms-of-service-modal';
+export const SWAP_IDLE_WARNING_MODAL = 'swap-idle-warning-modal';
+/* Swap */
+
+/* Announcement */
+export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
+export const EARNING_MIGRATION_MODAL = 'earning-migration-modal';
+/* Announcement */

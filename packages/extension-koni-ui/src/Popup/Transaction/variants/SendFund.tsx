@@ -2,24 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { AssetSetting, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals, _getOriginChainOfAsset, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
-import { HiddenInput } from '@subwallet/extension-koni-ui/components';
-import { AccountSelector } from '@subwallet/extension-koni-ui/components/Field/AccountSelector';
-import { AddressInput } from '@subwallet/extension-koni-ui/components/Field/AddressInput';
-import AmountInput from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { ChainSelector } from '@subwallet/extension-koni-ui/components/Field/ChainSelector';
-import { TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components/Field/TokenSelector';
-import { useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { useIsMantaPayEnabled } from '@subwallet/extension-koni-ui/hooks/account/useIsMantaPayEnabled';
+import { AccountSelector, AddressInput, AlertBox, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
+import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useIsMantaPayEnabled, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, formatBalance, isAccountAll, noop } from '@subwallet/extension-koni-ui/utils';
-import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
+import { findAccountByAddress, findNetworkJsonByGenesisHash, formatBalance, isAccountAll, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -211,13 +204,14 @@ const filterAccountFunc = (
 
 const hiddenFields: Array<keyof TransferParams> = ['chain'];
 const validateFields: Array<keyof TransferParams> = ['value', 'to'];
+const alertModalId = 'confirmation-alert-modal';
 
 const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   useSetCurrentPage('/transaction/send-fund');
   const { t } = useTranslation();
   const notification = useNotification();
 
-  const { defaultData, onDone, persistData } = useTransactionContext<TransferParams>();
+  const { defaultData, persistData } = useTransactionContext<TransferParams>();
   const { defaultSlug: sendFundSlug } = defaultData;
   const isFirstRender = useIsFirstRender();
 
@@ -234,26 +228,36 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const chain = useWatchTransaction('chain', form, defaultData);
   const asset = useWatchTransaction('asset', form, defaultData);
 
-  const { chainInfoMap, chainStateMap } = useSelector((root) => root.chainStore);
+  const assetInfo = useFetchChainAssetInfo(asset);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
+
+  const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
   const checkAction = usePreCheckAction(from, true, detectTranslate('The account you are using is {{accountTitle}}, you cannot send assets with it'));
   const isZKModeEnabled = useIsMantaPayEnabled(from);
 
+  const hideMaxButton = useMemo(() => {
+    const chainInfo = chainInfoMap[chain];
+
+    return !!chainInfo && !!assetInfo && _isChainEvmCompatible(chainInfo) && destChain === chain && _isNativeToken(assetInfo);
+  }, [chainInfoMap, chain, destChain, assetInfo]);
+
   const [loading, setLoading] = useState(false);
   const [isTransferAll, setIsTransferAll] = useState(false);
   const [, update] = useState({});
+  const [isFetchingMaxValue, setIsFetchingMaxValue] = useState(false);
   const [isBalanceReady, setIsBalanceReady] = useState(true);
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
-  const chainStatus = useMemo(() => chainStateMap[chain]?.connectionStatus, [chain, chainStateMap]);
+  const chainStatus = useMemo(() => chainStatusMap[chain]?.connectionStatus, [chain, chainStatusMap]);
 
   const handleTransferAll = useCallback((value: boolean) => {
     setForceUpdateMaxValue({});
     setIsTransferAll(value);
   }, []);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(onDone, handleTransferAll);
+  const { onError, onSuccess } = useHandleSubmitTransaction(handleTransferAll);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -315,6 +319,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
     if (!from || !chain || !destChain) {
       return Promise.resolve();
+    }
+
+    if (!isEthereumAddress(_recipientAddress)) {
+      const destChainInfo = chainInfoMap[destChain];
+      const addressPrefix = destChainInfo?.substrateInfo?.addressPrefix ?? 42;
+      const _addressOnChain = reformatAddress(_recipientAddress, addressPrefix);
+
+      if (_addressOnChain !== _recipientAddress) {
+        return Promise.reject(t('Recipient should be a valid {{networkName}} address', { replace: { networkName: destChainInfo.name } }));
+      }
     }
 
     const isOnChain = chain === destChain;
@@ -434,11 +448,11 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   // Submit transaction
   const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
-    const { asset, chain, destChain, from, to, value } = values;
+    const { asset, chain, destChain, from: _from, to, value } = values;
 
     let sendPromise: Promise<SWTransactionResponse>;
 
-    const account = findAccountByAddress(accounts, from);
+    const account = findAccountByAddress(accounts, _from);
 
     if (!account) {
       setLoading(false);
@@ -449,6 +463,10 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       return;
     }
+
+    const chainInfo = chainInfoMap[chain];
+    const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+    const from = reformatAddress(_from, addressPrefix);
 
     const isLedger = !!account.isHardware;
     const isEthereum = isEthereumAddress(account.address);
@@ -511,7 +529,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         })
       ;
     }, 300);
-  }, [accounts, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
+  }, [accounts, chainInfoMap, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -522,6 +540,36 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(value);
     }
   }, [maxTransfer]);
+
+  const onPreSubmit = useCallback(() => {
+    if (_isNativeToken(assetInfo)) {
+      const minAmount = _getTokenMinAmount(assetInfo);
+      const bnMinAmount = new BN(minAmount);
+
+      if (bnMinAmount.gt(BN_ZERO) && isTransferAll && chain === destChain) {
+        openAlert({
+          type: NotificationType.WARNING,
+          content: t('Transferring all will remove all assets on this network. Are you sure?'),
+          title: t('Pay attention!'),
+          okButton: {
+            text: t('Transfer'),
+            onClick: () => {
+              closeAlert();
+              form.submit();
+            }
+          },
+          cancelButton: {
+            text: t('Cancel'),
+            onClick: closeAlert
+          }
+        });
+
+        return;
+      }
+    }
+
+    form.submit();
+  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic
@@ -571,6 +619,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   useEffect(() => {
     let cancel = false;
 
+    setIsFetchingMaxValue(false);
+
     if (from && asset) {
       getMaxTransfer({
         address: from,
@@ -580,10 +630,16 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         destChain
       })
         .then((balance) => {
-          !cancel && setMaxTransfer(balance.value);
+          if (!cancel) {
+            setMaxTransfer(balance.value);
+            setIsFetchingMaxValue(true);
+          }
         })
         .catch(() => {
-          !cancel && setMaxTransfer('0');
+          if (!cancel) {
+            setMaxTransfer('0');
+            setIsFetchingMaxValue(true);
+          }
         })
         .finally(() => {
           if (!cancel) {
@@ -683,7 +739,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             <AddressInput
               addressPrefix={destChainNetworkPrefix}
               allowDomain={true}
-              chain={chain}
+              chain={destChain}
+              fitNetwork={true}
               label={t('Send to')}
               networkGenesisHash={destChainGenesisHash}
               placeholder={t('Account address')}
@@ -708,7 +765,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
               forceUpdateMaxValue={forceUpdateMaxValue}
               maxValue={maxTransfer}
               onSetMax={onSetMaxTransferable}
-              showMaxButton={true}
+              showMaxButton={!hideMaxButton}
               tooltip={t('Amount')}
               disabled={decimals === 0}
             />
@@ -721,14 +778,31 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
+        {
+          chain !== destChain && (
+            <div className={'__warning_message_cross_chain'}>
+              <AlertBox
+                description={t('Cross-chain transfer to an exchange (CEX) will result in loss of funds. Make sure the receiving address is not an exchange address.')}
+                title={t('Pay attention!')}
+                type={'warning'}
+              />
+            </div>
+          )
+        }
+        {
+          !!alertProps && (
+            <AlertModal
+              modalId={alertModalId}
+              {...alertProps}
+            />
+          )
+        }
       </TransactionContent>
       <TransactionFooter
         className={`${className} -transaction-footer`}
-        errors={[]}
-        warnings={[]}
       >
         <Button
-          disabled={!isBalanceReady}
+          disabled={!isBalanceReady || (isTransferAll ? !isFetchingMaxValue : false)}
           icon={(
             <Icon
               phosphorIcon={PaperPlaneTilt}
@@ -736,7 +810,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           )}
           loading={loading}
-          onClick={checkAction(form.submit, extrinsicType)}
+          onClick={checkAction(onPreSubmit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}
@@ -762,6 +836,10 @@ const SendFund = styled(_SendFund)(({ theme }) => {
 
     '.middle-item': {
       marginBottom: token.marginSM
+    },
+
+    '.__warning_message_cross_chain': {
+      marginTop: token.marginXS
     },
 
     '&.-transaction-content.-is-zero-balance': {

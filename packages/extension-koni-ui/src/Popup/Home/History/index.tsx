@@ -4,16 +4,18 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { quickFormatAddressToCompare } from '@subwallet/extension-base/utils';
 import { AccountSelector, BasicInputEvent, ChainSelector, EmptyList, FilterModal, HistoryItem, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { HISTORY_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DEFAULT_SESSION_VALUE, HISTORY_DETAIL_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainInfoWithState, useFilterModal, useHistorySelection, useSelector, useSetCurrentPage } from '@subwallet/extension-koni-ui/hooks';
 import { cancelSubscription, subscribeTransactionHistory } from '@subwallet/extension-koni-ui/messaging';
-import { ChainItemType, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
+import { ChainItemType, SessionStorage, ThemeProps, TransactionHistoryDisplayData, TransactionHistoryDisplayItem } from '@subwallet/extension-koni-ui/types';
 import { customFormatDate, findAccountByAddress, findNetworkJsonByGenesisHash, formatHistoryDate, isTypeStaking, isTypeTransfer } from '@subwallet/extension-koni-ui/utils';
 import { ButtonProps, Icon, ModalContext, SwIconProps, SwList, SwSubHeader } from '@subwallet/react-ui';
-import { Aperture, ArrowDownLeft, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
+import { Aperture, ArrowDownLeft, ArrowsLeftRight, ArrowUpRight, Clock, ClockCounterClockwise, Database, FadersHorizontal, Rocket, Spinner } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useParams } from 'react-router-dom';
@@ -33,12 +35,18 @@ const IconMap: Record<string, SwIconProps['phosphorIcon']> = {
   crowdloan: Rocket,
   nft: Aperture,
   processing: Spinner,
-  default: ClockCounterClockwise
+  default: ClockCounterClockwise,
+  timeout: ClockCounterClockwise,
+  swap: ArrowsLeftRight
 };
 
 function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
   if (item.status === ExtrinsicStatus.PROCESSING || item.status === ExtrinsicStatus.SUBMITTING) {
     return IconMap.processing;
+  }
+
+  if (item.status === ExtrinsicStatus.TIMEOUT) {
+    return IconMap.timeout;
   }
 
   if (item.type === ExtrinsicType.SEND_NFT) {
@@ -51,6 +59,10 @@ function getIcon (item: TransactionHistoryItem): SwIconProps['phosphorIcon'] {
 
   if (item.type === ExtrinsicType.STAKING_CLAIM_REWARD) {
     return IconMap.claim_reward;
+  }
+
+  if (item.type === ExtrinsicType.SWAP) {
+    return IconMap.swap;
   }
 
   if (isTypeStaking(item.type)) {
@@ -101,6 +113,11 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
     displayData.typeName = nameMap.processing;
   }
 
+  if (item.status === ExtrinsicStatus.TIMEOUT) {
+    displayData.className = '-processing';
+    displayData.typeName = nameMap.timeout;
+  }
+
   if (item.status === ExtrinsicStatus.SUBMITTING) {
     displayData.className = '-processing';
     displayData.typeName = nameMap.submitting;
@@ -112,6 +129,8 @@ function getDisplayData (item: TransactionHistoryItem, nameMap: Record<string, s
 const FILTER_MODAL_ID = 'history-filter-id';
 
 enum FilterValue {
+  ALL = 'all',
+  TOKENS = 'tokens',
   SEND = 'send',
   RECEIVED = 'received',
   NFT = 'nft',
@@ -120,6 +139,8 @@ enum FilterValue {
   CROWDLOAN = 'crowdloan',
   SUCCESSFUL = 'successful',
   FAILED = 'failed',
+  EARN = 'earn',
+  SWAP = 'swap'
 }
 
 function getHistoryItemKey (item: Pick<TransactionHistoryItem, 'chain' | 'address' | 'extrinsicHash' | 'transactionId'>) {
@@ -188,11 +209,13 @@ function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHist
 }
 
 const modalId = HISTORY_DETAIL_MODAL;
+const remindSeedPhraseModalId = REMIND_BACKUP_SEED_PHRASE_MODAL;
 const DEFAULT_ITEMS_COUNT = 20;
 const NEXT_ITEMS_COUNT = 10;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useSetCurrentPage('/home/history');
+  const dataContext = useContext(DataContext);
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const { accounts, currentAccount, isAllAccount } = useSelector((root) => root.accountState);
@@ -201,7 +224,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { language } = useSelector((root) => root.settings);
   const [loading, setLoading] = useState<boolean>(true);
   const [rawHistoryList, setRawHistoryList] = useState<TransactionHistoryItem[]>([]);
-
   const isActive = checkActive(modalId);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
@@ -237,12 +259,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           if (item.type === ExtrinsicType.CROWDLOAN) {
             return true;
           }
+        } else if (filter === FilterValue.SWAP) {
+          if (item.type === ExtrinsicType.SWAP) {
+            return true;
+          }
         } else if (filter === FilterValue.SUCCESSFUL) {
           if (item.status === ExtrinsicStatus.SUCCESS) {
             return true;
           }
         } else if (filter === FilterValue.FAILED) {
           if (item.status === ExtrinsicStatus.FAIL) {
+            return true;
+          }
+        } else if (filter === FilterValue.EARN) {
+          if (YIELD_EXTRINSIC_TYPES.includes(item.type)) {
             return true;
           }
         }
@@ -257,8 +287,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       { label: t('Send token'), value: FilterValue.SEND },
       { label: t('Receive token'), value: FilterValue.RECEIVED },
       { label: t('NFT transaction'), value: FilterValue.NFT },
-      { label: t('Stake transaction'), value: FilterValue.STAKE },
-      { label: t('Claim staking reward'), value: FilterValue.CLAIM },
+      { label: t('Earning transaction'), value: FilterValue.STAKE },
+      { label: t('Claim reward'), value: FilterValue.CLAIM },
+      { label: t('Swap'), value: FilterValue.SWAP },
       // { label: t('Crowdloan transaction'), value: FilterValue.CROWDLOAN }, // support crowdloan later
       { label: t('Successful'), value: FilterValue.SUCCESSFUL },
       { label: t('Failed'), value: FilterValue.FAILED }
@@ -273,38 +304,95 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     }, {} as Record<string, string>);
   }, [accounts]);
 
-  const typeNameMap: Record<string, string> = useMemo(() => ({
+  const typeNameMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'submitting' | 'processing' | 'timeout' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     submitting: t('Submitting...'),
     processing: t('Processing...'),
+    timeout: t('Time-out'),
     send: t('Send'),
     received: t('Receive'),
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Send token'),
+    [ExtrinsicType.TRANSFER_TOKEN]: t('Send token'),
+    [ExtrinsicType.TRANSFER_XCM]: t('Send token'),
     [ExtrinsicType.SEND_NFT]: t('NFT'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond'),
-    [ExtrinsicType.STAKING_UNBOND]: t('Unbond'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unstake'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw'),
+    [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compound'),
+    [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: t('Cancel compound'),
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.JOIN_YIELD_POOL]: t('Stake'),
+    [ExtrinsicType.MINT_QDOT]: t('Mint qDOT'),
+    [ExtrinsicType.MINT_SDOT]: t('Mint sDOT'),
+    [ExtrinsicType.MINT_LDOT]: t('Mint LDOT'),
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT'),
+    [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT'),
+    [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT'),
+    [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT'),
+    [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
+    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve'),
+    [ExtrinsicType.SWAP]: t('Swap'),
+    [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
 
-  const typeTitleMap: Record<string, string> = useMemo(() => ({
+  const typeTitleMap: Record<string, string> = useMemo((): Record<ExtrinsicType | 'default' | 'send' | 'received', string> => ({
     default: t('Transaction'),
     send: t('Send token'),
     received: t('Receive token'),
+    [ExtrinsicType.TRANSFER_BALANCE]: t('Send token'),
+    [ExtrinsicType.TRANSFER_TOKEN]: t('Send token'),
+    [ExtrinsicType.TRANSFER_XCM]: t('Send token'),
     [ExtrinsicType.SEND_NFT]: t('NFT transaction'),
     [ExtrinsicType.CROWDLOAN]: t('Crowdloan transaction'),
     [ExtrinsicType.STAKING_JOIN_POOL]: t('Stake transaction'),
     [ExtrinsicType.STAKING_LEAVE_POOL]: t('Unstake transaction'),
-    [ExtrinsicType.STAKING_BOND]: t('Bond transaction'),
-    [ExtrinsicType.STAKING_UNBOND]: t('Unbond transaction'),
+    [ExtrinsicType.STAKING_BOND]: t('Stake transaction'),
+    [ExtrinsicType.STAKING_UNBOND]: t('Unstake transaction'),
     [ExtrinsicType.STAKING_CLAIM_REWARD]: t('Claim Reward transaction'),
     [ExtrinsicType.STAKING_WITHDRAW]: t('Withdraw transaction'),
+    [ExtrinsicType.STAKING_POOL_WITHDRAW]: t('Withdraw transaction'),
     [ExtrinsicType.STAKING_CANCEL_UNSTAKE]: t('Cancel unstake transaction'),
-    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction')
+    [ExtrinsicType.STAKING_COMPOUNDING]: t('Compound transaction'),
+    [ExtrinsicType.STAKING_CANCEL_COMPOUNDING]: t('Cancel compound transaction'),
+    [ExtrinsicType.EVM_EXECUTE]: t('EVM Transaction'),
+    [ExtrinsicType.JOIN_YIELD_POOL]: t('Stake transaction'),
+    [ExtrinsicType.MINT_QDOT]: t('Mint qDOT transaction'),
+    [ExtrinsicType.MINT_SDOT]: t('Mint sDOT transaction'),
+    [ExtrinsicType.MINT_LDOT]: t('Mint LDOT transaction'),
+    [ExtrinsicType.MINT_VDOT]: t('Mint vDOT transaction'),
+    [ExtrinsicType.MINT_VMANTA]: t('Mint vMANTA transaction'),
+    [ExtrinsicType.MINT_STDOT]: t('Mint stDOT transaction'),
+    [ExtrinsicType.REDEEM_QDOT]: t('Redeem qDOT transaction'),
+    [ExtrinsicType.REDEEM_SDOT]: t('Redeem sDOT transaction'),
+    [ExtrinsicType.REDEEM_LDOT]: t('Redeem LDOT transaction'),
+    [ExtrinsicType.REDEEM_VDOT]: t('Redeem vDOT transaction'),
+    [ExtrinsicType.REDEEM_VMANTA]: t('Redeem vMANTA transaction'),
+    [ExtrinsicType.REDEEM_STDOT]: t('Redeem stDOT transaction'),
+    [ExtrinsicType.UNSTAKE_QDOT]: t('Unstake qDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VDOT]: t('Unstake vDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_VMANTA]: t('Unstake vMANTA tranasction'),
+    [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
+    [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
+    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve transaction'),
+    [ExtrinsicType.SWAP]: t('Swap transaction'),
+    [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);
 
   // Fill display data to history list
@@ -346,10 +434,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal]);
 
   const onCloseDetail = useCallback(() => {
+    const infoSession = Date.now();
+
+    const { remind, timeBackup, timeCalculate } = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
+
     inactiveModal(modalId);
+
+    if (infoSession - timeCalculate >= timeBackup && remind) {
+      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+    }
+
     setSelectedItem(null);
     setOpenDetailLink(false);
-  }, [inactiveModal]);
+  }, [activeModal, inactiveModal]);
 
   const onClickFilter = useCallback(() => {
     activeModal(FILTER_MODAL_ID);
@@ -361,10 +458,11 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
       if (existed) {
         setSelectedItem(existed);
+        inactiveModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
         activeModal(modalId);
       }
     }
-  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap]);
+  }, [activeModal, chain, extrinsicHashOrId, openDetailLink, historyMap, inactiveModal]);
 
   useEffect(() => {
     if (isActive) {
@@ -377,8 +475,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           return selected;
         }
       });
+      inactiveModal(remindSeedPhraseModalId);
     }
-  }, [isActive, historyMap]);
+  }, [isActive, historyMap, inactiveModal]);
 
   useEffect(() => {
     if (currentAccount?.address !== curAdr) {
@@ -627,6 +726,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     <>
       <PageWrapper
         className={`history ${className}`}
+        resolve={dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance', 'mantaPay'])}
       >
         <Layout.Base>
           <SwSubHeader

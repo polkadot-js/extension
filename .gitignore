@@ -16,6 +16,7 @@ tmp/
 .pnp.*
 cc-test-reporter
 lerna-debug.log*
+master-build-firefox.zip
 master-build.zip
 master-src.zip
 npm-debug.log*

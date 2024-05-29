@@ -43,7 +43,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     {
       icon: reloadIcon,
       disabled: loading,
-      size: 'sm',
+      size: 'xs',
       onClick: () => {
         setLoading(true);
         notify({
@@ -153,7 +153,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`nft_container ${className}`}
-      resolve={dataContext.awaitStores(['nft'])}
+      resolve={dataContext.awaitStores(['nft', 'balance'])}
     >
       <Layout.Base
         showSubHeader={true}
@@ -186,6 +186,13 @@ const NftCollections = styled(Component)<Props>(({ theme: { token } }: Props) =>
   return ({
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
+
+    '.ant-sw-sub-header-container': {
+      paddingBottom: token.paddingXS,
+      paddingTop: token.paddingXS,
+      minHeight: 56,
+      marginBottom: token.marginXS
+    },
 
     '&__inner': {
       display: 'flex',

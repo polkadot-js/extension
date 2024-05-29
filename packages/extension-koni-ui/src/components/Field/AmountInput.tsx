@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { getOS } from '@subwallet/extension-base/utils';
+import { osName } from '@subwallet/extension-base/utils';
 import { useForwardInputRef } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Input, InputRef } from '@subwallet/react-ui';
@@ -18,13 +18,14 @@ interface Props extends ThemeProps, BasicInputWrapper {
   onSetMax?: (value: boolean) => void;
   showMaxButton?: boolean;
   forceUpdateMaxValue?: object;
+  defaultInvalidOutputValue?: string;
 }
 
 const isValidInput = (input: string) => {
   return !(isNaN(parseFloat(input)) || !input.match(/^-?\d*(\.\d+)?$/));
 };
 
-export const getInputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
+export const getInputValuesFromString = (input: string, power: number): string => {
   const intValue = input.split('.')[0];
   let valueBigN = new BigN(isValidInput(intValue) ? intValue : '0');
 
@@ -33,9 +34,9 @@ export const getInputValuesFromString: (input: string, power: number) => string 
   return valueBigN.toFixed();
 };
 
-export const getOutputValuesFromString: (input: string, power: number) => string = (input: string, power: number) => {
+export const getOutputValuesFromString = (input: string, power: number, defaultInvalidOutputValue = ''): string => {
   if (!isValidInput(input)) {
-    return '';
+    return defaultInvalidOutputValue;
   }
 
   let valueBigN = new BigN(input);
@@ -57,7 +58,7 @@ interface ControlData {
   [cmdFirefoxKey]: boolean;
 }
 
-const isMacOs = getOS() === 'Mac OS';
+const isMacOs = osName === 'macOS';
 
 const isControlKey = (keycode: number) => {
   if (isMacOs) {
@@ -68,7 +69,7 @@ const isControlKey = (keycode: number) => {
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value } = props;
+  const { className, decimals, defaultInvalidOutputValue, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, showMaxButton, statusHelp, tooltip, value } = props;
 
   const { t } = useTranslation();
 
@@ -126,11 +127,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     setInputValue(value);
     setFirstTime(false);
 
-    const transformVal = getOutputValuesFromString(value, decimals);
+    const transformVal = getOutputValuesFromString(value, decimals, defaultInvalidOutputValue);
 
     onChange && onChange({ target: { value: transformVal } });
     onSetMax?.(false);
-  }, [decimals, getMaxLengthText, onChange, onSetMax]);
+  }, [decimals, defaultInvalidOutputValue, getMaxLengthText, onChange, onSetMax]);
 
   const onKeyDown = useCallback(
     (event: React.KeyboardEvent<Element>): void => {
@@ -186,7 +187,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     let amount = true;
 
     if (inputValue && !firstTime) {
-      const transformVal = getOutputValuesFromString(inputValue || '0', decimals);
+      const transformVal = getOutputValuesFromString(inputValue || '0', decimals, defaultInvalidOutputValue);
 
       setTimeout(() => {
         if (amount) {

@@ -9,6 +9,8 @@ import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData
 
 import { runCampaign } from './helpers';
 
+const targetEnvs = ['extension', 'mobile'];
+
 export default class CampaignService {
   readonly #state: KoniState;
 
@@ -17,15 +19,17 @@ export default class CampaignService {
   }
 
   public init () {
-    this.fetchCampaign()
-      .catch((e) => {
-        console.error('Error on fetch campaigns', e);
-      });
+    if (targetEnvs.includes(TARGET_ENV)) {
+      this.fetchCampaign()
+        .catch((e) => {
+          console.error('Error on fetch campaigns', e);
+        });
 
-    this.runCampaign()
-      .catch((e) => {
-        console.error('Error on run campaigns', e);
-      });
+      this.runCampaign()
+        .catch((e) => {
+          console.error('Error on run campaigns', e);
+        });
+    }
   }
 
   private async fetchCampaign () {
@@ -51,6 +55,7 @@ export default class CampaignService {
             endTime,
             startTime,
             isDone: false,
+            isArchive: false,
             campaignId,
             type: CampaignDataType.BANNER,
             buttons,
@@ -70,6 +75,7 @@ export default class CampaignService {
           endTime,
           startTime,
           isDone: false,
+          isArchive: false,
           campaignId,
           type: CampaignDataType.NOTIFICATION,
           buttons,
@@ -84,6 +90,28 @@ export default class CampaignService {
 
       if (!exists) {
         await this.#state.dbService.upsertCampaign(campaign);
+      } else {
+        const data: CampaignData = {
+          ...campaign,
+          isDone: exists.isDone
+        };
+
+        await this.#state.dbService.upsertCampaign(data);
+      }
+    }
+
+    const allCampaign = await this.#state.dbService.getAllCampaign();
+
+    for (const stored of allCampaign) {
+      const exists = campaigns.find((campaign) => campaign.slug === stored.slug);
+
+      if (!exists) {
+        const data: CampaignData = {
+          ...stored,
+          isArchive: true
+        };
+
+        await this.#state.dbService.upsertCampaign(data);
       }
     }
 

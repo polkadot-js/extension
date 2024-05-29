@@ -3,4 +3,4 @@
 
 export { default as nftParamsHandler } from './nftParamsHandler';
 
-export * from './staking';
+export * from './earning';

@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NominationPoolDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, Icon, Number, Web3Block } from '@subwallet/react-ui';
 import SwAvatar from '@subwallet/react-ui/es/sw-avatar';
 import CN from 'classnames';
@@ -15,19 +14,19 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = NominationPoolDataType & ThemeProps & {
   onClickMoreBtn: (e: SyntheticEvent) => void;
+  prefixAddress?: number
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, decimals, id, isProfitable, name, onClickMoreBtn, symbol } = props;
-
+  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, prefixAddress, symbol } = props;
   const { t } = useTranslation();
 
   return (
     <Web3Block
-      className={className}
+      className={CN(className, { 'is-crowded': isCrowded })}
       leftItem={
         <SwAvatar
-          identPrefix={42}
+          identPrefix={prefixAddress}
           size={40}
           theme={isEthereumAddress(address) ? 'ethereum' : 'polkadot'}
           value={address}
@@ -39,7 +38,7 @@ const Component: React.FC<Props> = (props: Props) => {
             <span>{name || `Pool #${id}`}</span>
           </div>
           <div className={'middle-item__bond-amount'}>
-            <span className={'middle-item__bond-amount-label'}>{t('Bonded:')}</span>
+            <span className={'middle-item__bond-amount-label'}>{t('Staked:')}</span>
             <Number
               className={'middle-item__bond-amount-number'}
               decimal={decimals}
@@ -81,6 +80,12 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
     padding: token.paddingSM,
     borderRadius: token.borderRadiusLG,
     background: token.colorBgSecondary,
+
+    '&.is-crowded': {
+      '.ant-web3-block-left-item, .ant-web3-block-middle-item, .right-item__select-icon': {
+        opacity: 0.4
+      }
+    },
 
     '.ant-web3-block-middle-item': {
       paddingRight: token.paddingXXS

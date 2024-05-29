@@ -28,10 +28,16 @@ export enum _ChainConnectionStatus {
 }
 
 export interface _ChainState {
+  slug: string;
+  active: boolean;
+  currentProvider: string;
+  manualTurnOff: boolean;
+}
+
+export interface _ChainApiStatus {
   slug: string,
-  active: boolean,
-  currentProvider: string,
-  connectionStatus: _ChainConnectionStatus
+  connectionStatus: _ChainConnectionStatus,
+  lastUpdated: number,
 }
 
 export interface _SubstrateDefaultFormatBalance {
@@ -156,7 +162,8 @@ export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
 
 export const _FUNGIBLE_CONTRACT_STANDARDS = [
   _AssetType.ERC20,
-  _AssetType.PSP22
+  _AssetType.PSP22,
+  _AssetType.GRC20
 ];
 
 export const _NFT_CONTRACT_STANDARDS = [

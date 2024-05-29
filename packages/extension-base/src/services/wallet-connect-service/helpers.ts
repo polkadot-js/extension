@@ -18,7 +18,7 @@ export const getWCId = (id: number): string => {
 export const convertConnectRequest = (request: SignClientTypes.EventArguments['session_proposal']): WalletConnectSessionRequest => {
   return {
     id: getWCId(request.id),
-    isInternal: false,
+    isInternal: true,
     request: request,
     url: request.params.proposer.metadata.url
   };
@@ -71,11 +71,7 @@ export const isWalletConnectRequest = (id?: string): boolean => {
 };
 
 export const isProposalExpired = (params: ProposalTypes.Struct): boolean => {
-  const timeNum = params.expiry;
-  const expireTime = new Date(timeNum > 10 ** 12 ? timeNum : timeNum * 1000);
-  const now = new Date();
-
-  return now.getTime() >= expireTime.getTime();
+  return params.expiryTimestamp * 1000 < Date.now();
 };
 
 export const isSupportWalletConnectNamespace = (namespace: string): boolean => {

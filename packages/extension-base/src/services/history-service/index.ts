@@ -133,7 +133,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
         Object.keys(rsMap).forEach((hash) => {
           // only push item that does not have same hash with another item
           if (!excludeTransferExtrinsicHash.includes(hash) && rsMap[hash].length === 1) {
-            result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+            const item = parseSubscanTransferData(address, rsMap[hash][0], chainInfo);
+
+            if (item) {
+              result.push(item);
+            }
           }
         });
 
@@ -153,7 +157,11 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
       Object.keys(rsMap).forEach((hash) => {
         // only push item that does not have same hash with another item
         if (rsMap[hash].length === 1) {
-          result.push(parseSubscanTransferData(address, rsMap[hash][0], chainInfo));
+          const item = parseSubscanTransferData(address, rsMap[hash][0], chainInfo);
+
+          if (item) {
+            result.push(item);
+          }
         }
       });
 
@@ -202,16 +210,21 @@ export class HistoryService implements StoppableServiceInterface, PersistDataSer
 
   // Insert history with check override origin 'app'
   async addHistoryItems (historyItems: TransactionHistoryItem[]) {
-    // Prevent override record with original is 'app'
-    const appRecords = this.historySubject.value.filter((item) => item.origin === 'app');
-    const excludeKeys = appRecords.map((item) => {
-      return `${item.chain}-${item.extrinsicHash}`;
-    });
+    const updateRecords: TransactionHistoryItem[] = [];
 
-    const updateRecords = historyItems.filter((item) => {
-      const key = `${item.chain}-${item.extrinsicHash}`;
+    const appItems = this.historySubject.value.filter((i) => i.origin === 'app');
 
-      return item.origin === 'app' || !excludeKeys.includes(key);
+    historyItems.forEach((item) => {
+      const needUpdateItem = appItems.find(
+        (item_) => item_.extrinsicHash === item.extrinsicHash && item.chain === item_.chain && item.address === item_.address);
+
+      if (needUpdateItem) {
+        updateRecords.push({ ...needUpdateItem, status: item.status });
+
+        return;
+      }
+
+      updateRecords.push(item);
     });
 
     await this.dbService.upsertHistory(updateRecords);

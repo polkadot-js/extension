@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetRef, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { CampaignData, ChainStakingMetadata, CrowdloanItem, MetadataItem, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
-import { BalanceItem } from '@subwallet/extension-base/types';
+import { BalanceItem, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
 import Dexie, { Table, Transaction } from 'dexie';
 
-const DEFAULT_DATABASE = 'SubWalletDB_v2';
+export const DEFAULT_DATABASE = 'SubWalletDB_v2';
 
 export interface DefaultChainDoc {
   chain: string
@@ -20,10 +20,15 @@ export interface DefaultDocWithAddressAndChain extends DefaultChainDoc, DefaultA
 
 export interface IBalance extends BalanceItem, DefaultAddressDoc {}
 export interface IChain extends _ChainInfo {
-  active: boolean,
-  currentProvider: string
+  active: boolean;
+  currentProvider: string;
+  manualTurnOff: boolean;
 }
 export interface ICrowdloanItem extends CrowdloanItem, DefaultAddressDoc, DefaultChainDoc {}
+export interface IKeyValue {
+  key: string,
+  value: string
+}
 export interface INft extends NftItem, DefaultAddressDoc {}
 export interface ITransactionHistoryItem extends TransactionHistoryItem, DefaultAddressDoc, DefaultChainDoc {}
 
@@ -39,6 +44,10 @@ export interface IMetadataItem extends MetadataItem, DefaultChainDoc {}
 export type IMantaPayLedger = any;
 
 export type ICampaign = CampaignData;
+
+export interface IAssetRef extends _AssetRef {
+  slug: string
+}
 
 export default class KoniDatabase extends Dexie {
   public price!: Table<PriceJson, object>;
@@ -58,8 +67,13 @@ export default class KoniDatabase extends Dexie {
   public chainStakingMetadata!: Table<ChainStakingMetadata, object>;
   public nominatorMetadata!: Table<NominatorMetadata, object>;
 
+  public yieldPoolInfo!: Table<YieldPoolInfo, object>;
+  public yieldPosition!: Table<YieldPositionInfo, object>;
+
   public mantaPay!: Table<IMantaPayLedger, object>;
   public campaign!: Table<ICampaign, object>;
+
+  public keyValue!: Table<IKeyValue, object>;
 
   private schemaVersion: number;
 
@@ -81,7 +95,6 @@ export default class KoniDatabase extends Dexie {
       stakings: '[chain+address+type], [chain+address], chain, address, type',
       transactions: '[chain+address+extrinsicHash], &[chain+address+extrinsicHash], chain, address, extrinsicHash, action',
       migrations: '[key+name]',
-
       chainStakingMetadata: '[chain+type], chain, type',
       nominatorMetadata: '[chain+address+type], [chain+address], chain, address, type'
     });
@@ -95,7 +108,16 @@ export default class KoniDatabase extends Dexie {
     });
 
     this.conditionalVersion(4, {
+      yieldPoolInfo: 'slug, chain, type',
+      yieldPosition: '[slug+chain+address], [address+slug], address, chain'
+    });
+
+    this.conditionalVersion(5, {
       campaign: 'slug'
+    });
+
+    this.conditionalVersion(6, {
+      keyValue: 'key'
     });
   }
 
@@ -113,5 +135,16 @@ export default class KoniDatabase extends Dexie {
     if (upgrade != null) {
       dexieVersion.upgrade(upgrade);
     }
+  }
+
+  // Singletons
+  public static instance: KoniDatabase;
+
+  public static getInstance (name?: string, schemaVersion?: number): KoniDatabase {
+    if (!KoniDatabase.instance) {
+      KoniDatabase.instance = new KoniDatabase(name, schemaVersion);
+    }
+
+    return KoniDatabase.instance;
   }
 }

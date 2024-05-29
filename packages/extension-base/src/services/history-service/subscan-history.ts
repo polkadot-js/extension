@@ -74,12 +74,16 @@ export function parseSubscanExtrinsicData (address: string, extrinsicItem: Extri
   }
 }
 
-export function parseSubscanTransferData (address: string, transferItem: TransferItem, chainInfo: _ChainInfo): TransactionHistoryItem {
+export function parseSubscanTransferData (address: string, transferItem: TransferItem, chainInfo: _ChainInfo): TransactionHistoryItem | null {
   const chainType = chainInfo.substrateInfo ? ChainType.SUBSTRATE : ChainType.EVM;
   const nativeDecimals = chainInfo.substrateInfo?.decimals || chainInfo.evmInfo?.decimals || 18;
   const nativeSymbol = chainInfo.substrateInfo?.symbol || chainInfo.evmInfo?.symbol || '';
   const from = autoFormatAddress(transferItem.from);
   const to = autoFormatAddress(transferItem.to);
+
+  if (!transferItem.from_account_display || !transferItem.to_account_display) {
+    return null;
+  }
 
   return {
     address,
@@ -87,14 +91,14 @@ export function parseSubscanTransferData (address: string, transferItem: Transfe
     time: transferItem.block_timestamp * 1000,
     chainType,
     from,
-    fromName: transferItem.from_account_display.display,
+    fromName: transferItem.from_account_display.display || transferItem.from_account_display.address,
     direction: isSameAddress(address, from) ? TransactionDirection.SEND : TransactionDirection.RECEIVED,
     blockNumber: transferItem.block_num,
     blockHash: '',
     chain: chainInfo.slug,
     type: ExtrinsicType.TRANSFER_BALANCE,
     to,
-    toName: transferItem.to_account_display.display,
+    toName: transferItem.to_account_display.display || transferItem.to_account_display.address,
     extrinsicHash: transferItem.hash,
     amount: {
       value: transferItem.amount,

@@ -1,8 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { StakingType, UnstakingStatus } from '@subwallet/extension-base/background/KoniTypes';
-import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
+import { StakingType } from '@subwallet/extension-base/background/KoniTypes';
+import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { UnstakingStatus } from '@subwallet/extension-base/types';
 import { ALL_KEY } from '@subwallet/extension-koni-ui/constants/common';
 import { getBondingOptions, getNominationPoolOptions } from '@subwallet/extension-koni-ui/messaging';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -49,7 +50,7 @@ export function getWaitingTime (waitingTime: number, status: UnstakingStatus, t:
       } // TODO: should not be shorten
     }) as string;
 
-    return t('Withdraw in {{time}}', { replace: { time: formattedWaitingTime } });
+    return t('Withdrawable in {{time}}', { replace: { time: formattedWaitingTime } });
   }
 }
 

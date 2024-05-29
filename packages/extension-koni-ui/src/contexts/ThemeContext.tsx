@@ -74,6 +74,30 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         }
       }
     },
+    '.__currency-value-detail-tooltip': {
+      paddingBottom: 0,
+
+      '.ant-tooltip-inner': {
+        padding: `${token.paddingXXS}px ${token.paddingXXS + 2}px`,
+        fontSize: token.fontSizeXS,
+        minHeight: 'auto',
+        minWidth: 'auto'
+      },
+
+      '.ant-tooltip-arrow': {
+        transform: 'translateX(-50%) translateY(100%) rotate(180deg) scaleX(0.5)'
+      }
+    },
+
+    '.__tooltip-overlay-remind': {
+      '.ant-tooltip-inner': {
+        fontSize: token.fontSizeXS,
+        lineHeight: token.lineHeightXS,
+        fontWeight: 700,
+        padding: `2px ${token.paddingXS}px`,
+        minHeight: 'auto'
+      }
+    },
 
     '.text-secondary': {
       color: token.colorTextSecondary
@@ -180,6 +204,23 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
     '.ant-notification-top': {
       '.ant-notification-notice': {
         marginInlineEnd: 'auto'
+      }
+    },
+    '.setting-item': {
+      '.ant-web3-block-left-item': {
+        paddingRight: 0
+      },
+      '.ant-web3-block': {
+        gap: token.sizeSM,
+        paddingLeft: token.paddingSM,
+        paddingRight: token.paddingXXS,
+        paddingTop: 6,
+        paddingBottom: 6,
+        flex: 1
+      },
+      '.ant-web3-block-right-item.ant-web3-block-right-item': {
+        marginRight: 0,
+        padding: 10
       }
     },
 

@@ -6,6 +6,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AccountType } from '@subwallet/extension-koni-ui/types';
+import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { findAccountByAddress } from '@subwallet/extension-koni-ui/utils/account/account';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { useMemo } from 'react';
@@ -47,15 +48,19 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
     let accountType: AccountType = 'ALL';
 
     if (address) {
+      if (isAccountAll(address)) {
+        return 'ALL';
+      }
+
       if (isEthereumAddress(address)) {
         accountType = 'ETHEREUM';
       } else {
         accountType = 'SUBSTRATE';
       }
-    } else {
-      if (currentAccount?.type === 'ethereum') {
+    } else if (currentAccount?.type) {
+      if (currentAccount.type === 'ethereum') {
         accountType = 'ETHEREUM';
-      } else if (currentAccount?.type === 'sr25519') {
+      } else if (['ed25519', 'sr25519', 'ecdsa'].includes(currentAccount.type)) {
         accountType = 'SUBSTRATE';
       }
     }

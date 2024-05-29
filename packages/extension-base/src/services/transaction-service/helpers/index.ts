@@ -39,7 +39,7 @@ const typeName = (type: SWTransaction['extrinsicType']) => {
     case ExtrinsicType.STAKING_BOND:
       return 'Bond';
     case ExtrinsicType.STAKING_UNBOND:
-      return 'Unbond';
+      return 'Unstake';
     case ExtrinsicType.STAKING_CLAIM_REWARD:
       return 'Claim reward';
     case ExtrinsicType.STAKING_WITHDRAW:
@@ -54,6 +54,8 @@ const typeName = (type: SWTransaction['extrinsicType']) => {
       return 'Cancel compounding';
     case ExtrinsicType.STAKING_POOL_WITHDRAW:
       return 'Withdraw pool';
+    case ExtrinsicType.JOIN_YIELD_POOL:
+      return 'Start earning';
     case ExtrinsicType.UNKNOWN:
     default:
       return 'unknown';

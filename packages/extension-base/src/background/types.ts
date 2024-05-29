@@ -51,6 +51,8 @@ export interface AccountJson extends AbstractAddressJson {
   isMasterAccount?: boolean;
   isMasterPassword?: boolean;
   isReadOnly?: boolean;
+  isSubWallet?: boolean; // import from SubWallet
+  pendingMigrate?: boolean;
   originGenesisHash?: string | null;
   parentAddress?: string;
   source?: string;
@@ -59,6 +61,7 @@ export interface AccountJson extends AbstractAddressJson {
 
 export interface AddressJson extends AbstractAddressJson {
   isRecent?: boolean;
+  recentChainSlugs?: string[];
 }
 
 // all Accounts and the address of the current Account
@@ -117,6 +120,7 @@ export interface SigningRequest extends ConfirmationRequestBase {
 // [MessageType]: [RequestType, ResponseType, SubscriptionMessageType?]
 export interface RequestSignatures extends KoniRequestSignatures {
   // private/internal requests, i.e. from a popup
+  'pri(ping)': [null, string];
   'pri(accounts.create.external)': [RequestAccountCreateExternal, boolean];
   'pri(accounts.create.hardware)': [RequestAccountCreateHardware, boolean];
   'pri(accounts.create.suri)': [RequestAccountCreateSuri, boolean];

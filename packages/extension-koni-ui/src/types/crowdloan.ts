@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _FundStatus } from '@subwallet/chain-list/types';
-import { CrowdloanParaState } from '@subwallet/extension-base/background/KoniTypes';
+import { CrowdloanParaState, CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import BigN from 'bignumber.js';
 
 export type CrowdloanValueInfo = {
@@ -36,6 +36,7 @@ export type _CrowdloanItemType = {
   relayChainName: string;
   contribution: {
     symbol: string;
+    currency?: CurrencyJson;
     value: BigN;
     convertedValue: BigN;
   };

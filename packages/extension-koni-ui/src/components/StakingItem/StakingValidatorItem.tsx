@@ -1,8 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ValidatorDataType } from '@subwallet/extension-koni-ui/hooks/screen/staking/useGetValidatorList';
-import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { Theme, ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
 import { formatBalance, toShort } from '@subwallet/extension-koni-ui/utils';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
 import { BackgroundIcon, Button, Icon, Web3Block } from '@subwallet/react-ui';
@@ -24,10 +23,11 @@ type Props = ThemeProps & {
   showUnSelectedIcon?: boolean;
   isNominated?: boolean;
   disabled?: boolean;
+  prefixAddress?: number
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showUnSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, prefixAddress, showUnSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
@@ -47,6 +47,7 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'validator-item-content'}
         leftItem={
           <SwAvatar
+            identPrefix={prefixAddress}
             isShowSubIcon={validatorInfo.isVerified}
             size={40}
             subIcon={<BackgroundIcon

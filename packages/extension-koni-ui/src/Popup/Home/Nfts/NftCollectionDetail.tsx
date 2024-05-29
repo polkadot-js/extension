@@ -33,8 +33,8 @@ const subHeaderRightButton = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+  const state = useLocation().state as INftCollectionDetail;
+  const { collectionInfo, nftList } = state;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -67,8 +67,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const handleOnClickNft = useCallback((state: INftItemDetail) => {
-    navigate('/home/nfts/item-detail', { state });
-  }, [navigate]);
+    navigate('/home/nfts/item-detail', { state: { ...state, nftList } });
+  }, [navigate, nftList]);
 
   const renderNft = useCallback((nftItem: NftItem) => {
     const routingParams = { collectionInfo, nftItem } as INftItemDetail;
@@ -177,6 +177,13 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     color: token.colorTextLight1,
     fontSize: token.fontSizeLG,
 
+    '.ant-sw-sub-header-container': {
+      paddingBottom: token.paddingXS,
+      paddingTop: token.paddingXS,
+      minHeight: 56,
+      marginBottom: token.marginXS
+    },
+
     '.header-content': {
       color: token.colorTextBase,
       fontWeight: token.fontWeightStrong,
@@ -193,7 +200,6 @@ const NftCollectionDetail = styled(Component)<Props>(({ theme: { token } }: Prop
     },
 
     '.nft_item_list__container': {
-      paddingTop: 14,
       flex: 1,
       height: '100%',
 

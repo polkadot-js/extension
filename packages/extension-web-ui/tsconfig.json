@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": "..",
+    "outDir": "./build",
+    "rootDir": "./src"
+  },
+  "references": [
+    { "path": "../extension-base" },
+    { "path": "../extension-chains" },
+    { "path": "../extension-dapp" },
+    { "path": "../extension-inject" },
+    { "path": "../extension-mocks" }
+  ]
+}

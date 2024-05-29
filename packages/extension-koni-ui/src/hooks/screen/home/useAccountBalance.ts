@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetPriceId, _getAssetSymbol, _getChainName, _getMultiChainAssetPriceId, _getMultiChainAssetSymbol, _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
 import { SubstrateBalance } from '@subwallet/extension-base/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
@@ -10,11 +10,13 @@ import { AssetRegistryStore, BalanceStore, ChainStore, PriceStore } from '@subwa
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
 import { AccountBalanceHookType } from '@subwallet/extension-koni-ui/types/hook';
 import BigN from 'bignumber.js';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
 const BN_0 = new BigN(0);
 const BN_10 = new BigN(10);
 const BN_100 = new BigN(100);
+const defaultCurrency = { label: 'United States Dollar', symbol: '$', isPrefix: true };
 
 export function getBalanceValue (balance: string, decimals: number): BigN {
   return new BigN(balance).div(BN_10.pow(decimals));
@@ -27,7 +29,8 @@ export function getConvertedBalanceValue (balance: BigN, price: number): BigN {
 function getDefaultBalanceItem (
   slug: string,
   symbol: string,
-  logoKey: string
+  logoKey: string,
+  currency?: CurrencyJson
 ): TokenBalanceItemType {
   return {
     free: {
@@ -52,6 +55,7 @@ function getDefaultBalanceItem (
     priceValue: 0,
     logoKey,
     slug,
+    currency: currency || defaultCurrency,
     symbol
   };
 }
@@ -59,7 +63,8 @@ function getDefaultBalanceItem (
 function getDefaultTokenGroupBalance (
   tokenGroupKey: string,
   assetRegistryMap: AssetRegistryStore['assetRegistry'],
-  multiChainAsset?: _MultiChainAsset
+  multiChainAsset?: _MultiChainAsset,
+  currency?: CurrencyJson
 ): TokenBalanceItemType {
   let symbol: string;
   let logoKey: string;
@@ -76,16 +81,17 @@ function getDefaultTokenGroupBalance (
     logoKey = asset.slug;
   }
 
-  return getDefaultBalanceItem(tokenGroupKey, symbol, logoKey.toLowerCase());
+  return getDefaultBalanceItem(tokenGroupKey, symbol, logoKey.toLowerCase(), currency);
 }
 
 function getDefaultTokenBalance (
   tokenSlug: string,
-  chainAsset: _ChainAsset
+  chainAsset: _ChainAsset,
+  currency?: CurrencyJson
 ): TokenBalanceItemType {
   const symbol = _getAssetSymbol(chainAsset);
 
-  return getDefaultBalanceItem(tokenSlug, symbol, chainAsset.slug.toLowerCase());
+  return getDefaultBalanceItem(tokenSlug, symbol, chainAsset.slug.toLowerCase(), currency);
 }
 
 function getAccountBalance (
@@ -97,7 +103,8 @@ function getAccountBalance (
   assetRegistryMap: AssetRegistryStore['assetRegistry'],
   multiChainAssetMap: AssetRegistryStore['multiChainAssetMap'],
   chainInfoMap: ChainStore['chainInfoMap'],
-  isShowZeroBalance: boolean
+  isShowZeroBalance: boolean,
+  currency?: CurrencyJson
 ): AccountBalanceHookType {
   const totalBalanceInfo: AccountBalanceHookType['totalBalanceInfo'] = {
     convertedValue: new BigN(0),
@@ -115,7 +122,7 @@ function getAccountBalance (
     const tokenGroupNotSupport: boolean[] = [];
     // note: multiChainAsset may be undefined due to tokenGroupKey may be a tokenSlug
     const multiChainAsset: _MultiChainAsset | undefined = multiChainAssetMap[tokenGroupKey];
-    const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, assetRegistryMap, multiChainAsset);
+    const tokenGroupBalance = getDefaultTokenGroupBalance(tokenGroupKey, assetRegistryMap, multiChainAsset, currency);
 
     tokenGroupMap[tokenGroupKey].forEach((tokenSlug) => {
       const chainAsset = assetRegistryMap[tokenSlug];
@@ -126,7 +133,9 @@ function getAccountBalance (
         return;
       }
 
-      const tokenBalance = getDefaultTokenBalance(tokenSlug, chainAsset);
+      const tokenBalance = getDefaultTokenBalance(tokenSlug, chainAsset, currency);
+
+      tokenBalance.currency = currency;
       const originChain = _getAssetOriginChain(chainAsset);
       const balanceItem = balanceMap[address]?.[tokenSlug];
       const decimals = _getAssetDecimals(chainAsset);
@@ -143,7 +152,6 @@ function getAccountBalance (
 
       tokenBalance.isReady = isTokenBalanceReady;
       tokenBalance.isNotSupport = isTokenNotSupport;
-
       tokenBalance.chain = originChain;
       tokenBalance.chainDisplayName = _getChainName(chainInfoMap[originChain]);
       tokenBalance.isTestnet = !_isAssetValuable(chainAsset);
@@ -247,6 +255,8 @@ function getAccountBalance (
     // make sure priceId exists and token group has monetary value
     // todo: check if multiChainAsset has monetary value too (after Nampc updates the background)
     if (!tokenGroupPriceId || (assetRegistryMap[tokenGroupKey] && !_isAssetValuable(assetRegistryMap[tokenGroupKey]))) {
+      tokenGroupBalance.currency = currency;
+
       if (!tokenGroupBalance.isNotSupport) {
         tokenGroupBalanceMap[tokenGroupKey] = tokenGroupBalance;
       }
@@ -293,15 +303,20 @@ function getAccountBalance (
   };
 }
 
-export default function useAccountBalance (tokenGroupMap: Record<string, string[]>): AccountBalanceHookType {
+export default function useAccountBalance (tokenGroupMap: Record<string, string[]>, showZeroBalance?: boolean): AccountBalanceHookType {
   const balanceMap = useSelector((state: RootState) => state.balance.balanceMap);
   const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
   const priceMap = useSelector((state: RootState) => state.price.priceMap);
   const price24hMap = useSelector((state: RootState) => state.price.price24hMap);
+  const currency = useSelector((state: RootState) => state.price.currencyData);
   const assetRegistryMap = useSelector((state: RootState) => state.assetRegistry.assetRegistry);
   const multiChainAssetMap = useSelector((state: RootState) => state.assetRegistry.multiChainAssetMap);
-  const isShowZeroBalance = useSelector((state: RootState) => state.settings.isShowZeroBalance);
+  const isShowZeroBalanceSetting = useSelector((state: RootState) => state.settings.isShowZeroBalance);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
+
+  const isShowZeroBalance = useMemo(() => {
+    return showZeroBalance || isShowZeroBalanceSetting;
+  }, [isShowZeroBalanceSetting, showZeroBalance]);
 
   return getAccountBalance(
     currentAccount?.address || '',
@@ -312,6 +327,7 @@ export default function useAccountBalance (tokenGroupMap: Record<string, string[
     assetRegistryMap,
     multiChainAssetMap,
     chainInfoMap,
-    isShowZeroBalance
+    isShowZeroBalance,
+    currency
   );
 }

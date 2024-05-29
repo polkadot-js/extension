@@ -3,6 +3,8 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BasicTxErrorType, StakingTxErrorType, TransactionErrorType, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { YieldValidationStatus } from '@subwallet/extension-base/types';
+import { SwapErrorType } from '@subwallet/extension-base/types/swap';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { t } from 'i18next';
 
@@ -80,8 +82,28 @@ const defaultErrorMap = {
     message: detectTranslate('Invalid. Inactive nomination pool'),
     code: undefined
   },
+  [StakingTxErrorType.CAN_NOT_GET_METADATA]: {
+    message: detectTranslate('Unable to fetch staking data. Re-enable current network and try again'),
+    code: undefined
+  },
   [TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT]: {
     message: detectTranslate('Receiver is not enough existential deposit'),
+    code: undefined
+  },
+  [YieldValidationStatus.NOT_ENOUGH_FEE]: {
+    message: detectTranslate('Insufficient balance'),
+    code: undefined
+  },
+  [YieldValidationStatus.NOT_ENOUGH_MIN_JOIN_POOL]: {
+    message: detectTranslate('Not enough min earning amount'),
+    code: undefined
+  },
+  [SwapErrorType.QUOTE_TIMEOUT]: {
+    message: detectTranslate('Quote timeout'),
+    code: undefined
+  },
+  [SwapErrorType.INVALID_RECIPIENT]: {
+    message: detectTranslate('Invalid recipient'),
     code: undefined
   }
 } as Record<TransactionErrorType, { message: string, code?: number }>;

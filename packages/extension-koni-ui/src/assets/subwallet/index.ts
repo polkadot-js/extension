@@ -13,7 +13,12 @@ const SwLogosMap: Record<string, string> = {
   onramper: DefaultLogosMap.onramper,
   moonpay: DefaultLogosMap.moonpay,
   banxa: DefaultLogosMap.banxa,
-  coinbase: DefaultLogosMap.coinbase
+  coinbase: DefaultLogosMap.coinbase,
+  stellaswap: DefaultLogosMap.stellaswap,
+  chain_flip_mainnet: DefaultLogosMap.chain_flip,
+  chain_flip_testnet: DefaultLogosMap.chain_flip,
+  hydradx_mainnet: DefaultLogosMap.hydradx,
+  hydradx_testnet: DefaultLogosMap.hydradx
 };
 
 export default SwLogosMap;

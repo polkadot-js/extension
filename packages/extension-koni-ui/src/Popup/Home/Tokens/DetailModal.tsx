@@ -137,16 +137,17 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
 
   const symbol = currentTokenInfo?.symbol || '';
 
+  const filteredItems = useMemo(() => {
+    return accountItems.filter((item) => {
+      return new BigN(item.free).plus(item.locked).gt(0);
+    });
+  }, [accountItems]);
+
   useEffect(() => {
     if (!isActive) {
       form?.resetFields();
     }
   }, [form, isActive]);
-
-  const filteredItems = accountItems
-    .filter((item) => {
-      return new BigN(item.free).gt(0);
-    });
 
   return (
     <SwModal

@@ -4,6 +4,8 @@
 export interface SubscanRequest<T> {
   id: number,
   retry: number, // retry < 1 not start, retry === 0 start, retry > 0 number of retry
+  /** Serve smaller first  */
+  ordinal: number,
   status: 'pending' | 'running',
   run: () => Promise<any>;
   resolve: (value: any) => T;
@@ -59,9 +61,13 @@ export interface ExtrinsicItem {
   block_timestamp: number,
   extrinsic_index: string,
   call_module_function: string,
+  /** Need be called from another api */
   params: string,
+  /** Deprecated */
   account_id: string,
+  /** Deprecated */
   account_index: string,
+  /** Deprecated */
   signature: string,
   call_module: string,
   nonce: number,
@@ -69,6 +75,7 @@ export interface ExtrinsicItem {
   success: boolean,
   fee: string,
   fee_used: string,
+  /** Deprecated */
   from_hex: string,
   tip: string,
   finalized: boolean,
@@ -190,4 +197,26 @@ export interface TransfersListResponse {
 export type RequestBlockRange = {
   from: number | null,
   to: number | null
+}
+
+export interface RewardHistoryItem {
+  block_num: number;
+  extrinsic_idx: number;
+  stash: string;
+  account: string;
+  module_id: string;
+  event_id: string;
+  event_method: string;
+  params: string;
+  extrinsic_hash: string;
+  event_idx: number;
+  amount: string;
+  block_timestamp: number;
+  event_index: string;
+  extrinsic_index: string;
+}
+
+export interface RewardHistoryListResponse {
+  count: number,
+  list: null | RewardHistoryItem[]
 }

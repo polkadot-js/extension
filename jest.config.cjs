@@ -1,15 +1,16 @@
 // Copyright 2019-2022 @subwallet/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-const config = require('@polkadot/dev/config/jest.cjs');
+const {extraGlobals, ...config} = require('@polkadot/dev/config/jest.cjs');
 
 module.exports = {
   ...config,
+  sandboxInjectedGlobals: config['extraGlobals'],
   modulePathIgnorePatterns: [
     ...config.modulePathIgnorePatterns
   ],
   moduleNameMapper: {
-    '@subwallet/extension-(base|chains|compat-metamask|dapp|inject|mocks|koni-base|koni-ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
+    '@subwallet/extension-(base|chains|compat-metamask|dapp|inject|mocks|koni-base|koni-ui|web-ui)(.*)$': '<rootDir>/packages/extension-$1/src/$2',
     // eslint-disable-next-line sort-keys
     '@subwallet/extension-koni(.*)$': '<rootDir>/packages/extension-koni/src/$1',
     '\\.(css|less)$': 'empty/object',

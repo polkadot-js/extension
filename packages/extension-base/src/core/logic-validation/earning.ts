@@ -38,9 +38,10 @@ export function _handleDisplayInsufficientEarningError (error: Error, availableB
   if (bnAvailableBalance.lte(minJoinPool)) {
     return {
       title: 'Insufficient balance',
-      message: 'You don\'t have enough {{symbol}} ({{chain}}), make sure your available balance is higher than {{minJoinPool}} {{symbol}}'
+      message: 'You don\'t have enough {{symbol}} ({{chain}}) to stake, make sure your available balance is higher than {{minJoinPool}} {{symbol}}'
     };
   }
+
 
   return {
     title: 'Insufficient balance',

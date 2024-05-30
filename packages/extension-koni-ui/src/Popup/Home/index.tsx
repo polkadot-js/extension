@@ -11,7 +11,7 @@ import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType,
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect, useMemo } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
 import { useLocation } from 'react-router-dom';
@@ -36,6 +36,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
   const banners = useGetBannerByScreen('home');
+  const remindBackUpShowed = useRef<boolean>(false);
 
   const firstBanner = useMemo((): CampaignBanner | undefined => banners[0], [banners]);
 
@@ -69,15 +70,19 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [activeModal, firstBanner, location]);
 
   useEffect(() => {
-    const infoSession = Date.now();
+    // Run remind backup seed phrase one time
+    if (!remindBackUpShowed.current) {
+      const infoSession = Date.now();
 
-    const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
+      const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
 
-    if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup &&
-      sessionLatest.remind &&
-      (isFromIgnorePage?.from !== historyPageIgnoreRemind)) {
-      inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
-      activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+      if (infoSession - sessionLatest.timeCalculate > sessionLatest.timeBackup &&
+        sessionLatest.remind &&
+        (isFromIgnorePage?.from !== historyPageIgnoreRemind)) {
+        inactiveModal(HOME_CAMPAIGN_BANNER_MODAL);
+        activeModal(REMIND_BACKUP_SEED_PHRASE_MODAL);
+        remindBackUpShowed.current = true;
+      }
     }
   }, [activeModal, inactiveModal, location, sessionLatest]);
 

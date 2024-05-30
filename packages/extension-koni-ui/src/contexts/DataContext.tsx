@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ping } from '@subwallet/extension-koni-ui/messaging';
 import { persistor, store, StoreName } from '@subwallet/extension-koni-ui/stores';
 import { getMissionPoolData, subscribeAccountsData, subscribeAddressBook, subscribeAssetLogoMaps, subscribeAssetRegistry, subscribeAssetSettings, subscribeAuthorizeRequests, subscribeAuthUrls, subscribeBalance, subscribeBuyServices, subscribeBuyTokens, subscribeChainInfoMap, subscribeChainLogoMaps, subscribeChainStakingMetadata, subscribeChainStateMap, subscribeChainStatusMap, subscribeConfirmationRequests, subscribeConnectWCRequests, subscribeCrowdloan, subscribeKeyringState, subscribeMantaPayConfig, subscribeMantaPaySyncingState, subscribeMetadataRequests, subscribeMultiChainAssetMap, subscribeNftCollections, subscribeNftItems, subscribePrice, subscribeProcessingCampaign, subscribeRewardHistory, subscribeSigningRequests, subscribeStaking, subscribeStakingNominatorMetadata, subscribeStakingReward, subscribeSwapPairs, subscribeTransactionRequests, subscribeTxHistory, subscribeUiSettings, subscribeWalletConnectSessions, subscribeWCNotSupportRequests, subscribeXcmRefMap, subscribeYieldMinAmountPercent, subscribeYieldPoolInfo, subscribeYieldPositionInfo, subscribeYieldReward } from '@subwallet/extension-koni-ui/stores/utils';
 import Bowser from 'bowser';
@@ -184,6 +185,8 @@ export function initBasicData () {
 export const DataContext = React.createContext(_DataContext);
 
 export const DataContextProvider = ({ children }: DataContextProviderProps) => {
+  ping().catch(console.error);
+
   // Init basic data
   initBasicData();
 

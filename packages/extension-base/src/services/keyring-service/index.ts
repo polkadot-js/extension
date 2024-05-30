@@ -186,4 +186,17 @@ export class KeyringService {
     this.updateKeyringState();
     this.currentAccountSubject.next({ address: ALL_ACCOUNT_KEY, currentGenesisHash: null });
   }
+  /* Reset */
+
+  /* Others */
+  removeNoneHardwareGenesisHash () {
+    const pairs = keyring.getPairs();
+
+    const needUpdatePairs = pairs.filter(({ meta: { genesisHash, isHardware } }) => !isHardware && genesisHash && genesisHash !== '');
+
+    needUpdatePairs.forEach((pair) => {
+      keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: '' });
+    });
+  }
+  /* Others */
 }

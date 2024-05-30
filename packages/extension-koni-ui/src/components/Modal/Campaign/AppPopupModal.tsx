@@ -132,10 +132,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AppPopupModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.ant-sw-modal-content': {
-      paddingTop: token.paddingXXS,
-      borderRadius: `${token.borderRadiusXL}px ${token.borderRadiusXL}px 0 0`
-    }
   };
 });
 

@@ -3,7 +3,7 @@
 
 import { APP_POPUP_MODAL, SHOW_APP_POPUP } from '@subwallet/extension-koni-ui/constants';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useLocalStorage } from 'usehooks-ts';
 
 import AppPopupModal from '../components/Modal/Campaign/AppPopupModal';
@@ -26,11 +26,13 @@ export type AppPopupModalInfo = {
 export interface AppPopupModalType {
   openAppPopupModal: (data: AppPopupModalInfo) => void;
   hideAppPopupModal: () => void;
+  setData: (data: AppPopupModalInfo[]) => void;
 }
 
 export const AppPopupModalContext = React.createContext({} as AppPopupModalType);
 
 export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextProviderProps) => {
+  const [data, setData] = useState<AppPopupModalInfo[] | undefined>(undefined);
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const [showPopup, setShowPopup] = useLocalStorage<boolean>(SHOW_APP_POPUP, true);
@@ -47,24 +49,26 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
     }
   }, [activeModal, showPopup]);
 
+  useEffect(() => {
+    if (data && data.length) {
+      openAppPopupModal(data[0]);
+    }
+  }, [data, openAppPopupModal]);
+
   const hideAppPopupModal = useCallback(() => {
     setShowPopup(false);
     inactiveModal(APP_POPUP_MODAL);
-    setTimeout(
-      () =>
-        setAppPopupModal((prevState) => ({
-          ...prevState,
-          title: '',
-          message: '',
-          buttons: [],
-          externalButtons: <></>
-        })),
-      300
-    );
+    setAppPopupModal((prevState) => ({
+      ...prevState,
+      title: '',
+      message: '',
+      buttons: [],
+      externalButtons: <></>
+    }));
   }, [inactiveModal, setShowPopup]);
 
   return (
-    <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal }}>
+    <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal, setData }}>
       {children}
       <AppPopupModal
         buttons={appPopupModal.buttons || []}

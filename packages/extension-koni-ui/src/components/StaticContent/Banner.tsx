@@ -53,8 +53,8 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
 
   const onClickConfirmInstructionModal = useCallback(() => {
     inactiveModal(APP_INSTRUCTION_MODAL);
-    onPressBanner(bannerId)(data.action.url);
-  }, [bannerId, data.action.url, inactiveModal, onPressBanner]);
+    onPressBanner(bannerId)(data.action?.url);
+  }, [bannerId, data.action?.url, inactiveModal, onPressBanner]);
 
   return (
     <>

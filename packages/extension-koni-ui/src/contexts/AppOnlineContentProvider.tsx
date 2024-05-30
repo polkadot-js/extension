@@ -5,7 +5,7 @@ import { AllowedPath } from '@subwallet/extension-base/background/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
 import { getOutputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
-import { AppPopupModalContext } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
+import { AppPopupModalContext, AppPopupModalInfo } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
 import { useHandleAppBannerMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppBannerMap';
@@ -334,16 +334,18 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         });
 
         if (filteredPopupList && filteredPopupList.length) {
-          appPopupModalContext.openAppPopupModal({
+          const result: AppPopupModalInfo[] = filteredPopupList.map((item) => ({
             type: 'popup',
-            repeat: filteredPopupList[0].repeat,
-            title: filteredPopupList[0].info.name,
-            message: filteredPopupList[0].content || '',
-            buttons: filteredPopupList[0].buttons,
-            onPressBtn: (url) => {
-              handleButtonClick(`${filteredPopupList[0].position}-${filteredPopupList[0].id}`)('popup', url);
+            repeat: item.repeat,
+            title: item.info.name,
+            message: item.content || '',
+            buttons: item.buttons,
+            onPressBtn: (url?: string) => {
+              handleButtonClick(`${item.position}-${item.id}`)('popup', url);
             }
-          });
+          }));
+
+          appPopupModalContext.setData(result);
         }
       }
     },

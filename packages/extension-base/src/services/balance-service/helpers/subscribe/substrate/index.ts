@@ -388,6 +388,10 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
     try {
       const assetIndex = _getTokenOnChainAssetId(tokenInfo);
 
+      if (assetIndex === '-1') {
+        return undefined;
+      }
+
       // Get Token Balance
       return await substrateApi.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
         const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {

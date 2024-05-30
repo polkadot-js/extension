@@ -340,6 +340,10 @@ export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationCha
   return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
 }
 
+export function _isRelayChain (chainInfo: _ChainInfo) {
+  return _isSubstrateRelayChain(chainInfo) || _isPureEvmChain(chainInfo);
+}
+
 export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.chainType === _SubstrateChainType.RELAYCHAIN;
 }

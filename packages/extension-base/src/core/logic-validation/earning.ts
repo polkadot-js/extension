@@ -42,7 +42,6 @@ export function _handleDisplayInsufficientEarningError (error: Error, availableB
     };
   }
 
-
   return {
     title: 'Insufficient balance',
     message: 'You don\'t have enough {{symbol}} ({{chain}}) to pay gas fee. Lower your amount and try again'

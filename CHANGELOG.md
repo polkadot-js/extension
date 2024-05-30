@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.2.2
+Build date: May 30, 2024.
+
+Features & Update:
+- Remove support for Moonbeam on Polkadot vault (#3056)
+- Update UI for Earning position details (#3127)
+- Remove the logic that differentiates between Native tokens and Local tokens in case show sub-logo (#3075)
+- Show duplicate transaction history when transfer local token (#2613)
+
+Bugs fixed:
+- Fixed some bug related to MV3 (#3146)
+  - Timing logic to display seed phrase backup prompt popup
+  - Bug disconnect port
+
 ## 1.2.1
 Build date: May 28, 2024.
 

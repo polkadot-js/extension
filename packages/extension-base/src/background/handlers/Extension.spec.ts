@@ -45,7 +45,7 @@ describe('Extension', () => {
         origin: 'example.com',
         url: 'http://localhost:3000'
       };
-      await chrome.storage.local.set({ authUrls: JSON.stringify(authUrls) });
+      localStorage.setItem('authUrls', JSON.stringify(authUrls));
       state = new State();
       tabs = new Tabs(state);
 

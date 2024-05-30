@@ -59,7 +59,7 @@ interface SignRequest extends Resolver<ResponseSigning> {
   url: string;
 }
 
-const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
+const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
@@ -123,7 +123,7 @@ function extractMetadata (store: MetadataStore): void {
 }
 
 export default class State {
-  #authUrls: AuthUrls = {};
+  readonly #authUrls: AuthUrls = {};
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
@@ -156,28 +156,19 @@ export default class State {
   constructor (providers: Providers = {}) {
     this.#providers = providers;
 
-    // Via the transition from v2 - v3 manifest localStorage is not available in service workers.
-    // Therefore we invoke an IIFE so that we can set state in the constructor with async/await.
-    // This requires the `new State` call to now be `await new State`.
-    return (async (): Promise<State> => {
-      extractMetadata(this.#metaStore);
+    extractMetadata(this.#metaStore);
 
-      // retrieve previously set authorizations
-      const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
-      const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
-      const previousAuth = JSON.parse(authString) as AuthUrls;
+    // retrieve previously set authorizations
+    const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';
+    const previousAuth = JSON.parse(authString) as AuthUrls;
 
-      this.#authUrls = previousAuth;
+    this.#authUrls = previousAuth;
 
-      // retrieve previously set default auth accounts
-      const storageDefaultAuthAccounts: Record<string, string> = await chrome.storage.local.get(DEFAULT_AUTH_ACCOUNTS);
-      const defaultAuthString: string = storageDefaultAuthAccounts?.[DEFAULT_AUTH_ACCOUNTS] || '[]';
-      const previousDefaultAuth = JSON.parse(defaultAuthString) as string[];
+    // retrieve previously set default auth accounts
+    const defaultAuthString = localStorage.getItem(DEFAULT_AUTH_ACCOUNTS) || '[]';
+    const previousDefaultAuth = JSON.parse(defaultAuthString) as string[];
 
-      this.defaultAuthAccountSelection = previousDefaultAuth;
-
-      return this;
-    })() as unknown as State;
+    this.defaultAuthAccountSelection = previousDefaultAuth;
   }
 
   public get knownMetadata (): MetadataDef[] {
@@ -239,7 +230,7 @@ export default class State {
   }
 
   private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
-    const complete = async (authorizedAccounts: string[] = []) => {
+    const complete = (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
       this.#authUrls[this.stripUrl(url)] = {
@@ -250,21 +241,19 @@ export default class State {
         url
       };
 
-      await this.saveCurrentAuthList();
-      await this.updateDefaultAuthAccounts(authorizedAccounts);
+      this.saveCurrentAuthList();
+      this.updateDefaultAuthAccounts(authorizedAccounts);
       delete this.#authRequests[id];
       this.updateIconAuth(true);
     };
 
     return {
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      reject: async (error: Error): Promise<void> => {
-        await complete();
+      reject: (error: Error): void => {
+        complete();
         reject(error);
       },
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises
-      resolve: async ({ authorizedAccounts, result }: AuthResponse): Promise<void> => {
-        await complete(authorizedAccounts);
+      resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
+        complete(authorizedAccounts);
         resolve({ authorizedAccounts, result });
       }
     };
@@ -300,17 +289,17 @@ export default class State {
     this.updateIconAuth(true);
   }
 
-  private async saveCurrentAuthList () {
-    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(this.#authUrls) });
+  private saveCurrentAuthList () {
+    localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
   }
 
-  private async saveDefaultAuthAccounts () {
-    await chrome.storage.local.set({ [DEFAULT_AUTH_ACCOUNTS]: JSON.stringify(this.defaultAuthAccountSelection) });
+  private saveDefaultAuthAccounts () {
+    localStorage.setItem(DEFAULT_AUTH_ACCOUNTS, JSON.stringify(this.defaultAuthAccountSelection));
   }
 
-  public async updateDefaultAuthAccounts (newList: string[]) {
+  public updateDefaultAuthAccounts (newList: string[]) {
     this.defaultAuthAccountSelection = newList;
-    await this.saveDefaultAuthAccounts();
+    this.saveDefaultAuthAccounts();
   }
 
   private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
@@ -369,20 +358,20 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    withErrorLog(() => chrome.action.setBadgeText({ text }));
+    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();
     }
   }
 
-  public async removeAuthorization (url: string): Promise<AuthUrls> {
+  public removeAuthorization (url: string): AuthUrls {
     const entry = this.#authUrls[url];
 
     assert(entry, `The source ${url} is not known`);
 
     delete this.#authUrls[url];
-    await this.saveCurrentAuthList();
+    this.saveCurrentAuthList();
 
     return this.#authUrls;
   }
@@ -402,12 +391,12 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): Promise<void> {
+  public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
     authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
       this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
     });
 
-    await this.saveCurrentAuthList();
+    this.saveCurrentAuthList();
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {

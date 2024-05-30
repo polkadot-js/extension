@@ -46,8 +46,7 @@ describe('Extension', () => {
         url: 'http://localhost:3000'
       };
       await chrome.storage.local.set({ authUrls: JSON.stringify(authUrls) });
-      // eslint-disable-next-line @typescript-eslint/await-thenable
-      state = await new State();
+      state = new State();
       tabs = new Tabs(state);
 
       return new Extension(state);

@@ -116,7 +116,7 @@ export default class Extension {
     };
   }
 
-  private async accountsForget ({ address }: RequestAccountForget): Promise<boolean> {
+  private accountsForget ({ address }: RequestAccountForget): boolean {
     const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
 
     // cycle through authUrls and prepare the array of diff
@@ -128,12 +128,12 @@ export default class Extension {
       authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
     });
 
-    await this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
+    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
 
     // cycle through default account selection for auth and remove any occurrence of the account
     const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
 
-    await this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
+    this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
 
     keyring.forgetAccount(address);
 
@@ -212,8 +212,8 @@ export default class Extension {
     return true;
   }
 
-  private async authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
-    return await this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
+  private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
+    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
   private getAuthList (): ResponseAuthorizeList {
@@ -518,10 +518,8 @@ export default class Extension {
     return true;
   }
 
-  private async removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
-    const remAuth = await this.#state.removeAuthorization(url);
-
-    return { list: remAuth };
+  private removeAuthorization (url: string): ResponseAuthorizeList {
+    return { list: this.#state.removeAuthorization(url) };
   }
 
   private deleteAuthRequest (requestId: string): void {
@@ -547,7 +545,7 @@ export default class Extension {
         return this.getAuthList();
 
       case 'pri(authorize.remove)':
-        return await this.removeAuthorization(request as string);
+        return this.removeAuthorization(request as string);
 
       case 'pri(authorize.delete.request)':
         return this.deleteAuthRequest(request as string);
@@ -556,7 +554,7 @@ export default class Extension {
         return port && this.authorizeSubscribe(id, port);
 
       case 'pri(authorize.update)':
-        return await this.authorizeUpdate(request as RequestUpdateAuthorizedAccounts);
+        return this.authorizeUpdate(request as RequestUpdateAuthorizedAccounts);
 
       case 'pri(accounts.create.external)':
         return this.accountsCreateExternal(request as RequestAccountCreateExternal);

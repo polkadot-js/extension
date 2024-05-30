@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EIP155_SIGNING_METHODS, POLKADOT_SIGNING_METHODS, WalletConnectSigningMethod } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { isMobile } from '@subwallet/extension-base/utils';
+import { targetIsMobile } from '@subwallet/extension-base/utils';
 import { SignClientTypes } from '@walletconnect/types';
 
 export const PROJECT_ID_EXTENSION = '6da34c0b48164d27681924dd9a46d6be';
@@ -10,8 +10,8 @@ export const PROJECT_ID_MOBILE = '6da34c0b48164d27681924dd9a46d6be';
 export const RELAY_URL = 'wss://relay.walletconnect.com';
 
 export const DEFAULT_WALLET_CONNECT_OPTIONS: SignClientTypes.Options = {
-  logger: 'debug',
-  projectId: !isMobile ? PROJECT_ID_EXTENSION : PROJECT_ID_MOBILE,
+  logger: 'error',
+  projectId: targetIsMobile ? PROJECT_ID_MOBILE : PROJECT_ID_EXTENSION,
   relayUrl: RELAY_URL,
   metadata: {
     name: 'SubWallet',

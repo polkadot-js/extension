@@ -3,10 +3,9 @@
 
 const createConfig = require('./webpack.shared.cjs');
 
-module.exports = [createConfig({
+module.exports = createConfig({
   content: './src/content.ts',
-  page: './src/page.ts'
-}), createConfig({
-  background: ['./src/installation.ts', './src/background.ts'],
+  page: './src/page.ts',
+  background: ['./src/background-init.ts', './src/background.ts'],
   extension: './src/extension.ts'
-}, [], true)];
+});

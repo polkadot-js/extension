@@ -36,11 +36,11 @@ const alertTypeAndIconMap = {
 const Component: React.FC<Props> = (props: Props) => {
   const { cancelButton,
     className,
+    closable,
     content,
     modalId,
     okButton,
     title,
-    closable,
     type = NotificationType.INFO } = props;
 
   const { inactiveModal } = useContext(ModalContext);

@@ -49,7 +49,7 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
     }
   });
 
-  // inject6963EIP(evmProvider);
+  inject6963EIP(evmProvider);
 }
 
 export const eip6963ProviderInfo: EIP6963ProviderInfo = {

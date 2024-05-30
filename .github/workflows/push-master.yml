@@ -32,12 +32,22 @@ jobs:
         yarn install --immutable | grep -v 'YN0013'
         yarn ${{ matrix.step }}
 
-    - name: Upload to Build to Nextcloud
+    - name: Upload Build to Nextcloud
       id: nextcloud_upload
       uses: trympet/nextcloud-artifacts-action@v2
       with:
         name: 'master-build.zip'
         path: 'master-build.zip'
+        nextcloud-url: 'https://file.cdmteck.com'
+        nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
+        nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
+
+    - name: Upload Firefox Build to Nextcloud
+      id: nextcloud_upload_firefox
+      uses: trympet/nextcloud-artifacts-action@v2
+      with:
+        name: 'master-build-firefox.zip'
+        path: 'master-build-firefox.zip'
         nextcloud-url: 'https://file.cdmteck.com'
         nextcloud-username: ${{ secrets.NEXTCLOUD_USERNAME }}
         nextcloud-password: ${{ secrets.NEXTCLOUD_PASSWORD }}
@@ -68,4 +78,5 @@ jobs:
         description: |
           Master is completed.
           - Extension: ${{ steps.nextcloud_upload.outputs.SHAREABLE_URL }}
+          - Extension (Firefox): ${{ steps.nextcloud_upload_firefox.outputs.SHAREABLE_URL }}
           - Web-runner: ${{ steps.netlify_deployment.outputs.deploy-url }}

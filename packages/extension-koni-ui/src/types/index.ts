@@ -129,6 +129,7 @@ export * from './localStorage';
 export * from './metadata';
 export * from './missionPool';
 export * from './navigation';
+export * from './scanner';
 export * from './staking';
 export * from './transaction';
 export * from './walletConnect';

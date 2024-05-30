@@ -220,7 +220,6 @@ export * from './common';
 export * from './confirmation';
 export * from './connector';
 export * from './crowdloan';
-export * from './crowdloan';
 export * from './earning';
 export * from './form';
 export * from './history';
@@ -231,3 +230,4 @@ export * from './scanner';
 export * from './sort';
 export * from './transaction';
 export * from './walletConnect';
+// export * from './handleRemindBackupTime.ts'; This will load in create view => load direct file to get better performance

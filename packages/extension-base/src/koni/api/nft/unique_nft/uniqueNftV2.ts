@@ -3,7 +3,6 @@
 
 import { UNIQUE_SCAN_ENDPOINT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
-import fetch from 'cross-fetch';
 
 interface NftData {
   collection_id: number;

@@ -4,8 +4,7 @@
 import QrScannerErrorNotice from '@subwallet/extension-web-ui/components/Qr/Scanner/ErrorNotice';
 import { CONFIRMATION_SCAN_MODAL } from '@subwallet/extension-web-ui/constants/modal';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { SigData, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { ScannerResult } from '@subwallet/extension-web-ui/types/scanner';
+import { ScannerResult, SigData, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';

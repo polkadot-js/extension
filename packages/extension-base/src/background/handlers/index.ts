@@ -14,7 +14,8 @@ import Tabs from './Tabs.js';
 
 export { withErrorLog } from './helpers.js';
 
-const state = new State();
+// eslint-disable-next-line @typescript-eslint/await-thenable
+const state = await new State();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 

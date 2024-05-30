@@ -155,7 +155,7 @@ export function _isSubstrateChain (chainInfo: _ChainInfo) {
 }
 
 export function _getEvmChainId (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
+  return chainInfo.evmInfo?.evmChainId; // fallback to Ethereum
 }
 
 export function _getSubstrateParaId (chainInfo: _ChainInfo) {

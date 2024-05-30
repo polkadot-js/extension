@@ -11,7 +11,7 @@ import { useAccountBalance, useGetBannerByScreen, useGetChainSlugsByAccountType,
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { ModalContext } from '@subwallet/react-ui';
-import React, {useCallback, useContext, useEffect, useMemo, useRef} from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { Outlet } from 'react-router';
 import { useLocation } from 'react-router-dom';

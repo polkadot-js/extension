@@ -478,6 +478,10 @@ export function _isMantaZkAsset (chainAsset: _ChainAsset) {
   return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
 }
 
+export function _getChainExistentialDeposit (chainInfo: _ChainInfo): string {
+  return chainInfo?.substrateInfo?.existentialDeposit || '0';
+}
+
 export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {
   if (Object.keys(providers).length === 0) {
     return {

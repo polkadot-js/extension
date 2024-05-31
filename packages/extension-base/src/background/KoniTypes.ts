@@ -618,6 +618,7 @@ export interface BasicTokenInfo {
 
 export interface AmountData extends BasicTokenInfo {
   value: string;
+  metadata?: unknown;
 }
 
 export interface FeeData extends AmountData {
@@ -1154,7 +1155,8 @@ export interface ApiMap {
 export interface RequestFreeBalance {
   address: string,
   networkKey: string,
-  token?: string
+  token?: string,
+  extrinsicType?: ExtrinsicType
 }
 
 export interface RequestMaxTransferable {
@@ -2023,6 +2025,10 @@ export interface ResponseSubscribeHistory {
 }
 
 /* Campaign */
+
+/* Core types */
+export type _Address = string;
+export type _BalanceMetadata = unknown;
 
 // Use stringify to communicate, pure boolean value will error with case 'false' value
 export interface KoniRequestSignatures {

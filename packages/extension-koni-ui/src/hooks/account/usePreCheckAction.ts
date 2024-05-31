@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { ALL_STAKING_ACTIONS, isLedgerCapable, ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
+import { ALL_STAKING_ACTIONS, isLedgerCapable, isProductionMode, ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
 import { BLOCK_ACTION_LEDGER_NETWORKS, PredefinedLedgerNetwork } from '@subwallet/extension-koni-ui/constants/ledger';
 import { AccountSignMode } from '@subwallet/extension-koni-ui/types';
 import { getSignMode } from '@subwallet/extension-koni-ui/utils';
@@ -54,6 +54,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
         let block = false;
         let accountTitle = getAccountTypeTitle(account);
         let defaultMessage = detectTranslate('The account you are using is {{accountTitle}}, you cannot use this feature with it');
+        const isEthereumAccount = isEthereumAddress(account.address);
 
         switch (mode) {
           case AccountSignMode.READ_ONLY:
@@ -72,6 +73,13 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
           defaultMessage = detectTranslate('You are using a {{accountTitle}}. Earning is not supported with this account type');
         }
 
+        if (mode === AccountSignMode.QR) {
+          if (isEthereumAccount && isProductionMode) {
+            accountTitle = t('EVM QR signer account');
+            block = true;
+          }
+        }
+
         if (mode === AccountSignMode.LEDGER) {
           if (!isLedgerCapable) {
             notify({
@@ -84,7 +92,6 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
           }
 
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
-          const isEthereumAccount = isEthereumAddress(account.address);
 
           if (networkBlock.includes('*')) { // Block all network
             block = true;

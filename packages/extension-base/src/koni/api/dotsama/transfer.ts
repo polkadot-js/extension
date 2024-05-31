@@ -6,9 +6,23 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
-import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetMultilocation, _isBridgedToken, _isNativeToken, _isTokenGearSmartContract, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import {
+  _getContractAddressOfToken,
+  _getTokenOnChainAssetId,
+  _getTokenOnChainInfo,
+  _getXcmAssetMultilocation,
+  _isBridgedToken,
+  _isChainEvmCompatible,
+  _isNativeToken,
+  _isTokenGearSmartContract,
+  _isTokenTransferredByEvm,
+  _isTokenWasmSmartContract
+} from '@subwallet/extension-base/services/chain-service/utils';
+import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { getGRC20ContractPromise } from '@subwallet/extension-base/utils';
+import BigN from 'bignumber.js';
+import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { BN, u8aToHex } from '@polkadot/util';
@@ -115,4 +129,50 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   console.log(transfer?.toHex());
 
   return [transfer, transferAmount || value];
+};
+
+export const getTransferMockTxFee = async (address: string, chainInfo: _ChainInfo, tokenInfo: _ChainAsset, api: _SubstrateApi | _EvmApi): Promise<BigN> => {
+  try {
+    let estimatedFee;
+
+    if (_isChainEvmCompatible(chainInfo) && _isTokenTransferredByEvm(tokenInfo)) {
+      const web3 = api as _EvmApi;
+      const transaction: TransactionConfig = {
+        value: 0,
+        to: '0x0000000000000000000000000000000000000000', // null address
+        from: address
+      };
+      const gasLimit = await web3.api.eth.estimateGas(transaction);
+      const priority = await calculateGasFeeParams(web3, chainInfo.slug);
+
+      if (priority.baseGasFee) {
+        const maxFee = priority.maxFeePerGas;
+
+        estimatedFee = maxFee.multipliedBy(gasLimit);
+      } else {
+        estimatedFee = new BigN(priority.gasPrice).multipliedBy(gasLimit);
+      }
+    } else {
+      const substrateApi = api as _SubstrateApi;
+      const [mockTx] = await createTransferExtrinsic({
+        from: address,
+        networkKey: chainInfo.slug,
+        substrateApi,
+        to: address,
+        tokenInfo,
+        transferAll: true,
+        value: '1000000000000000000'
+      });
+
+      const paymentInfo = await mockTx?.paymentInfo(address);
+
+      estimatedFee = new BigN(paymentInfo?.partialFee?.toString() || '0'); // todo: should handle error case instead of setting fee to 0
+    }
+
+    return estimatedFee;
+  } catch (e) {
+    console.error('error mocking tx fee', e);
+
+    return new BigN(0);
+  }
 };

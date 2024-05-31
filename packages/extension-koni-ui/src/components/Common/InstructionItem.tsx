@@ -9,7 +9,7 @@ import styled from 'styled-components';
 interface Props extends ThemeProps{
   title: string;
   description: React.ReactNode;
-  iconInstruction: React.ReactNode;
+  iconInstruction?: React.ReactNode;
 }
 
 const Component: React.FC<Props> = (props: Props) => {
@@ -18,7 +18,7 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <>
       <div className={CN(className)}>
-        <div className='__item-left-part'>{iconInstruction}</div>
+        {!!iconInstruction && <div className='__item-left-part'>{iconInstruction}</div>}
         <div className='__item-right-part'>
           <div className={'__item-title'}>{title}</div>
           <div className={'__item-description'}>{description}</div>

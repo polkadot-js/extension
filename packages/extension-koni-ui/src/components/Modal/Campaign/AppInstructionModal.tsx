@@ -66,13 +66,15 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
           {data.map((_props, index) => (
             <InstructionItem
               description={_props.description}
-              iconInstruction={<BackgroundIcon
-                backgroundColor={_props.icon_color && convertHexColorToRGBA(_props.icon_color, 0.1)}
-                iconColor={_props.icon_color}
-                phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)}
-                size={'lg'}
-                weight={'fill'}
-              />}
+              iconInstruction={_props.icon
+                ? <BackgroundIcon
+                  backgroundColor={_props.icon_color && convertHexColorToRGBA(_props.icon_color, 0.1)}
+                  iconColor={_props.icon_color}
+                  phosphorIcon={getBannerButtonIcon(_props.icon as unknown as string)}
+                  size={'lg'}
+                  weight={'fill'}
+                />
+                : undefined}
               key={index}
               title={_props.title}
             />

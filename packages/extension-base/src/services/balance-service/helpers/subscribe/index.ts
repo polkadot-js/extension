@@ -78,16 +78,6 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
   }
 };
 
-// interface SubscribeBlanceOptions {
-//   addresses: string[];
-//   chains: string[];
-//   tokens: string[];
-//   chainInfoMap: Record<string, _ChainInfo>;
-//   substrateApiMap: Record<string, _SubstrateApi>;
-//   evmApiMap: Record<string, _EvmApi>;
-//   callback: (rs: BalanceItem[]) => void;
-// }
-
 // main subscription, use for multiple chains, multiple addresses and multiple tokens
 export function subscribeBalance (addresses: string[], chains: string[], tokens: string[], _chainAssetMap: Record<string, _ChainAsset>, _chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
   // Filter chain and token
@@ -129,23 +119,6 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
         evmApi
       });
     }
-
-    // if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
-    //   const fungibleTokensByChain = state.chainService.getFungibleTokensByChain(chainSlug, true);
-    //   const now = new Date().getTime();
-    //
-    //   Object.values(fungibleTokensByChain).map((token) => {
-    //     return {
-    //       tokenSlug: token.slug,
-    //       free: '0',
-    //       locked: '0',
-    //       state: APIItemState.READY,
-    //       timestamp: now
-    //     } as BalanceItem;
-    //   }).forEach(callback);
-    //
-    //   return undefined;
-    // }
 
     const substrateApi = await substrateApiMap[chainSlug].isReady;
 

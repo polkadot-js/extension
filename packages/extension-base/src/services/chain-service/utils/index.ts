@@ -163,7 +163,7 @@ export function _getSubstrateParaId (chainInfo: _ChainInfo) {
 }
 
 export function _getSubstrateRelayParent (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.relaySlug || '';
+  return chainInfo.substrateInfo?.relaySlug;
 }
 
 export function _getSubstrateGenesisHash (chainInfo: _ChainInfo) {

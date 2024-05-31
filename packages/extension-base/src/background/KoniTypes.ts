@@ -1151,11 +1151,6 @@ export interface ApiMap {
   evm: Record<string, _EvmApi>;
 }
 
-export interface SupportTransferResponse {
-  supportTransfer: boolean;
-  supportTransferAll: boolean;
-}
-
 export interface RequestFreeBalance {
   address: string,
   networkKey: string,

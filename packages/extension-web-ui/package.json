@@ -43,7 +43,7 @@
     "@subwallet/keyring": "^0.1.5",
     "@subwallet/react-ui": "^5.1.2-b77",
     "@subwallet/ui-keyring": "^0.1.5",
-    "@walletconnect/types": "^2.11.3",
+    "@walletconnect/types": "^2.13.1",
     "axios": "^1.2.1",
     "bip39": "^3.1.0",
     "boring-avatars": "^1.7.0",

@@ -162,14 +162,14 @@ export default class State {
   public async init () {
     // retrieve previously set authorizations
     const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
-    const authString = storageAuthUrls[AUTH_URLS_KEY] || '{}';
+    const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
     this.#authUrls = previousAuth;
 
     // retrieve previously set default auth accounts
     const storageDefaultAuthAccounts: Record<string, string> = await chrome.storage.local.get(DEFAULT_AUTH_ACCOUNTS);
-    const defaultAuthString: string = storageDefaultAuthAccounts[DEFAULT_AUTH_ACCOUNTS] || '[]';
+    const defaultAuthString: string = storageDefaultAuthAccounts?.[DEFAULT_AUTH_ACCOUNTS] || '[]';
     const previousDefaultAuth = JSON.parse(defaultAuthString) as string[];
 
     this.defaultAuthAccountSelection = previousDefaultAuth;

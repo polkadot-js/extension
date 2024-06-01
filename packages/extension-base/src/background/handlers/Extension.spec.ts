@@ -47,6 +47,7 @@ describe('Extension', () => {
       };
       localStorage.setItem('authUrls', JSON.stringify(authUrls));
       state = new State();
+      await state.init();
       tabs = new Tabs(state);
 
       return new Extension(state);

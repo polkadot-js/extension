@@ -116,7 +116,7 @@ export default class Extension {
     };
   }
 
-  private accountsForget ({ address }: RequestAccountForget): boolean {
+  private async accountsForget ({ address }: RequestAccountForget): Promise<boolean> {
     const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
 
     // cycle through authUrls and prepare the array of diff
@@ -128,12 +128,12 @@ export default class Extension {
       authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
     });
 
-    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
+    await this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
 
     // cycle through default account selection for auth and remove any occurrence of the account
     const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
 
-    this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
+    await this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
 
     keyring.forgetAccount(address);
 
@@ -212,8 +212,8 @@ export default class Extension {
     return true;
   }
 
-  private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
-    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
+  private async authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
+    return await this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
   private getAuthList (): ResponseAuthorizeList {
@@ -518,8 +518,10 @@ export default class Extension {
     return true;
   }
 
-  private removeAuthorization (url: string): ResponseAuthorizeList {
-    return { list: this.#state.removeAuthorization(url) };
+  private async removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
+    const remAuth = await this.#state.removeAuthorization(url);
+
+    return { list: remAuth };
   }
 
   private deleteAuthRequest (requestId: string): void {

@@ -7,7 +7,7 @@ import { isValidSubstrateAddress, reformatAddress } from '@subwallet/extension-b
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useChainChecker, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useChainChecker, useGetChainPrefixBySlug, useGetNftContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-web-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { convertFieldToError, convertFieldToObject, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
@@ -64,7 +64,7 @@ function Component ({ className = '', modalContent, onSubmitCallback }: Props): 
 
   const dataContext = useContext(DataContext);
 
-  const chainInfoMap = useGetContractSupportedChains();
+  const chainInfoMap = useGetNftContractSupportedChains();
 
   const [form] = Form.useForm<NftImportFormType>();
   const selectedChain = Form.useWatch('chain', form);

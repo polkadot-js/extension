@@ -4,10 +4,8 @@
 import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType, SwapFeeInfo, SwapPair, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
-import { formatNumber } from '@subwallet/extension-base/utils';
+import { SwapFeeInfo, SwapPair, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
@@ -53,6 +51,13 @@ export const MOCK_SWAP_FEE: SwapFeeInfo = {
   feeOptions: []
 };
 
+export const _PROVIDER_TO_SUPPORTED_PAIR_MAP: Record<string, string[]> = {
+  [SwapProviderId.HYDRADX_MAINNET]: [COMMON_CHAIN_SLUGS.HYDRADX],
+  [SwapProviderId.HYDRADX_TESTNET]: [COMMON_CHAIN_SLUGS.HYDRADX_TESTNET],
+  [SwapProviderId.CHAIN_FLIP_MAINNET]: [COMMON_CHAIN_SLUGS.POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM],
+  [SwapProviderId.CHAIN_FLIP_TESTNET]: [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM_SEPOLIA]
+};
+
 export function getSwapAlternativeAsset (swapPair: SwapPair): string | undefined {
   return swapPair?.metadata?.alternativeAsset as string;
 }
@@ -69,51 +74,4 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   const bnRate = bnFromAmount.div(bnToAmount);
 
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
-}
-
-export function getChainflipEarlyValidationError (error: SwapErrorType, metadata: ChainflipPreValidationMetadata): SwapError { // todo: support more providers
-  switch (error) {
-    case SwapErrorType.NOT_MEET_MIN_SWAP: {
-      const parsedMinSwapValue = formatNumber(metadata.minSwap.value, metadata.minSwap.decimals);
-      const message = `Amount too low. Increase your amount above ${parsedMinSwapValue} ${metadata.minSwap.symbol} and try again`;
-
-      return new SwapError(error, message);
-    }
-
-    case SwapErrorType.SWAP_EXCEED_ALLOWANCE: {
-      if (metadata.maxSwap) {
-        const parsedMaxSwapValue = formatNumber(metadata.maxSwap.value, metadata.maxSwap.decimals);
-
-        return new SwapError(error, `Amount too high. Lower your amount below ${parsedMaxSwapValue} ${metadata.maxSwap.symbol} and try again`);
-      } else {
-        return new SwapError(error, 'Amount too high. Lower your amount and try again');
-      }
-    }
-
-    case SwapErrorType.ASSET_NOT_SUPPORTED:
-      return new SwapError(error, 'This swap pair is not supported');
-    case SwapErrorType.UNKNOWN:
-      return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
-    case SwapErrorType.ERROR_FETCHING_QUOTE:
-      return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
-    default:
-      return new SwapError(error);
-  }
-}
-
-export function getEarlyHydradxValidationError (error: SwapErrorType, metadata: HydradxPreValidationMetadata): SwapError {
-  switch (error) {
-    case SwapErrorType.AMOUNT_CANNOT_BE_ZERO: {
-      return new SwapError(error, 'Amount too low. Increase your amount above 0 and try again');
-    }
-
-    case SwapErrorType.ASSET_NOT_SUPPORTED:
-      return new SwapError(error, 'This swap pair is not supported');
-    case SwapErrorType.UNKNOWN:
-      return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
-    case SwapErrorType.ERROR_FETCHING_QUOTE:
-      return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
-    default:
-      return new SwapError(error);
-  }
 }

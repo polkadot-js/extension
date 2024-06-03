@@ -7,12 +7,13 @@ import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType, RequestChangeFeeToken, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
+import { _getEarlyHydradxValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
@@ -33,6 +34,7 @@ export class HydradxHandler implements SwapBaseInterface {
   private tradeRouter: TradeRouter | undefined;
   private readonly isTestnet: boolean = true;
   public isReady = false;
+  providerSlug: SwapProviderId;
 
   constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     this.swapBaseHandler = new SwapBaseHandler({
@@ -41,6 +43,7 @@ export class HydradxHandler implements SwapBaseInterface {
       providerName: isTestnet ? 'HydraDX Testnet' : 'HydraDX',
       providerSlug: isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET
     });
+    this.providerSlug = isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET;
 
     this.isTestnet = isTestnet;
   }
@@ -94,7 +97,7 @@ export class HydradxHandler implements SwapBaseInterface {
     const bnAmount = new BigNumber(params.request.fromAmount);
     const fromAsset = this.chainService.getAssetBySlug(params.request.pair.from);
 
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
+    const fromAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
 
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
@@ -109,7 +112,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
-    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+    const alternativeAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
 
     if (bnAlternativeAssetBalance.lte(0)) {
@@ -287,7 +290,7 @@ export class HydradxHandler implements SwapBaseInterface {
     if (earlyValidation.error) {
       const metadata = earlyValidation.metadata as HydradxPreValidationMetadata;
 
-      return getEarlyHydradxValidationError(earlyValidation.error, metadata);
+      return _getEarlyHydradxValidationError(earlyValidation.error, metadata);
     }
 
     try {
@@ -381,7 +384,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const chainApi = await substrateApi.isReady;
 
-    const destinationAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
+    const destinationAssetBalance = await this.balanceService.getTransferableBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
     const xcmFee = params.process.totalFee[params.currentStep];
 
     const bnAmount = new BigNumber(params.quote.fromAmount);

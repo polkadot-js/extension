@@ -3,8 +3,7 @@
 
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceItem } from '@subwallet/extension-base/types';
-import { sumBN } from '@subwallet/extension-base/utils';
-import BN from 'bn.js';
+import BigN from 'bignumber.js';
 
 /**
  * Group the balance of {token} from {items} into {address}
@@ -16,34 +15,15 @@ import BN from 'bn.js';
 export const groupBalance = (items: BalanceItem[], address: string, token: string): BalanceItem => {
   const states = items.map((item) => item.state);
 
-  const result: BalanceItem = {
+  return {
     address,
     tokenSlug: token,
-    free: sumBN(items.map((item) => new BN(item.free))).toString(),
-    locked: sumBN(items.map((item) => new BN(item.locked))).toString(),
+    free: BigN.sum.apply(null, items.map((item) => item.free)).toFixed(),
+    locked: BigN.sum.apply(null, items.map((item) => item.locked)).toFixed(),
     state: states.every((item) => item === APIItemState.NOT_SUPPORT)
       ? APIItemState.NOT_SUPPORT
       : states.some((item) => item === APIItemState.READY)
         ? APIItemState.READY
         : APIItemState.PENDING
   };
-
-  for (const item of items) {
-    if (item.substrateInfo) {
-      if (!result.substrateInfo) {
-        result.substrateInfo = { ...item.substrateInfo };
-      } else {
-        const old = { ...result.substrateInfo };
-        const _new = { ...item.substrateInfo };
-
-        result.substrateInfo = {
-          reserved: new BN(old.reserved || '0').add(new BN(_new.reserved || '0')).toString(),
-          feeFrozen: new BN(old.feeFrozen || '0').add(new BN(_new.feeFrozen || '0')).toString(),
-          miscFrozen: new BN(old.miscFrozen || '0').add(new BN(_new.miscFrozen || '0')).toString()
-        };
-      }
-    }
-  }
-
-  return result;
 };

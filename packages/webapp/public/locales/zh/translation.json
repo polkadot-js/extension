@@ -314,8 +314,6 @@
   "Your metadata is out of date": "你的原始数据已过期",
   "Decimal": "DEL",
   "Spec Version": "特殊版本",
-  "This feature is not available for": "此功能不适用于",
-  "Please change to another account type.": "请替换其他账户类型。",
   "Back to home": "返回主页",
   "Signature request": "签名请求",
   "Validator": "验证者",
@@ -1252,5 +1250,9 @@
   "If you lose your seed phrases/private keys/JSON backup files/QR backup codes, your accounts can't be recovered and your assets are lost. Learn how to back up your accounts to secure your assets now.": "",
   "Update successful": "",
   "Your SubWallet extension is updated to Manifest V3!": "",
-  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": ""
+  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": "",
+  "EVM QR signer account": "",
+  "Substrate QR signer account": "",
+  "Invalid QR code. EVM networks are not supported": "",
+  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": ""
 }

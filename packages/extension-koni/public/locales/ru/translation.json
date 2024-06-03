@@ -646,7 +646,6 @@
   "Request does not exist": "Запрос не существует",
   "Unsupported action": "Неподдерживаемое действие",
   "Wrong signature. Please sign with the account you use in dApp": "Неверная подпись. Пожалуйста, подпишитесь аккаунтом, который вы используете в dApp",
-  "Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards": "Недостаточный стейк. Пожалуйста, внесите стейк как минимум в размере {{number}} {{tokenSymbol}} для получения вознаграждений",
   "You cannot select more than {{number}} validators for this network": "Вы не можете выбрать более {{number}} валидаторов для этой сети",
   "You cannot select more than {{number}} dApps for this network": "Вы не можете выбрать более {{number}} dApp для этой сети",
   "You cannot select more than {{number}} collators for this network": "Вы не можете выбрать более {{number}} коллаторов для этой сети",
@@ -1254,5 +1253,6 @@
   "EVM QR signer account": "",
   "Substrate QR signer account": "",
   "Invalid QR code. EVM networks are not supported": "",
-  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": ""
+  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
+  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": ""
 }

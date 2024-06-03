@@ -182,11 +182,11 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     return;
   }
 
-  if (!nativeTokenAvailable.metadata) {
-    validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
-
-    return;
-  }
+  // if (!nativeTokenAvailable.metadata) {
+  //   validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+  //
+  //   return;
+  // }
 
   const { edAsWarning, extrinsicType, isTransferAll, skipFeeValidation } = transactionInput;
 
@@ -213,7 +213,8 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE)); // todo: should be generalized and reused in all features
   }
 
-  const isNeedCheckRemainingBalance = !isTransferAll && extrinsicType === ExtrinsicType.TRANSFER_BALANCE && _canAccountBeReaped(nativeTokenAvailable.metadata as FrameSystemAccountInfo);
+  // todo: only system.pallet has metadata, we should add for other pallets and mechanisms as well
+  const isNeedCheckRemainingBalance = !isTransferAll && extrinsicType === ExtrinsicType.TRANSFER_BALANCE && nativeTokenAvailable.metadata && _canAccountBeReaped(nativeTokenAvailable.metadata as FrameSystemAccountInfo);
   const isRemainingBalanceValid = bnNativeTokenAvailable.minus(bnNativeTokenTransferAmount).minus(bnFee).lt(_getTokenMinAmount(nativeTokenInfo));
 
   if (isNeedCheckRemainingBalance && isRemainingBalanceValid) {

@@ -7,8 +7,7 @@ import { WALLET_CONNECT_CREATE_MODAL } from '@subwallet/extension-web-ui/constan
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useDefaultNavigate, useNotification, useOpenQrScanner } from '@subwallet/extension-web-ui/hooks';
 import { addConnection } from '@subwallet/extension-web-ui/messaging';
-import { FormCallbacks, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { ScannerResult } from '@subwallet/extension-web-ui/types/scanner';
+import { FormCallbacks, ScannerResult, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { validWalletConnectUri } from '@subwallet/extension-web-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, PageIcon, SwQrScanner } from '@subwallet/react-ui';
 import { SwModalProps } from '@subwallet/react-ui/es/sw-modal/SwModal';

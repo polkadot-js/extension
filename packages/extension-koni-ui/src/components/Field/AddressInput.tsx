@@ -4,11 +4,9 @@
 import { AbstractAddressJson } from '@subwallet/extension-base/background/types';
 import { CHAINS_SUPPORTED_DOMAIN, isAzeroDomain } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { AddressBookModal } from '@subwallet/extension-koni-ui/components';
 import { useForwardInputRef, useOpenQrScanner, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { resolveAddressToDomain, resolveDomainToAddress, saveRecentAccount } from '@subwallet/extension-koni-ui/messaging';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
+import { ScannerResult, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { findContactByAddress, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, Input, InputRef, ModalContext, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -19,6 +17,7 @@ import styled from 'styled-components';
 import { decodeAddress, isAddress, isEthereumAddress } from '@polkadot/util-crypto';
 
 import { Avatar } from '../Avatar';
+import { AddressBookModal } from '../Modal';
 import { QrScannerErrorNotice } from '../Qr';
 import { BasicInputWrapper } from './Base';
 

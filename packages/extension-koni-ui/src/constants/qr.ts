@@ -26,6 +26,7 @@ export const STANDARD_FRAME_SIZE = 2 ** 8;
 export const ETHEREUM_ID = new Uint8Array([0x45]);
 export const SUBSTRATE_ID = new Uint8Array([0x53]);
 export const CRYPTO_SR25519 = new Uint8Array([0x01]);
+export const CRYPTO_ETHEREUM = new Uint8Array([0x03]);
 export const CMD = {
   ETHEREUM: {
     SIGN_HASH: 0,

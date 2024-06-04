@@ -1060,6 +1060,10 @@ export default class KoniTabs {
       return this.redirectIfPhishing(url);
     }
 
+    if (type === 'pub(ping)') {
+      return Promise.resolve(true);
+    }
+
     // Wait for account ready and chain ready
     await Promise.all([this.#koniState.eventService.waitAccountReady, this.#koniState.eventService.waitChainReady]);
 
@@ -1087,9 +1091,6 @@ export default class KoniTabs {
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
-
-      case 'pub(ping)':
-        return Promise.resolve(true);
 
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();

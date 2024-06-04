@@ -224,6 +224,7 @@ function Component ({ compound,
 
           <Button
             block={true}
+            disabled={poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

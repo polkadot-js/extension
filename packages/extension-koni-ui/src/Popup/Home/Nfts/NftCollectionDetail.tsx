@@ -33,8 +33,8 @@ const subHeaderRightButton = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  const location = useLocation();
-  const { collectionInfo, nftList } = location.state as INftCollectionDetail;
+  const state = useLocation().state as INftCollectionDetail;
+  const { collectionInfo, nftList } = state;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -67,8 +67,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const handleOnClickNft = useCallback((state: INftItemDetail) => {
-    navigate('/home/nfts/item-detail', { state });
-  }, [navigate]);
+    navigate('/home/nfts/item-detail', { state: { ...state, nftList } });
+  }, [navigate, nftList]);
 
   const renderNft = useCallback((nftItem: NftItem) => {
     const routingParams = { collectionInfo, nftItem } as INftItemDetail;

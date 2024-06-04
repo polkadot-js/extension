@@ -30,3 +30,4 @@ export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
 export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';
 export const EARNING_MIGRATION_ANNOUNCEMENT = 'announcement.earning-migration';
 export const TIME_OUT_RECORD = 'general.time-out-record';
+export const LATEST_SESSION = 'general.latest-session';

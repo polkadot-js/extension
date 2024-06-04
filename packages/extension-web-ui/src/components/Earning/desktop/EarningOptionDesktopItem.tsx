@@ -2,8 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
+import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, Logo, Number } from '@subwallet/react-ui';
 import { PlusCircle } from 'phosphor-react';
 import React from 'react';
@@ -20,8 +22,9 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
-  const { balance, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const { balance, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
 
   return (
     <div
@@ -43,6 +46,12 @@ const Component: React.FC<Props> = (props: Props) => {
                 </span>)
               </span>
             )}
+            {isTestnet && <div className={'__item-tag-wrapper'}>
+              <NetworkTag
+                className={'__item-tag'}
+                type={isTestnet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />
+            </div>}
           </div>
 
           {
@@ -86,7 +95,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Number
             className={'__item-total-stake-value'}
             decimal={0}
-            prefix={'$'}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={totalValueStaked}
           />
         </div>
@@ -129,6 +138,13 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       gap: token.padding,
       alignItems: 'center'
     },
+    '.__item-tag': {
+      marginRight: 0,
+      'white-space': 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      minWidth: 70
+    },
 
     '.__item-info-wrapper': {
       display: 'flex',
@@ -142,7 +158,10 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       lineHeight: token.lineHeightHeading4,
       fontWeight: 600,
       color: token.colorTextLight1,
-      textAlign: 'center'
+      textAlign: 'center',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
     },
 
     '.__item-available-balance-wrapper': {
@@ -260,6 +279,10 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
       justifyContent: 'center',
       paddingTop: token.paddingLG,
       paddingBottom: token.padding
+    },
+    '.__item-tag-wrapper': {
+      display: 'flex',
+      alignItems: 'center'
     },
 
     '.__item-button-icon': {

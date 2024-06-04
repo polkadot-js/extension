@@ -4,18 +4,16 @@
   "homepage_url": "https://subwallet.app/",
   "name": "SubWallet - Polkadot Wallet",
   "short_name": "SubWallet",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "permissions": [
     "notifications",
     "storage",
     "tabs"
   ],
-  "minimum_chrome_version": "66",
   "background": {
-    "page": "background.html",
-    "persistent": true
+    "service_worker": "background.js"
   },
-  "browser_action": {
+  "action": {
     "default_title": "SubWallet",
     "default_popup": "index.html"
   },
@@ -24,11 +22,17 @@
       "js": [
         "content.js"
       ],
-      "matches": [
-        "http://*/*",
-        "https://*/*"
-      ],
+      "matches": ["file://*/*", "http://*/*", "https://*/*"],
       "run_at": "document_start",
+      "all_frames": true
+    },
+    {
+      "js": [
+        "page.js"
+      ],
+      "matches": ["file://*/*", "http://*/*", "https://*/*"],
+      "run_at": "document_start",
+      "world": "MAIN",
       "all_frames": true
     }
   ],
@@ -39,10 +43,14 @@
     "64": "images/icon-64.png",
     "128": "images/icon-128.png"
   },
-  "web_accessible_resources": [
-    "page.js",
-    "images/icons/__error__.png"
-  ],
-  "content_security_policy": "script-src 'self' blob: 'unsafe-eval' 'wasm-eval'; object-src 'self'",
+  "web_accessible_resources": [{
+    "resources": ["page.js", "images/icons/__error__.png"],
+    "use_dynamic_url": false,
+    "matches": ["file://*/*", "http://*/*", "https://*/*"]
+  }],
+  "minimum_chrome_version": "111",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
   "version": "0.0.1"
 }

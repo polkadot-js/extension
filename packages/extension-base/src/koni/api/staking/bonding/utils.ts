@@ -627,7 +627,7 @@ export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): 
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
   const number = formatNumber(bnMinStake.toString(), tokenInfo.decimals || 0, balanceFormatter);
 
-  return t('Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
+  return t('Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
 };
 
 export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number): string => {

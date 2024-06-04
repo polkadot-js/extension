@@ -42,7 +42,6 @@ const onExportJson = (jsonData: KeyringPairs$Json): (() => void) => {
 function Component ({ addresses, className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
-
   const { inactiveModal } = useContext(ModalContext);
 
   const [form] = Form.useForm<LoginFormState>();
@@ -96,16 +95,16 @@ function Component ({ addresses, className = '' }: Props): React.ReactElement<Pr
   return (
     <SwModal
       className={className}
-      id={EXPORT_ACCOUNTS_PASSWORD_MODAL}
-      onCancel={closeModal}
-      title={t('Confirmation')}
-      zIndex={9999}
       closeIcon={(
         <Icon
           phosphorIcon={CaretLeft}
           size='md'
         />
       )}
+      id={EXPORT_ACCOUNTS_PASSWORD_MODAL}
+      onCancel={closeModal}
+      title={t('Confirmation')}
+      zIndex={9999}
     >
       <div className='body-container'>
         <Form

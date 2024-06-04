@@ -3,15 +3,14 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { checkBalanceWithTransactionFee, checkSigningAccountForTransaction, checkSupportForTransaction, estimateFeeForTransaction } from '@subwallet/extension-base/core/logic-validation/transfer';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
-import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
@@ -27,15 +26,12 @@ import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/et
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { BN_ZERO } from '@subwallet/extension-base/utils/number';
 import keyring from '@subwallet/ui-keyring';
-import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
 import { t } from 'i18next';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, interval as rxjsInterval, Subscription } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
-import { Subscription } from 'web3-core-subscriptions';
-import { BlockHeader } from 'web3-eth';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { Signer, SignerResult } from '@polkadot/api/types';
@@ -44,7 +40,6 @@ import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
-import { _TRANSFER_CHAIN_GROUP } from '../chain-service/constants';
 import NotificationService from '../notification-service/NotificationService';
 
 export default class TransactionService {
@@ -93,145 +88,50 @@ export default class TransactionService {
     return [];
   }
 
-  public async generalValidate (validationInput: SWTransactionInput): Promise<SWTransactionResponse> {
-    const validation = {
-      ...validationInput,
-      errors: validationInput.errors || [],
-      warnings: validationInput.warnings || []
-    };
-    const { additionalValidator, address, chain, edAsWarning, extrinsicType, isTransferAll, transaction } = validation;
-
-    // Check duplicate transaction
-    validation.errors.push(...this.checkDuplicate(validationInput));
-
-    // Return unsupported error if not found transaction
-    if (!transaction) {
-      if (extrinsicType === ExtrinsicType.SEND_NFT) {
-        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED, t('This feature is not yet available for this NFT')));
-      } else {
-        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
-      }
-    }
-
+  public async validateTransaction (transactionInput: SWTransactionInput): Promise<SWTransactionResponse> {
     const validationResponse: SWTransactionResponse = {
+      ...transactionInput,
       status: undefined,
-      ...validation
+      errors: transactionInput.errors || [],
+      warnings: transactionInput.warnings || []
     };
 
-    // Estimate fee
-    const estimateFee: FeeData = {
-      symbol: '',
-      decimals: 0,
-      value: '',
-      tooHigh: false
-    };
+    const { additionalValidator, address, chain, extrinsicType } = validationResponse;
+
+    const transaction = transactionInput.transaction;
+
+    // Check duplicated transaction
+    validationResponse.errors.push(...this.checkDuplicate(transactionInput));
+
+    // Check support for transaction
+    checkSupportForTransaction(validationResponse, transaction);
 
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
     if (!chainInfo) {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Cannot find network')));
-    } else {
-      const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-      estimateFee.decimals = decimals;
-      estimateFee.symbol = symbol;
-
-      if (transaction) {
-        try {
-          if (isSubstrateTransaction(transaction)) {
-            estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
-          } else {
-            const web3 = this.state.chainService.getEvmApi(chain);
-
-            if (!web3) {
-              validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
-            } else {
-              const gasLimit = await web3.api.eth.estimateGas(transaction);
-
-              const priority = await calculateGasFeeParams(web3, chainInfo.slug);
-
-              if (priority.baseGasFee) {
-                const maxFee = priority.maxFeePerGas; // TODO: Need review
-
-                estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
-              } else {
-                estimateFee.value = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
-              }
-
-              estimateFee.tooHigh = priority.busyNetwork;
-            }
-          }
-        } catch (e) {
-          const error = e as Error;
-
-          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-          }
-
-          estimateFee.value = '0';
-        }
-      }
     }
 
-    validationResponse.estimateFee = estimateFee;
+    const evmApi = this.state.chainService.getEvmApi(chainInfo.slug);
+    const isNeedEvmApi = transaction && !isSubstrateTransaction(transaction) && !evmApi;
 
-    // Read-only account
-    const pair = keyring.getPair(address);
-
-    if (!pair) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Unable to find account')));
-    } else {
-      if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('This account is watch-only')));
-      }
+    if (isNeedEvmApi) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
     }
 
-    // Balance
-    const transferNative = validationResponse.transferNativeAmount || '0';
+    // Estimate fee for transaction
+    validationResponse.estimateFee = await estimateFeeForTransaction(validationResponse, transaction, chainInfo, evmApi);
+
+    // Check account signing transaction
+    checkSigningAccountForTransaction(validationResponse);
+
     const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(chain);
+    const nativeTokenAvailable = await this.state.balanceService.getTransferableBalance(address, chain, nativeTokenInfo.slug, extrinsicType);
 
-    const balance = await this.state.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
+    // Check available balance against transaction fee
+    checkBalanceWithTransactionFee(validationResponse, transactionInput, nativeTokenInfo, nativeTokenAvailable);
 
-    const existentialDeposit = nativeTokenInfo.minAmount || '0';
-
-    const feeNum = parseInt(estimateFee.value);
-    const balanceNum = parseInt(balance.value);
-    const edNum = parseInt(existentialDeposit);
-    const transferNativeNum = parseInt(transferNative);
-
-    if (!validationInput.skipFeeValidation) {
-      // TODO
-      if (!new BigN(balance.value).gt(0)) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-      }
-
-      if (transferNativeNum + feeNum > balanceNum) {
-        if (!isTransferAll) {
-          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-        } else {
-          if ([
-            ..._TRANSFER_CHAIN_GROUP.acala,
-            ..._TRANSFER_CHAIN_GROUP.genshiro,
-            ..._TRANSFER_CHAIN_GROUP.bitcountry,
-            ..._TRANSFER_CHAIN_GROUP.statemine
-          ].includes(chain)) { // Chain not have transfer all function
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-          }
-        }
-      }
-
-      if (!isTransferAll) {
-        if (balanceNum - (transferNativeNum + feeNum) < edNum) {
-          if (edAsWarning) {
-            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-          } else {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-          }
-        }
-      }
-    }
-
-    // Validate transaction with additionalValidator method
+    // Check additional validations
     additionalValidator && await additionalValidator(validationResponse);
 
     return validationResponse;
@@ -287,7 +187,7 @@ export default class TransactionService {
   }
 
   public async handleTransaction (transaction: SWTransactionInput): Promise<SWTransactionResponse> {
-    const validatedTransaction = await this.generalValidate(transaction);
+    const validatedTransaction = await this.validateTransaction(transaction);
     const stopByErrors = validatedTransaction.errors.length > 0;
     const stopByWarnings = validatedTransaction.warnings.length > 0 && !validatedTransaction.ignoreWarnings;
 
@@ -909,7 +809,7 @@ export default class TransactionService {
         maxFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxFeePerGas).toString(16)),
         maxPriorityFeePerGas: addHexPrefix(anyNumberToBN(transaction.maxPriorityFeePerGas).toString(16)),
         gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
-        to: transaction.to !== undefined ? transaction.to : '',
+        to: transaction.to,
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
         chainId: _getEvmChainId(chainInfo),
@@ -920,7 +820,7 @@ export default class TransactionService {
         nonce: transaction.nonce ?? 0,
         gasPrice: addHexPrefix(anyNumberToBN(transaction.gasPrice).toString(16)),
         gasLimit: addHexPrefix(anyNumberToBN(transaction.gas).toString(16)),
-        to: transaction.to !== undefined ? transaction.to : '',
+        to: transaction.to,
         value: addHexPrefix(anyNumberToBN(transaction.value).toString(16)),
         data: transaction.data,
         chainId: _getEvmChainId(chainInfo),
@@ -1003,7 +903,7 @@ export default class TransactionService {
       maxFeePerGas: anyNumberToBN(payload.maxFeePerGas).toNumber(),
       maxPriorityFeePerGas: anyNumberToBN(payload.maxPriorityFeePerGas).toNumber(),
       gasLimit: anyNumberToBN(payload.gas).toNumber(),
-      to: payload.to !== undefined ? payload.to : '',
+      to: payload.to,
       value: anyNumberToBN(payload.value).toNumber(),
       data: payload.data,
       chainId: payload.chainId
@@ -1041,10 +941,10 @@ export default class TransactionService {
 
             this.watchTransactionSubscribes[id] = new Promise<void>((resolve, reject) => {
               // eslint-disable-next-line prefer-const
-              let subscribe: Subscription<BlockHeader>;
+              let subscribe: Subscription;
 
               const onComplete = () => {
-                subscribe?.unsubscribe?.()?.then(console.debug).catch(console.debug);
+                subscribe?.unsubscribe?.();
                 delete this.watchTransactionSubscribes[id];
               };
 
@@ -1073,7 +973,7 @@ export default class TransactionService {
                 web3Api.eth.getTransactionReceipt(txHash).then(onSuccess).catch(onError);
               };
 
-              subscribe = web3Api.eth.subscribe('newBlockHeaders', onCheck);
+              subscribe = rxjsInterval(3000).subscribe(onCheck);
             });
           } else {
             this.removeTransaction(id);

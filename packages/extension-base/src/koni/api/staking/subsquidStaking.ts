@@ -5,8 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
 import { INDEXER_SUPPORTED_STAKING_CHAINS, SUBSQUID_ENDPOINTS } from '@subwallet/extension-base/koni/api/staking/config';
 import { _getChainSubstrateAddressPrefix, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { reformatAddress } from '@subwallet/extension-base/utils';
-import axios from 'axios';
+import { fetchJson, reformatAddress } from '@subwallet/extension-base/utils';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -62,13 +61,12 @@ const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMa
           address: reformatAddress(account, 42)
         };
 
-        const resp = await axios({ url: SUBSQUID_ENDPOINTS[chain],
-          method: 'post',
-          data: { query: getSubsquidQuery(parsedAccount, chain) } });
+        try {
+          const respData = await fetchJson<Record<string, any>>(
+            SUBSQUID_ENDPOINTS[chain],
+            { method: 'post', data: { query: getSubsquidQuery(parsedAccount, chain) } }
+          );
 
-        if (resp.status === 200) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          const respData = resp.data.data as Record<string, any>;
           const rewardItem = respData.stakerById as StakingResponseItem;
 
           if (rewardItem) {
@@ -86,6 +84,8 @@ const getSubsquidStaking = async (accounts: string[], chain: string, chainInfoMa
               stakingRewardItem.latestReward = latestReward.amount;
             }
           }
+        } catch (e) {
+          console.error(e);
         }
 
         if (stakingRewardItem.totalReward && parseFloat(stakingRewardItem.totalReward) > 0) {

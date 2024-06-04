@@ -4,7 +4,8 @@
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
 import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/types';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -24,6 +25,7 @@ export type Props = ThemeProps & {
 
 function Component ({ activeStake, className, convertActiveStake, inputAsset, isShowBalance, poolInfo }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
+  const { currencyData } = useSelector((state: RootState) => state.price);
 
   const totalApy = useMemo((): number | undefined => {
     return (
@@ -94,7 +96,7 @@ function Component ({ activeStake, className, convertActiveStake, inputAsset, is
             className={'__active-stake-converted-value'}
             decimal={0}
             hide={!isShowBalance}
-            prefix={'$'}
+            prefix={(currencyData?.isPrefix && currencyData?.symbol) || ''}
             value={convertActiveStake}
           />
         </div>

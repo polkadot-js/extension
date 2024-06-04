@@ -5,7 +5,6 @@ import { ApolloClient, createHttpLink, gql, InMemoryCache } from '@apollo/client
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { ChainType, ExtrinsicStatus, ExtrinsicType, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { MAX_FETCH_PAGE_PER_SESSION, MIN__NUM_HISTORY_PER_ACCOUNT } from '@subwallet/extension-base/services/history-service/constants';
-import fetch from 'cross-fetch';
 
 import { isArray } from '@polkadot/util';
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';

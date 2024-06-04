@@ -5,13 +5,14 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { MAX_NOMINATIONS } from '@subwallet/extension-base/constants';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { parseIdentity } from '@subwallet/extension-base/services/earning-service/utils';
-import { EarningStatus, NominationPoolInfo, PalletNominationPoolsBondedPoolInner, PalletNominationPoolsPoolMember, PalletStakingExposure, TernoaStakingRewardsStakingRewardsData, UnstakingStatus, ValidatorExtraInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, NominationPoolInfo, PalletNominationPoolsBondedPoolInner, PalletStakingExposure, TernoaStakingRewardsStakingRewardsData, UnstakingStatus, ValidatorExtraInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
@@ -754,7 +755,7 @@ export async function getRelayValidatorsInfo (chain: string, substrateApi: _Subs
   const bnTotalEraStake = new BN(_totalEraStake.toString());
   const eraStakers = _eraStakers as any[];
 
-  const rawMinBond = _minBond.toHuman() as string;
+  const rawMinBond = _minBond.toHuman();
   const minBond = rawMinBond.replaceAll(',', '');
 
   const totalStakeMap: Record<string, BN> = {};
@@ -916,6 +917,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     if (paramsCount === 2) {
       bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
     } else {
+      // @ts-ignore
       bondTx = chainApi.api.tx.staking.bond(address, binaryAmount, bondDest);
     }
 
@@ -928,6 +930,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     if (paramsCount === 2) {
       bondTx = chainApi.api.tx.staking.bond(binaryAmount, bondDest);
     } else {
+      // @ts-ignore
       bondTx = chainApi.api.tx.staking.bond(nominatorMetadata.address, binaryAmount, bondDest);
     }
 
@@ -950,6 +953,7 @@ export async function getRelayBondingExtrinsic (substrateApi: _SubstrateApi, amo
     return nominateTx;
   }
 
+  // @ts-ignore
   return chainApi.api.tx.utility.batchAll([bondTx, nominateTx]);
 }
 
@@ -978,6 +982,7 @@ export async function getRelayWithdrawalExtrinsic (substrateApi: _SubstrateApi, 
 
     return chainApi.api.tx.staking.withdrawUnbonded(slashingSpanCount);
   } else {
+    // @ts-ignore
     return chainApi.api.tx.staking.withdrawUnbonded();
   }
 }
@@ -1026,6 +1031,7 @@ export async function getPoolingWithdrawalExtrinsic (substrateApi: _SubstrateApi
 
     return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address }, slashingSpanCount);
   } else {
+    // @ts-ignore
     return chainApi.api.tx.nominationPools.withdrawUnbonded({ Id: nominatorMetadata.address });
   }
 }

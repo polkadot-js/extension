@@ -37,16 +37,6 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
     }
   }, [poolInfo.statistic]);
 
-  const unStakePeriodLiquidStaking = useMemo(() => {
-    if (poolInfo.type === YieldPoolType.LIQUID_STAKING) {
-      const value = getUnstakingPeriod(t, unstakePeriod);
-
-      return t(`Up to ${value}`);
-    }
-
-    return unstakePeriod;
-  }, [poolInfo.type, t, unstakePeriod]);
-
   return (
     <CollapsiblePanel
       className={CN(className)}
@@ -81,7 +71,8 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
         />
         {unstakePeriod !== undefined && (
           <MetaInfo.Default label={t('Unstaking period')}>
-            {unStakePeriodLiquidStaking || getUnstakingPeriod(t, unstakePeriod)}
+            {poolInfo.type === YieldPoolType.LIQUID_STAKING && <span className={'__label'}>Up to</span>}
+            {getUnstakingPeriod(t, unstakePeriod)}
           </MetaInfo.Default>
         )}
       </MetaInfo>
@@ -90,5 +81,8 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
 }
 
 export const EarningInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.__label': {
+    paddingRight: token.paddingXXS
+  }
 
 }));

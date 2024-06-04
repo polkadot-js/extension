@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -14,7 +14,7 @@ import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTE
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useChainConnection, useNotification, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useNotification, usePreCheckAction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
 import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
@@ -81,7 +81,7 @@ const Component = () => {
   const { accounts, currentAccount, isAllAccount } = useSelector((state) => state.accountState);
   const assetRegistryMap = useSelector((state) => state.assetRegistry.assetRegistry);
   const swapPairs = useSelector((state) => state.swap.swapPairs);
-  const priceMap = useSelector((state) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
   const chainInfoMap = useSelector((root) => root.chainStore.chainInfoMap);
   const hasInternalConfirmations = useSelector((state: RootState) => state.requestState.hasInternalConfirmations);
   const { multiChainAssetMap } = useSelector((state) => state.assetRegistry);
@@ -141,6 +141,7 @@ const Component = () => {
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const recipientValue = useWatchTransaction('recipient', form, defaultData);
   const { checkChainConnected, turnOnChain } = useChainConnection();
+  const onPreCheck = usePreCheckAction(fromValue);
 
   const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
 
@@ -360,8 +361,8 @@ const Component = () => {
   const feeItems = useMemo(() => {
     const result: FeeItem[] = [];
     const feeTypeMap: Record<SwapFeeType, FeeItem> = {
-      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: '$', type: SwapFeeType.NETWORK_FEE },
-      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: '$', type: SwapFeeType.PLATFORM_FEE },
+      NETWORK_FEE: { label: 'Network fee', value: new BigN(0), prefix: `${(currencyData.isPrefix && currencyData.symbol) || ''}`, suffix: `${(!currencyData.isPrefix && currencyData.symbol) || ''}`, type: SwapFeeType.NETWORK_FEE },
+      PLATFORM_FEE: { label: 'Protocol fee', value: new BigN(0), prefix: `${(currencyData.isPrefix && currencyData.symbol) || ''}`, suffix: `${(!currencyData.isPrefix && currencyData.symbol) || ''}`, type: SwapFeeType.PLATFORM_FEE },
       WALLET_FEE: { label: 'Wallet commission', value: new BigN(0), suffix: '%', type: SwapFeeType.WALLET_FEE }
     };
 
@@ -377,7 +378,7 @@ const Component = () => {
     );
 
     return result;
-  }, [currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
+  }, [currencyData.isPrefix, currencyData.symbol, currentQuote?.feeInfo.feeComponent, getConvertedBalance]);
 
   const canShowAvailableBalance = useMemo(() => {
     if (fromValue && chainValue && chainInfoMap[chainValue]) {
@@ -1266,7 +1267,8 @@ const Component = () => {
                                 : (
                                   <Number
                                     decimal={0}
-                                    prefix={'$'}
+                                    prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                                    suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                                     value={estimatedFeeValue}
                                   />
                                 )
@@ -1320,7 +1322,7 @@ const Component = () => {
               className={'__swap-submit-button'}
               disabled={submitLoading || handleRequestLoading || isNotConnectedAltChain}
               loading={submitLoading}
-              onClick={form.submit}
+              onClick={onPreCheck(form.submit, ExtrinsicType.SWAP)}
             >
               {t('Swap')}
             </Button>
@@ -1463,7 +1465,8 @@ const Component = () => {
                     decimals={0}
                     label={t('Estimated fee')}
                     onClickValue={onToggleFeeDetails}
-                    prefix={'$'}
+                    prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                    suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                     suffixNode={
                       <Icon
                         className={'__estimated-fee-button'}

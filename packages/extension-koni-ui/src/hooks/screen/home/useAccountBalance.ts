@@ -4,7 +4,6 @@
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetPriceId, _getAssetSymbol, _getChainName, _getMultiChainAssetPriceId, _getMultiChainAssetSymbol, _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
-import { SubstrateBalance } from '@subwallet/extension-base/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { AssetRegistryStore, BalanceStore, ChainStore, PriceStore } from '@subwallet/extension-koni-ui/stores/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
@@ -16,7 +15,7 @@ import { useSelector } from 'react-redux';
 const BN_0 = new BigN(0);
 const BN_10 = new BigN(10);
 const BN_100 = new BigN(100);
-const defaultCurrency = { label: 'United States Dollar', symbol: 'USD', isPrefix: true };
+const defaultCurrency = { label: 'United States Dollar', symbol: '$', isPrefix: true };
 
 export function getBalanceValue (balance: string, decimals: number): BigN {
   return new BigN(balance).div(BN_10.pow(decimals));
@@ -165,22 +164,22 @@ function getAccountBalance (
 
         tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
 
-        if (balanceItem?.substrateInfo) {
-          const mergeData = (key: keyof SubstrateBalance) => {
-            const newValue = balanceItem?.substrateInfo?.[key];
-
-            if (newValue) {
-              const value = getBalanceValue(newValue, decimals);
-
-              tokenBalance[key] = new BigN(tokenBalance[key] || '0').plus(value).toString();
-              tokenGroupBalance[key] = new BigN(tokenGroupBalance[key] || '0').plus(value).toString();
-            }
-          };
-
-          mergeData('reserved');
-          mergeData('miscFrozen');
-          mergeData('feeFrozen');
-        }
+        // if (balanceItem?.substrateInfo) {
+        //   const mergeData = (key: keyof SubstrateBalance) => {
+        //     const newValue = balanceItem?.substrateInfo?.[key];
+        //
+        //     if (newValue) {
+        //       const value = getBalanceValue(newValue, decimals);
+        //
+        //       tokenBalance[key] = new BigN(tokenBalance[key] || '0').plus(value).toString();
+        //       tokenGroupBalance[key] = new BigN(tokenGroupBalance[key] || '0').plus(value).toString();
+        //     }
+        //   };
+        //
+        //   mergeData('reserved');
+        //   mergeData('miscFrozen');
+        //   mergeData('feeFrozen');
+        // }
 
         if (!isShowZeroBalance && tokenBalance.total.value.eq(BN_0)) {
           return;

@@ -7,6 +7,10 @@ import { CronReloadRequest, Notification, RequestGetTransaction, RequestParseEvm
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
 
+export async function ping () {
+  return sendMessage('pri(ping)', null);
+}
+
 export async function windowOpen (params: WindowOpenParams): Promise<boolean> {
   return sendMessage('pri(window.open)', params);
 }

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getSubstrateGenesisHash, _isChainEvmCompatible, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
@@ -78,18 +78,18 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
   }
 };
 
-// interface SubscribeBlanceOptions {
-//   addresses: string[];
-//   chains: string[];
-//   tokens: string[];
-//   chainInfoMap: Record<string, _ChainInfo>;
-//   substrateApiMap: Record<string, _SubstrateApi>;
-//   evmApiMap: Record<string, _EvmApi>;
-//   callback: (rs: BalanceItem[]) => void;
-// }
-
 // main subscription, use for multiple chains, multiple addresses and multiple tokens
-export function subscribeBalance (addresses: string[], chains: string[], tokens: string[], _chainAssetMap: Record<string, _ChainAsset>, _chainInfoMap: Record<string, _ChainInfo>, substrateApiMap: Record<string, _SubstrateApi>, evmApiMap: Record<string, _EvmApi>, callback: (rs: BalanceItem[]) => void) {
+export function subscribeBalance (
+  addresses: string[],
+  chains: string[],
+  tokens: string[],
+  _chainAssetMap: Record<string, _ChainAsset>,
+  _chainInfoMap: Record<string, _ChainInfo>,
+  substrateApiMap: Record<string, _SubstrateApi>,
+  evmApiMap: Record<string, _EvmApi>,
+  callback: (rs: BalanceItem[]) => void,
+  extrinsicType?: ExtrinsicType
+) {
   // Filter chain and token
   const chainAssetMap: Record<string, _ChainAsset> = Object.fromEntries(Object.entries(_chainAssetMap).filter(([token]) => tokens.includes(token)));
   const chainInfoMap: Record<string, _ChainInfo> = Object.fromEntries(Object.entries(_chainInfoMap).filter(([chain]) => chains.includes(chain)));
@@ -100,7 +100,7 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
     const [useAddresses, notSupportAddresses] = filterAddress(addresses, chainInfo);
 
     if (notSupportAddresses.length) {
-      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL]);
+      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL, _AssetType.GRC20]);
 
       const now = new Date().getTime();
 
@@ -130,26 +130,9 @@ export function subscribeBalance (addresses: string[], chains: string[], tokens:
       });
     }
 
-    // if (!useAddresses || useAddresses.length === 0 || _PURE_EVM_CHAINS.indexOf(chainSlug) > -1) {
-    //   const fungibleTokensByChain = state.chainService.getFungibleTokensByChain(chainSlug, true);
-    //   const now = new Date().getTime();
-    //
-    //   Object.values(fungibleTokensByChain).map((token) => {
-    //     return {
-    //       tokenSlug: token.slug,
-    //       free: '0',
-    //       locked: '0',
-    //       state: APIItemState.READY,
-    //       timestamp: now
-    //     } as BalanceItem;
-    //   }).forEach(callback);
-    //
-    //   return undefined;
-    // }
-
     const substrateApi = await substrateApiMap[chainSlug].isReady;
 
-    return subscribeSubstrateBalance(useAddresses, chainInfo, chainAssetMap, substrateApi, evmApi, callback);
+    return subscribeSubstrateBalance(useAddresses, chainInfo, chainAssetMap, substrateApi, evmApi, callback, extrinsicType);
   });
 
   return () => {

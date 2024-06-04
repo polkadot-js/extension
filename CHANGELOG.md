@@ -1,5 +1,133 @@
 # CHANGELOG
 
+## 1.2.2
+Build date: May 30, 2024.
+
+Features & Update:
+- Remove support for Moonbeam on Polkadot vault (#3056)
+- Update UI for Earning position details (#3127)
+- Remove the logic that differentiates between Native tokens and Local tokens in case show sub-logo (#3075)
+- Show duplicate transaction history when transfer local token (#2613)
+
+Bugs fixed:
+- Fixed some bug related to MV3 (#3146)
+  - Timing logic to display seed phrase backup prompt popup
+  - Bug disconnect port
+
+## 1.2.1
+Build date: May 28, 2024.
+
+Features & Update:
+- Update Extension Manifest V3 (#2205)
+- Handle case displayed account with specific network (#2709)
+
+## 1.1.68
+Build date: May 25, 2024.
+
+Features & Update:
+- Update chainlist (#3088)
+  - Add support for STINK token
+  - Add support for WUD token on HydraDX and Polkadot Asset Hub
+  - Add support for WIFD on HydraDX and Polkadot Asset Hub
+  - Add support for Linea
+  - Add support for bridged tokens
+  - Update logo Moonriver, Moonbeam
+  - Add support for Kusama people chain
+- Add popup to remind users to perform backups account (popup hiển thị định kỳ) (#2317)
+- Add popup remind backup account (popup hiển thị ngay khi mở trình duyệt) (#3050)
+- Add highlight button Export multi account when navigate to select account screen (#3090, #3108)
+
+Bugs fixed:
+- Fix bug missing custom tokens on applying online patch (#3101)
+- Fix error when fetching with Avail network (#3115)
+
+## 1.1.67
+Build date: May 22, 2024.
+
+Features & Update:
+- Update chain-list:
+  - Update price-id for DED
+  - Update ED for Vara
+
+Bugs fixed:
+- Fix bug integrating chain online (#3084)
+
+## 1.1.66
+Build date: May 21, 2024.
+
+Features & Update:
+- Update chain-list (#3055)
+  - Support SQD token on Arbitrum
+  - Support for Common LP Drops and Common Staking Drops
+  - Update price-id for AUDD
+- Update new chain-list interface (#3085)
+- Support GRC-20 token (#2852, #3067)
+
+Bugs fixed:
+- Handle the case of not resetting the wallet to the default state when click Erase all (#3035)
+
+## 1.1.65
+Build date: May 17, 2024.
+
+Features & Update:
+- Update chain-list (#3040)
+  - Update chainBalanceSlug and explorer for some chains
+  - Add support for Hyperbridge (Nexus)
+  - Add support for CESS testnet
+  - Add support for Pendulum, Amplitude assets
+  - Add support for BOB and tokens on BOB
+
+Bugs fixed:
+- Fixed bug Unable to back screen in case open General settings to Marketing campaign (#3062)
+- Fixed bug when transferring PSP22 token (#3041)
+
+## 1.1.64
+Build date: May 11, 2024.
+
+Features & Update:
+- Update chain-list (#3020)
+  - Add support for Curio Network
+  - Add new blockchain explorer for InvArch
+  - Add explorer for Mythos and Avail Turing
+  - Update ED for Mythos
+  - Update symbol for native token on Commune AI: C -> COMAI
+
+Bugs fixed:
+- Fixed bug enable chains when detect balance (#2882)
+- Fixed bug  Invalid recipient address when Dapp deploy smart contract (#2859)
+
+
+## 1.1.63
+Build date: May 09, 2024.
+
+Bugs fixed:
+- Fixed cannot signing with dApp in case network is not publish (#3027)
+- Fixed bug Network's status show incorrect (#3037)
+
+## 1.1.62
+Build date: May 08, 2024.
+
+Features & Update:
+- Add more currency type (#2738, #3011)
+- Disallow staking to collators/pools that maxed out member threshold (#2743, 2754)
+- Display list Recommended by label in Select pool screen (#2940)
+
+Bugs fixed:
+- Fixed bug Don't display network on Mission pool details (#3005)
+- Fixed bug Can't hit the "Confirm" button on ToS of the Swap feature (#3007)
+- Fixed bug Error getting wrong validator address (#2821)
+- Update Validator name/ Collator name (#2998)
+
+## 1.1.61
+Build date: May 02, 2024.
+
+Features & Update:
+- Hide popup Introducing Earning feature (#2948)
+
+Bugs fixed:
+- Fixed bug Cannot read properties of undefined (reading 'length') (#2986)
+- Fixed bug related to earning feature (#2680)
+
 ## 1.1.60
 Build date: Apl 30, 2024.
 

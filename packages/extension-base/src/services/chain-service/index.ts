@@ -4,7 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
-import { _DEFAULT_ACTIVE_CHAINS, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
+import { _DEFAULT_ACTIVE_CHAINS, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
@@ -21,6 +21,20 @@ import Web3 from 'web3';
 
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
+
+const filterChainInfoMap = (data: Record<string, _ChainInfo>): Record<string, _ChainInfo> => {
+  return Object.fromEntries(
+    Object.entries(data)
+      .filter(([, info]) => !info.bitcoinInfo)
+  );
+};
+
+const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
+  return Object.fromEntries(
+    Object.entries(assets)
+      .filter(([, info]) => chainInfo[info.originChain])
+  );
+};
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -278,7 +292,7 @@ export class ChainService {
   }
 
   public getSupportedSmartContractTypes () {
-    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34];
+    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721];
   }
 
   public getActiveChainInfoMap () {
@@ -590,8 +604,6 @@ export class ChainService {
     await this.initAssetSettings();
     this.initAssetRefMap();
     await this.autoEnableTokens();
-
-    this.checkLatestData();
   }
 
   initAssetRefMap () {
@@ -673,7 +685,7 @@ export class ChainService {
         const latestAssetPatch = JSON.stringify(latestAssetInfo);
 
         if (this.assetMapPatch !== latestAssetPatch) {
-          const assetRegistry = { ...ChainAssetMap, ...latestAssetInfo };
+          const assetRegistry = filterAssetInfoMap(this.getChainInfoMap(), Object.assign({}, this.dataMap.assetRegistry, latestAssetInfo));
 
           this.assetMapPatch = latestAssetPatch;
           this.dataMap.assetRegistry = assetRegistry;
@@ -730,6 +742,10 @@ export class ChainService {
 
       if (!assetState) { // If this asset not has asset setting, this token is not enabled before (not turned off before)
         if (!chainState || !chainState.manualTurnOff) {
+          await this.updateAssetSetting(assetSlug, { visible: true });
+        }
+      } else {
+        if (originChain === 'avail_mainnet') {
           await this.updateAssetSetting(assetSlug, { visible: true });
         }
       }
@@ -807,16 +823,16 @@ export class ChainService {
     };
 
     if (chainInfo.substrateInfo !== null && chainInfo.substrateInfo !== undefined) {
-      if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
-        const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
-        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
+      // if (_MANTA_ZK_CHAIN_GROUP.includes(chainInfo.slug) && MODULE_SUPPORT.MANTA_ZK && this.mantaChainHandler) {
+      //   const apiPromise = await this.mantaChainHandler?.initMantaPay(endpoint, chainInfo.slug);
+      //   const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, externalApiPromise: apiPromise, onUpdateStatus });
+      //
+      //   this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      // } else {
+      const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
-        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
-      } else {
-        const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
-
-        this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
-      }
+      this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
+      // }
     }
 
     /**
@@ -881,23 +897,28 @@ export class ChainService {
     this.lockChainInfoMap = true;
 
     const initPromises = chainSlugs.map(async (chainSlug) => {
-      const chainInfo = chainInfoMap[chainSlug];
-      const currentState = chainStateMap[chainSlug]?.active;
+      // Add try catch to prevent one chain error stop the whole process
+      try {
+        const chainInfo = chainInfoMap[chainSlug];
+        const currentState = chainStateMap[chainSlug]?.active;
 
-      if (!currentState) {
-        this.dbService.updateChainStore({
-          ...chainInfo,
-          active: true,
-          currentProvider: chainStateMap[chainSlug].currentProvider,
-          manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
-        }).catch(console.error);
+        if (!currentState) {
+          // Enable chain success then update chain state
+          await this.initApiForChain(chainInfo);
 
-        chainStateMap[chainSlug].active = true;
-        await this.initApiForChain(chainInfo);
+          this.dbService.updateChainStore({
+            ...chainInfo,
+            active: true,
+            currentProvider: chainStateMap[chainSlug].currentProvider,
+            manualTurnOff: !!chainStateMap[chainSlug].manualTurnOff
+          }).catch(console.error);
 
-        this.eventService.emit('chain.updateState', chainSlug);
-        needUpdate = true;
-      }
+          chainStateMap[chainSlug].active = true;
+
+          this.eventService.emit('chain.updateState', chainSlug);
+          needUpdate = true;
+        }
+      } catch (e) {}
     });
 
     await Promise.all(initPromises);
@@ -1018,7 +1039,7 @@ export class ChainService {
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
-    const defaultChainInfoMap = ChainInfoMap;
+    const defaultChainInfoMap = filterChainInfoMap(ChainInfoMap);
     const storedChainSettingMap: Record<string, IChain> = {};
 
     storedChainSettings.forEach((chainStoredSetting) => {
@@ -1143,6 +1164,7 @@ export class ChainService {
               providers: storedChainInfo.providers, // TODO: review
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
+              bitcoinInfo: storedChainInfo.bitcoinInfo ?? null,
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
               icon: storedChainInfo.icon,
@@ -1199,22 +1221,15 @@ export class ChainService {
 
   private async initAssetRegistry (deprecatedCustomChainMap: Record<string, string>) {
     const storedAssetRegistry = await this.dbService.getAllAssetStore();
-    const latestAssetRegistry = ChainAssetMap;
+    const latestAssetRegistry = filterAssetInfoMap(this.getChainInfoMap(), ChainAssetMap);
     const availableChains = Object.values(this.dataMap.chainInfoMap)
       .filter((info) => (info.chainStatus === _ChainStatus.ACTIVE))
       .map((chainInfo) => chainInfo.slug);
 
-    // Fill out zk assets from latestAssetRegistry if not supported
-    if (!MODULE_SUPPORT.MANTA_ZK) {
-      Object.keys(latestAssetRegistry).forEach((slug) => {
-        if (_isMantaZkAsset(latestAssetRegistry[slug])) {
-          delete latestAssetRegistry[slug];
-        }
-      });
-    }
+    let finalAssetRegistry: Record<string, _ChainAsset> = {};
 
     if (storedAssetRegistry.length === 0) {
-      this.dataMap.assetRegistry = latestAssetRegistry;
+      finalAssetRegistry = latestAssetRegistry;
     } else {
       const mergedAssetRegistry: Record<string, _ChainAsset> = latestAssetRegistry;
 
@@ -1262,10 +1277,26 @@ export class ChainService {
         }
       }
 
-      this.dataMap.assetRegistry = mergedAssetRegistry;
+      finalAssetRegistry = mergedAssetRegistry;
 
       await this.dbService.removeFromAssetStore(deprecatedAssets);
     }
+
+    // Fill out zk assets from finalAssetRegistry if not supported
+    if (!MODULE_SUPPORT.MANTA_ZK) {
+      const zkAssets: string[] = [];
+
+      Object.entries(finalAssetRegistry).forEach(([slug, assets]) => {
+        if (_isMantaZkAsset(assets)) {
+          zkAssets.push(slug);
+          delete finalAssetRegistry[slug];
+        }
+      });
+
+      await this.dbService.removeFromAssetStore(zkAssets);
+    }
+
+    this.dataMap.assetRegistry = finalAssetRegistry;
   }
 
   private updateChainStateMapSubscription () {
@@ -1378,6 +1409,7 @@ export class ChainService {
       providers: params.chainEditInfo.providers,
       substrateInfo,
       evmInfo,
+      bitcoinInfo: null,
       isTestnet: false,
       chainStatus: _ChainStatus.ACTIVE,
       icon: '', // Todo: Allow update with custom chain,
@@ -1640,9 +1672,9 @@ export class ChainService {
 
   private async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
     if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenType)) {
-      return await this.evmChainHandler.getSmartContractTokenInfo(contractAddress, tokenType, originChain);
-    } else if ([_AssetType.PSP34, _AssetType.PSP22].includes(tokenType)) {
-      return await this.substrateChainHandler.getSmartContractTokenInfo(contractAddress, tokenType, originChain, contractCaller);
+      return await this.evmChainHandler.getEvmContractTokenInfo(contractAddress, tokenType, originChain);
+    } else if ([_AssetType.PSP34, _AssetType.PSP22, _AssetType.GRC20].includes(tokenType)) {
+      return await this.substrateChainHandler.getSubstrateContractTokenInfo(contractAddress, tokenType, originChain, contractCaller);
     }
 
     return {
@@ -1925,7 +1957,7 @@ export class ChainService {
     const chainInfoMap = this.getChainInfoMap();
 
     Object.values(chainInfoMap).forEach((i) => {
-      const subscanSlug = i.slug === 'goldberg_testnet' ? 'avail-testnet' : i.extraInfo?.subscanSlug; // Hotfix for Goldberg testnet
+      const subscanSlug = i.extraInfo?.subscanSlug;
 
       if (!subscanSlug) {
         return;

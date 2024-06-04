@@ -13,7 +13,8 @@ export const _API_OPTIONS_CHAIN_GROUP = {
   acala: ['acala', 'karura', 'origintrail', 'kintsugi'],
   turing: ['turingStaging', 'turing'],
   avail: ['kate', 'availTuringTest', 'avail_mainnet'],
-  goldberg: ['goldberg_testnet']
+  goldberg: ['goldberg_testnet'],
+  gear: ['vara_network', 'vara_testnet']
 };
 
 export const _PREDEFINED_SINGLE_MODES: Record<string, SingleModeJson> = {
@@ -88,12 +89,14 @@ export const _STAKING_ERA_LENGTH_MAP: Record<string, number> = { // in hours
   kate: 6,
   creditcoin: 24,
   vara_network: 12,
+  vara_testnet: 12,
   goldberg_testnet: 24,
   manta_network: 6,
   krest_network: 4,
   polimec: 6,
   enjin_relaychain: 24,
   availTuringTest: 24,
+  polkadex: 24,
   avail_mainnet: 24
 };
 
@@ -110,6 +113,7 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   edgeware: 6,
   creditcoin: 12,
   vara_network: 3,
+  vara_testnet: 3,
   goldberg_testnet: 20,
   polimec: 12,
   bifrost: 13, // expect 12 but actual 13
@@ -206,7 +210,8 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   neatcoin: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
   nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
   polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
-  vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 }
+  vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
+  vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 }
 };
 
 // Send fund------------------------------------------------------------------------------------------------------------

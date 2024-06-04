@@ -1,9 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { isSupportWindow } from '@subwallet/extension-base/utils';
+
 export function getLocalStorage<T> (key: string, defaultValue: T): T {
   const item =
-    typeof window !== 'undefined' ? window.localStorage.getItem(key) : false;
+    isSupportWindow ? window.localStorage.getItem(key) : false;
 
   if (item) {
     try {

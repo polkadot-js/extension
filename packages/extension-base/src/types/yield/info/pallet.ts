@@ -3,13 +3,6 @@
 
 import { BN } from '@polkadot/util';
 
-export interface PalletNominationPoolsPoolMember {
-  poolId: number,
-  points: number,
-  lasRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
-}
-
 export interface PalletStakingExposureItem {
   who: string,
   value: number
@@ -183,4 +176,11 @@ export interface RuntimeDispatchInfo {
   },
   class: string,
   partialFee: number
+}
+
+export interface SpStakingPagedExposureMetadata {
+  total: number,
+  own: number,
+  nominatorCount: number,
+  pageCount: number
 }

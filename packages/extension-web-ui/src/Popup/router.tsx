@@ -25,7 +25,13 @@ export class LazyLoader {
       this.loadPromise = new Promise<ComponentType<any>>((resolve, reject) => {
         this.elemLoader().then((module) => {
           resolve(module.default);
-        }).catch(reject);
+        }).catch((e) => {
+          if (/Loading chunk .*? failed/.test((e as Error).message)) {
+            window.location.reload();
+          } else {
+            reject(e);
+          }
+        });
       });
     }
 

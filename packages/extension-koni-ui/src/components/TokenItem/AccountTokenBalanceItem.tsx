@@ -115,22 +115,24 @@ const Component: React.FC<Props> = (props: Props) => {
         value={locked}
         valueColorSchema='gray'
       />
-      {!!link && <Button
-        block
-        disabled={!link}
-        className={'__explorer'}
-        icon={
-          <Icon
-            className={'__icon-button'}
-            phosphorIcon={ArrowSquareOut}
-          />
-        }
-        onClick={openBlockExplorer(link)}
-        size={'xs'}
-        type={'ghost'}
-      >
-        {t('View on explorer')}
-      </Button>}
+      {!!link && (
+        <Button
+          block
+          className={'__explorer'}
+          disabled={!link}
+          icon={
+            <Icon
+              className={'__icon-button'}
+              phosphorIcon={ArrowSquareOut}
+            />
+          }
+          onClick={openBlockExplorer(link)}
+          size={'xs'}
+          type={'ghost'}
+        >
+          {t('View on explorer')}
+        </Button>
+      )}
     </MetaInfo>
   );
 };
@@ -207,7 +209,6 @@ const AccountTokenBalanceItem = styled(Component)<Props>(({ theme: { token } }: 
         'white-space': 'nowrap'
       }
     },
-
 
     '.balance-info': {
       paddingLeft: token.paddingXL,

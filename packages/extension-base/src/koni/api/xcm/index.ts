@@ -7,9 +7,12 @@ import { getExtrinsicByXcmPalletPallet } from '@subwallet/extension-base/koni/ap
 import { getExtrinsicByXtokensPallet } from '@subwallet/extension-base/koni/api/xcm/xTokens';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import BigN from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { u8aToHex } from '@polkadot/util';
+import { addressToEvm, isEthereumAddress } from '@polkadot/util-crypto';
 
 interface CreateXcmExtrinsicProps {
   originTokenInfo: _ChainAsset;
@@ -48,4 +51,33 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
   }
 
   return extrinsic;
+};
+
+export const getXcmMockTxFee = async (substrateApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, address: string, originTokenInfo: _ChainAsset, destinationTokenInfo: _ChainAsset): Promise<BigN> => {
+  try {
+    const destChainInfo = chainInfoMap[destinationTokenInfo.originChain];
+    const originChainInfo = chainInfoMap[originTokenInfo.originChain];
+
+    // mock receiving account from sender
+    const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(destChainInfo) && !_isChainEvmCompatible(originChainInfo)
+      ? u8aToHex(addressToEvm(address))
+      : address
+    ;
+
+    const mockTx = await createXcmExtrinsic({
+      chainInfoMap,
+      destinationTokenInfo,
+      originTokenInfo,
+      recipient: recipient,
+      sendingValue: '1000000000000000000',
+      substrateApi
+    });
+    const paymentInfo = await mockTx.paymentInfo(address);
+
+    return new BigN(paymentInfo?.partialFee?.toString() || '0');
+  } catch (e) {
+    console.error('error mocking xcm tx fee', e);
+
+    return new BigN(0);
+  }
 };

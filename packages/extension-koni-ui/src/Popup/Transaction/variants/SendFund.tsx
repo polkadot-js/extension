@@ -776,6 +776,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
         <FreeBalance
           address={from}
           chain={chain}
+          extrinsicType={extrinsicType}
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />

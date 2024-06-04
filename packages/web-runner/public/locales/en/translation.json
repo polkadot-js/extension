@@ -314,8 +314,6 @@
   "Your metadata is out of date": "",
   "Decimal": "",
   "Spec Version": "",
-  "This feature is not available for": "",
-  "Please change to another account type.": "",
   "Back to home": "",
   "Signature request": "",
   "Validator": "",
@@ -648,7 +646,6 @@
   "Request does not exist": "",
   "Unsupported action": "",
   "Wrong signature. Please sign with the account you use in dApp": "",
-  "Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards": "",
   "You cannot select more than {{number}} validators for this network": "",
   "You cannot select more than {{number}} dApps for this network": "",
   "You cannot select more than {{number}} collators for this network": "",
@@ -1252,5 +1249,10 @@
   "If you lose your seed phrases/private keys/JSON backup files/QR backup codes, your accounts can't be recovered and your assets are lost. Learn how to back up your accounts to secure your assets now.": "",
   "Update successful": "",
   "Your SubWallet extension is updated to Manifest V3!": "",
-  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": ""
+  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": "",
+  "EVM QR signer account": "",
+  "Substrate QR signer account": "",
+  "Invalid QR code. EVM networks are not supported": "",
+  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
+  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": ""
 }

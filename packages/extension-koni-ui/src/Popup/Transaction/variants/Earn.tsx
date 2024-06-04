@@ -488,7 +488,7 @@ const Component = () => {
         .catch(onError)
         .finally(() => {
           setSubmitLoading(false);
-          setIsDisableHeader(true);
+          setIsDisableHeader(false);
         });
     }, 300);
   }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps, setIsDisableHeader]);

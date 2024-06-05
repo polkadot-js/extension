@@ -4,14 +4,15 @@
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
+import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { convertKeyTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -33,9 +34,11 @@ async function handleCancel ({ id }: WalletConnectSessionRequest) {
   });
 }
 
+const timeOutWCMissingKey = 'unsuccessful_connect_wc_modal';
+const wcMissingModalId = 'WALLET_CONNECT_CONFIRM_MODAL';
+
 function Component ({ className, request }: Props) {
   const { params } = request.request;
-
   const { t } = useTranslation();
   const navigate = useNavigate();
   const notification = useNotification();
@@ -45,6 +48,16 @@ function Component ({ className, request }: Props) {
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
     [WALLET_CONNECT_POLKADOT_NAMESPACE]: t('Substrate networks')
   }), [t]);
+  const { inactiveModal } = useContext(ModalContext);
+
+  useEffect(() => {
+    const timeOut = JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
+
+    inactiveModal(wcMissingModalId);
+    clearTimeout(timeOut[timeOutWCMissingKey]);
+    delete timeOut[timeOutWCMissingKey];
+    localStorage.setItem(TIME_OUT_RECORD, JSON.stringify(timeOut));
+  }, [inactiveModal]);
 
   const { isExpired,
     isUnSupportCase,
@@ -75,9 +88,10 @@ function Component ({ className, request }: Props) {
   const onCancel = useCallback(() => {
     setLoading(true);
     handleCancel(request).finally(() => {
+      navigate('/wallet-connect/list');
       setLoading(false);
     });
-  }, [request]);
+  }, [navigate, request]);
 
   const onConfirm = useCallback(() => {
     setLoading(true);
@@ -92,12 +106,14 @@ function Component ({ className, request }: Props) {
         });
       })
       .finally(() => {
+        navigate('/wallet-connect/list');
         setLoading(false);
       });
-  }, [namespaceAccounts, notification, request]);
+  }, [namespaceAccounts, navigate, notification, request]);
 
   const onAddAccount = useCallback(() => {
     setSelectedAccountTypes(convertKeyTypes(missingType));
+    setLoading(true);
     navigate('/accounts/new-seed-phrase', { state: { useGoBack: true } });
   }, [setSelectedAccountTypes, missingType, navigate]);
 

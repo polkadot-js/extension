@@ -1,9 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SWStorage } from '@subwallet/extension-base/storage';
-import { RuntimeInfo } from '@subwallet/extension-base/utils';
-import Bowser from 'bowser';
+import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils';
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -73,12 +71,6 @@ export const IPFS2_RMRK = 'https://ipfs2.rmrk.link/ipfs/'; // ????
 export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
 export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
 
-const detectFirefox = (): boolean => {
-  return (SWStorage.instance.getItem('browserInfo') || Bowser.getParser(window.navigator.userAgent).getBrowserName()).toLowerCase() === 'firefox';
-};
-
-const isFirefox = detectFirefox();
-
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',
@@ -135,6 +127,7 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
   pioneer = 'pioneer'
 }
 
+// This is for localhost or http only
 const RANDOM_IPFS_GATEWAY_SETTING = [
   {
     provider: CLOUDFLARE_PINATA_SERVER,
@@ -149,42 +142,47 @@ if (isFirefox) {
   });
 }
 
-if (!RuntimeInfo.protocol ||
-  (!RuntimeInfo.protocol.startsWith('http') || RuntimeInfo.protocol.startsWith('https'))) {
+if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
+  // This is for https
+  if (RuntimeInfo.protocol.startsWith('https')) {
+    RANDOM_IPFS_GATEWAY_SETTING.push({
+      provider: IPFS_FLEEK,
+      weight: 4
+    },
+    {
+      provider: IPFS_GATEWAY_4EVERLAND,
+      weight: 2
+    },
+    {
+      provider: IPFS_W3S_LINK,
+      weight: 1
+    },
+    {
+      provider: CF_IPFS_GATEWAY,
+      weight: 4
+    },
+    {
+      provider: PINATA_IPFS_GATEWAY,
+      weight: 1 // Rate limit too low
+    },
+    {
+      provider: IPFS_IO,
+      weight: 5
+    }
+    );
+  }
+} else {
+  // This is for extension env or other
   RANDOM_IPFS_GATEWAY_SETTING.push({
-    provider: IPFS_FLEEK,
-    weight: 4
-  },
-  {
-    provider: IPFS_GATEWAY_4EVERLAND,
-    weight: 2
-  },
-  {
-    provider: IPFS_W3S_LINK,
-    weight: 1
-  },
-  {
-    provider: CF_IPFS_GATEWAY,
-    weight: 4
-  },
-  {
-    provider: PINATA_IPFS_GATEWAY,
-    weight: 1 // Rate limit too low
-  },
-  {
     provider: NFT_STORAGE_GATEWAY,
     weight: 50
-  },
-  {
-    provider: GATEWAY_IPFS_IO,
-    weight: 5
   },
   {
     provider: DWEB_LINK,
     weight: 5
   },
   {
-    provider: IPFS_IO,
+    provider: GATEWAY_IPFS_IO,
     weight: 5
   }
   );

@@ -19,6 +19,7 @@ function Component (
   { chain,
     chainDisplayName = '',
     className = '',
+    currency,
     isReady,
     logoKey,
     onClick,
@@ -38,7 +39,7 @@ function Component (
         convertedBalanceValue={total.convertedValue}
         decimal={0}
         displayToken={symbol}
-        isShowSubLogo={!!chain && !slug.includes('NATIVE')}
+        isShowSubLogo={true}
         middleItem={
           (
             <>
@@ -52,6 +53,7 @@ function Component (
         name={symbol}
         networkMainLogoShape={'squircle'}
         onPressItem={onClick}
+        prefix={(currency?.isPrefix && currency.symbol) || ''}
         price={priceValue}
         rightItem={
           (
@@ -70,8 +72,9 @@ function Component (
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
                   intOpacity={0.45}
-                  prefix='$'
+                  prefix={(currency?.isPrefix && currency.symbol) || ''}
                   size={12}
+                  suffix={(!currency?.isPrefix && currency?.symbol) || ''}
                   unitOpacity={0.45}
                   value={total.convertedValue}
                 />
@@ -99,6 +102,7 @@ function Component (
           )
         }
         subNetworkKey={chain}
+        suffix={(!currency?.isPrefix && currency?.symbol) || ''}
         symbol={logoKey}
       />
     </div>

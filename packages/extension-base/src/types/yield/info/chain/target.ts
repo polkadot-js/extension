@@ -11,6 +11,7 @@ export interface NominationPoolInfo extends Pick<PalletNominationPoolsBondedPool
   name?: string;
   bondedAmount: string;
   isProfitable: boolean;
+  isCrowded?: boolean;
 }
 
 /* Native */
@@ -33,6 +34,8 @@ export interface ValidatorInfo {
   isVerified: boolean;
   icon?: string;
   isCrowded: boolean;
+  eraRewardPoint?: string;
+  topQuartile?: boolean;
 }
 
 export type YieldPoolTarget = NominationPoolInfo | ValidatorInfo;

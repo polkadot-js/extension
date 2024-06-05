@@ -3,10 +3,10 @@
 
 import { SWError } from '@subwallet/extension-base/background/errors/SWError';
 import { BASE_FETCH_ORDINAL_EVENT_DATA } from '@subwallet/extension-base/koni/api/nft/ordinal_nft/constants';
+import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
 import { CrowdloanContributionsResponse, ExtrinsicItem, ExtrinsicsListResponse, IMultiChainBalance, RequestBlockRange, RewardHistoryListResponse, SubscanRequest, SubscanResponse, TransferItem, TransfersListResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SubscanEventBaseItemData, SubscanEventListResponse, SubscanExtrinsicParam, SubscanExtrinsicParamResponse } from '@subwallet/extension-base/types';
 import { wait } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 const QUERY_ROW = 100;
 
@@ -404,5 +404,16 @@ export class SubscanService {
 
       return jsonData.data;
     }, ordinal);
+  }
+
+  // Singleton
+  private static _instance: SubscanService;
+
+  public static getInstance () {
+    if (!SubscanService._instance) {
+      SubscanService._instance = new SubscanService(SUBSCAN_API_CHAIN_MAP);
+    }
+
+    return SubscanService._instance;
   }
 }

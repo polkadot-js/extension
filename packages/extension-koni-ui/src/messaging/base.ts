@@ -15,7 +15,73 @@ interface Handler {
 }
 
 type Handlers = Record<string, Handler>;
-const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+let port: chrome.runtime.Port;
+
+onConnectPort();
+
+function onConnectPort () {
+  if (!chrome.runtime) {
+    console.error('The connection to the SubWallet port will be disconnected. Please reload your wallet.');
+
+    return;
+  }
+
+  // connect to the extension
+  port = chrome.runtime.connect({ name: PORT_EXTENSION });
+
+  // setup a listener for messages, any incoming resolves the promise
+  port.onMessage.addListener((data: Message['data']): void => {
+    const handler = handlers[data.id];
+
+    if (!handler) {
+      console.error(`Unknown response: ${JSON.stringify(data)}.`);
+
+      return;
+    }
+
+    if (!handler.subscriber) {
+      delete handlers[data.id];
+    }
+
+    if (data.subscription) {
+      // eslint-disable-next-line @typescript-eslint/ban-types
+      (handler.subscriber as Function)(data.subscription);
+    } else if (data.error) {
+      handler.reject(new Error(data.error));
+    } else {
+      handler.resolve(data.response);
+    }
+  });
+
+  port.onDisconnect.addListener(onDisconnectPort);
+}
+
+function onDisconnectPort () {
+  const err = checkForLastError();
+
+  port.onDisconnect.removeListener(
+    onDisconnectPort
+  );
+
+  if (err) {
+    console.warn(`${err.message}, Reconnecting to the port.`);
+    setTimeout(onConnectPort, 1000);
+  } else {
+    console.error('The connection to the SubWallet port will be disconnected. Please reload your wallet.');
+  }
+}
+
+function checkForLastError () {
+  const { lastError } = chrome.runtime;
+
+  if (!lastError) {
+    return undefined;
+  }
+
+  // repair incomplete error object (eg chromium v77)
+  return new Error(lastError.message);
+}
+
 const handlers: Handlers = {};
 
 export function sendMessage<TMessageType extends MessageTypesWithNullRequest> (message: TMessageType): Promise<ResponseTypes[TMessageType]>;
@@ -27,6 +93,12 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
     const id = getId();
 
     handlers[id] = { reject, resolve, subscriber };
+
+    if (!port) {
+      console.error('The connection to the SubWallet port will be disconnected. Please reload your wallet.');
+
+      return;
+    }
 
     port.postMessage({ id, message, request: request || {} });
   });
@@ -44,6 +116,12 @@ export function lazySendMessage<TMessageType extends MessageTypesWithNoSubscript
   const rs = {
     promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
     start: () => {
+      if (!port) {
+        console.error('The connection to the SubWallet port will be disconnected. Please reload your wallet.');
+
+        return;
+      }
+
       port.postMessage({ id, message, request: request || {} });
     }
   };
@@ -69,6 +147,12 @@ export function lazySubscribeMessage<TMessageType extends MessageTypesWithSubscr
   const rs = {
     promise: handlePromise as Promise<ResponseTypes[TMessageType]>,
     start: () => {
+      if (!port) {
+        console.error('The connection to the SubWallet port will be disconnected. Please reload your wallet.');
+
+        return;
+      }
+
       port.postMessage({ id, message, request: request || {} });
     },
     unsub: () => {
@@ -103,27 +187,3 @@ export function subscribeMessage<TMessageType extends MessageTypesWithSubscripti
     unsub: lazyItem.unsub
   };
 }
-
-// setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message['data']): void => {
-  const handler = handlers[data.id];
-
-  if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
-
-    return;
-  }
-
-  if (!handler.subscriber) {
-    delete handlers[data.id];
-  }
-
-  if (data.subscription) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (handler.subscriber as Function)(data.subscription);
-  } else if (data.error) {
-    handler.reject(new Error(data.error));
-  } else {
-    handler.resolve(data.response);
-  }
-});

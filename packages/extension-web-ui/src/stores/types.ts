@@ -9,6 +9,7 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 import { DAppCategory, DAppInfo } from '@subwallet/extension-web-ui/types/dapp';
 import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
 import { SessionTypes } from '@walletconnect/types';
@@ -79,6 +80,7 @@ export interface BaseReduxStore {
 export interface LocalUiSettings {
   language: LanguageType,
   isShowZeroBalance: boolean,
+  currency: string
 }
 
 export interface AppSettings extends LocalUiSettings, UiSettings, Omit<SettingsStruct, 'camera' | 'notification'>, BaseReduxStore {
@@ -198,4 +200,8 @@ export interface DAppStore extends BaseReduxStore {
 
 export interface MissionPoolStore extends BaseReduxStore {
   missions: MissionInfo[];
+}
+
+export interface SwapStore extends BaseReduxStore {
+  swapPairs: SwapPair[];
 }

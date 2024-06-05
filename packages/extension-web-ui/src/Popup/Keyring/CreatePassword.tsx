@@ -98,7 +98,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     if (previousInfo?.prevPathname) {
       navigate(previousInfo.prevPathname, { state: previousInfo.prevState as unknown });
     } else {
-      navigate(returnPath);
+      navigate(returnPath, { state: { from: returnPath } });
       setReturnStorage(DEFAULT_ROUTER_PATH);
     }
   }, [navigate, previousInfo.prevPathname, previousInfo.prevState, returnPath, setReturnStorage]);
@@ -219,7 +219,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 rules={passwordRules}
                 statusHelpAsTooltip={isWebUI}
               >
-                <Input
+                <Input.Password
                   onChange={onChangePassword}
                   placeholder={t('Enter password')}
                   type='password'
@@ -230,7 +230,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
                 rules={confirmPasswordRules}
                 statusHelpAsTooltip={isWebUI}
               >
-                <Input
+                <Input.Password
                   onKeyDown={onConfirmPasswordKeyPress}
                   placeholder={t('Confirm password')}
                   type='password'

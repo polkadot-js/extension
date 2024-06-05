@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { subscribeCrowdloan } from '@subwallet/extension-base/koni/api/dotsama/crowdloan';
-import { nftHandler } from '@subwallet/extension-base/koni/background/handlers';
+import { NftHandler } from '@subwallet/extension-base/koni/api/nft';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { COMMON_RELOAD_EVENTS, EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
@@ -15,6 +15,8 @@ import { Logger } from '@polkadot/util/types';
 import KoniState from './handlers/State';
 
 type SubscriptionName = 'balance' | 'crowdloan' | 'yieldPoolStats' | 'yieldPosition';
+
+const nftHandler = new NftHandler();
 
 export class KoniSubscription {
   private eventHandler?: (events: EventItem<EventType>[], eventTypes: EventType[]) => void;

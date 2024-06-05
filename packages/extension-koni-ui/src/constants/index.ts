@@ -4,6 +4,8 @@
 export * from './account';
 export * from './buy';
 export * from './common';
+export * from './enviroment';
+export * from './error';
 export * from './history';
 export * from './ledger';
 export * from './localStorage';
@@ -16,3 +18,5 @@ export * from './signing';
 export * from './strings';
 export * from './transaction';
 export * from './earning';
+export * from './error';
+export * from './session';

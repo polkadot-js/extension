@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState, CrowdloanItem } from '@subwallet/extension-base/background/KoniTypes';
+import { APIItemState, CrowdloanItem, CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainNativeTokenBasicInfo, _getSubstrateRelayParent } from '@subwallet/extension-base/services/chain-service/utils';
 import { fetchStaticData } from '@subwallet/extension-base/utils/fetchStaticData';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
@@ -15,7 +15,8 @@ import { useSelector } from 'react-redux';
 function getCrowdloanContributeList (
   crowdloanMap: Record<string, CrowdloanItem>,
   chainInfoMap: Record<string, _ChainInfo>,
-  priceMap: Record<string, number>
+  priceMap: Record<string, number>,
+  currency: CurrencyJson
 ): _CrowdloanItemType[] {
   const result: _CrowdloanItemType[] = [];
 
@@ -53,7 +54,8 @@ function getCrowdloanContributeList (
       contribution: {
         symbol,
         value: contributeValue,
-        convertedValue: convertedContributeValue
+        convertedValue: convertedContributeValue,
+        currency
       },
       fundStatus: crowdloanItem.status,
       unlockTime: new Date(crowdloanItem.endTime).getTime()
@@ -75,7 +77,7 @@ export default function useGetCrowdloanList () {
   const crowdloanMap = useSelector((state: RootState) => state.crowdloan.crowdloanMap);
   // chainInfoMap needs to be fetched from online for dynamic usage
   const [chainInfoMap, setChainInfoMap] = useState<Record<string, _ChainInfo>>({});
-  const priceMap = useSelector((state: RootState) => state.price.priceMap);
+  const { currencyData, priceMap } = useSelector((state: RootState) => state.price);
 
   useEffect(() => {
     fetchStaticData<_ChainInfo[]>('chains').then((rs) => {
@@ -97,7 +99,8 @@ export default function useGetCrowdloanList () {
     return getCrowdloanContributeList(
       crowdloanMap,
       chainInfoMap,
-      priceMap
+      priceMap,
+      currencyData
     );
-  }, [crowdloanMap, chainInfoMap, priceMap]);
+  }, [crowdloanMap, chainInfoMap, priceMap, currencyData]);
 }

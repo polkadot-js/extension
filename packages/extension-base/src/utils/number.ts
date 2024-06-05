@@ -11,6 +11,11 @@ export interface NumberFormatter {
   (input: string, metadata?: Record<string, number>): string;
 }
 
+interface LocaleNumberFormat {
+  decimal: string;
+  thousand: string;
+}
+
 // Clear zero from end, use with decimal only
 const clearZero = (result: string): string => {
   let index = result.length - 1;
@@ -59,6 +64,10 @@ export const balanceFormatter: NumberFormatter = (
         return `${intNumber.dividedBy(NUM_1M).toFixed(2)} M`;
       }
 
+      return int;
+    }
+
+    if (!decimal) {
       return int;
     }
 
@@ -115,6 +124,110 @@ export const balanceFormatter: NumberFormatter = (
   }
 
   return int;
+};
+
+const intToLocaleString = (str: string, separator: string) =>
+  str.replace(/\B(?=(\d{3})+(?!\d))/g, separator);
+
+const getNumberSeparators = () => {
+  // default
+  const res: LocaleNumberFormat = {
+    decimal: '.',
+    thousand: ''
+  };
+
+  // convert a number formatted according to locale
+  const str = parseFloat('1234.56').toLocaleString();
+
+  // if the resulting number does not contain previous number
+  // (i.e. in some Arabic formats), return defaults
+  if (!str.match('1')) {
+    return res;
+  }
+
+  // get decimal and thousand separators
+  res.decimal = str.replace(/.*4(.*)5.*/, '$1');
+  res.thousand = str.replace(/.*1(.*)2.*/, '$1');
+
+  // return results
+  return res;
+};
+
+export const balanceNoPrefixFormater: NumberFormatter = (
+  input: string,
+  metadata?: Record<string, number>
+): string => {
+  const [int, decimal] = input.split('.');
+  const { thousand: thousandSeparator } = getNumberSeparators();
+
+  const absGteOne = new BigNumber(input).abs().gte(1);
+  const minNumberFormat = metadata?.minNumberFormat || 2;
+  const maxNumberFormat = metadata?.maxNumberFormat || 6;
+
+  let _decimal = '';
+
+  if (absGteOne) {
+    if (!decimal) {
+      return intToLocaleString(int, thousandSeparator);
+    }
+
+    // Get only minNumberFormat number at decimal
+    if (decimal.length <= minNumberFormat) {
+      _decimal = decimal;
+    } else {
+      _decimal = decimal.slice(0, minNumberFormat);
+    }
+
+    // Clear zero number for decimal
+    _decimal = clearZero(_decimal);
+  } else {
+    // Index of cursor
+    let index = 0;
+
+    // Count of not zero number in decimal
+    let current = 0;
+
+    // Find a not zero number in decimal
+    let metNotZero = false;
+
+    // Get at least minNumberFormat number not 0 from index 0
+    // If count of 0 number at prefix greater or equal maxNumberFormat should stop and return 0
+
+    // current === minNumberFormat: get enough number
+    // index === decimal.length: end of decimal
+    // index === maxNumberFormat: reach limit of 0 number at prefix
+    if (decimal) {
+      while (
+        current < minNumberFormat &&
+        index < decimal.length &&
+        (index < maxNumberFormat || metNotZero)
+      ) {
+        const _char = decimal[index];
+
+        _decimal += _char;
+        index++;
+
+        if (_char !== '0') {
+          metNotZero = true;
+        }
+
+        if (metNotZero) {
+          current++;
+        }
+      }
+
+      // Clear zero number for decimal
+      _decimal = clearZero(_decimal);
+    }
+  }
+
+  const int_ = intToLocaleString(int, thousandSeparator);
+
+  if (_decimal) {
+    return `${int_}.${_decimal}`;
+  }
+
+  return int_;
 };
 
 export const PREDEFINED_FORMATTER: Record<string, NumberFormatter> = {

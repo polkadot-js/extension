@@ -5,9 +5,9 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
-import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
+import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -27,17 +27,19 @@ import MintCampaignService from '@subwallet/extension-base/services/mint-campaig
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
+import { openPopup } from '@subwallet/extension-base/services/request-service/handler/PopupHandler';
 import { AuthUrls, MetaRequest, SignRequest } from '@subwallet/extension-base/services/request-service/types';
 import SettingService from '@subwallet/extension-base/services/setting-service/SettingService';
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SubscanService } from '@subwallet/extension-base/services/subscan-service';
-import { SUBSCAN_API_CHAIN_MAP } from '@subwallet/extension-base/services/subscan-service/subscan-chain-map';
+import { SwapService } from '@subwallet/extension-base/services/swap-service';
 import TransactionService from '@subwallet/extension-base/services/transaction-service';
 import { TransactionEventResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import WalletConnectService from '@subwallet/extension-base/services/wallet-connect-service';
+import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
-import { BalanceItem, BalanceMap, EvmFeeInfo } from '@subwallet/extension-base/types';
-import { isAccountAll, stripUrl, TARGET_ENV } from '@subwallet/extension-base/utils';
+import { BalanceItem, BalanceMap, EvmFeeInfo, StorageDataInterface } from '@subwallet/extension-base/types';
+import { isAccountAll, stripUrl, targetIsWeb, wait } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
@@ -52,7 +54,7 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, u8aToHex } from '@polkadot/util';
+import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, noop, u8aToHex } from '@polkadot/util';
 import { Logger } from '@polkadot/util/types';
 import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -85,6 +87,8 @@ const generateDefaultCrowdloanMap = (): Record<string, CrowdloanItem> => {
 
   return crowdloanMap;
 };
+
+const DEFAULT_CURRENCY: CurrencyType = 'USD';
 
 export default class KoniState {
   private injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
@@ -135,6 +139,7 @@ export default class KoniState {
   readonly buyService: BuyService;
   readonly earningService: EarningService;
   readonly feeService: FeeService;
+  readonly swapService: SwapService;
 
   // Handle the general status of the extension
   private generalStatus: ServiceStatus = ServiceStatus.INITIALIZING;
@@ -150,7 +155,7 @@ export default class KoniState {
 
     this.notificationService = new NotificationService();
     this.chainService = new ChainService(this.dbService, this.eventService);
-    this.subscanService = new SubscanService(SUBSCAN_API_CHAIN_MAP);
+    this.subscanService = SubscanService.getInstance();
     this.settingService = new SettingService();
     this.requestService = new RequestService(this.chainService, this.settingService, this.keyringService);
     this.priceService = new PriceService(this.dbService, this.eventService, this.chainService);
@@ -165,13 +170,14 @@ export default class KoniState {
     this.transactionService = new TransactionService(this);
     this.earningService = new EarningService(this);
     this.feeService = new FeeService(this);
+    this.swapService = new SwapService(this);
 
     this.subscription = new KoniSubscription(this, this.dbService);
     this.cron = new KoniCron(this, this.subscription, this.dbService);
     this.logger = createLogger('State');
 
     // Init state
-    if (TARGET_ENV !== 'mobile') {
+    if (targetIsWeb) {
       this.init().catch(console.error);
     }
   }
@@ -319,6 +325,7 @@ export default class KoniState {
 
     await this.balanceService.init();
     await this.earningService.init();
+    await this.swapService.init();
 
     this.onReady();
     this.onAccountAdd();
@@ -328,6 +335,8 @@ export default class KoniState {
     await this.dbService.stores.crowdloan.removeEndedCrowdloans();
 
     await this.startSubscription();
+
+    this.chainService.checkLatestData();
   }
 
   public async initMantaPay (password: string) {
@@ -1476,13 +1485,35 @@ export default class KoniState {
       data: transactionParams.data
     };
 
+    const getTransactionGas = async () => {
+      try {
+        transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      } catch (e) {
+        // @ts-ignore
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+      }
+    };
+
     // Calculate transaction data
     try {
-      transaction.gas = await web3.eth.estimateGas({ ...transaction });
+      await Promise.race([
+        getTransactionGas(),
+        wait(3000).then(async () => {
+          if (!transaction.gas) {
+            await this.chainService.initSingleApi(networkKey);
+            await getTransactionGas();
+          }
+        })
+      ]);
     } catch (e) {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+    }
+
+    if (!transaction.gas) {
+      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS);
     }
 
     let estimateGas: string;
@@ -1610,6 +1641,100 @@ export default class KoniState {
     return await this.requestService.completeConfirmation(request);
   }
 
+  private async onMV3Update () {
+    const migrationStatus = await SWStorage.instance.getItem('mv3_migration');
+
+    if (!migrationStatus || migrationStatus !== 'done') {
+      // Open migration tab
+      const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
+
+      await openPopup(url);
+
+      // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+    }
+  }
+
+  public async migrateMV3LocalStorage (data: string) {
+    try {
+      const parsedData = JSON.parse(data) as Record<string, string>;
+
+      parsedData.mv3_migration = 'done';
+
+      await SWStorage.instance.setMap(parsedData);
+
+      // Reload some services use SWStorage
+      // wallet connect
+      this.walletConnectService.initClient().catch(console.error);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
+  private async onMV3Install () {
+    await SWStorage.instance.setItem('mv3_migration', 'done');
+
+    // Open expand page
+    const url = `${chrome.runtime.getURL('index.html')}#/welcome`;
+
+    withErrorLog(() => chrome.tabs.create({ url }));
+  }
+
+  public onInstallOrUpdate (details: chrome.runtime.InstalledDetails) {
+    // Open mv3 migration window
+    if (details.reason === 'install') {
+      this.onMV3Install().catch(console.error);
+    } else if (details.reason === 'update') {
+      this.onMV3Update().catch(console.error);
+    }
+  }
+
+  private async onHandleRemindExportAccount () {
+    const remindStatus = await SWStorage.instance.getItem(REMIND_EXPORT_ACCOUNT);
+
+    if (!remindStatus || !remindStatus.includes('done')) {
+      const handleRemind = (account: CurrentAccountInfo) => {
+        if (account.address !== '') {
+          // Open remind tab
+          const url = `${chrome.runtime.getURL('index.html')}#/remind-export-account`;
+
+          openPopup(url)
+            .then(noop)
+            .catch(console.error)
+            .finally(() => subscription.unsubscribe());
+        } else {
+          setTimeout(() => {
+            subscription.unsubscribe();
+          }, 3000);
+        }
+      };
+
+      const subscription = this.keyringService.currentAccountSubject.subscribe(handleRemind);
+    }
+  }
+
+  public async setStorageFromWS ({ key, value }: StorageDataInterface) {
+    try {
+      const jsonData = JSON.stringify(value);
+
+      await SWStorage.instance.setItem(key, jsonData);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+
+      return false;
+    }
+  }
+
+  public onCheckToRemindUser () {
+    this.onHandleRemindExportAccount()
+      .catch(console.error);
+  }
+
   public onInstall () {
     // const singleModes = Object.values(_PREDEFINED_SINGLE_MODES);
 
@@ -1693,7 +1818,7 @@ export default class KoniState {
     // Stopping services
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
-    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop()]);
+    await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop(), this.swapService.stop()]);
 
     // Complete sleeping
     sleeping.resolve();
@@ -1701,7 +1826,7 @@ export default class KoniState {
     this.waitSleeping = null;
   }
 
-  private async _start (isWakeup = false) {
+  private async _start () {
     // Wait sleep finish before start to avoid conflict
     this.generalStatus === ServiceStatus.STOPPING && this.waitSleeping && await this.waitSleeping;
 
@@ -1717,6 +1842,7 @@ export default class KoniState {
       return;
     }
 
+    const isWakeup = this.generalStatus === ServiceStatus.STOPPED;
     const starting = createPromiseHandler<void>();
 
     this.generalStatus = ServiceStatus.STARTING;
@@ -1729,7 +1855,7 @@ export default class KoniState {
     }
 
     // Start services
-    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.balanceService.start(), this.earningService.start()]);
+    await Promise.all([this.cron.start(), this.subscription.start(), this.historyService.start(), this.priceService.start(), this.balanceService.start(), this.earningService.start(), this.swapService.start()]);
 
     // Complete starting
     starting.resolve();
@@ -1738,7 +1864,7 @@ export default class KoniState {
   }
 
   public async wakeup () {
-    await this._start(true);
+    await this._start();
   }
 
   public cancelSubscription (id: string): boolean {
@@ -1847,7 +1973,9 @@ export default class KoniState {
     this.accountRefStore.set('refList', []);
 
     if (resetAll) {
+      await this.priceService.setPriceCurrency(DEFAULT_CURRENCY);
       this.settingService.resetWallet();
+      await this.priceService.setPriceCurrency(DEFAULT_CURRENCY);
     }
 
     this.chainService.resetWallet(resetAll);
@@ -1855,6 +1983,8 @@ export default class KoniState {
 
     await this.chainService.init();
     this.afterChainServiceInit();
+
+    this.chainService.checkLatestData();
   }
 
   public async enableMantaPay (updateStore: boolean, address: string, password: string, seedPhrase?: string) {

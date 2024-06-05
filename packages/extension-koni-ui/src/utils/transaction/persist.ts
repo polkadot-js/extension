@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, CURRENT_PAGE, EARN_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, TRANSFER_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
+import { CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, CURRENT_PAGE, EARN_TRANSACTION, NFT_TRANSACTION, STAKE_TRANSACTION, SWAP_TRANSACTION, TRANSFER_TRANSACTION, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-koni-ui/constants';
 
 import { removeStorage } from '../common';
 
@@ -29,6 +29,8 @@ export const detectTransactionPersistKey = (type?: ExtrinsicType): string => {
       return WITHDRAW_TRANSACTION;
     case ExtrinsicType.STAKING_CLAIM_REWARD:
       return CLAIM_REWARD_TRANSACTION;
+    case ExtrinsicType.SWAP:
+      return SWAP_TRANSACTION;
     default:
       return '';
   }

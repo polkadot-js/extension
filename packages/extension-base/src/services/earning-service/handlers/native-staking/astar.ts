@@ -9,7 +9,6 @@ import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chai
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { BaseYieldPositionInfo, EarningStatus, NativeYieldPoolInfo, PalletDappsStakingAccountLedger, PalletDappsStakingDappInfo, StakeCancelWithdrawalParams, SubmitJoinNativeStaking, TransactionData, UnstakingStatus, ValidatorInfo, YieldPoolInfo, YieldPoolMethodInfo, YieldPositionInfo, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
 import { balanceFormatter, formatNumber, isUrl, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
-import fetch from 'cross-fetch';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
 import { UnsubscribePromise } from '@polkadot/api-base/types/base';
@@ -300,7 +299,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
     const defaultInfo = this.baseInfo;
     const chainInfo = this.chainInfo;
 
-    const unsub = await substrateApi.api.query.dappsStaking.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
+    const unsub = await substrateApi.api.query.dappsStaking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
         unsub();
 
@@ -343,7 +342,7 @@ export default class AstarNativeStakingPoolHandler extends BaseParaNativeStaking
 
     return () => {
       cancel = true;
-      unsub();
+      unsub && unsub();
     };
   }
 

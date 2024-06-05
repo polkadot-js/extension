@@ -1,13 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import fetch from 'cross-fetch';
-
 const PRODUCTION_BRANCHES = ['master', 'webapp', 'webapp-dev'];
 const branchName = process.env.BRANCH_NAME || 'subwallet-dev';
 const fetchDomain = PRODUCTION_BRANCHES.indexOf(branchName) > -1 ? 'https://chain-list-assets.subwallet.app' : 'https://dev.sw-chain-list-assets.pages.dev';
 
-const ChainListVersion = '0.2.53';
+const ChainListVersion = '0.2.62';
 
 export async function fetchPatchData<T> (slug: string) {
   try {

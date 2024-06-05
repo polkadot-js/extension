@@ -9,6 +9,7 @@ import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { SwapPair } from '@subwallet/extension-base/types/swap';
 import { addLazy, canDerive, fetchStaticData, isEmptyObject } from '@subwallet/extension-base/utils';
 import { lazySubscribeMessage } from '@subwallet/extension-web-ui/messaging';
 import { store } from '@subwallet/extension-web-ui/stores';
@@ -425,7 +426,13 @@ export const subscribeBuyServices = lazySubscribeMessage('pri(buyService.service
 /* Earning */
 
 export const updateYieldPoolInfo = (data: YieldPoolInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+  addLazy(
+    'updateYieldPoolInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPoolInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPoolInfo = lazySubscribeMessage(
@@ -436,7 +443,13 @@ export const subscribeYieldPoolInfo = lazySubscribeMessage(
 );
 
 export const updateYieldPositionInfo = (data: YieldPositionInfo[]) => {
-  store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+  addLazy(
+    'updateYieldPositionInfo',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldPositionInfo', payload: data });
+    },
+    900
+  );
 };
 
 export const subscribeYieldPositionInfo = lazySubscribeMessage(
@@ -447,7 +460,13 @@ export const subscribeYieldPositionInfo = lazySubscribeMessage(
 );
 
 export const updateYieldReward = (data: EarningRewardJson) => {
-  store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+  addLazy(
+    'updateYieldReward',
+    () => {
+      store.dispatch({ type: 'earning/updateYieldReward', payload: Object.values(data.data) });
+    },
+    900
+  );
 };
 
 export const subscribeYieldReward = lazySubscribeMessage(
@@ -488,3 +507,11 @@ export const subscribeYieldMinAmountPercent = lazySubscribeMessage(
 );
 
 /* Earning */
+
+/* Swap */
+export const updateSwapPairs = (data: SwapPair[]) => {
+  store.dispatch({ type: 'swap/updateSwapPairs', payload: data });
+};
+
+export const subscribeSwapPairs = lazySubscribeMessage('pri(swapService.subscribePairs)', null, updateSwapPairs, updateSwapPairs);
+/* Swap */

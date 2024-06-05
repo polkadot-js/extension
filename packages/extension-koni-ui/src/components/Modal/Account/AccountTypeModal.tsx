@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { DEFAULT_ACCOUNT_TYPES } from '@subwallet/extension-koni-ui/constants';
-import { useClickOutSide, useSetSelectedAccountTypes, useSwitchModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useClickOutSide, useSetSelectedAccountTypes, useSetSessionLatest, useSwitchModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { PhosphorIcon, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { renderModalSelector } from '@subwallet/extension-koni-ui/utils/common/dom';
 import { Button, Icon, ModalContext, SwModal } from '@subwallet/react-ui';
@@ -31,20 +31,23 @@ const Component: React.FC<Props> = (props: Props) => {
   const { checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const isActive = checkActive(id);
+  const { setStateSelectAccount } = useSetSessionLatest();
 
   const setSelectedAccountTypes = useSetSelectedAccountTypes(false);
 
   const [selectedItems, setSelectedItems] = useState<KeypairType[]>(DEFAULT_ACCOUNT_TYPES);
 
   const onCancel = useCallback(() => {
+    setStateSelectAccount(true);
     inactiveModal(id);
-  }, [id, inactiveModal]);
+  }, [id, inactiveModal, setStateSelectAccount]);
 
   const onSubmit = useCallback(() => {
+    setStateSelectAccount(true);
     setSelectedAccountTypes(selectedItems);
     navigate(url);
     inactiveModal(id);
-  }, [setSelectedAccountTypes, selectedItems, navigate, url, inactiveModal, id]);
+  }, [setStateSelectAccount, setSelectedAccountTypes, selectedItems, navigate, url, inactiveModal, id]);
 
   const onBack = useSwitchModal(id, previousId);
 

@@ -1,22 +1,22 @@
-    2358	AnhMTV                        	Update chain list patch with fixed version
-    2173	Nam Phạm                      	[Issue 2786] feat: enable some tokens automatically
-    1980	S2kael                        	[Issue-2824] Handle case online data is null
-     620	lw-cdm                        	Fix eslint issues
+    2657	AnhMTV                        	Release version 1.2.3
+    2390	Nam Phạm                      	[Issue 3094] fix bug validating transactions not using system pallet
+    2063	S2kael                        	[Issue-3094] Update stable version for chain-list
+     815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
+     432	nguyentiendung                	
      185	quangdo                       	
+     155	bluezdot                      	fix eslint
+     129	Thiendekaco                   	[Issue 3117] [fix] [mv3] Extension - Still show icon ZK mode on Export account screen in case upgrade version MV2 -> MV3
+     115	Automation Bot                	[CI Skip] Auto increase webapp build number
+     106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-      99	lw-cdm                        	
-      88	dominhquang                   	[Issue-2649] Add send crash log feature
+     101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md
-      82	nguyentiendung                	[Issue-2784] Update url for redirect swap extension
       82	Thibaut Sardan                	Add account filtering feature (#832)
-      80	leewong                       	Update account filter for earn transaction
-      77	bluezdot                      	[Issue-2805] Update chainlist
+      81	leewong                       	Swap - Change idle time to 300s
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
-      34	Thiendekaco                   	[Issue 2785] Extension - Support connect Ledger device for Asset Hub
-      29	Automation Bot                	[CI Skip] Auto increase webapp build number
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
@@ -38,6 +38,7 @@
        2	Shawn Tabrizi                 	Add configurable notifications (#767)
        2	WoeOm                         	add darwinia network (#493)
        2	Yash Mittal                   	Address comment
+       1	0_0./                         	
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
        1	Amit Chauhan                  	Fixed toast flicker effect when multiple show toast method called
        1	Andrei Eres                   	Add extension prefix (#891)

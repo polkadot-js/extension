@@ -36,7 +36,7 @@ export default class DatabaseService {
 
   constructor (private eventService: EventService) {
     this.logger = createLogger('DB-Service');
-    this._db = new KoniDatabase();
+    this._db = KoniDatabase.getInstance();
     this._db.on('ready', () => {
       this.eventService.emit('database.ready', true);
     });
@@ -72,11 +72,9 @@ export default class DatabaseService {
     await this.stores.price.table.put(priceData);
   }
 
-  async getPriceStore () {
+  async getPriceStore (keyData?: string) {
     try {
-      const rs = await this.stores.price.table.get('usd');
-
-      return rs;
+      return await this.stores.price.table.get(keyData || 'USD');
     } catch (e) {
       this.logger.error(e);
 

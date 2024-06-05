@@ -34,6 +34,7 @@ const Component: React.FC<Props> = (props: Props) => {
         <MetaInfo.Account
           address={data.recipientAddress}
           label={t('Send to')}
+          networkPrefix={networkPrefix}
         />
 
         <MetaInfo.Chain

@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { UnlockDotCheckMintData, UnlockDotCheckMintRequest, UnlockDotCheckMintResponse, UnlockDotFetchMintedRequest, UnlockDotFetchMintedResponse, UnlockDotMintedData, UnlockDotMintSubmitRequest, UnlockDotMintSubmitResponse, UnlockDotSubmitMintData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
-import { isSameAddress } from '@subwallet/extension-base/utils';
-import axios from 'axios';
+import { UnlockDotCheckMintData, UnlockDotCheckMintRequest, UnlockDotCheckMintResponse, UnlockDotFetchMintedResponse, UnlockDotMintedData, UnlockDotMintSubmitRequest, UnlockDotMintSubmitResponse, UnlockDotSubmitMintData, UnlockDotTransactionNft } from '@subwallet/extension-base/types';
+import { fetchJson, isSameAddress } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
 import { MINT_HOST } from '../constants';
@@ -55,14 +54,13 @@ export default class UnlockDotCampaign {
       }
     };
 
-    const response = await axios.request({
-      baseURL: this.#host,
-      url: '/api/mint/check',
+    const respData = await fetchJson<UnlockDotCheckMintResponse>(`${this.#host}/api/mint/check`, {
       method: 'POST',
-      data
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
-
-    const respData = response.data as UnlockDotCheckMintResponse;
 
     if (
       respData.inMintingTime &&
@@ -86,28 +84,23 @@ export default class UnlockDotCampaign {
       recipient: address
     };
 
-    const response = await axios.request({
-      baseURL: this.#host,
-      url: '/api/mint/submit',
+    return await fetchJson<UnlockDotMintSubmitResponse>(`${this.#host}/api/mint/submit`, {
       method: 'POST',
-      data
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
-
-    return response.data as UnlockDotMintSubmitResponse;
   }
 
   // @ts-ignore
   private async getMinted (address: string, slug: string) {
-    const params: UnlockDotFetchMintedRequest = { address };
+    const params = { address };
 
-    const response = await axios.request({
-      baseURL: this.#host,
-      url: '/api/mint/fetch',
+    const data = await fetchJson<UnlockDotFetchMintedResponse>(`${this.#host}/api/mint/check`, {
       method: 'GET',
       params: params
     });
-
-    const data = response.data as UnlockDotFetchMintedResponse;
 
     for (const item of data) {
       if (
@@ -134,14 +127,13 @@ export default class UnlockDotCampaign {
       }
     };
 
-    const response = await axios.request({
-      baseURL: this.#host,
-      url: '/api/mint/check',
+    const respData = await fetchJson<UnlockDotCheckMintResponse>(`${this.#host}/api/mint/check`, {
       method: 'POST',
-      data
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
     });
-
-    const respData = response.data as UnlockDotCheckMintResponse;
 
     if (
       respData.inMintingTime &&

@@ -11,6 +11,8 @@ import { assert, BN, hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, ethereumEncode, isEthereumAddress } from '@polkadot/util-crypto';
 
 export { canDerive } from './canDerive';
+export * from './mv3';
+export * from './fetch';
 
 export const notDef = (x: any) => x === null || typeof x === 'undefined';
 export const isDef = (x: any) => !notDef(x);
@@ -425,11 +427,13 @@ export * from './array';
 export * from './asset';
 export * from './environment';
 export * from './eth';
-export * from './number';
+export * from './fetchEvmChainInfo';
+export * from './fetchStaticData';
+export * from './gear';
 export * from './lazy';
+export * from './number';
+export * from './object';
 export * from './promise';
 export * from './registry';
+export * from './swap';
 export * from './translate';
-export * from './object';
-export * from './fetchStaticData';
-export * from './fetchEvmChainInfo';

@@ -3,6 +3,7 @@
 
 import AutoEnableSomeTokens from '@subwallet/extension-base/services/migration-service/scripts/databases/AutoEnableSomeTokens';
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
+import MigrateRemoveGenesisHash from '@subwallet/extension-base/services/migration-service/scripts/MigrateRemoveGenesisHash';
 import MigrateTransactionHistoryBySymbol from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistoryBySymbol';
 
 import BaseMigrationJob from '../Base';
@@ -51,9 +52,10 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.26-01': MigratePolygonUSDCProvider,
   '1.1.28-01': MigrateEarningVersion,
   '1.1.41-01': DeleteChainStaking,
-  '1.1.44-01': MigrateAssetSetting,
-  '1.1.45-01': MigrateTransactionHistoryBySymbol,
-  '1.1.46-01': AutoEnableSomeTokens
+  '1.1.46-01': AutoEnableSomeTokens,
+  '1.1.62-01': MigrateAssetSetting,
+  '1.1.62-02': MigrateTransactionHistoryBySymbol,
+  '1.2.69-01': MigrateRemoveGenesisHash
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

@@ -4,6 +4,7 @@
 import '@polkadot/types-augment';
 
 import { options as acalaOptions } from '@acala-network/api';
+import { GearApi } from '@gear-js/api';
 import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } from '@subwallet/extension-base/services/chain-service/constants';
@@ -12,7 +13,7 @@ import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/ha
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainConnectionStatus, _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
-import { spec as availSpec } from 'avail-js-sdk';
+import { goldbergRpc, goldbergTypes, spec as availSpec } from 'avail-js-sdk';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
@@ -24,8 +25,6 @@ import { TypeRegistry } from '@polkadot/types/create';
 import { Registry } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
-
-import goldbergSpec from './chain-spec/goldberg';
 
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;
@@ -129,9 +128,14 @@ export class SubstrateApi implements _SubstrateApi {
     } else if (_API_OPTIONS_CHAIN_GROUP.goldberg.includes(this.chainSlug)) {
       api = new ApiPromise({
         provider,
-        rpc: goldbergSpec.rpc,
-        types: goldbergSpec.types,
-        signedExtensions: goldbergSpec.signedExtensions,
+        rpc: goldbergRpc,
+        types: goldbergTypes,
+        signedExtensions: availSpec.signedExtensions,
+        noInitWarn: true
+      });
+    } else if (_API_OPTIONS_CHAIN_GROUP.gear.includes(this.chainSlug)) {
+      api = new GearApi({
+        provider,
         noInitWarn: true
       });
     } else {

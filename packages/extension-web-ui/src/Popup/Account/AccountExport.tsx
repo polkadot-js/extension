@@ -383,7 +383,7 @@ const Component: React.FC<Props> = (props: Props) => {
                   ]}
                   statusHelpAsTooltip={isWebUI}
                 >
-                  <Input
+                  <Input.Password
                     disabled={loading}
                     placeholder={t('Type your SubWallet password')}
                     suffix={<span />}

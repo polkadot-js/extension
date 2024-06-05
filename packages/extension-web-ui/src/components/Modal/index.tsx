@@ -20,3 +20,4 @@ export * from './GlobalSearchTokenModal';
 export * from './ReceiveModal';
 export * from './Wallet';
 export * from './Common';
+export * from './Swap';

@@ -75,6 +75,8 @@ function Component ({ children, className, modalContent, modalId }: Props) {
         return ExtrinsicType.STAKING_COMPOUNDING;
       case 'send-nft':
         return ExtrinsicType.SEND_NFT;
+      case 'swap':
+        return ExtrinsicType.SWAP;
       case 'send-fund':
       default:
         return ExtrinsicType.TRANSFER_BALANCE;
@@ -135,6 +137,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
     disabled: boolean,
     onClick: null | VoidFunction
   }>({ disabled: false, onClick: null });
+  const [customScreenTitle, setCustomScreenTitle] = useState<string | undefined>();
 
   const chainChecker = useChainChecker();
 
@@ -167,6 +170,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
     persistData: setStorage,
     onDone,
     setSubHeaderRightButtons,
+    setCustomScreenTitle,
     goBack,
     setBackProps,
     closeAlert,
@@ -221,7 +225,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
         <Layout.WithSubHeaderOnly
           onBack={goBack}
           showBackButton
-          title={titleMap[transactionType]}
+          title={customScreenTitle || titleMap[transactionType]}
         >
           <TransactionContext.Provider value={contextValues}>
             <PageWrapper resolve={dataContext.awaitStores(['chainStore', 'assetRegistry', 'balance'])}>
@@ -254,7 +258,7 @@ function Component ({ children, className, modalContent, modalId }: Props) {
                 onBack={onClickBack || goBack}
                 rightButtons={subHeaderRightButtons}
                 showBackButton
-                title={titleMap[transactionType]}
+                title={customScreenTitle || titleMap[transactionType]}
               />
               <Outlet />
             </div>

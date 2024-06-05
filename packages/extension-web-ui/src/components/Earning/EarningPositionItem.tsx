@@ -1,11 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType } from '@subwallet/extension-base/types';
 import { BN_TEN } from '@subwallet/extension-base/utils';
 import EarningTypeTag from '@subwallet/extension-web-ui/components/Earning/EarningTypeTag';
-import { useSelector } from '@subwallet/extension-web-ui/hooks';
-import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { ExtraYieldPositionInfo, NetworkType, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -20,18 +21,16 @@ type Props = ThemeProps & {
 }
 
 const Component: React.FC<Props> = (props: Props) => {
+  const { t } = useTranslation();
   const { className, isShowBalance,
     onClick,
     positionInfo } = props;
-  const { asset, balanceToken, chain, group, price, slug, totalStake, type } = positionInfo;
+  const { asset, balanceToken, chain, currency, group, price, slug, totalStake, type } = positionInfo;
 
   const { poolInfoMap } = useSelector((state) => state.earning);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
   const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
   const poolInfo = poolInfoMap[slug];
-
-  const showSubLogo = useMemo(() => {
-    return ![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(type);
-  }, [type]);
 
   const poolName = useMemo(() => {
     return (multiChainAssetMap[group] || assetRegistry[group]).symbol;
@@ -45,6 +44,12 @@ const Component: React.FC<Props> = (props: Props) => {
     return new BigN(balanceValue).div(BN_TEN.pow(asset.decimals || 0)).multipliedBy(price);
   }, [asset.decimals, balanceValue, price]);
 
+  const isTestNet = useMemo(() => {
+    return chainInfoMap[positionInfo.chain].isTestnet;
+  }, [chainInfoMap, positionInfo.chain]);
+
+  const _isRelatedToAstar = isRelatedToAstar(slug);
+
   return (
     <div
       className={CN(className)}
@@ -53,7 +58,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className={'__item-left-part'}>
         <Logo
           className={'__item-logo'}
-          isShowSubLogo={showSubLogo}
+          isShowSubLogo={true}
           size={40}
           subNetwork={poolInfo.metadata.logo || poolInfo.chain}
           token={balanceToken.toLowerCase()}
@@ -62,14 +67,19 @@ const Component: React.FC<Props> = (props: Props) => {
         <div className='__item-lines-container'>
           <div className='__item-line-1'>
             <div className='__item-name'>{poolName}</div>
-            <div className='__item-balance-value'>
-              <Number
-                decimal={asset.decimals || 0}
-                hide={!isShowBalance}
-                suffix={asset.symbol}
-                value={balanceValue}
-              />
-            </div>
+
+            {
+              !_isRelatedToAstar && (
+                <div className='__item-balance-value'>
+                  <Number
+                    decimal={asset.decimals || 0}
+                    hide={!isShowBalance}
+                    suffix={asset.symbol}
+                    value={balanceValue}
+                  />
+                </div>
+              )
+            }
           </div>
           <div className='__item-line-2'>
             <div className='__item-tags-container'>
@@ -78,20 +88,38 @@ const Component: React.FC<Props> = (props: Props) => {
                 className={'__item-tag'}
                 type={type}
               />
+              {isTestNet && <NetworkTag
+                className={'__item-tag'}
+                type={isTestNet ? NetworkType.TEST_NETWORK : NetworkType.MAIN_NETWORK}
+              />}
             </div>
-            <div className='__item-converted-balance-value'>
-              <Number
-                decimal={0}
-                hide={!isShowBalance}
-                prefix={'$'}
-                value={convertedBalanceValue}
-              />
-            </div>
+
+            {
+              !_isRelatedToAstar && (
+                <div className='__item-converted-balance-value'>
+                  <Number
+                    decimal={0}
+                    hide={!isShowBalance}
+                    prefix={(currency?.isPrefix && currency.symbol) || ''}
+                    suffix={(!currency?.isPrefix && currency?.symbol) || ''}
+                    value={convertedBalanceValue}
+                  />
+                </div>
+              )
+            }
           </div>
         </div>
       </div>
 
       <div className={'__item-right-part'}>
+        {
+          _isRelatedToAstar && (
+            <div className={'__visit-dapp'}>
+              {t('View on dApp')}
+            </div>
+          )
+        }
+
         <Icon
           phosphorIcon={CaretRight}
           size='sm'
@@ -124,7 +152,8 @@ const EarningPositionItem = styled(Component)<Props>(({ theme: { token } }: Prop
     '.__item-right-part': {
       display: 'flex',
       alignItems: 'center',
-      paddingLeft: 10
+      paddingLeft: 10,
+      gap: 10
     },
 
     '.__item-logo': {
@@ -196,6 +225,12 @@ const EarningPositionItem = styled(Component)<Props>(({ theme: { token } }: Prop
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       minWidth: 70
+    },
+
+    '.__visit-dapp': {
+      color: token.colorTextLight4,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
     }
   });
 });

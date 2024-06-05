@@ -30,7 +30,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const asset = useGetChainAssetInfo(inputAsset);
 
-  const { priceMap } = useSelector((state) => state.price);
+  const { currencyData, priceMap } = useSelector((state) => state.price);
 
   const apy = useMemo((): number | undefined => {
     if (totalApy) {
@@ -113,7 +113,8 @@ const Component: React.FC<Props> = (props: Props) => {
                 ? (
                   <Number
                     decimal={0}
-                    prefix={'$'}
+                    prefix={(currencyData.isPrefix && currencyData.symbol) || ''}
+                    suffix={(!currencyData.isPrefix && currencyData.symbol) || ''}
                     value={total}
                   />
                 )

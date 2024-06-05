@@ -88,8 +88,24 @@ export function _getContractAddressOfToken (tokenInfo: _ChainAsset) {
   return tokenInfo.metadata?.contractAddress as string || '';
 }
 
+/**
+ * @function _isNativeTokenTransferredByEvm
+ * @description Check if the native token is transferred by EVM, some token is only transferred by Substrate, need to check disableEvmTransfer flag
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the native token can transfer by EVM
+ * */
+export function _isNativeTokenTransferredByEvm (tokenInfo: _ChainAsset) {
+  return !tokenInfo.metadata?.disableEvmTransfer;
+}
+
+/**
+ * @function _isTokenTransferredByEvm
+ * @description Check if the token is transferred by EVM
+ * @param {_ChainAsset} tokenInfo - The token info object
+ * @returns {boolean} - Return true if the token can transfer by EVM
+ * */
 export function _isTokenTransferredByEvm (tokenInfo: _ChainAsset) {
-  return !!tokenInfo.metadata?.contractAddress || _isNativeToken(tokenInfo);
+  return !!tokenInfo.metadata?.contractAddress || (_isNativeToken(tokenInfo) && _isNativeTokenTransferredByEvm(tokenInfo));
 }
 
 export function _checkSmartContractSupportByChain (chainInfo: _ChainInfo, contractType: _AssetType) {
@@ -178,6 +194,18 @@ export function _isChainSupportWasmNft (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP34) || false;
 }
 
+export function _isChainSupportEvmERC20 (chainInfo: _ChainInfo) {
+  return chainInfo.evmInfo?.supportSmartContract?.includes(_AssetType.ERC20) || false;
+}
+
+export function _isChainSupportWasmPSP22 (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.PSP22) || false;
+}
+
+export function _isChainSupportGRC20 (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.GRC20) || false;
+}
+
 export const _isSupportOrdinal = (chain: string) => {
   const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 
@@ -211,7 +239,7 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
 
   if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
     chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
-      if ([_AssetType.PSP22].includes(assetType)) {
+      if ([_AssetType.PSP22, _AssetType.GRC20].includes(assetType)) {
         result.push(assetType);
       }
     });
@@ -278,6 +306,10 @@ export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
   return [_AssetType.PSP34, _AssetType.ERC721].includes(assetInfo.assetType);
 }
 
+export function _isTokenGearSmartContract (tokenInfo: _ChainAsset) {
+  return [_AssetType.GRC20, _AssetType.GRC721].includes(tokenInfo.assetType);
+}
+
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {
   return `${originTokenSlug}___${destinationTokenSlug}`;
 }
@@ -324,19 +356,23 @@ export function _isAssetValuable (assetInfo: _ChainAsset) {
   return assetInfo.hasValue;
 }
 
-export function _getMultiChainAsset (assetInfo: _ChainAsset) {
+export function _getMultiChainAsset (assetInfo?: _ChainAsset) {
   return assetInfo?.multiChainAsset || '';
 }
 
-export function _getAssetPriceId (assetInfo: _ChainAsset) {
+export function _getAssetPriceId (assetInfo?: _ChainAsset) {
   return assetInfo?.priceId || '';
+}
+
+export function _getAssetName (assetInfo?: _ChainAsset) {
+  return assetInfo?.name || '';
 }
 
 export function _getMultiChainAssetPriceId (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset?.priceId || '';
 }
 
-export function _getAssetSymbol (assetInfo: _ChainAsset) {
+export function _getAssetSymbol (assetInfo?: _ChainAsset) {
   return assetInfo?.symbol || '';
 }
 
@@ -344,16 +380,16 @@ export function _getMultiChainAssetSymbol (multiChainAsset: _MultiChainAsset) {
   return multiChainAsset.symbol;
 }
 
-export function _getAssetOriginChain (assetInfo: _ChainAsset) {
-  return assetInfo.originChain;
+export function _getAssetOriginChain (assetInfo?: _ChainAsset) {
+  return assetInfo?.originChain || '';
 }
 
 export function _getChainName (chainInfo: _ChainInfo) {
   return chainInfo.name;
 }
 
-export function _getAssetDecimals (assetInfo: _ChainAsset): number {
-  return assetInfo.decimals || 0;
+export function _getAssetDecimals (assetInfo?: _ChainAsset): number {
+  return assetInfo?.decimals || 0;
 }
 
 export function _getBlockExplorerFromChain (chainInfo: _ChainInfo): string | undefined {
@@ -442,6 +478,10 @@ export function _isMantaZkAsset (chainAsset: _ChainAsset) {
   return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
 }
 
+export function _getChainExistentialDeposit (chainInfo: _ChainInfo): string {
+  return chainInfo?.substrateInfo?.existentialDeposit || '0';
+}
+
 export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {
   if (Object.keys(providers).length === 0) {
     return {
@@ -469,6 +509,10 @@ export function randomizeProvider (providers: Record<string, string>, excludedKe
     providerKey: selectedProviderKey,
     providerValue: selectedProviderValue
   };
+}
+
+export function _isAssetCanPayTxFee (chainAsset: _ChainAsset): boolean {
+  return chainAsset.metadata?.canPayTxFee as boolean ?? false;
 }
 
 export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfoList: _ChainInfo[]) {
@@ -502,7 +546,9 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
 
         currentChainState.currentProvider = providerKey;
 
-        needUpdateChainApiList.push(currentChainInfo);
+        if (currentChainState.active) {
+          needUpdateChainApiList.push(currentChainInfo);
+        }
       }
 
       needUpdate = true;
@@ -511,6 +557,11 @@ export function updateLatestChainInfo (currentDataMap: _DataMap, latestChainInfo
     if (currentChainInfo) {
       needUpdate = true;
       currentChainInfo.extraInfo = latestChainInfo.extraInfo;
+      currentChainInfo.chainStatus = latestChainInfo.chainStatus;
+
+      if (Object.keys(currentChainInfo.providers).length === 0) {
+        currentChainInfo.chainStatus = _ChainStatus.INACTIVE;
+      }
     }
 
     if (needUpdate) {

@@ -266,7 +266,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
           chain: chainSlug,
           genesisHash: genesisHash,
           specVersion: currentSpecVersion,
-          hexValue: api.runtimeMetadata.asCallsOnly.toHex(), // Shorten metadata to save space
+          hexValue: api.runtimeMetadata.toHex(),
           types: getSpecTypes(api.registry, systemChain, api.runtimeVersion.specName, api.runtimeVersion.specVersion) as unknown as Record<string, string>,
           userExtensions: getSpecExtensions(api.registry, systemChain, api.runtimeVersion.specName)
         }).catch(console.error);

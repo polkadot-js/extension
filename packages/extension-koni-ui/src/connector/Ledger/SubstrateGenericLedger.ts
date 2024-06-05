@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { ResponseSign } from '@zondax/ledger-polkadot/dist/types';
+import type { ResponseSign } from '@zondax/ledger-substrate/dist/common';
 
 import { wrapBytes } from '@subwallet/extension-dapp';
 import { PolkadotGenericApp } from '@zondax/ledger-substrate';
 
-import { LEDGER_DEFAULT_ACCOUNT, LEDGER_DEFAULT_CHANGE, LEDGER_DEFAULT_INDEX } from '@polkadot/hw-ledger/constants';
+import { LEDGER_DEFAULT_ACCOUNT, LEDGER_DEFAULT_CHANGE, LEDGER_DEFAULT_INDEX, LEDGER_SUCCESS_CODE } from '@polkadot/hw-ledger/constants';
 import { AccountOptions, LedgerAddress, LedgerSignature, LedgerVersion } from '@polkadot/hw-ledger/types';
 import { transports } from '@polkadot/hw-ledger-transports';
 import { hexAddPrefix, hexStripPrefix, u8aToHex } from '@polkadot/util';
@@ -101,7 +101,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
 
       const transport = await def.create();
 
-      this.app = PolkadotGenericApp.newApp(transport, 'Polkadot', 'http://192.168.10.12:3001/transaction/metadata');
+      this.app = PolkadotGenericApp.newApp(transport, '', '');
     }
 
     return this.app;
@@ -111,12 +111,12 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
     try {
       const result = await promise as ResponseSign;
 
-      if (!result.returnCode) {
+      if (!result.return_code) {
         return result as V;
-      } else if (result.returnCode === 36864) {
+      } else if (result.return_code === LEDGER_SUCCESS_CODE) {
         return result as V;
       } else {
-        throw new Error(result.errorMessage);
+        throw new Error(result.error_message);
       }
     } catch (e) {
       const error = e as Error;

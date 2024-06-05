@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
-import { CONFIRMATION_QR_MODAL, PolkadotDerivationPathGens, StandardDerivationPathGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRMATION_QR_MODAL, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -17,10 +17,8 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { Metadata, TypeRegistry } from '@polkadot/types';
 import { SignerPayloadJSON, SignerResult } from '@polkadot/types/types';
 import { hexToU8a, u8aToHex, u8aToU8a } from '@polkadot/util';
-import { base64Decode } from '@polkadot/util-crypto';
 
 import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
@@ -95,47 +93,47 @@ const Component: React.FC<Props> = (props: Props) => {
         if (signMode === AccountSignMode.GENERIC_LEDGER) {
           return {
             isError: true,
-            title: t('Metadata attention!'),
-            description: t('Network {{networkName}} don\'t save metadata, you must ', { replace: { networkName } })
+            title: t('Unable to sign'),
+            description: t('{{networkName}} network\'s metadata is outdated. Update metadata and try again', { replace: { networkName } })
           };
         } else {
           return {
             isError: false,
-            title: t('Metadata attention!'),
-            description: t('Network {{networkName}} don\'t save metadata, this maybe lead to signature invalid', { replace: { networkName } })
+            title: t('Pay attention!'),
+            description: t('{{networkName}} network\'s metadata is not updated, which can lead to an invalid signature', { replace: { networkName } })
           };
         }
-      } else {
-        const metadata = new Metadata(new TypeRegistry(), base64Decode(chain.definition.metaCalls || ''));
-        const version = metadata.version;
-
-        if (version >= 15) {
-          if (signMode === AccountSignMode.LEGACY_LEDGER) {
-            const gens = chain.genesisHash || '___';
-
-            if (PolkadotDerivationPathGens.includes(gens) || StandardDerivationPathGens.includes(gens)) {
-              return {
-                isError: true,
-                title: t('Runtime attention!'),
-                description: t('Network {{networkName}} don\'t save metadata, you must ', { replace: { networkName } })
-              };
-            } else {
-              return {
-                isError: true,
-                title: t('Runtime attention!'),
-                description: t('Network {{networkName}} don\'t save metadata, you need to migrate and ', { replace: { networkName } })
-              };
-            }
-          }
-        } else {
-          if (signMode === AccountSignMode.GENERIC_LEDGER) {
-            return {
-              isError: true,
-              title: t('Runtime attention!'),
-              description: t('Network {{networkName}} don\'t save metadata', { replace: { networkName } })
-            };
-          }
-        }
+      // } else {
+      //   const metadata = new Metadata(new TypeRegistry(), base64Decode(chain.definition.metaCalls || ''));
+      //   const version = metadata.version;
+      //
+      //   if (version >= 15) {
+      //     if (signMode === AccountSignMode.LEGACY_LEDGER) {
+      //       const gens = chain.genesisHash || '___';
+      //
+      //       if (PolkadotDerivationPathGens.includes(gens) || StandardDerivationPathGens.includes(gens)) {
+      //         return {
+      //           isError: true,
+      //           title: t('Runtime attention!'),
+      //           description: t('Network {{networkName}} don\'t save metadata, you must ', { replace: { networkName } })
+      //         };
+      //       } else {
+      //         return {
+      //           isError: true,
+      //           title: t('Runtime attention!'),
+      //           description: t('Network {{networkName}} don\'t save metadata, you need to migrate and ', { replace: { networkName } })
+      //         };
+      //       }
+      //     }
+      //   } else {
+      //     if (signMode === AccountSignMode.GENERIC_LEDGER) {
+      //       return {
+      //         isError: true,
+      //         title: t('Runtime attention!'),
+      //         description: t('Network {{networkName}} don\'t save metadata', { replace: { networkName } })
+      //       };
+      //     }
+      //   }
       }
     }
 
@@ -250,8 +248,8 @@ const Component: React.FC<Props> = (props: Props) => {
           .then(({ signature }) => {
             onApproveSignature({ signature });
           })
-          .catch((e: Error) => {
-            console.error(e);
+          .catch(console.error)
+          .finally(() => {
             setLoading(false);
           });
       }

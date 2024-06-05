@@ -6215,7 +6215,6 @@ __metadata:
     "@types/styled-components": ^5.1.26
     "@walletconnect/types": ^2.13.1
     "@wojtekmaj/enzyme-adapter-react-17": ^0.8.0
-    "@zondax/ledger-polkadot": ^0.16.0
     bip39: ^3.1.0
     boring-avatars: ^1.7.0
     bowser: ^2.11.0
@@ -8732,13 +8731,6 @@ __metadata:
   version: 0.0.14
   resolution: "@zeroio/type-definitions@npm:0.0.14"
   checksum: b2729f034fbd865385309ffd9c33ec0f75eb0affdef66e970da8dc98b339c0351700c9ba6dd8d488acbd87fa2321c5061571cc2664da0ab4f0e5fe23ea805a49
-  languageName: node
-  linkType: hard
-
-"@zondax/ledger-polkadot@npm:^0.16.0":
-  version: 0.16.0
-  resolution: "@zondax/ledger-polkadot@npm:0.16.0"
-  checksum: 65fc6f68c386558ba91ba02a07f91039fb55393550859667ac691b97524dda99a4d65b7f2e6b3d72002ed49b877ae8359d244215793d05f3583751ca091d2999
   languageName: node
   linkType: hard
 

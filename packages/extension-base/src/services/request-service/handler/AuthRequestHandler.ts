@@ -8,7 +8,7 @@ import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
-import { PREDEFINED_CHAIN_DAPP_CHAIN_MAP, WEB_APP_URL } from '@subwallet/extension-base/services/request-service/constants';
+import { DAPP_CONNECT_ALL_TYPE_ACCOUNT_URL, PREDEFINED_CHAIN_DAPP_CHAIN_MAP, WEB_APP_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import AuthorizeStore from '@subwallet/extension-base/stores/Authorize';
 import { createPromiseHandler, getDomainFromUrl, PromiseHandler, stripUrl } from '@subwallet/extension-base/utils';
@@ -214,7 +214,9 @@ export default class AuthRequestHandler {
   private authorizePromiseMap: Record<string, PromiseHandler<boolean>> = {};
   public async authorizeUrlV2 (url: string, request: RequestAuthorizeTab): Promise<boolean> {
     let authList = await this.getAuthList();
-    let accountAuthType = request.accountAuthType || 'substrate';
+    const idStr = stripUrl(url);
+    const isAllowedDappConnectAllType = !!DAPP_CONNECT_ALL_TYPE_ACCOUNT_URL.find((url_) => url.includes(url_));
+    let accountAuthType = isAllowedDappConnectAllType ? 'both' : (request.accountAuthType || 'substrate');
 
     request.accountAuthType = accountAuthType;
 
@@ -225,8 +227,6 @@ export default class AuthRequestHandler {
     const id = getId();
     const promiseHandler = createPromiseHandler<boolean>();
     const { promise, reject, resolve } = promiseHandler;
-    const idStr = stripUrl(url);
-
     const isExistedAuthBothBefore = Object.entries(this.authorizeUrlSubject.value)
       .find(([key, data]) =>
         (key === idStr && data.accountAuthType === 'both'));

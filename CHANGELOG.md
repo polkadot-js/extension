@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.2.3
+Build date: Jun 03, 2024.
+
+Features & Update:
+- Update chain-list (#3094)
+  - Remove bit.country testnet, Ethereum Goerli
+  - Add support for Ink Whale token INW2
+  - Add support for Kreivo Network
+  - Add support Bitlayer
+  - Add support Bsquared network
+  - Add support BounceBit
+- Improve swap quote fetching speed (#3104)
+- Update transferable balance calculation formula (2118)
+
 ## 1.2.2
 Build date: May 30, 2024.
 

@@ -2,38 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { FOUR_INSTRUCTIONS_WEIGHT, getDestMultilocation, getDestWeight } from '@subwallet/extension-base/koni/api/xcm/utils';
-import { _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetId, _getXcmAssetMultilocation, _getXcmAssetType, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  STABLE_XCM_VERSION
+} from '@subwallet/extension-base/koni/api/xcm/utils';
 
 import { ApiPromise } from '@polkadot/api';
-
-function getCurrencyId (tokenInfo: _ChainAsset): unknown {
-  if (['acala', 'karura'].includes(tokenInfo.originChain) && _isNativeToken(tokenInfo)) {
-    return _getXcmAssetMultilocation(tokenInfo) as Record<string, string>;
-  } else if (['moonbeam', 'moonbase', 'moonriver'].includes(tokenInfo.originChain)) {
-    const tokenType = _getXcmAssetType(tokenInfo);
-    const assetId = _getXcmAssetId(tokenInfo);
-
-    return { [tokenType]: assetId };
-  } else if (['pioneer'].includes(tokenInfo.originChain)) {
-    return _getXcmAssetMultilocation(tokenInfo) as Record<string, string>;
-  }
-
-  return _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo);
-}
-
-const V3_SUPPORTED_CHAINS = ['moonbeam', 'moonriver', 'bifrost_dot', 'interlay', 'hydradx_main', 'acala', 'parallel', 'astar', 'shiden', 'centrifuge', 'manta_network', 'pendulum'];
+import {
+  _getXcmDestWeight,
+  _getXcmMultiAssets,
+  _getXcmMultiLocation
+} from "@subwallet/extension-base/core/substrate/xcm-parser";
 
 export function getExtrinsicByXtokensPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = ['pioneer'].includes(originChainInfo.slug) ? FOUR_INSTRUCTIONS_WEIGHT : getDestWeight();
-  const destVersion = V3_SUPPORTED_CHAINS.includes(originChainInfo.slug)
-    ? 'V3'
-    : undefined;
+  const version = STABLE_XCM_VERSION;
+  const destination = _getXcmMultiLocation(originChainInfo, destinationChainInfo, version, recipientAddress);
+  const tokenLocation = _getXcmMultiAssets(tokenInfo, value, version);
 
-  return api.tx.xTokens.transfer(
-    getCurrencyId(tokenInfo),
-    value,
-    getDestMultilocation(destinationChainInfo, recipientAddress, destVersion),
-    weightParam
+  return api.tx.xTokens.transferMultiassets(
+    tokenLocation,
+    0,
+    destination,
+    _getXcmDestWeight(originChainInfo)
   );
 }

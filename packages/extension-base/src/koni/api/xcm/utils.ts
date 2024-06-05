@@ -10,6 +10,15 @@ import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 export const FOUR_INSTRUCTIONS_WEIGHT = 5000000000;
 export const FOUR_INSTRUCTIONS_LIMITED_WEIGHT = { Limited: 5000000000 };
 
+export const STABLE_XCM_VERSION = 3;
+
+export function isUseTeleportProtocol (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo) {
+  const relayChainToSystemChain = ['polkadot'].includes(originChainInfo.slug) && ['statemint'].includes(destChainInfo.slug) || ['kusama'].includes(originChainInfo.slug) && ['statemine'].includes(destChainInfo.slug);
+  const systemChainToRelayChain = ['polkadot'].includes(destChainInfo.slug) && ['statemint'].includes(originChainInfo.slug) || ['kusama'].includes(destChainInfo.slug) && ['statemine'].includes(originChainInfo.slug);
+
+  return relayChainToSystemChain || systemChainToRelayChain;
+}
+
 // get multilocation for destination chain from a parachain
 
 export function getReceiverLocation (destinationChainInfo: _ChainInfo, toAddress: string, version?: string): Record<string, any> {

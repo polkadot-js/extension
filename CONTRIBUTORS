@@ -1,13 +1,13 @@
-    2643	AnhMTV                        	Release version 1.2.2
-    2355	Nam Phạm                      	[Issue 3129] fix: force apply patch
-    2060	S2kael                        	[Issue-3121] Fix HTTP provider error when subscribe tx status
+    2657	AnhMTV                        	Release version 1.2.3
+    2390	Nam Phạm                      	[Issue 3094] fix bug validating transactions not using system pallet
+    2063	S2kael                        	[Issue-3094] Update stable version for chain-list
      815	lw-cdm                        	Fix eslint issues
      465	Jaco                          	0.42.5 (#969)
-     425	nguyentiendung                	
+     432	nguyentiendung                	
      185	quangdo                       	
-     150	bluezdot                      	[Issue-3088] Update logo earning option
+     155	bluezdot                      	fix eslint
      129	Thiendekaco                   	[Issue 3117] [fix] [mv3] Extension - Still show icon ZK mode on Export account screen in case upgrade version MV2 -> MV3
-     108	Automation Bot                	[CI Skip] Auto increase webapp build number
+     115	Automation Bot                	[CI Skip] Auto increase webapp build number
      106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	

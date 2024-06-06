@@ -4,7 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isNativeToken, _isRelayChain, _isSubstrateParaChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isRelayChain, _isSubstrateParaChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -85,7 +85,7 @@ function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConse
     junctions.push(junction);
   } else {
     junctions.push({
-      GlobalConsensus: _getGlobalConsensusJunction(destChainInfo)
+      GlobalConsensus: _getGlobalConsensusJunction(destChainInfo, version)
     });
 
     if (_isSubstrateParaChain(destChainInfo)) {
@@ -110,7 +110,7 @@ function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConse
   };
 }
 
-export function _getGlobalConsensusJunction (destChainInfo: _ChainInfo) {
+export function _getGlobalConsensusJunction (destChainInfo: _ChainInfo, version: number) {
   let chainSlug = destChainInfo.slug;
   let evmChainId: number | undefined;
 
@@ -134,11 +134,11 @@ export function _getGlobalConsensusJunction (destChainInfo: _ChainInfo) {
 
   switch (chainSlug) {
     case COMMON_CHAIN_SLUGS.POLKADOT:
-      return { Polkadot: null };
+      return version < 4 ? { Polkadot: null } : 'Polkadot';
     case COMMON_CHAIN_SLUGS.KUSAMA:
-      return { Kusama: null };
+      return version < 4 ? { Kusama: null } : 'Kusama';
     default:
-      return { Rococo: null };
+      return version < 4 ? { Rococo: null } : 'Rococo';
   }
 }
 

@@ -50,8 +50,6 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
     extrinsic = getExtrinsicByXtokensPallet(originTokenInfo, originChainInfo, destinationChainInfo, recipient, sendingValue, api);
   }
 
-  console.log(extrinsic.toHex());
-
   return extrinsic;
 };
 

@@ -2,18 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import {
-  isUseTeleportProtocol,
-  STABLE_XCM_VERSION
-} from '@subwallet/extension-base/koni/api/xcm/utils';
+import { _getXcmBeneficiary, _getXcmDestWeight, _getXcmMultiAssets, _getXcmMultiLocation } from '@subwallet/extension-base/core/substrate/xcm-parser';
+import { isUseTeleportProtocol, STABLE_XCM_VERSION } from '@subwallet/extension-base/koni/api/xcm/utils';
 import { _isBridgedToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { ApiPromise } from '@polkadot/api';
-import {
-  _getXcmBeneficiary,
-  _getXcmDestWeight, _getXcmMultiAssets,
-  _getXcmMultiLocation
-} from "@subwallet/extension-base/core/substrate/xcm-parser";
 
 export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
   let version = STABLE_XCM_VERSION;
@@ -32,8 +25,6 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
   const destination = _getXcmMultiLocation(originChainInfo, destinationChainInfo, version);
   const beneficiary = _getXcmBeneficiary(destinationChainInfo, recipientAddress, version);
   const tokenLocation = _getXcmMultiAssets(tokenInfo, value, version);
-
-  console.log(destination, beneficiary, tokenLocation);
 
   return api.tx.polkadotXcm[method](
     destination,

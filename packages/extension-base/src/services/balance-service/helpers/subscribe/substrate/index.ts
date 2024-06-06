@@ -11,7 +11,7 @@ import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/toke
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -168,9 +168,9 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
       const isBridgedToken = _isBridgedToken(tokenInfo);
 
       if (isBridgedToken) {
-        const multiLocation = _getXcmAssetMultilocation(tokenInfo);
+        const onChainInfo = _getTokenOnChainInfo(tokenInfo);
 
-        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [multiLocation, address]), (balances) => {
+        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [onChainInfo, address]), (balances) => {
           const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
             const bdata = balance?.toHuman();
 

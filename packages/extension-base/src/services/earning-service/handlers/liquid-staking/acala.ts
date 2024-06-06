@@ -29,6 +29,10 @@ type AcalaLiquidStakingRedeemRequest = [number, boolean];
 const GRAPHQL_API = 'https://api.polkawallet.io/acala-liquid-staking-subql';
 const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAMP_DESC) {nodes { exchangeRate timestamp }}}';
 
+function convertDerivativeToken(amount: BN, exchangeRate: number, decimals: number) {
+  return amount.mul(new BN(exchangeRate)).div(BN_TEN.pow(new BN(decimals)));
+}
+
 export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly name: string;
   protected readonly shortName: string;
@@ -172,7 +176,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const balanceItem = balances[i];
         const address = useAddresses[i];
         const activeTotalBalance = balanceItem.free || BN_ZERO;
-        let totalBalance = activeTotalBalance.mul(new BN(exchangeRate)).div(decimals);
+        let totalBalance = convertDerivativeToken(activeTotalBalance, exchangeRate, this.rateDecimals);
         let unlockingBalance = BN_ZERO;
 
         const unstakings: UnstakingInfo[] = [];

@@ -29,7 +29,7 @@ type AcalaLiquidStakingRedeemRequest = [number, boolean];
 const GRAPHQL_API = 'https://api.polkawallet.io/acala-liquid-staking-subql';
 const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAMP_DESC) {nodes { exchangeRate timestamp }}}';
 
-function convertDerivativeToken(amount: BN, exchangeRate: number, decimals: number) {
+function convertDerivativeToken (amount: BN, exchangeRate: number, decimals: number) {
   return amount.mul(new BN(exchangeRate)).div(BN_TEN.pow(new BN(decimals)));
 }
 
@@ -185,21 +185,23 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
-          const [devirativeRedeemAmount, withdrawable] = redeemRequest;
+          const [devirativeRedeemAmount, _] = redeemRequest;
 
           const redeemAmount = convertDerivativeToken(new BN(devirativeRedeemAmount), exchangeRate, this.rateDecimals);
+
           totalBalance = totalBalance.add(redeemAmount);
           unlockingBalance = unlockingBalance.add(redeemAmount);
 
           unstakings.push({
             chain: this.chain,
-            status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
+            status: UnstakingStatus.UNLOCKING,
             claimable: redeemAmount.toString()
           });
         }
 
         // Handle unbondings
         const unbondings = await substrateApi.api.query.homa.unbondings.entries(address);
+
         if (unbondings.length > 0) {
           unbondings.forEach(([unbondingInfo, unbondingValue]) => {
             // @ts-ignore
@@ -216,13 +218,14 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
               unstakings.push({
                 chain: this.chain,
                 status: UnstakingStatus.UNLOCKING,
-                claimable: unbondingAmount.toString(),
+                claimable: unbondingAmount.toString()
+                // waitingTime: targetEra - currentEra -> Expect hiển thị theo ngày.
               });
             } else {
               unstakings.push({
                 chain: this.chain,
                 status: UnstakingStatus.CLAIMABLE,
-                claimable: unbondingAmount.toString(),
+                claimable: unbondingAmount.toString()
               });
             }
           });
@@ -328,7 +331,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const chainApi = await this.substrateApi.isReady;
-    const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, false);
+    const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, true); // set true to allow fast match
 
     return [ExtrinsicType.UNSTAKE_LDOT, extrinsic];
   }

@@ -160,10 +160,13 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       }
 
       const balances = _balances as unknown as TokenBalanceRaw[];
-      const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
-      // This rate is multiple with decimals
-      const exchangeRate = await this.getExchangeRate();
-      const decimals = BN_TEN.pow(new BN(this.rateDecimals));
+      const [redeemRequests, exchangeRate, _currentEra] = await Promise.all([
+        substrateApi.api.query.homa.redeemRequests.multi(useAddresses),
+        this.getExchangeRate(),
+        substrateApi.api.query.homa.relayChainCurrentEra()
+      ]);
+
+      const currentEra = _currentEra.toPrimitive() as number;
 
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
@@ -174,22 +177,50 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
         const unstakings: UnstakingInfo[] = [];
 
+        // Handle redeem request
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
-          // If withdrawable = false, redeem request is claimed
-          const [redeemAmount, withdrawable] = redeemRequest;
+          const [devirativeRedeemAmount, withdrawable] = redeemRequest;
 
-          // Redeem amount in derivative token
-          const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
-
-          totalBalance = totalBalance.add(amount);
-          unlockingBalance = unlockingBalance.add(amount);
+          const redeemAmount = convertDerivativeToken(new BN(devirativeRedeemAmount), exchangeRate, this.rateDecimals);
+          totalBalance = totalBalance.add(redeemAmount);
+          unlockingBalance = unlockingBalance.add(redeemAmount);
 
           unstakings.push({
             chain: this.chain,
             status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-            claimable: amount.toString()
+            claimable: redeemAmount.toString()
+          });
+        }
+
+        // Handle unbondings
+        const unbondings = await substrateApi.api.query.homa.unbondings.entries(address);
+        if (unbondings.length > 0) {
+          unbondings.forEach(([unbondingInfo, unbondingValue]) => {
+            // @ts-ignore
+            const _targetEra = unbondingInfo.toHuman()[1] as string;
+            const targetEra = parseInt(_targetEra.replaceAll(',', ''));
+
+            const amount = new BN(unbondingValue.toPrimitive() as number);
+            const unbondingAmount = convertDerivativeToken(amount, exchangeRate, this.rateDecimals);
+
+            totalBalance = totalBalance.add(unbondingAmount);
+            unlockingBalance = unlockingBalance.add(unbondingAmount);
+
+            if (targetEra > currentEra) {
+              unstakings.push({
+                chain: this.chain,
+                status: UnstakingStatus.UNLOCKING,
+                claimable: unbondingAmount.toString(),
+              });
+            } else {
+              unstakings.push({
+                chain: this.chain,
+                status: UnstakingStatus.CLAIMABLE,
+                claimable: unbondingAmount.toString(),
+              });
+            }
           });
         }
 

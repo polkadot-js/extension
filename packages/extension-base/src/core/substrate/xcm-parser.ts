@@ -110,7 +110,7 @@ function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConse
   };
 }
 
-export function _getGlobalConsensusJunction (destChainInfo: _ChainInfo, version: number) {
+function _getGlobalConsensusJunction (destChainInfo: _ChainInfo, version: number) {
   let chainSlug = destChainInfo.slug;
   let evmChainId: number | undefined;
 

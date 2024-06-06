@@ -146,6 +146,14 @@ function Component ({ compound,
     } as EarningEntryParam });
   }, [navigate]);
 
+  const isParallelLiquidStaking = useMemo(() => {
+    if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    return false;
+  }, [poolInfo.chain, poolInfo.type]);
+
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
       {
@@ -156,10 +164,11 @@ function Component ({ compound,
             type='phosphor'
           />
         ),
-        onClick: onEarnMore
+        onClick: onEarnMore,
+        disabled: isParallelLiquidStaking
       }
     ];
-  }, [onEarnMore]);
+  }, [isParallelLiquidStaking, onEarnMore]);
 
   return (
     <>
@@ -224,6 +233,7 @@ function Component ({ compound,
 
           <Button
             block={true}
+            disabled={poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

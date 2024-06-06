@@ -3,6 +3,7 @@
 
 import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
@@ -218,8 +219,8 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
               unstakings.push({
                 chain: this.chain,
                 status: UnstakingStatus.UNLOCKING,
-                claimable: unbondingAmount.toString()
-                // waitingTime: targetEra - currentEra -> Expect hiển thị theo ngày.
+                claimable: unbondingAmount.toString(),
+                waitingTime: (targetEra - currentEra + 1) * _STAKING_ERA_LENGTH_MAP[this.slug]
               });
             } else {
               unstakings.push({

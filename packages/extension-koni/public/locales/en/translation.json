@@ -646,7 +646,6 @@
   "Request does not exist": "",
   "Unsupported action": "",
   "Wrong signature. Please sign with the account you use in dApp": "",
-  "Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards": "",
   "You cannot select more than {{number}} validators for this network": "",
   "You cannot select more than {{number}} dApps for this network": "",
   "You cannot select more than {{number}} collators for this network": "",
@@ -1254,5 +1253,6 @@
   "EVM QR signer account": "",
   "Substrate QR signer account": "",
   "Invalid QR code. EVM networks are not supported": "",
-  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": ""
+  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
+  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": ""
 }

@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _handleDisplayForEarningError, _handleDisplayInsufficientEarningError } from '@subwallet/extension-base/core/logic-validation/earning';
 import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
@@ -157,7 +158,7 @@ const Component = () => {
     [chainAsset, poolInfo?.metadata?.inputAsset]
   );
 
-  const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
+  const nativeAsset: _ChainAsset | undefined = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
 
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
   const priceValue = priceMap[inputAsset.priceId || ''] || 0;
@@ -269,19 +270,20 @@ const Component = () => {
   }, [persistData]);
 
   const handleDataForInsufficientAlert = useCallback(() => {
-    const _assetDecimals = nativeAsset.decimals || 0;
+    const _assetDecimals = nativeAsset?.decimals || 0;
 
     return {
       minJoinPool: getInputValuesFromString(poolInfo?.statistic?.earningThreshold.join || '0', _assetDecimals),
-      symbol: nativeAsset.symbol,
-      chain: chainInfoMap[poolChain].name
+      symbol: nativeAsset?.symbol || '',
+      chain: chainInfoMap[poolChain].name,
+      isXCM: poolInfo?.type === YieldPoolType.LENDING || poolInfo?.type === YieldPoolType.LIQUID_STAKING
     };
-  }, [chainInfoMap, nativeAsset?.decimals, nativeAsset?.symbol, poolChain, poolInfo?.statistic?.earningThreshold.join]);
+  }, [chainInfoMap, nativeAsset?.decimals, nativeAsset?.symbol, poolChain, poolInfo?.statistic?.earningThreshold.join, poolInfo?.type]);
 
   const onError = useCallback(
     (error: Error) => {
-      const { chain, minJoinPool, symbol } = handleDataForInsufficientAlert();
-      const balanceDisplayInfo = _handleDisplayInsufficientEarningError(error, nativeTokenBalance.value || '0', amountValue || '0', minJoinPool);
+      const { chain, isXCM, minJoinPool, symbol } = handleDataForInsufficientAlert();
+      const balanceDisplayInfo = _handleDisplayInsufficientEarningError(error, isXCM, nativeTokenBalance.value || '0', amountValue || '0', minJoinPool);
 
       if (balanceDisplayInfo) {
         openAlert({

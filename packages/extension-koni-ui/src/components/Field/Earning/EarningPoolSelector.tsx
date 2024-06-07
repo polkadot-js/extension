@@ -276,13 +276,35 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           </Tooltip>
         )
         : (
-          <StakingPoolItem
-            {...item}
-            className={'pool-item'}
-            key={item.id}
-            onClickMoreBtn={onClickMore(item)}
-            prefixAddress={networkPrefix}
-          />
+          item.state === 'Blocked'
+            ? (
+              <Tooltip
+                key={item.id}
+                placement={'top'}
+                title={t('This pool is blocked. Select another to continue')}
+              >
+                <div
+                  className={'__pool-item-wrapper'}
+                  key={item.id}
+                >
+                  <StakingPoolItem
+                    {...item}
+                    className={'pool-item'}
+                    onClickMoreBtn={onClickMore(item)}
+                    prefixAddress={networkPrefix}
+                  />
+                </div>
+              </Tooltip>
+            )
+            : (
+              <StakingPoolItem
+                {...item}
+                className={'pool-item'}
+                key={item.id}
+                onClickMoreBtn={onClickMore(item)}
+                prefixAddress={networkPrefix}
+              />
+            )
         )
     );
   }, [networkPrefix, onClickMore, t]);

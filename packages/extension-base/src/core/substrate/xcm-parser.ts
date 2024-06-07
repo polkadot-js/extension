@@ -84,9 +84,7 @@ function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConse
   const junctions: unknown[] = [];
 
   if (isWithinSameConsensus) {
-    if (_isSubstrateRelayChain(destChainInfo)) {
-      return 'Here';
-    } else if (_isSubstrateParaChain(destChainInfo)) {
+    if (_isSubstrateParaChain(destChainInfo)) {
       junctions.push({
         Parachain: _getSubstrateParaId(destChainInfo)
       });
@@ -105,6 +103,10 @@ function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConse
 
   if (recipient) {
     junctions.push(_getRecipientLocation(destChainInfo, recipient, version));
+  }
+
+  if (junctions.length === 0 && !recipient) {
+    return 'Here';
   }
 
   if (version < 4 && junctions.length === 1) {

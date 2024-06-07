@@ -52,6 +52,7 @@ import { SessionTypes } from '@walletconnect/types/dist/types/sign-client/sessio
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import { t } from 'i18next';
+import { Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -96,6 +97,7 @@ export default class KoniExtension {
   #skipAutoLock = false;
   #firstTime = true;
   #alwaysLock = false;
+  #keyringLockSubject = new Subject<boolean>();
 
   constructor (state: KoniState) {
     this.#koniState = state;
@@ -3003,7 +3005,12 @@ export default class KoniExtension {
 
   private keyringLock (): void {
     this.#koniState.keyringService.lock();
+    this.#keyringLockSubject.next(true);
     clearTimeout(this.#lockTimeOut);
+  }
+
+  public keyringLockSubscribe (cb: (state: boolean) => void): any {
+    this.#keyringLockSubject.subscribe(cb);
   }
 
   // Export mnemonic

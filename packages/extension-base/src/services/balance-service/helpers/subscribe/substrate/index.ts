@@ -6,7 +6,7 @@ import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
 import { _getActiveStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
-import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
+import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo, isV1 } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -132,6 +132,8 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   const subscription = combineLatest({ balances: balanceSubscribe, poolMemberInfos: poolSubscribe }).subscribe(({ balances, poolMemberInfos }) => {
     const items: BalanceItem[] = balances.map((_balance, index) => {
       const balanceInfo = _balance.toPrimitive() as unknown as FrameSystemAccountInfo;
+
+      console.log(chainInfo.slug, 'v1', isV1(balanceInfo));
       const poolMemberInfo = poolMemberInfos[index].toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
       const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';

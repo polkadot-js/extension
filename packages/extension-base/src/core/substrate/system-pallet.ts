@@ -30,7 +30,7 @@ export type FrameSystemAccountInfoV1 = {
 
 export type FrameSystemAccountInfo = FrameSystemAccountInfoV1 | FrameSystemAccountInfoV2;
 
-function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
+export function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
   return (accountInfo as FrameSystemAccountInfoV1).data.miscFrozen !== undefined && (accountInfo as FrameSystemAccountInfoV1).data.feeFrozen !== undefined;
 }
 

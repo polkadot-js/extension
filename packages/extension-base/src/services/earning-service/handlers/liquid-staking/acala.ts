@@ -50,7 +50,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     defaultUnstake: true,
     fastUnstake: true,
     cancelUnstake: false,
-    withdraw: false, // TODO: Change after verify unstake info
+    withdraw: true,
     claimReward: false
   };
 
@@ -220,7 +220,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
                 chain: this.chain,
                 status: UnstakingStatus.UNLOCKING,
                 claimable: unbondingAmount.toString(),
-                waitingTime: (targetEra - currentEra + 1) * _STAKING_ERA_LENGTH_MAP[this.slug]
+                waitingTime: (targetEra - currentEra) * _STAKING_ERA_LENGTH_MAP.polkadot // Todo: Handle exact timestamp?
               });
             } else {
               unstakings.push({

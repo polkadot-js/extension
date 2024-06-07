@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EVMLedger, SubstrateLedger } from '@subwallet/extension-web-ui/connector';
-import { isLedgerCapable } from '@subwallet/extension-web-ui/constants';
+import { isLedgerCapable, ledgerIncompatible } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import useGetSupportedLedger from '@subwallet/extension-web-ui/hooks/ledger/useGetSupportedLedger';
 import { Ledger } from '@subwallet/extension-web-ui/types';
@@ -49,7 +49,7 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
 const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], chainInfoMap: Record<string, _ChainInfo>): Ledger => {
   const { isLedgerCapable } = baseState;
 
-  assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+  assert(isLedgerCapable, ledgerIncompatible);
 
   const chainInfo = chainInfoMap[slug];
   const isEthereumNetwork = _isChainEvmCompatible(chainInfo);

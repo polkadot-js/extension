@@ -98,6 +98,7 @@ const AttachReadOnly = new LazyLoader('AttachReadOnly', () => import('@subwallet
 const ConnectPolkadotVault = new LazyLoader('ConnectPolkadotVault', () => import('@subwallet/extension-web-ui/Popup/Account/ConnectQrSigner/ConnectPolkadotVault'));
 const ConnectKeystone = new LazyLoader('ConnectKeystone', () => import('@subwallet/extension-web-ui/Popup/Account/ConnectQrSigner/ConnectKeystone'));
 const ConnectLedger = new LazyLoader('ConnectLedger', () => import('@subwallet/extension-web-ui/Popup/Account/ConnectLedger'));
+const ExportAllDone = new LazyLoader('ExportAllDone', () => import('@subwallet/extension-web-ui/Popup/Account/ExportAllDone'));
 
 const Login = new LazyLoader('Login', () => import('@subwallet/extension-web-ui/Popup/Keyring/Login'));
 const CreatePassword = new LazyLoader('CreatePassword', () => import('@subwallet/extension-web-ui/Popup/Keyring/CreatePassword'));
@@ -300,7 +301,8 @@ export const router = createBrowserRouter([
           ConnectKeystone.generateRouterObject('connect-keystone'),
           ConnectLedger.generateRouterObject('connect-ledger'),
           AccountDetail.generateRouterObject('detail/:accountAddress'),
-          AccountExport.generateRouterObject('export/:accountAddress')
+          AccountExport.generateRouterObject('export/:accountAddress'),
+          ExportAllDone.generateRouterObject('export-all-done')
         ]
       },
       {

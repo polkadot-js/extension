@@ -53,6 +53,7 @@ export const IMPORT_NFT_MODAL = 'import-nft-modal';
 
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 export const SELECT_EXTENSION_MODAL = 'select-extension-modal';
+export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
 
 /* Extension  */
 

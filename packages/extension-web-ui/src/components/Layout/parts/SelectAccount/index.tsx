@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import ExportAllSelector from '@subwallet/extension-web-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { BaseSelectModal, SimpleQrModal } from '@subwallet/extension-web-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-web-ui/hooks';
@@ -10,13 +11,13 @@ import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, ButtonProps, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretDown, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
+import { CaretDown, Circle, Export, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -49,6 +50,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
 const simpleQrModalId = 'simple-qr-modal-id';
+const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -66,6 +68,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+  const { token } = useTheme() as Theme;
   const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
 
   const accounts = useMemo((): AccountJson[] => {
@@ -302,6 +305,44 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     inactiveModal(ConnectWebsiteId);
   }, [inactiveModal]);
 
+  const exportAllAccounts = useCallback(() => {
+    activeModal(multiExportAccountModalId);
+  }, [activeModal]);
+
+  const rightButton = useMemo((): ButtonProps => {
+    return ({
+      icon: (
+        <Icon
+          className={CN('__export-remind-btn')}
+          phosphorIcon={Export}
+          weight='fill'
+        />
+      ),
+      children: (
+        <Tooltip
+          className={'__icon-export-remind'}
+          open={true}
+          overlayClassName={CN('__tooltip-overlay-remind')}
+          placement={'bottomLeft'}
+          title={t('Export and back up accounts')}
+        >
+          <div>
+            <Icon
+              customSize={'7.39px'}
+              iconColor={token.colorHighlight}
+              phosphorIcon={Circle}
+              weight={'fill'}
+            />
+          </div>
+        </Tooltip>
+      ),
+      onClick: exportAllAccounts,
+      size: 'xs',
+      type: 'ghost',
+      tooltipPlacement: 'topLeft'
+    });
+  }, [exportAllAccounts, t, token.colorHighlight]);
+
   return (
     <div className={CN(className, 'container')}>
       {isPopup && (
@@ -339,6 +380,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
+        rightIconProps={rightButton}
         searchFunction={searchAccountFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Account name')}
@@ -351,7 +393,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             weight={'bold'}
           />
         }
-        title={t('Select account')}
+        title={t('Select account 4')}
       />
 
       <ConnectWebsiteModal
@@ -366,6 +408,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         address={selectedQrAddress}
         id={simpleQrModalId}
         onBack={onQrModalBack}
+      />
+      <ExportAllSelector
+        items={accounts}
       />
     </div>
   );

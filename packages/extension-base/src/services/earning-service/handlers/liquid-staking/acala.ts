@@ -210,23 +210,22 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
             const targetEra = parseInt(_targetEra.replaceAll(',', ''));
 
             const amount = new BN(unbondingValue.toPrimitive() as number);
-            const unbondingAmount = convertDerivativeToken(amount, exchangeRate, this.rateDecimals);
 
-            totalBalance = totalBalance.add(unbondingAmount);
-            unlockingBalance = unlockingBalance.add(unbondingAmount);
+            totalBalance = totalBalance.add(amount);
+            unlockingBalance = unlockingBalance.add(amount);
 
             if (targetEra > currentEra) {
               unstakings.push({
                 chain: this.chain,
                 status: UnstakingStatus.UNLOCKING,
-                claimable: unbondingAmount.toString(),
+                claimable: amount.toString(),
                 waitingTime: (targetEra - currentEra) * _STAKING_ERA_LENGTH_MAP.polkadot // Todo: Handle exact timestamp?
               });
             } else {
               unstakings.push({
                 chain: this.chain,
                 status: UnstakingStatus.CLAIMABLE,
-                claimable: unbondingAmount.toString()
+                claimable: amount.toString()
               });
             }
           });

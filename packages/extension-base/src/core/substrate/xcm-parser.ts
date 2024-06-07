@@ -67,22 +67,30 @@ function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: 
 }
 
 function _getMultiLocationParent (originChainInfo: _ChainInfo, isWithinSameConsensus: boolean): number {
-  if (isWithinSameConsensus) {
-    return _isSubstrateRelayChain(originChainInfo) ? 0 : 1;
-  } else {
-    return _isRelayChain(originChainInfo) ? 1 : 2;
+  let parent = 0; // how many hops up the hierarchy
+
+  if (_isSubstrateParaChain(originChainInfo)) {
+    parent += 1;
   }
+
+  if (!isWithinSameConsensus) {
+    parent += 1;
+  }
+
+  return parent;
 }
 
 function _getMultiLocationInterior (destChainInfo: _ChainInfo, isWithinSameConsensus: boolean, version: number, recipient?: _Address): unknown {
   const junctions: unknown[] = [];
 
   if (isWithinSameConsensus) {
-    const junction = _isSubstrateParaChain(destChainInfo)
-      ? { Parachain: _getSubstrateParaId(destChainInfo) }
-      : 'Here';
-
-    junctions.push(junction);
+    if (_isSubstrateRelayChain(destChainInfo)) {
+      return 'Here';
+    } else if (_isSubstrateParaChain(destChainInfo)) {
+      junctions.push({
+        Parachain: _getSubstrateParaId(destChainInfo)
+      });
+    }
   } else {
     junctions.push({
       GlobalConsensus: _getGlobalConsensusJunction(destChainInfo, version)
@@ -128,7 +136,9 @@ function _getGlobalConsensusJunction (destChainInfo: _ChainInfo, version: number
 
   if (evmChainId) {
     return {
-      Ethereum: evmChainId
+      Ethereum: {
+        chainId: evmChainId
+      }
     };
   }
 

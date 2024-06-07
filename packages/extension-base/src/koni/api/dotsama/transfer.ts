@@ -141,10 +141,11 @@ export const getTransferMockTxFee = async (address: string, chainInfo: _ChainInf
       }
     } else {
       const substrateApi = api as _SubstrateApi;
+      const chainApi = await substrateApi.isReady;
       const [mockTx] = await createTransferExtrinsic({
         from: address,
         networkKey: chainInfo.slug,
-        substrateApi,
+        substrateApi: chainApi,
         to: address,
         tokenInfo,
         transferAll: true,

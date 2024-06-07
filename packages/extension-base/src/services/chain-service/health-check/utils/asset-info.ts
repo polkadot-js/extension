@@ -64,14 +64,11 @@ interface AssetManagerWithChainInfoPalletMetadata {
   minimalBalance: number;
 }
 
-interface AssetRegistryWithAssetIdPalletMetadata {
-  symbol: string;
-  decimals: number;
-}
-
 interface AssetRegistryWithAssetIdPalletInfo {
   name: string;
   existentialDeposit: number;
+  decimals: number;
+  symbol: string;
 }
 
 interface AssetManagerWithAssetIdPalletMetadata {
@@ -221,18 +218,16 @@ const getByAssetManagerWithAssetIdPallet = async (asset: _ChainAsset, api: ApiPr
 };
 
 const getByAssetRegistryWithAssetIdPallet = async (asset: _ChainAsset, api: ApiPromise): Promise<AssetSpec> => {
-  const [_info, _metadata] = await api.queryMulti([
-    [api.query.assetRegistry.assets, _getTokenOnChainAssetId(asset)],
-    [api.query.assetRegistry.assetMetadataMap, _getTokenOnChainAssetId(asset)]
+  const [_info] = await api.queryMulti([
+    [api.query.assetRegistry.assets, _getTokenOnChainAssetId(asset)]
   ]);
 
   const info = _info.toPrimitive() as unknown as AssetRegistryWithAssetIdPalletInfo;
-  const metadata = _metadata.toPrimitive() as unknown as AssetRegistryWithAssetIdPalletMetadata;
 
   return {
-    decimals: metadata.decimals,
+    decimals: info.decimals,
     minAmount: info.existentialDeposit.toString(),
-    symbol: metadata.symbol
+    symbol: info.symbol
   };
 };
 

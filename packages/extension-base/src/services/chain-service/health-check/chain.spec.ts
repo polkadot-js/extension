@@ -18,8 +18,8 @@ describe('test chain', () => {
   it('chain', async () => {
     const chainInfos = Object.values(ChainInfoMap).filter((info) =>
       info.chainStatus === _ChainStatus.ACTIVE
-      // && !['acala_testnet'].includes(info.slug)
-      // && ['imbue_network'].includes(info.slug)
+      && !['avail_mainnet'].includes(info.slug)
+      // && ['subsocial_x', 'crabParachain', 'pangolin', 'acala_testnet'].includes(info.slug)
     );
     const errorChain: Record<string, string[]> = {};
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/chain-list';
-import { _ChainStatus } from '@subwallet/chain-list/types';
+import { _ChainStatus, _SubstrateChainType } from '@subwallet/chain-list/types';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 
 import { ApiPromise } from '@polkadot/api';
@@ -63,6 +63,14 @@ describe('test chain', () => {
 
         if (paraChainId !== substrateInfo.paraId) {
           errors.push(`Wrong paraChainId: current - ${substrateInfo.paraId ?? 'null'}, onChain - ${paraChainId ?? 'null'}`);
+        }
+
+        if (substrateInfo.paraId && substrateInfo.chainType !== _SubstrateChainType.PARACHAIN) {
+          errors.push(`Wrong chainType: current - ${substrateInfo.chainType ?? 'null'}, onChain - ${_SubstrateChainType.PARACHAIN ?? 'null'}`);
+        }
+
+        if (!substrateInfo.paraId && substrateInfo.chainType !== _SubstrateChainType.RELAYCHAIN) {
+          errors.push(`Wrong chainType: current - ${substrateInfo.chainType ?? 'null'}, onChain - ${_SubstrateChainType.RELAYCHAIN ?? 'null'}`);
         }
       };
 

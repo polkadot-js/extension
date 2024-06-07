@@ -3,6 +3,7 @@
 
 import { PREDEFINED_EARNING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { BaseSelectModal, StakingPoolItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-web-ui/components/Avatar';
@@ -11,7 +12,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-web-ui/components/M
 import { EarningPoolDetailModalId } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-web-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-web-ui/components/Modal/SortingModal';
-import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useFilterModal, useGetPoolTargetList, useSelector, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Badge, Button, Icon, InputRef, ModalContext, Tooltip, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -73,6 +74,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const maxPoolMembersValue = useMemo(() => {
+    const poolInfo = poolInfoMap[slug];
+
+    if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
+  }, [poolInfoMap, slug]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -425,6 +436,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <EarningPoolDetailModal
         detailItem={viewDetailItem}
+        maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}
       />
     </>

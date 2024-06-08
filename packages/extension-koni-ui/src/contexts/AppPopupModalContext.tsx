@@ -1,10 +1,12 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APP_POPUP_MODAL, SHOW_APP_POPUP } from '@subwallet/extension-koni-ui/constants';
+import { APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { setIsShowPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext } from '@subwallet/react-ui';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { useLocalStorage } from 'usehooks-ts';
+import React, { useCallback, useContext, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import AppPopupModal from '../components/Modal/Campaign/AppPopupModal';
 import { AppContentButton, PopupFrequency } from '../types/staticContent';
@@ -26,49 +28,37 @@ export type AppPopupModalInfo = {
 export interface AppPopupModalType {
   openAppPopupModal: (data: AppPopupModalInfo) => void;
   hideAppPopupModal: () => void;
-  setData: (data: AppPopupModalInfo[]) => void;
 }
 
 export const AppPopupModalContext = React.createContext({} as AppPopupModalType);
 
 export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextProviderProps) => {
-  const [data, setData] = useState<AppPopupModalInfo[] | undefined>(undefined);
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const [showPopup, setShowPopup] = useLocalStorage<boolean>(SHOW_APP_POPUP, true);
+  const { isShowPopup } = useSelector((state: RootState) => state.campaign);
 
   const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
-    if (data.repeat && data.repeat === 'every_time') {
-      if (showPopup) {
-        setAppPopupModal(data);
-        activeModal(APP_POPUP_MODAL);
-      }
-    } else {
+    if (isShowPopup) {
       setAppPopupModal(data);
       activeModal(APP_POPUP_MODAL);
     }
-  }, [activeModal, showPopup]);
-
-  useEffect(() => {
-    if (data && data.length) {
-      openAppPopupModal(data[0]);
-    }
-  }, [data, openAppPopupModal]);
+  }, [activeModal, isShowPopup]);
 
   const hideAppPopupModal = useCallback(() => {
-    setShowPopup(false);
-    inactiveModal(APP_POPUP_MODAL);
-    setAppPopupModal((prevState) => ({
-      ...prevState,
-      title: '',
-      message: '',
-      buttons: [],
-      externalButtons: <></>
-    }));
-  }, [inactiveModal, setShowPopup]);
+    setIsShowPopup({ value: false }).then(() => {
+      inactiveModal(APP_POPUP_MODAL);
+      setAppPopupModal((prevState) => ({
+        ...prevState,
+        title: '',
+        message: '',
+        buttons: [],
+        externalButtons: <></>
+      }));
+    }).catch((e) => console.error(e));
+  }, [inactiveModal]);
 
   return (
-    <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal, setData }}>
+    <AppPopupModalContext.Provider value={{ openAppPopupModal, hideAppPopupModal }}>
       {children}
       <AppPopupModal
         buttons={appPopupModal.buttons || []}

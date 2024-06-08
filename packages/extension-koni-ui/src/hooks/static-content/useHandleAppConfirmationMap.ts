@@ -1,11 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
 import { YieldPositionInfo } from '@subwallet/extension-base/types';
+import { getOutputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateAppConfirmationData, updateConfirmationHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import { AppConfirmationData, ConditionBalanceType, ConditionEarningType, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { AppConfirmationData, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import BigN from 'bignumber.js';
 import { useCallback, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 export interface AppConfirmationHookType {
   setAppConfirmationData: (data: AppConfirmationData[]) => void;
@@ -14,14 +18,13 @@ export interface AppConfirmationHookType {
 }
 
 export const useHandleAppConfirmationMap = (
-  appConfirmationData: AppConfirmationData[],
-  confirmationHistoryMap: Record<string, PopupHistoryData>,
-  yieldPositionList: YieldPositionInfo[],
-  checkBalanceCondition: (conditionBalance: ConditionBalanceType[]) => boolean,
-  checkEarningCondition: (_yieldPositionList: YieldPositionInfo[], conditionEarning: ConditionEarningType[]) => boolean
+  yieldPositionList: YieldPositionInfo[]
 ): AppConfirmationHookType => {
   const dispatch = useDispatch();
-
+  const { appConfirmationData, confirmationHistoryMap } = useSelector((state: RootState) => state.staticContent);
+  const { balanceMap } = useSelector((state: RootState) => state.balance);
+  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
+  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const getFilteredAppConfirmationByTimeAndPlatform = useCallback(
     (data: AppConfirmationData[]) => {
       dispatch(updateAppConfirmationData(data));
@@ -66,23 +69,74 @@ export const useHandleAppConfirmationMap = (
     [confirmationHistoryMap, dispatch]
   );
 
+  const checkComparison = useCallback((comparison: string, value: string, comparisonValue: string) => {
+    switch (comparison) {
+      case 'eq':
+        return new BigN(value).eq(comparisonValue);
+      case 'gt':
+        return new BigN(value).gt(comparisonValue);
+      case 'gte':
+        return new BigN(value).gte(comparisonValue);
+      case 'lt':
+        return new BigN(value).lt(comparisonValue);
+      case 'lte':
+        return new BigN(value).lte(comparisonValue);
+      default:
+        return true;
+    }
+  }, []);
+
   const filteredAppConfirmationMap = useMemo(() => {
     return appConfirmationData.filter((item) => {
       if (!!Object.keys(item.conditions) && !!Object.keys(item.conditions).length) {
-        const isPassBalanceCondition = item.conditions['condition-balance']
-          ? checkBalanceCondition(item.conditions['condition-balance'])
-          : true;
+        const isPassValidation: boolean[] = [];
 
-        const isPassEarningCondition = item.conditions['condition-earning']
-          ? checkEarningCondition(yieldPositionList, item.conditions['condition-earning'])
-          : true;
+        if (item.conditions['condition-balance'] && item.conditions['condition-balance'].length) {
+          const dataFilterByBalanceCondition = item.conditions['condition-balance'].map((_item) => {
+            return Object.values(balanceMap).some((info) => {
+              const balanceData = info[_item.chain_asset];
+              const decimals = _getAssetDecimals(assetRegistry[_item.chain_asset]);
+              const freeBalance = balanceData?.free;
+              const lockedBalance = balanceData?.locked;
+              const value = new BigN(freeBalance).plus(lockedBalance).toString();
+              const comparisonValue = getOutputValuesFromString(_item.value.toString(), decimals);
 
-        return isPassBalanceCondition || isPassEarningCondition;
+              return checkComparison(_item.comparison, value, comparisonValue);
+            });
+          });
+
+          isPassValidation.push(dataFilterByBalanceCondition.some((item) => item));
+        }
+
+        if (item.conditions['condition-earning'] && item.conditions['condition-earning'].length) {
+          const dataFilterByEarningCondition = item.conditions['condition-earning'].map((condition) => {
+            const yieldPosition = yieldPositionList.find((_item) => _item.slug === condition.pool_slug);
+
+            if (yieldPosition) {
+              const chainInfo = chainInfoMap[yieldPosition.chain];
+              const decimals = chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals;
+              const activeStake = yieldPosition.totalStake;
+              const comparisonValue = getOutputValuesFromString(condition.value.toString(), decimals || 0);
+
+              return checkComparison(condition.comparison, activeStake, comparisonValue);
+            } else {
+              return false;
+            }
+          });
+
+          isPassValidation.push(dataFilterByEarningCondition.some((item) => item));
+        }
+
+        if (isPassValidation && isPassValidation.length) {
+          return isPassValidation.some((item) => item);
+        } else {
+          return true;
+        }
       } else {
         return true;
       }
     });
-  }, [appConfirmationData, checkBalanceCondition, checkEarningCondition, yieldPositionList]);
+  }, [appConfirmationData, assetRegistry, balanceMap, chainInfoMap, checkComparison, yieldPositionList]);
 
   const appConfirmationMap = useMemo(() => {
     if (filteredAppConfirmationMap) {

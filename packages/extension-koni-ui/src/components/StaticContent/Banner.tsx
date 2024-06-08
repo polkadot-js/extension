@@ -14,11 +14,11 @@ import styled from 'styled-components';
 interface Props extends ThemeProps {
   data: AppBannerData;
   dismissBanner?: (ids: string[]) => void;
-  onPressBanner: (id: string) => (url?: string) => void;
+  onClickBanner: (id: string) => (url?: string) => void;
   instructionDataList: StaticDataProps[];
 }
 
-const Component = ({ className, data, dismissBanner, instructionDataList, onPressBanner }: Props) => {
+const Component = ({ className, data, dismissBanner, instructionDataList, onClickBanner }: Props) => {
   const bannerId = useMemo(() => `${data.position}-${data.id}`, [data.id, data.position]);
   const { activeModal, inactiveModal } = useContext(ModalContext);
 
@@ -43,9 +43,9 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
     }
 
     if (url) {
-      onPressBanner(bannerId)(url);
+      onClickBanner(bannerId)(url);
     }
-  }, [activeModal, bannerId, data.action?.url, data.instruction, onPressBanner]);
+  }, [activeModal, bannerId, data.action?.url, data.instruction, onClickBanner]);
 
   const _dismissBanner = useCallback(() => dismissBanner && dismissBanner([bannerId]), [bannerId, dismissBanner]);
 
@@ -53,8 +53,8 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onPres
 
   const onClickConfirmInstructionModal = useCallback(() => {
     inactiveModal(APP_INSTRUCTION_MODAL);
-    onPressBanner(bannerId)(data.action?.url);
-  }, [bannerId, data.action?.url, inactiveModal, onPressBanner]);
+    onClickBanner(bannerId)(data.action?.url);
+  }, [bannerId, data.action?.url, inactiveModal, onClickBanner]);
 
   return (
     <>

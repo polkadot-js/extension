@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Layout, PageWrapper, ResetWalletModal } from '@subwallet/extension-koni-ui/components';
-import { RESET_WALLET_MODAL, SHOW_APP_POPUP } from '@subwallet/extension-koni-ui/constants';
+import { RESET_WALLET_MODAL } from '@subwallet/extension-koni-ui/constants';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useUILock from '@subwallet/extension-koni-ui/hooks/common/useUILock';
 import useFocusById from '@subwallet/extension-koni-ui/hooks/form/useFocusById';
@@ -14,7 +14,6 @@ import { Button, Form, Image, Input, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useState } from 'react';
 import styled from 'styled-components';
-import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps
 
@@ -37,7 +36,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const [loading, setLoading] = useState(false);
   const [isDisable, setIsDisable] = useState(true);
   const { unlock } = useUILock();
-  const [, setShowPopup] = useLocalStorage<boolean>(SHOW_APP_POPUP, true);
 
   const onUpdate: FormCallbacks<LoginFormState>['onFieldsChange'] = useCallback((changedFields: FormFieldData[], allFields: FormFieldData[]) => {
     const { empty, error } = simpleCheckForm(allFields);
@@ -52,7 +50,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const onSubmit: FormCallbacks<LoginFormState>['onFinish'] = useCallback((values: LoginFormState) => {
     setLoading(true);
-    setShowPopup(true);
     setTimeout(() => {
       keyringUnlock({
         password: values[FormFieldName.PASSWORD]
@@ -71,7 +68,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
           setLoading(false);
         });
     }, 500);
-  }, [setShowPopup, onError, t, unlock]);
+  }, [onError, t, unlock]);
 
   const onReset = useCallback(() => {
     activeModal(RESET_WALLET_MODAL);

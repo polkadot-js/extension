@@ -132,6 +132,12 @@ const Component: React.FC<Props> = (props: Props) => {
 
 const AppPopupModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
+    '.ant-sw-modal-body': {
+      paddingBottom: 0
+    },
+    '.ant-sw-modal-footer': {
+      borderTop: 'none'
+    }
   };
 });
 

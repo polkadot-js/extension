@@ -1,8 +1,6 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AppOnlineContentContextProvider } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
-import { AppPopupModalContextProvider } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { DataContextProvider } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { InjectContextProvider } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { ScannerContextProvider } from '@subwallet/extension-koni-ui/contexts/ScannerContext';
@@ -22,16 +20,12 @@ export default function Popup (): React.ReactElement {
         <ModalContextProvider>
           <ScannerContextProvider>
             <NotificationProvider>
-              <AppPopupModalContextProvider>
-                <AppOnlineContentContextProvider>
-                  <InjectContextProvider>
-                    <RouterProvider
-                      fallbackElement={<LoadingScreen className='root-loading' />}
-                      router={router}
-                    />
-                  </InjectContextProvider>
-                </AppOnlineContentContextProvider>
-              </AppPopupModalContextProvider>
+              <InjectContextProvider>
+                <RouterProvider
+                  fallbackElement={<LoadingScreen className='root-loading' />}
+                  router={router}
+                />
+              </InjectContextProvider>
             </NotificationProvider>
           </ScannerContextProvider>
         </ModalContextProvider>

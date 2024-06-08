@@ -7,6 +7,7 @@ import { CampaignStore, ReduxStatus } from '@subwallet/extension-koni-ui/stores/
 
 const initialState: CampaignStore = {
   banners: [],
+  isShowPopup: true,
   reduxStatus: ReduxStatus.INIT
 };
 
@@ -20,9 +21,16 @@ const campaignSlice = createSlice({
         banners: action.payload,
         reduxStatus: ReduxStatus.READY
       };
+    },
+    updateIsShowPopup (state, action: PayloadAction<boolean>) {
+      return {
+        ...state,
+        isShowPopup: action.payload,
+        reduxStatus: ReduxStatus.READY
+      };
     }
   }
 });
 
-export const { updateBanner } = campaignSlice.actions;
+export const { updateBanner, updateIsShowPopup } = campaignSlice.actions;
 export default campaignSlice.reducer;

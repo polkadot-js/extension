@@ -53,7 +53,7 @@ const Component = ({ banners, className, dismissBanner, onClickBanner }: Props) 
             dismissBanner={dismissBanner}
             instructionDataList={instructionDataList}
             key={item.id}
-            onPressBanner={onClickBanner}
+            onClickBanner={onClickBanner}
           />
         ))}
       </Slider>

@@ -2167,6 +2167,10 @@ export interface CampaignButton {
   metadata: Record<string, any> | null;
 }
 
+export interface ShowPopupRequest {
+  value: boolean;
+}
+
 export enum CampaignDataType {
   NOTIFICATION = 'notification',
   BANNER = 'banner'
@@ -2552,7 +2556,7 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.notSupport.approve)': [RequestApproveWalletConnectNotSupport, boolean];
   'pri(walletConnect.notSupport.reject)': [RequestRejectWalletConnectNotSupport, boolean];
 
-  /// Metadata
+  /// Metadatacampaign
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
 
   /* Campaign */
@@ -2564,6 +2568,8 @@ export interface KoniRequestSignatures {
 
   /* Campaign */
   'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
+  'pri(campaign.popup.subscribeIsShowPopup)': [null, ShowPopupRequest, ShowPopupRequest];
+  'pri(campaign.popup.setIsShowPopup)': [ShowPopupRequest, null];
   'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
   /* Campaign */
 

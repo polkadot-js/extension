@@ -1,24 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AllowedPath } from '@subwallet/extension-base/background/types';
-import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { YieldPositionInfo } from '@subwallet/extension-base/types';
-import { getOutputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { AppPopupModalContext, AppPopupModalInfo } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
 import { useHandleAppBannerMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppBannerMap';
 import { useHandleAppConfirmationMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppConfirmationMap';
 import { useHandleAppPopupMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppPopupMap';
-import { windowOpen } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { AppBannerData, AppBasicInfoData, AppConfirmationData, AppPopupData, ConditionBalanceType, ConditionEarningType, OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { EarningPoolsParam, EarningPositionDetailParam } from '@subwallet/extension-koni-ui/types';
+import { AppBannerData, AppBasicInfoData, AppConfirmationData, AppPopupData, OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import axios from 'axios';
-import BigN from 'bignumber.js';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import urlParse from 'url-parse';
 
 interface AppOnlineContentContextProviderProps {
   children?: React.ReactElement;
@@ -73,59 +70,19 @@ const getPositionByRouteName = (currentRoute?: string) => {
   }
 };
 
-const getAllowedPathByPosition = (position?: string) => {
-  if (!position) {
-    return '';
-  }
-
-  switch (position) {
-    case 'collections':
-      return '/home/nfts/collections';
-    case 'earning':
-      return '/home/earning';
-    case 'crowdloans':
-      return '/home/crowdloans';
-    case '/':
-    default:
-      return '/home/tokens';
-  }
-};
-
 export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentContextProviderProps) => {
   const appPopupModalContext = useContext(AppPopupModalContext);
-  const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
-  const { balanceMap } = useSelector((state: RootState) => state.balance);
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const yieldPositionList = useGroupYieldPosition();
   const language = useSelector((state: RootState) => state.settings.language);
   const { getAppInstructionData } = useGetAppInstructionData(language);
+  const navigate = useNavigate();
 
-  const { appBannerData,
-    appConfirmationData,
-    appPopupData,
-    bannerHistoryMap,
+  const { bannerHistoryMap,
     confirmationHistoryMap,
     popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
 
   const getAppContentData = useCallback(async (dataType: OnlineContentDataType) => {
     return await axios.get(`https://content.subwallet.app/api/list/app-${dataType}?preview=true`);
-  }, []);
-
-  const checkComparison = useCallback((comparison: string, value: string, comparisonValue: string) => {
-    switch (comparison) {
-      case 'eq':
-        return new BigN(value).eq(comparisonValue);
-      case 'gt':
-        return new BigN(value).gt(comparisonValue);
-      case 'gte':
-        return new BigN(value).gte(comparisonValue);
-      case 'lt':
-        return new BigN(value).lt(comparisonValue);
-      case 'lte':
-        return new BigN(value).lte(comparisonValue);
-      default:
-        return true;
-    }
   }, []);
 
   // check popup exist time
@@ -200,71 +157,12 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     []
   );
 
-  const checkBalanceCondition = useCallback(
-    (conditionBalance: ConditionBalanceType[]) => {
-      const conditionBalanceList = conditionBalance.map((item) => {
-        return Object.values(balanceMap).some((info) => {
-          const balanceData = info[item.chain_asset];
-          const decimals = _getAssetDecimals(assetRegistry[item.chain_asset]);
-          const freeBalance = balanceData?.free;
-          const lockedBalance = balanceData?.locked;
-          const value = new BigN(freeBalance).plus(lockedBalance).toString();
-          const comparisonValue = getOutputValuesFromString(item.value.toString(), decimals);
-
-          return checkComparison(item.comparison, value, comparisonValue);
-        });
-      });
-
-      return conditionBalanceList.some((item) => item);
-    },
-    [assetRegistry, balanceMap, checkComparison]
-  );
-
-  const checkEarningCondition = useCallback(
-    (_yieldPositionList: YieldPositionInfo[], conditionEarning: ConditionEarningType[]) => {
-      const conditionEarningList = conditionEarning.map((condition) => {
-        const yieldPosition = _yieldPositionList.find((item) => item.slug === condition.pool_slug);
-
-        if (yieldPosition) {
-          const chainInfo = chainInfoMap[yieldPosition.chain];
-          const decimals = chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals;
-          const activeStake = yieldPosition.totalStake;
-          const comparisonValue = getOutputValuesFromString(condition.value.toString(), decimals || 0);
-
-          return checkComparison(condition.comparison, activeStake, comparisonValue);
-        } else {
-          return false;
-        }
-      });
-
-      return conditionEarningList.some((item) => item);
-    },
-    [chainInfoMap, checkComparison]
-  );
-
-  const { appPopupMap, setAppPopupData, updatePopupHistoryMap } = useHandleAppPopupMap(
-    appPopupData,
-    popupHistoryMap,
-    yieldPositionList,
-    checkPopupExistTime,
-    checkBalanceCondition,
-    checkEarningCondition
-  );
+  const { appPopupMap, setAppPopupData, updatePopupHistoryMap } = useHandleAppPopupMap(yieldPositionList, checkPopupExistTime);
   const { appBannerMap, setAppBannerData, updateBannerHistoryMap } = useHandleAppBannerMap(
-    appBannerData,
-    bannerHistoryMap,
     yieldPositionList,
-    checkPopupExistTime,
-    checkBalanceCondition,
-    checkEarningCondition
+    checkPopupExistTime
   );
-  const { appConfirmationMap, setAppConfirmationData, updateConfirmationHistoryMap } = useHandleAppConfirmationMap(
-    appConfirmationData,
-    confirmationHistoryMap,
-    yieldPositionList,
-    checkBalanceCondition,
-    checkEarningCondition
-  );
+  const { appConfirmationMap, setAppConfirmationData, updateConfirmationHistoryMap } = useHandleAppConfirmationMap(yieldPositionList);
 
   useEffect(() => {
     getAppInstructionData();
@@ -297,19 +195,49 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         }
 
         if (url) {
-          if (url.startsWith('subwallet://')) {
-            const parts = url.split('/');
-            const target = parts[parts.length - 1];
-            const allowedPath = getAllowedPathByPosition(target);
+          // eslint-disable-next-line new-cap
+          const parseUrl = new urlParse(url);
+          const urlQuery = parseUrl.query.substring(1);
+          const urlQueryMap: Record<string, string> = {};
 
-            windowOpen({ allowedPath: allowedPath as AllowedPath }).catch((e) => console.error(e));
+          urlQuery.split('&').forEach((item) => {
+            const splitItem = item.split('=');
+
+            urlQueryMap[splitItem[0]] = splitItem[1];
+          });
+
+          if (url.startsWith('subwallet://')) {
+            if (parseUrl.pathname.startsWith('/main/nfts/collection')) {
+              navigate('/home/nfts/collections');
+            }
+
+            if (parseUrl.pathname.startsWith('/main/crowdloans')) {
+              navigate('/home/crowdloans');
+            }
+
+            if (parseUrl.pathname.startsWith('/main/earning')) {
+              navigate('/home/earning');
+            }
+
+            if (parseUrl.pathname.startsWith('/main/earning/earning-position-detail')) {
+              navigate('/home/earning/position-detail', { state: {
+                earningSlug: urlQueryMap.slug
+              } as EarningPositionDetailParam });
+            }
+
+            if (parseUrl.pathname.startsWith('/main/earning/earning-pool-list')) {
+              navigate('/home/earning/pools', { state: {
+                poolGroup: urlQueryMap.group,
+                symbol: urlQueryMap.symbol
+              } as EarningPoolsParam });
+            }
           } else {
             openInNewTab(url)();
           }
         }
       };
     },
-    [updateConfirmationHistoryMap, updatePopupHistoryMap]
+    [navigate, updateConfirmationHistoryMap, updatePopupHistoryMap]
   );
 
   const showAppPopup = useCallback(
@@ -345,7 +273,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
             }
           }));
 
-          appPopupModalContext.setData(result);
+          appPopupModalContext.openAppPopupModal(result[0]);
         }
       }
     },

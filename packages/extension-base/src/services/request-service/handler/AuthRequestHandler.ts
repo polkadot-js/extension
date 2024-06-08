@@ -32,6 +32,29 @@ export default class AuthRequestHandler {
   constructor (requestService: RequestService, chainService: ChainService, private keyringService: KeyringService) {
     this.#requestService = requestService;
     this.#chainService = chainService;
+
+    this.init().catch(console.error);
+  }
+
+  private async init () {
+    const authList = await this.getAuthList();
+    let needUpdateAuthList = false;
+
+    Object.entries(authList).forEach(([key, value]) => {
+      const existKeyAllBothConnect = DAPP_CONNECT_ALL_TYPE_ACCOUNT_URL.find((url_) => url_.includes(key));
+
+      if (existKeyAllBothConnect && value.accountAuthType !== 'both') {
+        needUpdateAuthList = true;
+        authList[key] = {
+          ...value,
+          accountAuthType: 'both'
+        };
+      }
+    });
+
+    if (needUpdateAuthList) {
+      this.setAuthorize(authList);
+    }
   }
 
   private getAddressList (value = false): Record<string, boolean> {

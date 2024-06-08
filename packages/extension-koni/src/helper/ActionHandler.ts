@@ -42,6 +42,7 @@ export class ActionHandler {
   setHandler (handler: SWHandler): void {
     this.mainHandler = handler;
     this.waitMainHandler.resolve(handler);
+    this.handleKeyringLock();
   }
 
   public onInstalled (details: chrome.runtime.InstalledDetails): void {
@@ -54,6 +55,16 @@ export class ActionHandler {
 
   private _getPortId (port: chrome.runtime.Port): string {
     return `${port.sender?.documentId || port.sender?.tab?.id || 'extension-popup'}`;
+  }
+
+  private handleKeyringLock () {
+    if (this.mainHandler) {
+      this.mainHandler.extensionHandler.keyringLockSubscribe((state) => {
+        if (state && Object.keys(this.connectionMap).length === 0) {
+          stopHeartbeat();
+        }
+      });
+    }
   }
 
   private async _onPortMessage (port: chrome.runtime.Port, data: TransportRequestMessage<keyof RequestSignatures>, portId: string) {
@@ -105,7 +116,6 @@ export class ActionHandler {
           this.waitActiveHandler = createPromiseHandler<boolean>();
           this.mainHandler && this.mainHandler.state.sleep().catch(console.error);
         }, SLEEP_TIMEOUT);
-        stopHeartbeat();
       }
     }
   }

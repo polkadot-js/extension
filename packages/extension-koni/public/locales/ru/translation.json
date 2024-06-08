@@ -1254,5 +1254,6 @@
   "Substrate QR signer account": "",
   "Invalid QR code. EVM networks are not supported": "",
   "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
-  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": ""
+  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": "",
+  "You don't have enough {{symbol}} ({{chainName}}) to pay gas fee. Top up your transferable balance and try again": ""
 }

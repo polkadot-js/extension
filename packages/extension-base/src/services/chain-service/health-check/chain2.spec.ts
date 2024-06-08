@@ -2,26 +2,26 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/chain-list';
-import { _ChainStatus, _SubstrateChainType } from '@subwallet/chain-list/types';
+import {_ChainStatus, _SubstrateChainType, _SubstrateInfo} from '@subwallet/chain-list/types';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
-
 import { ApiPromise } from '@polkadot/api';
-
 import { chainProvider, chainProviderBackup } from './constants';
-import { checkNativeAsset, getEvmNativeInfo, getSubstrateNativeInfo, handleEvmProvider, handleSubstrateProvider } from './utils';
+import { AssetSpec, checkNativeAsset, checkParachainId, checkSs58Prefix, getEvmNativeInfo, getSubstrateNativeInfo, handleEvmProvider, handleSubstrateProvider, NativeAssetInfo } from './utils';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
-const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet'];
-// const onlyChains: string[] = ['subsocial_x', 'crabParachain', 'pangolin', 'acala_testnet'];
+interface OnchainInfo {
+  ss58Prefix: number,
+  parachainId: number | null
+  nativeToken: AssetSpec
+}
+
+const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet']; // ignore these chains;
+const onlyChains: string[] = ['polkadot', 'manta_network']; // check only these chains if set;
 
 describe('test chain', () => {
   it('chain', async () => {
-    const chainInfos = Object.values(ChainInfoMap).filter((info) =>
-      info.chainStatus === _ChainStatus.ACTIVE
-      && !ignoreChains.includes(info.slug)
-      // && onlyChains.includes(info.slug)
-    );
+    const chainInfos = getChainlistInfos();
     const errorChain: Record<string, string[]> = {};
 
     for (const chainInfo of chainInfos) {
@@ -43,36 +43,10 @@ describe('test chain', () => {
       };
 
       const onSuccessSubstrate = async (api: ApiPromise) => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const onchainInfo = await retrieveOnchainInfo(api)
         const substrateInfo = chainInfo.substrateInfo!;
-        const ss58Prefix = api.consts.system.ss58Prefix.toPrimitive() as number;
-        const paraChainId = api.query.parachainInfo ? (await api.query.parachainInfo.parachainId()).toPrimitive() as number : null;
 
-        if (!ignoreChains.includes(chain)) {
-          const nativeToken = await getSubstrateNativeInfo(api);
-
-          checkNativeAsset(nativeToken, {
-            decimals: substrateInfo.decimals,
-            existentialDeposit: substrateInfo.existentialDeposit,
-            symbol: substrateInfo.symbol
-          }, errors);
-        }
-
-        if (ss58Prefix !== substrateInfo.addressPrefix) {
-          errors.push(`Wrong addressPrefix: current - ${substrateInfo.addressPrefix}, onChain - ${ss58Prefix}`);
-        }
-
-        if (paraChainId !== substrateInfo.paraId) {
-          errors.push(`Wrong paraChainId: current - ${substrateInfo.paraId ?? 'null'}, onChain - ${paraChainId ?? 'null'}`);
-        }
-
-        if (substrateInfo.paraId && substrateInfo.chainType !== _SubstrateChainType.PARACHAIN) {
-          errors.push(`Wrong chainType: current - ${substrateInfo.chainType ?? 'null'}, onChain - ${_SubstrateChainType.PARACHAIN ?? 'null'}`);
-        }
-
-        if (!substrateInfo.paraId && substrateInfo.chainType !== _SubstrateChainType.RELAYCHAIN) {
-          errors.push(`Wrong chainType: current - ${substrateInfo.chainType ?? 'null'}, onChain - ${_SubstrateChainType.RELAYCHAIN ?? 'null'}`);
-        }
+        validateSubstrateInfo(onchainInfo, substrateInfo, errors);
       };
 
       const onSuccessEvm = async (api: _EvmApi) => {
@@ -132,3 +106,39 @@ describe('test chain', () => {
     console.log('result errorChain', errorChain);
   });
 });
+
+function getChainlistInfos () {
+  if (onlyChains.length > 0) {
+    return Object.values(ChainInfoMap).filter((info) =>
+        info.chainStatus === _ChainStatus.ACTIVE && onlyChains.includes(info.slug)
+    );
+  }
+
+  return Object.values(ChainInfoMap).filter((info) =>
+      info.chainStatus === _ChainStatus.ACTIVE && !ignoreChains.includes(info.slug)
+  );
+}
+
+async function retrieveOnchainInfo (api: ApiPromise): Promise<OnchainInfo> {
+  const ss58Prefix = api.consts.system.ss58Prefix.toPrimitive() as number;
+  const parachainId = api.query.parachainInfo ? (await api.query.parachainInfo.parachainId()).toPrimitive() as number : null;
+  const nativeToken = await getSubstrateNativeInfo(api);
+
+  return {
+    ss58Prefix,
+    parachainId,
+    nativeToken
+  } as unknown as OnchainInfo
+}
+
+function validateSubstrateInfo(onchainInfo: OnchainInfo, chainlistInfo: _SubstrateInfo, errors: string[]) {
+  const chainlistNativeToken = {
+    decimals: chainlistInfo.decimals,
+    existentialDeposit: chainlistInfo.existentialDeposit,
+    symbol: chainlistInfo.symbol
+  } as NativeAssetInfo;
+
+  checkNativeAsset(onchainInfo.nativeToken, chainlistNativeToken, errors);
+  checkSs58Prefix(onchainInfo.ss58Prefix, chainlistInfo.addressPrefix, errors);
+  checkParachainId(onchainInfo.parachainId, chainlistInfo.paraId, errors);
+}

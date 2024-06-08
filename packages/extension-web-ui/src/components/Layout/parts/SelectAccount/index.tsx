@@ -393,7 +393,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             weight={'bold'}
           />
         }
-        title={t('Select account 4')}
+        title={t('Select account')}
       />
 
       <ConnectWebsiteModal
@@ -517,6 +517,17 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8
+    },
+
+    '.__icon-export-remind': {
+      position: 'absolute',
+      top: '-35%',
+      left: '40%'
+    },
+
+    '.anticon.__export-remind-btn': {
+      height: 23,
+      width: 24
     },
 
     '.connect-icon': {

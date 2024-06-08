@@ -7,7 +7,7 @@
 
 import '@polkadot/extension-mocks/chrome';
 
-import type { AuthUrls, ResponseSigning } from '@polkadot/extension-base/background/types';
+import type { ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
@@ -29,23 +29,13 @@ describe('Extension', () => {
   let tabs: Tabs;
   const suri = 'seed sock milk update focus rotate barely fade car face mechanic mercy';
   const password = 'passw0rd';
-  const address = '5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX';
 
   async function createExtension (): Promise<Extension> {
     try {
       await cryptoWaitReady();
 
       keyring.loadAll({ store: new AccountsStore() });
-      const authUrls: AuthUrls = {};
 
-      authUrls['localhost:3000'] = {
-        authorizedAccounts: [address],
-        count: 0,
-        id: '11',
-        origin: 'example.com',
-        url: 'http://localhost:3000'
-      };
-      localStorage.setItem('authUrls', JSON.stringify(authUrls));
       state = new State();
       await state.init();
       tabs = new Tabs(state);

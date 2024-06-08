@@ -77,6 +77,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     const result: YieldPoolInfo[] = [];
 
     pools.forEach((poolInfo) => {
+      if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+        return;
+      }
+
       if (poolInfo.type === YieldPoolType.NATIVE_STAKING && _STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain)) {
         let minJoinPool: string;
 

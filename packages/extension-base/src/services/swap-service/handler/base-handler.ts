@@ -103,13 +103,15 @@ export class SwapBaseHandler {
     const xcmFeeComponent = params.process.totalFee[stepIndex].feeComponent[0]; // todo: can do better than indexing
     const xcmFee = new BigNumber(xcmFeeComponent.amount || '0');
     let xcmAmount = bnAmount.minus(bnFromAssetBalance);
+    let editedXcmFee = new BigNumber(0);
 
     if (_isNativeToken(alternativeAsset)) {
       xcmAmount = xcmAmount.plus(xcmFee);
+      editedXcmFee = xcmFee.times(2);
     }
 
-    if (!bnAlternativeAssetBalance.minus(xcmAmount).gt(0)) {
-      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(xcmFee);
+    if (!bnAlternativeAssetBalance.minus(_isNativeToken(alternativeAsset) ? xcmAmount.plus(xcmFee) : xcmFee).gt(0)) {
+      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(_isNativeToken(alternativeAsset) ? editedXcmFee : xcmFee);
       const maxValue = formatNumber(maxBn.toString(), fromAsset.decimals || 0);
 
       const altInputTokenInfo = this.chainService.getAssetBySlug(alternativeAssetSlug);
@@ -122,7 +124,7 @@ export class SwapBaseHandler {
       const altNetworkName = alternativeChain.name;
 
       const currentValue = formatNumber(bnFromAssetBalance.toString(), fromAsset.decimals || 0);
-      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee);
+      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(_isNativeToken(alternativeAsset) ? editedXcmFee : xcmFee);
       const maxXCMValue = formatNumber(bnMaxXCM.toString(), fromAsset.decimals || 0);
 
       if (maxBn.lte(0) || bnFromAssetBalance.lte(0) || bnMaxXCM.lte(0)) {

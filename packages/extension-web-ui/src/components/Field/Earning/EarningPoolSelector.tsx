@@ -11,7 +11,7 @@ import { EarningPoolDetailModal } from '@subwallet/extension-web-ui/components/M
 import { EarningPoolDetailModalId } from '@subwallet/extension-web-ui/components/Modal/Earning/EarningPoolDetailModal';
 import { FilterModal } from '@subwallet/extension-web-ui/components/Modal/FilterModal';
 import { SortingModal } from '@subwallet/extension-web-ui/components/Modal/SortingModal';
-import { useFilterModal, useGetPoolTargetList, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useFilterModal, useGetPoolTargetList, useSelector, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Badge, Button, Icon, InputRef, ModalContext, Tooltip, useExcludeModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -67,10 +67,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const isActive = checkActive(id);
 
   const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
+  const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
 
@@ -255,6 +257,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 {...item}
                 className={'pool-item'}
                 onClickMoreBtn={onClickMore(item)}
+                prefixAddress={networkPrefix}
               />
             </div>
           </Tooltip>
@@ -265,10 +268,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             className={'pool-item'}
             key={item.id}
             onClickMoreBtn={onClickMore(item)}
+            prefixAddress={networkPrefix}
           />
         )
     );
-  }, [onClickMore, t]);
+  }, [networkPrefix, onClickMore, t]);
 
   const renderEmpty = useCallback(() => {
     return (

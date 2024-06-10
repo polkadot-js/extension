@@ -1,9 +1,9 @@
-// Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type Transport from '@ledgerhq/hw-transport';
 
-import { Ledger, LedgerTypes } from '@subwallet/extension-koni-ui/types';
+import { Ledger, LedgerTypes } from '@subwallet/extension-web-ui/types';
 
 interface LedgerApp {
   transport: Transport;

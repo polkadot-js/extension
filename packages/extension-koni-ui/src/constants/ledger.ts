@@ -5,6 +5,8 @@ import { ChainInfoMap } from '@subwallet/chain-list';
 import { ExtrinsicType, LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 
 export const SUBSTRATE_GENERIC_KEY = 'substrate_generic';
+export const POLKADOT_KEY = 'polkadot';
+export const POLKADOT_SLIP_44 = 354;
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
@@ -17,7 +19,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: SUBSTRATE_GENERIC_KEY,
     isDevMode: false,
     isGeneric: true,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 354
   },
   {
     accountName: 'EVM',
@@ -29,19 +32,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.ethereum.slug,
     isDevMode: false,
     isGeneric: true,
-    isEthereum: true
-  },
-  {
-    accountName: 'Avail',
-    appName: 'Avail',
-    networkName: 'Avail network',
-    genesisHash: ChainInfoMap.availTuringTest.substrateInfo?.genesisHash || '0xd3d2f3a3495dc597434a99d7d449ebad6616db45e4e4f178f31cc6fa14378b70',
-    icon: 'substrate',
-    network: 'avail',
-    slug: ChainInfoMap.availTuringTest.slug,
-    isDevMode: false,
-    isGeneric: false,
-    isEthereum: false
+    isEthereum: true,
+    slip44: 60
   },
   {
     accountName: 'Polkadot',
@@ -53,7 +45,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.polkadot.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 354
   },
   {
     accountName: 'Statemint',
@@ -65,7 +58,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.statemint.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 354
   },
   {
     accountName: 'Statemine',
@@ -77,7 +71,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.statemine.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 434
   },
   {
     accountName: 'Kusama',
@@ -89,7 +84,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.kusama.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 434
   },
   {
     accountName: 'Acala',
@@ -101,7 +97,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.acala.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 787
   },
   {
     accountName: 'Aleph Zero',
@@ -113,7 +110,21 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.aleph.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 643
+  },
+  {
+    accountName: 'Aleph Zero Testnet',
+    appName: 'Aleph Zero',
+    networkName: 'Aleph Zero Testnet network',
+    genesisHash: ChainInfoMap.alephTest.substrateInfo?.genesisHash || '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
+    icon: 'substrate',
+    network: 'aleph-node',
+    slug: ChainInfoMap.alephTest.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false,
+    slip44: 643
   },
   {
     accountName: 'Astar',
@@ -125,7 +136,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.astar.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 810
   },
   {
     accountName: 'Karura',
@@ -137,7 +149,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.karura.slug,
     isDevMode: false,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 686
   },
   {
     accountName: 'Edgeware',
@@ -149,7 +162,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.edgeware.slug,
     isDevMode: true,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 523
   },
   {
     accountName: 'XX Network',
@@ -161,7 +175,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.xx_network.slug,
     isDevMode: true,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 1955
   },
   {
     accountName: 'Polymesh',
@@ -173,7 +188,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slug: ChainInfoMap.polymesh.slug,
     isDevMode: true,
     isGeneric: false,
-    isEthereum: false
+    isEthereum: false,
+    slip44: 595
   }
   // {
   //   displayName: 'Centrifuge',
@@ -208,8 +224,14 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
 
 export const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
-export const PolkadotDerivationPathGens: string[] = ['polkadot'].map((slug) => ChainInfoMap[slug].substrateInfo?.genesisHash || '');
-export const StandardDerivationPathGens: string[] = ['statemint', 'parallel', 'phala', 'pendulum'].map((slug) => ChainInfoMap[slug].substrateInfo?.genesisHash || '');
+export const PolkadotDerivationPathGens: string[] = [POLKADOT_KEY].map((slug) => ChainInfoMap[slug].substrateInfo?.genesisHash || '');
+export const StandardDerivationPathGens: string[] = Object.values(PredefinedLedgerNetwork)
+  .filter((network) => {
+    return network.slug !== POLKADOT_KEY && network.slip44 === POLKADOT_SLIP_44 && !network.isGeneric;
+  })
+  .map(({ genesisHash }) => genesisHash);
+
+export const NotNeedMigrationGens: string[] = [...PolkadotDerivationPathGens, ...StandardDerivationPathGens];
 
 /*
   BLOCK

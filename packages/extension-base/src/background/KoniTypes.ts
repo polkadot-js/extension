@@ -1408,6 +1408,8 @@ export interface LedgerNetwork {
   isGeneric: boolean;
   /** Use for evm account */
   isEthereum: boolean;
+  /** Slip44 in the derivation path */
+  slip44: number;
 }
 
 /// Qr Sign

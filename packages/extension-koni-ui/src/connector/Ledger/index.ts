@@ -4,3 +4,4 @@
 export * from './EVMLedger';
 export * from './SubstrateGenericLedger';
 export * from './SubstrateLegacyLedger';
+export * from './SubstrateMigrationLedger';

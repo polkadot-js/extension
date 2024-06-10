@@ -82,7 +82,7 @@ export class EVMLedger extends BaseLedger<EthApp> {
     const addressIndex = (accountOptions?.addressIndex || 0) + (addressOffset || 0);
     const change = accountOptions?.change || 0;
 
-    return `44'/60'/${account}'/${change}/${addressIndex}`;
+    return `44'/${this.slip44}'/${account}'/${change}/${addressIndex}`;
   }
 
   getApp = async (): Promise<EthApp> => {

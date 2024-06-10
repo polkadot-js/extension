@@ -18,5 +18,4 @@ export * from './signing';
 export * from './strings';
 export * from './transaction';
 export * from './earning';
-export * from './error';
 export * from './session';

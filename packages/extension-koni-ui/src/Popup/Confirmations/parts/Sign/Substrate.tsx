@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
-import { CONFIRMATION_QR_MODAL, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
@@ -87,10 +87,21 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [signMode]);
   const chainSlug = useMemo(() => signMode === AccountSignMode.GENERIC_LEDGER ? SUBSTRATE_GENERIC_KEY : (chainInfo?.slug || ''), [chainInfo?.slug, signMode]);
   const networkName = useMemo(() => chainInfo?.name || chain?.name || toShort(genesisHash), [chainInfo, genesisHash, chain]);
+  const isRuntimeUpdated = useMemo(() => {
+    const _payload = request.payload;
+
+    if (isRawPayload(_payload)) {
+      return false;
+    } else {
+      return _payload.signedExtensions.includes('CheckMetadataHash');
+    }
+  }, [request.payload]);
   const alertData = useMemo((): AlertData | undefined => {
+    const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
+
     if (!isMessage) {
       if (!chain || !chain.hasMetadata) {
-        if (signMode === AccountSignMode.GENERIC_LEDGER) {
+        if (requireMetadata) {
           return {
             isError: true,
             title: t('Unable to sign'),
@@ -103,42 +114,39 @@ const Component: React.FC<Props> = (props: Props) => {
             description: t('{{networkName}} network\'s metadata is not updated, which can lead to an invalid signature', { replace: { networkName } })
           };
         }
-      // } else {
-      //   const metadata = new Metadata(new TypeRegistry(), base64Decode(chain.definition.metaCalls || ''));
-      //   const version = metadata.version;
-      //
-      //   if (version >= 15) {
-      //     if (signMode === AccountSignMode.LEGACY_LEDGER) {
-      //       const gens = chain.genesisHash || '___';
-      //
-      //       if (PolkadotDerivationPathGens.includes(gens) || StandardDerivationPathGens.includes(gens)) {
-      //         return {
-      //           isError: true,
-      //           title: t('Runtime attention!'),
-      //           description: t('Network {{networkName}} don\'t save metadata, you must ', { replace: { networkName } })
-      //         };
-      //       } else {
-      //         return {
-      //           isError: true,
-      //           title: t('Runtime attention!'),
-      //           description: t('Network {{networkName}} don\'t save metadata, you need to migrate and ', { replace: { networkName } })
-      //         };
-      //       }
-      //     }
-      //   } else {
-      //     if (signMode === AccountSignMode.GENERIC_LEDGER) {
-      //       return {
-      //         isError: true,
-      //         title: t('Runtime attention!'),
-      //         description: t('Network {{networkName}} don\'t save metadata', { replace: { networkName } })
-      //       };
-      //     }
-      //   }
+      } else {
+        if (isRuntimeUpdated) {
+          if (signMode === AccountSignMode.LEGACY_LEDGER) {
+            const gens = chain.genesisHash || '___';
+
+            if (NotNeedMigrationGens.includes(gens)) {
+              return {
+                isError: false,
+                title: t('Runtime attention!'),
+                description: t('You should re-attach account by Generic App then use it normally')
+              };
+            } else {
+              return {
+                isError: false,
+                title: t('Runtime attention!'),
+                description: t('You should re-attach account by Generic App then use it normally')
+              };
+            }
+          }
+        } else {
+          if (signMode === AccountSignMode.GENERIC_LEDGER) {
+            return {
+              isError: true,
+              title: t('Runtime attention!'),
+              description: t('You need to wait network update runtime', { replace: { networkName } })
+            };
+          }
+        }
       }
     }
 
     return undefined;
-  }, [chain, isMessage, signMode, t, networkName]);
+  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -147,7 +155,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, isLedger);
+    warning: ledgerWarning } = useLedger(chainSlug, isLedger, isRuntimeUpdated);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 
@@ -225,7 +233,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
         let metadata: Uint8Array;
 
-        if (signMode === AccountSignMode.GENERIC_LEDGER) {
+        if (isRuntimeUpdated) {
           try {
             const blob = u8aToHex(payloadU8a);
             const shortener = await getShortMetadata(chainInfo?.slug || '', blob);
@@ -254,7 +262,7 @@ const Component: React.FC<Props> = (props: Props) => {
           });
       }
     }, 100);
-  }, [payload, isLedgerConnected, ledger, refreshLedger, ledgerSignMessage, account, onApproveSignature, chainInfo, ledgerSignTransaction, notify, signMode]);
+  }, [payload, isLedgerConnected, ledger, refreshLedger, ledgerSignMessage, account, onApproveSignature, chainInfo, ledgerSignTransaction, notify, isRuntimeUpdated]);
 
   const onConfirmInject = useCallback(() => {
     if (substrateWallet) {

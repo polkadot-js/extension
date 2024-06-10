@@ -3,25 +3,22 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
-import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-web-ui/constants/modal';
+import { AlertBox } from '@subwallet/extension-web-ui/components';
+import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-web-ui/constants';
 import { InjectContext } from '@subwallet/extension-web-ui/contexts/InjectContext';
-import { useGetChainInfoByGenesisHash, useNotification, useParseSubstrateRequestPayload, useUnlockChecker } from '@subwallet/extension-web-ui/hooks';
-import { useLedger } from '@subwallet/extension-web-ui/hooks/ledger/useLedger';
+import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-web-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-web-ui/messaging';
-import { RootState } from '@subwallet/extension-web-ui/stores';
 import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isSubstrateMessage, removeTransactionPersist } from '@subwallet/extension-web-ui/utils';
-import { getSignMode } from '@subwallet/extension-web-ui/utils/account/account';
+import { getShortMetadata, getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { SignerResult } from '@polkadot/types/types';
-import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
+import { SignerPayloadJSON, SignerResult } from '@polkadot/types/types';
+import { hexToU8a, u8aToHex, u8aToU8a } from '@polkadot/util';
 
 import { DisplayPayloadModal, ScanSignature, SubstrateQr } from '../Qr';
 
@@ -33,13 +30,19 @@ interface Props extends ThemeProps {
   txExpirationTime?: number;
 }
 
+interface AlertData {
+  description: string;
+  title: string;
+  isError: boolean;
+}
+
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
 
 const handleCancel = async (id: string) => await cancelSignRequest(id);
 
 const handleSignature = async (id: string, { signature }: SigData) => await approveSignSignature(id, signature);
 
-const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED];
+const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED, AccountSignMode.LEGACY_LEDGER, AccountSignMode.GENERIC_LEDGER];
 
 const Component: React.FC<Props> = (props: Props) => {
   const { account, className, extrinsicType, id, request, txExpirationTime } = props;
@@ -51,24 +54,30 @@ const Component: React.FC<Props> = (props: Props) => {
   const { activeModal } = useContext(ModalContext);
   const { substrateWallet } = useContext(InjectContext);
 
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap } = useSelector((state) => state.chainStore);
 
-  const payload = useParseSubstrateRequestPayload(request);
+  const genesisHash = useMemo(() => {
+    const _payload = request.payload;
 
-  const [loading, setLoading] = useState(false);
+    return isRawPayload(_payload)
+      ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
+      : _payload.genesisHash;
+  }, [account.originGenesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, request.payload]);
 
-  const signMode = useMemo(() => getSignMode(account), [account]);
+  const chain = useMetadata(genesisHash);
+  const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
+  const payload = useParseSubstrateRequestPayload(chain, request);
 
-  const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
   const isMessage = isSubstrateMessage(payload);
 
-  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
-
+  const signMode = useMemo(() => getSignMode(account), [account]);
+  const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case AccountSignMode.QR:
         return QrCode;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return Swatches;
       case AccountSignMode.INJECTED:
         return Wallet;
@@ -76,30 +85,82 @@ const Component: React.FC<Props> = (props: Props) => {
         return CheckCircle;
     }
   }, [signMode]);
+  const chainSlug = useMemo(() => signMode === AccountSignMode.GENERIC_LEDGER ? SUBSTRATE_GENERIC_KEY : (chainInfo?.slug || ''), [chainInfo?.slug, signMode]);
+  const networkName = useMemo(() => chainInfo?.name || chain?.name || toShort(genesisHash), [chainInfo, genesisHash, chain]);
+  const isRuntimeUpdated = useMemo(() => {
+    const _payload = request.payload;
 
-  const genesisHash = useMemo(() => {
-    if (isSubstrateMessage(payload)) {
-      return chainInfoMap.polkadot.substrateInfo?.genesisHash || '';
+    if (isRawPayload(_payload)) {
+      return false;
     } else {
-      return payload.genesisHash.toHex();
+      return _payload.signedExtensions.includes('CheckMetadataHash');
     }
-  }, [chainInfoMap.polkadot.substrateInfo?.genesisHash, payload]);
+  }, [request.payload]);
+  const alertData = useMemo((): AlertData | undefined => {
+    const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
-  const chain = useGetChainInfoByGenesisHash(genesisHash);
+    if (!isMessage) {
+      if (!chain || !chain.hasMetadata) {
+        if (requireMetadata) {
+          return {
+            isError: true,
+            title: t('Unable to sign'),
+            description: t('{{networkName}} network\'s metadata is outdated. Update metadata and try again', { replace: { networkName } })
+          };
+        } else {
+          return {
+            isError: false,
+            title: t('Pay attention!'),
+            description: t('{{networkName}} network\'s metadata is not updated, which can lead to an invalid signature', { replace: { networkName } })
+          };
+        }
+      } else {
+        if (isRuntimeUpdated) {
+          if (signMode === AccountSignMode.LEGACY_LEDGER) {
+            const gens = chain.genesisHash || '___';
+
+            if (NotNeedMigrationGens.includes(gens)) {
+              return {
+                isError: false,
+                title: t('Runtime attention!'),
+                description: t('You should re-attach account by Generic App then use it normally')
+              };
+            } else {
+              return {
+                isError: false,
+                title: t('Runtime attention!'),
+                description: t('You should re-attach account by Generic App then use it normally')
+              };
+            }
+          }
+        } else {
+          if (signMode === AccountSignMode.GENERIC_LEDGER) {
+            return {
+              isError: true,
+              title: t('Runtime attention!'),
+              description: t('You need to wait network update runtime', { replace: { networkName } })
+            };
+          }
+        }
+      }
+    }
+
+    return undefined;
+  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
     isLocked,
     ledger,
     refresh: refreshLedger,
-    signTransaction: ledgerSign,
-    warning: ledgerWarning } = useLedger(chain?.slug, isLedger);
+    signMessage: ledgerSignMessage,
+    signTransaction: ledgerSignTransaction,
+    warning: ledgerWarning } = useLedger(chainSlug, isLedger, isRuntimeUpdated);
 
-  const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
-    isLedgerLoading,
-    isLocked,
-    ledger
-  ]);
+  const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
+
+  const [loading, setLoading] = useState(false);
+  const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
 
   // Handle buttons actions
   const onCancel = useCallback(() => {
@@ -142,7 +203,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [activeModal]);
 
   const onConfirmLedger = useCallback(() => {
-    if (!payload || typeof payload === 'string') {
+    if (!payload) {
       return;
     }
 
@@ -154,28 +215,54 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setLoading(true);
 
-    setTimeout(() => {
-      const payloadU8a = payload.toU8a(true);
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    setTimeout(async () => {
+      if (typeof payload === 'string') {
+        ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset)
+          .then(({ signature }) => {
+            onApproveSignature({ signature });
+          })
+          .catch((e: Error) => {
+            console.error(e);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      } else {
+        const payloadU8a = payload.toU8a(true);
 
-      ledgerSign(payloadU8a, account.accountIndex, account.addressOffset)
-        .then(({ signature }) => {
-          onApproveSignature({ signature });
-        })
-        .catch((e: Error) => {
-          console.log(e);
-          setLoading(false);
-        });
-    });
-  }, [
-    account.accountIndex,
-    account.addressOffset,
-    isLedgerConnected,
-    ledger,
-    ledgerSign,
-    onApproveSignature,
-    payload,
-    refreshLedger
-  ]);
+        let metadata: Uint8Array;
+
+        if (isRuntimeUpdated) {
+          try {
+            const blob = u8aToHex(payloadU8a);
+            const shortener = await getShortMetadata(chainInfo?.slug || '', blob);
+
+            metadata = hexToU8a(shortener);
+          } catch (e) {
+            notify({
+              message: (e as Error).message,
+              type: 'error'
+            });
+            setLoading(false);
+
+            return;
+          }
+        } else {
+          metadata = new Uint8Array(0);
+        }
+
+        ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset)
+          .then(({ signature }) => {
+            onApproveSignature({ signature });
+          })
+          .catch(console.error)
+          .finally(() => {
+            setLoading(false);
+          });
+      }
+    }, 100);
+  }, [payload, isLedgerConnected, ledger, refreshLedger, ledgerSignMessage, account, onApproveSignature, chainInfo, ledgerSignTransaction, notify, isRuntimeUpdated]);
 
   const onConfirmInject = useCallback(() => {
     if (substrateWallet) {
@@ -228,7 +315,8 @@ const Component: React.FC<Props> = (props: Props) => {
       case AccountSignMode.QR:
         onConfirmQr();
         break;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         onConfirmLedger();
         break;
       case AccountSignMode.INJECTED:
@@ -275,57 +363,74 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [txExpirationTime]);
 
   return (
-    <div className={CN(className, 'confirmation-footer')}>
-      <Button
-        disabled={loading}
-        icon={(
-          <Icon
-            phosphorIcon={XCircle}
-            weight='fill'
-          />
-        )}
-        onClick={onCancel}
-        schema={'secondary'}
-      >
-        {t('Cancel')}
-      </Button>
-      <Button
-        disabled={showQuoteExpired || (isMessage && !modeCanSignMessage.includes(signMode))}
-        icon={(
-          <Icon
-            phosphorIcon={approveIcon}
-            weight='fill'
-          />
-        )}
-        loading={loading}
-        onClick={onConfirm}
-      >
-        {
-          signMode !== AccountSignMode.LEDGER
-            ? t('Approve')
-            : !isLedgerConnected
-              ? t('Refresh')
-              : t('Approve')
-        }
-      </Button>
+    <>
       {
-        signMode === AccountSignMode.QR && (
-          <DisplayPayloadModal>
-            <SubstrateQr
-              address={account.address}
-              genesisHash={genesisHash}
-              payload={payload || ''}
-            />
-          </DisplayPayloadModal>
+        alertData && (
+          <AlertBox
+            className={CN(className, 'alert-box')}
+            description={alertData.description}
+            title={alertData.title}
+            type={alertData.isError ? 'error' : 'warning'}
+          />
         )
       }
-      {signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
-    </div>
+      <div className={CN(className, 'confirmation-footer')}>
+        <Button
+          disabled={loading}
+          icon={(
+            <Icon
+              phosphorIcon={XCircle}
+              weight='fill'
+            />
+          )}
+          onClick={onCancel}
+          schema={'secondary'}
+        >
+          {t('Cancel')}
+        </Button>
+        <Button
+          disabled={showQuoteExpired || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
+          icon={(
+            <Icon
+              phosphorIcon={approveIcon}
+              weight='fill'
+            />
+          )}
+          loading={loading}
+          onClick={onConfirm}
+        >
+          {
+            !isLedger
+              ? t('Approve')
+              : !isLedgerConnected
+                ? t('Refresh')
+                : t('Approve')
+          }
+        </Button>
+        {
+          signMode === AccountSignMode.QR && (
+            <DisplayPayloadModal>
+              <SubstrateQr
+                address={account.address}
+                genesisHash={genesisHash}
+                payload={payload || ''}
+              />
+            </DisplayPayloadModal>
+          )
+        }
+        {signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
+      </div>
+    </>
   );
 };
 
 const SubstrateSignArea = styled(Component)<Props>(({ theme: { token } }: Props) => {
-  return {};
+  return {
+    '&.alert-box': {
+      margin: token.padding,
+      marginBottom: 0
+    }
+  };
 });
 
 export default SubstrateSignArea;

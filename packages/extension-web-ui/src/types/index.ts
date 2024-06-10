@@ -139,6 +139,7 @@ export * from './form';
 export * from './history';
 export * from './hook';
 export * from './ledger';
+export * from './metadata';
 export * from './missionPool';
 export * from './navigation';
 export * from './scanner';

@@ -2,36 +2,34 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { getBeneficiary, getDestinationChainLocation, getDestWeight, getTokenLocation } from '@subwallet/extension-base/koni/api/xcm/utils';
-import { _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getXcmBeneficiary, _getXcmDestWeight, _getXcmMultiAssets, _getXcmMultiLocation } from '@subwallet/extension-base/core/substrate/xcm-parser';
+import { isUseTeleportProtocol, STABLE_XCM_VERSION } from '@subwallet/extension-base/koni/api/xcm/utils';
+import { _isBridgedToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { ApiPromise } from '@polkadot/api';
 
 export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = getDestWeight();
-  const version = ['statemint', 'statemine', 'shiden', 'astar'].includes(originChainInfo.slug) ? 'V3' : 'V1';
-  const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress, version);
-  const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo, version);
-  let assetLocation = getTokenLocation(tokenInfo, value, version);
-
+  let version = STABLE_XCM_VERSION;
   let method = 'limitedReserveTransferAssets';
 
-  if (['statemint', 'statemine'].includes(originChainInfo.slug) && _isSubstrateRelayChain(destinationChainInfo)) {
-    assetLocation = {
-      [version]: [
-        {
-          id: { Concrete: { parents: 1, interior: 'Here' } },
-          fun: { Fungible: value }
-        }
-      ]
-    };
+  if (_isBridgedToken(tokenInfo)) {
+    version = 4;
+    method = 'transferAssets';
+  }
+
+  if (isUseTeleportProtocol(originChainInfo, destinationChainInfo)) {
     method = 'limitedTeleportAssets';
   }
+
+  const weightParam = _getXcmDestWeight(originChainInfo);
+  const destination = _getXcmMultiLocation(originChainInfo, destinationChainInfo, version);
+  const beneficiary = _getXcmBeneficiary(destinationChainInfo, recipientAddress, version);
+  const tokenLocation = _getXcmMultiAssets(tokenInfo, value, version);
 
   return api.tx.polkadotXcm[method](
     destination,
     beneficiary,
-    assetLocation,
+    tokenLocation,
     0, // FeeAssetItem
     weightParam
   );

@@ -94,13 +94,12 @@ function _getSystemPalletTotalBalanceV2 (accountInfo: FrameSystemAccountInfoV2):
 function _getSystemPalletTransferableV1 (accountInfo: FrameSystemAccountInfoV1, existentialDeposit: string, strictMode?: boolean): string {
   const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(accountInfo, existentialDeposit, strictMode));
   const bnAppliedFrozen = BigN.max(accountInfo.data.feeFrozen, accountInfo.data.miscFrozen);
-  const bnTotalBalance = new BigN(_getSystemPalletTotalBalanceV1(accountInfo));
 
-  const bnTransferableBalance = bnTotalBalance.minus(BigN.max(bnAppliedFrozen, accountInfo.data.reserved, bnAppliedExistentialDeposit));
+  const bnTransferableBalance = new BigN(accountInfo.data.free).minus(BigN.max(bnAppliedFrozen, bnAppliedExistentialDeposit));
 
   return BigN.max(bnTransferableBalance, 0).toFixed();
 }
 
 function _getSystemPalletTotalBalanceV1 (accountInfo: FrameSystemAccountInfoV1): string {
-  return new BigN(accountInfo.data.free).toFixed();
+  return new BigN(accountInfo.data.free).plus(accountInfo.data.reserved).toFixed();
 }

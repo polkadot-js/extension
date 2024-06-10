@@ -20,8 +20,8 @@ export function _handleDisplayForEarningError (error: TransactionError) {
 
 export const INSUFFICIENT_MESSAGES = ['残高不足', 'Недостаточный баланс', 'Insufficient balance'];
 
-export function _handleDisplayInsufficientEarningError (error: Error, availableBalance: string, amount: string, minJoinPool: string) {
-  if (!INSUFFICIENT_MESSAGES.some((v) => error.message.includes(v))) {
+export function _handleDisplayInsufficientEarningError (error: Error, isXCM: boolean, availableBalance: string, amount: string, minJoinPool: string) {
+  if (isXCM || !INSUFFICIENT_MESSAGES.some((v) => error.message.includes(v))) {
     return undefined;
   }
 

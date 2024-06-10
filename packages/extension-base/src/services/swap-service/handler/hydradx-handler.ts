@@ -40,7 +40,7 @@ export class HydradxHandler implements SwapBaseInterface {
     this.swapBaseHandler = new SwapBaseHandler({
       balanceService,
       chainService,
-      providerName: isTestnet ? 'HydraDX Testnet' : 'HydraDX',
+      providerName: isTestnet ? 'Hydration Testnet' : 'Hydration',
       providerSlug: isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET
     });
     this.providerSlug = isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET;

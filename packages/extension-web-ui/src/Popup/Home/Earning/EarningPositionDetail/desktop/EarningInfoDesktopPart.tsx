@@ -74,6 +74,7 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
           <Button
             block={true}
             className={'__right-item -ghost-type-3'}
+            disabled={poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

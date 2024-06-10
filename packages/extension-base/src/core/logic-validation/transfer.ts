@@ -182,12 +182,6 @@ export function checkBalanceWithTransactionFee (validationResponse: SWTransactio
     return;
   }
 
-  // if (!nativeTokenAvailable.metadata) {
-  //   validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
-  //
-  //   return;
-  // }
-
   const { edAsWarning, extrinsicType, isTransferAll, skipFeeValidation } = transactionInput;
 
   if (skipFeeValidation) {

@@ -151,7 +151,8 @@ const createConfig = (entry, alias = {}, useSplitChunk = false) => {
       }),
       new HtmlWebpackPlugin({
         filename: 'index.html',
-        template: 'public/index.html'
+        template: 'public/index.html',
+        meta: { 'app-version': pkgJson.buildNumber }
       })
     ],
     resolve: {

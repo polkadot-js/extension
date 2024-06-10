@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ChainInfoMap } from '@subwallet/chain-list';
-import {_ChainStatus, _SubstrateChainType, _SubstrateInfo} from '@subwallet/chain-list/types';
+import {_ChainInfo, _ChainStatus, _SubstrateChainType, _SubstrateInfo} from '@subwallet/chain-list/types';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
-import { ApiPromise } from '@polkadot/api';
+import {ApiPromise, WsProvider} from '@polkadot/api';
 import { chainProvider, chainProviderBackup } from './constants';
 import { AssetSpec, checkNativeAsset, checkParachainId, checkSs58Prefix, getEvmNativeInfo, getSubstrateNativeInfo, handleEvmProvider, handleSubstrateProvider, NativeAssetInfo } from './utils';
+import {EvmApi} from "@subwallet/extension-base/services/chain-service/handler/EvmApi";
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
@@ -22,7 +23,7 @@ const onlyChains: string[] = ['polkadot', 'manta_network']; // check only these 
 describe('test chain', () => {
   it('chain', async () => {
     const chainInfos = getChainlistInfos();
-    const errorChain: Record<string, string[]> = {};
+    const errorChainMap: Record<string, string[]> = {};
 
     for (const chainInfo of chainInfos) {
       const chain = chainInfo.slug;
@@ -60,6 +61,8 @@ describe('test chain', () => {
           symbol: evmInfo.symbol
         }, errors);
       };
+
+      await checkProviderMatchChain(chainInfo, provider, key);
 
       if (chainInfo.substrateInfo) {
         await handleSubstrateProvider({
@@ -99,11 +102,11 @@ describe('test chain', () => {
       }
 
       if (errors.length) {
-        errorChain[chain] = errors;
+        errorChainMap[chain] = errors;
       }
     }
 
-    console.log('result errorChain', errorChain);
+    console.log('result errorChain', errorChainMap);
   });
 });
 
@@ -117,6 +120,33 @@ function getChainlistInfos () {
   return Object.values(ChainInfoMap).filter((info) =>
       info.chainStatus === _ChainStatus.ACTIVE && !ignoreChains.includes(info.slug)
   );
+}
+
+async function checkProviderMatchChain (chainInfo: _ChainInfo, provider: string, key: string) {
+  if (chainInfo.substrateInfo) {
+    const _api = new ApiPromise({ provider: new WsProvider(provider) });
+    const substrateApi = await _api.isReady;
+    const genesisHash = substrateApi.genesisHash.toHex();
+
+    return genesisHash === chainInfo.substrateInfo.genesisHash;
+  }
+
+  if (chainInfo.evmInfo) {
+    let _key = key;
+    let _provider = provider;
+
+    if (chainInfo.substrateInfo) {
+      const _providerIndex = chainProviderBackup[chainInfo.slug] || chainProviderBackup.default;
+      const length = Object.keys(chainInfo.providers).length;
+      const providerIndex = _providerIndex >= length ? length - 1 : _providerIndex;
+
+      [_key, _provider] = Object.entries(chainInfo.providers)[providerIndex];
+    }
+    const _api = new EvmApi(chainInfo.slug, _provider, { providerName: _key });
+    const chainId = await _api.api.eth.getChainId();
+
+    return chainId === chainInfo.evmInfo.evmChainId;
+  }
 }
 
 async function retrieveOnchainInfo (api: ApiPromise): Promise<OnchainInfo> {
@@ -142,3 +172,4 @@ function validateSubstrateInfo(onchainInfo: OnchainInfo, chainlistInfo: _Substra
   checkSs58Prefix(onchainInfo.ss58Prefix, chainlistInfo.addressPrefix, errors);
   checkParachainId(onchainInfo.parachainId, chainlistInfo.paraId, errors);
 }
+

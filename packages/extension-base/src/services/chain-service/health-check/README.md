@@ -4,21 +4,25 @@
   - Substrate
   - Evm
   - ...
-- 2.2. Get expect on-chain info
-  - Determined on-chain info to get corresponding chain type.
-- 2.3. Retrieve on-chain info.
-  - ss58Prefix
-  - paraChainId
-  - native token
-    - symbol
-    - decimals
-    - ED
-  - ? subscan
-    - subscanSlug
-    - chainBalanceSlug
+- 2.2. Check if provider match chain
+  - Substrate: check correct genesisHash.
+  - Evm: check correct chainId.
+- 2.3. Retrieve on-chain info
+  - Substrate:
+    - ss58Prefix
+    - paraChainId
+    - native token
+      - symbol
+      - decimals
+      - ED
+  - Evm:
+    - native token
+      - symbol
+      - decimals
+      - ED
 - 2.4. Validate chain info.
-  - Input: onchainInfo, chainlistInfo.
-  - Output: errorList and message.
+  - Input: on-chain info, chain-list info.
+  - Output: true/false.
 - 2.5. Check chainlist constrains logic.
   - If paraId: chainType = PARACHAIN else RELACHAIN.
   - If chainType = PARACHAIN: check relaySlug else null.

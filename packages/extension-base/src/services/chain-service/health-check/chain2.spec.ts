@@ -17,27 +17,37 @@ interface OnchainInfo {
 }
 
 const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet', 'shibuya', 'aventus']; // ignore these chains;
-// const onlyChains: string[] = ['polkadot', 'manta_network']; // check only these chains if set;
-const onlyChains: string[] = [];
-const CASE_TIME_OUT = 20000;
+const onlyChains: string[] = []; // check only these chains if set;
+const CASE_TIME_OUT = 60000; // 1 minutes
 
 describe('test chain', () => {
   const chainInfos = getChainlistInfos();
-  test.each(chainInfos)(`test %j`, async (chainInfo) => {
+  test.each(chainInfos)(`validate %j`, async (chainInfo) => {
     const chain = chainInfo.slug;
     console.log('start', chain);
     const providerIndex = chainProvider[chain] || chainProvider.default;
     const [key, provider] = Object.entries(chainInfo.providers)[providerIndex];
 
-    // 1. Check provider match chain
-    const [isProviderMatchChain, api] = await checkProviderMatchChain(chainInfo, provider, key) as [boolean, ApiPromise | EvmApi | null];
+    if (chainInfo.substrateInfo) {
+      const [isProviderMatchChain, api] = await checkSubstrateProvider(chainInfo, provider) as [boolean, ApiPromise | null];
+      expect(isProviderMatchChain).toEqual(true);
 
-    expect(isProviderMatchChain).toEqual(true);
-
-    // 2. If provider match chain, retrieve on-chain data and validating it.
-    if (isProviderMatchChain && api) {
-      expect(await isValidData(chainInfo, api)).toEqual(true);
+      if (isProviderMatchChain && api) {
+        expect(await isValidSubstrateData(chainInfo, api)).toEqual(true);
+      }
     }
+
+    if (chainInfo.evmInfo) {
+      const [isProviderMatchChain, api] = await checkEvmProvider(chainInfo, provider, key) as [boolean, EvmApi | null];
+      expect(isProviderMatchChain).toEqual(true);
+
+      if (isProviderMatchChain && api) {
+        expect(await isValidEvmData(chainInfo, api)).toEqual(true);
+      }
+    }
+
+
+
   }, CASE_TIME_OUT);
 });
 
@@ -53,7 +63,7 @@ function getChainlistInfos () {
   );
 }
 
-async function checkProviderMatchChain (chainInfo: _ChainInfo, provider: string, key: string) {
+async function checkSubstrateProvider (chainInfo: _ChainInfo, provider: string) {
   if (chainInfo.substrateInfo) {
     const _api = new ApiPromise({ provider: new WsProvider(provider) });
     const substrateApi = await _api.isReady;
@@ -66,6 +76,10 @@ async function checkProviderMatchChain (chainInfo: _ChainInfo, provider: string,
     return trueGenesisHash ? [trueGenesisHash, _api] : [trueGenesisHash, null];
   }
 
+  return [false, null];
+}
+
+async function checkEvmProvider (chainInfo: _ChainInfo, provider: string, key: string) {
   if (chainInfo.evmInfo) {
     let _key = key;
     let _provider = provider;
@@ -90,7 +104,7 @@ async function checkProviderMatchChain (chainInfo: _ChainInfo, provider: string,
   return [false, null];
 }
 
-async function isValidData (chainInfo: _ChainInfo, api: ApiPromise | EvmApi) {
+async function isValidSubstrateData (chainInfo: _ChainInfo, api: ApiPromise) {
   if (chainInfo.substrateInfo) {
       const onchainInfo = await retrieveSubstrateOnchainInfo(api as ApiPromise)
       const substrateInfo = chainInfo.substrateInfo!;
@@ -98,25 +112,30 @@ async function isValidData (chainInfo: _ChainInfo, api: ApiPromise | EvmApi) {
       return validateSubstrateInfo(onchainInfo, substrateInfo);
   }
 
+  return false
+}
+
+async function isValidEvmData (chainInfo: _ChainInfo, api: EvmApi) {
   if (chainInfo.evmInfo) {
-      const nativeToken = await getEvmNativeInfo(api as EvmApi);
-      const evmInfo = chainInfo.evmInfo!;
+    const nativeToken = await getEvmNativeInfo(api as EvmApi);
+    const evmInfo = chainInfo.evmInfo!;
 
-      console.log(
-        `[Evm] current decimals - ${evmInfo.decimals}, onChain - ${nativeToken.decimals} \n`,
-        `[Evm] current ED - ${evmInfo.existentialDeposit}, onChain - ${nativeToken.minAmount} \n`,
-        `[Evm] current symbol - ${evmInfo.symbol}, onChain - ${nativeToken.symbol} \n`
-      );
+    console.log(
+      `[Evm] current decimals - ${evmInfo.decimals}, onChain - ${nativeToken.decimals} \n`,
+      `[Evm] current ED - ${evmInfo.existentialDeposit}, onChain - ${nativeToken.minAmount} \n`,
+      `[Evm] current symbol - ${evmInfo.symbol}, onChain - ${nativeToken.symbol} \n`
+    );
 
-      return checkNativeAsset(nativeToken, {
-        decimals: evmInfo.decimals,
-        existentialDeposit: evmInfo.existentialDeposit,
-        symbol: evmInfo.symbol
-      });
+    return checkNativeAsset(nativeToken, {
+      decimals: evmInfo.decimals,
+      existentialDeposit: evmInfo.existentialDeposit,
+      symbol: evmInfo.symbol
+    });
   }
 
   return false
 }
+
 async function retrieveSubstrateOnchainInfo (api: ApiPromise): Promise<OnchainInfo> {
   const ss58Prefix = api.consts.system.ss58Prefix.toPrimitive() as number;
   const parachainId = api.query.parachainInfo ? (await api.query.parachainInfo.parachainId()).toPrimitive() as number : null;

@@ -7,7 +7,7 @@ import { isValidSubstrateAddress } from '@subwallet/extension-base/utils';
 import { AddressInput, ChainSelector, Layout, PageWrapper, TokenTypeSelector } from '@subwallet/extension-web-ui/components';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useChainChecker, useDefaultNavigate, useGetChainPrefixBySlug, useGetFungibleContractSupportedChains, useNotification, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { upsertCustomToken, validateCustomToken } from '@subwallet/extension-web-ui/messaging';
 import { FormCallbacks, FormRule, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { convertFieldToError, convertFieldToObject, reformatAddress, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
@@ -63,7 +63,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const showNotification = useNotification();
   const { isWebUI } = useContext(ScreenContext);
 
-  const chainInfoMap = useGetContractSupportedChains();
+  const chainInfoMap = useGetFungibleContractSupportedChains();
 
   const [form] = Form.useForm<TokenImportFormType>();
 
@@ -92,6 +92,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainChecker = useChainChecker();
   const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
+  const isSelectGRC20 = useMemo(() => {
+    return selectedTokenType === _AssetType.GRC20;
+  }, [selectedTokenType]);
+
   const tokenTypeOptions = useMemo(() => {
     return getTokenTypeSupported(chainInfoMap[selectedChain]);
   }, [chainInfoMap, selectedChain]);
@@ -104,9 +108,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             const selectedTokenType = getFieldValue('type') as _AssetType;
             const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType) && isEthereumAddress(contractAddress);
             const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
-            const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
+            const isValidGrc20Contract = [_AssetType.GRC20].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
+            const reformattedAddress = isValidGrc20Contract ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
-            if (isValidEvmContract || isValidWasmContract) {
+            if (isValidEvmContract || isValidWasmContract || isValidGrc20Contract) {
               setLoading(true);
               validateCustomToken({
                 contractAddress: reformattedAddress,
@@ -185,7 +190,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
     const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
 
-    const reformattedAddress = reformatAddress(contractAddress, chainNetworkPrefix);
+    const reformattedAddress = type === _AssetType.GRC20 ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 
@@ -308,7 +313,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
                 disabled={!selectedTokenType}
-                label={t('Contract address')}
+                label={isSelectGRC20 ? t('Program ID') : t('Contract address')}
                 showScanner={true}
               />
             </Form.Item>

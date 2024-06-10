@@ -3,137 +3,19 @@
 
 import { GearApi } from '@gear-js/api';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { SupportTransferResponse } from '@subwallet/extension-base/background/KoniTypes';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { _BALANCE_TOKEN_GROUP, _MANTA_ZK_CHAIN_GROUP, _TRANSFER_CHAIN_GROUP, _TRANSFER_NOT_SUPPORTED_CHAINS, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
+import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenTransferredByEvm, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isBridgedToken, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenTransferredByEvm, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { AccountInfoWithProviders, AccountInfoWithRefCount } from '@polkadot/types/interfaces';
 import { BN, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
-
-function isRefCount (accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount): accountInfo is AccountInfoWithRefCount {
-  return !!(accountInfo as AccountInfoWithRefCount).refcount;
-}
-
-export async function checkReferenceCount (networkKey: string, address: string, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<boolean> {
-  const apiProps = await substrateApiMap[networkKey].isReady;
-  const api = apiProps.api;
-
-  if (_isChainEvmCompatible(chainInfo)) {
-    return false;
-  }
-
-  // @ts-ignore
-  const accountInfo: AccountInfoWithProviders | AccountInfoWithRefCount = await api.query.system.account(address);
-
-  return accountInfo
-    ? isRefCount(accountInfo)
-      ? !accountInfo.refcount.isZero()
-      : !accountInfo.consumers.isZero()
-    : false;
-}
-
-export async function checkSupportTransfer (networkKey: string, tokenInfo: _ChainAsset, substrateApiMap: Record<string, _SubstrateApi>, chainInfo: _ChainInfo): Promise<SupportTransferResponse> {
-  const substrateApi = await substrateApiMap[networkKey].isReady;
-
-  if (!tokenInfo) {
-    return {
-      supportTransfer: false,
-      supportTransferAll: false
-    };
-  }
-
-  if (_isChainEvmCompatible(chainInfo)) {
-    return {
-      supportTransfer: true,
-      supportTransferAll: true
-    };
-  }
-
-  if (tokenInfo.symbol.startsWith(_ZK_ASSET_PREFIX) && _MANTA_ZK_CHAIN_GROUP.includes(tokenInfo.originChain)) {
-    return {
-      supportTransfer: false,
-      supportTransferAll: false
-    };
-  }
-
-  if (_TRANSFER_NOT_SUPPORTED_CHAINS.includes(networkKey)) {
-    return {
-      supportTransfer: false,
-      supportTransferAll: false
-    };
-  }
-
-  const api = substrateApi.api;
-  const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
-  const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
-  const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
-  const result: SupportTransferResponse = {
-    supportTransfer: false,
-    supportTransferAll: false
-  };
-
-  if (!(isTxCurrenciesSupported || isTxBalancesSupported || isTxTokensSupported || isTxEqBalancesSupported)) {
-    return result;
-  }
-
-  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) { // for PSP tokens
-    return {
-      supportTransfer: true,
-      supportTransferAll: true
-    };
-  }
-
-  // TODO: need review
-  if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxCurrenciesSupported) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.kintsugi.includes(networkKey) && !_isNativeToken(tokenInfo) && isTxTokensSupported) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (
-    _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
-    // && !_isNativeToken(tokenInfo) && isTxEqBalancesSupported
-  ) {
-    result.supportTransfer = false;
-    result.supportTransferAll = false;
-  // } else if (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) && _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol)) {
-  //   result.supportTransfer = true;
-  //   result.supportTransferAll = true;
-  } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo) && _BALANCE_TOKEN_GROUP.bitcountry.includes(tokenInfo.symbol)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey) && _isNativeToken(tokenInfo)) {
-  //   result.supportTransfer = true;
-  //   result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.avail.includes(networkKey)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  } else if (_TRANSFER_CHAIN_GROUP.centrifuge.includes(networkKey)) {
-    result.supportTransfer = true;
-    result.supportTransferAll = true;
-  }
-
-  return result;
-}
 
 interface CreateTransferExtrinsicProps {
   substrateApi: _SubstrateApi;
@@ -159,11 +41,18 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   const isTxCurrenciesSupported = !!api && !!api.tx && !!api.tx.currencies;
   const isTxBalancesSupported = !!api && !!api.tx && !!api.tx.balances;
   const isTxTokensSupported = !!api && !!api.tx && !!api.tx.tokens;
-  // const isTxEqBalancesSupported = !!api && !!api.tx && !!api.tx.eqBalances;
   const isTxAssetsSupported = !!api && !!api.tx && !!api.tx.assets;
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
-  if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
+  if (_isBridgedToken(tokenInfo) && api.tx.foreignAssets) {
+    const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+
+    if (transferAll) {
+      transfer = api.tx.foreignAssets.transfer(onChainInfo, to, value);
+    } else {
+      transfer = api.tx.foreignAssets.transferKeepAlive(onChainInfo, to, value);
+    }
+  } else if (_isTokenWasmSmartContract(tokenInfo) && api.query.contracts) {
     const contractPromise = getPSP22ContractPromise(api, _getContractAddressOfToken(tokenInfo));
     // @ts-ignore
     const gasLimit = await getWasmContractGasLimit(api, from, 'psp22::transfer', contractPromise, {}, [from, value, {}]);
@@ -204,26 +93,10 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     } else if (value) {
       transfer = api.tx.tokens.transfer(to, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo), new BN(value));
     }
-  } else if (
-    _TRANSFER_CHAIN_GROUP.genshiro.includes(networkKey)
-    // && isTxEqBalancesSupported
-  ) {
-    // transfer = api.tx.eqBalances.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
-    /* empty */
-  // } else if (!_isNativeToken(tokenInfo) && (_TRANSFER_CHAIN_GROUP.crab.includes(networkKey) || _BALANCE_TOKEN_GROUP.crab.includes(tokenInfo.symbol))) {
-  //   if (transferAll) {
-  //     transfer = api.tx.kton.transferAll(to, false);
-  //   } else if (value) {
-  //     transfer = api.tx.kton.transfer(to, new BN(value));
-  //   }
   } else if (_TRANSFER_CHAIN_GROUP.bitcountry.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.currencies.transfer(to, _getTokenOnChainInfo(tokenInfo), value);
   } else if (_TRANSFER_CHAIN_GROUP.statemine.includes(networkKey) && !_isNativeToken(tokenInfo)) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
-    // } else if (_TRANSFER_CHAIN_GROUP.riochain.includes(networkKey)) {
-    //   if (_isNativeToken(tokenInfo)) {
-    //     transfer = api.tx.currencies.transferNativeCurrency(to, value);
-    //   }
   } else if (_TRANSFER_CHAIN_GROUP.sora_substrate.includes(networkKey) && isTxAssetsSupported) {
     transfer = api.tx.assets.transfer(_getTokenOnChainAssetId(tokenInfo), to, value);
   } else if (isTxBalancesSupported && _isNativeToken(tokenInfo)) {
@@ -268,10 +141,11 @@ export const getTransferMockTxFee = async (address: string, chainInfo: _ChainInf
       }
     } else {
       const substrateApi = api as _SubstrateApi;
+      const chainApi = await substrateApi.isReady;
       const [mockTx] = await createTransferExtrinsic({
         from: address,
         networkKey: chainInfo.slug,
-        substrateApi,
+        substrateApi: chainApi,
         to: address,
         tokenInfo,
         transferAll: true,

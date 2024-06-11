@@ -28,8 +28,8 @@ export default abstract class BaseStore <T> {
     });
   }
 
-  public allMap (update: (value: Record<string, T>) => void): void {
-    chrome.storage.local.get(null, (result: StoreValue): void => {
+  public async allMap (update: (value: Record<string, T>) => void): Promise<void> {
+    await chrome.storage.local.get(null).then((result: StoreValue) => {
       lastError('all');
 
       const entries = Object.entries(result);
@@ -47,30 +47,30 @@ export default abstract class BaseStore <T> {
     });
   }
 
-  public get (key: string, update: (value: T) => void): void {
+  public async get (key: string, update: (value: T) => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.get([prefixedKey], (result: StoreValue): void => {
+    await chrome.storage.local.get([prefixedKey]).then((result: StoreValue) => {
       lastError('get');
 
       update(result[prefixedKey] as T);
     });
   }
 
-  public remove (key: string, update?: () => void): void {
+  public async remove (key: string, update?: () => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.remove(prefixedKey, (): void => {
+    await chrome.storage.local.remove(prefixedKey).then(() => {
       lastError('remove');
 
       update && update();
     });
   }
 
-  public set (key: string, value: T, update?: () => void): void {
+  public async set (key: string, value: T, update?: () => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    chrome.storage.local.set({ [prefixedKey]: value }, (): void => {
+    await chrome.storage.local.set({ [prefixedKey]: value }).then(() => {
       lastError('set');
 
       update && update();

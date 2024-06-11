@@ -86,8 +86,8 @@ export enum NotificationOptions {
 const AUTH_URLS_KEY = 'authUrls';
 const DEFAULT_AUTH_ACCOUNTS = 'defaultAuthAccounts';
 
-function extractMetadata (store: MetadataStore): void {
-  store.allMap((map): void => {
+async function extractMetadata (store: MetadataStore): Promise<void> {
+  await store.allMap(async (map): Promise<void> => {
     const knownEntries = Object.entries(knownGenesis);
     const defs: Record<string, { def: MetadataDef, index: number, key: string }> = {};
     const removals: string[] = [];
@@ -117,7 +117,10 @@ function extractMetadata (store: MetadataStore): void {
         }
       });
 
-    removals.forEach((key) => store.remove(key));
+    for (const key of removals) {
+      await store.remove(key);
+    }
+
     Object.values(defs).forEach(({ def }) => addMetadata(def));
   });
 }

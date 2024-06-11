@@ -482,7 +482,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - scrollRef.current.offsetHeight);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -506,9 +506,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [inactiveModal, poolInfo]);
 
   useEffect(() => {
-    if (isScrollEnd) {
-      setDisableEarnButton(false);
-    }
+    setDisableEarnButton(!isScrollEnd);
   }, [isScrollEnd]);
 
   if (!poolInfo) {
@@ -534,14 +532,14 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
 
-        <Button
+        {!isScrollEnd && <Button
           className={'__scroll-to-end-button'}
           disabled={isScrollEnd}
           icon={<Icon phosphorIcon={CaretDown} />}
           onClick={onScrollContent}
           shape={'circle'}
           size={'xs'}
-        />
+        />}
       </div>
 
       <div className={'__buttons'}>

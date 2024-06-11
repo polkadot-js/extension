@@ -55,12 +55,12 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
 
 const earningTypeLabelMap = {
-  [YieldPoolType.NATIVE_STAKING]: 'direct nomination',
-  [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
-  [YieldPoolType.LENDING]: 'lending',
-  [YieldPoolType.LIQUID_STAKING]: 'liquid staking',
-  [YieldPoolType.PARACHAIN_STAKING]: 'direct nomination',
-  [YieldPoolType.SINGLE_FARMING]: 'single farming'
+  [YieldPoolType.NATIVE_STAKING]: 'Direct nomination',
+  [YieldPoolType.NOMINATION_POOL]: 'Nomination pool',
+  [YieldPoolType.LENDING]: 'Lending',
+  [YieldPoolType.LIQUID_STAKING]: 'Liquid staking',
+  [YieldPoolType.PARACHAIN_STAKING]: 'Direct nomination',
+  [YieldPoolType.SINGLE_FARMING]: 'Single farming'
 };
 
 type LocationStateRW = {
@@ -704,7 +704,7 @@ const Component = ({ className }: ComponentProps) => {
     const _shortName = poolInfo.metadata.shortName;
     const _type = t(earningTypeLabelMap[poolInfo.type]);
 
-    return t('{{shortName}} {{type}} process:', { replace: { shortName: _shortName, type: _type } });
+    return t('{{type}} process on {{shortName}} :', { replace: { shortName: _shortName, type: _type } });
   })();
 
   const onCancelInstructionModal = useCallback(() => {

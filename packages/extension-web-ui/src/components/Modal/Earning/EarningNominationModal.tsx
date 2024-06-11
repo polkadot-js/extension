@@ -94,7 +94,8 @@ const EarningPoolDetailModal = styled(Component)<Props>(({ theme: { token } }: P
 
     '.__nomination-name': {
       textOverflow: 'ellipsis',
-      overflow: 'hidden'
+      overflow: 'hidden',
+      color: token.colorWhite
     }
   });
 });

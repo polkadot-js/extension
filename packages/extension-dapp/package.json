@@ -17,13 +17,13 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.2.4-0",
+  "version": "1.2.5-0",
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.20.6",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
-    "@subwallet/extension-inject": "^1.2.4-0"
+    "@subwallet/extension-inject": "^1.2.5-0"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

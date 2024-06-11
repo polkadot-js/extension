@@ -43,6 +43,16 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
     };
   }
 
+  // Device disconnected
+  if (message.includes('The device was disconnect') ||
+    message.includes('A transfer error has occurred')
+  ) {
+    return {
+      status: 'error',
+      message: t('Your Ledger is disconnected. Reconnect and try again')
+    };
+  }
+
   // Have a request in queue
   if (
     message.includes('Cannot set property message of  which has only a getter') || // EVM

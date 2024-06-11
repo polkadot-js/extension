@@ -1,13 +1,13 @@
-    2665	AnhMTV                        	Release version 1.2.4
+    2675	AnhMTV                        	Release version 1.2.5
     2421	Nam Phạm                      	[Issue 3134] chore: update chainlist
-    2065	S2kael                        	[Issue-3161] Update stable version for chain-list
+    2070	S2kael                        	
      817	lw-cdm                        	[Issue-3150] Extension - Update insufficient balance message for earn screen
      465	Jaco                          	0.42.5 (#969)
-     447	nguyentiendung                	[Issue-3139] Extension - Remove Parallel liquid staking
+     451	nguyentiendung                	[Issue-3140] WebApp - Remove Parallel liquid staking
      185	quangdo                       	
-     159	bluezdot                      	[Issue-3136] Update hydradation logo in swap
-     130	Thiendekaco                   	[Issue 3144] [fix] [mv3] Extension - Update lock time of MV3 extension
-     115	Automation Bot                	[CI Skip] Auto increase webapp build number
+     174	bluezdot                      	
+     137	Thiendekaco                   	[Issue 2779] [fix] WebApp - Re-check bug error page #2
+     117	Automation Bot                	[CI Skip] Auto increase webapp build number
      106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	

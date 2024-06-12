@@ -43,7 +43,7 @@ function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | nul
   } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {
     return [new VaraNftApi(chain, substrateAddresses)];
   } else if (_NFT_CHAIN_GROUP.avail.includes(chain)) {
-    return [new BlobInscriptionApi(chain, ['5GgRqSNN1zTsjA6N7cofcdP9yewA6JG83S649HbuBut8MG4o'])];
+    return [new BlobInscriptionApi(chain, substrateAddresses)];
   }
 
   return null;

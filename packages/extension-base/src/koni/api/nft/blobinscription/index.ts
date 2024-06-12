@@ -5,7 +5,6 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { AVAIL_LIGHT_CLIENT_NFT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import BigNumber from 'bignumber.js';
-import fetch from 'cross-fetch';
 
 interface NftResponse {
   data: {
@@ -41,28 +40,29 @@ export class BlobInscriptionApi extends BaseNftApi {
     super(chain, undefined, addresses);
   }
 
+  // @typescript-eslint/restrict-template-expressions
   private static parseNftRequest (address: string, isJson = true) {
     return {
       query: `
         query MyQuery {
-          dataAvailabilities(where: {isJson_eq: ${isJson ? 'true' : 'false'}, sender: {address_eq: ${address}}) {
-            isJson
+          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: ${isJson}}) {
             id
             extrinsicHash
-            dataValue
             dataRaw
+            dataValue
+            isJson
             sender {
               address
             }
           }
-      }
+        }
       `
     };
   }
 
   private async getBalances (address: string) {
     const response = await fetch(this.endpoint, {
-      method: 'post',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
@@ -73,7 +73,7 @@ export class BlobInscriptionApi extends BaseNftApi {
 
     return result?.data?.dataAvailabilities;
 
-    // const result = [
+    // const testResult = [
     //   {
     //     isJson: false,
     //     id: '0000116353-c5fc0-000001',
@@ -100,46 +100,54 @@ export class BlobInscriptionApi extends BaseNftApi {
     //   }
     // ];
     //
-    // return result;
+    // return testResult;
   }
 
   public async handleNfts (params: HandleNftParams) {
     try {
       await Promise.all(this.addresses.map(async (address) => {
-        // 1. Lấy balance
         const balances = await this.getBalances(address);
 
-        // 2. Handle và push inscription
         if (balances.length > 0) {
           const collectionMap: Record <string, NftCollection> = {};
 
           for (const nft of balances) {
-            if (nft.isJson) {
-              const data = JSON.parse(nft.dataValue) as ALC;
+            try {
+              if (nft.isJson) {
+                const _data = JSON.parse(nft.dataValue) as ALC | number;
 
-              const parsedNft: NftItem = {
-                id: data.tick, // is distinct?
-                chain: this.chain,
-                owner: address, // is submitter = owner? '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
-                name: data.tick,
-                image: 'https://ipfs.uniquenetwork.dev/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_43.png', // recheck
-                description: 'abc', // recheck
-                collectionId: COLLECT_ID
-                // properties: data
-              };
+                if (_data === Infinity) {
+                  continue;
+                }
 
-              params.updateItem(this.chain, parsedNft, address); // '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
+                const data = _data as ALC;
 
-              if (!collectionMap[COLLECT_ID]) {
-                const parsedCollection: NftCollection = {
-                  collectionId: COLLECT_ID,
+                const parsedNft: NftItem = {
+                  id: data.tick, // is distinct?
                   chain: this.chain,
-                  collectionName: COLLECT_ID
+                  owner: address, // is submitter = owner? '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
+                  name: data.tick,
+                  image: 'https://ipfs.uniquenetwork.dev/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_43.png', // recheck
+                  description: 'abc', // recheck
+                  collectionId: COLLECT_ID
+                  // properties: data
                 };
 
-                collectionMap[COLLECT_ID] = parsedCollection;
-                params.updateCollection(this.chain, parsedCollection);
+                params.updateItem(this.chain, parsedNft, address); // '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
+
+                if (!collectionMap[COLLECT_ID]) {
+                  const parsedCollection: NftCollection = {
+                    collectionId: COLLECT_ID,
+                    chain: this.chain,
+                    collectionName: COLLECT_ID
+                  };
+
+                  collectionMap[COLLECT_ID] = parsedCollection;
+                  params.updateCollection(this.chain, parsedCollection);
+                }
               }
+            } catch (e) {
+              console.error(`Failed to fetch blob inscription ${nft.dataValue}`, e);
             }
           }
         }

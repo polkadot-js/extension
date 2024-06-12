@@ -39,7 +39,7 @@ export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 
 export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql';
 
-export const AVAIL_LIGHT_CLIENT_NFT = 'https://indexer-nft.availspace.app/graphql';
+export const AVAIL_LIGHT_CLIENT_NFT = 'https://nft-indexer-demo.cdmteck.com/graphql'; // 'https://indexer-nft.availspace.app/graphql';
 
 export const UNIQUE_SCAN_ENDPOINT = 'https://api-unique.uniquescan.io/v1/graphql';
 

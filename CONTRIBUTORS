@@ -1,4 +1,4 @@
-    2675	AnhMTV                        	Release version 1.2.5
+    2677	AnhMTV                        	
     2421	Nam Phạm                      	[Issue 3134] chore: update chainlist
     2070	S2kael                        	
      817	lw-cdm                        	[Issue-3150] Extension - Update insufficient balance message for earn screen
@@ -8,7 +8,7 @@
      174	bluezdot                      	
      137	Thiendekaco                   	[Issue 2779] [fix] WebApp - Re-check bug error page #2
      117	Automation Bot                	[CI Skip] Auto increase webapp build number
-     106	dominhquang                   	[Issue-2649] Add send crash log feature
+     107	dominhquang                   	[Issue-3194] Fix bug can not backup data in Mobile App
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md

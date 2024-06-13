@@ -178,11 +178,15 @@ function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHist
   const exclusionMap: Record<string, boolean> = {};
 
   const getExclusionKey = (i: TransactionHistoryItem): string => {
+    if (i.type === ExtrinsicType.TRANSFER_TOKEN) {
+      return `${i.direction}_${i.blockNumber}_${ExtrinsicType.TRANSFER_BALANCE}_${i.from}_${i.to}`.toLowerCase();
+    }
+
     return `${i.direction}_${i.blockNumber}_${i.type}_${i.from}_${i.to}`.toLowerCase();
   };
 
   items.forEach((i) => {
-    if (i.origin === 'app' && i.blockNumber > 0 && i.type === ExtrinsicType.TRANSFER_BALANCE) {
+    if (i.origin === 'app' && i.blockNumber > 0 && (i.type === ExtrinsicType.TRANSFER_BALANCE || i.type === ExtrinsicType.TRANSFER_TOKEN)) {
       exclusionMap[getExclusionKey(i)] = true;
     }
   });

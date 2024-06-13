@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## 1.2.4
+Build date: Jun 08, 2024.
+
+Features & Update:
+- Update Parallel liquid staking (#3139)
+- Update lock time of MV3 extension (#3144)
+- Support more XCM channels (#3134)
+  - Support transfer between PAH - KAH
+  - Add XCM support for Pendulum:
+    - USDT: Polkadot Asset Hub **<-->** Pendulum
+    - USDC: Polkadot Asset Hub **<-->** Pendulum
+    - DOT: Polkadot **<-->** Pendulum
+- Update chainlist
+  - Add support for BORK token
+  - Update HydraDX information
+- Add the "View on explorer" button on the Token details screen (#3053)
+- Update some message related to earning feature (#3150)
+- Update transferable formula for system pallet v1 (#3166)
+
 ## 1.2.3
 Build date: Jun 03, 2024.
 

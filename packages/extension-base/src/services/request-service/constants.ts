@@ -13,5 +13,10 @@ export const WEB_APP_URL = [
   /// Web app
   'localhost:9000', // Local
   'subwallet-webapp.pages.dev', // Pull request build
-  'web.subwallet.app' // Production
+  'web.subwallet.app' // Production,
+];
+
+export const DAPP_CONNECT_ALL_TYPE_ACCOUNT_URL = [
+  'https://polkadot.js.org/apps/',
+  'https://ipfs.io/ipns/dotapps.io'
 ];

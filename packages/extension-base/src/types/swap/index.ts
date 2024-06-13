@@ -77,7 +77,10 @@ export const _SUPPORTED_SWAP_PROVIDERS: SwapProviderId[] = [
   SwapProviderId.CHAIN_FLIP_TESTNET,
   SwapProviderId.CHAIN_FLIP_MAINNET,
   SwapProviderId.HYDRADX_MAINNET,
-  SwapProviderId.HYDRADX_TESTNET
+  SwapProviderId.HYDRADX_TESTNET,
+  SwapProviderId.POLKADOT_ASSET_HUB,
+  SwapProviderId.KUSAMA_ASSET_HUB,
+  SwapProviderId.ROCOCO_ASSET_HUB
 ];
 
 export interface SwapProvider {

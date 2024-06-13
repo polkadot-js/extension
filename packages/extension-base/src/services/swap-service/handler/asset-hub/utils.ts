@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getXcmAssetMultilocation } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapErrorType } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 import { ApiPromise } from '@polkadot/api';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { StagingXcmV3MultiLocation } from '@polkadot/types/lookup';
 
 export const _getPoolInfo = async (api: ApiPromise, asset1: _ChainAsset, asset2: _ChainAsset): Promise<[string, string]> => {
@@ -63,7 +63,7 @@ export const estimateTokensForPool = async (api: ApiPromise, asset1: _ChainAsset
 };
 
 export const estimateTokensForPath = async (api: ApiPromise, amounts: string[], paths: _ChainAsset[]): Promise<string[]> => {
-  if (paths.length < 1) {
+  if (paths.length < 2) {
     return amounts;
   }
 
@@ -127,7 +127,7 @@ export const checkMinAmountForPath = (reserves: Array<[string, string]>, amounts
 };
 
 // Build extrinsic for swap
-export const buildSwapExtrinsic = async (api: ApiPromise, paths: _ChainAsset[], recipient: string, amountIn: string, amountOutMin: string): Promise<SubmittableExtrinsic<'promise'>> => {
+export const buildSwapExtrinsic = (api: ApiPromise, paths: _ChainAsset[], recipient: string, amountIn: string, amountOutMin: string): SubmittableExtrinsic<'promise'> => {
   const pathsInfo = paths.map((asset) => {
     const multilocation = _getXcmAssetMultilocation(asset);
 

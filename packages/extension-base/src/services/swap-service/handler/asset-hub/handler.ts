@@ -300,7 +300,9 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
     const paths = params.quote.route.path.map((slug) => this.chainService.getAssetBySlug(slug));
     const { fromAmount, toAmount } = params.quote;
 
-    const extrinsic = await buildSwapExtrinsic(api, paths, params.address, fromAmount, toAmount);
+    const minReceive = new BigN(1 - params.slippage).times(toAmount).integerValue();
+
+    const extrinsic = buildSwapExtrinsic(api, paths, params.address, fromAmount, minReceive.toString());
 
     return {
       txChain: fromAsset.originChain,

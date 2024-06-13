@@ -113,6 +113,14 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
+  const isParallelLiquidStaking = useMemo(() => {
+    if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    return false;
+  }, [poolInfo.chain, poolInfo.type]);
+
   const getButtons = useCallback((compact?: boolean): ButtonOptionProps[] => {
     const result: ButtonOptionProps[] = [];
 
@@ -139,6 +147,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
           temp.onClick = onClickButton(onClickStakeButton);
+          temp.disable = !!isParallelLiquidStaking;
           break;
 
         case YieldAction.CLAIM_REWARD:
@@ -175,7 +184,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, onClickButton, onClickCancelUnStakeButton, onClickClaimButton, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, poolInfo, t]);
+  }, [actionListByChain, availableActionsByMetadata, isParallelLiquidStaking, onClickButton, onClickCancelUnStakeButton, onClickClaimButton, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, poolInfo.type, t]);
 
   return (
     <div

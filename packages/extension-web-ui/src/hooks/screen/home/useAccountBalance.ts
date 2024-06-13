@@ -4,7 +4,6 @@
 import { _ChainAsset, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState, CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetPriceId, _getAssetSymbol, _getChainName, _getMultiChainAssetPriceId, _getMultiChainAssetSymbol, _isAssetValuable } from '@subwallet/extension-base/services/chain-service/utils';
-import { SubstrateBalance } from '@subwallet/extension-base/types';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { AssetRegistryStore, BalanceStore, ChainStore, PriceStore } from '@subwallet/extension-web-ui/stores/types';
 import { TokenBalanceItemType } from '@subwallet/extension-web-ui/types/balance';
@@ -174,22 +173,22 @@ function getAccountBalance (
 
         tokenBalance.total.value = tokenBalance.free.value.plus(tokenBalance.locked.value);
 
-        if (balanceItem?.substrateInfo) {
-          const mergeData = (key: keyof SubstrateBalance) => {
-            const newValue = balanceItem?.substrateInfo?.[key];
-
-            if (newValue) {
-              const value = getBalanceValue(newValue, decimals);
-
-              tokenBalance[key] = new BigN(tokenBalance[key] || '0').plus(value).toString();
-              tokenGroupBalance[key] = new BigN(tokenGroupBalance[key] || '0').plus(value).toString();
-            }
-          };
-
-          mergeData('reserved');
-          mergeData('miscFrozen');
-          mergeData('feeFrozen');
-        }
+        // if (balanceItem?.substrateInfo) {
+        //   const mergeData = (key: keyof SubstrateBalance) => {
+        //     const newValue = balanceItem?.substrateInfo?.[key];
+        //
+        //     if (newValue) {
+        //       const value = getBalanceValue(newValue, decimals);
+        //
+        //       tokenBalance[key] = new BigN(tokenBalance[key] || '0').plus(value).toString();
+        //       tokenGroupBalance[key] = new BigN(tokenGroupBalance[key] || '0').plus(value).toString();
+        //     }
+        //   };
+        //
+        //   mergeData('reserved');
+        //   mergeData('miscFrozen');
+        //   mergeData('feeFrozen');
+        // }
 
         if (!isShowZeroBalance) {
           if (tokenBalance.total.value.eq(BN_0)) {

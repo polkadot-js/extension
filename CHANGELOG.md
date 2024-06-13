@@ -1,5 +1,64 @@
 # CHANGELOG
 
+## 1.2.5
+Build date: Jun 11, 2024.
+
+Features & Update:
+- Add CheckMetadataHash signed extension support (#3175)
+- Improve the Substrate Provider to meet the demands of dApps utilizing both EVM and Substrate (#2869)
+- Refactoring code earning service (#3000)
+
+Bugs fixed:
+- Fixed bug Sign transaction failed for some tokens with Aleph Zero Ledger account (#3145)
+
+
+## 1.2.4
+Build date: Jun 08, 2024.
+
+Features & Update:
+- Update Parallel liquid staking (#3139)
+- Update lock time of MV3 extension (#3144)
+- Support more XCM channels (#3134)
+  - Support transfer between PAH - KAH
+  - Add XCM support for Pendulum:
+    - USDT: Polkadot Asset Hub **<-->** Pendulum
+    - USDC: Polkadot Asset Hub **<-->** Pendulum
+    - DOT: Polkadot **<-->** Pendulum
+- Update chainlist
+  - Add support for BORK token
+  - Update HydraDX information
+- Add the "View on explorer" button on the Token details screen (#3053)
+- Update some message related to earning feature (#3150)
+- Update transferable formula for system pallet v1 (#3166)
+
+## 1.2.3
+Build date: Jun 03, 2024.
+
+Features & Update:
+- Update chain-list (#3094)
+  - Remove bit.country testnet, Ethereum Goerli
+  - Add support for Ink Whale token INW2
+  - Add support for Kreivo Network
+  - Add support Bitlayer
+  - Add support Bsquared network
+  - Add support BounceBit
+- Improve swap quote fetching speed (#3104)
+- Update transferable balance calculation formula (2118)
+
+## 1.2.2
+Build date: May 30, 2024.
+
+Features & Update:
+- Remove support for Moonbeam on Polkadot vault (#3056)
+- Update UI for Earning position details (#3127)
+- Remove the logic that differentiates between Native tokens and Local tokens in case show sub-logo (#3075)
+- Show duplicate transaction history when transfer local token (#2613)
+
+Bugs fixed:
+- Fixed some bug related to MV3 (#3146)
+  - Timing logic to display seed phrase backup prompt popup
+  - Bug disconnect port
+
 ## 1.2.1
 Build date: May 28, 2024.
 

@@ -6,16 +6,17 @@ import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertModal } from '@subwallet/extension-web-ui/components';
-import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-web-ui/constants';
+import { isProductionMode, NEED_SIGN_CONFIRMATION } from '@subwallet/extension-web-ui/constants';
 import { useAlert, useConfirmationsInfo, useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-web-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isRawPayload } from '@subwallet/extension-web-ui/utils';
+import { AccountSignMode, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { getSignMode, isRawPayload } from '@subwallet/extension-web-ui/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { ConfirmationHeader } from './parts';
 import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
@@ -92,7 +93,15 @@ const Component = function ({ className }: Props) {
         isMessage = confirmation.type === 'evmSignatureRequest';
       }
 
-      if (account?.isReadOnly || !canSign) {
+      const signMode = getSignMode(account);
+      const isEvm = isEthereumAddress(account?.address);
+
+      const notSupport = signMode === AccountSignMode.READ_ONLY ||
+        signMode === AccountSignMode.UNKNOWN ||
+        (signMode === AccountSignMode.QR && isEvm && isProductionMode) ||
+        !canSign;
+
+      if (notSupport) {
         return (
           <NotSupportConfirmation
             account={account}

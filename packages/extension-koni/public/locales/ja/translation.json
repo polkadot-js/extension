@@ -314,8 +314,6 @@
   "Your metadata is out of date": "あなたのメタデータは古くなっています",
   "Decimal": "小数",
   "Spec Version": "スペックバージョン",
-  "This feature is not available for": "この機能は利用できません",
-  "Please change to another account type.": "別のアカウントタイプに変更してください。",
   "Back to home": "ホームに戻る",
   "Signature request": "署名依頼",
   "Validator": "バリデーター",
@@ -648,7 +646,6 @@
   "Request does not exist": "リクエストが存在しません",
   "Unsupported action": "サポートされていないアクション",
   "Wrong signature. Please sign with the account you use in dApp": "署名が間違っています。dAppで使用しているアカウントで署名してください。",
-  "Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards": "ステーク不足。報酬を得るには最低 {{number}} {{tokenSymbol}} をステークしてください。",
   "You cannot select more than {{number}} validators for this network": "このネットワークでは、{{number}} 以上のバリデーターを選択することはできません。",
   "You cannot select more than {{number}} dApps for this network": "このネットワークでは、{{number}} 以上のdAppを選択することはできません。",
   "You cannot select more than {{number}} collators for this network": "このネットワークでは、{{number}} 以上のコレーターを選択することはできません。",
@@ -1252,5 +1249,12 @@
   "If you lose your seed phrases/private keys/JSON backup files/QR backup codes, your accounts can't be recovered and your assets are lost. Learn how to back up your accounts to secure your assets now.": "",
   "Update successful": "",
   "Your SubWallet extension is updated to Manifest V3!": "",
-  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": ""
+  "This update is required by Google, and helps improve the privacy, security, and performance of SubWallet extension.\n You can learn more details on Chrome for Developers, or safely dismiss this message.": "",
+  "EVM QR signer account": "",
+  "Substrate QR signer account": "",
+  "Invalid QR code. EVM networks are not supported": "",
+  "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
+  "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": "",
+  "You don't have enough {{symbol}} ({{chainName}}) to pay gas fee. Top up your transferable balance and try again": "",
+  "Your Ledger is disconnected. Reconnect and try again": ""
 }

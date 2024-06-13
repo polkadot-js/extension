@@ -293,7 +293,13 @@ const Component: React.FC<Props> = (props: Props) => {
         loading={loading}
         onClick={onConfirm}
       >
-        {t('Approve')}
+        {
+          signMode !== AccountSignMode.LEDGER
+            ? t('Approve')
+            : !isLedgerConnected
+              ? t('Refresh')
+              : t('Approve')
+        }
       </Button>
       {
         signMode === AccountSignMode.QR && (

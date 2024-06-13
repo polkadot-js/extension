@@ -290,7 +290,7 @@ export default class KoniTabs {
     anyType }: RequestAccountList): Promise<InjectedAccount[]> {
     const authInfo = await this.getAuthInfo(url);
 
-    return transformAccountsV2(this.#koniState.keyringService.accounts, anyType, authInfo, accountAuthType);
+    return transformAccountsV2(this.#koniState.keyringService.accounts, anyType, authInfo, authInfo?.accountAuthType || accountAuthType);
   }
 
   private accountsSubscribeV2 (url: string, { accountAuthType }: RequestAccountSubscribe, id: string, port: chrome.runtime.Port): string {
@@ -302,9 +302,10 @@ export default class KoniTabs {
       subscription: authInfoSubject.subscribe((infos: AuthUrls) => {
         this.getAuthInfo(url, infos)
           .then((authInfo) => {
+            const accountAuthType_ = authInfo?.accountAuthType || accountAuthType;
             const accounts = this.#koniState.keyringService.accounts;
 
-            return cb(transformAccountsV2(accounts, false, authInfo, accountAuthType));
+            return cb(transformAccountsV2(accounts, false, authInfo, accountAuthType_));
           })
           .catch(console.error);
       }),
@@ -1060,6 +1061,10 @@ export default class KoniTabs {
       return this.redirectIfPhishing(url);
     }
 
+    if (type === 'pub(ping)') {
+      return Promise.resolve(true);
+    }
+
     // Wait for account ready and chain ready
     await Promise.all([this.#koniState.eventService.waitAccountReady, this.#koniState.eventService.waitChainReady]);
 
@@ -1087,9 +1092,6 @@ export default class KoniTabs {
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
-
-      case 'pub(ping)':
-        return Promise.resolve(true);
 
       case 'pub(rpc.listProviders)':
         return this.rpcListProviders();

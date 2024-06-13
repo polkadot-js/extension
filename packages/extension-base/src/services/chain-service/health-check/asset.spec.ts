@@ -21,7 +21,6 @@ describe('test chain asset', () => {
     const chainAssets = Object.values(ChainAssetMap).filter((info) =>
       ChainInfoMap[info.originChain].chainStatus === _ChainStatus.ACTIVE &&
       !ignoreChains.includes(info.originChain)
-      // && ['moonriver'].includes(info.originChain)
     );
     const assetByChain: Record<string, _ChainAsset[]> = {};
     const errorChain: Record<string, string> = {};

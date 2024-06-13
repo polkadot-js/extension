@@ -401,3 +401,70 @@ export const compareAsset = (
     errors.push(`Wrong decimals: current - ${asset.decimals ?? 'null'}, onChain - ${decimals}`);
   }
 };
+
+export const validateAsset = (
+  onchainAsset: AssetSpec,
+  chainlistAsset: _ChainAsset
+) => {
+  const { decimals, minAmount, symbol } = onchainAsset;
+
+  const chainlistMinAmount = chainlistAsset.minAmount || '0';
+  const chainlistDecimals = chainlistAsset.decimals || 0;
+  const chainlistSymbol = chainlistAsset.symbol;
+
+  // todo: create log
+
+  const isValidSymbol = symbol === chainlistSymbol ? true : 'zk' + symbol === chainlistSymbol;
+  const isValidMinAmount = minAmount === chainlistMinAmount;
+  const isValidDecimal = decimals === chainlistDecimals;
+
+  return (isValidSymbol && isValidMinAmount && isValidDecimal);
+
+  // if (minAmount !== chainlistMinAmount) {
+  //   const convert = new BigN(minAmount).dividedBy(BN_TEN.pow(decimals)).toFixed();
+  //   const _convert = new BigN(chainlistMinAmount).dividedBy(BN_TEN.pow(chainlistDecimals)).toFixed();
+  //
+  //   errors.push(`Wrong min amount: current - ${chainlistAsset.minAmount ?? 'null'} (${_convert}), onChain - ${minAmount} (${convert})`);
+  // }
+  //
+  // if (symbol !== chainlistSymbol) {
+  //   const zkSymbol = 'zk' + symbol;
+  //
+  //   if (zkSymbol !== chainlistSymbol) {
+  //     errors.push(`Wrong symbol: current - ${chainlistAsset.symbol}, onChain - ${symbol}`);
+  //   }
+  // }
+  //
+  // if (decimals !== chainlistDecimals) {
+  //   errors.push(`Wrong decimals: current - ${chainlistAsset.decimals ?? 'null'}, onChain - ${decimals}`);
+  // }
+};
+//
+// export const validateEvmAsset = (
+//   assetInfo: AssetSpec,
+//   asset: _ChainAsset
+// ) => {
+//   const { decimals, minAmount, symbol } = assetInfo;
+//
+//   const _minAmount = asset.minAmount || '0';
+//   const _decimals = asset.decimals || 0;
+//
+//   if (minAmount !== _minAmount) {
+//     const convert = new BigN(minAmount).dividedBy(BN_TEN.pow(decimals)).toFixed();
+//     const _convert = new BigN(_minAmount).dividedBy(BN_TEN.pow(_decimals)).toFixed();
+//
+//     errors.push(`Wrong min amount: current - ${asset.minAmount ?? 'null'} (${_convert}), onChain - ${minAmount} (${convert})`);
+//   }
+//
+//   if (symbol !== asset.symbol) {
+//     const zkSymbol = 'zk' + symbol;
+//
+//     if (zkSymbol !== asset.symbol) {
+//       errors.push(`Wrong symbol: current - ${asset.symbol}, onChain - ${symbol}`);
+//     }
+//   }
+//
+//   if (onchainDecimals !== _decimals) {
+//     errors.push(`Wrong decimals: current - ${asset.decimals ?? 'null'}, onChain - ${decimals}`);
+//   }
+// };

@@ -63,7 +63,7 @@ function getChainlistInfos () {
   );
 }
 
-async function checkSubstrateProvider (chainInfo: _ChainInfo, provider: string) {
+export async function checkSubstrateProvider (chainInfo: _ChainInfo, provider: string) {
   if (chainInfo.substrateInfo) {
     const _api = new ApiPromise({ provider: new WsProvider(provider) });
     const substrateApi = await _api.isReady;
@@ -79,7 +79,7 @@ async function checkSubstrateProvider (chainInfo: _ChainInfo, provider: string) 
   return [false, null];
 }
 
-async function checkEvmProvider (chainInfo: _ChainInfo, provider: string, key: string) {
+export async function checkEvmProvider (chainInfo: _ChainInfo, provider: string, key: string) {
   if (chainInfo.evmInfo) {
     let _key = key;
     let _provider = provider;

@@ -6,6 +6,7 @@ import AppInstructionModal from '@subwallet/extension-koni-ui/components/Modal/C
 import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInstructionModal';
 import ContentGenerator from '@subwallet/extension-koni-ui/components/StaticContent/ContentGenerator';
 import { APP_INSTRUCTION_DATA, APP_INSTRUCTION_MODAL, APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { setIsShowPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { AppContentButton } from '@subwallet/extension-koni-ui/types/staticContent';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
@@ -85,11 +86,13 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const _onClickButton = useCallback(
     (url?: string, hasInstruction?: boolean) => {
-      if (instructionButton && instructionButton.instruction && currentInstructionData && hasInstruction) {
-        activeModal(instructionModalId);
-      } else {
-        onAccept(url);
-      }
+      setIsShowPopup({ value: false }).then(() => {
+        if (instructionButton && instructionButton.instruction && currentInstructionData && hasInstruction) {
+          activeModal(instructionModalId);
+        } else {
+          onAccept(url);
+        }
+      }).catch((e) => console.log(e));
     },
     [currentInstructionData, instructionButton, onAccept, activeModal]
   );

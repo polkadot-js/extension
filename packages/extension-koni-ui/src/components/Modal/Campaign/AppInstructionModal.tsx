@@ -57,6 +57,7 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
         {media && (
           <Image
             alt={''}
+            className={'instruction-image'}
             src={media}
             width={'100%'}
           />
@@ -88,6 +89,10 @@ const Component = ({ className, data, instruction, media, onPressCancelBtn, onPr
 const AppInstructionModal = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
     display: 'flex',
+
+    '.instruction-image': {
+      marginBottom: token.marginXS
+    },
 
     '.content-wrapper': {
       display: 'flex',

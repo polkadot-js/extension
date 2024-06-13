@@ -6,7 +6,7 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType } from '@subwallet/extension-base/types/swap';
+import { AssetHubPreValidationMetadata, ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
@@ -98,6 +98,23 @@ export function _getEarlyHydradxValidationError (error: SwapErrorType, metadata:
       return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
     case SwapErrorType.ERROR_FETCHING_QUOTE:
       return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
+    default:
+      return new SwapError(error);
+  }
+}
+
+export function _getEarlyAssetHubValidationError (error: SwapErrorType, metadata: AssetHubPreValidationMetadata): SwapError {
+  switch (error) {
+    case SwapErrorType.AMOUNT_CANNOT_BE_ZERO:
+      return new SwapError(error, 'Amount too low. Increase your amount above 0 and try again');
+    case SwapErrorType.ASSET_NOT_SUPPORTED:
+      return new SwapError(error, 'This swap pair is not supported');
+    case SwapErrorType.UNKNOWN:
+      return new SwapError(error, `Undefined error. Check your Internet and ${metadata.chain.slug} connection or contact support`);
+    case SwapErrorType.ERROR_FETCHING_QUOTE:
+      return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
+    case SwapErrorType.MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT:
+      return new SwapError(error, 'You swap to much. It make pool not enough existential deposit'); // TODO: i18n this
     default:
       return new SwapError(error);
   }

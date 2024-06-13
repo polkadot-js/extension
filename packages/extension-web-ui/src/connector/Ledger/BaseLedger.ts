@@ -46,11 +46,7 @@ export abstract class BaseLedger<T extends LedgerApp> extends Ledger {
     try {
       return await promise;
     } catch (e) {
-      const error = e as Error;
-
-      error.message = this.mappingError(error);
-
-      throw error;
+      throw Error(this.mappingError(new Error((e as Error).message)));
     }
   };
 

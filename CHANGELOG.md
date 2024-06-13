@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 1.2.5
+Build date: Jun 11, 2024.
+
+Features & Update:
+- Add CheckMetadataHash signed extension support (#3175)
+- Improve the Substrate Provider to meet the demands of dApps utilizing both EVM and Substrate (#2869)
+- Refactoring code earning service (#3000)
+
+Bugs fixed:
+- Fixed bug Sign transaction failed for some tokens with Aleph Zero Ledger account (#3145)
+
+
 ## 1.2.4
 Build date: Jun 08, 2024.
 

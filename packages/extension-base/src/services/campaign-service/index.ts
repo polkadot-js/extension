@@ -124,7 +124,6 @@ export default class CampaignService {
   }
 
   public setIsShowPopup (value: ShowPopupRequest) {
-    console.log('value------------------', value);
     this.isShowPopupSubject.next(value);
   }
 

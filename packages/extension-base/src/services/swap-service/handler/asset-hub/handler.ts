@@ -4,12 +4,11 @@
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
-import { _getEarlyAssetHubValidationError, _getEarlyHydradxValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
+import { _getEarlyAssetHubValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
 import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { buildSwapExtrinsic } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
+import { _getChainNativeTokenSlug, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateSwapRate, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
@@ -18,6 +17,7 @@ import BigN from 'bignumber.js';
 
 import { SwapBaseHandler, SwapBaseInterface } from '../base-handler';
 import { AssetHubRouter } from './router';
+import { buildSwapExtrinsic } from './utils';
 
 export class AssetHubSwapHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;

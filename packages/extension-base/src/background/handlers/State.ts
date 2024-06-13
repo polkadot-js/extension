@@ -158,11 +158,10 @@ export default class State {
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
-
-    extractMetadata(this.#metaStore);
   }
 
   public async init () {
+    await extractMetadata(this.#metaStore);
     // retrieve previously set authorizations
     const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
     const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';

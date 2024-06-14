@@ -1,4 +1,7 @@
-import {_AssetType, _ChainAsset} from "@subwallet/chain-list/types";
+// Copyright 2019-2022 @subwallet/extension-base authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { _AssetType, _ChainAsset } from "@subwallet/chain-list/types";
 
 export function validateAssetSlug (chainAsset: _ChainAsset) {
   const slug = chainAsset.slug;
@@ -16,7 +19,7 @@ export function validateAssetSlug (chainAsset: _ChainAsset) {
     return slug === `${originChain}-${assetType}-${symbol}-${runeId}`;
   }
 
-  if ([_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721]) {
+  if ([_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721].includes(assetType)) {
     const contractAddress = chainAsset.metadata?.contractAddress;
 
     return slug === `${originChain}-${assetType}-${symbol}-${contractAddress}`;
@@ -27,5 +30,6 @@ export function validateAssetSlug (chainAsset: _ChainAsset) {
 
 export function validateBrigeToken (chainAsset: _ChainAsset) {
   const isBridged = chainAsset.metadata?.isBridged;
+
   return isBridged ? (!!chainAsset.metadata?.onChainInfo) : true;
 }

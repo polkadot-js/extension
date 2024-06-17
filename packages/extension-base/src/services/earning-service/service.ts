@@ -39,7 +39,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
-  private useOnlineCacheOnly = false;
+  private useOnlineCacheOnly = true;
 
   constructor (state: KoniState) {
     this.state = state;

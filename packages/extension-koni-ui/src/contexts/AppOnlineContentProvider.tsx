@@ -70,12 +70,6 @@ const getPositionByRouteName = (currentRoute?: string) => {
   }
 };
 
-export const getStaticContentByDevMode = () => {
-  return process.env.NODE_ENV === 'production' ? 'list' : 'preview';
-};
-
-const dataByDevModeStatus = getStaticContentByDevMode();
-
 export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentContextProviderProps) => {
   const appPopupModalContext = useContext(AppPopupModalContext);
   const yieldPositionList = useGroupYieldPosition();
@@ -88,8 +82,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
 
   const getAppContentData = useCallback(async (dataType: OnlineContentDataType) => {
-    console.log('dataByDevModeStatus', dataByDevModeStatus);
-
     return await fetchStaticData(`app-${dataType}s`);
   }, []);
 
@@ -183,6 +175,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
 
     Promise.all([popupPromise, bannerPromise, confirmationPromise])
       .then((values) => {
+        console.log('values', values);
         // @ts-ignore
         setAppPopupData(values[0].data as AppPopupData[]);
         // @ts-ignore

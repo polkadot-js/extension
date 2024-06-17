@@ -3,6 +3,8 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AppOnlineContentContextProvider } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
+import { AppPopupModalContextProvider } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
@@ -140,12 +142,22 @@ export function Example () {
   </PageWrapper>;
 }
 
+export function RootWrapper () {
+  return (
+    <AppPopupModalContextProvider>
+      <AppOnlineContentContextProvider>
+        <Root />
+      </AppOnlineContentContextProvider>
+    </AppPopupModalContextProvider>
+  );
+}
+
 // Todo: Create error page
 export const router = createHashRouter([
   {
     path: '/',
     loader: () => i18nPromise,
-    element: <Root />,
+    element: <RootWrapper />,
     errorElement: <ErrorFallback />,
     children: [
       Welcome.generateRouterObject('/welcome'),

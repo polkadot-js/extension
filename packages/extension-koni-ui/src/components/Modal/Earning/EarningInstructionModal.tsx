@@ -36,7 +36,6 @@ export interface BoxProps {
   title: string;
   description: string;
   iconColor: string;
-  icon_color?: string;
   icon: PhosphorIcon;
 }
 

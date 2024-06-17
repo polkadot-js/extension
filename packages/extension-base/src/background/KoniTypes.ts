@@ -1966,7 +1966,7 @@ export interface CampaignButton {
   metadata: Record<string, any> | null;
 }
 
-export interface ShowPopupRequest {
+export interface ShowCampaignPopupRequest {
   value: boolean;
 }
 
@@ -2351,7 +2351,7 @@ export interface KoniRequestSignatures {
   'pri(walletConnect.notSupport.approve)': [RequestApproveWalletConnectNotSupport, boolean];
   'pri(walletConnect.notSupport.reject)': [RequestRejectWalletConnectNotSupport, boolean];
 
-  /// Metadatacampaign
+  /// Metadata
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
 
   /* Campaign */
@@ -2363,8 +2363,8 @@ export interface KoniRequestSignatures {
 
   /* Campaign */
   'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
-  'pri(campaign.popup.subscribeIsShowPopup)': [null, ShowPopupRequest, ShowPopupRequest];
-  'pri(campaign.popup.setIsShowPopup)': [ShowPopupRequest, null];
+  'pri(campaign.popup.subscribeVisibility)': [null, ShowCampaignPopupRequest, ShowCampaignPopupRequest];
+  'pri(campaign.popup.toggle)': [ShowCampaignPopupRequest, null];
   'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
   /* Campaign */
 

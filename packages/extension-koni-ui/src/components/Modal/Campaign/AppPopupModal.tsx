@@ -3,12 +3,11 @@
 
 import { YieldPoolType } from '@subwallet/extension-base/types';
 import AppInstructionModal from '@subwallet/extension-koni-ui/components/Modal/Campaign/AppInstructionModal';
-import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInstructionModal';
 import ContentGenerator from '@subwallet/extension-koni-ui/components/StaticContent/ContentGenerator';
 import { APP_INSTRUCTION_DATA, APP_INSTRUCTION_MODAL, APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { setIsShowPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
+import { toggleCampaignPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { AppContentButton } from '@subwallet/extension-koni-ui/types/staticContent';
+import { AppContentButton, AppInstructionInfo } from '@subwallet/extension-koni-ui/types/staticContent';
 import { ModalContext, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useContext, useMemo } from 'react';
@@ -29,7 +28,7 @@ interface Props extends ThemeProps {
 export interface StaticDataProps {
   group: string;
   id: string;
-  instructions: BoxProps[];
+  instructions: AppInstructionInfo[];
   locale?: string;
   slug: YieldPoolType | 'DAPP_STAKING' | 'UNSTAKE_INFO';
   title: string | null;
@@ -86,7 +85,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const _onClickButton = useCallback(
     (url?: string, hasInstruction?: boolean) => {
-      setIsShowPopup({ value: false }).then(() => {
+      toggleCampaignPopup({ value: false }).then(() => {
         if (instructionButton && instructionButton.instruction && currentInstructionData && hasInstruction) {
           activeModal(instructionModalId);
         } else {

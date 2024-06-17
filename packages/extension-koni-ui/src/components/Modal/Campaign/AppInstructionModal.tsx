@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { InstructionItem } from '@subwallet/extension-koni-ui/components';
-import { BoxProps } from '@subwallet/extension-koni-ui/components/Modal/Earning/EarningInstructionModal';
 import { APP_INSTRUCTION_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { AppContentButtonInstruction } from '@subwallet/extension-koni-ui/types/staticContent';
+import { AppContentButtonInstruction, AppInstructionInfo } from '@subwallet/extension-koni-ui/types/staticContent';
 import { convertHexColorToRGBA, getBannerButtonIcon } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, Image, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -17,7 +16,7 @@ const modalId = APP_INSTRUCTION_MODAL;
 interface Props extends ThemeProps {
   title: string;
   media?: string;
-  data: BoxProps[];
+  data: AppInstructionInfo[];
   instruction: AppContentButtonInstruction;
   onPressCancelBtn: () => void;
   onPressConfirmBtn: () => void;

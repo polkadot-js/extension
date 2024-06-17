@@ -131,7 +131,7 @@ export interface BalanceStore extends BaseReduxStore {
 
 export interface CampaignStore extends BaseReduxStore {
   banners: CampaignBanner[],
-  isShowPopup: boolean
+  isPopupVisible: boolean
 }
 
 export interface AppOnlineContent {

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { CampaignData, CampaignDataType, ShowPopupRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { CampaignData, CampaignDataType, ShowCampaignPopupRequest } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ListCampaignResponse } from '@subwallet/extension-base/services/campaign-service/types';
 import { TARGET_ENV } from '@subwallet/extension-base/utils';
@@ -14,7 +14,7 @@ const targetEnvs = ['extension', 'mobile'];
 
 export default class CampaignService {
   readonly #state: KoniState;
-  private isShowPopupSubject = new BehaviorSubject<ShowPopupRequest>({ value: true });
+  private popupVisibilitySubject = new BehaviorSubject<ShowCampaignPopupRequest>({ value: true });
   constructor (state: KoniState) {
     this.#state = state;
   }
@@ -119,16 +119,16 @@ export default class CampaignService {
     this.#state.eventService.emit('campaign.ready', true);
   }
 
-  public getIsShowPopup () {
-    return this.isShowPopupSubject.value;
+  public getIsPopupVisible () {
+    return this.popupVisibilitySubject.value;
   }
 
-  public setIsShowPopup (value: ShowPopupRequest) {
-    this.isShowPopupSubject.next(value);
+  public toggleCampaignPopup (value: ShowCampaignPopupRequest) {
+    this.popupVisibilitySubject.next(value);
   }
 
-  public subscribeIsShowPopup () {
-    return this.isShowPopupSubject;
+  public subscribeCampaignPopupVisibility () {
+    return this.popupVisibilitySubject;
   }
 
   private async runCampaign () {
@@ -187,6 +187,6 @@ export default class CampaignService {
   }
 
   public stop () {
-    this.setIsShowPopup({ value: true });
+    this.toggleCampaignPopup({ value: true });
   }
 }

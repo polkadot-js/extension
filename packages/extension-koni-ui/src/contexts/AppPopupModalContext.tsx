@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { setIsShowPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
+import { toggleCampaignPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useState } from 'react';
@@ -35,17 +35,17 @@ export const AppPopupModalContext = React.createContext({} as AppPopupModalType)
 export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextProviderProps) => {
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
   const { activeModal, inactiveModal } = useContext(ModalContext);
-  const { isShowPopup } = useSelector((state: RootState) => state.campaign);
+  const { isPopupVisible } = useSelector((state: RootState) => state.campaign);
 
   const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
-    if (isShowPopup) {
+    if (isPopupVisible) {
       setAppPopupModal(data);
       activeModal(APP_POPUP_MODAL);
     }
-  }, [activeModal, isShowPopup]);
+  }, [activeModal, isPopupVisible]);
 
   const hideAppPopupModal = useCallback(() => {
-    setIsShowPopup({ value: false }).then(() => {
+    toggleCampaignPopup({ value: false }).then(() => {
       inactiveModal(APP_POPUP_MODAL);
       setAppPopupModal((prevState) => ({
         ...prevState,

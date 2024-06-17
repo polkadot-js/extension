@@ -368,14 +368,13 @@ export class SubscanService {
       }
 
       const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
-
       const returnData = jsonData.data;
 
       if (!returnData) {
-        throw new SWError('SubscanService.getRewardHistoryList', `{"message": "lack data response on getRewardHistoryList ${chain} - ${address}"}`);
+        return { count: 0, list: null } as RewardHistoryListResponse;
       }
 
-      return returnData;
+      return jsonData.data;
     }, 2);
   }
 

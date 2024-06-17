@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { STATIC_DATA_CONTENT_URL } from '@subwallet/extension-koni-ui/constants';
+import { fetchStaticData } from '@subwallet/extension-base/utils';
 import { AppPopupModalContext, AppPopupModalInfo } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
@@ -12,7 +12,6 @@ import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EarningPoolsParam, EarningPositionDetailParam } from '@subwallet/extension-koni-ui/types';
 import { AppBannerData, AppBasicInfoData, AppConfirmationData, AppPopupData, OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import axios from 'axios';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -89,7 +88,9 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
 
   const getAppContentData = useCallback(async (dataType: OnlineContentDataType) => {
-    return await axios.get(`${STATIC_DATA_CONTENT_URL}app-${dataType}s/${dataByDevModeStatus}.json`);
+    console.log('dataByDevModeStatus', dataByDevModeStatus);
+
+    return await fetchStaticData(`app-${dataType}s`);
   }, []);
 
   // check popup exist time
@@ -182,8 +183,11 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
 
     Promise.all([popupPromise, bannerPromise, confirmationPromise])
       .then((values) => {
+        // @ts-ignore
         setAppPopupData(values[0].data as AppPopupData[]);
+        // @ts-ignore
         setAppBannerData(values[1].data as AppBannerData[]);
+        // @ts-ignore
         setAppConfirmationData(values[2].data as AppConfirmationData[]);
       })
       .catch((e) => {

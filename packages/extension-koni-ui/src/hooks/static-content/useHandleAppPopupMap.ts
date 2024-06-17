@@ -22,6 +22,8 @@ export const useHandleAppPopupMap = (
   checkPopupExistTime: (info: AppBasicInfoData) => boolean
 ): AppPopupHookType => {
   const { appPopupData, popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
+
+  console.log('appPopupData', appPopupData);
   const dispatch = useDispatch();
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { balanceMap } = useSelector((state: RootState) => state.balance);
@@ -29,10 +31,12 @@ export const useHandleAppPopupMap = (
   const getFilteredAppPopupByTimeAndPlatform = useCallback(
     (data: AppPopupData[]) => {
       const activeList = data.filter(({ info }) => checkPopupExistTime(info));
-      const filteredData = activeList
-        .filter(({ info }) => info.platforms.includes('extension'))
-        .sort((a, b) => a.priority - b.priority);
+      const filteredData = activeList && activeList.length
+        ? activeList.filter(({ info }) => info.platforms.includes('extension'))
+          .sort((a, b) => a.priority - b.priority)
+        : [];
 
+      console.log('filteredData', filteredData);
       dispatch(updateAppPopupData(filteredData));
     },
     [checkPopupExistTime, dispatch]

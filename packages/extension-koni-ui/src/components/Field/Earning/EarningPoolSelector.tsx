@@ -171,9 +171,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 }
               }
 
-              if (a.isCrowded && !b.isCrowded) {
+              if (a.disabled && !b.disabled) {
                 return 1;
-              } else if (!a.isCrowded && b.isCrowded) {
+              } else if (!a.disabled && b.disabled) {
                 return -1;
               }
 

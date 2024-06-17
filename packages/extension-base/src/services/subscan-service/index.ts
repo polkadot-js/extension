@@ -368,6 +368,11 @@ export class SubscanService {
       }
 
       const jsonData = (await rs.json()) as SubscanResponse<RewardHistoryListResponse>;
+      const returnData = jsonData.data;
+
+      if (!returnData) {
+        return { count: 0, list: null } as RewardHistoryListResponse;
+      }
 
       return jsonData.data;
     }, 2);

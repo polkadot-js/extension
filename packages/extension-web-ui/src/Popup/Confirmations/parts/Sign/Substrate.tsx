@@ -96,6 +96,19 @@ const Component: React.FC<Props> = (props: Props) => {
       return _payload.signedExtensions.includes('CheckMetadataHash');
     }
   }, [request.payload]);
+  const isMissingData = useMemo(() => {
+    const _payload = request.payload;
+
+    if (isRawPayload(_payload)) {
+      return false;
+    } else {
+      if (_payload.signedExtensions.includes('CheckMetadataHash')) {
+        return _payload.mode !== 1 || !_payload.metadataHash;
+      } else {
+        return false;
+      }
+    }
+  }, [request.payload]);
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
@@ -129,7 +142,15 @@ const Component: React.FC<Props> = (props: Props) => {
               return {
                 isError: false,
                 title: t('Runtime attention!'),
-                description: t('You should re-attach account by Generic App then use it normally')
+                description: t('You\'re using Migration app for signing, please migration asset to new account by Generic App then use it normally')
+              };
+            }
+          } else if (signMode === AccountSignMode.GENERIC_LEDGER) {
+            if (isMissingData) {
+              return {
+                isError: true,
+                title: t('Data attention!'),
+                description: t('Your transaction missing data, please contact dApp or SubWallet support', { replace: { networkName } })
               };
             }
           }
@@ -138,7 +159,7 @@ const Component: React.FC<Props> = (props: Props) => {
             return {
               isError: true,
               title: t('Runtime attention!'),
-              description: t('You need to wait network update runtime', { replace: { networkName } })
+              description: t('You need to wait {{networkName}} network update runtime', { replace: { networkName } })
             };
           }
         }
@@ -146,7 +167,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return undefined;
-  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
+  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName, isMissingData]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,

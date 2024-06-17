@@ -34,7 +34,7 @@ import { BehaviorSubject, interval as rxjsInterval, Subscription } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { Signer, SignerResult } from '@polkadot/api/types';
+import { Signer, SignerOptions, SignerResult } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { isHex } from '@polkadot/util';
@@ -238,7 +238,7 @@ export default class TransactionService {
 
   private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
     // Send Transaction
-    const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
+    const emitter = await (transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction));
 
     const { eventsHandler } = transaction;
 
@@ -1060,7 +1060,7 @@ export default class TransactionService {
     return emitter;
   }
 
-  private signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): TransactionEmitter {
+  private async signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,
@@ -1069,7 +1069,11 @@ export default class TransactionService {
       extrinsicHash: id
     };
 
-    (transaction as SubmittableExtrinsic).signAsync(address, {
+    const extrinsic = transaction as SubmittableExtrinsic;
+    const registry = extrinsic.registry;
+    const signedExtensions = registry.signedExtensions;
+
+    const signerOption: Partial<SignerOptions> = {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
           const signing = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
@@ -1080,7 +1084,32 @@ export default class TransactionService {
           } as SignerResult;
         }
       } as Signer
-    }).then(async (rs) => {
+    };
+
+    if (signedExtensions.includes('CheckMetadataHash')) {
+      try {
+        const data = {
+          id: chain
+        };
+
+        const resp = await fetch('https://ledger-api.subwallet.app/node/metadata/hash', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const rs = await resp.json() as { metadataHash: string };
+
+        signerOption.mode = 1;
+        signerOption.metadataHash = `0x${rs.metadataHash}`;
+      } catch (e) {
+
+      }
+    }
+
+    extrinsic.signAsync(address, signerOption).then(async (rs) => {
       // Emit signed event
       emitter.emit('signed', eventData);
 

@@ -105,7 +105,7 @@
     "@subwallet/keyring": "^0.1.5",
     "@subwallet/react-ui": "5.1.2-b77",
     "@subwallet/ui-keyring": "^0.1.5",
-    "@zondax/ledger-substrate": "0.43.0",
+    "@zondax/ledger-substrate": "0.44.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^29.3.1",
     "browserify-sign": "^4.2.2",

@@ -5,6 +5,8 @@ import type Transport from '@ledgerhq/hw-transport';
 
 import { Ledger, LedgerTypes } from '@subwallet/extension-web-ui/types';
 
+import { AccountOptions } from '@polkadot/hw-ledger/types';
+
 interface LedgerApp {
   transport: Transport;
 }
@@ -28,6 +30,7 @@ export abstract class BaseLedger<T extends LedgerApp> extends Ledger {
     this.slip44 = slip44;
   }
 
+  protected abstract serializePath (accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): string
   protected abstract getApp(): Promise<T>
 
   protected withApp = async<V> (fn: (_app: T) => Promise<V>): Promise<V> => {

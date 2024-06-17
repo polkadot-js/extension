@@ -8722,12 +8722,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zondax/ledger-substrate@npm:0.43.0":
-  version: 0.43.0
-  resolution: "@zondax/ledger-substrate@npm:0.43.0"
+"@zondax/ledger-js@npm:^0.8.2":
+  version: 0.8.2
+  resolution: "@zondax/ledger-js@npm:0.8.2"
   dependencies:
+    "@ledgerhq/hw-transport": 6.30.6
+  checksum: 7b33cd87d8569732028a57e594a4674f9fa232155c227031a00985bf9b6af62774a5cdbed59a5754c998122862ded64060b042c97850a38e6b734455828b362d
+  languageName: node
+  linkType: hard
+
+"@zondax/ledger-substrate@npm:0.44.2":
+  version: 0.44.2
+  resolution: "@zondax/ledger-substrate@npm:0.44.2"
+  dependencies:
+    "@ledgerhq/hw-transport": 6.30.6
+    "@zondax/ledger-js": ^0.8.2
     axios: ^1.6.8
-  checksum: edcdfdbd7237d6b8f54c3ffaa10e1d7c0aa5eecfcb1bb1b9cdd31c1bc71180bf23c24e618ba8eb0cd4961d88135552cb8b2aa0afde40a7581cd86727bad62b7f
+  checksum: 1f0035725c88335c8e1c234fc75ebdbc39666d8567bb3d77734ed861f85a49b87d358f520bef76287ff2e75914f790a5454cb27b7814489292100730023a9541
   languageName: node
   linkType: hard
 

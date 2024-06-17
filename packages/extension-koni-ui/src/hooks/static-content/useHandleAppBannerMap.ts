@@ -28,7 +28,7 @@ export const useHandleAppBannerMap = (
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const getFilteredAppBannerByTimeAndPlatform = useCallback(
     (data: AppBannerData[]) => {
-      const activeList = data.filter(({ info }) => checkPopupExistTime(info));
+      const activeList = data && data.length ? data.filter(({ info }) => checkPopupExistTime(info)) : [];
       const filteredData = activeList
         .filter(({ info }) => {
           return info.platforms.includes('extension');
@@ -41,16 +41,18 @@ export const useHandleAppBannerMap = (
   );
 
   const initBannerHistoryMap = useCallback((data: AppBannerData[]) => {
-    const newData: Record<string, PopupHistoryData> = data.reduce(
-      (o, key) =>
-        Object.assign(o, {
-          [`${key.position}-${key.id}`]: {
-            lastShowTime: 0,
-            showTimes: 0
-          }
-        }),
-      {}
-    );
+    const newData: Record<string, PopupHistoryData> = data && data.length
+      ? data.reduce(
+        (o, key) =>
+          Object.assign(o, {
+            [`${key.position}-${key.id}`]: {
+              lastShowTime: 0,
+              showTimes: 0
+            }
+          }),
+        {}
+      )
+      : {};
     const result = { ...newData, ...bannerHistoryMap };
 
     dispatch(updateBannerHistoryData(result));

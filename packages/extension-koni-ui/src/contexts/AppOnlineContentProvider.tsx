@@ -175,13 +175,12 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
 
     Promise.all([popupPromise, bannerPromise, confirmationPromise])
       .then((values) => {
-        console.log('values', values);
         // @ts-ignore
-        setAppPopupData(values[0].data as AppPopupData[]);
+        setAppPopupData(values[0] as AppPopupData[]);
         // @ts-ignore
-        setAppBannerData(values[1].data as AppBannerData[]);
+        setAppBannerData(values[1] as AppBannerData[]);
         // @ts-ignore
-        setAppConfirmationData(values[2].data as AppConfirmationData[]);
+        setAppConfirmationData(values[2] as AppConfirmationData[]);
       })
       .catch((e) => {
         console.error(e);

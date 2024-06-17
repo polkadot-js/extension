@@ -33,16 +33,18 @@ export const useHandleAppConfirmationMap = (
   );
 
   const initConfirmationHistoryMap = useCallback((data: AppConfirmationData[]) => {
-    const newData: Record<string, PopupHistoryData> = data.reduce(
-      (o, key) =>
-        Object.assign(o, {
-          [`${key.position}-${key.id}`]: {
-            lastShowTime: 0,
-            showTimes: 0
-          }
-        }),
-      {}
-    );
+    const newData: Record<string, PopupHistoryData> = data && data.length
+      ? data.reduce(
+        (o, key) =>
+          Object.assign(o, {
+            [`${key.position}-${key.id}`]: {
+              lastShowTime: 0,
+              showTimes: 0
+            }
+          }),
+        {}
+      )
+      : {};
     const result = { ...newData, ...confirmationHistoryMap };
 
     dispatch(updateConfirmationHistoryData(result));

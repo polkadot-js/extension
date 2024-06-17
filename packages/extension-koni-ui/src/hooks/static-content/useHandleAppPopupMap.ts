@@ -23,36 +23,36 @@ export const useHandleAppPopupMap = (
 ): AppPopupHookType => {
   const { appPopupData, popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
 
-  console.log('appPopupData', appPopupData);
   const dispatch = useDispatch();
   const { assetRegistry } = useSelector((state: RootState) => state.assetRegistry);
   const { balanceMap } = useSelector((state: RootState) => state.balance);
   const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
   const getFilteredAppPopupByTimeAndPlatform = useCallback(
     (data: AppPopupData[]) => {
-      const activeList = data.filter(({ info }) => checkPopupExistTime(info));
+      const activeList = data && data.length ? data.filter(({ info }) => checkPopupExistTime(info)) : [];
       const filteredData = activeList && activeList.length
         ? activeList.filter(({ info }) => info.platforms.includes('extension'))
           .sort((a, b) => a.priority - b.priority)
         : [];
 
-      console.log('filteredData', filteredData);
       dispatch(updateAppPopupData(filteredData));
     },
     [checkPopupExistTime, dispatch]
   );
 
   const initPopupHistoryMap = useCallback((data: AppPopupData[]) => {
-    const newData: Record<string, PopupHistoryData> = data.reduce(
-      (o, key) =>
-        Object.assign(o, {
-          [`${key.position}-${key.id}`]: {
-            lastShowTime: 0,
-            showTimes: 0
-          }
-        }),
-      {}
-    );
+    const newData: Record<string, PopupHistoryData> = data && data.length
+      ? data.reduce(
+        (o, key) =>
+          Object.assign(o, {
+            [`${key.position}-${key.id}`]: {
+              lastShowTime: 0,
+              showTimes: 0
+            }
+          }),
+        {}
+      )
+      : {};
     const result = { ...newData, ...popupHistoryMap };
 
     dispatch(updatePopupHistoryData(result));

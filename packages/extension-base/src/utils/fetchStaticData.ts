@@ -11,9 +11,6 @@ const fetchTarget = PRODUCTION_BRANCHES.indexOf(branchName) > -1 ? 'list.json' :
 export async function fetchStaticData<T> (slug: string, targetFile?: string, isJson = true) {
   const fetchFile = targetFile || fetchTarget;
 
-  console.log(branchName, fetchFile);
-  console.log(`https://static-data.subwallet.app/${slug}/${fetchFile}`);
-
   try {
     if (isJson) {
       return await fetchJson<T>(`https://static-data.subwallet.app/${slug}/${fetchFile}`);

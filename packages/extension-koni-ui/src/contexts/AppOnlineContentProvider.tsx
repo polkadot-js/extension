@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { STATIC_DATA_CONTENT_URL } from '@subwallet/extension-koni-ui/constants';
 import { AppPopupModalContext, AppPopupModalInfo } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
@@ -70,6 +71,12 @@ const getPositionByRouteName = (currentRoute?: string) => {
   }
 };
 
+export const getStaticContentByDevMode = () => {
+  return process.env.NODE_ENV === 'production' ? 'list' : 'preview';
+};
+
+const dataByDevModeStatus = getStaticContentByDevMode();
+
 export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentContextProviderProps) => {
   const appPopupModalContext = useContext(AppPopupModalContext);
   const yieldPositionList = useGroupYieldPosition();
@@ -82,7 +89,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
 
   const getAppContentData = useCallback(async (dataType: OnlineContentDataType) => {
-    return await axios.get(`https://content.subwallet.app/api/list/app-${dataType}?preview=true`);
+    return await axios.get(`${STATIC_DATA_CONTENT_URL}app-${dataType}s/${dataByDevModeStatus}.json`);
   }, []);
 
   // check popup exist time

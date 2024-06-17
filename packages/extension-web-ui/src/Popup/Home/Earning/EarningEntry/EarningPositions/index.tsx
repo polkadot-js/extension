@@ -10,6 +10,7 @@ import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRA
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
+import EarningPositionBalance from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry/EarningPositions/EarningPositionsBalance';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
 import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake';
@@ -94,6 +95,8 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return getValue(secondItem) - getValue(firstItem);
       });
   }, [assetInfoMap, currencyData, earningPositions, priceMap]);
+
+  console.log('items', items);
 
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
@@ -452,6 +455,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           isWebUI
             ? (
               <>
+                <EarningPositionBalance />
                 <Toolbar
                   className={'__desktop-toolbar'}
                   extraActionNode={

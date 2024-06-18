@@ -1966,6 +1966,10 @@ export interface CampaignButton {
   metadata: Record<string, any> | null;
 }
 
+export interface ShowCampaignPopupRequest {
+  value: boolean;
+}
+
 export enum CampaignDataType {
   NOTIFICATION = 'notification',
   BANNER = 'banner'
@@ -2359,6 +2363,8 @@ export interface KoniRequestSignatures {
 
   /* Campaign */
   'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
+  'pri(campaign.popup.subscribeVisibility)': [null, ShowCampaignPopupRequest, ShowCampaignPopupRequest];
+  'pri(campaign.popup.toggle)': [ShowCampaignPopupRequest, null];
   'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
   /* Campaign */
 

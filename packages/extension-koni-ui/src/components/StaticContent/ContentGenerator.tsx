@@ -14,6 +14,13 @@ interface Props extends ThemeProps {
   content: string;
 }
 
+const onClickHyperLink = (href?: string) => {
+  return (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
+    e.preventDefault();
+    window.open(href);
+  };
+};
+
 const Component = ({ className, content }: Props) => {
   return (
     <ReactMarkdown
@@ -76,6 +83,16 @@ const Component = ({ className, content }: Props) => {
               {...rest}
               className={CN([className, 'custom-paragraph'])}
             >{children}</p>
+          );
+        },
+        a (props) {
+          const { children, className, href, ...rest } = props;
+
+          return (
+            <a
+              {...rest}
+              onClick={onClickHyperLink(href)}
+            >{children}</a>
           );
         }
       }}

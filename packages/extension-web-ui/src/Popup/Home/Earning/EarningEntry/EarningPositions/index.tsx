@@ -6,6 +6,7 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, BaseModal, EarningInstructionModal, EarningPositionDesktopItem, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { FilterTabsNode } from '@subwallet/extension-web-ui/components/FilterTabsNode';
 import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
@@ -19,10 +20,10 @@ import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbon
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
+import { ArrowsClockwise, Database, FadersHorizontal, HandsClapping, Leaf, Plus, PlusCircle, SquaresFour, Users, Vault } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -32,6 +33,21 @@ type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
   setEntryView: React.Dispatch<React.SetStateAction<EarningEntryView>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+type FilterTabItemType = {
+  label: string,
+  value: string,
+  icon: SwIconProps['phosphorIcon'],
+  iconColor: string,
+}
+
+enum FilterValue {
+  ALL = 'ALL',
+  NOMINATION_POOL = 'NOMINATION_POOL',
+  DIRECT_NOMINATION = 'NATIVE_STAKING',
+  LIQUID_STAKING = 'LIQUID_STAKING',
+  LENDING = 'LENDING'
 }
 
 let cacheData: Record<string, boolean> = {};
@@ -66,7 +82,49 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { inactiveModal } = useContext(ModalContext);
 
   const [searchInput, setSearchInput] = useState<string>('');
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const [selectedPositionInfo, setSelectedPositionInfo] = useState<ExtraYieldPositionInfo | undefined>(undefined);
+
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL,
+        icon: SquaresFour,
+        iconColor: '#4CEAAC'
+      },
+      {
+        label: t('Nomination pool'),
+        value: FilterValue.NOMINATION_POOL,
+        icon: Users,
+        iconColor: '#4CEAAC'
+
+      },
+      {
+        label: t('Direct nomination'),
+        value: FilterValue.DIRECT_NOMINATION,
+        icon: Database,
+        iconColor: '#D9A33E'
+      },
+      {
+        label: t('Liquid staking'),
+        value: FilterValue.LIQUID_STAKING,
+        icon: Leaf,
+        iconColor: '#D92079'
+      },
+      {
+        label: t('Lending'),
+        value: FilterValue.LENDING,
+        icon: HandsClapping,
+        iconColor: '#2DA73F'
+      }
+    ];
+  }, [t]);
+
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+  }, []);
+
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
       return [];
@@ -438,6 +496,25 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     setEntryView(EarningEntryView.OPTIONS);
   }, [setEntryView]);
 
+  const filteredItems = useMemo(() => {
+    const filterTabFunction = (item: ExtraYieldPositionInfo) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      return item.type === selectedFilterTab;
+    };
+
+    const _filterFunction = (_item: ExtraYieldPositionInfo) => {
+      return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
+    };
+
+    return items.filter(_filterFunction);
+  }, [items, filterFunction, searchFunction, searchInput, selectedFilterTab]);
+
+  console.log('filteredItems', filteredItems);
+  console.log('selectedFilterTab', selectedFilterTab);
+
   return (
     <>
       <Layout.Base
@@ -454,27 +531,34 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
             ? (
               <>
                 <EarningPositionBalance items={items} />
-                <Toolbar
-                  className={'__desktop-toolbar'}
-                  extraActionNode={
-                    subHeaderButtons.map((b, index) => (
-                      <Button
-                        {...b}
-                        key={index}
-                        size={'xs'}
-                        type={'ghost'}
-                      />
-                    ))
-                  }
-                  inputPlaceholder={t<string>('Search token')}
-                  onClickFilter={onClickFilterButton}
-                  onSearch={setSearchInput}
-                  searchValue={searchInput}
-                />
+                <div className={'action-wrapper'}>
+                  <FilterTabsNode
+                    className={'filter-tabs-container'}
+                    items={filterTabItems}
+                    onSelect={onSelectFilterTab}
+                    selectedItem={selectedFilterTab}
+                  />
+                  <Toolbar
+                    className={'__desktop-toolbar'}
+                    extraActionNode={
+                      subHeaderButtons.map((b, index) => (
+                        <Button
+                          {...b}
+                          key={index}
+                          size={'xs'}
+                          type={'ghost'}
+                        />
+                      ))
+                    }
+                    inputPlaceholder={t<string>('Search token')}
+                    onSearch={setSearchInput}
+                    searchValue={searchInput}
+                  />
+                </div>
                 <SwList
                   className={'__desktop-list-container'}
                   filterBy={filterFunction}
-                  list={items}
+                  list={filteredItems}
                   renderItem={renderItem}
                   renderWhenEmpty={emptyList}
                   searchBy={searchFunction}
@@ -705,6 +789,12 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
       lineHeight: token.lineHeightHeading5,
       color: token.colorTextSecondary
     }
+  },
+
+  '.action-wrapper': {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center'
   },
 
   '&.-mobile-mode': {

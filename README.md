@@ -17,6 +17,7 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 ## Firefox installation from source instructions.
 
 1. Uncompress `master-src.zip`
+2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)
 2. Install dependencies via `yarn install`
 3. Build all packages via `yarn build`
   - The `/packages/extension/build` will contain the exact code used in the add-on

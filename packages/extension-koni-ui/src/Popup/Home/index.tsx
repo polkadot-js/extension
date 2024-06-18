@@ -3,13 +3,15 @@
 
 import { Layout } from '@subwallet/extension-koni-ui/components';
 import { GlobalSearchTokenModal } from '@subwallet/extension-koni-ui/components/Modal/GlobalSearchTokenModal';
+import RemindUpgradeFirefoxVersion from '@subwallet/extension-koni-ui/components/Modal/RemindUpgradeFirefoxVersion';
 import { GeneralTermModal } from '@subwallet/extension-koni-ui/components/Modal/TermsAndConditions/GeneralTermModal';
-import { CONFIRM_GENERAL_TERM, DEFAULT_SESSION_VALUE, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_GENERAL_TERM, DEFAULT_SESSION_VALUE, GENERAL_TERM_AND_CONDITION_MODAL, HOME_CAMPAIGN_BANNER_MODAL, LATEST_SESSION, REMIND_BACKUP_SEED_PHRASE_MODAL, REMIND_UPGRADE_FIREFOX_VERSION } from '@subwallet/extension-koni-ui/constants';
 import { AppOnlineContentContext } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
 import { HomeContext } from '@subwallet/extension-koni-ui/contexts/screen/HomeContext';
-import { useAccountBalance, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useSetSessionLatest, useTokenGroup } from '@subwallet/extension-koni-ui/hooks';
+import { useAccountBalance, useGetChainSlugsByAccountType, useGetMantaPayConfig, useHandleMantaPaySync, useSetSessionLatest, useTokenGroup, useUpgradeFireFoxVersion } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { RemindBackUpSeedPhraseParamState, SessionStorage, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { isFirefox } from '@subwallet/extension-koni-ui/utils';
 import { ModalContext } from '@subwallet/react-ui';
 import React, { useCallback, useContext, useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
@@ -32,6 +34,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const accountBalance = useAccountBalance(tokenGroupStructure.tokenGroupMap);
   const currentAccount = useSelector((state: RootState) => state.accountState.currentAccount);
   const [isConfirmedTermGeneral, setIsConfirmedTermGeneral] = useLocalStorage(CONFIRM_GENERAL_TERM, 'nonConfirmed');
+  const { isNeedUpgradeVersion } = useUpgradeFireFoxVersion();
   const { showAppPopup } = useContext(AppOnlineContentContext);
 
   const mantaPayConfig = useGetMantaPayConfig(currentAccount?.address);
@@ -63,10 +66,25 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
     const sessionLatestInit = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
-    if (!sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
-      showAppPopup(location.pathname);
+    const handleOpenBanner = () => {
+      if (!sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
+        showAppPopup(location.pathname);
+      }
+    };
+
+    if (isFirefox()) {
+      isNeedUpgradeVersion().then((rs) => {
+        if (rs) {
+          activeModal(REMIND_UPGRADE_FIREFOX_VERSION);
+        } else {
+          handleOpenBanner();
+        }
+      })
+        .catch(console.error);
+    } else {
+      handleOpenBanner();
     }
-  }, [activeModal, location, showAppPopup]);
+  }, [activeModal, isNeedUpgradeVersion, location, showAppPopup]);
 
   useEffect(() => {
     // Run remind backup seed phrase one time
@@ -106,6 +124,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           >
             <Outlet />
             <GeneralTermModal onOk={onAfterConfirmTermModal} />
+            <RemindUpgradeFirefoxVersion />
           </Layout.Home>
         </div>
       </HomeContext.Provider>

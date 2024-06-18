@@ -25,6 +25,7 @@ async function updateManifest() {
       delete manifest.web_accessible_resources[0].use_dynamic_url;
     }
 
+    manifest.permissions.push("activeTab");
     manifest = {...manifest, host_permissions : ["<all_urls>"], optional_permissions : ["activeTab"]};
 
     if(manifest.content_scripts && manifest.content_scripts.length > 0) {

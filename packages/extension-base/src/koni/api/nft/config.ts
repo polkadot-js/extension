@@ -128,12 +128,7 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 }
 
 // This is for localhost or http only
-const RANDOM_IPFS_GATEWAY_SETTING = [
-  {
-    provider: CLOUDFLARE_PINATA_SERVER,
-    weight: 10
-  }
-];
+const RANDOM_IPFS_GATEWAY_SETTING: Array<{provider: string, weight: number}> = [];
 
 if (isFirefox) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
@@ -186,6 +181,13 @@ if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
     weight: 5
   }
   );
+}
+
+if (RANDOM_IPFS_GATEWAY_SETTING.length === 0) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: SUBWALLET_IPFS,
+    weight: 10
+  });
 }
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);

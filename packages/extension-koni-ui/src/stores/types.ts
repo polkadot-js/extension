@@ -15,6 +15,8 @@ import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
+import { AppBannerData, AppConfirmationData, AppPopupData, PopupHistoryData } from '../types/staticContent';
+
 // todo: move this file to extension-koni-ui/src/types/
 
 export type CurrentAccountType = {
@@ -128,7 +130,17 @@ export interface BalanceStore extends BaseReduxStore {
 }
 
 export interface CampaignStore extends BaseReduxStore {
-  banners: CampaignBanner[]
+  banners: CampaignBanner[],
+  isPopupVisible: boolean
+}
+
+export interface AppOnlineContent {
+  appPopupData: AppPopupData[];
+  appBannerData: AppBannerData[];
+  appConfirmationData: AppConfirmationData[];
+  popupHistoryMap: Record<string, PopupHistoryData>;
+  bannerHistoryMap: Record<string, PopupHistoryData>;
+  confirmationHistoryMap: Record<string, PopupHistoryData>;
 }
 
 export interface BuyServiceStore extends BaseReduxStore {

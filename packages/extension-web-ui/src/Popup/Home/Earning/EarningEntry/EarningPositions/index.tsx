@@ -96,8 +96,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
       });
   }, [assetInfoMap, currencyData, earningPositions, priceMap]);
 
-  console.log('items', items);
-
   const filterOptions = [
     { label: t('Nomination pool'), value: YieldPoolType.NOMINATION_POOL },
     { label: t('Direct nomination'), value: YieldPoolType.NATIVE_STAKING },
@@ -443,7 +441,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   return (
     <>
       <Layout.Base
-        className={CN(className)}
+        className={CN(className, { '-mobile-mode': !isWebUI })}
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={false}
@@ -455,7 +453,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           isWebUI
             ? (
               <>
-                <EarningPositionBalance />
+                <EarningPositionBalance items={items} />
                 <Toolbar
                   className={'__desktop-toolbar'}
                   extraActionNode={
@@ -486,20 +484,23 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               </>
             )
             : (
-              <SwList.Section
-                actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-                className={'__section-list-container'}
-                enableSearchInput
-                filterBy={filterFunction}
-                list={items}
-                onClickActionBtn={onClickFilterButton}
-                renderItem={renderItem}
-                renderWhenEmpty={emptyList}
-                searchFunction={searchFunction}
-                searchMinCharactersCount={1}
-                searchPlaceholder={t<string>('Search token')}
-                showActionBtn
-              />
+              <>
+                <EarningPositionBalance items={items} />
+                <SwList.Section
+                  actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+                  className={'__section-list-container'}
+                  enableSearchInput
+                  filterBy={filterFunction}
+                  list={items}
+                  onClickActionBtn={onClickFilterButton}
+                  renderItem={renderItem}
+                  renderWhenEmpty={emptyList}
+                  searchFunction={searchFunction}
+                  searchMinCharactersCount={1}
+                  searchPlaceholder={t<string>('Search token')}
+                  showActionBtn
+                />
+              </>
             )
         }
         <div className={'footer-separator'}></div>
@@ -703,6 +704,12 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5,
       color: token.colorTextSecondary
+    }
+  },
+
+  '&.-mobile-mode': {
+    '.ant-sw-sub-header-container': {
+      marginBottom: 0
     }
   },
 

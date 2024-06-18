@@ -1,40 +1,94 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { balanceNoPrefixFormater, formatNumber } from '@subwallet/extension-base/utils';
+import { balanceNoPrefixFormater, BN_TEN, formatNumber, isAccountAll } from '@subwallet/extension-base/utils';
+import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
+import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
-import { reloadCron, saveShowBalance } from '@subwallet/extension-web-ui/messaging';
+import { saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, Number, Tag, Tooltip } from '@subwallet/react-ui';
+import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { Button, Icon, Number, Tooltip } from '@subwallet/react-ui';
+import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, Eye, EyeSlash } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { Eye, EyeSlash } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
-export type Props = ThemeProps
+export type Props = ThemeProps & {
+  items: ExtraYieldPositionInfo[];
+}
 
-function Component ({ className }: Props): React.ReactElement<Props> {
+function Component ({ className, items }: Props): React.ReactElement<Props> {
   const dataContext = useContext(DataContext);
   const { setBackground } = useContext(WebUIContext);
+  const { isWebUI } = useContext(ScreenContext);
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
   const { currencyData } = useSelector((state: RootState) => state.price);
-  const [reloading, setReloading] = useState(false);
-
-  const onChangeShowBalance = useCallback(() => {
-    saveShowBalance(!isShowBalance).catch(console.error);
-  }, [isShowBalance]);
+  const earningRewards = useSelector((state) => state.earning.earningRewards);
+  const { currentAccount } = useSelector((state) => state.accountState);
 
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
 
   const isTotalBalanceDecrease = totalBalanceInfo.change.status === 'decrease';
-  const totalChangePercent = totalBalanceInfo.change.percent;
-  const totalChangeValue = totalBalanceInfo.change.value;
-  const totalValue = totalBalanceInfo.convertedValue;
+
+  const onChangeShowBalance = useCallback(() => {
+    saveShowBalance(!isShowBalance).catch(console.error);
+  }, [isShowBalance]);
+
+  const totalActiveStake = useMemo(() => {
+    let result = BN_ZERO;
+
+    items.forEach((item) => {
+      result = result.plus((new BigN(item.totalStake)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
+    });
+
+    return result;
+  }, [items]);
+
+  const totalUnstake = useMemo(() => {
+    let result = BN_ZERO;
+
+    items.forEach((item) => {
+      result = result.plus((new BigN(item.unstakeBalance)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
+    });
+
+    return result;
+  }, [items]);
+
+  const totalValue = useMemo(() => {
+    return new BigN(totalUnstake).plus(totalActiveStake);
+  }, [totalActiveStake, totalUnstake]);
+
+  const totalUnclaimReward = useMemo(() => {
+    let result = BN_ZERO;
+    const address = currentAccount?.address || '';
+    const isAll = isAccountAll(address);
+
+    if (isAll) {
+      earningRewards.forEach((item) => {
+        const rewardItem = items.find((reward) => reward.slug === item.slug);
+
+        if (rewardItem && item.unclaimedReward) {
+          result = result.plus((new BigN(item.unclaimedReward)).div(BN_TEN.pow(rewardItem.asset.decimals || 0)).multipliedBy(rewardItem.price));
+        }
+      });
+    } else {
+      earningRewards.forEach((item) => {
+        const rewardItem = items.find((reward) => reward.slug === item.slug && item.address === address);
+
+        if (rewardItem && item.unclaimedReward) {
+          result = result.plus((new BigN(item.unclaimedReward)).div(BN_TEN.pow(rewardItem.asset.decimals || 0)).multipliedBy(rewardItem.price));
+        }
+      });
+    }
+
+    return result;
+  }, [currentAccount?.address, earningRewards, items]);
 
   useEffect(() => {
     dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance']).catch(console.error);
@@ -46,21 +100,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     setBackground(backgroundColor);
   }, [isTotalBalanceDecrease, setBackground]);
 
-  const reloadBalance = useCallback(() => {
-    setReloading(true);
-    reloadCron({ data: 'balance' })
-      .catch(console.error)
-      .finally(() => {
-        setReloading(false);
-      });
-  }, []);
-
   return (
-    <div className={CN(className, 'flex-row')}>
+    <div className={CN(className, 'flex-row', { '-mobile-mode': !isWebUI })}>
       <div className={CN('__block-item', '__total-balance-block')}>
         <div className={'__block-title-wrapper'}>
-          <div className={'__block-title'}>{t('Total balance')}</div>
-          <Button
+          <div className={'__block-title'}>{t('Est. Total Value')}</div>
+          {!isWebUI && <Button
             className='__balance-visibility-toggle'
             icon={
               <Icon
@@ -71,20 +116,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             size={'xs'}
             tooltip={isShowBalance ? t('Hide balance') : t('Show balance')}
             type='ghost'
-          />
-          <Button
-            className='__balance-reload-toggle'
-            icon={
-              <Icon
-                phosphorIcon={ArrowsClockwise}
-              />
-            }
-            loading={reloading}
-            onClick={reloadBalance}
-            size={'xs'}
-            tooltip={t('Refresh Balance')}
-            type='ghost'
-          />
+          />}
         </div>
 
         <div className={'__block-content'}>
@@ -102,129 +134,107 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                   decimal={0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
-                  prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
+                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
                   subFloatNumber
                   value={totalValue}
                 />
               </div>
             </Tooltip>
           </div>
+        </div>
+      </div>
 
-          <div className={'__balance-change-container'}>
-            <Number
-              className={'__balance-change-value'}
-              decimal={0}
-              decimalOpacity={1}
-              hide={!isShowBalance}
-              prefix={isTotalBalanceDecrease ? `- ${currencyData?.symbol}` : `+ ${currencyData?.symbol}`}
-              value={totalChangeValue}
-            />
-            <Tag
-              className={`__balance-change-percent ${isTotalBalanceDecrease ? '-decrease' : ''}`}
-              shape={'round'}
+      {isWebUI && (
+        <>
+          <div
+            className='__block-divider'
+          />
+
+          <div className={CN('__block-item', '__balance-block')}>
+            <div className='__block-title-wrapper'>
+              <div className={'__block-title'}>{t('Est. Total active')}</div>
+            </div>
+            <Tooltip
+              overlayClassName={CN({
+                'ant-tooltip-hidden': !isShowBalance
+              })}
+              placement={'top'}
+              title={currencyData.symbol + ' ' + formatNumber(totalActiveStake, 0, balanceNoPrefixFormater)}
             >
-              <Number
-                decimal={0}
-                decimalOpacity={1}
-                hide={!isShowBalance}
-                prefix={isTotalBalanceDecrease ? '-' : '+'}
-                suffix={'%'}
-                value={totalChangePercent}
-                weight={700}
-              />
-            </Tag>
+              <div className={'__block-content'}>
+                <Number
+                  className='__balance-value'
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  hide={!isShowBalance}
+                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  subFloatNumber
+                  value={totalActiveStake}
+                />
+              </div>
+            </Tooltip>
+
           </div>
-        </div>
-      </div>
 
-      <div
-        className='__block-divider'
-      />
+          <div
+            className='__block-divider'
+          />
 
-      <div className={CN('__block-item', '__balance-block')}>
-        <div className='__block-title-wrapper'>
-          <div className={'__block-title'}>{t('Transferable balance 1')}</div>
-        </div>
-        <Tooltip
-          overlayClassName={CN({
-            'ant-tooltip-hidden': !isShowBalance
-          })}
-          placement={'top'}
-          title={currencyData.symbol + ' ' + formatNumber(totalBalanceInfo.freeValue, 0, balanceNoPrefixFormater)}
-        >
-          <div className={'__block-content'}>
-            <Number
-              className='__balance-value'
-              decimal={0}
-              decimalOpacity={0.45}
-              hide={!isShowBalance}
-              prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-              subFloatNumber
-              value={totalBalanceInfo.freeValue}
-            />
+          <div className={CN('__block-item', '__balance-block')}>
+            <div className='__block-title-wrapper'>
+              <div className={'__block-title'}>{t('Est. Total unstake')}</div>
+            </div>
+            <Tooltip
+              overlayClassName={CN({
+                'ant-tooltip-hidden': !isShowBalance
+              })}
+              placement={'top'}
+              title={currencyData.symbol + ' ' + formatNumber(totalUnstake, 0, balanceNoPrefixFormater)}
+            >
+              <div className={'__block-content'}>
+                <Number
+                  className='__balance-value'
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  hide={!isShowBalance}
+                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  subFloatNumber
+                  value={totalUnstake}
+                />
+              </div>
+            </Tooltip>
           </div>
-        </Tooltip>
 
-      </div>
+          <div
+            className='__block-divider __divider-special'
+          />
 
-      <div
-        className='__block-divider'
-      />
-
-      <div className={CN('__block-item', '__balance-block')}>
-        <div className='__block-title-wrapper'>
-          <div className={'__block-title'}>{t('Locked balance')}</div>
-        </div>
-        <Tooltip
-          overlayClassName={CN({
-            'ant-tooltip-hidden': !isShowBalance
-          })}
-          placement={'top'}
-          title={currencyData.symbol + ' ' + formatNumber(totalBalanceInfo.lockedValue, 0, balanceNoPrefixFormater)}
-        >
-          <div className={'__block-content'}>
-            <Number
-              className='__balance-value'
-              decimal={0}
-              decimalOpacity={0.45}
-              hide={!isShowBalance}
-              prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-              subFloatNumber
-              value={totalBalanceInfo.lockedValue}
-            />
+          <div className={CN('__block-item', '__balance-block')}>
+            <div className='__block-title-wrapper'>
+              <div className={'__block-title'}>{t('Est. Total unclaim')}</div>
+            </div>
+            <Tooltip
+              overlayClassName={CN({
+                'ant-tooltip-hidden': !isShowBalance
+              })}
+              placement={'top'}
+              title={currencyData.symbol + ' ' + formatNumber(totalUnclaimReward, 0, balanceNoPrefixFormater)}
+            >
+              <div className={'__block-content'}>
+                <Number
+                  className='__balance-value'
+                  decimal={0}
+                  decimalOpacity={0.45}
+                  hide={!isShowBalance}
+                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  subFloatNumber
+                  value={totalUnclaimReward}
+                />
+              </div>
+            </Tooltip>
           </div>
-        </Tooltip>
-      </div>
-
-      <div
-        className='__block-divider __divider-special'
-      />
-
-      <div className={CN('__block-item', '__balance-block')}>
-        <div className='__block-title-wrapper'>
-          <div className={'__block-title'}>{t('Locked balance')}</div>
-        </div>
-        <Tooltip
-          overlayClassName={CN({
-            'ant-tooltip-hidden': !isShowBalance
-          })}
-          placement={'top'}
-          title={currencyData.symbol + ' ' + formatNumber(totalBalanceInfo.lockedValue, 0, balanceNoPrefixFormater)}
-        >
-          <div className={'__block-content'}>
-            <Number
-              className='__balance-value'
-              decimal={0}
-              decimalOpacity={0.45}
-              hide={!isShowBalance}
-              prefix={(currencyData?.isPrefix && currencyData.symbol) || ''}
-              subFloatNumber
-              value={totalBalanceInfo.lockedValue}
-            />
-          </div>
-        </Tooltip>
-      </div>
-
+        </>)
+      }
     </div>
   );
 }
@@ -233,7 +243,6 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'stretch',
-  marginBottom: 56,
   flexWrap: 'wrap',
 
   '.ant-number .ant-typography': {
@@ -242,9 +251,43 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
     lineHeight: 'inherit'
   },
 
+  '&.-mobile-mode': {
+    '.__block-title': {
+      color: token.colorTextTertiary,
+      fontSize: token.fontSizeSM,
+      lineHeight: token.lineHeightSM
+    },
+    '.__block-title-wrapper': {
+      marginBottom: 0,
+      minHeight: 'fit-content',
+      gap: 4
+    },
+    '.__total-balance-block': {
+      paddingLeft: token.padding,
+      paddingRight: token.padding,
+      paddingBottom: token.padding
+
+    },
+    '.__block-content': {
+      fontSize: token.fontSizeHeading2,
+      lineHeight: token.lineHeightHeading2
+    },
+    '.__balance-visibility-toggle': {
+      width: 20,
+      height: 20,
+      minWidth: 'fit-content',
+      '.anticon': {
+        height: 20,
+        width: 20
+      }
+    }
+
+  },
+
   '.__block-title': {
     fontSize: token.fontSize,
-    lineHeight: token.lineHeight
+    lineHeight: token.lineHeight,
+    color: token.colorWhite
   },
 
   '.__balance-value': {
@@ -314,8 +357,8 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
 
   '.__total-balance-block': {
     '.__balance-value': {
-      fontSize: 38,
-      lineHeight: '46px'
+      fontSize: 30,
+      lineHeight: '38px'
     }
   },
 

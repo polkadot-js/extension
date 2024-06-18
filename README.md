@@ -1,7 +1,5 @@
 # polkadot{.js} extension
 
-**Important** Please be aware, this repository has not had a release to the google or firefox store in over 2 years which leaves the store version out of sync with the latest release of this extension. 
-
 A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
@@ -15,6 +13,14 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 
 ## Documentation and examples
 Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
+
+## Firefox installation from source instructions.
+
+1. Uncompress `master-src.zip`
+2. Install dependencies via `yarn install`
+3. Build all packages via `yarn build`
+  - The `/packages/extension/build` will contain the exact code used in the add-on
+4. To regenerate the dst, and src compressed files run: `yarn build:zip` 
 
 ## Development version
 

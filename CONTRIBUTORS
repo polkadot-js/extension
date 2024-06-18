@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
       91	Thibaut Sardan                	fix typos (#1343)
-      26	Tarik Gul                     	Add firefox installation from src instructions (#1371)
+      27	Tarik Gul                     	Update api, and phishing (#1373)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

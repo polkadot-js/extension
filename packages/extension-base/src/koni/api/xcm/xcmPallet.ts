@@ -2,21 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { getBeneficiary, getDestinationChainLocation, getDestWeight, getTokenLocation } from '@subwallet/extension-base/koni/api/xcm/utils';
+import { _getXcmBeneficiary, _getXcmDestWeight, _getXcmMultiAssets, _getXcmMultiLocation } from '@subwallet/extension-base/core/substrate/xcm-parser';
+import { isUseTeleportProtocol, STABLE_XCM_VERSION } from '@subwallet/extension-base/koni/api/xcm/utils';
 
 import { ApiPromise } from '@polkadot/api';
 
 // this pallet is only used by Relaychains
 export function getExtrinsicByXcmPalletPallet (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, recipientAddress: string, value: string, api: ApiPromise) {
-  const weightParam = getDestWeight();
-  const xcmVer = 'V3';
-  const destination = getDestinationChainLocation(originChainInfo, destinationChainInfo, xcmVer);
-  const beneficiary = getBeneficiary(destinationChainInfo, recipientAddress, xcmVer);
-  const tokenLocation = getTokenLocation(tokenInfo, value, xcmVer);
+  const weightParam = _getXcmDestWeight(originChainInfo);
+  const destination = _getXcmMultiLocation(originChainInfo, destinationChainInfo, STABLE_XCM_VERSION);
+  const beneficiary = _getXcmBeneficiary(destinationChainInfo, recipientAddress, STABLE_XCM_VERSION);
+  const tokenLocation = _getXcmMultiAssets(tokenInfo, value, STABLE_XCM_VERSION);
 
   let method = 'limitedReserveTransferAssets';
 
-  if (['statemint', 'statemine'].includes(destinationChainInfo.slug)) {
+  if (isUseTeleportProtocol(originChainInfo, destinationChainInfo)) {
     method = 'limitedTeleportAssets';
   }
 

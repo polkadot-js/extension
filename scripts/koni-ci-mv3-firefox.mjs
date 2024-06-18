@@ -16,6 +16,15 @@ async function updateManifest() {
       };
     }
 
+    if (manifest.content_scripts?.[1]) {
+      // Remove the second content script
+      manifest.content_scripts.splice(1, 1);
+    }
+
+    if (manifest.web_accessible_resources?.[0]) {
+      delete manifest.web_accessible_resources[0].use_dynamic_url;
+    }
+
     manifest = {...manifest, host_permissions : ["<all_urls>"], optional_permissions : ["activeTab"]};
 
     if(manifest.content_scripts && manifest.content_scripts.length > 0) {

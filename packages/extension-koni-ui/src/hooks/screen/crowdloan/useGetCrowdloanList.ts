@@ -29,6 +29,11 @@ function getCrowdloanContributeList (
     }
 
     const relayParentKey = _getSubstrateRelayParent(chainInfo);
+
+    if (!relayParentKey) {
+      return;
+    }
+
     const relayChainInfo = chainInfoMap[relayParentKey];
 
     if (!relayChainInfo) {

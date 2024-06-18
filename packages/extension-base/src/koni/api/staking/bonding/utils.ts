@@ -5,9 +5,10 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, PalletStakingEraRewardPoints, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, PalletStakingEraRewardPoints, PalletStakingValidatorPrefs, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import BigNumber from 'bignumber.js';
@@ -581,16 +582,14 @@ export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupported
   }
 }
 
-export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+export function getRelayValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
   // mapping store validator and totalPoints
   const validatorTotalPointsMap: Record<string, BigNumber> = {};
 
   Object.values(eraRewardMap).forEach((info) => {
     const individual = info.individual;
 
-    Object.entries(individual).forEach(([validator, rawPoints]) => {
-      const points = rawPoints.replaceAll(',', '');
-
+    Object.entries(individual).forEach(([validator, points]) => {
       if (!validatorTotalPointsMap[validator]) {
         validatorTotalPointsMap[validator] = new BigNumber(points);
       } else {
@@ -602,7 +601,7 @@ export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakin
   return validatorTotalPointsMap;
 }
 
-export function getTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
+export function getRelayTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
   const sortValidatorPointsList = Object.fromEntries(
     Object.entries(validatorPointsList)
       .sort(
@@ -623,11 +622,50 @@ export function getTopValidatorByPoints (validatorPointsList: Record<string, Big
   return Object.keys(top50PercentRecord);
 }
 
+export function getRelayBlockedValidatorList (validators: any[]) {
+  const blockValidatorList: string[] = [];
+
+  for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (isBlocked) {
+      blockValidatorList.push(validatorAddress);
+    }
+  }
+
+  return blockValidatorList;
+}
+
+export function getRelayEraRewardMap (eraRewardPointArray: Codec[], startEraForPoints: number) {
+  const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
+
+  for (const item of eraRewardPointArray) {
+    eraRewardMap[startEraForPoints] = item.toPrimitive() as unknown as PalletStakingEraRewardPoints;
+    startEraForPoints++;
+  }
+
+  return eraRewardMap;
+}
+
+export async function getRelayMaxNominations (substrateApi: _SubstrateApi) {
+  await substrateApi.isReady;
+  const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+  const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
+  const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
+
+  return maxNominationsByNominationQuota || maxNominations;
+}
+
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
   const number = formatNumber(bnMinStake.toString(), tokenInfo.decimals || 0, balanceFormatter);
 
-  return t('Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
+  return t('Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
 };
 
 export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number): string => {

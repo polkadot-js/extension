@@ -7,13 +7,14 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { _getChainflipEarlyValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
 import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, getChainflipEarlyValidationError, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData } from '@subwallet/extension-base/types';
 import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
 import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
@@ -42,6 +43,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
   private swapSdk: SwapSDK;
   private readonly isTestnet: boolean;
   private swapBaseHandler: SwapBaseHandler;
+  providerSlug: SwapProviderId;
 
   constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     this.swapBaseHandler = new SwapBaseHandler({
@@ -51,6 +53,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
       providerSlug: isTestnet ? SwapProviderId.CHAIN_FLIP_TESTNET : SwapProviderId.CHAIN_FLIP_MAINNET
     });
     this.isTestnet = isTestnet;
+    this.providerSlug = isTestnet ? SwapProviderId.CHAIN_FLIP_TESTNET : SwapProviderId.CHAIN_FLIP_MAINNET;
 
     this.swapSdk = new SwapSDK({
       network: isTestnet ? 'perseverance' : 'mainnet'
@@ -230,7 +233,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const metadata = earlyValidation.metadata as ChainflipPreValidationMetadata;
 
     if (earlyValidation.error) {
-      return getChainflipEarlyValidationError(earlyValidation.error, metadata);
+      return _getChainflipEarlyValidationError(earlyValidation.error, metadata);
     }
 
     const srcChainId = this.chainMapping[fromAsset.originChain];

@@ -155,7 +155,7 @@ export function _isSubstrateChain (chainInfo: _ChainInfo) {
 }
 
 export function _getEvmChainId (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
+  return chainInfo.evmInfo?.evmChainId; // fallback to Ethereum
 }
 
 export function _getSubstrateParaId (chainInfo: _ChainInfo) {
@@ -163,7 +163,7 @@ export function _getSubstrateParaId (chainInfo: _ChainInfo) {
 }
 
 export function _getSubstrateRelayParent (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.relaySlug || '';
+  return chainInfo.substrateInfo?.relaySlug;
 }
 
 export function _getSubstrateGenesisHash (chainInfo: _ChainInfo) {
@@ -340,6 +340,10 @@ export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationCha
   return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
 }
 
+export function _isRelayChain (chainInfo: _ChainInfo) {
+  return _isSubstrateRelayChain(chainInfo) || _isPureEvmChain(chainInfo);
+}
+
 export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.chainType === _SubstrateChainType.RELAYCHAIN;
 }
@@ -476,6 +480,10 @@ export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, cha
 
 export function _isMantaZkAsset (chainAsset: _ChainAsset) {
   return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
+}
+
+export function _getChainExistentialDeposit (chainInfo: _ChainInfo): string {
+  return chainInfo?.substrateInfo?.existentialDeposit || '0';
 }
 
 export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {

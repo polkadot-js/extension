@@ -1,7 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { _handleDisplayForEarningError, _handleDisplayInsufficientEarningError } from '@subwallet/extension-base/core/logic-validation/earning';
 import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { isLendingPool, isLiquidPool } from '@subwallet/extension-base/services/earning-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
@@ -11,9 +13,8 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
-import { BN_ZERO, EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
+import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
-import { insufficientMessages } from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -50,7 +51,7 @@ const Component = () => {
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
-    setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
+    setBackProps, setIsDisableHeader, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
   const { slug } = defaultData;
 
@@ -157,7 +158,7 @@ const Component = () => {
     [chainAsset, poolInfo?.metadata?.inputAsset]
   );
 
-  const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
+  const nativeAsset: _ChainAsset | undefined = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
 
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
   const priceValue = priceMap[inputAsset.priceId || ''] || 0;
@@ -269,45 +270,32 @@ const Component = () => {
   }, [persistData]);
 
   const handleDataForInsufficientAlert = useCallback(() => {
-    const _assetDecimals = nativeAsset.decimals || 0;
-    const existentialDeposit = nativeAsset.minAmount || '0';
+    const _assetDecimals = nativeAsset?.decimals || 0;
 
     return {
-      existentialDeposit: getInputValuesFromString(existentialDeposit, _assetDecimals),
-      availableBalance: getInputValuesFromString(nativeTokenBalance.value, _assetDecimals),
-      maintainBalance: getInputValuesFromString(poolInfo?.metadata?.maintainBalance || '0', _assetDecimals),
-      symbol: nativeAsset.symbol
+      minJoinPool: getInputValuesFromString(poolInfo?.statistic?.earningThreshold.join || '0', _assetDecimals),
+      symbol: nativeAsset?.symbol || '',
+      chain: chainInfoMap[poolChain].name,
+      isXCM: poolInfo?.type === YieldPoolType.LENDING || poolInfo?.type === YieldPoolType.LIQUID_STAKING
     };
-  }, [nativeAsset, nativeTokenBalance.value, poolInfo?.metadata?.maintainBalance]);
+  }, [chainInfoMap, nativeAsset?.decimals, nativeAsset?.symbol, poolChain, poolInfo?.statistic?.earningThreshold.join, poolInfo?.type]);
 
   const onError = useCallback(
     (error: Error) => {
-      if (insufficientMessages.some((v) => error.message.includes(v))) {
-        const availableBalanceBN = new BigN(nativeTokenBalance.value || 0);
+      const { chain, isXCM, minJoinPool, symbol } = handleDataForInsufficientAlert();
+      const balanceDisplayInfo = _handleDisplayInsufficientEarningError(error, isXCM, nativeTokenBalance.value || '0', amountValue || '0', minJoinPool);
 
-        if (availableBalanceBN.gt(BN_ZERO) && new BigN(amountValue || 0).gt(availableBalanceBN)) {
-          openAlert({
-            title: t('Insufficient balance'),
-            type: NotificationType.ERROR,
-            content: t('Insufficient balance. Amount must be smaller than available balance'),
-            okButton: {
-              text: t('I understand'),
-              onClick: closeAlert,
-              icon: CheckCircle
-            }
-          });
-        } else {
-          openAlert({
-            title: t('Insufficient balance'),
-            type: NotificationType.ERROR,
-            content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
-            okButton: {
-              text: t('I understand'),
-              onClick: closeAlert,
-              icon: CheckCircle
-            }
-          });
-        }
+      if (balanceDisplayInfo) {
+        openAlert({
+          title: t(balanceDisplayInfo.title),
+          type: NotificationType.ERROR,
+          content: t(balanceDisplayInfo.message, { replace: { minJoinPool, symbol, chain } }),
+          okButton: {
+            text: t('I understand'),
+            onClick: closeAlert,
+            icon: CheckCircle
+          }
+        });
 
         dispatchProcessState({
           type: EarningActionType.STEP_ERROR_ROLLBACK,
@@ -355,14 +343,14 @@ const Component = () => {
         const { errors: _errors, id, warnings } = rs;
 
         if (_errors.length || warnings.length) {
-          if (_errors[0]?.message !== 'Rejected by user') {
-            if (
-              _errors[0]?.message.startsWith('UnknownError Connection to Indexed DataBase server lost') ||
-              _errors[0]?.message.startsWith('Provided address is invalid, the capitalization checksum test failed') ||
-              _errors[0]?.message.startsWith('connection not open on send()')
-            ) {
+          const error = _errors[0]; // we only handle the first error for now
+
+          if (error.message !== 'Rejected by user') {
+            const displayInfo = _handleDisplayForEarningError(error);
+
+            if (displayInfo) {
               notify({
-                message: t('Your selected network has lost connection. Update it by re-enabling it or changing network provider'),
+                message: t(displayInfo.message),
                 type: 'error',
                 duration: 8
               });
@@ -371,13 +359,13 @@ const Component = () => {
             }
 
             // hideAll();
-            onError(_errors[0]);
+            onError(error);
 
             return false;
           } else {
             dispatchProcessState({
               type: needRollback ? EarningActionType.STEP_ERROR_ROLLBACK : EarningActionType.STEP_ERROR,
-              payload: _errors[0]
+              payload: error
             });
 
             return false;
@@ -405,6 +393,7 @@ const Component = () => {
 
   const onSubmit: FormCallbacks<EarnParams>['onFinish'] = useCallback((values: EarnParams) => {
     setSubmitLoading(true);
+    setIsDisableHeader(true);
     const { from, slug, target, value: _currentAmount } = values;
 
     const getData = (submitStep: number): SubmitYieldJoinData => {
@@ -501,9 +490,10 @@ const Component = () => {
         .catch(onError)
         .finally(() => {
           setSubmitLoading(false);
+          setIsDisableHeader(false);
         });
     }, 300);
-  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps]);
+  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps, setIsDisableHeader]);
 
   const renderMetaInfo = useCallback(() => {
     const value = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
@@ -984,6 +974,7 @@ const Component = () => {
                       loading={targetLoading}
                       setForceFetchValidator={setForceFetchValidator}
                       slug={slug}
+                      defaultValue={defaultData.target}
                     />
                   </Form.Item>
                 )}

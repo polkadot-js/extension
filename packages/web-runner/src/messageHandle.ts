@@ -24,9 +24,9 @@ export function responseMessage (response: TransportResponseMessage<keyof Reques
   }
 }
 
-export function setupHandlers () {
-  const handlers = SWHandler.instance.handle;
+const swHandler = SWHandler.instance;
 
+export function setupHandlers () {
   window.addEventListener('message', (ev) => {
     const data = ev.data as TransportRequestMessage<keyof RequestSignatures>;
     const port = {
@@ -50,7 +50,7 @@ export function setupHandlers () {
       }
 
       // @ts-ignore
-      handlers(data, port);
+      swHandler.handle(data, port);
     }
   });
 }

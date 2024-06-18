@@ -114,7 +114,7 @@ export function _getEarlyAssetHubValidationError (error: SwapErrorType, metadata
     case SwapErrorType.ERROR_FETCHING_QUOTE:
       return new SwapError(error, 'No swap quote found. Adjust your amount or try again later.');
     case SwapErrorType.MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT:
-      return new SwapError(error, 'You swap to much. It make pool not enough existential deposit'); // TODO: i18n this
+      return new SwapError(error, 'You swap too much. It make pool not enough existential deposit'); // TODO: i18n this
     default:
       return new SwapError(error);
   }

@@ -30,9 +30,9 @@ export const getReserveForPool = async (api: ApiPromise, asset1: _ChainAsset, as
   if (balanceAsset1 !== '0' && balanceAsset2 !== '0') {
     return [balanceAsset1, balanceAsset2];
   } else {
-    [balanceAsset1, balanceAsset2] = await _getPoolInfo(api, asset2, asset1);
+    [balanceAsset2, balanceAsset1] = await _getPoolInfo(api, asset2, asset1);
 
-    return [balanceAsset2, balanceAsset1];
+    return [balanceAsset1, balanceAsset2];
   }
 };
 
@@ -76,7 +76,7 @@ export const estimateTokensForPath = async (api: ApiPromise, amounts: string[], 
 };
 
 export const checkLiquidityForPool = (amount: string, reserve1: string, reserve2: string): SwapErrorType | undefined => {
-  if (new BigN(reserve1).eq('0') && new BigN(reserve2).eq('0')) {
+  if (new BigN(reserve1).eq('0') || new BigN(reserve2).eq('0')) {
     return SwapErrorType.ASSET_NOT_SUPPORTED;
   } else if (new BigN(reserve1).lt(amount)) {
     return SwapErrorType.NOT_ENOUGH_LIQUIDITY;

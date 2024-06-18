@@ -29,17 +29,18 @@ export class AssetHubRouter {
   }
 
   buildPath (pair: SwapPair): Array<_ChainAsset> {
-    const nativeToken = this.nativeToken;
-    const nativeTokenSlug = nativeToken.slug;
+    // const nativeToken = this.nativeToken;
+    // const nativeTokenSlug = nativeToken.slug;
 
     const assetFrom = this.chainService.getAssetBySlug(pair.from);
     const assetTo = this.chainService.getAssetBySlug(pair.to);
 
-    if (pair.from === nativeTokenSlug || pair.to === nativeTokenSlug) {
-      return [assetFrom, assetTo];
-    } else {
-      return [assetFrom, nativeToken, assetTo];
-    }
+    return [assetFrom, assetTo];
+    // if (pair.from === nativeTokenSlug || pair.to === nativeTokenSlug) {
+    //   return [assetFrom, assetTo];
+    // } else {
+    //   return [assetFrom, nativeToken, assetTo];
+    // }
   }
 
   async earlyValidateSwapValidation (request: SwapRequest): Promise<SwapEarlyValidation> {

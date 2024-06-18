@@ -28,6 +28,7 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 Steps to build the extension and view your changes in a browser:
 
 1. Build via `yarn build`
+  - NOTE: You may need to enable corepack by running `corepack enable`
 2. Install the extension
   - Chrome:
     - go to `chrome://extensions/`

@@ -15,8 +15,8 @@ import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
-import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { BaseStepDetail, CommonFeeComponent, CommonFeeInfo, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
+import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -93,7 +93,7 @@ export class HydradxHandler implements SwapBaseInterface {
     return this.swapBaseHandler.slug;
   }
 
-  async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonFeeInfo] | undefined> {
     const bnAmount = new BigNumber(params.request.fromAmount);
     const fromAsset = this.chainService.getAssetBySlug(params.request.pair.from);
 
@@ -145,7 +145,7 @@ export class HydradxHandler implements SwapBaseInterface {
       const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
       const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      const fee: SwapFeeInfo = {
+      const fee: CommonFeeInfo = {
         feeComponent: [{
           feeType: SwapFeeType.NETWORK_FEE,
           amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
@@ -161,7 +161,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
-  async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonFeeInfo] | undefined> {
     if (!params.selectedQuote) {
       return Promise.resolve(undefined);
     }
@@ -195,7 +195,7 @@ export class HydradxHandler implements SwapBaseInterface {
       const _txFee = await setFeeTx.paymentInfo(params.request.address);
       const txFee = _txFee.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      const fee: SwapFeeInfo = {
+      const fee: CommonFeeInfo = {
         feeComponent: [{
           feeType: SwapFeeType.NETWORK_FEE,
           amount: Math.round(txFee.partialFee).toString(),
@@ -215,7 +215,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
-  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonFeeInfo] | undefined> {
     if (params.selectedQuote) {
       const submitStep = {
         name: 'Swap',
@@ -228,7 +228,7 @@ export class HydradxHandler implements SwapBaseInterface {
     return Promise.resolve(undefined);
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<CommonOptimalPath> {
     return this.swapBaseHandler.generateOptimalProcess(params, [
       this.getXcmStep,
       // this.getFeeOptionStep.bind(this),
@@ -309,13 +309,13 @@ export class HydradxHandler implements SwapBaseInterface {
       const extrinsic = substrateApi.api.tx(txHex);
       const paymentInfo = await extrinsic.paymentInfo(request.address);
 
-      const networkFee: SwapFeeComponent = {
+      const networkFee: CommonFeeComponent = {
         tokenSlug: fromChainNativeTokenSlug,
         amount: paymentInfo.partialFee.toString(),
         feeType: SwapFeeType.NETWORK_FEE
       };
 
-      const tradeFee: SwapFeeComponent = {
+      const tradeFee: CommonFeeComponent = {
         tokenSlug: toAsset.slug, // fee is subtracted from receiving amount
         amount: quoteResponse.tradeFee.toString(),
         feeType: SwapFeeType.PLATFORM_FEE

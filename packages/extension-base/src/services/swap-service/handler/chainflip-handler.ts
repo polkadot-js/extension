@@ -16,8 +16,8 @@ import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData } from '@subwallet/extension-base/types';
-import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { BaseStepDetail, CommonFeeComponent, CommonFeeInfo, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
+import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
 
@@ -251,7 +251,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
         amount: request.fromAmount
       });
 
-      const feeComponent: SwapFeeComponent[] = [];
+      const feeComponent: CommonFeeComponent[] = [];
 
       quoteResponse.quote.includedFees.forEach((fee) => {
         switch (fee.type) {
@@ -447,7 +447,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     }
   }
 
-  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonFeeInfo] | undefined> {
     if (params.selectedQuote) {
       const submitStep = {
         name: 'Swap',
@@ -460,7 +460,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     return Promise.resolve(undefined);
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<CommonOptimalPath> {
     return this.swapBaseHandler.generateOptimalProcess(params, [
       this.getSubmitStep
     ]);

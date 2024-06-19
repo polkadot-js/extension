@@ -33,6 +33,11 @@ export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
 export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 /* Campaign */
 
+/* AppPopup */
+export const APP_POPUP_MODAL = 'app-popup-modal';
+export const APP_INSTRUCTION_MODAL = 'app-instruction-modal';
+/* AppPopup */
+
 /* Terms and Conditions */
 export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
 export const TERM_AND_CONDITION_SEED_PHRASE_MODAL = 'term-and-condition-seed-phrase-modal';

@@ -3,7 +3,6 @@
 
 import { balanceNoPrefixFormater, BN_TEN, formatNumber, isAccountAll } from '@subwallet/extension-base/utils';
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
-import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { BackgroundColorMap, WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
@@ -23,7 +22,6 @@ export type Props = ThemeProps & {
 }
 
 function Component ({ className, items }: Props): React.ReactElement<Props> {
-  const dataContext = useContext(DataContext);
   const { setBackground } = useContext(WebUIContext);
   const { isWebUI } = useContext(ScreenContext);
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
@@ -89,10 +87,6 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
 
     return result;
   }, [currentAccount?.address, earningRewards, items]);
-
-  useEffect(() => {
-    dataContext.awaitStores(['price', 'chainStore', 'assetRegistry', 'balance']).catch(console.error);
-  }, [dataContext]);
 
   useEffect(() => {
     const backgroundColor = isTotalBalanceDecrease ? BackgroundColorMap.DECREASE : BackgroundColorMap.INCREASE;
@@ -357,8 +351,8 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
 
   '.__total-balance-block': {
     '.__balance-value': {
-      fontSize: 30,
-      lineHeight: '38px'
+      fontSize: 38,
+      lineHeight: '46px'
     }
   },
 

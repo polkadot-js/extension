@@ -23,7 +23,6 @@ type Props = ThemeProps & {
 };
 
 function Component ({ className = '', items, onSelect, selectedItem }: Props): React.ReactElement<Props> {
-  console.log('items reactNode', items);
   const onClick = useCallback((value: string) => {
     return () => {
       onSelect(value);

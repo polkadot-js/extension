@@ -517,9 +517,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     return items.filter(_filterFunction);
   }, [items, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
-  console.log('filteredItems', filteredItems);
-  console.log('selectedFilterTab', selectedFilterTab);
-
   return (
     <>
       <Layout.Base

@@ -41,6 +41,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const isZkModeSyncing = useSelector((state: RootState) => state.mantaPay.isSyncing);
   const handleMantaPaySync = useHandleMantaPaySync();
   const remindBackUpShowed = useRef<boolean>(false);
+  const showAppPopupFunc = useRef<(currentRoute: string | undefined) => void>(showAppPopup);
 
   const { sessionLatest } = useSetSessionLatest();
 
@@ -63,12 +64,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [handleMantaPaySync, isZkModeSyncing, mantaPayConfig]);
 
   useEffect(() => {
+    showAppPopupFunc.current = showAppPopup;
+  }, [showAppPopup]);
+
+  useEffect(() => {
     const isFromIgnorePage = location.state as RemindBackUpSeedPhraseParamState;
     const sessionLatestInit = (JSON.parse(localStorage.getItem(LATEST_SESSION) || JSON.stringify(DEFAULT_SESSION_VALUE))) as SessionStorage;
 
     const handleOpenBanner = () => {
       if (!sessionLatestInit.remind && isFromIgnorePage?.from !== historyPageIgnoreBanner) {
-        showAppPopup(location.pathname);
+        showAppPopupFunc.current(location.pathname);
       }
     };
 
@@ -84,7 +89,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     } else {
       handleOpenBanner();
     }
-  }, [activeModal, isNeedUpgradeVersion, location, showAppPopup]);
+  }, [activeModal, isNeedUpgradeVersion, location]);
 
   useEffect(() => {
     // Run remind backup seed phrase one time

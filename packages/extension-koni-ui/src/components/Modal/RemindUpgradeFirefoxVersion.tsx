@@ -15,7 +15,7 @@ import styled, { useTheme } from 'styled-components';
 type Props = ThemeProps;
 
 const RemindUpdateFireFoxVersionModalId = REMIND_UPGRADE_FIREFOX_VERSION;
-const DomainUserGuide = '/';
+const DomainUserGuide = 'faqs#i-cant-connect-my-accounts-to-any-dapps-on-firefox.-what-should-i-do';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();

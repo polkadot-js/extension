@@ -8,7 +8,7 @@ import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { Button, ModalContext, PageIcon, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { GlobeHemisphereWest } from 'phosphor-react';
+import { ShieldWarning } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
 
@@ -76,7 +76,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
             color={token['colorWarning-5']}
             iconProps={{
               weight: 'fill',
-              phosphorIcon: GlobeHemisphereWest
+              phosphorIcon: ShieldWarning
             }}
           />
           <div className='__modal-description'>
@@ -116,7 +116,7 @@ const RemindUpgradeVersionModal = styled(Component)<Props>(({ theme: { token } }
     '.ant-sw-modal-footer': {
       borderTop: 'none',
       display: 'flex',
-      gap: token.sizeSM
+      gap: token.sizeXXS
     }
   };
 });

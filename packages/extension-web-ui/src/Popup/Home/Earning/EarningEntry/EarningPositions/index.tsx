@@ -18,7 +18,7 @@ import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variant
 import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond';
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
-import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
@@ -27,7 +27,7 @@ import { ArrowsClockwise, Database, FadersHorizontal, HandsClapping, Leaf, Plus,
 import { IconWeight } from 'phosphor-react/src/lib';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
@@ -83,6 +83,8 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const { inactiveModal } = useContext(ModalContext);
 
+  const { token } = useTheme() as Theme;
+
   const [searchInput, setSearchInput] = useState<string>('');
   const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const [selectedPositionInfo, setSelectedPositionInfo] = useState<ExtraYieldPositionInfo | undefined>(undefined);
@@ -93,38 +95,38 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         label: t('All'),
         value: FilterValue.ALL,
         icon: SquaresFour,
-        iconColor: '#084cfc',
+        iconColor: token.geekblue,
         weight: 'fill'
       },
       {
         label: t('Nomination pool'),
         value: FilterValue.NOMINATION_POOL,
         icon: Users,
-        iconColor: '#4CEAAC'
+        iconColor: token['colorSuccess-6']
 
       },
       {
         label: t('Direct nomination'),
         value: FilterValue.DIRECT_NOMINATION,
         icon: Database,
-        iconColor: '#D9A33E',
+        iconColor: token['gold-6'],
         weight: 'fill'
       },
       {
         label: t('Liquid staking'),
         value: FilterValue.LIQUID_STAKING,
         icon: Leaf,
-        iconColor: '#D92079',
+        iconColor: token['magenta-6'],
         weight: 'fill'
       },
       {
         label: t('Lending'),
         value: FilterValue.LENDING,
         icon: HandsClapping,
-        iconColor: '#2DA73F'
+        iconColor: token['green-6']
       }
     ];
-  }, [t]);
+  }, [t, token]);
 
   const onSelectFilterTab = useCallback((value: string) => {
     setSelectedFilterTab(value);

@@ -4,6 +4,7 @@
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Icon, SwIconProps } from '@subwallet/react-ui';
 import CN from 'classnames';
+import { IconWeight } from 'phosphor-react/src/lib';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
@@ -12,6 +13,7 @@ export type FilterTabItemType = {
   value: string,
   icon: SwIconProps['phosphorIcon'],
   iconColor: string,
+  weight?: IconWeight,
 }
 
 type Props = ThemeProps & {
@@ -41,9 +43,10 @@ function Component ({ className = '', items, onSelect, selectedItem }: Props): R
             tabIndex={-1}
           >
             <Icon
-              phosphorIcon={i.icon}
-              iconColor={i.iconColor}
               customSize={'16px'}
+              iconColor={i.iconColor}
+              phosphorIcon={i.icon}
+              weight={i.weight ?? undefined}
             />
             <div className={'__tab-item-label'}>
               {i.label}
@@ -60,6 +63,7 @@ export const FilterTabsNode = styled(Component)<Props>(({ theme: { token } }: Pr
     display: 'flex',
     gap: token.sizeXS,
     maxHeight: 30,
+    marginBottom: 20,
 
     '.__tab-item': {
       cursor: 'pointer',
@@ -74,7 +78,7 @@ export const FilterTabsNode = styled(Component)<Props>(({ theme: { token } }: Pr
       paddingBottom: 4,
       borderRadius: 50,
       borderStyle: 'solid',
-      borderColor: token.colorBorder,
+      borderColor: token.colorBgBorder,
       borderWidth: 2
     },
 

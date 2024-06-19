@@ -24,6 +24,7 @@ import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList } from '@s
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { ArrowsClockwise, Database, FadersHorizontal, HandsClapping, Leaf, Plus, PlusCircle, SquaresFour, Users, Vault } from 'phosphor-react';
+import { IconWeight } from 'phosphor-react/src/lib';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -40,6 +41,7 @@ type FilterTabItemType = {
   value: string,
   icon: SwIconProps['phosphorIcon'],
   iconColor: string,
+  weight?: IconWeight,
 }
 
 enum FilterValue {
@@ -91,7 +93,8 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         label: t('All'),
         value: FilterValue.ALL,
         icon: SquaresFour,
-        iconColor: '#4CEAAC'
+        iconColor: '#084cfc',
+        weight: 'fill'
       },
       {
         label: t('Nomination pool'),
@@ -104,13 +107,15 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         label: t('Direct nomination'),
         value: FilterValue.DIRECT_NOMINATION,
         icon: Database,
-        iconColor: '#D9A33E'
+        iconColor: '#D9A33E',
+        weight: 'fill'
       },
       {
         label: t('Liquid staking'),
         value: FilterValue.LIQUID_STAKING,
         icon: Leaf,
-        iconColor: '#D92079'
+        iconColor: '#D92079',
+        weight: 'fill'
       },
       {
         label: t('Lending'),

@@ -596,7 +596,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
 
     form.submit();
-  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
+  }, [assetInfo, chain, chainInfoMap, closeAlert, destChain, form, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic

@@ -4,7 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateParaChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -60,11 +60,11 @@ export function _getXcmMultiLocation (originChainInfo: _ChainInfo, destChainInfo
   };
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-
-function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
+export function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
   return _getSubstrateRelayParent(originChainInfo) === destChainInfo.slug || _getSubstrateRelayParent(destChainInfo) === originChainInfo.slug || _getSubstrateRelayParent(originChainInfo) === _getSubstrateRelayParent(destChainInfo);
 }
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function _getMultiLocationParent (originChainInfo: _ChainInfo, isWithinSameConsensus: boolean): number {
   let parent = 0; // how many hops up the hierarchy

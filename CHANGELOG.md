@@ -1,8 +1,20 @@
 # CHANGELOG
 
+## 0.47.6 June 18, 2024
+
+Changes:
+
+- Bump @polkadot/api to 11.3.1
+- Bump @polkadot/phishing to 0.22.9
+- Update build process to enable review by Firefox store
+    - Adds `corepack enable` to CI process
+    - Removes hardcoded path to `.yarn/release` in .yarnrc.yml
+    - Updates zip script to ensure correct compression
+
+
 ## 0.47.5 May 22, 2024
 
-- **Important** Not published to the stores, aligns with latest released packages.
+- **Important** Published only to Chrome store.
 
 Changes:
 

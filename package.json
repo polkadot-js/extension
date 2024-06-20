@@ -21,7 +21,8 @@
     "koni-ci-ghact-build": "./scripts/koni-ci-ghact-build.mjs",
     "koni-ci-mv3-firefox": "./scripts/koni-ci-mv3-firefox.mjs",
     "koni-ci-webapp-update-build-number": "./scripts/koni-ci-webapp-update-build-number.mjs",
-    "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs"
+    "koni-dev-build-ts": "./scripts/koni-dev-build-ts.mjs",
+
   },
   "scripts": {
     "build": "koni-dev-build-ts && yarn build:zip && yarn build:rollup",

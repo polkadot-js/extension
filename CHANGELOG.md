@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.2.7
+Build date: Jun 20, 2024.
+
+Features & Update:
+- Support MV3 on Firefox (#3108)
+
+
 ## 1.2.6
 Build date: Jun 19, 2024.
 

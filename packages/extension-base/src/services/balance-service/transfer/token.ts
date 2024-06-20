@@ -3,8 +3,8 @@
 
 import { GearApi } from '@gear-js/api';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
+import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isBridgedToken, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenTransferredByEvm, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';

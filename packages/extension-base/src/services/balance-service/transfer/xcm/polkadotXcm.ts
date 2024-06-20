@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _getXcmBeneficiary, _getXcmDestWeight, _getXcmMultiAssets, _getXcmMultiLocation, _isXcmWithinSameConsensus } from '@subwallet/extension-base/core/substrate/xcm-parser';
-import { isUseTeleportProtocol, STABLE_XCM_VERSION } from '@subwallet/extension-base/koni/api/xcm/utils';
+import { isUseTeleportProtocol, STABLE_XCM_VERSION } from '@subwallet/extension-base/services/balance-service/transfer/xcm/utils';
 import { _isBridgedToken } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { ApiPromise } from '@polkadot/api';

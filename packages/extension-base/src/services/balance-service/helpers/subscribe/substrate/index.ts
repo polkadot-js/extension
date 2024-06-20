@@ -8,8 +8,8 @@ import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/co
 import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
-import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';

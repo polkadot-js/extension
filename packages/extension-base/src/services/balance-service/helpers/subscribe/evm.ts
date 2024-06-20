@@ -4,7 +4,7 @@
 import { _AssetType } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
-import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
+import { getERC20Contract } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeEvmPalletBalance } from '@subwallet/extension-base/types';

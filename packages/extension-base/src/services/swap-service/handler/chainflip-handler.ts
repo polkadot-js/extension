@@ -8,9 +8,9 @@ import { SwapError } from '@subwallet/extension-base/background/errors/SwapError
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getChainflipEarlyValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
-import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
-import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/services/balance-service/transfer/smart-contract';
+import { createTransferExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/token';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken, _isNativeToken, _isSubstrateChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { getExtrinsicByPolkadotXcmPallet } from '@subwallet/extension-base/koni/api/xcm/polkadotXcm';
-import { getExtrinsicByXcmPalletPallet } from '@subwallet/extension-base/koni/api/xcm/xcmPallet';
-import { getExtrinsicByXtokensPallet } from '@subwallet/extension-base/koni/api/xcm/xTokens';
+import { getExtrinsicByPolkadotXcmPallet } from '@subwallet/extension-base/services/balance-service/transfer/xcm/polkadotXcm';
+import { getExtrinsicByXcmPalletPallet } from '@subwallet/extension-base/services/balance-service/transfer/xcm/xcmPallet';
+import { getExtrinsicByXtokensPallet } from '@subwallet/extension-base/services/balance-service/transfer/xcm/xTokens';
 import { _XCM_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ERC20_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { _ERC20_ABI } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { Contract } from 'web3-eth-contract';
 

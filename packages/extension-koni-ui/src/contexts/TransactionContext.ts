@@ -12,6 +12,7 @@ export interface TransactionContextProps {
   onDone: (extrinsicHash: string) => void;
   setSubHeaderRightButtons: Dispatch<SetStateAction<ButtonProps[] | undefined>>;
   setCustomScreenTitle: Dispatch<SetStateAction<string | undefined>>;
+  setIsDisableHeader: Dispatch<SetStateAction<boolean | undefined>>;
   goBack: () => void;
   setBackProps: Dispatch<SetStateAction<{
     disabled: boolean,
@@ -26,6 +27,8 @@ export interface TransactionContextProps {
 export const TransactionContext = React.createContext<TransactionContextProps>({
   defaultData: { from: '', chain: '', asset: '' },
   needPersistData: false,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  setIsDisableHeader: () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   persistData: (value) => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function

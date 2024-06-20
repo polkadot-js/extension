@@ -439,6 +439,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       <EarningPoolDetailModal
+        chain={chain}
         detailItem={viewDetailItem}
         maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}

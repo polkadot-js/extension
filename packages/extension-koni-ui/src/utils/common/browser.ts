@@ -20,6 +20,14 @@ export const isFirefox = (): boolean => {
   return getBrowserName().toLowerCase() === 'firefox';
 };
 
+export const getVersionBrowser = (): string[] => {
+  const browser = Bowser.getParser(window.navigator.userAgent);
+  const browserName = browser.getBrowserName();
+  const version = browser.getBrowserVersion();
+
+  return [browserName, version];
+};
+
 export const setSelectedAccountTypes = (keypairTypes: KeypairType[]) => {
   localStorage.setItem(SELECTED_ACCOUNT_TYPE, JSON.stringify(keypairTypes));
 };

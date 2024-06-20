@@ -60,6 +60,21 @@ export function _getXcmMultiLocation (originChainInfo: _ChainInfo, destChainInfo
   };
 }
 
+export function _isXcmTransferUnstable (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
+  return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo);
+}
+
+export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
+  switch (originChainInfo.slug) {
+    case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 2 DOT. Continue at your own risk';
+    case COMMON_CHAIN_SLUGS.KUSAMA_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 0.4 KSM. Continue at your own risk';
+    default:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a large transaction fee. Continue at your own risk';
+  }
+}
+
 export function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
   return _getSubstrateRelayParent(originChainInfo) === destChainInfo.slug || _getSubstrateRelayParent(destChainInfo) === originChainInfo.slug || _getSubstrateRelayParent(originChainInfo) === _getSubstrateRelayParent(destChainInfo);
 }

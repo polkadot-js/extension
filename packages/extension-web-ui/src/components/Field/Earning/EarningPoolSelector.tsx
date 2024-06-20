@@ -3,6 +3,7 @@
 
 import { PREDEFINED_EARNING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { BaseSelectModal, StakingPoolItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-web-ui/components/Avatar';
@@ -75,6 +76,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const maxPoolMembersValue = useMemo(() => {
+    const poolInfo = poolInfoMap[slug];
+
+    if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
+  }, [poolInfoMap, slug]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     return [
@@ -429,6 +440,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
       <EarningPoolDetailModal
         detailItem={viewDetailItem}
+        maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}
       />
     </>

@@ -24,7 +24,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <Web3Block
-      className={className}
+      className={CN(className, { 'is-crowded': isCrowded })}
       leftItem={
         <SwAvatar
           identPrefix={prefixAddress}
@@ -84,6 +84,12 @@ const StakingPoolItem = styled(Component)<Props>(({ theme: { token } }: Props) =
 
     '.ant-web3-block-middle-item': {
       paddingRight: token.paddingXXS
+    },
+
+    '&.is-crowded': {
+      '.ant-web3-block-left-item, .ant-web3-block-middle-item, .right-item__select-icon': {
+        opacity: 0.4
+      }
     },
 
     '.middle-item__name': {

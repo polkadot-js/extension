@@ -5,13 +5,13 @@ import { GearApi } from '@gear-js/api';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
-import { _getActiveStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
+import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -132,9 +132,10 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   const subscription = combineLatest({ balances: balanceSubscribe, poolMemberInfos: poolSubscribe }).subscribe(({ balances, poolMemberInfos }) => {
     const items: BalanceItem[] = balances.map((_balance, index) => {
       const balanceInfo = _balance.toPrimitive() as unknown as FrameSystemAccountInfo;
+
       const poolMemberInfo = poolMemberInfos[index].toPrimitive() as unknown as PalletNominationPoolsPoolMember;
 
-      const nominationPoolBalance = poolMemberInfo ? _getActiveStakeInNominationPool(poolMemberInfo) : '0';
+      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : new BigN(0);
 
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), extrinsicType);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
@@ -168,9 +169,9 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
       const isBridgedToken = _isBridgedToken(tokenInfo);
 
       if (isBridgedToken) {
-        const multiLocation = _getXcmAssetMultilocation(tokenInfo);
+        const onChainInfo = _getTokenOnChainInfo(tokenInfo);
 
-        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [multiLocation, address]), (balances) => {
+        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [onChainInfo, address]), (balances) => {
           const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
             const bdata = balance?.toHuman();
 
@@ -347,6 +348,10 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
   const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const assetIndex = _getTokenOnChainAssetId(tokenInfo);
+
+      if (assetIndex === '-1') {
+        return undefined;
+      }
 
       // Get Token Balance
       return await substrateApi.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {

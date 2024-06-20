@@ -3,6 +3,7 @@
 
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { BaseModal, SelectValidatorInput, StakingValidatorItem } from '@subwallet/extension-web-ui/components';
 import EmptyValidator from '@subwallet/extension-web-ui/components/Account/EmptyValidator';
@@ -99,6 +100,14 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const isRelayChain = useMemo(() => _STAKING_CHAIN_GROUP.relay.includes(chain), [chain]);
   const isSingleSelect = useMemo(() => _isSingleSelect || !isRelayChain, [_isSingleSelect, isRelayChain]);
   const hasReturn = useMemo(() => items[0]?.expectedReturn !== undefined, [items]);
+
+  const maxPoolMembersValue = useMemo(() => {
+    if (poolInfo.type === YieldPoolType.NATIVE_STAKING) { // todo: should also check chain group for pool
+      return poolInfo.maxPoolMembers;
+    }
+
+    return undefined;
+  }, [poolInfo]);
 
   const sortingOptions: SortOption[] = useMemo(() => {
     const result: SortOption[] = [
@@ -198,7 +207,16 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           return new BigN(a.minBond).minus(b.minBond).toNumber();
         case SortKey.NOMINATING:
           return sortValidator(a, b);
+
         case SortKey.DEFAULT:
+          if (a.isCrowded && !b.isCrowded) {
+            return 1;
+          } else if (!a.isCrowded && b.isCrowded) {
+            return -1;
+          } else {
+            return 0;
+          }
+
         default:
           return 0;
       }
@@ -406,6 +424,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       {viewDetailItem && (
         <EarningValidatorDetailModal
           chain={chain}
+          maxPoolMembersValue={maxPoolMembersValue}
           validatorItem={viewDetailItem}
         />
       )}
@@ -427,6 +446,9 @@ const EarningValidatorSelector = styled(forwardRef(Component))<Props>(({ theme: 
       borderTop: 0,
       paddingLeft: 0,
       paddingRight: 0
+    },
+    '.__pool-item-wrapper': {
+      marginBottom: token.marginXS
     },
 
     '.pool-item:not(:last-child)': {

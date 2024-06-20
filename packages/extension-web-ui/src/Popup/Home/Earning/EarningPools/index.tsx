@@ -82,6 +82,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
     const result: YieldPoolInfo[] = [];
 
     pools.forEach((poolInfo) => {
+      if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+        return;
+      }
+
       if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
         let minJoinPool: string;
 
@@ -253,7 +257,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
-      if (isNeedToShowInstruction(item)) {
+      if (isNeedToShowInstruction(item) && isWebUI) {
         activeModal(instructionModalId);
 
         return;
@@ -261,7 +265,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
       navigateToEarnTransaction(item.slug, item.chain);
     };
-  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, navigateToEarnTransaction, onConnectChain, openConnectChainModal]);
+  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, isWebUI, navigateToEarnTransaction, onConnectChain, openConnectChainModal]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

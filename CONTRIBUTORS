@@ -1,13 +1,13 @@
-    2657	AnhMTV                        	Release version 1.2.3
-    2390	Nam Phạm                      	[Issue 3094] fix bug validating transactions not using system pallet
-    2063	S2kael                        	[Issue-3094] Update stable version for chain-list
-     815	lw-cdm                        	Fix eslint issues
+    2675	AnhMTV                        	Release version 1.2.5
+    2421	Nam Phạm                      	[Issue 3134] chore: update chainlist
+    2070	S2kael                        	
+     817	lw-cdm                        	[Issue-3150] Extension - Update insufficient balance message for earn screen
      465	Jaco                          	0.42.5 (#969)
-     432	nguyentiendung                	
+     451	nguyentiendung                	[Issue-3140] WebApp - Remove Parallel liquid staking
      185	quangdo                       	
-     155	bluezdot                      	fix eslint
-     129	Thiendekaco                   	[Issue 3117] [fix] [mv3] Extension - Still show icon ZK mode on Export account screen in case upgrade version MV2 -> MV3
-     115	Automation Bot                	[CI Skip] Auto increase webapp build number
+     174	bluezdot                      	
+     137	Thiendekaco                   	[Issue 2779] [fix] WebApp - Re-check bug error page #2
+     117	Automation Bot                	[CI Skip] Auto increase webapp build number
      106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	

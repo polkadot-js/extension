@@ -4,6 +4,7 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _getXcmUnstableWarning, _isXcmTransferUnstable } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
@@ -446,7 +447,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   );
 
   // Submit transaction
-  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
+  const doSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
     const { asset, chain, destChain, from: _from, to, value } = values;
 
@@ -541,7 +542,33 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     }
   }, [maxTransfer]);
 
-  const onPreSubmit = useCallback(() => {
+  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
+    if (chain !== destChain) {
+      const originChainInfo = chainInfoMap[chain];
+      const destChainInfo = chainInfoMap[destChain];
+
+      if (_isXcmTransferUnstable(originChainInfo, destChainInfo)) {
+        openAlert({
+          type: NotificationType.WARNING,
+          content: t(_getXcmUnstableWarning(originChainInfo)),
+          title: t('Pay attention!'),
+          okButton: {
+            text: t('Continue'),
+            onClick: () => {
+              closeAlert();
+              doSubmit(values);
+            }
+          },
+          cancelButton: {
+            text: t('Cancel'),
+            onClick: closeAlert
+          }
+        });
+
+        return;
+      }
+    }
+
     if (_isNativeToken(assetInfo)) {
       const minAmount = _getTokenMinAmount(assetInfo);
       const bnMinAmount = new BN(minAmount);
@@ -555,7 +582,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             text: t('Transfer'),
             onClick: () => {
               closeAlert();
-              form.submit();
+              doSubmit(values);
             }
           },
           cancelButton: {
@@ -568,8 +595,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       }
     }
 
-    form.submit();
-  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
+    doSubmit(values);
+  }, [assetInfo, chain, chainInfoMap, closeAlert, destChain, doSubmit, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic
@@ -810,7 +837,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
             />
           )}
           loading={loading}
-          onClick={checkAction(onPreSubmit, extrinsicType)}
+          onClick={checkAction(form.submit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}

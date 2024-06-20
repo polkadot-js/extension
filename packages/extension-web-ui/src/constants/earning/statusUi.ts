@@ -50,6 +50,11 @@ export const NominationPoolsEarningStatusUi: Record<NominationPoolState['state']
     schema: 'warning' as InfoItemBase['valueColorSchema'],
     icon: ListChecks,
     name: detectTranslate('Destroying')
+  },
+  Blocked: {
+    schema: 'danger' as InfoItemBase['valueColorSchema'],
+    icon: XCircle,
+    name: detectTranslate('Blocked')
   }
 };
 

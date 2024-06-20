@@ -9,7 +9,7 @@ import { SWTransactionResponse } from '@subwallet/extension-base/services/transa
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, AlertBox, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useIsMantaPayEnabled, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
-import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { getMaxTransfer, getOptimalTransferProcess, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
 import { findAccountByAddress, findNetworkJsonByGenesisHash, formatBalance, isAccountAll, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
@@ -667,6 +667,21 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useEffect(() => {
+    getOptimalTransferProcess({
+      amount: transferAmount,
+      address: from,
+      originChain: chain,
+      tokenSlug: asset
+    })
+      .then((optimalPath) => {
+        console.log(optimalPath);
+      })
+      .catch(() => {
+        console.log('fucking error');
+      });
+  }, [asset, chain, from, transferAmount]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);

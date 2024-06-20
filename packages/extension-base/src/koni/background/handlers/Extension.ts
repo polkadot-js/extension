@@ -15,16 +15,16 @@ import { additionalValidateTransfer, additionalValidateXcmTransfer, validateTran
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
-import { createTransferExtrinsic, getTransferMockTxFee } from '@subwallet/extension-base/koni/api/dotsama/transfer';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
 import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
 import { getPoolingBondingExtrinsic, getPoolingUnbondingExtrinsic, validatePoolBondingCondition, validateRelayUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
-import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
-import { getPSP34TransferExtrinsic } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { createXcmExtrinsic, getXcmMockTxFee } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_EXTRINSIC_TYPES } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { RequestOptimalTransferProcess } from '@subwallet/extension-base/services/balance-service/helpers/process';
+import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject, getPSP34TransferExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/smart-contract';
+import { createTransferExtrinsic, getTransferMockTxFee } from '@subwallet/extension-base/services/balance-service/transfer/token';
+import { createXcmExtrinsic, getXcmMockTxFee } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
@@ -38,6 +38,7 @@ import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, Wall
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { AccountsStore } from '@subwallet/extension-base/stores';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, StorageDataInterface, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { BN_ZERO, convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, MODULE_SUPPORT, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
 import { parseContractInput, parseEvmRlp } from '@subwallet/extension-base/utils/eth/parseTransaction';
@@ -1696,6 +1697,10 @@ export default class KoniExtension {
     };
   }
 
+  private async getOptimalTransferProcess (params: RequestOptimalTransferProcess): Promise<CommonOptimalPath> {
+    return this.#koniState.balanceService.getOptimalTransferProcess(params);
+  }
+
   private async makeTransfer (inputData: RequestTransfer): Promise<SWTransactionResponse> {
     const { from, networkKey, to, tokenSlug, transferAll, value } = inputData;
     const transferTokenInfo = this.#koniState.chainService.getAssetBySlug(tokenSlug);
@@ -2081,7 +2086,7 @@ export default class KoniExtension {
     const apiProps = this.#koniState.getSubstrateApi(networkKey);
     const extrinsic = !isPSP34
       ? await getNftTransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {})
-      : await getPSP34TransferExtrinsic(networkKey, apiProps, senderAddress, recipientAddress, params || {});
+      : await getPSP34TransferExtrinsic(apiProps, senderAddress, recipientAddress, params || {});
 
     // this.addContact(recipientAddress);
 
@@ -4716,6 +4721,8 @@ export default class KoniExtension {
         return await this.makeTransfer(request as RequestTransfer);
       case 'pri(accounts.crossChainTransfer)':
         return await this.makeCrossChainTransfer(request as RequestCrossChainTransfer);
+      case 'pri(accounts.getOptimalTransferProcess)':
+        return await this.getOptimalTransferProcess(request as RequestOptimalTransferProcess);
 
       /// Sign QR
       case 'pri(qr.transaction.parse.substrate)':

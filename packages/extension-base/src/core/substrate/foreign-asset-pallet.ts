@@ -9,9 +9,9 @@ export type PalletAssetsAssetAccount = {
 }
 
 export function _getForeignAssetPalletTransferable (accountInfo: PalletAssetsAssetAccount): bigint {
-  return accountInfo.status !== 'Liquid' ? 0n : BigInt(accountInfo.balance);
+  return accountInfo.status !== 'Liquid' ? BigInt(0) : BigInt(accountInfo.balance);
 }
 
 export function _getForeignAssetPalletLockedBalance (accountInfo: PalletAssetsAssetAccount): bigint {
-  return accountInfo.status === 'Liquid' ? 0n : BigInt(accountInfo.balance);
+  return accountInfo.status === 'Liquid' ? BigInt(0) : BigInt(accountInfo.balance);
 }

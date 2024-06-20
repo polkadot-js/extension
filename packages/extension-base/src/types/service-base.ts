@@ -8,7 +8,14 @@ import { OptimalYieldPath, OptimalYieldPathParams, YieldStepType } from '@subwal
 export type OptimalProcessParams = OptimalYieldPathParams | OptimalSwapPathParams;
 export type OptimalProcessResult = OptimalYieldPath | CommonOptimalPath;
 
-export type BaseStepType = SwapStepType | YieldStepType;
+export enum CommonStepType {
+  DEFAULT = 'DEFAULT',
+  XCM = 'XCM',
+  TOKEN_APPROVAL = 'TOKEN_APPROVAL',
+  SET_FEE_TOKEN = 'SET_FEE_TOKEN',
+  TRANSFER = 'TRANSFER'
+}
+export type BaseStepType = CommonStepType | SwapStepType | YieldStepType;
 export type BaseFeeType = SwapFeeType;
 
 export interface BaseStepDetail {
@@ -23,7 +30,7 @@ export interface CommonFeeComponent {
   tokenSlug: string;
 }
 
-export interface CommonFeeInfo {
+export interface CommonStepFeeInfo {
   feeComponent: CommonFeeComponent[];
   defaultFeeToken: string; // token to pay transaction fee with
   feeOptions: string[]; // list of tokenSlug, always include defaultFeeToken
@@ -35,6 +42,18 @@ export interface CommonStepDetail extends BaseStepDetail {
 }
 
 export interface CommonOptimalPath { // path means the steps to complete the swap, not the quote itself
-  totalFee: CommonFeeInfo[]; // each item in the array is tx fee for a step
+  totalFee: CommonStepFeeInfo[]; // each item in the array is tx fee for a step
   steps: CommonStepDetail[];
 }
+
+export const DEFAULT_FIRST_STEP: CommonStepDetail = {
+  id: 0,
+  name: 'Fill information',
+  type: CommonStepType.DEFAULT
+};
+
+export const MOCK_STEP_FEE: CommonStepFeeInfo = {
+  feeComponent: [],
+  defaultFeeToken: '',
+  feeOptions: []
+};

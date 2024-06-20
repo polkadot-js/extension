@@ -16,7 +16,7 @@ import { _getAssetDecimals, _getChainNativeTokenSlug, _getContractAddressOfToken
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { calculateSwapRate, CHAIN_FLIP_SUPPORTED_MAINNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_MAINNET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_ASSET_MAPPING, CHAIN_FLIP_SUPPORTED_TESTNET_MAPPING, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { TransactionData } from '@subwallet/extension-base/types';
-import { BaseStepDetail, CommonFeeComponent, CommonFeeInfo, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
+import { BaseStepDetail, CommonFeeComponent, CommonOptimalPath, CommonStepFeeInfo, CommonStepType } from '@subwallet/extension-base/types/service-base';
 import { ChainflipPreValidationMetadata, ChainflipSwapTxData, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { AxiosError } from 'axios';
 import BigNumber from 'bignumber.js';
@@ -336,9 +336,9 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     for (const [index, step] of params.process.steps.entries()) {
       const getErrors = async (): Promise<TransactionError[]> => {
         switch (step.type) {
-          case SwapStepType.DEFAULT:
+          case CommonStepType.DEFAULT:
             return Promise.resolve([]);
-          case SwapStepType.TOKEN_APPROVAL:
+          case CommonStepType.TOKEN_APPROVAL:
             return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
           default:
             return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
@@ -349,7 +349,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === SwapStepType.XCM) {
+      } else if (step.type === CommonStepType.XCM) {
         isXcmOk = true;
       }
     }
@@ -438,7 +438,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     const type = process.steps[currentStep].type;
 
     switch (type) {
-      case SwapStepType.DEFAULT:
+      case CommonStepType.DEFAULT:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
       case SwapStepType.SWAP:
         return this.handleSubmitStep(params);
@@ -447,7 +447,7 @@ export class ChainflipSwapHandler implements SwapBaseInterface {
     }
   }
 
-  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonFeeInfo] | undefined> {
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined> {
     if (params.selectedQuote) {
       const submitStep = {
         name: 'Swap',

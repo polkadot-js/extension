@@ -7,8 +7,8 @@ import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/backg
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CommonFeeComponent, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
-import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { CommonFeeComponent, CommonOptimalPath, CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { formatNumberString, isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddMoreBalanceModal, AddressInput, AlertBox, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
@@ -801,7 +801,7 @@ const Component = () => {
   };
 
   const isSwapXCM = useMemo(() => {
-    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+    return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
 
   const renderAlertBox = () => {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CommonFeeInfo, CommonStepDetail } from '@subwallet/extension-base/types/service-base';
+import { CommonStepFeeInfo, CommonStepDetail } from '@subwallet/extension-base/types/service-base';
 import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
 // todo: review this file again and remove unnecessary logic
@@ -22,7 +22,7 @@ interface StepResult {
 
 export interface SwapProcessState {
   steps: CommonStepDetail[]; // list steps
-  feeStructure: CommonFeeInfo[];
+  feeStructure: CommonStepFeeInfo[];
   currentStep: number; // Current step
   stepResults: Record<number, StepResult>;
 }

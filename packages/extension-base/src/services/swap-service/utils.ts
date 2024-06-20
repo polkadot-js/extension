@@ -5,8 +5,7 @@ import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { CommonFeeInfo, CommonStepDetail } from '@subwallet/extension-base/types/service-base';
-import { SwapPair, SwapProviderId, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { SwapPair, SwapProviderId } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
@@ -38,18 +37,6 @@ export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in millisecon
   default: 30000,
   [SwapProviderId.CHAIN_FLIP_TESTNET]: 30000,
   [SwapProviderId.CHAIN_FLIP_MAINNET]: 30000
-};
-
-export const DEFAULT_SWAP_FIRST_STEP: CommonStepDetail = {
-  id: 0,
-  name: 'Fill information',
-  type: SwapStepType.DEFAULT
-};
-
-export const MOCK_SWAP_FEE: CommonFeeInfo = {
-  feeComponent: [],
-  defaultFeeToken: '',
-  feeOptions: []
 };
 
 export const _PROVIDER_TO_SUPPORTED_PAIR_MAP: Record<string, string[]> = {

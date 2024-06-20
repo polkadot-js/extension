@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
-import { BaseStepDetail, CommonFeeInfo, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
+import { BaseStepDetail, CommonStepFeeInfo, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import BigN from 'bignumber.js';
 
 // core
@@ -33,7 +33,7 @@ export interface SwapQuote {
   isLowLiquidity?: boolean; // definition would be different for different providers
   metadata?: any;
 
-  feeInfo: CommonFeeInfo;
+  feeInfo: CommonStepFeeInfo;
 }
 
 export interface SwapRoute {
@@ -55,11 +55,7 @@ export enum SwapErrorType {
 }
 
 export enum SwapStepType {
-  DEFAULT = 'DEFAULT',
-  TOKEN_APPROVAL = 'TOKEN_APPROVAL',
-  SET_FEE_TOKEN = 'SET_FEE_TOKEN',
-  SWAP = 'SWAP',
-  XCM = 'XCM'
+  SWAP = 'SWAP'
 }
 
 export enum SwapProviderId {
@@ -112,7 +108,7 @@ export interface HydradxSwapTxData extends SwapBaseTxData {
 }
 
 // parameters & responses
-export type GenSwapStepFunc = (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, CommonFeeInfo] | undefined>;
+export type GenSwapStepFunc = (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined>;
 
 export interface ChainflipPreValidationMetadata {
   minSwap: AmountData;

@@ -7,8 +7,8 @@ import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/backg
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CommonFeeComponent, CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
-import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { CommonFeeComponent, CommonOptimalPath, CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, AlertBox, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { SwapFromField, SwapToField } from '@subwallet/extension-koni-ui/components/Field/Swap';
@@ -839,7 +839,7 @@ const Component = () => {
   };
 
   const isSwapXCM = useMemo(() => {
-    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+    return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
 
   const renderAlertBox = () => {

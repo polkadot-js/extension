@@ -14,17 +14,23 @@ export function validateChainHasProvider (chainInfo: _ChainInfo) {
 }
 
 export function validateParaId (chainInfo: _ChainInfo) {
-  if (chainInfo.substrateInfo) {
-    const paraId = chainInfo.substrateInfo.paraId;
-    const chainType = chainInfo.substrateInfo.chainType;
-    const relaySlug = chainInfo.substrateInfo.relaySlug;
-
-    return paraId ? chainType === _SubstrateChainType.PARACHAIN && !!relaySlug : chainType === _SubstrateChainType.RELAYCHAIN && !relaySlug;
+  if (!chainInfo.substrateInfo) {
+    throw new Error('Not substrate chain');
   }
 
-  return false; // not substrate chain
+  const paraId = chainInfo.substrateInfo.paraId;
+  const chainType = chainInfo.substrateInfo.chainType;
+  const relaySlug = chainInfo.substrateInfo.relaySlug;
+
+  return paraId ?
+    (chainType === _SubstrateChainType.PARACHAIN && !!relaySlug) :
+    (chainType === _SubstrateChainType.RELAYCHAIN && !relaySlug);
 }
 
 export function checkEvmSupportSmartContract (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo ? (!!chainInfo.evmInfo.supportSmartContract) : false;
+  if (!chainInfo.evmInfo) {
+    throw new Error('Not Evm chain');
+  }
+
+  return !!chainInfo.evmInfo.supportSmartContract;
 }

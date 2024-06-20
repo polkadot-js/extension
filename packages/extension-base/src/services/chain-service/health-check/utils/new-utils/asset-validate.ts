@@ -25,11 +25,15 @@ export function validateAssetSlug (chainAsset: _ChainAsset) {
     return slug === `${originChain}-${assetType}-${symbol}-${contractAddress}`;
   }
 
-  return undefined;
+  throw new Error(`${slug} has unknown token type ${assetType}`)
 }
 
 export function validateBrigeToken (chainAsset: _ChainAsset) {
   const isBridged = chainAsset.metadata?.isBridged;
 
-  return isBridged ? (!!chainAsset.metadata?.onChainInfo) : true;
+  if (!isBridged) {
+    throw new Error(`${chainAsset} is not bridged token`)
+  }
+
+  return !!chainAsset.metadata?.onChainInfo;
 }

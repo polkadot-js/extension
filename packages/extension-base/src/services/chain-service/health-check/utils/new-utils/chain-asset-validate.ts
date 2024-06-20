@@ -8,11 +8,20 @@ export function validateTokenHasValueByChain (chainAsset: _ChainAsset) {
   const chainInfo = ChainInfoMap[chainAsset.originChain];
   const isTestnet = chainInfo && chainInfo.isTestnet;
 
+  if (!chainInfo) {
+    throw new Error(`${chainAsset.originChain} is not existed`)
+  }
+
   return isTestnet !== chainAsset.hasValue; // todo: also check multichainAsset hasValue if has.
 }
 
 export function validateNativeInfoByChain (chainAsset: _ChainAsset) {
   const chainInfo = ChainInfoMap[chainAsset.originChain];
+
+  if (!chainInfo) {
+    throw new Error(`${chainAsset.originChain} is not existed`)
+  }
+
   const nativeSymbol = chainInfo?.evmInfo ? chainInfo?.evmInfo?.symbol : chainInfo?.substrateInfo ? chainInfo?.substrateInfo?.symbol : chainInfo?.bitcoinInfo?.symbol;
   const nativeDecimal = chainInfo?.evmInfo ? chainInfo?.evmInfo?.decimals : chainInfo?.substrateInfo ? chainInfo?.substrateInfo?.decimals : chainInfo?.bitcoinInfo?.decimals;
   const nativeED = chainInfo?.evmInfo ? chainInfo?.evmInfo?.existentialDeposit : chainInfo?.substrateInfo ? chainInfo?.substrateInfo?.existentialDeposit : chainInfo?.bitcoinInfo?.existentialDeposit;
@@ -23,6 +32,11 @@ export function validateNativeInfoByChain (chainAsset: _ChainAsset) {
 
 export function validateAssetTypeSupportByChain (chainAsset: _ChainAsset) {
   const chainInfo = ChainInfoMap[chainAsset.originChain];
+
+  if (!chainInfo) {
+    throw new Error(`${chainAsset.originChain} is not existed`)
+  }
+
   const bitcoinSupportAssetTypes = [_AssetType.NATIVE, _AssetType.RUNE, _AssetType.BRC20];
   const evmSupportAssetTypes = [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.ERC721];
   const substrateSupportAssetTypes = [_AssetType.NATIVE, _AssetType.LOCAL, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721];
@@ -40,16 +54,25 @@ export function validateAssetTypeSupportByChain (chainAsset: _ChainAsset) {
     return bitcoinSupportAssetTypes.includes(chainAsset.assetType);
   }
 
-  return true // recheck
+  throw new Error(`${chainAsset.originChain} does not has a suitable chainInfo`)
 }
 
 export function validateChainDisableEvmTransfer (chainAsset: _ChainAsset) {
   const chainInfo = ChainInfoMap[chainAsset.originChain];
+
+  if (!chainInfo) {
+    throw new Error(`${chainAsset.originChain} is not existed`);
+  }
+
+  if (!chainInfo.evmInfo) {
+    throw new Error(`${chainAsset.originChain} is not Evm chain`);
+  }
+
   const isChainMatchCondition = chainInfo.evmInfo?.evmChainId == -1 && chainInfo.substrateInfo;
 
   if (isChainMatchCondition) {
     return chainAsset.metadata?.disableEvmTransfer;
   }
 
-  return true; // recheck
+  return false;
 }

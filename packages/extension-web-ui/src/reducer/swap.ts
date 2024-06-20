@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { CommonStepFeeInfo, CommonStepDetail } from '@subwallet/extension-base/types/service-base';
+import { CommonStepDetail, CommonStepFeeInfo } from '@subwallet/extension-base/types/service-base';
 import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
 // todo: review this file again and remove unnecessary logic

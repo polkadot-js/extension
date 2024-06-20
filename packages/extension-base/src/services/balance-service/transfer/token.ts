@@ -7,7 +7,18 @@ import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/cont
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _isBridgedToken, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenTransferredByEvm, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
+import {
+  _getContractAddressOfToken,
+  _getTokenOnChainAssetId,
+  _getTokenOnChainInfo,
+  _getXcmAssetMultilocation,
+  _isBridgedToken,
+  _isChainEvmCompatible,
+  _isNativeToken,
+  _isTokenGearSmartContract,
+  _isTokenTransferredByEvm,
+  _isTokenWasmSmartContract
+} from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -45,7 +56,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   let transferAmount; // for PSP-22 tokens, might be deprecated in the future
 
   if (_isBridgedToken(tokenInfo) && api.tx.foreignAssets) {
-    const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+    const onChainInfo = _getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo);
 
     if (transferAll) {
       transfer = api.tx.foreignAssets.transfer(onChainInfo, to, value);

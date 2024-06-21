@@ -7,7 +7,7 @@
      185	quangdo                       	
      177	bluezdot                      	[Issue-3197] Re-handle error when no data response
      146	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
-     133	dominhquang                   	[Issue-2806] fix bug cannot see Instruction url and onclick hyperlink on popup
+     134	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      117	Automation Bot                	[CI Skip] Auto increase webapp build number
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	

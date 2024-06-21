@@ -3,7 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { calculateReward } from '@subwallet/extension-base/services/earning-service/utils';
-import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo } from '@subwallet/extension-base/types';
+import { NormalYieldPoolStatistic, YieldCompoundingPeriod, YieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { CollapsiblePanel, MetaInfo } from '@subwallet/extension-web-ui/components';
 import { useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { getUnstakingPeriod } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
@@ -71,6 +71,7 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
         />
         {unstakePeriod !== undefined && (
           <MetaInfo.Default label={t('Unstaking period')}>
+            {poolInfo.type === YieldPoolType.LIQUID_STAKING && <span className={'__label'}>Up to</span>}
             {getUnstakingPeriod(t, unstakePeriod)}
           </MetaInfo.Default>
         )}
@@ -80,5 +81,8 @@ function Component ({ className, inputAsset, poolInfo }: Props) {
 }
 
 export const EarningInfoPart = styled(Component)<Props>(({ theme: { token } }: Props) => ({
+  '.__label': {
+    paddingRight: token.paddingXXS
+  }
 
 }));

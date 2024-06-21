@@ -38,7 +38,7 @@ const tokenUrl = '/home/tokens';
 const loginUrl = '/keyring/login';
 const phishingUrl = '/phishing-page-detected';
 const mv3MigrationUrl = '/mv3-migration';
-const remindExportAccountUrl = '/remind-export-account';
+// const remindExportAccountUrl = '/remind-export-account';
 const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const accountNewSeedPhrase = '/accounts/new-seed-phrase';
@@ -164,7 +164,7 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
       return null;
     }
 
-    const requireLogin = pathName !== mv3MigrationUrl && pathName !== remindExportAccountUrl && !pathName.startsWith(phishingUrl);
+    const requireLogin = pathName !== mv3MigrationUrl && !pathName.startsWith(phishingUrl);
 
     if (!requireLogin) {
       // Do nothing

@@ -9,9 +9,8 @@ import { getAstarWithdrawable } from '@subwallet/extension-base/services/earning
 import { RequestYieldWithdrawal, UnstakingInfo, UnstakingStatus, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, HiddenInput, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useGetBalance, useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useGetChainAssetInfo, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { yieldSubmitStakingWithdrawal } from '@subwallet/extension-web-ui/messaging';
 import { accountFilterFunc } from '@subwallet/extension-web-ui/Popup/Transaction/helper';
 import { FormCallbacks, FormFieldData, ThemeProps, WithdrawParams } from '@subwallet/extension-web-ui/types';
@@ -61,7 +60,6 @@ const Component = () => {
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const { chainInfoMap } = useSelector((state) => state.chainStore);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { poolInfoMap } = useSelector((state) => state.earning);
 
   const [isDisable, setIsDisable] = useState(true);
@@ -97,27 +95,14 @@ const Component = () => {
     persistData(values);
   }, [persistData]);
 
-  const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
-  const existentialDeposit = useMemo(() => {
-    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
-
-    if (assetInfo) {
-      return assetInfo.minAmount || '0';
-    }
-
-    return '0';
-  }, [assetRegistry, chainValue]);
-
   const handleDataForInsufficientAlert = useCallback(
     (estimateFee: AmountData) => {
       return {
-        existentialDeposit: getInputValuesFromString(existentialDeposit, estimateFee.decimals),
-        availableBalance: getInputValuesFromString(nativeTokenBalance.value, estimateFee.decimals),
-        maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', estimateFee.decimals),
+        chainName: chainInfoMap[chainValue]?.name || '',
         symbol: estimateFee.symbol
       };
     },
-    [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
+    [chainInfoMap, chainValue]
   );
 
   const { onError, onSuccess } = useHandleSubmitTransaction(undefined, handleDataForInsufficientAlert);

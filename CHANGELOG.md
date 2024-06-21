@@ -1,5 +1,53 @@
 # CHANGELOG
 
+## 1.2.6
+Build date: Jun 19, 2024.
+
+Features & Update:
+- Improve the Marketing Campaign application mechanism (#2806)
+- Update chain-list (#3185)
+  - Add vASTR token
+  - Remove priceid vETH
+  - Update provider
+- Show nomination pool with block status (#3043)
+- Hide the popup Remind backup seed phrase (#3198)
+- Support transfer between PAH - KAH (#3095)
+
+Bugs fixed:
+- Check error logs in earning feature (#3197)
+- Fixed bug related to earning feature ( Round 5) (#2995)
+
+## 1.2.5
+Build date: Jun 11, 2024.
+
+Features & Update:
+- Add CheckMetadataHash signed extension support (#3175)
+- Improve the Substrate Provider to meet the demands of dApps utilizing both EVM and Substrate (#2869)
+- Refactoring code earning service (#3000)
+
+Bugs fixed:
+- Fixed bug Sign transaction failed for some tokens with Aleph Zero Ledger account (#3145)
+
+
+## 1.2.4
+Build date: Jun 08, 2024.
+
+Features & Update:
+- Update Parallel liquid staking (#3139)
+- Update lock time of MV3 extension (#3144)
+- Support more XCM channels (#3134)
+  - Support transfer between PAH - KAH
+  - Add XCM support for Pendulum:
+    - USDT: Polkadot Asset Hub **<-->** Pendulum
+    - USDC: Polkadot Asset Hub **<-->** Pendulum
+    - DOT: Polkadot **<-->** Pendulum
+- Update chainlist
+  - Add support for BORK token
+  - Update HydraDX information
+- Add the "View on explorer" button on the Token details screen (#3053)
+- Update some message related to earning feature (#3150)
+- Update transferable formula for system pallet v1 (#3166)
+
 ## 1.2.3
 Build date: Jun 03, 2024.
 

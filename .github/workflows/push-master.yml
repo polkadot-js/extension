@@ -27,5 +27,6 @@ jobs:
         GH_RELEASE_FILES: master-build.zip,master-src.zip
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
+        corepack enable
         yarn install --immutable
         yarn ${{ matrix.step }}

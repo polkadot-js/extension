@@ -582,8 +582,6 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           const stepType = processState.steps[step].type;
           const submitPromise: Promise<SWTransactionResponse> | undefined = stepType === CommonStepType.TOKEN_APPROVAL ? handleSnowBridgeSpendingApproval(values) : handleBasicSubmit(values);
 
-          console.log(step, stepType, submitPromise, isLastStep);
-
           const rs = await submitPromise;
           const success = onSuccess(isLastStep, needRollback)(rs);
 
@@ -778,7 +776,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       amount: transferAmount,
       address: from,
       originChain: chain,
-      tokenSlug: asset
+      tokenSlug: asset,
+      destChain
     })
       .then((result) => {
         dispatchProcessState({
@@ -792,7 +791,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       .catch((e) => {
         console.log('error', e);
       });
-  }, [asset, chain, from, transferAmount]);
+  }, [asset, chain, destChain, from, transferAmount]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);

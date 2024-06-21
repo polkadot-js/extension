@@ -12,6 +12,7 @@ import { AccountAuthType, AccountJson, AuthorizeRequest, MessageTypes, MetadataR
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, LATEST_SESSION, XCM_FEE_RATIO } from '@subwallet/extension-base/constants';
 import { additionalValidateTransfer, additionalValidateXcmTransfer, validateTransferRequest, validateXcmTransferRequest } from '@subwallet/extension-base/core/logic-validation/transfer';
+import { _isSnowBridgeXcm } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
 import { getERC20SpendingApprovalTx } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
 import { SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
@@ -26,7 +27,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { RequestOptimalTransferProcess } from '@subwallet/extension-base/services/balance-service/helpers/process';
 import { getERC20TransactionObject, getERC721Transaction, getEVMTransactionObject, getPSP34TransferExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/smart-contract';
 import { createTransferExtrinsic, getTransferMockTxFee } from '@subwallet/extension-base/services/balance-service/transfer/token';
-import { createXcmExtrinsic, getXcmMockTxFee } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
+import { createSnowBridgeExtrinsic, createXcmExtrinsic, getXcmMockTxFee } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
@@ -1836,27 +1837,43 @@ export default class KoniExtension {
     const destinationTokenInfo = this.#koniState.getXcmEqualAssetByChain(destinationNetworkKey, tokenSlug);
 
     const [errors, fromKeyPair] = validateXcmTransferRequest(destinationTokenInfo, from, value);
-    let extrinsic: SubmittableExtrinsic<'promise'> | null = null;
+    let extrinsic: SubmittableExtrinsic<'promise'> | TransactionConfig | null = null;
 
     if (errors.length > 0) {
       return this.#koniState.transactionService.generateBeforeHandleResponseErrors(errors);
     }
 
+    const chainInfoMap = this.#koniState.getChainInfoMap();
+    const isSnowBridgeXcm = _isSnowBridgeXcm(chainInfoMap[originNetworkKey], chainInfoMap[destinationNetworkKey]);
+
     let additionalValidator: undefined | ((inputTransaction: SWTransactionResponse) => Promise<void>);
     let eventsHandler: undefined | ((eventEmitter: TransactionEmitter) => void);
 
     if (fromKeyPair && destinationTokenInfo) {
-      const substrateApi = this.#koniState.getSubstrateApi(originNetworkKey);
-      const chainInfoMap = this.#koniState.getChainInfoMap();
+      if (isSnowBridgeXcm) {
+        const evmApi = this.#koniState.getEvmApi(originNetworkKey);
 
-      extrinsic = await createXcmExtrinsic({
-        destinationTokenInfo,
-        originTokenInfo,
-        sendingValue: value,
-        recipient: to,
-        chainInfoMap,
-        substrateApi
-      });
+        extrinsic = await createSnowBridgeExtrinsic({
+          destinationTokenInfo,
+          originTokenInfo,
+          sendingValue: value,
+          sender: from,
+          recipient: to,
+          chainInfoMap,
+          evmApi
+        });
+      } else {
+        const substrateApi = this.#koniState.getSubstrateApi(originNetworkKey);
+
+        extrinsic = await createXcmExtrinsic({
+          destinationTokenInfo,
+          originTokenInfo,
+          sendingValue: value,
+          recipient: to,
+          chainInfoMap,
+          substrateApi
+        });
+      }
 
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
         const { value: senderTransferable } = await this.getAddressTransferableBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
@@ -1892,7 +1909,7 @@ export default class KoniExtension {
       transaction: extrinsic,
       data: inputData,
       extrinsicType: ExtrinsicType.TRANSFER_XCM,
-      chainType: ChainType.SUBSTRATE,
+      chainType: !isSnowBridgeXcm ? ChainType.SUBSTRATE : ChainType.EVM,
       transferNativeAmount: _isNativeToken(originTokenInfo) ? value : '0',
       ignoreWarnings: inputData.transferAll,
       isTransferAll: inputData.transferAll,

@@ -30,6 +30,7 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
   recipient,
   sendingValue,
   substrateApi }: CreateXcmExtrinsicProps): Promise<SubmittableExtrinsic<'promise'>> => {
+  console.log('got here bitch');
   const originChainInfo = chainInfoMap[originTokenInfo.originChain];
   const destinationChainInfo = chainInfoMap[destinationTokenInfo.originChain];
 

@@ -1,10 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { TokenSpendingApprovalParams } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
-import { useGetChainAssetInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -20,9 +18,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const txParams = useMemo((): TokenSpendingApprovalParams => transaction.data as TokenSpendingApprovalParams, [transaction.data]);
 
-  const inputAsset = useGetChainAssetInfo(txParams.contractAddress);
-  const spenderAsset = useGetChainAssetInfo(txParams.spenderAddress);
-
   return (
     <div className={CN(className)}>
       <CommonTransactionInfo
@@ -34,18 +29,18 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper
       >
         {
-          !!inputAsset && (
+          (
             <MetaInfo.Account
-              address={_getContractAddressOfToken(inputAsset)}
+              address={txParams.contractAddress}
               label={t('Contract')}
             />
           )
         }
 
         {
-          !!spenderAsset && (
+          (
             <MetaInfo.Account
-              address={_getContractAddressOfToken(spenderAsset)}
+              address={txParams.spenderAddress}
               label={t('Spender contract')}
             />
           )

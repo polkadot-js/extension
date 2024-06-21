@@ -1,18 +1,21 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { AlertBox, CloseIcon, Layout } from '@subwallet/extension-web-ui/components';
+import { AlertBox, BaseModal, CloseIcon, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
+import { ACCOUNT_EXPORT_ALL_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useDefaultNavigate } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { Button, Icon, PageIcon } from '@subwallet/react-ui';
+import { Icon, ModalContext, PageIcon } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-type Props = ThemeProps;
+type Props = ThemeProps & {
+  id?: string;
+};
 
 const FinishIcon = (
   <Icon
@@ -27,86 +30,79 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
-
-  return (
-    <Layout.WithSubHeaderOnly
-      onBack={goHome}
-      rightFooterButton={
-        !isWebUI
-          ? {
-            children: t('Finish'),
-            icon: FinishIcon,
+  const { inactiveModal } = useContext(ModalContext);
+  //
+  const onCancel = useCallback(() => {
+    inactiveModal(ACCOUNT_EXPORT_ALL_MODAL);
+  }, [inactiveModal]);
+  const contentBlock = (
+    <PageWrapper className={CN(className)}>
+      <Layout.WithSubHeaderOnly
+        onBack={goHome}
+        rightFooterButton={{
+          children: t('Finish'),
+          icon: FinishIcon,
+          onClick: goHome
+        }}
+        subHeaderIcons={[
+          {
+            icon: <CloseIcon />,
             onClick: goHome
           }
-          : undefined}
-      subHeaderIcons={[
-        {
-          icon: <CloseIcon />,
-          onClick: goHome
-        }
-      ]}
-      title={t('Successful')}
-    >
-      <div className={CN(className, 'body-container')}>
-        <div className={'notice'}>
-          <AlertBox
-            description={t('Anyone with your key can use any assets held in your account.')}
-            title={t('Warning: Never disclose this key')}
-            type='warning'
-          />
-        </div>
-        <div className='result-content'>
-          <div className='page-icon'>
-            <PageIcon
-              color='var(--page-icon-color)'
-              iconProps={{
-                phosphorIcon: CheckCircle,
-                weight: 'fill'
-              }}
+        ]}
+        title={t('Successful')}
+      >
+        <div className='body-container'>
+          <div className={CN('notice')}>
+            <AlertBox
+              description={t('Anyone with your key can use any assets held in your account.')}
+              title={t('Warning: Never disclose this key')}
+              type='warning'
             />
           </div>
-          <div className='json-done-tile'>
-            {t('Success!')}
-          </div>
-          <div className='json-done-description'>
-            {t('You have successfully export JSON file for your accounts')}
+          <div className='result-content'>
+            <div className='page-icon'>
+              <PageIcon
+                color='var(--page-icon-color)'
+                iconProps={{
+                  phosphorIcon: CheckCircle,
+                  weight: 'fill'
+                }}
+              />
+            </div>
+            <div className='json-done-tile'>
+              {t('Success!')}
+            </div>
+            <div className='json-done-description'>
+              {t('You have successfully export JSON file for your accounts')}
+            </div>
           </div>
         </div>
-        {
-          isWebUI && (
-            <div className={'__button-wrapper'}>
-              <Button
-                block={true}
-                className={'__button'}
-                icon={(
-                  <Icon
-                    phosphorIcon={CheckCircle}
-                    weight='fill'
-                  />
-                )}
-                onClick={goHome}
-                schema={'primary'}
-              >
-                {t('Finish')}
-              </Button>
-            </div>
-          )
-        }
-      </div>
-    </Layout.WithSubHeaderOnly>
+      </Layout.WithSubHeaderOnly>
+    </PageWrapper>
   );
+
+  if (isWebUI) {
+    return (
+      <BaseModal
+        className={CN(className, '-modal-container')}
+        closable={true}
+        id={ACCOUNT_EXPORT_ALL_MODAL}
+        onCancel={onCancel}
+        title={'Successful'}
+      >
+        {contentBlock}
+      </BaseModal>
+    );
+  }
+
+  return contentBlock;
 };
 
 const ExportAllDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    textAlign: 'center',
-
     '.body-container': {
       padding: `0 ${token.padding}px`
-    },
-
-    '.__button-wrapper': {
-      paddingTop: 64
     },
 
     '.notice': {
@@ -120,20 +116,9 @@ const ExportAllDone = styled(Component)<Props>(({ theme: { token } }: Props) => 
       gap: token.size
     },
 
-    '.title': {
-      marginTop: token.margin,
-      marginBottom: token.margin,
-      fontWeight: token.fontWeightStrong,
-      fontSize: token.fontSizeHeading3,
-      lineHeight: token.lineHeightHeading3,
-      color: token.colorTextBase
-    },
-
     '.page-icon': {
       display: 'flex',
       justifyContent: 'center',
-      marginTop: token.controlHeightLG,
-      marginBottom: token.margin,
       '--page-icon-color': token.colorSecondary
     },
 
@@ -147,31 +132,10 @@ const ExportAllDone = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.json-done-description': {
       padding: `0 ${token.controlHeightLG - token.padding}px`,
-      marginTop: token.margin,
-      marginBottom: token.margin * 2,
+      color: token.colorTextLabel,
+      textAlign: 'center',
       fontSize: token.fontSizeHeading5,
-      lineHeight: token.lineHeightHeading5,
-      color: token.colorTextDescription,
-      textAlign: 'center'
-    },
-
-    '.web-ui-enable &': {
-      maxWidth: '416px',
-      paddingLeft: token.padding,
-      paddingRight: token.padding,
-      margin: '0 auto',
-
-      '.page-icon': {
-        marginTop: 0
-      },
-
-      '.title': {
-        marginTop: 0
-      },
-
-      '.description': {
-        marginTop: 0
-      }
+      lineHeight: token.lineHeightHeading5
     }
   };
 });

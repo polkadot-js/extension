@@ -3,14 +3,14 @@
 
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { AccountItemWithName, BasicInputWrapper, FilterModal, GeneralEmptyList } from '@subwallet/extension-web-ui/components';
+import { AccountItemWithName, BaseModal, BasicInputWrapper, FilterModal, GeneralEmptyList } from '@subwallet/extension-web-ui/components';
 import ExportAllSelectItem from '@subwallet/extension-web-ui/components/Layout/parts/SelectAccount/ExportAllSelectItem';
 import AccountExportPasswordModal from '@subwallet/extension-web-ui/components/Modal/Account/AccountExportPasswordModal';
 import { EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useFilterModal, useGoBackSelectAccount, useSelectAccount } from '@subwallet/extension-web-ui/hooks';
 import { AccountSignMode, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getSignMode, isAccountAll, searchAccountFunction } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, InputRef, ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { Button, Icon, InputRef, ModalContext, SwList } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
 import { CaretLeft, Export, FadersHorizontal } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
@@ -186,7 +186,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   return (
     <>
-      <SwModal
+      <BaseModal
         className={`${className}`}
         closeIcon={(
           <Icon
@@ -227,7 +227,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           searchPlaceholder={t<string>('Account name')}
           showActionBtn
         />
-      </SwModal>
+      </BaseModal>
 
       <FilterModal
         id={FILTER_MODAL_ID}

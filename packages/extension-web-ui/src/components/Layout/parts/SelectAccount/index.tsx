@@ -54,7 +54,7 @@ const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, inactiveModal } = useContext(ModalContext);
+  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
@@ -97,6 +97,10 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
     return result;
   }, [_accounts, currentAccount?.address]);
+
+  const filteredListExportAccount = useMemo(() => {
+    return accounts.filter((accountExport) => !accountExport.isInjected);
+  }, [accounts]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -309,6 +313,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(multiExportAccountModalId);
   }, [activeModal]);
 
+  const isActiveModal = checkActive(modalId);
+
+  useEffect(() => {
+    const element = document.getElementsByClassName('__tooltip-overlay-remind')[0];
+
+    if (element) {
+      if (element.classList.contains('ant-tooltip-hidden')) {
+        isActiveModal && element.classList.remove('ant-tooltip-hidden');
+      } else {
+        (!isActiveModal) && element.classList.add('ant-tooltip-hidden');
+      }
+    }
+  }, [isActiveModal]);
+
   const rightButton = useMemo((): ButtonProps => {
     return ({
       icon: (
@@ -318,24 +336,23 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           weight='fill'
         />
       ),
-      children: (
-        <Tooltip
-          className={'__icon-export-remind'}
-          open={true}
-          overlayClassName={CN('__tooltip-overlay-remind')}
-          placement={'bottomLeft'}
-          title={t('Export and back up accounts')}
-        >
-          <div>
-            <Icon
-              customSize={'7.39px'}
-              iconColor={token.colorHighlight}
-              phosphorIcon={Circle}
-              weight={'fill'}
-            />
-          </div>
-        </Tooltip>
-      ),
+      children:
+          <Tooltip
+            className={'__icon-export-remind'}
+            open={true}
+            overlayClassName={CN('__tooltip-overlay-remind')}
+            placement={'bottomLeft'}
+            title={t('Export and back up accounts')}
+          >
+            <div>
+              <Icon
+                customSize={'7.39px'}
+                iconColor={token.colorHighlight}
+                phosphorIcon={Circle}
+                weight={'fill'}
+              />
+            </div>
+          </Tooltip>,
       onClick: exportAllAccounts,
       size: 'xs',
       type: 'ghost',
@@ -410,7 +427,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         onBack={onQrModalBack}
       />
       <ExportAllSelector
-        items={accounts}
+        items={filteredListExportAccount}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import { QuoteResetTime, SwapRoute } from '@subwallet/extension-koni-ui/componen
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainConnection, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import useHandleSubmitMultiTransaction from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitMultiTransaction';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-koni-ui/messaging/transaction/swap';
 import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
 import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-koni-ui/reducer';
@@ -77,7 +78,7 @@ const Component = () => {
   useSetCurrentPage('/transaction/swap');
   const { t } = useTranslation();
   const notify = useNotification();
-  const { closeAlert, defaultData, onDone, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { closeAlert, defaultData, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
 
   const { activeModal, inactiveAll, inactiveModal } = useContext(ModalContext);
 
@@ -148,6 +149,7 @@ const Component = () => {
   const onPreCheck = usePreCheckAction(fromValue);
 
   const [processState, dispatchProcessState] = useReducer(commonProcessReducer, DEFAULT_COMMON_PROCESS);
+  const { onError, onSuccess } = useHandleSubmitMultiTransaction(dispatchProcessState);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
     const result: Record<string, string[]> = {};
@@ -489,76 +491,6 @@ const Component = () => {
       </div>
     );
   };
-
-  const onError = useCallback(
-    (error: Error) => {
-      notify({
-        message: error.message,
-        type: 'error',
-        duration: 8
-      });
-
-      dispatchProcessState({
-        type: CommonActionType.STEP_ERROR_ROLLBACK,
-        payload: error
-      });
-    },
-    [notify]
-  );
-
-  const onSuccess = useCallback(
-    (lastStep: boolean, needRollback: boolean): ((rs: SWTransactionResponse) => boolean) => {
-      return (rs: SWTransactionResponse): boolean => {
-        const { errors: _errors, id, warnings } = rs;
-
-        if (_errors.length || warnings.length) {
-          if (_errors[0]?.message !== 'Rejected by user') {
-            if (
-              _errors[0]?.message.startsWith('UnknownError Connection to Indexed DataBase server lost') ||
-              _errors[0]?.message.startsWith('Provided address is invalid, the capitalization checksum test failed') ||
-              _errors[0]?.message.startsWith('connection not open on send()')
-            ) {
-              notify({
-                message: t('Your selected network has lost connection. Update it by re-enabling it or changing network provider'),
-                type: 'error',
-                duration: 8
-              });
-
-              return false;
-            }
-
-            // hideAll();
-            onError(_errors[0]);
-
-            return false;
-          } else {
-            dispatchProcessState({
-              type: needRollback ? CommonActionType.STEP_ERROR_ROLLBACK : CommonActionType.STEP_ERROR,
-              payload: _errors[0]
-            });
-
-            return false;
-          }
-        } else if (id) {
-          dispatchProcessState({
-            type: CommonActionType.STEP_COMPLETE,
-            payload: rs
-          });
-
-          if (lastStep) {
-            onDone(id);
-
-            return false;
-          }
-
-          return true;
-        } else {
-          return false;
-        }
-      };
-    },
-    [notify, onDone, onError, t]
-  );
 
   const isChainConnected = useMemo(() => {
     return checkChainConnected(chainValue);

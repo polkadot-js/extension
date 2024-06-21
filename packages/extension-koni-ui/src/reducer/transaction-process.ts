@@ -178,7 +178,7 @@ const handleStepErrorRollbackAction: ActionHandler<StepErrorRollbackAction> = (o
   return result;
 };
 
-type CommonProcessAction =
+export type CommonProcessAction =
     | InitAction
     | StepCreateAction
     | StepSubmitAction

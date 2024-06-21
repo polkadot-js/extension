@@ -5,6 +5,7 @@ import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
 import { getERC20Allowance } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
+import { SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { CommonOptimalPath, CommonStepType, DEFAULT_FIRST_STEP, MOCK_STEP_FEE } from '@subwallet/extension-base/types/service-base';
@@ -30,8 +31,6 @@ export function getDefaultTransferProcess (): CommonOptimalPath {
     ]
   };
 }
-
-const SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS = '0x27ca963C279c93801941e1eB8799c23f407d68e7';
 
 export async function getSnowbridgeTransferProcessFromEvm (address: string, evmApi: _EvmApi, tokenInfo: _ChainAsset, amount: string): Promise<CommonOptimalPath> {
   if (tokenInfo.originChain !== COMMON_CHAIN_SLUGS.ETHEREUM) {

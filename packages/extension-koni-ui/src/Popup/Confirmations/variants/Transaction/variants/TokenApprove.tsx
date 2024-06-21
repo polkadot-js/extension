@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { TokenApproveData } from '@subwallet/extension-base/types';
+import { TokenSpendingApprovalParams } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useGetChainAssetInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
@@ -18,10 +18,10 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const { t } = useTranslation();
 
-  const txParams = useMemo((): TokenApproveData => transaction.data as TokenApproveData, [transaction.data]);
+  const txParams = useMemo((): TokenSpendingApprovalParams => transaction.data as TokenSpendingApprovalParams, [transaction.data]);
 
-  const inputAsset = useGetChainAssetInfo(txParams.inputTokenSlug);
-  const spenderAsset = useGetChainAssetInfo(txParams.spenderTokenSlug);
+  const inputAsset = useGetChainAssetInfo(txParams.contractAddress);
+  const spenderAsset = useGetChainAssetInfo(txParams.spenderAddress);
 
   return (
     <div className={CN(className)}>

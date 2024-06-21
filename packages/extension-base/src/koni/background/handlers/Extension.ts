@@ -13,6 +13,8 @@ import { TransactionWarning } from '@subwallet/extension-base/background/warning
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, LATEST_SESSION, XCM_FEE_RATIO } from '@subwallet/extension-base/constants';
 import { additionalValidateTransfer, additionalValidateXcmTransfer, validateTransferRequest, validateXcmTransferRequest } from '@subwallet/extension-base/core/logic-validation/transfer';
 import { ALLOWED_PATH } from '@subwallet/extension-base/defaults';
+import { getERC20SpendingApprovalTx } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
+import { SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
@@ -37,7 +39,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { AccountsStore } from '@subwallet/extension-base/stores';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, StorageDataInterface, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, StorageDataInterface, TokenSpendingApprovalParams, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { BN_ZERO, convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, MODULE_SUPPORT, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
@@ -1699,6 +1701,30 @@ export default class KoniExtension {
 
   private async getOptimalTransferProcess (params: RequestOptimalTransferProcess): Promise<CommonOptimalPath> {
     return this.#koniState.balanceService.getOptimalTransferProcess(params);
+  }
+
+  private async approveSpending (params: TokenSpendingApprovalParams): Promise<SWTransactionResponse> {
+    const { amount, chain, contractAddress, owner, spenderAddress } = params;
+
+    if (spenderAddress !== SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS) {
+      throw new Error('Only SnowBridge is supported'); // todo: support all ERC20 spending approval
+    }
+
+    const evmApi = this.#koniState.getEvmApi(chain);
+    const transactionConfig = await getERC20SpendingApprovalTx(spenderAddress, owner, contractAddress, evmApi, amount);
+
+    return this.#koniState.transactionService.handleTransaction({
+      errors: [],
+      warnings: [],
+      address: owner,
+      chain,
+      chainType: ChainType.EVM,
+      transferNativeAmount: '0',
+      transaction: transactionConfig,
+      data: params,
+      extrinsicType: ExtrinsicType.TOKEN_SPENDING_APPROVAL,
+      isTransferAll: false
+    });
   }
 
   private async makeTransfer (inputData: RequestTransfer): Promise<SWTransactionResponse> {
@@ -4723,6 +4749,8 @@ export default class KoniExtension {
         return await this.makeCrossChainTransfer(request as RequestCrossChainTransfer);
       case 'pri(accounts.getOptimalTransferProcess)':
         return await this.getOptimalTransferProcess(request as RequestOptimalTransferProcess);
+      case 'pri(accounts.approveSpending)':
+        return await this.approveSpending(request as TokenSpendingApprovalParams);
 
       /// Sign QR
       case 'pri(qr.transaction.parse.substrate)':

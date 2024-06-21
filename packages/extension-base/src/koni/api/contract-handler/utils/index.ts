@@ -19,3 +19,5 @@ export const _NEUROGUNS_PSP34_ABI: Record<string, any> = require('./neuroguns_ps
 export const _AZERO_DOMAIN_REGISTRY_ABI: Record<string, any> = require('./azero_domain_registry_abi.json');
 // eslint-disable-next-line @typescript-eslint/no-var-requires,@typescript-eslint/no-unsafe-assignment
 export const _SNOWBRIDGE_GATEWAY_ABI: Record<string, any> = require('./snowbridge_gateway_abi.json');
+
+export const SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS = '0x27ca963C279c93801941e1eB8799c23f407d68e7';

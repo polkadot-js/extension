@@ -5,14 +5,15 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getXcmUnstableWarning, _isXcmTransferUnstable } from '@subwallet/extension-base/core/substrate/xcm-parser';
-import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { _getAssetDecimals, _getContractAddressOfToken, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { CommonStepType } from '@subwallet/extension-base/types/service-base';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, AlertBox, AlertModal, AmountInput, ChainSelector, HiddenInput, TokenItemType, TokenSelector } from '@subwallet/extension-koni-ui/components';
 import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useInitValidateTransaction, useIsMantaPayEnabled, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
 import useHandleSubmitMultiTransaction from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitMultiTransaction';
-import { getMaxTransfer, getOptimalTransferProcess, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
+import { approveSpending, getMaxTransfer, getOptimalTransferProcess, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-koni-ui/messaging';
 import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
@@ -535,6 +536,19 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return sendPromise;
   }, [chainInfoMap, isTransferAll]);
 
+  // todo: must refactor later, temporary solution to support SnowBridge
+  const handleSnowBridgeSpendingApproval = useCallback((values: TransferParams): Promise<SWTransactionResponse> => {
+    const tokenInfo = assetRegistry[values.asset];
+
+    return approveSpending({
+      amount: values.value,
+      contractAddress: _getContractAddressOfToken(tokenInfo),
+      spenderAddress: SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS,
+      chain: values.chain,
+      owner: values.from
+    });
+  }, [assetRegistry]);
+
   // Submit transaction
   const doSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     if (isShowWarningOnSubmit(values)) {
@@ -566,13 +580,9 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           return await submitData(step + 1);
         } else {
           const stepType = processState.steps[step].type;
-          const submitPromise: Promise<SWTransactionResponse> | undefined = stepType === CommonStepType.TOKEN_APPROVAL ? undefined : handleBasicSubmit(values);
+          const submitPromise: Promise<SWTransactionResponse> | undefined = stepType === CommonStepType.TOKEN_APPROVAL ? handleSnowBridgeSpendingApproval(values) : handleBasicSubmit(values);
 
           console.log(step, stepType, submitPromise, isLastStep);
-
-          if (!submitPromise) {
-            return false;
-          }
 
           const rs = await submitPromise;
           const success = onSuccess(isLastStep, needRollback)(rs);
@@ -598,7 +608,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
           setLoading(false);
         });
     }, 300);
-  }, [handleBasicSubmit, isShowWarningOnSubmit, onError, onSuccess, processState.currentStep, processState.steps]);
+  }, [handleBasicSubmit, handleSnowBridgeSpendingApproval, isShowWarningOnSubmit, onError, onSuccess, processState.currentStep, processState.steps]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 

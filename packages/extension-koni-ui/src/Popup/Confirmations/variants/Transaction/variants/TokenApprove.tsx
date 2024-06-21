@@ -3,6 +3,7 @@
 
 import { TokenSpendingApprovalParams } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { useGetNativeTokenBasicInfo } from '@subwallet/extension-koni-ui/hooks';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +17,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className, transaction } = props;
   const { t } = useTranslation();
 
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
   const txParams = useMemo((): TokenSpendingApprovalParams => transaction.data as TokenSpendingApprovalParams, [transaction.data]);
 
   return (
@@ -45,6 +47,12 @@ const Component: React.FC<Props> = (props: Props) => {
             />
           )
         }
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Estimated fee')}
+          suffix={symbol}
+          value={transaction.estimateFee?.value || 0}
+        />
       </MetaInfo>
     </div>
   );

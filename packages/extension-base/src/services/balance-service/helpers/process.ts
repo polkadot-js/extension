@@ -4,10 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
-import { getERC20Allowance } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
-import { getSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { CommonOptimalPath, CommonStepType, DEFAULT_FIRST_STEP, MOCK_STEP_FEE } from '@subwallet/extension-base/types/service-base';
 
 export interface RequestOptimalTransferProcess {
@@ -41,16 +38,16 @@ export async function getSnowbridgeTransferProcessFromEvm (address: string, evmA
     totalFee: [MOCK_STEP_FEE],
     steps: [DEFAULT_FIRST_STEP]
   };
-  const allowance = await getERC20Allowance(getSnowBridgeGatewayContract(evmApi.chainSlug), address, _getContractAddressOfToken(tokenInfo), evmApi);
+  // const allowance = await getERC20Allowance(getSnowBridgeGatewayContract(evmApi.chainSlug), address, _getContractAddressOfToken(tokenInfo), evmApi);
 
-  if (!allowance || BigInt(allowance) < BigInt(amount)) {
-    result.steps.push({
-      id: result.steps.length,
-      type: CommonStepType.TOKEN_APPROVAL,
-      name: 'Approve spending'
-    });
-    result.totalFee.push(MOCK_STEP_FEE);
-  }
+  result.steps.push({ // always approve spending because sometimes allowance check fails
+    id: result.steps.length,
+    type: CommonStepType.TOKEN_APPROVAL,
+    name: 'Approve spending'
+  });
+  result.totalFee.push(MOCK_STEP_FEE);
+  // if (!allowance || BigInt(allowance) < BigInt(amount)) {
+  // }
 
   result.steps.push({
     id: result.steps.length,
@@ -59,5 +56,5 @@ export async function getSnowbridgeTransferProcessFromEvm (address: string, evmA
   });
   result.totalFee.push(MOCK_STEP_FEE);
 
-  return result;
+  return Promise.resolve(result);
 }

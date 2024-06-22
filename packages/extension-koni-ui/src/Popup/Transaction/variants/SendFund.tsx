@@ -626,7 +626,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       if (_isXcmTransferUnstable(originChainInfo, destChainInfo)) {
         openAlert({
           type: NotificationType.WARNING,
-          content: t(_getXcmUnstableWarning(originChainInfo)),
+          content: t(_getXcmUnstableWarning(originChainInfo, destChainInfo)),
           title: t('Pay attention!'),
           okButton: {
             text: t('Continue'),

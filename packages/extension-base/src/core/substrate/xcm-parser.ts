@@ -64,7 +64,7 @@ export function _isXcmTransferUnstable (originChainInfo: _ChainInfo, destChainIn
   return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo);
 }
 
-export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
+function getAssetHubBridgeUnstableWarning (originChainInfo: _ChainInfo): string {
   switch (originChainInfo.slug) {
     case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
       return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 2 DOT. Continue at your own risk';
@@ -72,6 +72,25 @@ export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
       return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 0.4 KSM. Continue at your own risk';
     default:
       return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a large transaction fee. Continue at your own risk';
+  }
+}
+
+function getSnowBridgeUnstableWarning (originChainInfo: _ChainInfo): string {
+  switch (originChainInfo.slug) {
+    case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a fee of 70$ and takes up to 1 hour to complete. Continue at your own risk';
+    case COMMON_CHAIN_SLUGS.ETHEREUM:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a fee of 5$ and takes up to 1 hour to complete. Continue at your own risk';
+    default:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a high fee and takes up to 1 hour to complete. Continue at your own risk';
+  }
+}
+
+export function _getXcmUnstableWarning (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): string {
+  if (_isSnowBridgeXcm(originChainInfo, destChainInfo)) {
+    return getSnowBridgeUnstableWarning(originChainInfo);
+  } else {
+    return getAssetHubBridgeUnstableWarning(originChainInfo);
   }
 }
 

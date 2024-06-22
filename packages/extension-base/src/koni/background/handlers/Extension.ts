@@ -1877,9 +1877,12 @@ export default class KoniExtension {
       }
 
       additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
-        const { value: senderTransferable } = await this.getAddressTransferableBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug });
+        const [{ value: senderTransferable }, { value: recipientNativeBalance }] = await Promise.all([
+          this.getAddressTransferableBalance({ address: from, networkKey: originNetworkKey, token: originTokenInfo.slug }),
+          this.getAddressTransferableBalance({ address: to, networkKey: destinationNetworkKey, extrinsicType: ExtrinsicType.TRANSFER_BALANCE })
+        ]);
 
-        const [warning, error] = additionalValidateXcmTransfer(originTokenInfo, destinationTokenInfo, value, senderTransferable);
+        const [warning, error] = additionalValidateXcmTransfer(originTokenInfo, destinationTokenInfo, value, senderTransferable, recipientNativeBalance, chainInfoMap[destinationNetworkKey]);
 
         error && inputTransaction.errors.push(error);
         warning && inputTransaction.warnings.push(warning);

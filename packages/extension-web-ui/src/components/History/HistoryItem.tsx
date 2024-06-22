@@ -57,7 +57,7 @@ function Component (
   const time = customFormatDate(item.time, '#hhhh#:#mm#');
   const link = getLink(item, chainInfoMap);
 
-  const showAmount = useMemo(() => item.type !== ExtrinsicType.TOKEN_APPROVE, [item.type]);
+  const showAmount = useMemo(() => item.type !== ExtrinsicType.TOKEN_SPENDING_APPROVAL, [item.type]);
 
   const handleOnClick = useCallback(
     (e?: SyntheticEvent) => {

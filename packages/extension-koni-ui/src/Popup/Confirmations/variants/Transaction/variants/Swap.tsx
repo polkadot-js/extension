@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapStepType, SwapTxData } from '@subwallet/extension-base/types/swap';
+import { CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { SwapTxData } from '@subwallet/extension-base/types/swap';
 import { AlertBox, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { SwapRoute, SwapTransactionBlock } from '@subwallet/extension-koni-ui/components/Swap';
 import { BN_TEN, BN_ZERO } from '@subwallet/extension-koni-ui/constants';
@@ -73,7 +74,7 @@ const Component: React.FC<Props> = (props: Props) => {
   };
 
   const isSwapXCM = useMemo(() => {
-    return data.process.steps.some((item) => item.type === SwapStepType.XCM);
+    return data.process.steps.some((item) => item.type === CommonStepType.XCM);
   }, [data.process.steps]);
 
   const getWaitingTime = useMemo(() => {

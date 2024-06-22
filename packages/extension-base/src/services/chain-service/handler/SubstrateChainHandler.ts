@@ -3,7 +3,7 @@
 
 import { GearApi } from '@gear-js/api';
 import { _AssetType } from '@subwallet/chain-list/types';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
@@ -17,7 +17,7 @@ import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-import { _PSP22_ABI, _PSP34_ABI } from '../helper';
+import { _PSP22_ABI, _PSP34_ABI } from '../../../koni/api/contract-handler/utils';
 
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 

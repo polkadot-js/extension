@@ -1723,6 +1723,7 @@ export default class KoniExtension {
       transferNativeAmount: '0',
       transaction: transactionConfig,
       data: params,
+      resolveOnDone: true, // todo: double-check this for other transactions
       extrinsicType: ExtrinsicType.TOKEN_SPENDING_APPROVAL,
       isTransferAll: false
     });

@@ -85,7 +85,7 @@ export function validateXcmTransferRequest (destTokenInfo: _ChainAsset | undefin
   return [errors, keypair, transferValue];
 }
 
-export function additionalValidateXcmTransfer (originTokenInfo: _ChainAsset, destinationTokenInfo: _ChainAsset, sendingAmount: string, senderTransferable: string, receiverNativeBalance: string, destChainInfo: _ChainInfo): [TransactionWarning | undefined, TransactionError | undefined] {
+export function additionalValidateXcmTransfer (originTokenInfo: _ChainAsset, destinationTokenInfo: _ChainAsset, sendingAmount: string, senderTransferable: string, receiverNativeBalance: string, destChainInfo: _ChainInfo, isSnowBridge = false): [TransactionWarning | undefined, TransactionError | undefined] {
   const destMinAmount = _getTokenMinAmount(destinationTokenInfo);
   const minSendingRequired = new BigN(destMinAmount).multipliedBy(XCM_MIN_AMOUNT_RATIO);
 
@@ -100,7 +100,9 @@ export function additionalValidateXcmTransfer (originTokenInfo: _ChainAsset, des
   }
 
   // check native token ED on dest chain for receiver
-  if (new BigN(receiverNativeBalance).lt(_getChainExistentialDeposit(destChainInfo))) {
+  const bnKeepAliveBalance = _isNativeToken(destinationTokenInfo) ? new BigN(receiverNativeBalance).plus(sendingAmount) : new BigN(receiverNativeBalance);
+
+  if (isSnowBridge && bnKeepAliveBalance.lt(_getChainExistentialDeposit(destChainInfo))) {
     const { decimals, symbol } = _getChainNativeTokenBasicInfo(destChainInfo);
     const atLeastStr = formatNumber(_getChainExistentialDeposit(destChainInfo), decimals || 0, balanceFormatter, { maxNumberFormat: 6 });
 

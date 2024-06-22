@@ -99,7 +99,7 @@ export function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChai
 }
 
 export function _isSnowBridgeXcm (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
-  return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo) && _isPureEvmChain(originChainInfo);
+  return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo) && (_isPureEvmChain(originChainInfo) || _isPureEvmChain(destChainInfo));
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

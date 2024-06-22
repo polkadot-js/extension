@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.2.8
+Build date: Jun 21, 2024.
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter') (#3218)
+
+
+## 1.2.7
+Build date: Jun 20, 2024.
+
+Features & Update:
+- Support MV3 on Firefox (#3108)
+
+
 ## 1.2.6
 Build date: Jun 19, 2024.
 

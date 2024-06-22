@@ -102,7 +102,7 @@ export function additionalValidateXcmTransfer (originTokenInfo: _ChainAsset, des
   // check native token ED on dest chain for receiver
   if (new BigN(receiverNativeBalance).lt(_getChainExistentialDeposit(destChainInfo))) {
     const { decimals, symbol } = _getChainNativeTokenBasicInfo(destChainInfo);
-    const atLeastStr = formatNumber(receiverNativeBalance, decimals || 0, balanceFormatter, { maxNumberFormat: 6 });
+    const atLeastStr = formatNumber(_getChainExistentialDeposit(destChainInfo), decimals || 0, balanceFormatter, { maxNumberFormat: 6 });
 
     error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t(' Insufficient {{symbol}} on {{chain}} to cover min balance ({{amount}} {{symbol}})', { replace: { amount: atLeastStr, symbol, chain: destChainInfo.name } }));
   }

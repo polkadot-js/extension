@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { getWeb3Contract } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
-import { _SNOWBRIDGE_GATEWAY_ABI, SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { _SNOWBRIDGE_GATEWAY_ABI, getSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getSubstrateParaId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
@@ -13,7 +13,8 @@ import { u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 export async function getSnowBridgeEvmTransfer (tokenInfo: _ChainAsset, originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo, sender: string, recipientAddress: string, value: string, evmApi: _EvmApi): Promise<TransactionConfig> {
-  const snowBridgeContract = getWeb3Contract(SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS, evmApi, _SNOWBRIDGE_GATEWAY_ABI);
+  const snowBridgeContractAddress = getSnowBridgeGatewayContract(originChainInfo.slug);
+  const snowBridgeContract = getWeb3Contract(snowBridgeContractAddress, evmApi, _SNOWBRIDGE_GATEWAY_ABI);
   const tokenContract = _getContractAddressOfToken(tokenInfo);
   const destinationChainParaId = _getSubstrateParaId(destinationChainInfo);
   const recipient = {
@@ -39,7 +40,7 @@ export async function getSnowBridgeEvmTransfer (tokenInfo: _ChainAsset, originCh
 
   return {
     from: sender,
-    to: SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS,
+    to: snowBridgeContractAddress,
     data: transferEncodedCall,
     gas: gasLimit,
     gasPrice: priority.gasPrice,

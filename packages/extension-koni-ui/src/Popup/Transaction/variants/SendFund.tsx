@@ -5,7 +5,7 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getXcmUnstableWarning, _isXcmTransferUnstable } from '@subwallet/extension-base/core/substrate/xcm-parser';
-import { SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { getSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _getAssetDecimals, _getContractAddressOfToken, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { CommonStepType } from '@subwallet/extension-base/types/service-base';
@@ -543,7 +543,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     return approveSpending({
       amount: values.value,
       contractAddress: _getContractAddressOfToken(tokenInfo),
-      spenderAddress: SNOWBRIDGE_GATEWAY_CONTRACT_ADDRESS,
+      spenderAddress: getSnowBridgeGatewayContract(values.chain),
       chain: values.chain,
       owner: values.from
     });

@@ -303,7 +303,7 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   },
 
   '.__block-divider': {
-    height: 116,
+    height: 76,
     width: 1,
     backgroundColor: token.colorBgDivider,
     marginTop: token.marginSM
@@ -344,8 +344,7 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   '.__block-item': {
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 200px',
-    minHeight: 128
+    flex: '1 1 200px'
   },
 
   '.__block-title-wrapper': {
@@ -397,7 +396,7 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
     }
   },
 
-  '@media screen and (min-width: 990px) and (max-width: 1200px)': {
+  '@media screen and (min-width: 990px) and (max-width: 1135px)': {
     '.__divider-special': {
       display: 'none'
     }

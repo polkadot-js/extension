@@ -51,10 +51,20 @@ const useHandleSubmitMultiTransaction = (dispatchProcessState: (value: CommonPro
               });
 
               return false;
+            } else {
+              notify({
+                message: _errors[0]?.message || warnings[0]?.message,
+                type: _errors.length ? 'error' : 'warning',
+                duration: 8
+              });
             }
 
-            // hideAll();
-            onError(_errors[0]);
+            if (!_errors.length) {
+              warnings[0] && setIgnoreWarnings?.(true);
+            } else {
+              // hideAll();
+              onError(_errors[0]);
+            }
 
             return false;
           } else {
@@ -66,8 +76,6 @@ const useHandleSubmitMultiTransaction = (dispatchProcessState: (value: CommonPro
             return false;
           }
         } else if (id) {
-          warnings[0] && setIgnoreWarnings?.(true);
-
           dispatchProcessState({
             type: CommonActionType.STEP_COMPLETE,
             payload: rs
@@ -80,11 +88,9 @@ const useHandleSubmitMultiTransaction = (dispatchProcessState: (value: CommonPro
           }
 
           return true;
-        } else {
-          warnings[0] && setIgnoreWarnings?.(true);
-
-          return false;
         }
+
+        return false;
       };
     },
     [dispatchProcessState, notify, onDone, onError, setIgnoreWarnings, t]

@@ -30,7 +30,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isNotShowPrefix = poolSlugs.every((slug) => {
     const poolInfo = poolInfoMap[slug];
 
-    return [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo.type);
+    return [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo?.type);
   });
 
   return (

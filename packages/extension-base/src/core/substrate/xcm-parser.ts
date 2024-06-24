@@ -4,7 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateParaChain, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -58,6 +58,21 @@ export function _getXcmMultiLocation (originChainInfo: _ChainInfo, destChainInfo
       interior
     }
   };
+}
+
+export function _isXcmTransferUnstable (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
+  return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo);
+}
+
+export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
+  switch (originChainInfo.slug) {
+    case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 2 DOT. Continue at your own risk';
+    case COMMON_CHAIN_SLUGS.KUSAMA_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 0.4 KSM. Continue at your own risk';
+    default:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a large transaction fee. Continue at your own risk';
+  }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

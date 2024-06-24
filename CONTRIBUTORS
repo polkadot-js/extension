@@ -1,14 +1,14 @@
-    2675	AnhMTV                        	Release version 1.2.5
-    2421	Nam Phạm                      	[Issue 3134] chore: update chainlist
-    2070	S2kael                        	
-     817	lw-cdm                        	[Issue-3150] Extension - Update insufficient balance message for earn screen
+    2688	AnhMTV                        	Release version 1.2.6
+    2426	Nam Phạm                      	[Issue 3095] chore: update chainlist
+    2071	S2kael                        	[Issue-3185] Update stable version for chain-list
+     818	lw-cdm                        	Update condition to show alert on send fund screen
      465	Jaco                          	0.42.5 (#969)
-     451	nguyentiendung                	[Issue-3140] WebApp - Remove Parallel liquid staking
+     465	nguyentiendung                	[Issue-3043] Update: Sort pool list items that are disabled.
      185	quangdo                       	
-     174	bluezdot                      	
+     177	bluezdot                      	[Issue-3197] Re-handle error when no data response
      137	Thiendekaco                   	[Issue 2779] [fix] WebApp - Re-check bug error page #2
+     133	dominhquang                   	[Issue-2806] fix bug cannot see Instruction url and onclick hyperlink on popup
      117	Automation Bot                	[CI Skip] Auto increase webapp build number
-     106	dominhquang                   	[Issue-2649] Add send crash log feature
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md

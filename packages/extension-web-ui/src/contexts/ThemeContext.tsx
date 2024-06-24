@@ -107,6 +107,16 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         transform: 'translateX(-50%) translateY(100%) rotate(180deg) scaleX(0.5)'
       }
     },
+    '.__tooltip-overlay-remind': {
+      '.ant-tooltip-inner': {
+        fontSize: token.fontSizeXS,
+        lineHeight: token.lineHeightXS,
+        fontWeight: 700,
+        padding: `2px ${token.paddingXS}px`,
+        minHeight: 'auto',
+        marginRight: token.marginSM
+      }
+    },
     '.text-secondary': {
       color: token.colorTextSecondary
     },

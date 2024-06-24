@@ -99,7 +99,17 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   }, [_accounts, currentAccount?.address]);
 
   const filteredListExportAccount = useMemo(() => {
-    return accounts.filter((accountExport) => !accountExport.isInjected);
+    const accountList = accounts.filter((accountExport) => !accountExport.isInjected);
+
+    if (accountList.length === 1 && isAccountAll(accountList[0].address)) {
+      return [];
+    }
+
+    if (accountList.length === 2) {
+      return accountList.filter((acc) => !isAccountAll(acc.address));
+    }
+
+    return accountList;
   }, [accounts]);
 
   const noAllAccounts = useMemo(() => {
@@ -340,7 +350,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           <Tooltip
             className={'__icon-export-remind'}
             open={true}
-            overlayClassName={CN('__tooltip-overlay-remind')}
+            overlayClassName={CN(className, '__tooltip-overlay-remind')}
             placement={'bottomLeft'}
             title={t('Export and back up accounts')}
           >
@@ -358,7 +368,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
       type: 'ghost',
       tooltipPlacement: 'topLeft'
     });
-  }, [exportAllAccounts, t, token.colorHighlight]);
+  }, [className, exportAllAccounts, t, token.colorHighlight]);
 
   return (
     <div className={CN(className, 'container')}>
@@ -454,6 +464,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-select-modal-input-container:hover .account-name': {
         color: token.colorTextLight3
       }
+    },
+    '&.-tooltip-mobile': {
+      left: '193px',
+      top: '46px'
     },
 
     '&.ant-sw-modal': {

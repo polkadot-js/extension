@@ -1256,5 +1256,6 @@
   "Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.": "",
   "Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards": "",
   "You don't have enough {{symbol}} ({{chainName}}) to pay gas fee. Top up your transferable balance and try again": "",
-  "Your Ledger is disconnected. Reconnect and try again": "Ledger mất kết nối. Vui lòng kết nối lại"
+  "Your Ledger is disconnected. Reconnect and try again": "Ledger mất kết nối. Vui lòng kết nối lại",
+  "This pool is blocked. Select another to continue": ""
 }

@@ -141,8 +141,9 @@ export default class Mobile {
 
   private async _getLocalStorageExportData (): Promise<string> {
     await swStorage.waitReady;
+    const storage = await swStorage.copy();
 
-    return Promise.resolve(JSON.stringify(swStorage.copy()));
+    return Promise.resolve(JSON.stringify(storage));
   }
 
   private async _getDexieExportData (): Promise<string> {

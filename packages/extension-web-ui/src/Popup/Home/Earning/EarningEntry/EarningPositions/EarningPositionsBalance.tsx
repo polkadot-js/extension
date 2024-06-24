@@ -38,16 +38,6 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
     saveShowBalance(!isShowBalance).catch(console.error);
   }, [isShowBalance]);
 
-  const totalActiveStake = useMemo(() => {
-    let result = BN_ZERO;
-
-    items.forEach((item) => {
-      result = result.plus((new BigN(item.totalStake)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
-    });
-
-    return result;
-  }, [items]);
-
   const totalUnstake = useMemo(() => {
     let result = BN_ZERO;
 
@@ -58,9 +48,25 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
     return result;
   }, [items]);
 
+  const totalActiveStake = useMemo(() => {
+    let result = BN_ZERO;
+
+    items.forEach((item) => {
+      result = result.plus((new BigN(item.activeStake)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
+    });
+
+    return result;
+  }, [items]);
+
   const totalValue = useMemo(() => {
-    return new BigN(totalUnstake).plus(totalActiveStake);
-  }, [totalActiveStake, totalUnstake]);
+    let result = BN_ZERO;
+
+    items.forEach((item) => {
+      result = result.plus((new BigN(item.totalStake)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
+    });
+
+    return result;
+  }, [items]);
 
   const totalUnclaimReward = useMemo(() => {
     let result = BN_ZERO;
@@ -98,7 +104,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
     <div className={CN(className, 'flex-row', { '-mobile-mode': !isWebUI })}>
       <div className={CN('__block-item', '__total-balance-block')}>
         <div className={'__block-title-wrapper'}>
-          <div className={'__block-title'}>{t('Est. Total Value')}</div>
+          <div className={'__block-title'}>{t('Total value staked')}</div>
           {!isWebUI && <Button
             className='__balance-visibility-toggle'
             icon={
@@ -146,7 +152,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
 
           <div className={CN('__block-item', '__balance-block')}>
             <div className='__block-title-wrapper'>
-              <div className={'__block-title'}>{t('Est. Total active')}</div>
+              <div className={'__block-title'}>{t('Total active stake')}</div>
             </div>
             <Tooltip
               overlayClassName={CN({
@@ -176,7 +182,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
 
           <div className={CN('__block-item', '__balance-block')}>
             <div className='__block-title-wrapper'>
-              <div className={'__block-title'}>{t('Est. Total unstake')}</div>
+              <div className={'__block-title'}>{t('Total unstake')}</div>
             </div>
             <Tooltip
               overlayClassName={CN({
@@ -205,7 +211,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
 
           <div className={CN('__block-item', '__balance-block')}>
             <div className='__block-title-wrapper'>
-              <div className={'__block-title'}>{t('Est. Total unclaim')}</div>
+              <div className={'__block-title'}>{t('Total unclaimed rewards')}</div>
             </div>
             <Tooltip
               overlayClassName={CN({
@@ -338,7 +344,8 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   '.__block-item': {
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 200px'
+    flex: '1 1 200px',
+    minHeight: 128
   },
 
   '.__block-title-wrapper': {

@@ -798,7 +798,15 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   '.action-wrapper': {
     display: 'flex',
     justifyContent: 'space-between',
-    alignItems: 'center'
+    alignItems: 'center',
+    '.filter-tabs-container': {
+      flex: 1,
+      overflowX: 'auto'
+    },
+
+    '.__desktop-toolbar': {
+      minWidth: 360
+    }
   },
 
   '&.-mobile-mode': {

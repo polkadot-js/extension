@@ -85,6 +85,7 @@ const Component = ({ className, data, dismissBanner, instructionDataList, onClic
         <AppInstructionModal
           data={currentInstructionData.instructions}
           instruction={data.instruction}
+          media={currentInstructionData.media || ''}
           onPressCancelBtn={onClickCancelInstructionModal}
           onPressConfirmBtn={onClickConfirmInstructionModal}
           title={currentInstructionData.title || 'Instruction'}

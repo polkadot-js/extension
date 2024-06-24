@@ -4,6 +4,7 @@
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
+import { _getXcmUnstableWarning, _isXcmTransferUnstable } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
@@ -552,6 +553,32 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }
   }, [maxTransfer]);
   const onPreSubmit = useCallback(() => {
+    if (chain !== destChain) {
+      const originChainInfo = chainInfoMap[chain];
+      const destChainInfo = chainInfoMap[destChain];
+
+      if (_isXcmTransferUnstable(originChainInfo, destChainInfo)) {
+        openAlert({
+          type: NotificationType.WARNING,
+          content: t(_getXcmUnstableWarning(originChainInfo, destChainInfo)),
+          title: t('Pay attention!'),
+          okButton: {
+            text: t('Continue'),
+            onClick: () => {
+              closeAlert();
+              form.submit();
+            }
+          },
+          cancelButton: {
+            text: t('Cancel'),
+            onClick: closeAlert
+          }
+        });
+
+        return;
+      }
+    }
+
     if (_isNativeToken(assetInfo)) {
       const minAmount = _getTokenMinAmount(assetInfo);
       const bnMinAmount = new BN(minAmount);
@@ -579,7 +606,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
     }
 
     form.submit();
-  }, [assetInfo, chain, closeAlert, destChain, form, isTransferAll, openAlert, t]);
+  }, [assetInfo, chain, chainInfoMap, closeAlert, destChain, form, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic

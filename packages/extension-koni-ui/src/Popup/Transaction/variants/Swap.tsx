@@ -7,7 +7,8 @@ import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/backg
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { CommonFeeComponent, CommonOptimalPath, CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddressInput, AlertBox, HiddenInput, MetaInfo, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { SwapFromField, SwapToField } from '@subwallet/extension-koni-ui/components/Field/Swap';
@@ -16,9 +17,10 @@ import { QuoteResetTime, SwapRoute } from '@subwallet/extension-koni-ui/componen
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
 import { useChainConnection, useGetChainPrefixBySlug, useNotification, usePreCheckAction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-koni-ui/hooks';
+import useHandleSubmitMultiTransaction from '@subwallet/extension-koni-ui/hooks/transaction/useHandleSubmitMultiTransaction';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-koni-ui/messaging/transaction/swap';
 import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-koni-ui/Popup/Transaction/parts';
-import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-koni-ui/reducer';
+import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -76,7 +78,7 @@ const Component = () => {
   useSetCurrentPage('/transaction/swap');
   const { t } = useTranslation();
   const notify = useNotification();
-  const { closeAlert, defaultData, onDone, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
+  const { closeAlert, defaultData, openAlert, persistData, setBackProps, setCustomScreenTitle } = useTransactionContext<SwapParams>();
 
   const { activeModal, inactiveAll, inactiveModal } = useContext(ModalContext);
 
@@ -99,7 +101,7 @@ const Component = () => {
   const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: new BigN(0.01), isCustomType: true });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
-  const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
+  const [currentOptimalSwapPath, setOptimalSwapPath] = useState<CommonOptimalPath | undefined>(undefined);
 
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const [showQuoteArea, setShowQuoteArea] = useState<boolean>(false);
@@ -146,7 +148,8 @@ const Component = () => {
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const onPreCheck = usePreCheckAction(fromValue);
 
-  const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
+  const [processState, dispatchProcessState] = useReducer(commonProcessReducer, DEFAULT_COMMON_PROCESS);
+  const { onError, onSuccess } = useHandleSubmitMultiTransaction(dispatchProcessState);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
     const result: Record<string, string[]> = {};
@@ -368,7 +371,7 @@ const Component = () => {
     return totalBalance;
   }, [assetRegistryMap, currentQuote?.feeInfo.feeComponent, priceMap]);
 
-  const getConvertedBalance = useCallback((feeItem: SwapFeeComponent) => {
+  const getConvertedBalance = useCallback((feeItem: CommonFeeComponent) => {
     const asset = assetRegistryMap[feeItem.tokenSlug];
 
     if (asset) {
@@ -489,76 +492,6 @@ const Component = () => {
     );
   };
 
-  const onError = useCallback(
-    (error: Error) => {
-      notify({
-        message: error.message,
-        type: 'error',
-        duration: 8
-      });
-
-      dispatchProcessState({
-        type: SwapActionType.STEP_ERROR_ROLLBACK,
-        payload: error
-      });
-    },
-    [notify]
-  );
-
-  const onSuccess = useCallback(
-    (lastStep: boolean, needRollback: boolean): ((rs: SWTransactionResponse) => boolean) => {
-      return (rs: SWTransactionResponse): boolean => {
-        const { errors: _errors, id, warnings } = rs;
-
-        if (_errors.length || warnings.length) {
-          if (_errors[0]?.message !== 'Rejected by user') {
-            if (
-              _errors[0]?.message.startsWith('UnknownError Connection to Indexed DataBase server lost') ||
-              _errors[0]?.message.startsWith('Provided address is invalid, the capitalization checksum test failed') ||
-              _errors[0]?.message.startsWith('connection not open on send()')
-            ) {
-              notify({
-                message: t('Your selected network has lost connection. Update it by re-enabling it or changing network provider'),
-                type: 'error',
-                duration: 8
-              });
-
-              return false;
-            }
-
-            // hideAll();
-            onError(_errors[0]);
-
-            return false;
-          } else {
-            dispatchProcessState({
-              type: needRollback ? SwapActionType.STEP_ERROR_ROLLBACK : SwapActionType.STEP_ERROR,
-              payload: _errors[0]
-            });
-
-            return false;
-          }
-        } else if (id) {
-          dispatchProcessState({
-            type: SwapActionType.STEP_COMPLETE,
-            payload: rs
-          });
-
-          if (lastStep) {
-            onDone(id);
-
-            return false;
-          }
-
-          return true;
-        } else {
-          return false;
-        }
-      };
-    },
-    [notify, onDone, onError, t]
-  );
-
   const isChainConnected = useMemo(() => {
     return checkChainConnected(chainValue);
   }, [chainValue, checkChainConnected]);
@@ -612,7 +545,7 @@ const Component = () => {
 
       const submitData = async (step: number): Promise<boolean> => {
         dispatchProcessState({
-          type: SwapActionType.STEP_SUBMIT,
+          type: CommonActionType.STEP_SUBMIT,
           payload: null
         });
 
@@ -637,11 +570,11 @@ const Component = () => {
               return false;
             } else {
               dispatchProcessState({
-                type: SwapActionType.STEP_COMPLETE,
+                type: CommonActionType.STEP_COMPLETE,
                 payload: true
               });
               dispatchProcessState({
-                type: SwapActionType.STEP_SUBMIT,
+                type: CommonActionType.STEP_SUBMIT,
                 payload: null
               });
 
@@ -838,7 +771,7 @@ const Component = () => {
   };
 
   const isSwapXCM = useMemo(() => {
-    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+    return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
 
   const renderAlertBox = () => {
@@ -977,7 +910,7 @@ const Component = () => {
                   steps: result.process.steps,
                   feeStructure: result.process.totalFee
                 },
-                type: SwapActionType.STEP_CREATE
+                type: CommonActionType.STEP_CREATE
               });
 
               setQuoteOptions(result.quote.quotes);

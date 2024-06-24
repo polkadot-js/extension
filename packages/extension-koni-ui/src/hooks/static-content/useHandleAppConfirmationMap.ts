@@ -89,7 +89,7 @@ export const useHandleAppConfirmationMap = (
   }, []);
 
   const filteredAppConfirmationMap = useMemo(() => {
-    return appConfirmationData.filter((item) => {
+    return appConfirmationData?.filter((item) => {
       if (!!Object.keys(item.conditions) && !!Object.keys(item.conditions).length) {
         const isPassValidation: boolean[] = [];
 

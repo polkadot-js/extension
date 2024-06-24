@@ -1,5 +1,36 @@
 # CHANGELOG
 
+## 1.2.8
+Build date: Jun 21, 2024.
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter') (#3218)
+
+
+## 1.2.7
+Build date: Jun 20, 2024.
+
+Features & Update:
+- Support MV3 on Firefox (#3108)
+
+
+## 1.2.6
+Build date: Jun 19, 2024.
+
+Features & Update:
+- Improve the Marketing Campaign application mechanism (#2806)
+- Update chain-list (#3185)
+  - Add vASTR token
+  - Remove priceid vETH
+  - Update provider
+- Show nomination pool with block status (#3043)
+- Hide the popup Remind backup seed phrase (#3198)
+- Support transfer between PAH - KAH (#3095)
+
+Bugs fixed:
+- Check error logs in earning feature (#3197)
+- Fixed bug related to earning feature ( Round 5) (#2995)
+
 ## 1.2.5
 Build date: Jun 11, 2024.
 

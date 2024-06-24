@@ -6,6 +6,7 @@ export { default as RequestCameraAccessModal } from './RequestCameraAccessModal'
 export { default as RequestCreatePasswordModal } from './RequestCreatePasswordModal';
 export { default as ResetWalletModal } from './ResetWalletModal';
 export { default as RemindBackupSeedPhraseModal } from './RemindBackupSeedPhraseModal';
+export { default as RemindUpgradeVersionModal } from './RemindUpgradeFirefoxVersion';
 export { SortingModal } from './SortingModal';
 
 export * from './Account';

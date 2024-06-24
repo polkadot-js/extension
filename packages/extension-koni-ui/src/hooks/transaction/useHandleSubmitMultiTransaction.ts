@@ -51,6 +51,12 @@ const useHandleSubmitMultiTransaction = (dispatchProcessState: (value: CommonPro
               });
 
               return false;
+            } else {
+              notify({
+                message: _errors[0]?.message || warnings[0]?.message,
+                type: _errors.length ? 'error' : 'warning',
+                duration: 8
+              });
             }
 
             if (!_errors.length) {

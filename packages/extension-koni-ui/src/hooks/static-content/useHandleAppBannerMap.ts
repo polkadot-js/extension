@@ -102,7 +102,7 @@ export const useHandleAppBannerMap = (
   }, []);
 
   const filteredAppBannerMap = useMemo(() => {
-    return appBannerData.filter((item) => {
+    return appBannerData?.filter((item) => {
       if (!!Object.keys(item.conditions) && !!Object.keys(item.conditions).length) {
         const isPassValidation: boolean[] = [];
 

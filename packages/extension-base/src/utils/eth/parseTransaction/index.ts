@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { EvmTransactionArg, NestedArray, ParseEvmTransactionData, ResponseParseEvmContractInput, ResponseQrParseRLP } from '@subwallet/extension-base/background/KoniTypes';
-import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmAbiExplorer, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { fetchJson } from '@subwallet/extension-base/utils';

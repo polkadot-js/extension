@@ -685,25 +685,19 @@ const Component = () => {
     }
   }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
 
-  const destinationSwapValue = useMemo(() => {
-    if (currentQuote) {
-      const decimals = _getAssetDecimals(toAssetInfo);
-
-      return new BigN(currentQuote.toAmount || 0).div(BN_TEN.pow(decimals));
-    }
-
-    return BN_ZERO;
-  }, [currentQuote, toAssetInfo]);
-
   const minimumReceived = useMemo(() => {
-    const calcMinimumReceived = (value: BigN) => {
-      return value.toString().includes('e')
-        ? formatNumberString(value.toString())
-        : value.toString();
+    const calcMinimumReceived = (value: string) => {
+      const adjustedValue = supportSlippageSelection
+        ? value
+        : new BigN(value).multipliedBy(new BigN(1).minus(currentSlippage.slippage));
+
+      return adjustedValue.toString().includes('e')
+        ? formatNumberString(adjustedValue.toString())
+        : adjustedValue.toString();
     };
 
-    return calcMinimumReceived(destinationSwapValue);
-  }, [destinationSwapValue]);
+    return calcMinimumReceived(currentQuote?.toAmount || '0');
+  }, [currentQuote?.toAmount, currentSlippage.slippage, supportSlippageSelection]);
 
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');
@@ -1189,9 +1183,10 @@ const Component = () => {
                   </div>
 
                   <SwapToField
+                    decimals={_getAssetDecimals(toAssetInfo)}
                     loading={handleRequestLoading && showQuoteArea}
                     onSelectToken={onSelectToToken}
-                    swapValue={destinationSwapValue}
+                    swapValue={currentQuote?.toAmount || 0}
                     toAsset={toAssetInfo}
                     tokenSelectorItems={toTokenItems}
                     tokenSelectorValue={toTokenSlugValue}
@@ -1400,7 +1395,7 @@ const Component = () => {
                   <div className={'__minimum-received'}>
                     <MetaInfo.Number
                       customFormatter={swapCustomFormatter}
-                      decimals={0}
+                      decimals={_getAssetDecimals(toAssetInfo)}
                       formatType={'custom'}
                       label={
                         <Tooltip

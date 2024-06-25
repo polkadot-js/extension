@@ -24,6 +24,10 @@ const DEFAULT_PRICE_SUBJECT: PriceJson = {
   exchangeRateMap: {}
 };
 
+const checkFetchSuccess = (obj1: Omit<PriceJson, 'exchangeRateMap'>, obj2: Record<CurrencyType, ExchangeRateJSON>) => {
+  return Object.keys(obj1).length > 0 && Object.keys(obj2).length > 0;
+};
+
 export class PriceService implements StoppableServiceInterface, PersistDataServiceInterface, CronServiceInterface {
   status: ServiceStatus;
   private dbService: DatabaseService;
@@ -62,8 +66,10 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       getExchangeRateMap(),
       getPriceMap(priceIds, currency)
     ]).then(([exchangeRateMap, priceMap]) => {
-      this.rawExchangeRateMap.next(exchangeRateMap);
-      this.rawPriceSubject.next(priceMap);
+      if (checkFetchSuccess(priceMap, exchangeRateMap)) {
+        this.rawExchangeRateMap.next(exchangeRateMap);
+        this.rawPriceSubject.next(priceMap);
+      }
     });
   }
 

@@ -1,12 +1,12 @@
-    2700	AnhMTV                        	Release version 1.2.9
+    2704	AnhMTV                        	
     2464	Nam Phạm                      	[Issue 1984] fix: handle warning on send fund
     2072	S2kael                        	[Issue-3214] Update stable version for chain-list
-     818	lw-cdm                        	Update condition to show alert on send fund screen
+     819	lw-cdm                        	[Issue-3228] Remove modal-viewer support
+     467	nguyentiendung                	
      465	Jaco                          	0.42.5 (#969)
-     465	nguyentiendung                	[Issue-3043] Update: Sort pool list items that are disabled.
      185	quangdo                       	
      181	bluezdot                      	[Issue-3214] Update chainlist
-     146	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
+     147	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
      135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      117	Automation Bot                	[CI Skip] Auto increase webapp build number
      104	khainh                        	predefine metadata for Polkadot & Kusama chains

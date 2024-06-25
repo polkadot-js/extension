@@ -33,3 +33,4 @@ export const TIME_OUT_RECORD = 'general.time-out-record';
 export const APP_INSTRUCTION_DATA = 'static.instruction-data';
 export const SHOW_APP_POPUP = 'static.show-app-popup';
 export const LATEST_SESSION = 'general.latest-session';
+export const UPGRADE_FIREFOX_VERSION = 'general.updated-version-firefox';

@@ -10,9 +10,10 @@ import { getExchangeRateMap, getPriceMap } from '@subwallet/extension-base/servi
 import DatabaseService from '@subwallet/extension-base/services/storage-service/DatabaseService';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { CurrentCurrencyStore } from '@subwallet/extension-base/stores';
+import { wait } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 
 const DEFAULT_CURRENCY: CurrencyType = 'USD';
 const DEFAULT_PRICE_SUBJECT: PriceJson = {
@@ -62,15 +63,21 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   private async getTokenPrice (priceIds: Set<string>, currency?: CurrencyType, resolve?: (rs: boolean) => void, reject?: (e: boolean) => void) {
-    await Promise.all([
-      getExchangeRateMap(),
-      getPriceMap(priceIds, currency)
-    ]).then(([exchangeRateMap, priceMap]) => {
-      if (checkFetchSuccess(priceMap, exchangeRateMap)) {
-        this.rawExchangeRateMap.next(exchangeRateMap);
-        this.rawPriceSubject.next(priceMap);
-      }
-    });
+    const getPriceData = async () => {
+      await Promise.all([
+        getExchangeRateMap(),
+        getPriceMap(priceIds, currency)
+      ]).then(([exchangeRateMap, priceMap]) => {
+        if (checkFetchSuccess(priceMap, exchangeRateMap)) {
+          this.rawExchangeRateMap.next(exchangeRateMap);
+          this.rawPriceSubject.next(priceMap);
+        }
+      });
+    };
+
+    await Promise.race([
+      getPriceData(), wait(10 * 1000)
+    ]);
   }
 
   private getCurrentCurrencySubject (): Subject<CurrencyType> {
@@ -215,7 +222,7 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       }
     };
 
-    this.getCurrentCurrencySubject().subscribe((currency) => {
+    combineLatest([this.getCurrentCurrencySubject(), this.rawPriceSubject, this.rawExchangeRateMap]).subscribe(([currency]) => {
       this.calculatePriceMap(currency).then((data) => {
         if (data) {
           this.priceSubject.next(data);

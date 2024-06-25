@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CurrencyJson, CurrencyType, ExchangeRateJSON, PriceJson } from '@subwallet/extension-base/background/KoniTypes';
-import { createPromiseHandler } from '@subwallet/extension-base/utils';
 import { staticData, StaticKey } from '@subwallet/extension-base/utils/staticData';
 
-import { noop } from '@polkadot/util';
+import { isArray } from '@polkadot/util';
 
 interface GeckoItem {
   id: string,
@@ -30,33 +29,18 @@ let useBackupApi = false;
 
 export const getExchangeRateMap = async (): Promise<Record<CurrencyType, ExchangeRateJSON>> => {
   let response: Response | undefined;
-  const { promise, resolve } = createPromiseHandler<boolean>();
 
   try {
     try {
       response = await fetch('https://api-cache.subwallet.app/exchange-rate');
-    } catch (e) {
-      response = await fetch('https://static-cache.subwallet.app/exchange-rate/data.json');
+    } catch (e) {}
+
+    if (response?.status !== 200) {
+      try {
+        response = await fetch('https://static-cache.subwallet.app/exchange-rate/data.json');
+      } catch (e) {}
     }
 
-    if (response.status !== 200) {
-      const idInterval = setInterval(() => {
-        fetch('https://static-cache.subwallet.app/exchange-rate/data.json')
-          .then((result) => {
-            if (result?.ok) {
-              response = result;
-              clearInterval(idInterval);
-            }
-          }).catch(noop);
-      }, 10 * 1000);
-    } else {
-      resolve(true);
-    }
-  } catch (e) {}
-
-  await promise;
-
-  try {
     const responseDataExchangeRate = (await response?.json()) as ExchangeRateItem || {};
 
     const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
@@ -80,7 +64,6 @@ export const getExchangeRateMap = async (): Promise<Record<CurrencyType, Exchang
 };
 
 export const getPriceMap = async (priceIds: Set<string>, currency: CurrencyType = 'USD'): Promise<Omit<PriceJson, 'exchangeRateMap'>> => {
-  const { promise, resolve } = createPromiseHandler<boolean>();
   const idStr = Array.from(priceIds).join(',');
   let response: Response | undefined;
 
@@ -98,31 +81,19 @@ export const getPriceMap = async (priceIds: Set<string>, currency: CurrencyType 
 
       try {
         response = await fetch(`https://api-cache.subwallet.app/api/price/get?ids=${idStr}`);
-      } catch (e) {
-        response = await fetch('https://static-cache.subwallet.app/price/data.json');
+      } catch (e) {}
+
+      if (response?.status !== 200) {
+        try {
+          response = await fetch('https://static-cache.subwallet.app/price/data.json');
+        } catch (e) {}
       }
     }
 
-    if (response?.status !== 200) {
-      const idInterval = setInterval(() => {
-        fetch('https://static-cache.subwallet.app/price/data.json')
-          .then((rs) => {
-            if (rs?.ok) {
-              response = rs;
-              clearInterval(idInterval);
-              resolve(true);
-            }
-          }).catch(noop);
-      }, 10 * 1000);
-    } else {
-      resolve(true);
-    }
-  } catch (e) {}
-
-  await promise;
-
-  try {
-    const responseDataPrice = (await response?.json()) as Array<GeckoItem> || [];
+    const generateDataPriceRaw = await response?.json() as unknown || [];
+    const responseDataPrice = isArray(generateDataPriceRaw)
+      ? generateDataPriceRaw as Array<GeckoItem>
+      : Object.entries(generateDataPriceRaw).map(([id, value]) => ({ ...value, id }) as GeckoItem);
     const currencyData = staticData[StaticKey.CURRENCY_SYMBOL][currency || DEFAULT_CURRENCY] as CurrencyJson;
     const priceMap: Record<string, number> = {};
     const price24hMap: Record<string, number> = {};

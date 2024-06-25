@@ -799,7 +799,6 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 40,
     '.filter-tabs-container': {
       flex: 1,
       overflowX: 'auto'

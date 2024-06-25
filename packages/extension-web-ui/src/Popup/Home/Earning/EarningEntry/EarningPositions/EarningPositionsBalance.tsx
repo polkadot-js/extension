@@ -244,6 +244,7 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   justifyContent: 'space-between',
   alignItems: 'stretch',
   flexWrap: 'wrap',
+  marginBottom: 32,
 
   '.ant-number .ant-typography': {
     fontSize: 'inherit !important',
@@ -252,6 +253,10 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   },
 
   '&.-mobile-mode': {
+    marginBottom: 0,
+    '.__block-item': {
+      minHeight: 'fit-content'
+    },
     '.__block-title': {
       color: token.colorTextTertiary,
       fontSize: token.fontSizeSM,
@@ -260,7 +265,8 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
     '.__block-title-wrapper': {
       marginBottom: 0,
       minHeight: 'fit-content',
-      gap: 4
+      gap: 4,
+      paddingBottom: token.paddingXXS
     },
     '.__total-balance-block': {
       paddingLeft: token.padding,
@@ -344,7 +350,8 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   '.__block-item': {
     display: 'flex',
     flexDirection: 'column',
-    flex: '1 1 200px'
+    flex: '1 1 200px',
+    minHeight: 128
   },
 
   '.__block-title-wrapper': {
@@ -396,31 +403,24 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
     }
   },
 
-  '@media screen and (min-width: 990px) and (max-width: 1135px)': {
+  '@media screen and (max-width: 1135px)': {
     '.__divider-special': {
       display: 'none'
+    },
+    '.__balance-block': {
+      minHeight: 86
     }
   },
 
-  '@media screen and (min-width: 1480px) and (max-width: 1600px)': {
+  '@media screen and (max-width: 1305px)': {
     '.__balance-value': {
-      fontSize: '28px !important',
-      '.ant-number-decimal': {
-        fontSize: '22px !important'
-      }
+      fontSize: '24px !important',
+      lineHeight: '32px !important'
     },
     '.__total-balance-block': {
       '.__balance-value': {
-        fontSize: '35px !important'
-      }
-    }
-  },
-
-  '@media screen and (max-width: 1480px)': {
-    '.__balance-value': {
-      fontSize: '25px !important',
-      '.ant-number-decimal': {
-        fontSize: '20px !important'
+        fontSize: '30px !important',
+        lineHeight: '38px !important'
       }
     }
   },

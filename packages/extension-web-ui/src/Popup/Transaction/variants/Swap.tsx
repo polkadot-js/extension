@@ -687,15 +687,13 @@ const Component = () => {
 
   const destinationSwapValue = useMemo(() => {
     if (currentQuote) {
-      const decimals = _getAssetDecimals(fromAssetInfo);
+      const decimals = _getAssetDecimals(toAssetInfo);
 
-      return new BigN(fromAmountValue || 0)
-        .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate);
+      return new BigN(currentQuote.toAmount || 0).div(BN_TEN.pow(decimals));
     }
 
     return BN_ZERO;
-  }, [currentQuote, fromAmountValue, fromAssetInfo]);
+  }, [currentQuote, toAssetInfo]);
 
   const minimumReceived = useMemo(() => {
     const calcMinimumReceived = (value: BigN) => {

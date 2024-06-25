@@ -32,7 +32,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return assetRegistryMap[swapInfo.quote.pair.from] || undefined;
   }, [assetRegistryMap, swapInfo.quote.pair.from]);
 
-  const destinationValue = new BigN(swapInfo.quote.fromAmount).div(BN_TEN.pow(_getAssetDecimals(fromAssetInfo))).multipliedBy(swapInfo.quote.rate).multipliedBy(1 - swapInfo.slippage);
+  const destinationValue = new BigN(swapInfo.quote.toAmount).div(BN_TEN.pow(_getAssetDecimals(toAssetInfo)));
 
   return (
     <div className={CN(className, 'swap-confirmation-container')}>

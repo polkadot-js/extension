@@ -29,21 +29,15 @@ const Component: React.FC<Props> = (props: Props) => {
     onSelect?.(quote);
   }, [onSelect, quote]);
 
-  const fromAssetInfo = useMemo(() => {
-    return assetRegistryMap[quote.pair.from] || undefined;
-  }, [assetRegistryMap, quote.pair.from]);
-
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[quote.pair.to] || undefined;
   }, [assetRegistryMap, quote.pair.to]);
 
   const destinationSwapValue = useMemo(() => {
-    const decimals = _getAssetDecimals(fromAssetInfo);
+    const decimals = _getAssetDecimals(toAssetInfo);
 
-    return new BigN(quote.fromAmount)
-      .div(BN_TEN.pow(decimals))
-      .multipliedBy(quote.rate);
-  }, [quote, fromAssetInfo]);
+    return new BigN(quote.toAmount).div(BN_TEN.pow(decimals));
+  }, [quote.toAmount, toAssetInfo]);
 
   return (
     <>

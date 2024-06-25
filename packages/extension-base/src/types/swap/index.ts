@@ -130,6 +130,8 @@ export interface HydradxPreValidationMetadata {
 
 export interface AssetHubPreValidationMetadata {
   chain: _ChainInfo;
+  toAmount: string;
+  quoteRate: string;
 }
 
 export interface QuoteAskResponse {
@@ -184,6 +186,10 @@ export interface OptimalSwapPathParams {
 export interface SwapEarlyValidation {
   error?: SwapErrorType;
   metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata | AssetHubPreValidationMetadata;
+}
+
+export interface AssetHubSwapEarlyValidation extends SwapEarlyValidation {
+  metadata: AssetHubPreValidationMetadata;
 }
 
 export interface ValidateSwapProcessParams {

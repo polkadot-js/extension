@@ -66,3 +66,10 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
 
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
 }
+
+export function convertSwapRate (rate: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {
+  const decimalDiff = _getAssetDecimals(toAsset) - _getAssetDecimals(fromAsset);
+  const bnRate = new BigN(rate);
+
+  return bnRate.times(10 ** decimalDiff).pow(-1).toNumber();
+}

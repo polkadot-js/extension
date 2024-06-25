@@ -37,42 +37,48 @@ export const getReserveForPool = async (api: ApiPromise, asset1: _ChainAsset, as
 };
 
 export const getReserveForPath = async (api: ApiPromise, paths: _ChainAsset[]): Promise<Array<[string, string]>> => {
-  const rs: Array<[string, string]> = [];
+  const pairs: Array<[_ChainAsset, _ChainAsset]> = [];
 
   for (let i = 0; i < paths.length - 1; i++) {
     const asset1 = paths[i];
     const asset2 = paths[i + 1];
-    const tmp = await getReserveForPool(api, asset1, asset2);
 
-    rs.push(tmp);
+    pairs.push([asset1, asset2]);
   }
 
-  return rs;
+  return await Promise.all(pairs.map(async ([asset1, asset2]) => getReserveForPool(api, asset1, asset2)));
 };
 
-export const estimateTokensForPool = async (api: ApiPromise, asset1: _ChainAsset, asset2: _ChainAsset, amount: string): Promise<string> => {
-  const assetLocation1 = _getXcmAssetMultilocation(asset1) as StagingXcmV3MultiLocation;
-  const assetLocation2 = _getXcmAssetMultilocation(asset2) as StagingXcmV3MultiLocation;
-  const rs = await api.call.assetConversionApi.quotePriceExactTokensForTokens(assetLocation1, assetLocation2, amount, false);
-
-  if (!rs) {
+export const estimateTokensForPool = (amount: string, reserves: [string, string]): string => {
+  if (amount === '0') {
     return '0';
   }
 
-  return rs.unwrapOrDefault().toString();
+  return new BigN(amount).times(reserves[1]).div(reserves[0]).integerValue(BigN.ROUND_DOWN).toString();
 };
 
-export const estimateTokensForPath = async (api: ApiPromise, amounts: string[], paths: _ChainAsset[]): Promise<string[]> => {
-  if (paths.length < 2) {
-    return amounts;
+export const estimateTokensForPath = (amount: string, reserves: Array<[string, string]>): string[] => {
+  const result = [amount];
+
+  for (let i = 0; i < reserves.length; i++) {
+    const reserve = reserves[i];
+    const currentAmount = result[i];
+    const nextAmount = estimateTokensForPool(currentAmount, reserve);
+
+    result.push(nextAmount);
   }
 
-  const restPaths = paths.slice(1);
-  const lastAmount = amounts[amounts.length - 1];
+  return result;
+};
 
-  const currentAmount = await estimateTokensForPool(api, paths[0], paths[1], lastAmount);
+export const estimateRateForPath = (reserves: Array<[string, string]>): string => {
+  let result = new BigN(1);
 
-  return await estimateTokensForPath(api, [...amounts, currentAmount], restPaths);
+  for (const reserve of reserves) {
+    result = result.times(reserve[0]).div(reserve[1]);
+  }
+
+  return result.toString();
 };
 
 export const checkLiquidityForPool = (amount: string, reserve1: string, reserve2: string): SwapErrorType | undefined => {

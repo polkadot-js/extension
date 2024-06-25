@@ -5,8 +5,8 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenMinAmount } from '@subwallet/extension-base/services/chain-service/utils';
-import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
-import { AssetHubPreValidationMetadata, SwapEarlyValidation, SwapErrorType, SwapPair, SwapRequest } from '@subwallet/extension-base/types/swap';
+import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateRateForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
+import { AssetHubPreValidationMetadata, AssetHubSwapEarlyValidation, SwapErrorType, SwapPair, SwapRequest } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -43,22 +43,23 @@ export class AssetHubRouter {
     // }
   }
 
-  async earlyValidateSwapValidation (request: SwapRequest): Promise<SwapEarlyValidation> {
+  async earlyValidateSwapValidation (request: SwapRequest): Promise<AssetHubSwapEarlyValidation> {
     const substrateApi = await this.substrateApi.isReady;
     const paths = this.buildPath(request.pair);
 
     const api = await substrateApi.api.isReady;
     const amount = request.fromAmount;
     const reserves = await getReserveForPath(api, paths);
-    const amounts = await estimateTokensForPath(api, [amount], paths);
+    const amounts = estimateTokensForPath(amount, reserves);
+    const rate = estimateRateForPath(reserves);
+
+    const errors: SwapErrorType[] = [];
 
     // Check liquidity
     const liquidityError = checkLiquidityForPath(amounts, reserves);
 
     if (liquidityError) {
-      return {
-        error: liquidityError
-      };
+      errors.push(liquidityError);
     }
 
     // Check amount token in pool after swap
@@ -66,23 +67,24 @@ export class AssetHubRouter {
     const minAmountAfterSwapError = checkMinAmountForPath(reserves, amounts, minAmounts);
 
     if (minAmountAfterSwapError) {
-      return {
-        error: minAmountAfterSwapError
-      };
+      errors.push(minAmountAfterSwapError);
     }
 
     const bnAmount = new BigN(request.fromAmount);
 
     if (bnAmount.lte(0)) {
-      return {
-        error: SwapErrorType.AMOUNT_CANNOT_BE_ZERO
-      };
+      errors.push(SwapErrorType.AMOUNT_CANNOT_BE_ZERO);
     }
 
+    const metadata: AssetHubPreValidationMetadata = {
+      chain: this.chainService.getChainInfoByKey(this.chain),
+      toAmount: amounts[amounts.length - 1],
+      quoteRate: rate
+    };
+
     return {
-      metadata: {
-        chain: this.chainService.getChainInfoByKey(this.chain)
-      } as AssetHubPreValidationMetadata
+      error: errors[0],
+      metadata
     };
   }
 
@@ -91,7 +93,8 @@ export class AssetHubRouter {
     const paths = this.buildPath(pair);
 
     const api = await substrateApi.api.isReady;
-    const amounts = await estimateTokensForPath(api, [amountIn], paths);
+    const reserves = await getReserveForPath(api, paths);
+    const amounts = estimateTokensForPath(amountIn, reserves);
 
     return amounts[amounts.length - 1];
   }

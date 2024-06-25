@@ -191,7 +191,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
       const paths = this.router.buildPath(request.pair);
       const amountOut = earlyValidation.metadata.toAmount;
       const toAmount = new BigN(amountOut);
-      const minReceive = toAmount.times(1 - request.slippage).integerValue();
+      const minReceive = toAmount.times(1 - request.slippage).integerValue(BigN.ROUND_DOWN);
       const extrinsic = await this.router.buildSwapExtrinsic(paths, request.address, request.fromAmount, minReceive.toString());
       const paymentInfo = await extrinsic.paymentInfo(request.address);
 
@@ -297,7 +297,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
     const paths = params.quote.route.path.map((slug) => this.chainService.getAssetBySlug(slug));
     const { fromAmount, toAmount } = params.quote;
 
-    const minReceive = new BigN(1 - params.slippage).times(toAmount).integerValue();
+    const minReceive = new BigN(1 - params.slippage).times(toAmount).integerValue(BigN.ROUND_DOWN);
 
     const extrinsic = buildSwapExtrinsic(api, paths, params.address, fromAmount, minReceive.toString());
 

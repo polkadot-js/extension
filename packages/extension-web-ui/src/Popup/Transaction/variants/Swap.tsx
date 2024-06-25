@@ -689,7 +689,7 @@ const Component = () => {
     const calcMinimumReceived = (value: string) => {
       const adjustedValue = supportSlippageSelection
         ? value
-        : new BigN(value).multipliedBy(new BigN(1).minus(currentSlippage.slippage));
+        : new BigN(value).multipliedBy(new BigN(1).minus(currentSlippage.slippage)).integerValue(BigN.ROUND_DOWN);
 
       return adjustedValue.toString().includes('e')
         ? formatNumberString(adjustedValue.toString())

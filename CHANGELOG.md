@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 1.2.10
+Build date: Jun 25, 2024.
+
+Features & Update:
+- Update subwallet-react-ui (#3228)
+- Fix bug Screen flickering error when interacting with extensions (#3131)
+- Fix bug Show incorrect Amount on Transaction history, Transaction confirmation for transfer NFT (#3133)
+
+
 ## 1.2.9
 Build date: Jun 24, 2024.
 

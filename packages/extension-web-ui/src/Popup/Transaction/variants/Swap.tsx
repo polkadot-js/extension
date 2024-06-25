@@ -697,17 +697,13 @@ const Component = () => {
 
   const minimumReceived = useMemo(() => {
     const calcMinimumReceived = (value: BigN) => {
-      const adjustedValue = supportSlippageSelection
-        ? value
-        : value.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
-
-      return adjustedValue.toString().includes('e')
-        ? formatNumberString(adjustedValue.toString())
-        : adjustedValue.toString();
+      return value.toString().includes('e')
+        ? formatNumberString(value.toString())
+        : value.toString();
     };
 
     return calcMinimumReceived(destinationSwapValue);
-  }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
+  }, [destinationSwapValue]);
 
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');

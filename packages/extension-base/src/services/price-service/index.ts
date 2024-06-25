@@ -106,16 +106,27 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
   }
 
   private async calculatePriceMap (currency?: CurrencyType) {
-    const { price24hMap, priceMap } = this.rawPriceSubject.value;
-    const exchangeRateData = this.rawExchangeRateMap.value;
+    let { price24hMap, priceMap } = this.rawPriceSubject.value;
+    let exchangeRateData = this.rawExchangeRateMap.value;
+    const priceStored = await this.dbService.getPriceStore(currency);
+
     const currencyKey = currency || DEFAULT_CURRENCY;
 
     if (Object.keys(this.rawPriceSubject.value).length === 0) {
+      if (priceStored?.exchangeRateMap) {
+        exchangeRateData = priceStored.exchangeRateMap;
+      }
+
       return;
     }
 
     if (Object.keys(exchangeRateData).length === 0) {
-      return;
+      if (priceStored?.price24hMap) {
+        price24hMap = { ...priceStored.price24hMap };
+        priceMap = { ...priceStored.priceMap };
+      } else {
+        return;
+      }
     }
 
     const finalPriceMap = {
@@ -199,7 +210,6 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
     };
 
     this.getCurrentCurrencySubject().subscribe((currency) => {
-      console.log('Currency changed', currency);
       this.calculatePriceMap(currency).then((data) => {
         if (data) {
           this.priceSubject.next(data);

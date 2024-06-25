@@ -26,8 +26,15 @@ const DEFAULT_CURRENCY = 'USD';
 let useBackupApi = false;
 
 export const getExchangeRateMap = async (): Promise<Record<CurrencyType, ExchangeRateJSON>> => {
+  let response: Response | undefined;
+
   try {
-    const response = await fetch('https://api-cache.subwallet.app/exchange-rate');
+    try {
+      response = await fetch('https://api-cache.subwallet.app/exchange-rate');
+    } catch (e) {
+      response = await fetch('https://static-cache.subwallet.app/exchange-rate/data.json');
+    }
+
     const responseDataExchangeRate = (await response.json()) as ExchangeRateItem || {};
 
     const exchangeRateMap: Record<CurrencyType, ExchangeRateJSON> = Object.keys(responseDataExchangeRate.conversion_rates)
@@ -66,7 +73,12 @@ export const getPriceMap = async (priceIds: Set<string>, currency: CurrencyType 
 
   if (useBackupApi || rs?.status !== 200) {
     useBackupApi = true;
-    rs = await fetch(`https://chain-data.subwallet.app/api/price/get?ids=${idStr}`);
+
+    try {
+      rs = await fetch(`https://api-cache.subwallet.app/api/price/get?ids=${idStr}`);
+    } catch (e) {
+      rs = await fetch('https://static-cache.subwallet.app/price/data.json');
+    }
   }
 
   if (rs?.status !== 200) {

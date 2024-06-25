@@ -458,7 +458,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   );
 
   // Submit transaction
-  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
+  const doSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     setLoading(true);
     const { asset, chain, destChain, from: _from, to, value } = values;
 
@@ -552,7 +552,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(value);
     }
   }, [maxTransfer]);
-  const onPreSubmit = useCallback(() => {
+  const onSubmit = useCallback((values: TransferParams) => {
     if (chain !== destChain) {
       const originChainInfo = chainInfoMap[chain];
       const destChainInfo = chainInfoMap[destChain];
@@ -566,7 +566,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             text: t('Continue'),
             onClick: () => {
               closeAlert();
-              form.submit();
+              doSubmit(values);
             }
           },
           cancelButton: {
@@ -592,7 +592,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             text: t('Transfer'),
             onClick: () => {
               closeAlert();
-              form.submit();
+              doSubmit(values);
             }
           },
           cancelButton: {
@@ -605,8 +605,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       }
     }
 
-    form.submit();
-  }, [assetInfo, chain, chainInfoMap, closeAlert, destChain, form, isTransferAll, openAlert, t]);
+    doSubmit(values);
+  }, [assetInfo, chain, chainInfoMap, closeAlert, destChain, doSubmit, isTransferAll, openAlert, t]);
 
   // TODO: Need to review
   // Auto fill logic
@@ -815,6 +815,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
           address={from}
           chain={chain}
           className='balance'
+          extrinsicType={extrinsicType}
           onBalanceReady={setIsBalanceReady}
           tokenSlug={asset}
         />
@@ -852,7 +853,7 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
             />
           )}
           loading={loading}
-          onClick={checkAction(onPreSubmit, extrinsicType)}
+          onClick={checkAction(form.submit, extrinsicType)}
           schema={isTransferAll ? 'warning' : undefined}
         >
           {isTransferAll ? t('Transfer all') : t('Transfer')}

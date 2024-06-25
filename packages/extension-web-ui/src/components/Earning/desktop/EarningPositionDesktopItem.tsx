@@ -113,8 +113,12 @@ const Component: React.FC<Props> = (props: Props) => {
     };
   }, []);
 
-  const isParallelLiquidStaking = useMemo(() => {
+  const isChainUnsupported = useMemo(() => {
     if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    if (poolInfo.chain === 'interlay' && poolInfo.type === YieldPoolType.LENDING) {
       return true;
     }
 
@@ -147,7 +151,7 @@ const Component: React.FC<Props> = (props: Props) => {
           temp.label = !compact ? text : undefined;
           temp.tooltip = compact ? text : undefined;
           temp.onClick = onClickButton(onClickStakeButton);
-          temp.disable = !!isParallelLiquidStaking;
+          temp.disable = !!isChainUnsupported;
           break;
 
         case YieldAction.CLAIM_REWARD:
@@ -184,7 +188,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     return result;
-  }, [actionListByChain, availableActionsByMetadata, isParallelLiquidStaking, onClickButton, onClickCancelUnStakeButton, onClickClaimButton, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, poolInfo.type, t]);
+  }, [actionListByChain, availableActionsByMetadata, isChainUnsupported, onClickButton, onClickCancelUnStakeButton, onClickClaimButton, onClickStakeButton, onClickUnStakeButton, onClickWithdrawButton, poolInfo.type, t]);
 
   return (
     <div

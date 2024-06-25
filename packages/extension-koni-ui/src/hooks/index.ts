@@ -19,3 +19,4 @@ export * from './wallet-connect';
 export * from './history';
 export * from './earning';
 export * from './staticContent';
+export * from './browser';

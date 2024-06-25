@@ -4,12 +4,15 @@
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
 import { AmountData, BalanceErrorType, DetectBalanceCache, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { _isXcmWithinSameConsensus } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { getDefaultTransferProcess, getSnowbridgeTransferProcessFromEvm, RequestOptimalTransferProcess } from '@subwallet/extension-base/services/balance-service/helpers/process';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DetectAccountBalanceStore from '@subwallet/extension-base/stores/DetectAccountBalance';
 import { BalanceItem, BalanceJson } from '@subwallet/extension-base/types';
+import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { addLazy, createPromiseHandler, isAccountAll, PromiseHandler, waitTimeout } from '@subwallet/extension-base/utils';
 import keyring from '@subwallet/ui-keyring';
 import { t } from 'i18next';
@@ -507,5 +510,26 @@ export class BalanceService implements StoppableServiceInterface {
     this._intervalScan = undefined;
     this._unsubscribeBalanceDetectCache = undefined;
     this.startBalanceDetectCache = undefined;
+  }
+
+  // process
+  public async getOptimalTransferProcess (params: RequestOptimalTransferProcess): Promise<CommonOptimalPath> {
+    const originChainInfo = this.state.chainService.getChainInfoByKey(params.originChain);
+
+    if (!params.destChain) { // normal transfers
+      return getDefaultTransferProcess();
+    }
+
+    const destChainInfo = this.state.chainService.getChainInfoByKey(params.destChain);
+
+    // xcm
+    if (!_isXcmWithinSameConsensus(originChainInfo, destChainInfo) && _isPureEvmChain(originChainInfo)) {
+      const evmApi = this.state.chainService.getEvmApi(originChainInfo.slug);
+      const tokenInfo = this.state.chainService.getAssetBySlug(params.tokenSlug);
+
+      return getSnowbridgeTransferProcessFromEvm(params.address, evmApi, tokenInfo, params.amount);
+    }
+
+    return getDefaultTransferProcess();
   }
 }

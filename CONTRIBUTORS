@@ -1,14 +1,14 @@
-    2677	AnhMTV                        	
-    2421	Nam Phạm                      	[Issue 3134] chore: update chainlist
-    2070	S2kael                        	
-     817	lw-cdm                        	[Issue-3150] Extension - Update insufficient balance message for earn screen
+    2705	AnhMTV                        	Release version 1.2.10
+    2464	Nam Phạm                      	[Issue 1984] fix: handle warning on send fund
+    2072	S2kael                        	[Issue-3214] Update stable version for chain-list
+     819	lw-cdm                        	[Issue-3228] Remove modal-viewer support
+     467	nguyentiendung                	
      465	Jaco                          	0.42.5 (#969)
-     451	nguyentiendung                	[Issue-3140] WebApp - Remove Parallel liquid staking
      185	quangdo                       	
-     174	bluezdot                      	
-     137	Thiendekaco                   	[Issue 2779] [fix] WebApp - Re-check bug error page #2
+     181	bluezdot                      	[Issue-3214] Update chainlist
+     147	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
+     135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      117	Automation Bot                	[CI Skip] Auto increase webapp build number
-     107	dominhquang                   	[Issue-3194] Fix bug can not backup data in Mobile App
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
      101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md

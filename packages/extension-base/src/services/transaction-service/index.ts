@@ -579,9 +579,9 @@ export default class TransactionService {
         break;
       }
 
-      case ExtrinsicType.TOKEN_APPROVE: {
-        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
-        const inputAsset = this.state.chainService.getAssetBySlug(data.inputTokenSlug);
+      case ExtrinsicType.TOKEN_SPENDING_APPROVAL: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_SPENDING_APPROVAL>(transaction.data);
+        const inputAsset = this.state.chainService.getAssetBySlug(data.contractAddress);
 
         historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
 

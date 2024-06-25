@@ -241,7 +241,7 @@ const Component = function ({ className }: Props) {
           return t('Stake compound confirm');
         case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
           return t('Cancel compound confirm');
-        case ExtrinsicType.TOKEN_APPROVE:
+        case ExtrinsicType.TOKEN_SPENDING_APPROVAL:
           return t('Token approve');
         case ExtrinsicType.SWAP:
           return t('Swap confirmation');

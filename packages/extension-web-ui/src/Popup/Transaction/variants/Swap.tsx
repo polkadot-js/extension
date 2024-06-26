@@ -1382,8 +1382,7 @@ const Component = () => {
                       shape='squircle'
                       size={24}
                     />
-
-                    {currentQuote.provider.name}
+                    <span className={'__provider-name'}>{currentQuote.provider.name}</span>
                   </MetaInfo.Default>
 
                   <MetaInfo.Default
@@ -1580,6 +1579,11 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__xcm-notification': {
       marginBottom: token.marginSM
     },
+    '.__provider-name': {
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden'
+    },
     '.__fee-paid-token': {
       display: 'flex',
       alignItems: 'center'
@@ -1596,7 +1600,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__swap-provider .__value ': {
       display: 'flex',
-      gap: 8
+      gap: 8,
+      overflow: 'hidden'
+    },
+    '.__swap-provider .__col': {
+      alignItems: 'unset',
+      flexDirection: 'row',
+      justifyContent: 'flex-end'
+
     },
     '.ant-background-icon': {
       width: 24,

@@ -45,6 +45,10 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
   AMOUNT_CANNOT_BE_ZERO: {
     message: detectTranslate('Amount must be greater than 0'),
     code: undefined
+  },
+  MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT: {
+    message: detectTranslate('You swap to much. It make pool not enough existential deposit'),
+    code: undefined
   }
 };
 

@@ -212,6 +212,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decimals, forceUpdateMaxValue, maxValue]);
 
+  useEffect(() => {
+    const transformVal = value && getInputValuesFromString(value, decimals) || '0';
+    setInputValue(transformVal);
+  }, [value, decimals]);
+
   return (
     <Input
       className={className}

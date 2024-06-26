@@ -5,7 +5,7 @@ import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
-import { _getAssetDecimals, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { AssetHubPreValidationMetadata, ChainflipPreValidationMetadata, HydradxPreValidationMetadata, SwapErrorType } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -13,12 +13,21 @@ import BigN from 'bignumber.js';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _ChainAsset, feeTokenChainInfo: _ChainInfo, feeAmount: string, fromTokenBalance: string, feeTokenBalance: string, swapAmount: string, isXcmOk: boolean, minSwap?: string): TransactionError | undefined {
+  const bnFromTokenBalance = new BigN(fromTokenBalance);
+
+  if (!_isNativeToken(fromToken) && bnFromTokenBalance.minus(swapAmount).lt(_getTokenMinAmount(fromToken))) {
+    const parsedMaxBalanceSwap = formatNumber(bnFromTokenBalance.minus(_getTokenMinAmount(fromToken)), _getAssetDecimals(fromToken));
+
+    return new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+      `Amount too high. Lower your amount ${bnFromTokenBalance.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromToken.symbol}` : ''} and try again`);
+  }
+
   if (new BigN(feeTokenBalance).lte(feeAmount)) {
     return new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, `You don't have enough ${feeToken.symbol} (${feeTokenChainInfo.name}) to pay transaction fee`);
   }
 
   if (!_isNativeToken(fromToken) && fromToken.slug === feeToken.slug) { // todo: need review and refactor
-    if (new BigN(fromTokenBalance).lte(new BigN(feeAmount).plus(swapAmount))) {
+    if (bnFromTokenBalance.lte(new BigN(feeAmount).plus(swapAmount))) {
       return new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, `Insufficient balance. Deposit ${fromToken.symbol} and try again.`);
     }
   }
@@ -28,7 +37,7 @@ export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _Chain
   }
 
   if (minSwap) {
-    if (new BigN(fromTokenBalance).lte(minSwap)) {
+    if (bnFromTokenBalance.lte(minSwap)) {
       const parsedMinSwapValue = formatNumber(minSwap, _getAssetDecimals(fromToken));
 
       return new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE, `Insufficient balance. You need more than ${parsedMinSwapValue} ${fromToken.symbol} to start swapping. Deposit ${fromToken.symbol} and try again.`); // todo: min swap or amount?
@@ -39,7 +48,7 @@ export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _Chain
     const parsedMaxBalanceSwap = formatNumber(fromTokenBalance, _getAssetDecimals(fromToken));
 
     return new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-      `Amount too high. Lower your amount ${new BigN(fromTokenBalance).gt(0) ? `below ${parsedMaxBalanceSwap} ${fromToken.symbol}` : ''} and try again`);
+      `Amount too high. Lower your amount ${bnFromTokenBalance.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromToken.symbol}` : ''} and try again`);
   }
 
   return undefined;

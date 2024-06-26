@@ -114,8 +114,6 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
       selectedQuote: swapQuoteResponse.optimalQuote
     });
 
-    console.log('optimalProcess', optimalProcess);
-
     return {
       process: optimalProcess,
       quote: swapQuoteResponse

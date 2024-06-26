@@ -12,7 +12,7 @@ import BigN from 'bignumber.js';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _ChainAsset, feeTokenChainInfo: _ChainInfo, feeAmount: string, fromTokenBalance: string, feeTokenBalance: string, swapAmount: string, isXcmOk: boolean, minSwap?: string): TransactionError | undefined {
+export function _validateBalanceToSwapOnAssetHub (fromToken: _ChainAsset, feeToken: _ChainAsset, feeTokenChainInfo: _ChainInfo, feeAmount: string, fromTokenBalance: string, feeTokenBalance: string, swapAmount: string, isXcmOk: boolean, minSwap?: string): TransactionError | undefined {
   const bnFromTokenBalance = new BigN(fromTokenBalance);
 
   if (!_isNativeToken(fromToken) && bnFromTokenBalance.minus(swapAmount).lt(_getTokenMinAmount(fromToken))) {
@@ -27,6 +27,41 @@ export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _Chain
   }
 
   if (!_isNativeToken(fromToken) && fromToken.slug === feeToken.slug) { // todo: need review and refactor
+    if (bnFromTokenBalance.lte(new BigN(feeAmount).plus(swapAmount))) {
+      return new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, `Insufficient balance. Deposit ${fromToken.symbol} and try again.`);
+    }
+  }
+
+  if (isXcmOk) { // assume that the swap is valid if XCM is in the process and it was successful
+    return undefined;
+  }
+
+  if (minSwap) {
+    if (bnFromTokenBalance.lte(minSwap)) {
+      const parsedMinSwapValue = formatNumber(minSwap, _getAssetDecimals(fromToken));
+
+      return new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE, `Insufficient balance. You need more than ${parsedMinSwapValue} ${fromToken.symbol} to start swapping. Deposit ${fromToken.symbol} and try again.`); // todo: min swap or amount?
+    }
+  }
+
+  if (new BigN(swapAmount).gte(fromTokenBalance)) {
+    const parsedMaxBalanceSwap = formatNumber(fromTokenBalance, _getAssetDecimals(fromToken));
+
+    return new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
+      `Amount too high. Lower your amount ${bnFromTokenBalance.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromToken.symbol}` : ''} and try again`);
+  }
+
+  return undefined;
+}
+
+export function _validateBalanceToSwap (fromToken: _ChainAsset, feeToken: _ChainAsset, feeTokenChainInfo: _ChainInfo, feeAmount: string, fromTokenBalance: string, feeTokenBalance: string, swapAmount: string, isXcmOk: boolean, minSwap?: string): TransactionError | undefined {
+  const bnFromTokenBalance = new BigN(fromTokenBalance);
+
+  if (new BigN(feeTokenBalance).lte(feeAmount)) {
+    return new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, `You don't have enough ${feeToken.symbol} (${feeTokenChainInfo.name}) to pay transaction fee`);
+  }
+
+  if (fromToken.slug === feeToken.slug) { // todo: need review and refactor
     if (bnFromTokenBalance.lte(new BigN(feeAmount).plus(swapAmount))) {
       return new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, `Insufficient balance. Deposit ${fromToken.symbol} and try again.`);
     }

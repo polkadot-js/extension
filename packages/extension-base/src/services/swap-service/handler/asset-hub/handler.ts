@@ -4,7 +4,7 @@
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
-import { _getEarlyAssetHubValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
+import { _getEarlyAssetHubValidationError, _validateBalanceToSwapOnAssetHub, _validateSwapRecipient } from '@subwallet/extension-base/core/logic-validation/swap';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { createXcmExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
@@ -322,6 +322,61 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
     }
   }
 
+  public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean, stepIndex: number): Promise<TransactionError[]> {
+    // check swap quote timestamp
+    // check balance to pay transaction fee
+    // check balance against spending amount
+    if (!params.selectedQuote) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const selectedQuote = params.selectedQuote;
+    const currentTimestamp = +Date.now();
+
+    if (selectedQuote.aliveUntil <= currentTimestamp) {
+      return Promise.resolve([new TransactionError(SwapErrorType.QUOTE_TIMEOUT)]);
+    }
+
+    const stepFee = params.process.totalFee[stepIndex].feeComponent;
+    const networkFee = stepFee.find((fee) => fee.feeType === SwapFeeType.NETWORK_FEE);
+
+    if (!networkFee) {
+      return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
+    }
+
+    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
+    const feeTokenInfo = this.chainService.getAssetBySlug(networkFee.tokenSlug);
+    const feeTokenChain = this.chainService.getChainInfoByKey(feeTokenInfo.originChain);
+
+    const { fromAmount, minSwap } = params.selectedQuote;
+
+    const [feeTokenBalance, fromAssetBalance] = await Promise.all([
+      this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
+      this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
+    ]);
+
+    const balanceError = _validateBalanceToSwapOnAssetHub(fromAsset, feeTokenInfo, feeTokenChain, networkFee.amount, fromAssetBalance.value, feeTokenBalance.value, fromAmount, isXcmOk, minSwap);
+
+    if (balanceError) {
+      return Promise.resolve([balanceError]);
+    }
+
+    if (!params.recipient) {
+      return Promise.resolve([]);
+    }
+
+    const toAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.to);
+    const toAssetChain = this.chainService.getChainInfoByKey(toAsset.originChain);
+
+    const recipientError = _validateSwapRecipient(toAssetChain, params.recipient);
+
+    if (recipientError) {
+      return Promise.resolve([recipientError]);
+    }
+
+    return Promise.resolve([]);
+  }
+
   async validateSwapProcess (params: ValidateSwapProcessParams): Promise<TransactionError[]> {
     const amount = params.selectedQuote.fromAmount;
     const bnAmount = new BigN(amount);
@@ -340,7 +395,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
           case CommonStepType.XCM:
             return this.swapBaseHandler.validateXcmStep(params, index);
           case SwapStepType.SWAP:
-            return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
+            return this.validateSwapStep(params, isXcmOk, index);
           default:
             return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
         }

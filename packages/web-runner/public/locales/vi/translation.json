@@ -1258,5 +1258,6 @@
   "You don't have enough {{symbol}} ({{chainName}}) to pay gas fee. Top up your transferable balance and try again": "",
   "Your Ledger is disconnected. Reconnect and try again": "Ledger mất kết nối. Vui lòng kết nối lại",
   "This pool is blocked. Select another to continue": "",
-  " You're using an old version of Firefox, which no longer supports automatic dApp access and phishing detection. Review our user guide to learn how to update Firefox to version 127.0 or manually enable dApp access. ": ""
+  " You're using an old version of Firefox, which no longer supports automatic dApp access and phishing detection. Review our user guide to learn how to update Firefox to version 127.0 or manually enable dApp access. ": "",
+  " Insufficient {{symbol}} on {{chain}} to cover min balance ({{amount}} {{symbol}})": ""
 }

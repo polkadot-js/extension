@@ -47,7 +47,7 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT: {
-    message: detectTranslate('You swap to much. It make pool not enough existential deposit'),
+    message: detectTranslate('There is not enough liquidity to complete the swap. Lower your amount and try again'),
     code: undefined
   }
 };

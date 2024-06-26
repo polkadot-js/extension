@@ -133,12 +133,12 @@ export const checkMinAmountForPath = (reserves: Array<[string, string]>, amounts
 };
 
 // Build extrinsic for swap
-export const buildSwapExtrinsic = (api: ApiPromise, paths: _ChainAsset[], recipient: string, amountIn: string, amountOutMin: string): SubmittableExtrinsic<'promise'> => {
+export const buildSwapExtrinsic = (api: ApiPromise, paths: _ChainAsset[], recipient: string, amountIn: string, amountOutMin: string, keepAlive = true): SubmittableExtrinsic<'promise'> => {
   const pathsInfo = paths.map((asset) => {
     const multilocation = _getXcmAssetMultilocation(asset);
 
     return api.createType('MultiLocation', multilocation).toU8a();
   });
 
-  return api.tx.assetConversion.swapExactTokensForTokens(pathsInfo, amountIn, amountOutMin, recipient, true);
+  return api.tx.assetConversion.swapExactTokensForTokens(pathsInfo, amountIn, amountOutMin, recipient, keepAlive);
 };

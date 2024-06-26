@@ -17,7 +17,6 @@ import BigN from 'bignumber.js';
 
 import { SwapBaseHandler, SwapBaseInterface } from '../base-handler';
 import { AssetHubRouter } from './router';
-import { buildSwapExtrinsic } from './utils';
 
 export class AssetHubSwapHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
@@ -283,8 +282,6 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
 
   async handleSubmitStep (params: SwapSubmitParams): Promise<SwapSubmitStepData> {
     const fromAsset = this.chainService.getAssetBySlug(params.quote.pair.from);
-    const substrateApi = this.chainService.getSubstrateApi(this.chain);
-    const api = await substrateApi.api.isReady;
 
     const txData: SwapBaseTxData = {
       provider: this.providerInfo,
@@ -299,7 +296,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
 
     const minReceive = new BigN(1 - params.slippage).times(toAmount).integerValue(BigN.ROUND_DOWN);
 
-    const extrinsic = buildSwapExtrinsic(api, paths, params.address, fromAmount, minReceive.toString());
+    const extrinsic = await this.router?.buildSwapExtrinsic(paths, params.address, fromAmount, minReceive.toString());
 
     return {
       txChain: fromAsset.originChain,

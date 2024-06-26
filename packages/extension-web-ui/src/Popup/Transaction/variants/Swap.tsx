@@ -792,6 +792,12 @@ const Component = () => {
     return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
 
+  const isSwapAssetHub = useMemo(() => {
+    const providerId = currentQuote?.provider?.id;
+
+    return providerId ? [SwapProviderId.KUSAMA_ASSET_HUB, SwapProviderId.POLKADOT_ASSET_HUB, SwapProviderId.ROCOCO_ASSET_HUB].includes(providerId) : false;
+  }, [currentQuote?.provider?.id]);
+
   const renderAlertBox = () => {
     const multichainAsset = fromAssetInfo?.multiChainAsset;
     const fromAssetName = multichainAsset && multiChainAssetMap[multichainAsset]?.name;
@@ -799,6 +805,14 @@ const Component = () => {
 
     return (
       <>
+        {isSwapAssetHub && (
+          <AlertBox
+            className={'__assethub-notification'}
+            description={'Swapping on Asset Hub is in beta with a limited number of pairs and low liquidity. Continue at your own risk'}
+            title={'Pay attention!'}
+            type='warning'
+          />
+        )}
         {isSwapXCM && fromAssetName && toAssetName && (
           <AlertBox
             className={'__xcm-notification'}
@@ -1576,7 +1590,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center',
       cursor: 'pointer'
     },
-    '.__xcm-notification': {
+    '.__xcm-notification, .__assethub-notification': {
       marginBottom: token.marginSM
     },
     '.__provider-name': {

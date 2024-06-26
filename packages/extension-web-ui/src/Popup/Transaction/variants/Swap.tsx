@@ -805,7 +805,7 @@ const Component = () => {
 
     return (
       <>
-        {isSwapAssetHub && (
+        {isSwapAssetHub && !isFormInvalid && (
           <AlertBox
             className={'__assethub-notification'}
             description={'Swapping on Asset Hub is in beta with a limited number of pairs and low liquidity. Continue at your own risk'}
@@ -813,7 +813,7 @@ const Component = () => {
             type='warning'
           />
         )}
-        {isSwapXCM && fromAssetName && toAssetName && (
+        {isSwapXCM && fromAssetName && toAssetName && !isFormInvalid && (
           <AlertBox
             className={'__xcm-notification'}
             description={`The amount you entered is higher than your available balance on ${toAssetName} network. You need to first transfer cross-chain from ${fromAssetName} network to ${toAssetName} network to continue swapping`}

@@ -39,7 +39,7 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   NOT_ENOUGH_LIQUIDITY: {
-    message: detectTranslate('There is not enough liquidity to complete the swap. Lower your amount and try again'),
+    message: detectTranslate('Insufficient liquidity to complete the swap. Lower your amount and try again'),
     code: undefined
   },
   AMOUNT_CANNOT_BE_ZERO: {
@@ -47,7 +47,7 @@ const defaultErrorMap: Record<SwapErrorType, { message: string, code?: number }>
     code: undefined
   },
   MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT: {
-    message: detectTranslate('There is not enough liquidity to complete the swap. Lower your amount and try again'),
+    message: detectTranslate('Insufficient liquidity to complete the swap. Lower your amount and try again'),
     code: undefined
   }
 };

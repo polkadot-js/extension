@@ -346,14 +346,14 @@ export default class KoniExtension {
   }
 
   // TODO: move to request service
-  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
+  private signingApproveSignature ({ id, signature, signedTransaction }: RequestSigningApproveSignature): boolean {
     const queued = this.#koniState.getSignRequest(id);
 
     assert(queued, t('Unable to proceed. Please try again'));
 
     const { resolve } = queued;
 
-    resolve({ id, signature });
+    resolve({ id, signature, signedTransaction });
 
     return true;
   }

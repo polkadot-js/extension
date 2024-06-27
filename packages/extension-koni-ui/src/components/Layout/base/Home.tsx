@@ -69,12 +69,12 @@ const Home = ({ children, isDisableHeader, onClickFilterIcon, onClickSearchIcon,
 
   return (
     <Layout.Base
-      isDisableHeader={isDisableHeader}
       headerCenter={false}
       headerIcons={headerIcons}
       headerLeft={'default'}
       headerOnClickLeft={onClickListIcon}
       headerPaddingVertical={true}
+      isDisableHeader={isDisableHeader}
       showHeader={true}
       showLeftButton={true}
       showTabBar={showTabBar ?? true}

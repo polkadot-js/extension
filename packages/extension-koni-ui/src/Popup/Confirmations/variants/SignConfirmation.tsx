@@ -41,7 +41,7 @@ function Component ({ className, request }: Props) {
 
   const chain = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
-  const payload = useParseSubstrateRequestPayload(chain, request.request);
+  const { payload } = useParseSubstrateRequestPayload(chain, request.request);
   const onClickDetail = useOpenDetailModal();
 
   const isMessage = useMemo(() => isSubstrateMessage(payload), [payload]);

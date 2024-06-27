@@ -3,13 +3,14 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
+import { _isRuntimeUpdated, getShortMetadata } from '@subwallet/extension-base/utils';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
-import { AccountSignMode, PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { getShortMetadata, getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-koni-ui/utils';
+import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
@@ -40,7 +41,7 @@ const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
 
 const handleCancel = async (id: string) => await cancelSignRequest(id);
 
-const handleSignature = async (id: string, { signature }: SigData) => await approveSignSignature(id, signature);
+const handleSignature = async (id: string, { signature, signedTransaction }: SubstrateSigData) => await approveSignSignature(id, signature, signedTransaction);
 
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED, AccountSignMode.LEGACY_LEDGER, AccountSignMode.GENERIC_LEDGER];
 
@@ -63,15 +64,15 @@ const Component: React.FC<Props> = (props: Props) => {
       ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
       : _payload.genesisHash;
   }, [account.originGenesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, request.payload]);
+  const signMode = useMemo(() => getSignMode(account), [account]);
+  const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
 
   const chain = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
-  const payload = useParseSubstrateRequestPayload(chain, request);
+  const { hashLoading, missingData, payload } = useParseSubstrateRequestPayload(chain, request, isLedger);
 
   const isMessage = isSubstrateMessage(payload);
 
-  const signMode = useMemo(() => getSignMode(account), [account]);
-  const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const approveIcon = useMemo((): PhosphorIcon => {
     switch (signMode) {
       case AccountSignMode.QR:
@@ -93,22 +94,10 @@ const Component: React.FC<Props> = (props: Props) => {
     if (isRawPayload(_payload)) {
       return false;
     } else {
-      return _payload.signedExtensions.includes('CheckMetadataHash');
+      return _isRuntimeUpdated(_payload.signedExtensions);
     }
   }, [request.payload]);
-  const isMissingData = useMemo(() => {
-    const _payload = request.payload;
 
-    if (isRawPayload(_payload)) {
-      return false;
-    } else {
-      if (_payload.signedExtensions.includes('CheckMetadataHash')) {
-        return _payload.mode !== 1 || !_payload.metadataHash;
-      } else {
-        return false;
-      }
-    }
-  }, [request.payload]);
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
@@ -145,14 +134,6 @@ const Component: React.FC<Props> = (props: Props) => {
                 description: t('You\'re using Migration app for signing, please migration asset to new account by Generic App then use it normally')
               };
             }
-          } else if (signMode === AccountSignMode.GENERIC_LEDGER) {
-            if (isMissingData) {
-              return {
-                isError: true,
-                title: t('Data attention!'),
-                description: t('Your transaction missing data, please contact dApp or SubWallet support', { replace: { networkName } })
-              };
-            }
           }
         } else {
           if (signMode === AccountSignMode.GENERIC_LEDGER) {
@@ -167,7 +148,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return undefined;
-  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName, isMissingData]);
+  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -205,7 +186,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }, 1000);
   }, [id]);
 
-  const onApproveSignature = useCallback((signature: SigData) => {
+  const onApproveSignature = useCallback((signature: SubstrateSigData) => {
     setLoading(true);
 
     setTimeout(() => {
@@ -239,16 +220,15 @@ const Component: React.FC<Props> = (props: Props) => {
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     setTimeout(async () => {
       if (typeof payload === 'string') {
-        ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset)
-          .then(({ signature }) => {
-            onApproveSignature({ signature });
-          })
-          .catch((e: Error) => {
-            console.error(e);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        try {
+          const { signature } = await ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset);
+
+          onApproveSignature({ signature });
+        } catch (e) {
+          console.error(e);
+        }
+
+        setLoading(false);
       } else {
         const payloadU8a = payload.toU8a(true);
 
@@ -273,17 +253,30 @@ const Component: React.FC<Props> = (props: Props) => {
           metadata = new Uint8Array(0);
         }
 
-        ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset)
-          .then(({ signature }) => {
+        try {
+          const { signature } = await ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset);
+
+          if (missingData) {
+            const extrinsic = payload.registry.createType(
+              'Extrinsic',
+              { method: payload.method },
+              { version: 4 }
+            );
+
+            extrinsic.addSignature(account.address, signature, payload.toHex());
+
+            onApproveSignature({ signature, signedTransaction: extrinsic.toHex() });
+          } else {
             onApproveSignature({ signature });
-          })
-          .catch(console.error)
-          .finally(() => {
-            setLoading(false);
-          });
+          }
+        } catch (e) {
+          console.error(e);
+        }
+
+        setLoading(false);
       }
     }, 100);
-  }, [payload, isLedgerConnected, ledger, refreshLedger, ledgerSignMessage, account, onApproveSignature, chainInfo, ledgerSignTransaction, notify, isRuntimeUpdated]);
+  }, [account, chainInfo, isLedgerConnected, isRuntimeUpdated, ledger, ledgerSignMessage, ledgerSignTransaction, missingData, notify, onApproveSignature, payload, refreshLedger]);
 
   const onConfirmInject = useCallback(() => {
     if (substrateWallet) {
@@ -410,7 +403,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={showQuoteExpired || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
+          disabled={showQuoteExpired || hashLoading || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
           icon={(
             <Icon
               phosphorIcon={approveIcon}

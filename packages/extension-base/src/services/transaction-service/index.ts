@@ -21,7 +21,7 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { anyNumberToBN, reformatAddress } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, anyNumberToBN, getMetadataHash, reformatAddress } from '@subwallet/extension-base/utils';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { BN_ZERO } from '@subwallet/extension-base/utils/number';
@@ -1086,24 +1086,12 @@ export default class TransactionService {
       } as Signer
     };
 
-    if (signedExtensions.includes('CheckMetadataHash')) {
+    if (_isRuntimeUpdated(signedExtensions)) {
       try {
-        const data = {
-          id: chain
-        };
-
-        const resp = await fetch('https://ledger-api.subwallet.app/node/metadata/hash', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(data)
-        });
-
-        const rs = await resp.json() as { metadataHash: string };
+        const metadataHash = await getMetadataHash(chain);
 
         signerOption.mode = 1;
-        signerOption.metadataHash = `0x${rs.metadataHash}`;
+        signerOption.metadataHash = `0x${metadataHash}`;
       } catch (e) {
 
       }

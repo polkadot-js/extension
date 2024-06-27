@@ -6,7 +6,3 @@ export interface ChainProps {
   decimals: number;
   unit: string;
 }
-
-export interface ResponseShortenMetadata {
-  txMetadata: string;
-}

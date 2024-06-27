@@ -1,9 +1,9 @@
 // Copyright 2019-2024 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
-
+// @ts-nocheck
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 
-import { DEFAULT_SNAP_NAME, DEFAULT_SNAP_ORIGIN } from './defaults';
+import { DEFAULT_SNAP_NAME, DEFAULT_SNAP_ORIGIN } from './snapList';
 import { getMetaDataList, injectedMetamaskSnap } from '.';
 
 declare global {

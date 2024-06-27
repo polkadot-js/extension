@@ -32,4 +32,13 @@ export interface SnapInfo {
   blocked: boolean;
 }
 
+export interface SupportedSnap {
+  version: string;
+  name: string;
+}
+
+export type SupportedSnaps = {
+  [key: string]: SupportedSnap;
+};
+
 export type SnapObject = Record<string, SnapInfo>;

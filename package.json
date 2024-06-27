@@ -14,10 +14,10 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.46.10-5-x",
+  "version": "0.47.6",
   "versions": {
-    "git": "0.46.10-5-x",
-    "npm": "0.46.9"
+    "git": "0.47.6",
+    "npm": "0.47.6"
   },
   "workspaces": [
     "packages/*"
@@ -30,7 +30,7 @@
     "build:rollup": "polkadot-exec-rollup --config",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
-    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig .eslintignore .eslintrc.js babel.config.cjs CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.js LICENSE package.json README.md tsconfig.json yarn.lock",
+    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
     "clean": "polkadot-dev-clean-build",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
@@ -38,16 +38,16 @@
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.78.3",
+    "@polkadot/dev": "^0.79.3",
     "@types/node": "^20.10.5",
     "i18next-scanner": "^4.4.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^10.12.4",
+    "@polkadot/api": "^11.3.1",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/networks": "^12.6.2",
-    "@polkadot/types": "^10.12.4",
+    "@polkadot/types": "^11.3.1",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
     "@polkadot/x-fetch": "^12.6.2",

@@ -1,12 +1,85 @@
 # CHANGELOG
 
+## 0.47.6 June 18, 2024
+
+Changes:
+
+- Bump @polkadot/api to 11.3.1
+- Bump @polkadot/phishing to 0.22.9
+- Update build process to enable review by Firefox store
+    - Adds `corepack enable` to CI process
+    - Removes hardcoded path to `.yarn/release` in .yarnrc.yml
+    - Updates zip script to ensure correct compression
+
+
+## 0.47.5 May 22, 2024
+
+- **Important** Published only to Chrome store.
+
+Changes:
+
+- Bump @polkadot/api to 11.1.1
+- Bump @polkadot/phishing to 0.22.8
+- Bump @polkadot/dev to 0.79.3
+
+
+## 0.47.4 May 8, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump polkadot/api to 11.0.3 and @polkadot/phishing to 0.22.7
+
+
+## 0.47.3 Apr 27, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump polkadot/api to 11.0.2
+
+
+## 0.47.2 Apr 23, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- chore: upgrade web3 dep (Thanks to https://github.com/gdethier)
+
+Changes:
+
+- Update polkadot/api and polkadot/phishing
+
+
+## 0.47.1 Apr 18, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Contributed:
+
+- feat(extrinsic-ui): extrinsic asset id (Thanks to https://github.com/ryanleecode)
+- feat: display asset id in xcm format (Thanks to https://github.com/ryanleecode)
+
+Changes:
+
+- Update nvmrc version
+- Bump yarn to 4.1.1
+- Update the README with library notice
+- Fix typos
+- Update CI checkout and setup_node to v4
+- Update polkadot/* deps
+
+
 ## 0.46.9 Mar 20, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.
 
 Contributed:
 
- - Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
+- Fix: Prevent authorization request from incorrect origin due to chrome pre-rendering fixes (Thanks to https://github.com/F-OBrien)
 
 Changes:
 

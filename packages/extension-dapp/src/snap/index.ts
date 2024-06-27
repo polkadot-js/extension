@@ -5,61 +5,45 @@ import type { SignerResult } from '@polkadot/api/types/index.js';
 import type { InjectedAccount, InjectedExtension, InjectedMetadata, InjectedMetadataKnown, InjectedWindowProvider, MetadataDef } from '@polkadot/extension-inject/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { GetSnapsResponse, Snap, SnapRpcRequestParams } from './types';
+import type { SnapRpcRequestParams } from './types';
 
-import { DEFAULT_SNAP_NAME, DEFAULT_SNAP_ORIGIN, DEFAULT_SNAP_VERSION, SUPPORTED_SNAPS } from './defaults.js';
-import { hasMetamask } from './utils.js';
+import { SNAPS } from './snapList.js';
 
 export default class Metadata implements InjectedMetadata {
-  public get (): Promise<InjectedMetadataKnown[]> {
-    return getMetaDataList();
+  private snapId: string;
+
+  constructor(snapId: string) {
+    this.snapId = snapId;
   }
 
-  public provide (definition: MetadataDef): Promise<boolean> {
-    return setMetadata(definition);
+  public get(): Promise<InjectedMetadataKnown[]> {
+    return getMetaDataList(this.snapId);
+  }
+
+  public provide(definition: MetadataDef): Promise<boolean> {
+    return setMetadata(definition, this.snapId);
   }
 }
 
 /** @internal Requests permission for a dapp to communicate with the specified Snaps and attempts to install them if they're not already installed. */
-const connectSnap = async () => {
+const connectSnap = async (origin: string) => {
+  const { version } = SNAPS[origin];
+
   return await window.ethereum.request({
     method: 'wallet_requestSnaps',
-    params: SUPPORTED_SNAPS
+    params: {
+      [origin]: {
+        version
+      }
+    }
   });
-};
-
-/** @internal Retrieves information about installed Snaps available for communication. */
-const getSnaps = async (): Promise<GetSnapsResponse> => {
-  return (await window.ethereum.request({
-    method: 'wallet_getSnaps'
-  })) as unknown as GetSnapsResponse;
-};
-
-/**  @internal Retrieves information about a specific Snap based on its ID and version. */
-const getSnap = async (_id: string = DEFAULT_SNAP_ORIGIN, _version?: string): Promise<Snap | undefined> => {
-  if (!hasMetamask) {
-    return undefined;
-  }
-
-  try {
-    const snaps = await getSnaps();
-
-    return Object.values(snaps).find(
-      ({ id, version }) =>
-        id === _id && (!_version || version === _version)
-    );
-  } catch (e) {
-    console.log('Failed to obtain installed snap', e);
-
-    return undefined;
-  }
 };
 
 /** @internal Invokes a method on a Snap and returns the result. */
 const invokeSnap = async (args: SnapRpcRequestParams) => {
-  console.info('Args in invokeSnap:', args);
+  console.info('Args in invoke Snap:', args);
 
-  const snapId = args?.snapId || DEFAULT_SNAP_ORIGIN;
+  const snapId = args.snapId;
   const request = {
     method: args.method,
     params: args?.params || []
@@ -77,41 +61,51 @@ const invokeSnap = async (args: SnapRpcRequestParams) => {
 };
 
 /** @internal Gets the list of Snap accounts available in the connected wallet. */
-const getSnapAccounts = async (
+const getSnapAccounts = (
   // anyType?: boolean,
-): Promise<InjectedAccount[]> => {
-  const _addressAnyChain = await invokeSnap({
-    method: 'getAddress'
-    // params: { chainName: anyType ? 'any' : undefined }, // if we can have chainName here, we can show formatted address to users
-  });
+  snapId: string,
+): () => Promise<InjectedAccount[]> => {
+  return async (): Promise<InjectedAccount[]> => {
+    const _addressAnyChain = await invokeSnap({
+      method: 'getAddress',
+      // params: { chainName: anyType ? 'any' : undefined }, // if we can have chainName here, we can show formatted address to users
+      snapId
+    });
 
-  const account = {
-    address: _addressAnyChain,
-    name: 'Metamask account 1 🍻',
-    type: 'sr25519' as KeypairType
-  };
+    const account = {
+      address: _addressAnyChain,
+      name: 'Metamask account 🍻',
+      type: 'sr25519' as KeypairType
+    };
 
-  return [account];
+    return [account];
+  }
 };
 
 /** @internal Requests the Snap to sign a JSON payload with the connected wallet. */
-const requestSignJSON = async (
-  payload: SignerPayloadJSON
-): Promise<SignerResult> => {
-  return await invokeSnap({
-    method: 'signJSON',
-    params: { payload }
-  });
-};
+const requestSignJSON = (snapId: string) => {
+  return async (
+    payload: SignerPayloadJSON
+  ): Promise<SignerResult> => {
+    return await invokeSnap({
+      method: 'signJSON',
+      params: { payload },
+      snapId
+    });
+  }
+}
 
 /** @internal Requests the Snap to sign a raw payload with the connected wallet. */
-const requestSignRaw = async (
-  raw: SignerPayloadRaw
-): Promise<SignerResult> => {
-  return await invokeSnap({
-    method: 'signRaw',
-    params: { raw }
-  });
+const requestSignRaw = (snapId: string) => {
+  return async (
+    raw: SignerPayloadRaw
+  ): Promise<SignerResult> => {
+    return await invokeSnap({
+      method: 'signRaw',
+      params: { raw },
+      snapId
+    });
+  }
 };
 
 /**
@@ -121,10 +115,11 @@ const requestSignRaw = async (
  * The metadata includes information about Polkadot eco chains and other relevant details.
  * This information is stored and retrieved from the local state of Metamask Snaps.
  */
-export const getMetaDataList = async (): Promise<InjectedMetadataKnown[]> => {
+export const getMetaDataList = async (snapId: string): Promise<InjectedMetadataKnown[]> => {
   return await invokeSnap({
     method: 'getMetadataList',
-    params: {}
+    params: {},
+    snapId
   });
 };
 
@@ -135,94 +130,89 @@ export const getMetaDataList = async (): Promise<InjectedMetadataKnown[]> => {
  * The provided `metaData` object contains the information to be set. This data is stored using
  * the local state of Metamask Snaps for future use.
  */
-export const setMetadata = async (metaData: MetadataDef): Promise<boolean> => {
+export const setMetadata = async (metaData: MetadataDef, snapId: string): Promise<boolean> => {
   return await invokeSnap({
     method: 'setMetadata',
-    params: {
-      metaData
-    }
+    params: { metaData },
+    snapId
   });
 };
 
 /** @internal Creates a subscription manager for notifying subscribers about changes in injected accounts. */
-export const snapSubscriptionManager = () => {
-  let subscribers: ((accounts: InjectedAccount[]) => void | Promise<void>)[] = [];
+export const snapSubscriptionManager = (snapId: string) => {
+  return () => {
+    let subscribers: ((accounts: InjectedAccount[]) => void | Promise<void>)[] = [];
 
-  /** Subscribe to changes in injected accounts. The callback function to be invoked when changes in injected accounts occur. */
-  const subscribe = (callback: (accounts: InjectedAccount[]) => void | Promise<void>) => {
-    subscribers.push(callback);
+    /** Subscribe to changes in injected accounts. The callback function to be invoked when changes in injected accounts occur. */
+    const subscribe = (callback: (accounts: InjectedAccount[]) => void | Promise<void>) => {
+      subscribers.push(callback);
 
-    return () => {
-      subscribers = subscribers.filter((subscriber) => subscriber !== callback);
+      return () => {
+        subscribers = subscribers.filter((subscriber) => subscriber !== callback);
 
-      getSnapAccounts()
-        .then(callback)
-        .catch(console.error);
+        getSnapAccounts(snapId)()
+          .then(callback)
+          .catch(console.error);
+      };
+    }
+
+    /** Notify all subscribers about changes in injected accounts. */
+    const notifySubscribers = (accounts: InjectedAccount[]) => {
+      subscribers.forEach((callback) => callback(accounts));
     };
-  };
 
-  /** Notify all subscribers about changes in injected accounts. */
-  const notifySubscribers = (accounts: InjectedAccount[]) => {
-    subscribers.forEach((callback) => callback(accounts));
-  };
-
-  return { subscribe, notifySubscribers };
+    return { subscribe, notifySubscribers };
+  }
 };
 
 /** @internal This object encapsulates the functionality of Metamask Snap for seamless integration with dApps. */
-const metamaskSnap: InjectedExtension = {
-  accounts: {
-    get: getSnapAccounts,
-    subscribe: snapSubscriptionManager().subscribe
-  },
-  metadata: new Metadata(),
-  name: DEFAULT_SNAP_NAME,
-  // provider?: InjectedProvider,
-  signer: {
-    signPayload: requestSignJSON,
-    signRaw: requestSignRaw
-    // update?: (id: number, status: H256 | ISubmittableResult) => void
-  },
-  version: DEFAULT_SNAP_VERSION
+const metamaskSnap = (snapId: string): InjectedExtension => {
+  const { name, version } = SNAPS[snapId];
+
+  return {
+    accounts: {
+      get: getSnapAccounts(snapId),
+      subscribe: snapSubscriptionManager(snapId)().subscribe
+    },
+    metadata: new Metadata(snapId),
+    name,
+    // provider?: InjectedProvider,
+    signer: {
+      signPayload: requestSignJSON(snapId),
+      signRaw: requestSignRaw(snapId)
+      // update?: (id: number, status: H256 | ISubmittableResult) => void
+    },
+    version
+  }
 };
 
 /** @internal Connects to a specified dApp using the Snap API. */
-const connect = async (
-  appName: string
-): Promise<InjectedExtension> => {
-  console.info(`${DEFAULT_SNAP_NAME} is connecting to ${appName} ...`);
+const connect = (
+  origin: string
+) => {
+  return async (appName: string) => {
+    const { name } = SNAPS[origin];
+    console.info(`${name} is connecting to ${appName} ...`);
+    const response = await connectSnap(origin);
 
-  const response = await connectSnap();
-
-  return {
-    ...metamaskSnap,
-    version: response?.[DEFAULT_SNAP_ORIGIN]?.version // overwrites the default version
-  };
-};
-
-/**
- * @summary Injected Metamask Snap for dApp connection.
- * @description
- * Provides the necessary functionality to connect the injected Metamask Snap to a dApp.
- * The version property represents the default version of the injected Metamask Snap.
- */
-export const injectedMetamaskSnap: InjectedWindowProvider = {
-  connect,
-  enable: connect,
-  version: DEFAULT_SNAP_VERSION
-};
-
-/**
- * @summary Verifies the presence of Polkagate Snap on the user's wallet.
- * @description
- * This function asynchronously checks whether Polkagate Snap is installed in the user's Metamask extension.
- */
-export async function isPolkaMaskInstalled (): Promise<boolean> {
-  try {
-    return !!await getSnap();
-  } catch (e) {
-    console.info(e);
-
-    return false;
+    return {
+      ...metamaskSnap(origin),
+      version: response?.[origin]?.version
+    };
   }
-}
+};
+
+/**
+ * @summary Injected Metamask Snaps for dApp connection.
+ * @description
+ * Provides the necessary functionality to connect the injected Metamask Snaps to a dApp.
+ * The version property represents the  version of the injected Metamask Snaps.
+ */
+export const injectedMetamaskSnap = (origin: string): InjectedWindowProvider => {
+  const { version } = SNAPS[origin];
+  return {
+    connect: connect(origin),
+    enable: connect(origin),
+    version
+  }
+};

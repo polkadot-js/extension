@@ -6,7 +6,7 @@ import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, Injec
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { DEFAULT_SNAP_NAME } from './snap/defaults.js';
+import { SNAPS } from './snap/snapList.js';
 import { injectedMetamaskSnap } from './snap/index.js';
 import { hasMetamask } from './snap/utils.js';
 import { documentReadyPromise } from './util.js';
@@ -70,10 +70,21 @@ function getWindowExtensions (originName: string): Promise<InjectedExtension[]> 
    *  "Snap only" to inject snaps as an additional feature, suitable for such dapps.
    * */
   const isSnapOnlyRequested = ['onlysnap', 'only_snap', 'snaponly', 'snap_only'].includes(originName.toLowerCase());
-  const extensions =  isSnapOnlyRequested ? { DEFAULT_SNAP_NAME: injectedMetamaskSnap }: win.injectedWeb3;
+  const extensions = isSnapOnlyRequested
+    ? Object.fromEntries(
+      Object.entries(SNAPS).map(([origin, { name }]) => [
+        name,
+        injectedMetamaskSnap(origin),
+      ])
+    )
+    : win.injectedWeb3;
 
-  /** inject snap into window */
-  hasMetamask && (win.injectedWeb3[DEFAULT_SNAP_NAME] = injectedMetamaskSnap);
+  /** inject snaps into window */
+  if (hasMetamask) {
+    Object.entries(SNAPS).map(([origin, { name }]) => {
+      win.injectedWeb3[name] = injectedMetamaskSnap(origin)
+    })
+  }
 
   if (isSnapOnlyRequested) {
     return Promise

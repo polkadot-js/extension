@@ -9,7 +9,7 @@ import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-ko
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Button, ButtonProps, Icon, Image, ModalContext, SwModal } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Image, ModalContext, SwModal, Tag } from '@subwallet/react-ui';
 import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import styled, { ThemeContext } from 'styled-components';
@@ -140,6 +140,27 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               >
                 {status}
               </MetaInfo.Default>
+              {data?.categories && data.categories.length > 0 && (
+                <MetaInfo.Default
+                  className='__category-pool'
+                  label={t('Category')}
+                >
+                  {data.categories.map((category, index) => (
+                    <Tag
+                      className='__item-tag'
+                      color={category.color}
+                      key={index}
+                    >
+                      <Icon
+                        className='__item-tag-icon'
+                        customSize='12px'
+                      />
+                      {category.name}
+                    </Tag>
+                  ))}
+                </MetaInfo.Default>
+              )}
+
               <MetaInfo.Default
                 className={'-vertical'}
                 label={t('Description')}
@@ -236,6 +257,9 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       paddingBottom: 0,
       maxHeight: 600,
       borderRadius: 0
+    },
+    '.__item-tag:last-child': {
+      marginRight: 0
     },
     '.ant-sw-modal-header': {
       borderBottom: 0

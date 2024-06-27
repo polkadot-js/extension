@@ -113,6 +113,7 @@ function Component (props: Props): React.ReactElement<Props> {
     }
 
     const tagSlug = data.tags[0];
+    const tagCategory = data?.categories?.[0];
     const theme = tagMap[tagSlug]?.theme || 'gray';
     const name = tagMap[tagSlug]?.name || t(capitalize(tagSlug.replace('_', ' ')));
     const iconWeight = tagMap[tagSlug]?.iconWeight;
@@ -157,9 +158,23 @@ function Component (props: Props): React.ReactElement<Props> {
             </Tag>
           )
         }
+        {
+          tagCategory && (
+            <Tag
+              className='__item-tag'
+              color={tagCategory.color}
+            >
+              <Icon
+                className={'__item-tag-icon'}
+                customSize={'12px'}
+              />
+              {tagCategory.name}
+            </Tag>
+          )
+        }
       </>
     );
-  }, [data.tags, data.status, t, tagMap]);
+  }, [data.tags, data?.categories, data?.status, tagMap, t]);
 
   return (
     <div

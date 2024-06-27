@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
+import { SwScreenLayout } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Rocket, Vault, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -70,23 +70,13 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
     {
       icon: {
         type: 'phosphor',
-        phosphorIcon: Rocket,
+        phosphorIcon: Parachute,
         weight: 'fill'
       },
-      label: t('Crowdloans'),
-      key: 'crowdloans',
-      url: '/home/crowdloans'
+      label: t('Missions'),
+      key: 'mission-pools',
+      url: '/home/mission-pools'
     },
-    // {
-    //   icon: {
-    //     type: 'phosphor',
-    //     phosphorIcon: Database,
-    //     weight: 'fill'
-    //   },
-    //   label: t('Staking'),
-    //   key: 'staking',
-    //   url: '/home/staking'
-    // },
     {
       icon: {
         type: 'phosphor',

@@ -10,6 +10,13 @@ export enum MissionCategoryType {
   ARCHIVED='archived',
 }
 
+export enum MissionTab {
+  ALL='all',
+  DEFI='defi',
+  MEME='meme',
+  GAMING='gaming',
+}
+
 export const missionCategoryMap: Record<string, MissionCategory> = {
   [MissionCategoryType.UPCOMING]: {
     slug: MissionCategoryType.UPCOMING,

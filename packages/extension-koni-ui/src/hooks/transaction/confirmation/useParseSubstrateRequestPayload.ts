@@ -70,8 +70,6 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
           _payload.metadataHash = `0x${metadataHash}`;
         }
 
-        console.log(_payload);
-
         return _registry.createType('ExtrinsicPayload', _payload, { version: _payload.version });
       }
     }

@@ -125,7 +125,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
   mappingError (_error: Error): string {
     const error = _error.message || (_error as unknown as ResponseSign).errorMessage;
 
-    if (error.includes('28160')) {
+    if (error.includes('28160') || error.includes('CLA Not Supported')) {
       return 'App does not seem to be open';
     }
 

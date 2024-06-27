@@ -150,6 +150,14 @@ const Component: React.FC<Props> = (props: Props) => {
     return undefined;
   }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
 
+  const activeLedger = useMemo(() => {
+    if (isLedger) {
+      return !alertData?.isError;
+    }
+
+    return isLedger;
+  }, [isLedger, alertData]);
+
   const { error: ledgerError,
     isLoading: isLedgerLoading,
     isLocked,
@@ -157,7 +165,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, isLedger, isRuntimeUpdated || isMessage);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, isRuntimeUpdated || isMessage);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 

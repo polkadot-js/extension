@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.48.1 June 27, 2024
+
+- **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump @polkadot/api to 12.0.2
+    - NOTE: We are doing a minor bump because the api in this version now gives the option
+    to modify payloads for `signAndSend`, `signAsync`, and `dryRun` which the extension does not use. That being said, for any user that digests that package it will be available to use as a feature.
+- Bump @polkadot/phishing to 0.22.10
+
+
 ## 0.47.6 June 18, 2024
 
 Changes:

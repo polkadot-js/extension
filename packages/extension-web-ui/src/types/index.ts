@@ -126,6 +126,10 @@ export interface SigData {
   signature: `0x${string}`;
 }
 
+export interface SubstrateSigData extends SigData {
+  signedTransaction?: `0x${string}`;
+}
+
 export * from './account';
 export * from './balance';
 export * from './buy';

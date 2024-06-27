@@ -298,8 +298,14 @@ const Component: React.FC<Props> = (props: Props) => {
 
       setLoading(true);
       promise
-        .then(({ signature }) => {
-          onApproveSignature({ signature });
+        .then(({ signature, signedTransaction: _signedTransaction }) => {
+          const signedTransaction = _signedTransaction
+            ? _signedTransaction instanceof Uint8Array
+              ? u8aToHex(_signedTransaction)
+              : _signedTransaction
+            : undefined;
+
+          onApproveSignature({ signature, signedTransaction });
         })
         .catch((e) => {
           console.error(e);

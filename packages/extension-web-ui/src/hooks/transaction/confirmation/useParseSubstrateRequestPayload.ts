@@ -55,7 +55,7 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
       const payload = request.payload;
 
       if (isRawPayload(payload)) {
-        return '';
+        return payload.data;
       } else {
         const _registry = chain?.registry || registry;
 

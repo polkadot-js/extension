@@ -14,6 +14,7 @@ import { BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
+  isButtonClicked?: boolean;
   maxValue: string;
   onSetMax?: (value: boolean) => void;
   showMaxButton?: boolean;
@@ -70,7 +71,7 @@ const isControlKey = (keycode: number) => {
 };
 
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
-  const { className, decimals, defaultInvalidOutputValue, disabled, forceUpdateMaxValue, maxValue, onChange, onSetMax, prefix, showMaxButton, statusHelp, tooltip, value } = props;
+  const { className, decimals, defaultInvalidOutputValue, disabled, forceUpdateMaxValue, isButtonClicked, maxValue, onChange, onSetMax, prefix, showMaxButton, statusHelp, tooltip, value } = props;
 
   const { t } = useTranslation();
 
@@ -213,9 +214,24 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [decimals, forceUpdateMaxValue, maxValue]);
 
   useEffect(() => {
-    const transformVal = value && getInputValuesFromString(value, decimals) || '0';
-    setInputValue(transformVal);
-  }, [value, decimals]);
+    if (isButtonClicked) {
+      if (inputValue && inputValue.length > (getMaxLengthText(inputValue) || 0)) {
+        let valueStr = inputValue.toString();
+        const decimalPointIndex = valueStr.indexOf('.');
+
+        if (decimalPointIndex !== -1) {
+          valueStr = valueStr.slice(0, decimalPointIndex + decimals + 1);
+          valueStr = valueStr.replace(/0+$/, '');
+
+          if (valueStr.endsWith('.')) {
+            valueStr = valueStr.slice(0, -1);
+          }
+        }
+
+        setInputValue(valueStr);
+      }
+    }
+  }, [decimals, getMaxLengthText, inputValue, isButtonClicked, value]);
 
   return (
     <Input

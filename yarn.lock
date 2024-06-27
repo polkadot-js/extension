@@ -574,14 +574,20 @@
   resolved "https://registry.yarnpkg.com/@polkadot/dev-ts/-/dev-ts-0.79.3.tgz#cf335b4fcbe577089bac0545680b2f73f8d90035"
   integrity sha512-MtXuROswY7wlZCfYVAWPq/+FBa1o31OCAYgCmBUA1pDLNs2RdlOgA8h5MzFL7rizFhREMtPEW/MadNxl4sIskA==
   dependencies:
-    json5 "^2.2.3"
-    tslib "^2.6.2"
-    typescript "^5.3.3"
+    "@polkadot/extension-inject": "npm:0.46.10-3-x"
+    "@polkadot/util": "npm:^12.6.2"
+    "@polkadot/util-crypto": "npm:^12.6.2"
+    tslib: "npm:^2.6.2"
+  peerDependencies:
+    "@polkadot/api": "*"
+    "@polkadot/util": "*"
+    "@polkadot/util-crypto": "*"
+  languageName: unknown
+  linkType: soft
 
-"@polkadot/dev@^0.79.3":
-  version "0.79.3"
-  resolved "https://registry.yarnpkg.com/@polkadot/dev/-/dev-0.79.3.tgz#105cdbaf82f859ca9d0c84f611f484a73338b7d9"
-  integrity sha512-5XuRMTXP64UNhm6m1LAXDc3tgDwbJmnRS7Ad4wP9c1CFrBEN02nuEreC1+3XjkwhW+OPV8xUICAgDDM2RM0atw==
+"@polkadot/extension-inject@npm:0.47.6, @polkadot/extension-inject@workspace:packages/extension-inject":
+  version: 0.0.0-use.local
+  resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
     "@eslint/js" "^8.56.0"
     "@polkadot/dev-test" "^0.79.3"

@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, InjectedWindowProvider, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';
 
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
@@ -59,11 +59,11 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 }
 
 /** @internal retrieves all the extensions available on the window */
-function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
+function getWindowExtensions (originName: string, selectedExtensionByUser?: {[key:string]: InjectedWindowProvider}): Promise<InjectedExtension[]> {
   return Promise
     .all(
       Object
-        .entries(win.injectedWeb3)
+        .entries(selectedExtensionByUser ? selectedExtensionByUser : win.injectedWeb3)
         .map(([nameOrHash, { connect, enable, version }]): Promise<(InjectedExtension | void)> =>
           Promise
             .resolve()
@@ -106,7 +106,7 @@ async function filterEnable (caller: 'web3Accounts' | 'web3AccountsSubscribe', e
  * Enables all injected extensions that has been found on the page. This
  * should be called before making use of any other web3* functions.
  */
-export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = []): Promise<InjectedExtension[]> {
+export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = [], selectedExtensionByUser?: {[key:string]: InjectedWindowProvider}): Promise<InjectedExtension[]> {
   if (!originName) {
     throw new Error('You must pass a name for your app to the web3Enable function');
   }
@@ -118,7 +118,7 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
   web3EnablePromise = documentReadyPromise(
     (): Promise<InjectedExtension[]> =>
       initCompat.then(() =>
-        getWindowExtensions(originName)
+        getWindowExtensions(originName, selectedExtensionByUser)
           .then((values): InjectedExtension[] =>
             values.map((e): InjectedExtension => {
               // if we don't have an accounts subscriber, add a single-shot version

@@ -3,7 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
-import { _isRuntimeUpdated, getShortMetadata } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, detectTranslate, getShortMetadata } from '@subwallet/extension-base/utils';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
@@ -15,7 +15,7 @@ import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SignerPayloadJSON, SignerResult } from '@polkadot/types/types';
@@ -32,9 +32,9 @@ interface Props extends ThemeProps {
 }
 
 interface AlertData {
-  description: string;
+  description: React.ReactNode;
   title: string;
-  isError: boolean;
+  type: 'info' | 'warning' | 'error';
 }
 
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
@@ -42,6 +42,10 @@ const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
 const handleCancel = async (id: string) => await cancelSignRequest(id);
 
 const handleSignature = async (id: string, { signature, signedTransaction }: SubstrateSigData) => await approveSignSignature(id, signature, signedTransaction);
+
+const metadataFAQUrl = 'https://docs.subwallet.app/main/extension-user-guide/faqs#how-do-i-update-network-metadata';
+const genericFAQUrl = 'https://docs.subwallet.app/main/extension-user-guide/faqs#how-do-i-re-attach-a-new-polkadot-account-on-ledger';
+const migrationFAQUrl = 'https://docs.subwallet.app/main/extension-user-guide/faqs#how-do-i-move-assets-from-a-substrate-network-to-the-new-polkadot-account-on-ledger';
 
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED, AccountSignMode.LEGACY_LEDGER, AccountSignMode.GENERIC_LEDGER];
 
@@ -117,24 +121,52 @@ const Component: React.FC<Props> = (props: Props) => {
       if (!chain || !chain.hasMetadata || isMetadataOutdated) {
         if (requireMetadata) {
           return {
-            isError: true,
-            title: t('Unable to sign'),
-            description: t('{{networkName}} network\'s metadata is outdated. Update metadata and try again', { replace: { networkName } })
+            type: 'error',
+            title: t('Error!'),
+            description: (
+              <Trans
+                components={{
+                  highlight: (
+                    <a
+                      className='link'
+                      href={metadataFAQUrl}
+                      target='__blank'
+                    />
+                  )
+                }}
+                i18nKey={detectTranslate("{{networkName}} network's metadata is out of date. Update metadata using <highlight>this guide</highlight> and try again")}
+                values={{ networkName }}
+              />
+            )
           };
         } else {
           return {
-            isError: false,
+            type: 'warning',
             title: t('Pay attention!'),
-            description: t('{{networkName}} network\'s metadata is not updated, which can lead to an invalid signature', { replace: { networkName } })
+            description: (
+              <Trans
+                components={{
+                  highlight: (
+                    <a
+                      className='link'
+                      href={metadataFAQUrl}
+                      target='__blank'
+                    />
+                  )
+                }}
+                i18nKey={detectTranslate("{{networkName}} network's metadata is out of date, which may cause the transaction to fail. Update metadata using <highlight>this guide</highlight> or approve transaction at your own risk")}
+                values={{ networkName }}
+              />
+            )
           };
         }
       } else {
         if (isRuntimeUpdated) {
           if (requireMetadata && isMissingData && !addExtraData) {
             return {
-              isError: true,
-              title: t('Data attention!'),
-              description: t('Your transaction missing data, please contact dApp or SubWallet support', { replace: { networkName } })
+              type: 'error',
+              title: t('Error!'),
+              description: t('Unable to sign this transaction on Ledger because the dApp is out of date')
             };
           }
 
@@ -143,24 +175,51 @@ const Component: React.FC<Props> = (props: Props) => {
 
             if (NotNeedMigrationGens.includes(gens)) {
               return {
-                isError: false,
-                title: t('Runtime attention!'),
-                description: t('You should re-attach account by Generic App then use it normally')
+                type: 'info',
+                title: t('Helpful tip'),
+                description: (
+                  <Trans
+                    components={{
+                      highlight: (
+                        <a
+                          className='link'
+                          href={genericFAQUrl}
+                          target='__blank'
+                        />
+                      )
+                    }}
+                    i18nKey={detectTranslate('To sign this transaction, open “Polkadot” app on Ledger, hit Refresh and Approve again. For a better experience, re-attach your Polkadot new account using <highlight>this guide</highlight>')}
+                  />
+                )
               };
             } else {
               return {
-                isError: false,
-                title: t('Runtime attention!'),
-                description: t('You\'re using Migration app for signing, please migration asset to new account by Generic App then use it normally')
+                type: 'info',
+                title: t('Helpful tip'),
+                description: (
+                  <Trans
+                    components={{
+                      highlight: (
+                        <a
+                          className='link'
+                          href={migrationFAQUrl}
+                          target='__blank'
+                        />
+                      )
+                    }}
+                    i18nKey={detectTranslate('To sign this transaction, open “Polkadot Migration” app on Ledger, hit Refresh and Approve again. For a better experience, move your assets on {{networkName}} network to the Polkadot new account using <highlight>this guide</highlight>')}
+                    values={{ networkName }}
+                  />
+                )
               };
             }
           }
         } else {
           if (signMode === AccountSignMode.GENERIC_LEDGER) {
             return {
-              isError: true,
-              title: t('Runtime attention!'),
-              description: t('You need to wait {{networkName}} network update runtime', { replace: { networkName } })
+              type: 'error',
+              title: t('Error!'),
+              description: t('Unable to sign this transaction on Ledger because the {{networkName}} network is out of date', { replace: { networkName } })
             };
           }
         }
@@ -170,7 +229,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return undefined;
   }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, isMetadataOutdated, t, networkName, isMissingData, addExtraData]);
 
-  const activeLedger = useMemo(() => isLedger && !loadingChain && !alertData?.isError, [isLedger, loadingChain, alertData?.isError]);
+  const activeLedger = useMemo(() => isLedger && !loadingChain && alertData?.type !== 'error', [isLedger, loadingChain, alertData?.type]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -179,7 +238,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, isRuntimeUpdated || isMessage);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 
@@ -412,7 +471,7 @@ const Component: React.FC<Props> = (props: Props) => {
             className={CN(className, 'alert-box')}
             description={alertData.description}
             title={alertData.title}
-            type={alertData.isError ? 'error' : 'warning'}
+            type={alertData.type}
           />
         )
       }
@@ -431,7 +490,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={showQuoteExpired || loadingChain || hashLoading || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
+          disabled={showQuoteExpired || loadingChain || hashLoading || (isMessage ? !modeCanSignMessage.includes(signMode) : alertData?.type === 'error')}
           icon={(
             <Icon
               phosphorIcon={approveIcon}

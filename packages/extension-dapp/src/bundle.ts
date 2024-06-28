@@ -101,9 +101,19 @@ async function filterEnable (caller: 'web3Accounts' | 'web3AccountsSubscribe', e
 }
 
 /**
- * @summary Enables all the providers found on the injected window interface
+ * @summary Return record of all providers found on the injected window interface
  * @description
- * Enables all injected extensions that has been found on the page. This
+ * Enables all or one injected extensions that has been found on the page. This
+ * should be called before making use of any other web3* functions.
+ */
+export function getAllAvailableWebExtensions(): Record<string, InjectedWindowProvider> {
+  return win.injectedWeb3;
+}
+
+/**
+ * @summary Enables all or one the provider(s) found on the injected window interface
+ * @description
+ * Enables all or one injected extensions that has been found on the page. This
  * should be called before making use of any other web3* functions.
  */
 export function web3Enable (originName: string, compatInits: (() => Promise<boolean>)[] = [], selectedExtensionByUser?: {[key:string]: InjectedWindowProvider}): Promise<InjectedExtension[]> {

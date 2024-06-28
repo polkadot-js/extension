@@ -97,12 +97,24 @@ const Component: React.FC<Props> = (props: Props) => {
       return _isRuntimeUpdated(_payload.signedExtensions);
     }
   }, [request.payload]);
+  const isMetadataOutdated = useMemo(() => {
+    const _payload = request.payload;
+
+    if (isRawPayload(_payload)) {
+      return false;
+    } else {
+      const payloadSpecVersion = parseInt(_payload.specVersion);
+      const metadataSpecVersion = chain?.specVersion;
+
+      return payloadSpecVersion !== metadataSpecVersion;
+    }
+  }, [request.payload, chain?.specVersion]);
 
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
     if (!isMessage && !loadingChain) {
-      if (!chain || !chain.hasMetadata) {
+      if (!chain || !chain.hasMetadata || isMetadataOutdated) {
         if (requireMetadata) {
           return {
             isError: true,
@@ -156,7 +168,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return undefined;
-  }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, t, networkName, isMissingData, addExtraData]);
+  }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, isMetadataOutdated, t, networkName, isMissingData, addExtraData]);
 
   const activeLedger = useMemo(() => isLedger && !loadingChain && !alertData?.isError, [isLedger, loadingChain, alertData?.isError]);
 

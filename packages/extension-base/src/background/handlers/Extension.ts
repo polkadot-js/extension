@@ -121,8 +121,8 @@ export default class Extension {
 
     // cycle through authUrls and prepare the array of diff
     Object.entries(this.#state.authUrls).forEach(([url, urlInfo]) => {
-      // Note that urlInfo.authorizedAccounts may be undefined if this account was created
-      // before the funcrionality was introduced, and was never not authorized on any website yet
+      // Note that urlInfo.authorizedAccounts may be undefined if this website entry
+      // was created before the "account authorization per website" functionality was introduced
       if (urlInfo.authorizedAccounts?.includes(address)) {
         authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
       }

@@ -1,5 +1,5 @@
      634	Jaco                          	2024 (#1302)
-      91	Thibaut Sardan                	fix typos (#1343)
+      92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
       30	Tarik Gul                     	0.48.1 (#1379)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

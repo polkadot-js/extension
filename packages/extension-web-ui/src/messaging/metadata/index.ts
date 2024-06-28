@@ -8,7 +8,9 @@ import { metadataExpand } from '@subwallet/extension-chains';
 import { Chain } from '@subwallet/extension-chains/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { sendMessage } from '@subwallet/extension-web-ui/messaging/base';
-import { _getKnownHashes, _getKnownNetworks, findChainInfoByGenesisHash } from '@subwallet/extension-web-ui/utils';
+import { _getKnownHashes, _getKnownNetworks } from '@subwallet/extension-web-ui/utils';
+
+import { base64Encode } from '@polkadot/util-crypto';
 
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
@@ -52,7 +54,7 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, genesisHash?: string | null): Promise<Chain | null> {
+export async function getMetadataRaw (chainInfo: _ChainInfo | null, genesisHash?: string | null): Promise<Chain | null> {
   if (!genesisHash) {
     return null;
   }
@@ -64,8 +66,6 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
   if (!rawMetadata) {
     return null;
   }
-
-  const chainInfo = findChainInfoByGenesisHash(chainInfoMap, genesisHash);
 
   if (!chainInfo) {
     return null;
@@ -82,7 +82,8 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     hasMetadata: true,
     definition: {
       types: data.types,
-      userExtensions: data.userExtensions
+      userExtensions: data.userExtensions,
+      metaCalls: base64Encode(data.rawMetadata)
     } as MetadataDef,
     icon: chainInfo.icon,
     registry: registry,

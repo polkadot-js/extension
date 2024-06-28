@@ -39,7 +39,7 @@ function Component ({ className, request }: Props) {
       : _payload.genesisHash;
   }, [account, chainInfoMap, request]);
 
-  const chain = useMetadata(genesisHash);
+  const { chain } = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
   const { payload } = useParseSubstrateRequestPayload(chain, request.request);
   const onClickDetail = useOpenDetailModal();

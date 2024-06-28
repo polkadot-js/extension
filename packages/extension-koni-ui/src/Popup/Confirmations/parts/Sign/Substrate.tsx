@@ -101,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
-    if (!isMessage && (!loadingChain || chain)) {
+    if (!isMessage && !loadingChain) {
       if (!chain || !chain.hasMetadata) {
         if (requireMetadata) {
           return {

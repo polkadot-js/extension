@@ -20,7 +20,7 @@ import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContex
 import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-web-ui/hooks/account/useIsMantaPayEnabled';
 import useHandleSubmitMultiTransaction from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitMultiTransaction';
-import { approveSpending, getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
+import { approveSpending, getMaxTransfer, getOptimalTransferProcess, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
 import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-web-ui/reducer';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
@@ -629,7 +629,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(value);
     }
   }, [maxTransfer]);
-  const onSubmit = useCallback((values: TransferParams) => {
+
+  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     if (chain !== destChain) {
       const originChainInfo = chainInfoMap[chain];
       const destChainInfo = chainInfoMap[destChain];
@@ -781,6 +782,28 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useEffect(() => {
+    getOptimalTransferProcess({
+      amount: transferAmount,
+      address: from,
+      originChain: chain,
+      tokenSlug: asset,
+      destChain
+    })
+      .then((result) => {
+        dispatchProcessState({
+          payload: {
+            steps: result.steps,
+            feeStructure: result.totalFee
+          },
+          type: CommonActionType.STEP_CREATE
+        });
+      })
+      .catch((e) => {
+        console.log('error', e);
+      });
+  }, [asset, chain, destChain, from, transferAmount]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);

@@ -71,10 +71,11 @@ const Component = function ({ className }: Props) {
         const _isMessage = isRawPayload(request.request.payload);
 
         account = request.account;
+        const isEthereum = isEthereumAddress(account.address);
 
         if (account.isHardware) {
           if (account.isGeneric) {
-            canSign = true;
+            canSign = !isEthereum;
           } else {
             if (_isMessage) {
               canSign = true;

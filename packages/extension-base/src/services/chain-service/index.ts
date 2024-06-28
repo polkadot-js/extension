@@ -46,21 +46,21 @@ const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Recor
   );
 };
 
-const rawAssetRefMap = (assetRefMap: Record<string, _AssetRef>) => {
-  const result: Record<string, _AssetRef> = {};
-
-  Object.entries(assetRefMap).forEach(([key, assetRef]) => {
-    const originChainInfo = ChainInfoMap[assetRef.srcChain];
-    const destChainInfo = ChainInfoMap[assetRef.destChain];
-    const isSnowBridgeXcm = assetRef.path === _AssetRefPath.XCM && _isSnowBridgeXcm(originChainInfo, destChainInfo);
-
-    if (!isSnowBridgeXcm) {
-      result[key] = assetRef;
-    }
-  });
-
-  return result;
-};
+// const rawAssetRefMap = (assetRefMap: Record<string, _AssetRef>) => {
+//   const result: Record<string, _AssetRef> = {};
+//
+//   Object.entries(assetRefMap).forEach(([key, assetRef]) => {
+//     const originChainInfo = ChainInfoMap[assetRef.srcChain];
+//     const destChainInfo = ChainInfoMap[assetRef.destChain];
+//     const isSnowBridgeXcm = assetRef.path === _AssetRefPath.XCM && _isSnowBridgeXcm(originChainInfo, destChainInfo);
+//
+//     if (!isSnowBridgeXcm) {
+//       result[key] = assetRef;
+//     }
+//   });
+//
+//   return result;
+// };
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -630,7 +630,7 @@ export class ChainService {
   }
 
   initAssetRefMap () {
-    this.dataMap.assetRefMap = rawAssetRefMap(AssetRefMap);
+    this.dataMap.assetRefMap = AssetRefMap;
   }
 
   checkLatestData () {
@@ -665,7 +665,7 @@ export class ChainService {
   }
 
   handleLatestAssetRef (latestBlockedAssetRefList: string[], latestAssetRefMap: Record<string, _AssetRef> | null) {
-    const updatedAssetRefMap: Record<string, _AssetRef> = { ...rawAssetRefMap(AssetRefMap) };
+    const updatedAssetRefMap: Record<string, _AssetRef> = { ...AssetRefMap };
 
     if (latestAssetRefMap) {
       for (const [assetRefKey, assetRef] of Object.entries(latestAssetRefMap)) {

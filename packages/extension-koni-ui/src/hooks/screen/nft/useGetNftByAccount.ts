@@ -10,8 +10,6 @@ import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 interface NftData {
   nftCollections: NftCollection[]
   nftItems: NftItem[]
@@ -70,15 +68,9 @@ export default function useGetNftByAccount () {
       if (currentAccount?.isGeneric) {
         return undefined;
       } else {
-        const isEthereum = isEthereumAddress(currentAccount.address || '');
+        const availableGen: string[] = currentAccount.availableGenesisHashes || [];
 
-        if (isEthereum) {
-          return undefined;
-        } else {
-          const availableGen: string[] = currentAccount.availableGenesisHashes || [];
-
-          return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
-        }
+        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
       }
     } else {
       return undefined;

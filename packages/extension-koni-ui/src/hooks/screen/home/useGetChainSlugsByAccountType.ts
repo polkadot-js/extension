@@ -79,15 +79,9 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
       if (account.isGeneric) {
         return undefined;
       } else {
-        const isEthereum = isEthereumAddress(account.address || '');
+        const availableGen: string[] = account.availableGenesisHashes || [];
 
-        if (isEthereum) {
-          return undefined;
-        } else {
-          const availableGen: string[] = account.availableGenesisHashes || [];
-
-          return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
-        }
+        return availableGen.map((gen) => findNetworkJsonByGenesisHash(chainInfoMap, gen)?.slug || '');
       }
     } else {
       return undefined;

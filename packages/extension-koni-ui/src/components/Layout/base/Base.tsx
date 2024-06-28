@@ -5,7 +5,7 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
-import { CONFIRM_MISSIONS_POOL_ACTIVE } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRM_MISSIONS_POOL_ACTIVE, MISSIONS_POOL_SELECTED } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,7 +14,7 @@ import { Icon, SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
 import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -45,7 +45,17 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
     return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
   }, [missions]);
 
-  const [isConfirmedMissionPool, setIsConfirmedMissionPool] = useLocalStorage(CONFIRM_MISSIONS_POOL_ACTIVE, false);
+  const [missionPoolIds, setMissionPoolIds] = useLocalStorage(CONFIRM_MISSIONS_POOL_ACTIVE, '');
+  const [isMissionPoolSelected, setIsMissionPoolSelected] = useLocalStorage(MISSIONS_POOL_SELECTED, false);
+  const [hasLiveMissionsChanged, setHasLiveMissionsChanged] = useState(false);
+
+  const liveMissionFilter = useMemo(() => {
+    return missions.filter((item) => computeStatus(item) === 'live');
+  }, [missions]);
+
+  const liveMissionIds = useMemo(() => {
+    return liveMissionFilter.map((mission) => mission.id);
+  }, [liveMissionFilter]);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -54,16 +64,59 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       const pathExcludeHome = pathname.split('/home')[1];
       const currentTab = pathExcludeHome.split('/')[1];
 
-      if (currentTab === 'mission-pools' && !isConfirmedMissionPool) {
-        setIsConfirmedMissionPool(true);
-      }
-
       return currentTab || '';
     }
 
     return '';
-  }, [isConfirmedMissionPool, pathname, setIsConfirmedMissionPool]);
+  }, [pathname]);
 
+  useEffect(() => {
+    if (selectedTab === 'mission-pools') {
+      setIsMissionPoolSelected(true);
+    }
+
+    console.log('missionPoolIds', missionPoolIds);
+
+    let storedLiveMissionIds: number[] = [];
+
+    if (isMissionPoolSelected) {
+      if (missionPoolIds) {
+        try {
+          const parsedData: unknown = JSON.parse(missionPoolIds);
+
+          if (Array.isArray(parsedData) && parsedData.every((item) => typeof item === 'number')) {
+            storedLiveMissionIds = parsedData as number[];
+          } else {
+            console.error('Parsed data is not an array of numbers:', parsedData);
+            storedLiveMissionIds = [];
+          }
+
+          const hasChanged = storedLiveMissionIds.length !== liveMissionIds.length ||
+            !storedLiveMissionIds.every((id) => liveMissionIds.includes(id));
+
+          console.log('hasChanged', hasChanged);
+
+          if (hasChanged && isMissionPoolSelected) {
+            setMissionPoolIds(JSON.stringify(liveMissionIds));
+            setHasLiveMissionsChanged(true);
+            // setIsMissionPoolSelected(false);
+          } else {
+            setHasLiveMissionsChanged(false);
+          }
+        } catch (error) {
+          console.error('Error parsing missionPoolIds:', error);
+          storedLiveMissionIds = [];
+        }
+      } else {
+        setMissionPoolIds(JSON.stringify(liveMissionIds));
+      }
+    }
+
+    console.log('storedLiveMissionIds', storedLiveMissionIds);
+    console.log('liveMissionIds', liveMissionIds);
+  }, [missionPoolIds, liveMissionIds, selectedTab, setMissionPoolIds, setIsMissionPoolSelected, isMissionPoolSelected]);
+
+  console.log('hasLiveMissionsChanged', hasLiveMissionsChanged);
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
       icon: {
@@ -106,7 +159,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
               type='phosphor'
               weight='fill'
             />
-            {!isConfirmedMissionPool && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
+            {(hasLiveMissionsChanged || (!isMissionPoolSelected)) && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
           </>
         )
       },
@@ -124,7 +177,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       key: 'history',
       url: '/home/history'
     }
-  ]), [isConfirmedMissionPool, liveMissionsCount, t]);
+  ]), [hasLiveMissionsChanged, isMissionPoolSelected, liveMissionsCount, t]);
 
   const onSelectTab = useCallback(
     (url: string) => () => {

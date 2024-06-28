@@ -52,7 +52,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return [
       {
         label: t('All'),
-        value: 'all'
+        value: MissionTab.ALL
       },
       {
         label: t('Defi'),
@@ -278,7 +278,6 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginBottom: token.marginXS
     },
     '.__content-wrapper': {
-      marginBottom: token.margin,
       overflowX: 'auto'
     },
     '.ant-sw-header-container-padding-vertical': {

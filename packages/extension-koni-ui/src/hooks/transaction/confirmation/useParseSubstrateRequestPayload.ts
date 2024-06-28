@@ -19,13 +19,14 @@ const registry = new TypeRegistry();
 interface Result {
   payload: ExtrinsicPayload | string;
   hashLoading: boolean;
-  missingData: boolean;
+  isMissingData: boolean;
+  addExtraData: boolean;
 }
 
 const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestSign, isLedger?: boolean): Result => {
   const chainInfo = useGetChainInfoByGenesisHash(chain?.genesisHash || '');
   const chainSlug = useMemo(() => chainInfo?.slug || '', [chainInfo]);
-  const missingData = useMemo(() => {
+  const isMissingData = useMemo(() => {
     if (!request) {
       return false;
     }
@@ -44,6 +45,16 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
       return runtimeUpdated && (payload.mode !== 1 || !payload.metadataHash);
     }
   }, [request, isLedger]);
+
+  const addExtraData = useMemo(() => {
+    if (!isMissingData || !request) {
+      return false;
+    }
+
+    const payload = request.payload as SignerPayloadJSON;
+
+    return !!payload.withSignedTransaction;
+  }, [request, isMissingData]);
 
   const [metadataHash, setMetadataHash] = useState<string>(''); // Have value only when missingData is true
   const [hashLoading, setHashLoading] = useState(true);
@@ -79,7 +90,7 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
   useEffect(() => {
     let cancel = false;
 
-    if (!missingData) {
+    if (!addExtraData) {
       setHashLoading(false);
 
       return;
@@ -101,13 +112,14 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
     return () => {
       cancel = true;
     };
-  }, [chainSlug, missingData]);
+  }, [chainSlug, addExtraData]);
 
   return useMemo(() => ({
     hashLoading,
     payload,
-    missingData
-  }), [hashLoading, missingData, payload]);
+    isMissingData: isMissingData,
+    addExtraData
+  }), [addExtraData, hashLoading, isMissingData, payload]);
 };
 
 export default useParseSubstrateRequestPayload;

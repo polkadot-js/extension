@@ -67,9 +67,9 @@ const Component: React.FC<Props> = (props: Props) => {
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
 
-  const chain = useMetadata(genesisHash);
+  const { chain, loadingChain } = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
-  const { hashLoading, missingData, payload } = useParseSubstrateRequestPayload(chain, request, isLedger);
+  const { addExtraData, hashLoading, isMissingData, payload } = useParseSubstrateRequestPayload(chain, request, isLedger);
 
   const isMessage = isSubstrateMessage(payload);
 
@@ -101,7 +101,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
 
-    if (!isMessage) {
+    if (!isMessage && (!loadingChain || chain)) {
       if (!chain || !chain.hasMetadata) {
         if (requireMetadata) {
           return {
@@ -118,6 +118,14 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       } else {
         if (isRuntimeUpdated) {
+          if (requireMetadata && isMissingData && !addExtraData) {
+            return {
+              isError: true,
+              title: t('Data attention!'),
+              description: t('Your transaction missing data, please contact dApp or SubWallet support', { replace: { networkName } })
+            };
+          }
+
           if (signMode === AccountSignMode.LEGACY_LEDGER) {
             const gens = chain.genesisHash || '___';
 
@@ -148,15 +156,9 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return undefined;
-  }, [signMode, isRuntimeUpdated, isMessage, chain, t, networkName]);
+  }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, t, networkName, isMissingData, addExtraData]);
 
-  const activeLedger = useMemo(() => {
-    if (isLedger) {
-      return !alertData?.isError;
-    }
-
-    return isLedger;
-  }, [isLedger, alertData]);
+  const activeLedger = useMemo(() => isLedger && !loadingChain && !alertData?.isError, [isLedger, loadingChain, alertData?.isError]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -264,7 +266,7 @@ const Component: React.FC<Props> = (props: Props) => {
         try {
           const { signature } = await ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset);
 
-          if (missingData) {
+          if (addExtraData) {
             const extrinsic = payload.registry.createType(
               'Extrinsic',
               { method: payload.method },
@@ -284,7 +286,7 @@ const Component: React.FC<Props> = (props: Props) => {
         setLoading(false);
       }
     }, 100);
-  }, [account, chainInfo, isLedgerConnected, isRuntimeUpdated, ledger, ledgerSignMessage, ledgerSignTransaction, missingData, notify, onApproveSignature, payload, refreshLedger]);
+  }, [account, chainInfo, isLedgerConnected, isRuntimeUpdated, ledger, ledgerSignMessage, ledgerSignTransaction, addExtraData, notify, onApproveSignature, payload, refreshLedger]);
 
   const onConfirmInject = useCallback(() => {
     if (substrateWallet) {
@@ -417,7 +419,7 @@ const Component: React.FC<Props> = (props: Props) => {
           {t('Cancel')}
         </Button>
         <Button
-          disabled={showQuoteExpired || hashLoading || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
+          disabled={showQuoteExpired || loadingChain || hashLoading || (isMessage ? !modeCanSignMessage.includes(signMode) : !!alertData?.isError)}
           icon={(
             <Icon
               phosphorIcon={approveIcon}

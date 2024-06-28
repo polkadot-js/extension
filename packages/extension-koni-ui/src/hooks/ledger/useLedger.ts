@@ -282,8 +282,7 @@ export function useLedger (slug?: string, active = true, forceMigration = false)
 
     timeOutRef.current = setTimeout(() => {
       ledger_.getAddress(false, 0, 0)
-        .then((value) => {
-          console.log(value);
+        .then(() => {
           setIsLoading(false);
         })
         .catch((error: Error) => {

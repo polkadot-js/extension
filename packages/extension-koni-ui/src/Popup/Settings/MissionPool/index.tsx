@@ -240,11 +240,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <MissionDetailModal
         data={currentSelectItem}
       />
-
-      <div
-        className={'__scroll-container'}
-      >
-      </div>
     </Layout.Base>
   );
 };
@@ -261,6 +256,10 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS
+    },
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
     },
     '.filter-tabs-container': {
       paddingLeft: token.padding,

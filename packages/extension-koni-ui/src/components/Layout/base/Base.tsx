@@ -2,16 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import type { SwScreenLayoutProps } from '@subwallet/react-ui';
-import { SwScreenLayout } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { computeStatus } from '@subwallet/extension-koni-ui/utils';
+import { Icon, SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
 import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -35,6 +37,29 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { language } = useSelector((state) => state.settings);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
+  const isSelectedMissionRef = useRef(false);
+
+  const liveMissionsCount = useMemo(() => {
+    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
+  }, [missions]);
+
+  const selectedTab = useMemo((): string => {
+    const isHomePath = pathname.includes('/home');
+
+    if (isHomePath) {
+      const pathExcludeHome = pathname.split('/home')[1];
+      const currentTab = pathExcludeHome.split('/')[1];
+
+      if (currentTab === 'mission-pools' && !isSelectedMissionRef.current) {
+        isSelectedMissionRef.current = true;
+      }
+
+      return currentTab || '';
+    }
+
+    return '';
+  }, [pathname]);
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
@@ -69,9 +94,18 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
     },
     {
       icon: {
-        type: 'phosphor',
-        phosphorIcon: Parachute,
-        weight: 'fill'
+        type: 'customIcon',
+        customIcon: (
+          <>
+            <Icon
+              phosphorIcon={Parachute}
+              size='sm'
+              type='phosphor'
+              weight='fill'
+            />
+            {!isSelectedMissionRef.current && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
+          </>
+        )
       },
       label: t('Missions'),
       key: 'mission-pools',
@@ -87,20 +121,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       key: 'history',
       url: '/home/history'
     }
-  ]), [t]);
-
-  const selectedTab = useMemo((): string => {
-    const isHomePath = pathname.includes('/home');
-
-    if (isHomePath) {
-      const pathExcludeHome = pathname.split('/home')[1];
-      const currentTab = pathExcludeHome.split('/')[1];
-
-      return currentTab || '';
-    }
-
-    return '';
-  }, [pathname]);
+  ]), [liveMissionsCount, t]);
 
   const onSelectTab = useCallback(
     (url: string) => () => {
@@ -112,6 +133,8 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const defaultOnBack = useCallback(() => {
     goHome();
   }, [goHome]);
+
+  console.log('isSelectedMissionRef.current', isSelectedMissionRef.current);
 
   return (
     <SwScreenLayout
@@ -136,10 +159,26 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
   '.ant-sw-tab-bar-container': {
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingSM}px`,
     alignItems: 'flex-start',
+    position: 'relative',
 
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
     }
+  },
+  '.__active-count': {
+    borderRadius: '50%',
+    color: token.colorWhite,
+    fontSize: token.fontSizeXS,
+    fontWeight: token.bodyFontWeight,
+    lineHeight: token.lineHeightXS,
+    paddingTop: 0,
+    paddingRight: token.paddingXXS,
+    paddingLeft: token.paddingXXS,
+    paddingBottom: 0,
+    backgroundColor: token.colorError,
+    position: 'absolute',
+    right: 100,
+    top: 6
   },
 
   '&.disable-header > .ant-sw-screen-layout-header': {

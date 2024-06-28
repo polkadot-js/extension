@@ -127,6 +127,7 @@ export interface RequestSignatures {
   'pub(authorize.tab)': [RequestAuthorizeTab, Promise<AuthResponse>];
   'pub(bytes.sign)': [SignerPayloadRaw, ResponseSigning];
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
+  'pub(extrinsic.sign.modified)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];

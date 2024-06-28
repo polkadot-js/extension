@@ -132,6 +132,13 @@ export default class Tabs {
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 
+  private extrinsicSignModified (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+    const address = request.address;
+    const pair = this.getSigningPair(address);
+
+    return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
+  }
+
   private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
     return this.#state.injectMetadata(url, request);
   }
@@ -239,6 +246,9 @@ export default class Tabs {
 
       case 'pub(extrinsic.sign)':
         return this.extrinsicSign(url, request as SignerPayloadJSON);
+
+      case 'pub(extrinsic.sign.modified)':
+        return this.extrinsicSignModified(url, request as SignerPayloadJSON);
 
       case 'pub(metadata.list)':
         return this.metadataList(url);

@@ -5,6 +5,7 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
+import { CONFIRM_MISSIONS_POOL_ACTIVE } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -13,10 +14,11 @@ import { Icon, SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
 import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import Footer from '../parts/Footer';
 
@@ -38,11 +40,12 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const { t } = useTranslation();
   const { language } = useSelector((state) => state.settings);
   const { missions } = useSelector((state: RootState) => state.missionPool);
-  const isSelectedMissionRef = useRef(false);
 
   const liveMissionsCount = useMemo(() => {
     return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
   }, [missions]);
+
+  const [isConfirmedMissionPool, setIsConfirmedMissionPool] = useLocalStorage(CONFIRM_MISSIONS_POOL_ACTIVE, false);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -51,15 +54,15 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       const pathExcludeHome = pathname.split('/home')[1];
       const currentTab = pathExcludeHome.split('/')[1];
 
-      if (currentTab === 'mission-pools' && !isSelectedMissionRef.current) {
-        isSelectedMissionRef.current = true;
+      if (currentTab === 'mission-pools' && !isConfirmedMissionPool) {
+        setIsConfirmedMissionPool(true);
       }
 
       return currentTab || '';
     }
 
     return '';
-  }, [pathname]);
+  }, [isConfirmedMissionPool, pathname, setIsConfirmedMissionPool]);
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
@@ -103,7 +106,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
               type='phosphor'
               weight='fill'
             />
-            {!isSelectedMissionRef.current && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
+            {!isConfirmedMissionPool && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
           </>
         )
       },
@@ -121,7 +124,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       key: 'history',
       url: '/home/history'
     }
-  ]), [liveMissionsCount, t]);
+  ]), [isConfirmedMissionPool, liveMissionsCount, t]);
 
   const onSelectTab = useCallback(
     (url: string) => () => {
@@ -133,8 +136,6 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const defaultOnBack = useCallback(() => {
     goHome();
   }, [goHome]);
-
-  console.log('isSelectedMissionRef.current', isSelectedMissionRef.current);
 
   return (
     <SwScreenLayout

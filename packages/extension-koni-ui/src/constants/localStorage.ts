@@ -25,6 +25,7 @@ export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
 
 export const CONFIRM_GENERAL_TERM = 'general.term-and-condition';
+export const CONFIRM_MISSIONS_POOL_ACTIVE = 'mission-pool-active';
 export const CONFIRM_SWAP_TERM = 'swap.term-and-service';
 export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
 export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';

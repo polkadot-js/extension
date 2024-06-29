@@ -1,6 +1,6 @@
     2705	AnhMTV                        	Release version 1.2.10
     2464	Nam Phạm                      	[Issue 1984] fix: handle warning on send fund
-    2072	S2kael                        	[Issue-3214] Update stable version for chain-list
+    2119	S2kael                        	[Issue-2453] Update message and UX
      819	lw-cdm                        	[Issue-3228] Remove modal-viewer support
      467	nguyentiendung                	
      465	Jaco                          	0.42.5 (#969)

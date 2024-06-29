@@ -246,7 +246,7 @@ export const BLOCK_DEFAULT_LEDGER_NETWORKS: string[] = ['*'];
 /* TRANSFER */
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = [];
-export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['substrate_legacy', 'evm'];
+export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar'];
 /* TRANSFER */
 

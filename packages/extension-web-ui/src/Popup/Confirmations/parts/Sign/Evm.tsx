@@ -299,7 +299,7 @@ const Component: React.FC<Props> = (props: Props) => {
         onClick={onConfirm}
       >
         {
-          signMode !== AccountSignMode.LEDGER
+          !isLedger
             ? t('Approve')
             : !isLedgerConnected
               ? t('Refresh')

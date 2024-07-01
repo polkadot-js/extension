@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { SwapFeeInfo, SwapStepDetail } from '@subwallet/extension-base/types/swap';
+import { CommonStepDetail, CommonStepFeeInfo } from '@subwallet/extension-base/types/service-base';
 import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
 // todo: review this file again and remove unnecessary logic
@@ -21,8 +21,8 @@ interface StepResult {
 }
 
 export interface SwapProcessState {
-  steps: SwapStepDetail[]; // list steps
-  feeStructure: SwapFeeInfo[];
+  steps: CommonStepDetail[]; // list steps
+  feeStructure: CommonStepFeeInfo[];
   currentStep: number; // Current step
   stepResults: Record<number, StepResult>;
 }
@@ -65,7 +65,7 @@ interface StepCreateAction extends AbstractSwapAction {
 }
 
 const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { payload }) => {
-  const convertKey = (item: SwapStepDetail) => [item.id, item.type].join('-');
+  const convertKey = (item: CommonStepDetail) => [item.id, item.type].join('-');
   const oldSteps = oldState.steps.map(convertKey).join('_');
   const newSteps = payload.steps.map(convertKey).join('_');
 

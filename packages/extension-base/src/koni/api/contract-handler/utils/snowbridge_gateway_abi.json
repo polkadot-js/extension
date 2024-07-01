@@ -1,0 +1,1122 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "beefyClient",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "agentExecutor",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "bridgeHubParaID",
+        "type": "uint32",
+        "internalType": "ParaID"
+      },
+      {
+        "name": "bridgeHubAgentID",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "foreignTokenDecimals",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "maxDestinationFee",
+        "type": "uint128",
+        "internalType": "uint128"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "AGENT_EXECUTOR",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "BEEFY_CLIENT",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "agentExecute",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "agentOf",
+    "inputs": [
+      {
+        "name": "agentID",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "channelNoncesOf",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "internalType": "ChannelID"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "channelOperatingModeOf",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "internalType": "ChannelID"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum OperatingMode"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "createAgent",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "createChannel",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "dropRescueAbility",
+    "inputs": [
+
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "implementation",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "initialize",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "isTokenRegistered",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "operatingMode",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "enum OperatingMode"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "pricingParameters",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "UD60x18"
+      },
+      {
+        "name": "",
+        "type": "uint128",
+        "internalType": "uint128"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "quoteRegisterTokenFee",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "quoteSendTokenFee",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "destinationChain",
+        "type": "uint32",
+        "internalType": "ParaID"
+      },
+      {
+        "name": "destinationFee",
+        "type": "uint128",
+        "internalType": "uint128"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "registerToken",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "rescue",
+    "inputs": [
+      {
+        "name": "impl",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "implCodeHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "initializerParams",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "rescueOperator",
+    "inputs": [
+
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "sendToken",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "destinationChain",
+        "type": "uint32",
+        "internalType": "ParaID"
+      },
+      {
+        "name": "destinationAddress",
+        "type": "tuple",
+        "internalType": "struct MultiAddress",
+        "components": [
+          {
+            "name": "kind",
+            "type": "uint8",
+            "internalType": "enum Kind"
+          },
+          {
+            "name": "data",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "destinationFee",
+        "type": "uint128",
+        "internalType": "uint128"
+      },
+      {
+        "name": "amount",
+        "type": "uint128",
+        "internalType": "uint128"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "setOperatingMode",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setPricingParameters",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "setTokenTransferFees",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "submitV1",
+    "inputs": [
+      {
+        "name": "message",
+        "type": "tuple",
+        "internalType": "struct InboundMessage",
+        "components": [
+          {
+            "name": "channelID",
+            "type": "bytes32",
+            "internalType": "ChannelID"
+          },
+          {
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "command",
+            "type": "uint8",
+            "internalType": "enum Command"
+          },
+          {
+            "name": "params",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "maxDispatchGas",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "maxFeePerGas",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "reward",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "id",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      },
+      {
+        "name": "leafProof",
+        "type": "bytes32[]",
+        "internalType": "bytes32[]"
+      },
+      {
+        "name": "headerProof",
+        "type": "tuple",
+        "internalType": "struct Verification.Proof",
+        "components": [
+          {
+            "name": "header",
+            "type": "tuple",
+            "internalType": "struct Verification.ParachainHeader",
+            "components": [
+              {
+                "name": "parentHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "number",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "stateRoot",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "extrinsicsRoot",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "digestItems",
+                "type": "tuple[]",
+                "internalType": "struct Verification.DigestItem[]",
+                "components": [
+                  {
+                    "name": "kind",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "consensusEngineID",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
+                  },
+                  {
+                    "name": "data",
+                    "type": "bytes",
+                    "internalType": "bytes"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "name": "headProof",
+            "type": "tuple",
+            "internalType": "struct Verification.HeadProof",
+            "components": [
+              {
+                "name": "pos",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "width",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "proof",
+                "type": "bytes32[]",
+                "internalType": "bytes32[]"
+              }
+            ]
+          },
+          {
+            "name": "leafPartial",
+            "type": "tuple",
+            "internalType": "struct Verification.MMRLeafPartial",
+            "components": [
+              {
+                "name": "version",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "parentNumber",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "parentHash",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              },
+              {
+                "name": "nextAuthoritySetID",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "nextAuthoritySetLen",
+                "type": "uint32",
+                "internalType": "uint32"
+              },
+              {
+                "name": "nextAuthoritySetRoot",
+                "type": "bytes32",
+                "internalType": "bytes32"
+              }
+            ]
+          },
+          {
+            "name": "leafProof",
+            "type": "bytes32[]",
+            "internalType": "bytes32[]"
+          },
+          {
+            "name": "leafProofOrder",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "transferNativeFromAgent",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateChannel",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "upgrade",
+    "inputs": [
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "AgentCreated",
+    "inputs": [
+      {
+        "name": "agentID",
+        "type": "bytes32",
+        "indexed": false,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "agent",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "AgentFundsWithdrawn",
+    "inputs": [
+      {
+        "name": "agentID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "recipient",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ChannelCreated",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "ChannelID"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ChannelUpdated",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "ChannelID"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "InboundMessageDispatched",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "ChannelID"
+      },
+      {
+        "name": "nonce",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "messageID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "success",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OperatingModeChanged",
+    "inputs": [
+      {
+        "name": "mode",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum OperatingMode"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OutboundMessageAccepted",
+    "inputs": [
+      {
+        "name": "channelID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "ChannelID"
+      },
+      {
+        "name": "nonce",
+        "type": "uint64",
+        "indexed": false,
+        "internalType": "uint64"
+      },
+      {
+        "name": "messageID",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "payload",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PricingParametersChanged",
+    "inputs": [
+
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenRegistrationSent",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenSent",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "destinationChain",
+        "type": "uint32",
+        "indexed": true,
+        "internalType": "ParaID"
+      },
+      {
+        "name": "destinationAddress",
+        "type": "tuple",
+        "indexed": false,
+        "internalType": "struct MultiAddress",
+        "components": [
+          {
+            "name": "kind",
+            "type": "uint8",
+            "internalType": "enum Kind"
+          },
+          {
+            "name": "data",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      },
+      {
+        "name": "amount",
+        "type": "uint128",
+        "indexed": false,
+        "internalType": "uint128"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TokenTransferFeesChanged",
+    "inputs": [
+
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Upgraded",
+    "inputs": [
+      {
+        "name": "implementation",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AgentAlreadyCreated",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AgentDoesNotExist",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AgentExecutionFailed",
+    "inputs": [
+      {
+        "name": "returndata",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ChannelAlreadyCreated",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ChannelDoesNotExist",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "Disabled",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "FeePaymentToLow",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidAgentExecutionPayload",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidChannelUpdate",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidCodeHash",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidConstructorParams",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidContract",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidNonce",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidProof",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NativeTransferFailed",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "NotEnoughGas",
+    "inputs": [
+
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PRBMath_MulDiv18_Overflow",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "y",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PRBMath_MulDiv_Overflow",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "y",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "denominator",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PRBMath_UD60x18_Convert_Overflow",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PRBMath_UD60x18_Exp2_InputTooBig",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "uint256",
+        "internalType": "UD60x18"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PRBMath_UD60x18_Log_InputTooSmall",
+    "inputs": [
+      {
+        "name": "x",
+        "type": "uint256",
+        "internalType": "UD60x18"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": [
+
+    ]
+  }
+]

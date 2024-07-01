@@ -3,7 +3,7 @@
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetRef } from '@subwallet/chain-list/types';
-import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
+import { createXcmExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';

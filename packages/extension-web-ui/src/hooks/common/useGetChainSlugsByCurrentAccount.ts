@@ -116,9 +116,7 @@ export default function useGetChainSlugsByCurrentAccount (): string[] {
     const account: AccountJson | null = currentAccount;
 
     if (account?.isHardware) {
-      const isEthereum = isEthereumAddress(account.address || '');
-
-      if (isEthereum) {
+      if (account?.isGeneric) {
         return undefined;
       } else {
         const availableGen: string[] = account.availableGenesisHashes || [];

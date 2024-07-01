@@ -1,5 +1,55 @@
 # CHANGELOG
 
+## 1.2.11
+Build date: Jun 29, 2024.
+
+Features & Update:
+- Integrate Polkadot Ledger app from Zondax (#2453)
+
+Bugs fixed:
+- Fix bug Show incorrect screen when perform earning actions with Ledger's EVM account (#3254)
+
+
+## 1.2.10
+Build date: Jun 25, 2024.
+
+Features & Update:
+- Update subwallet-react-ui (#3228)
+- Fix bug Screen flickering error when interacting with extensions (#3131)
+- Fix bug Show incorrect Amount on Transaction history, Transaction confirmation for transfer NFT (#3133)
+
+
+## 1.2.9
+Build date: Jun 24, 2024.
+
+Features & Update:
+- Update chain-list (#3214)
+  - Add support for Analog Testnet
+  - Add support for more tokens on HydraDX
+  - Add support for tokens listed on StellaSwap Pulsar
+  - Add support for Karura assets
+  - Update logo for some tokens
+  - Update chain type for some chains
+- Support SnowBridge (#1984)
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter')
+
+
+## 1.2.8
+Build date: Jun 21, 2024.
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter') (#3218)
+
+
+## 1.2.7
+Build date: Jun 20, 2024.
+
+Features & Update:
+- Support MV3 on Firefox (#3108)
+
+
 ## 1.2.6
 Build date: Jun 19, 2024.
 

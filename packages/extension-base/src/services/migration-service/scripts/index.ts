@@ -14,6 +14,7 @@ import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
 import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
+import ClearMetadataDatabase from './ClearMetadataDatabase';
 import DeleteChain from './DeleteChain';
 import DeleteChainStaking from './DeleteChainStaking';
 import EnableVaraChain from './EnableVaraChain';
@@ -22,6 +23,7 @@ import MigrateAutoLock from './MigrateAutoLock';
 import MigrateChainPatrol from './MigrateChainPatrol';
 import MigrateImportedToken from './MigrateImportedToken';
 import MigrateLedgerAccount from './MigrateLedgerAccount';
+import MigrateLedgerAccountV2 from './MigrateLedgerAccountV2';
 import MigrateNetworkSettings from './MigrateNetworkSettings';
 import MigrateSettings from './MigrateSettings';
 import MigrateTokenDecimals from './MigrateTokenDecimals';
@@ -51,11 +53,13 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.24-01': MigrateProvidersV1M1P24,
   '1.1.26-01': MigratePolygonUSDCProvider,
   '1.1.28-01': MigrateEarningVersion,
+  '1.1.33-01': MigrateLedgerAccountV2,
   '1.1.41-01': DeleteChainStaking,
   '1.1.46-01': AutoEnableSomeTokens,
   '1.1.69-03': MigrateAssetSetting,
   '1.1.69-02': MigrateTransactionHistoryBySymbol,
-  '1.2.69-01': MigrateRemoveGenesisHash
+  '1.2.69-01': MigrateRemoveGenesisHash,
+  '1.2.1-01': ClearMetadataDatabase
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

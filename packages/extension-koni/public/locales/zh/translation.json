@@ -1259,5 +1259,20 @@
   "Your Ledger is disconnected. Reconnect and try again": "Ledger已断开连接。请重新连接",
   "This pool is blocked. Select another to continue": "",
   " You're using an old version of Firefox, which no longer supports automatic dApp access and phishing detection. Review our user guide to learn how to update Firefox to version 127.0 or manually enable dApp access. ": "",
-  " Insufficient {{symbol}} on {{chain}} to cover min balance ({{amount}} {{symbol}})": ""
+  " Insufficient {{symbol}} on {{chain}} to cover min balance ({{amount}} {{symbol}})": "",
+  "{{networkName}} network's metadata is outdated. Update metadata and try again": "",
+  "{{networkName}} network's metadata is not updated, which can lead to an invalid signature": "",
+  "Runtime attention!": "",
+  "You should re-attach account by Generic App then use it normally": "",
+  "{{networkName}} network's metadata is out of date. Update metadata using <highlight>this guide</highlight> and try again": "",
+  "{{networkName}} network's metadata is out of date, which may cause the transaction to fail. Update metadata using <highlight>this guide</highlight> or approve transaction at your own risk": "",
+  "Unable to sign this transaction on Ledger because the dApp is out of date": "",
+  "To sign this transaction, open “Polkadot” app on Ledger, hit Refresh and Approve again. For a better experience, re-attach your Polkadot new account using <highlight>this guide</highlight>": "",
+  "To sign this transaction, open “Polkadot Migration” app on Ledger, hit Refresh and Approve again. For a better experience, move your assets on {{networkName}} network to the Polkadot new account using <highlight>this guide</highlight>": "",
+  "Unable to sign this transaction on Ledger because the {{networkName}} network is out of date": "",
+  "Unable to sign. Open “{{network}}” on Ledger, refresh and approve again": "",
+  "Data attention!": "",
+  "Your transaction missing data, please contact dApp or SubWallet support": "",
+  "You're using Migration app for signing, please migration asset to new account by Generic App then use it normally": "",
+  "You need to wait {{networkName}} network update runtime": ""
 }

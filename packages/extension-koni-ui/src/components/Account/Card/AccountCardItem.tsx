@@ -71,7 +71,8 @@ function Component (props: _AccountCardItem): React.ReactElement<_AccountCardIte
 
   const iconProps: IconProps | undefined = useMemo((): IconProps | undefined => {
     switch (signMode) {
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return {
           type: 'icon',
           value: Swatches

@@ -42,7 +42,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
   const liveMissionsCount = useMemo(() => {
-    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : 0;
+    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : undefined;
   }, [missions]);
 
   const [missionPoolIds, setMissionPoolIds] = useLocalStorage(CONFIRM_MISSIONS_POOL_ACTIVE, '');
@@ -75,8 +75,6 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       setIsMissionPoolSelected(true);
     }
 
-    console.log('missionPoolIds', missionPoolIds);
-
     let storedLiveMissionIds: number[] = [];
 
     if (isMissionPoolSelected) {
@@ -94,29 +92,25 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
           const hasChanged = storedLiveMissionIds.length !== liveMissionIds.length ||
             !storedLiveMissionIds.every((id) => liveMissionIds.includes(id));
 
-          console.log('hasChanged', hasChanged);
-
-          if (hasChanged && isMissionPoolSelected) {
+          if (hasChanged) {
             setMissionPoolIds(JSON.stringify(liveMissionIds));
             setHasLiveMissionsChanged(true);
-            // setIsMissionPoolSelected(false);
+
+            if (selectedTab !== 'mission-pools') {
+              setIsMissionPoolSelected(false);
+            }
           } else {
             setHasLiveMissionsChanged(false);
           }
         } catch (error) {
           console.error('Error parsing missionPoolIds:', error);
-          storedLiveMissionIds = [];
         }
       } else {
         setMissionPoolIds(JSON.stringify(liveMissionIds));
       }
     }
-
-    console.log('storedLiveMissionIds', storedLiveMissionIds);
-    console.log('liveMissionIds', liveMissionIds);
   }, [missionPoolIds, liveMissionIds, selectedTab, setMissionPoolIds, setIsMissionPoolSelected, isMissionPoolSelected]);
 
-  console.log('hasLiveMissionsChanged', hasLiveMissionsChanged);
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
       icon: {

@@ -3110,8 +3110,6 @@ export default class KoniExtension {
 
     let registry: Registry;
 
-    let isEvm = false;
-
     if (isJsonPayload(payload)) {
       const [, chainInfo] = this.#koniState.findNetworkKeyByGenesisHash(payload.genesisHash);
       let metadata: MetadataDef | MetadataItem | undefined;
@@ -3178,10 +3176,6 @@ export default class KoniExtension {
           registry = this.#koniState.getSubstrateApi(chainInfo.slug).api.registry as unknown as TypeRegistry;
         }
       }
-
-      if (chainInfo) {
-        isEvm = _isChainEvmCompatible(chainInfo);
-      }
     } else {
       // for non-payload, just create a registry to use
       registry = new TypeRegistry();
@@ -3192,7 +3186,7 @@ export default class KoniExtension {
     resolve({
       id,
       // In case evm chain, must be cut 2 character after 0x
-      signature: isEvm ? `0x${result.signature.slice(4)}` : result.signature
+      signature: result.signature
     });
 
     if (this.#alwaysLock) {

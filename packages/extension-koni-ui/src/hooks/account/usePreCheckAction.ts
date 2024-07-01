@@ -91,9 +91,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
 
             return;
           }
-        }
 
-        if (mode === AccountSignMode.LEGACY_LEDGER) {
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
 
           if (networkBlock.includes('*')) { // Block all networks

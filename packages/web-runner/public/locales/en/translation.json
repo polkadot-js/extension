@@ -1264,5 +1264,15 @@
   "{{networkName}} network's metadata is not updated, which can lead to an invalid signature": "",
   "Runtime attention!": "",
   "You should re-attach account by Generic App then use it normally": "",
-  "You need to wait network update runtime": ""
+  "{{networkName}} network's metadata is out of date. Update metadata using <highlight>this guide</highlight> and try again": "",
+  "{{networkName}} network's metadata is out of date, which may cause the transaction to fail. Update metadata using <highlight>this guide</highlight> or approve transaction at your own risk": "",
+  "Unable to sign this transaction on Ledger because the dApp is out of date": "",
+  "To sign this transaction, open “Polkadot” app on Ledger, hit Refresh and Approve again. For a better experience, re-attach your Polkadot new account using <highlight>this guide</highlight>": "",
+  "To sign this transaction, open “Polkadot Migration” app on Ledger, hit Refresh and Approve again. For a better experience, move your assets on {{networkName}} network to the Polkadot new account using <highlight>this guide</highlight>": "",
+  "Unable to sign this transaction on Ledger because the {{networkName}} network is out of date": "",
+  "Unable to sign. Open “{{network}}” on Ledger, refresh and approve again": "",
+  "Data attention!": "",
+  "Your transaction missing data, please contact dApp or SubWallet support": "",
+  "You're using Migration app for signing, please migration asset to new account by Generic App then use it normally": "",
+  "You need to wait {{networkName}} network update runtime": ""
 }

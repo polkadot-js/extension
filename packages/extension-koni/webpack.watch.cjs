@@ -7,5 +7,6 @@ module.exports = createConfig({
   content: './src/content.ts',
   page: './src/page.ts',
   background: ['./src/background-init.ts', './src/background.ts'],
-  extension: './src/extension.ts'
+  extension: './src/extension.ts',
+  injectGlobal: './src/injectGlobal.ts'
 });

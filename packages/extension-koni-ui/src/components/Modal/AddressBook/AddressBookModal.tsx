@@ -58,9 +58,7 @@ const getGroupPriority = (item: AccountItem): number => {
 };
 
 const checkLedger = (account: AccountJson, networkGenesisHash?: string): boolean => {
-  const isEvmAddress = isEthereumAddress(account.address);
-
-  return !networkGenesisHash || !account.isHardware || isEvmAddress || (account.availableGenesisHashes || []).includes(networkGenesisHash);
+  return !networkGenesisHash || !account.isHardware || account.isGeneric || (account.availableGenesisHashes || []).includes(networkGenesisHash);
 };
 
 const Component: React.FC<Props> = (props: Props) => {

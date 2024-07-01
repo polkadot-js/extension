@@ -2172,7 +2172,9 @@ export default class KoniState {
 
     return {
       metadata: metadata?.hexValue || '',
-      specVersion: parseInt(metadata?.specVersion || '0')
+      specVersion: parseInt(metadata?.specVersion || '0'),
+      types: metadata?.types || {},
+      userExtensions: metadata?.userExtensions
     };
   }
 

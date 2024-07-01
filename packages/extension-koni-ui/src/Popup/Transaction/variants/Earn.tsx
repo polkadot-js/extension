@@ -968,13 +968,13 @@ const Component = () => {
                   >
                     <EarningPoolSelector
                       chain={poolChain}
+                      defaultValue={defaultData.target}
                       disabled={submitLoading}
                       from={fromValue}
                       label={t('Pool')}
                       loading={targetLoading}
                       setForceFetchValidator={setForceFetchValidator}
                       slug={slug}
-                      defaultValue={defaultData.target}
                     />
                   </Form.Item>
                 )}

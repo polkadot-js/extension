@@ -4,7 +4,7 @@
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
-import { ALL_STAKING_ACTIONS, isProductionMode } from '@subwallet/extension-web-ui/constants';
+import { ALL_STAKING_ACTIONS, isLedgerCapable, isProductionMode, ledgerIncompatible } from '@subwallet/extension-web-ui/constants';
 import { BLOCK_ACTION_LEDGER_NETWORKS, PredefinedLedgerNetwork } from '@subwallet/extension-web-ui/constants/ledger';
 import { AccountSignMode } from '@subwallet/extension-web-ui/types';
 import { getSignMode } from '@subwallet/extension-web-ui/utils';
@@ -25,7 +25,8 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
     const signMode = getSignMode(account);
 
     switch (signMode) {
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return t('Ledger account');
       case AccountSignMode.ALL_ACCOUNT:
         return t('All account');
@@ -80,7 +81,19 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
           }
         }
 
-        if (mode === AccountSignMode.LEDGER) {
+        if (mode === AccountSignMode.LEGACY_LEDGER || mode === AccountSignMode.GENERIC_LEDGER) {
+          if (!isLedgerCapable) {
+            notify({
+              message: t(ledgerIncompatible),
+              type: 'error',
+              duration: 8
+            });
+
+            return;
+          }
+        }
+
+        if (mode === AccountSignMode.LEGACY_LEDGER) {
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
 
           if (networkBlock.includes('*')) { // Block all network

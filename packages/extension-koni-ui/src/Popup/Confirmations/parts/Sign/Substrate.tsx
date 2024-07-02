@@ -1,13 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { _isRuntimeUpdated, detectTranslate, getShortMetadata } from '@subwallet/extension-base/utils';
-import { AlertBox } from '@subwallet/extension-koni-ui/components';
+import { AlertBox, AlertModal } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
-import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
+import { useAlert, useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-koni-ui/utils';
@@ -29,6 +29,7 @@ interface Props extends ThemeProps {
   request: RequestSign;
   extrinsicType?: ExtrinsicType;
   txExpirationTime?: number;
+  isInternal?: boolean
 }
 
 interface AlertData {
@@ -36,6 +37,7 @@ interface AlertData {
   title: string;
   type: 'info' | 'warning' | 'error';
 }
+const alertModalId = 'dapp-alert-modal';
 
 const handleConfirm = async (id: string) => await approveSignPasswordV2({ id });
 
@@ -50,7 +52,7 @@ const migrationFAQUrl = 'https://docs.subwallet.app/main/extension-user-guide/fa
 const modeCanSignMessage: AccountSignMode[] = [AccountSignMode.QR, AccountSignMode.PASSWORD, AccountSignMode.INJECTED, AccountSignMode.LEGACY_LEDGER, AccountSignMode.GENERIC_LEDGER];
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { account, className, extrinsicType, id, request, txExpirationTime } = props;
+  const { account, className, extrinsicType, id, isInternal, request, txExpirationTime } = props;
 
   const { t } = useTranslation();
   const notify = useNotification();
@@ -58,6 +60,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { activeModal } = useContext(ModalContext);
   const { substrateWallet } = useContext(InjectContext);
+  const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
@@ -101,6 +104,8 @@ const Component: React.FC<Props> = (props: Props) => {
       return _isRuntimeUpdated(_payload.signedExtensions);
     }
   }, [request.payload]);
+  const requireMetadata = useMemo(() => signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated), [isRuntimeUpdated, signMode]);
+
   const isMetadataOutdated = useMemo(() => {
     const _payload = request.payload;
 
@@ -113,6 +118,35 @@ const Component: React.FC<Props> = (props: Props) => {
       return payloadSpecVersion !== metadataSpecVersion;
     }
   }, [request.payload, chain?.specVersion]);
+
+  useEffect(() => {
+    if (!isMessage && !loadingChain && !requireMetadata && !isInternal && (!chain || !chain.hasMetadata || isMetadataOutdated)) {
+      openAlert({
+        title: t('Pay attention!'),
+        type: NotificationType.WARNING,
+        content: (
+          <Trans
+            components={{
+              highlight: (
+                <a
+                  className='link'
+                  href={metadataFAQUrl}
+                  target='__blank'
+                />
+              )
+            }}
+            i18nKey={detectTranslate("{{networkName}} network's metadata is out of date, which may cause the transaction to fail. Update metadata using <highlight>this guide</highlight> or approve transaction at your own risk")}
+            values={{ networkName }}
+          />),
+        okButton: {
+          text: t('I understand'),
+          icon: CheckCircle,
+          iconWeight: 'fill',
+          onClick: closeAlert
+        }
+      });
+    }
+  }, [chain, closeAlert, isInternal, isMessage, isMetadataOutdated, loadingChain, networkName, openAlert, requireMetadata, t]);
 
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);
@@ -135,26 +169,6 @@ const Component: React.FC<Props> = (props: Props) => {
                   )
                 }}
                 i18nKey={detectTranslate("{{networkName}} network's metadata is out of date. Update metadata using <highlight>this guide</highlight> and try again")}
-                values={{ networkName }}
-              />
-            )
-          };
-        } else {
-          return {
-            type: 'warning',
-            title: t('Pay attention!'),
-            description: (
-              <Trans
-                components={{
-                  highlight: (
-                    <a
-                      className='link'
-                      href={metadataFAQUrl}
-                      target='__blank'
-                    />
-                  )
-                }}
-                i18nKey={detectTranslate("{{networkName}} network's metadata is out of date, which may cause the transaction to fail. Update metadata using <highlight>this guide</highlight> or approve transaction at your own risk")}
                 values={{ networkName }}
               />
             )
@@ -227,7 +241,7 @@ const Component: React.FC<Props> = (props: Props) => {
     }
 
     return undefined;
-  }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, isMetadataOutdated, t, networkName, isMissingData, addExtraData]);
+  }, [addExtraData, chain, isMessage, isMetadataOutdated, isMissingData, isRuntimeUpdated, loadingChain, networkName, signMode, t]);
 
   const activeLedger = useMemo(() => isLedger && !loadingChain && alertData?.type !== 'error', [isLedger, loadingChain, alertData?.type]);
 
@@ -472,6 +486,14 @@ const Component: React.FC<Props> = (props: Props) => {
             description={alertData.description}
             title={alertData.title}
             type={alertData.type}
+          />
+        )
+      }
+      {
+        !!alertProps && (
+          <AlertModal
+            modalId={alertModalId}
+            {...alertProps}
           />
         )
       }

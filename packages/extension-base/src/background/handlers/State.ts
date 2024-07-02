@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
 import { knownGenesis } from '@polkadot/networks/defaults';
-import settings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import { MetadataStore } from '../../stores/index.js';

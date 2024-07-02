@@ -6,7 +6,7 @@ import type { Network } from '@polkadot/networks/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Ledger } from '@polkadot/hw-ledger';
-import uiSettings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import ledgerChains from '../util/legerChains.js';
@@ -36,7 +36,7 @@ function getState (): StateBase {
 
   return {
     isLedgerCapable,
-    isLedgerEnabled: isLedgerCapable && uiSettings.ledgerConn !== 'none'
+    isLedgerEnabled: isLedgerCapable && settings.ledgerConn !== 'none'
   };
 }
 

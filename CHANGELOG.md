@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 1.2.12
+Build date: Jul 03, 2024.
+
+Features & Update:
+- Update chainlist:
+  - Add support for Berachain testnet
+  - Add support for Atleta Testnet
+- Remove Interlay lending (#3226)
+
+Bugs fixed:
+- Fix bug Cannot read properties of undefined (reading 'includes') (#3259)
+- Fix bug Do not show Interlay's earning position (#3234)
+- Fix bug not showing popup Swap confirmation when swap with Injected account (#3230)
+
 ## 1.2.11
 Build date: Jun 29, 2024.
 
@@ -354,7 +368,6 @@ Features & Update:
 Build date: Mar 28, 2024.
 
 Features & Update:
-Nội dung release:
 - Integrate asset online (#2790)
 - Add Swap button (#2784)
 - Update chain-list (#2805)

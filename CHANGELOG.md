@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.48.2 July 2, 2024
+
+Contributed:
+
+- Fix: forget account for legacy account without authorizedAccounts (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Adjust ui imports for deterministic bundling
+
+
 ## 0.48.1 June 27, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.

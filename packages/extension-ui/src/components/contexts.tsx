@@ -7,7 +7,7 @@ import type { Theme } from './themes.js';
 
 import React from 'react';
 
-import settings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 
 const noop = (): void => undefined;
 

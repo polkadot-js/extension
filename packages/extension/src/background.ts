@@ -12,7 +12,7 @@ import type { RequestSignatures, TransportRequestMessage } from '@polkadot/exten
 import { handlers, withErrorLog } from '@polkadot/extension-base/background';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
-import keyring from '@polkadot/ui-keyring';
+import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 

@@ -5,7 +5,7 @@ import type { IconTheme } from '@polkadot/react-identicon/types';
 
 import React from 'react';
 
-import Icon from '@polkadot/react-identicon';
+import { Identicon as Icon } from '@polkadot/react-identicon';
 
 import { styled } from '../styled.js';
 

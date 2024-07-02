@@ -71,6 +71,7 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
 
       fetchData().catch((error) => {
         console.error(error);
+        setChain(null);
         setLoadingChain(false);
       });
     } else {

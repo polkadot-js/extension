@@ -119,8 +119,10 @@ const Component: React.FC<Props> = (props: Props) => {
     }
   }, [request.payload, chain?.specVersion]);
 
+  const isOpenAlert = !isMessage && !loadingChain && !requireMetadata && !isInternal && (!chain || !chain.hasMetadata || isMetadataOutdated);
+
   useEffect(() => {
-    if (!isMessage && !loadingChain && !requireMetadata && !isInternal && (!chain || !chain.hasMetadata || isMetadataOutdated)) {
+    if (isOpenAlert) {
       openAlert({
         title: t('Pay attention!'),
         type: NotificationType.WARNING,
@@ -146,7 +148,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
       });
     }
-  }, [chain, closeAlert, isInternal, isMessage, isMetadataOutdated, loadingChain, networkName, openAlert, requireMetadata, t]);
+  }, [closeAlert, isOpenAlert, networkName, openAlert, t]);
 
   const alertData = useMemo((): AlertData | undefined => {
     const requireMetadata = signMode === AccountSignMode.GENERIC_LEDGER || (signMode === AccountSignMode.LEGACY_LEDGER && isRuntimeUpdated);

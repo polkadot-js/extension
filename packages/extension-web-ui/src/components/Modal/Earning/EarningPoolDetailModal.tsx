@@ -5,6 +5,7 @@ import { EarningStatus } from '@subwallet/extension-base/types';
 import { BaseModal } from '@subwallet/extension-web-ui/components';
 import MetaInfo from '@subwallet/extension-web-ui/components/MetaInfo/MetaInfo';
 import { EarningStatusUi, NominationPoolsEarningStatusUi } from '@subwallet/extension-web-ui/constants';
+import { useGetChainPrefixBySlug } from '@subwallet/extension-web-ui/hooks';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { NominationPoolDataType, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Number } from '@subwallet/react-ui';
@@ -14,12 +15,13 @@ import styled from 'styled-components';
 type Props = ThemeProps & {
   onCancel: () => void,
   detailItem?: NominationPoolDataType,
-  maxPoolMembersValue?: number
+  maxPoolMembersValue?: number,
+  chain?: string,
 };
 
 export const EarningPoolDetailModalId = 'earningPoolDetailModalId';
 
-function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
+function Component ({ chain, className, detailItem, maxPoolMembersValue, onCancel }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { address = '', bondedAmount, decimals, isProfitable, memberCounter = 0, name, state, symbol } = detailItem || {};
 
@@ -27,6 +29,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
     return isProfitable ? EarningStatus.EARNING_REWARD : EarningStatus.NOT_EARNING;
   }, [isProfitable]);
 
+  const networkPrefix = useGetChainPrefixBySlug(chain);
   const ratePercent = useMemo(() => {
     const rate = maxPoolMembersValue && (memberCounter / maxPoolMembersValue);
 
@@ -59,6 +62,7 @@ function Component ({ className, detailItem, maxPoolMembersValue, onCancel }: Pr
           address={address}
           label={t('Pool')}
           name={name}
+          networkPrefix={networkPrefix}
         />
 
         {

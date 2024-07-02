@@ -20,8 +20,9 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)
 2. Install dependencies via `yarn install`
 3. Build all packages via `yarn build`
-  - The `/packages/extension/build` will contain the exact code used in the add-on
-4. To regenerate the dst, and src compressed files run: `yarn build:zip`
+  - The `/packages/extension/build` directory will contain the exact code used in the add-on, and should exactly match the uncompressed `master-build`.
+  
+NOTE: If you would like to regenerate the compressed `master-build.zip`, and `master-src.zip` files run: `yarn build:zip`
 
 ## Ensuring `master-build` and `master-src` dont have any diffs (For maintainers)
 

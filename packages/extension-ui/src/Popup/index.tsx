@@ -79,6 +79,8 @@ export default function Popup (): React.ReactElement {
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const history = useHistory();
 
+  console.log('WINDOW; ', window);
+
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');

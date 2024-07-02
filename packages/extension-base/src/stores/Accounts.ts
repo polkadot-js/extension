@@ -15,7 +15,7 @@ export default class AccountsStore extends BaseStore<KeyringJson> implements Key
     );
   }
 
-  public override set (key: string, value: KeyringJson, update?: () => void): void {
+  public override async set (key: string, value: KeyringJson, update?: () => void): Promise<void> {
     // shortcut, don't save testing accounts in extension storage
     if (key.startsWith('account:') && value.meta && value.meta.isTesting) {
       update && update();
@@ -23,6 +23,6 @@ export default class AccountsStore extends BaseStore<KeyringJson> implements Key
       return;
     }
 
-    super.set(key, value, update);
+    await super.set(key, value, update);
   }
 }

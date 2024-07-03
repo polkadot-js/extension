@@ -135,7 +135,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     >
       <Layout.WithSubHeaderOnly
         onBack={goBackToSettingList}
-        title={t('General settings')}
+        title={t('Crowdloans')}
       >
         <div className='content-container'>
           {!!banners.length && (

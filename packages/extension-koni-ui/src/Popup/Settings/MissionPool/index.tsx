@@ -249,6 +249,10 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+    '.__tab-item-label': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight
+    },
     '.__section-list-container': {
       paddingLeft: token.padding,
       paddingRight: token.padding,

@@ -6,7 +6,7 @@ import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
 import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import { Ledger } from '@subwallet/extension-koni-ui/types';
+import { Ledger, SignMessageLedger, SignTransactionLedger } from '@subwallet/extension-koni-ui/types';
 import { convertLedgerError } from '@subwallet/extension-koni-ui/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -30,8 +30,8 @@ interface Result extends StateBase {
   warning: string | null;
   getAddress: (accountIndex: number, accountLimit: number) => Promise<LedgerAddress>;
   getAllAddress: (start: number, end: number) => Promise<LedgerAddress[]>;
-  signTransaction: Ledger['signTransaction'];
-  signMessage: Ledger['signMessage'];
+  signTransaction: SignTransactionLedger;
+  signMessage: SignMessageLedger;
 }
 
 const baseState: StateBase = {
@@ -221,8 +221,19 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
       });
   }, [getLedger, ledger, t]);
 
-  const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+  const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
+      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset);
+
+      if (addressOnCurrentLedger.address !== address) {
+        return new Promise((resolve, reject) => {
+          const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+
+          handleError(error);
+          reject(error);
+        });
+      }
+
       return new Promise((resolve, reject) => {
         setError(null);
 
@@ -242,8 +253,19 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
     }
   }, [handleError, ledger, t]);
 
-  const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+  const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
+      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset);
+
+      if (addressOnCurrentLedger.address !== address) {
+        return new Promise((resolve, reject) => {
+          const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+
+          handleError(error);
+          reject(error);
+        });
+      }
+
       return new Promise((resolve, reject) => {
         setError(null);
 

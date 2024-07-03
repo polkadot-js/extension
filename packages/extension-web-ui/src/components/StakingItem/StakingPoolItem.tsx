@@ -14,10 +14,11 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 type Props = NominationPoolDataType & ThemeProps & {
   onClickMoreBtn: (e: SyntheticEvent) => void;
+  prefixAddress?: number
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, symbol } = props;
+  const { address, bondedAmount, className, decimals, id, isCrowded, isProfitable, name, onClickMoreBtn, prefixAddress, symbol } = props;
 
   const { t } = useTranslation();
 
@@ -26,7 +27,7 @@ const Component: React.FC<Props> = (props: Props) => {
       className={CN(className, { 'is-crowded': isCrowded })}
       leftItem={
         <SwAvatar
-          identPrefix={42}
+          identPrefix={prefixAddress}
           size={40}
           theme={isEthereumAddress(address) ? 'ethereum' : 'polkadot'}
           value={address}

@@ -1,10 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { TokenSpendingApprovalParams } from '@subwallet/extension-base/types';
 import { CommonTransactionInfo, MetaInfo } from '@subwallet/extension-web-ui/components';
-import { useGetChainAssetInfo } from '@subwallet/extension-web-ui/hooks';
+import { useGetNativeTokenBasicInfo } from '@subwallet/extension-web-ui/hooks';
 import CN from 'classnames';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -19,9 +18,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
 
   const txParams = useMemo((): TokenSpendingApprovalParams => transaction.data as TokenSpendingApprovalParams, [transaction.data]);
-
-  const inputAsset = useGetChainAssetInfo(txParams.contractAddress);
-  const spenderAsset = useGetChainAssetInfo(txParams.spenderAddress);
+  const { decimals, symbol } = useGetNativeTokenBasicInfo(transaction.chain);
 
   return (
     <div className={CN(className)}>
@@ -34,22 +31,28 @@ const Component: React.FC<Props> = (props: Props) => {
         hasBackgroundWrapper
       >
         {
-          !!inputAsset && (
+          (
             <MetaInfo.Account
-              address={_getContractAddressOfToken(inputAsset)}
+              address={txParams.contractAddress}
               label={t('Contract')}
             />
           )
         }
 
         {
-          !!spenderAsset && (
+          (
             <MetaInfo.Account
-              address={_getContractAddressOfToken(spenderAsset)}
+              address={txParams.spenderAddress}
               label={t('Spender contract')}
             />
           )
         }
+        <MetaInfo.Number
+          decimals={decimals}
+          label={t('Estimated fee')}
+          suffix={symbol}
+          value={transaction.estimateFee?.value || 0}
+        />
       </MetaInfo>
     </div>
   );

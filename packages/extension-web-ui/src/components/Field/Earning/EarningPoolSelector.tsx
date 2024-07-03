@@ -68,10 +68,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { t } = useTranslation();
 
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
 
   const isActive = checkActive(id);
 
   const items = useGetPoolTargetList(slug) as NominationPoolDataType[];
+  const networkPrefix = chainInfoMap[chain]?.substrateInfo?.addressPrefix;
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
   const { poolInfoMap } = useSelector((state) => state.earning);
@@ -266,6 +268,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 {...item}
                 className={'pool-item'}
                 onClickMoreBtn={onClickMore(item)}
+                prefixAddress={networkPrefix}
               />
             </div>
           </Tooltip>
@@ -276,10 +279,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
             className={'pool-item'}
             key={item.id}
             onClickMoreBtn={onClickMore(item)}
+            prefixAddress={networkPrefix}
           />
         )
     );
-  }, [onClickMore, t]);
+  }, [networkPrefix, onClickMore, t]);
 
   const renderEmpty = useCallback(() => {
     return (
@@ -394,7 +398,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>('Search validator')}
+        searchPlaceholder={t<string>('Search pool')}
         selected={value || ''}
         showActionBtn
         statusHelp={statusHelp}
@@ -435,6 +439,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
       />
 
       <EarningPoolDetailModal
+        chain={chain}
         detailItem={viewDetailItem}
         maxPoolMembersValue={maxPoolMembersValue}
         onCancel={onCloseDetail}

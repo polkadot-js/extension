@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.48.2 July 2, 2024
+## 0.48.2 July 3, 2024
 
 Contributed:
 

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import DefaultLogosMap from '@subwallet/extension-koni-ui/assets/logo';
-import { MetaInfo } from '@subwallet/extension-koni-ui/components';
+import { InfoItemBase, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { NetworkGroup } from '@subwallet/extension-koni-ui/components/MetaInfo/parts';
 import { useTranslation } from '@subwallet/extension-koni-ui/hooks';
-import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
+import { missionCategoryMap, MissionCategoryType, tagMap } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-koni-ui/themes';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-koni-ui/utils';
@@ -77,6 +77,18 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
     return '';
   }, [data?.status, t]);
 
+  const valueColorSchema = useMemo<InfoItemBase['valueColorSchema']>(() => {
+    const missionStatus = data?.status;
+
+    if (missionStatus != null && tagMap[missionStatus]?.theme) {
+      const statusColorSchema = tagMap[missionStatus]?.theme as InfoItemBase['valueColorSchema'];
+
+      return statusColorSchema;
+    } else {
+      return 'default';
+    }
+  }, [data?.status]);
+
   return (
     <SwModal
       className={`${className}`}
@@ -136,7 +148,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               <MetaInfo.Default
                 className={'__status-pool'}
                 label={t('Status')}
-                valueColorSchema={data.status === MissionCategoryType.ARCHIVED ? 'warning' : 'success'}
+                valueColorSchema={valueColorSchema}
               >
                 {status}
               </MetaInfo.Default>

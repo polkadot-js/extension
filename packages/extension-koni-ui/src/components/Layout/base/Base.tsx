@@ -175,17 +175,16 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
   '.__active-count': {
     borderRadius: '50%',
     color: token.colorWhite,
-    fontSize: token.fontSizeXS,
+    fontSize: token.sizeXS,
     fontWeight: token.bodyFontWeight,
-    lineHeight: token.lineHeightXS,
+    lineHeight: token.lineHeightLG,
     paddingTop: 0,
-    paddingRight: token.paddingXXS,
-    paddingLeft: token.paddingXXS,
     paddingBottom: 0,
     backgroundColor: token.colorError,
     position: 'absolute',
-    right: 100,
-    top: 6
+    right: 107,
+    top: 9,
+    minWidth: '12px'
   },
 
   '&.disable-header > .ant-sw-screen-layout-header': {

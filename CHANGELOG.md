@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 1.2.11
+Build date: Jun 29, 2024.
+
+Features & Update:
+- Integrate Polkadot Ledger app from Zondax (#2453)
+
+Bugs fixed:
+- Fix bug Show incorrect screen when perform earning actions with Ledger's EVM account (#3254)
+
+
 ## 1.2.10
 Build date: Jun 25, 2024.
 

@@ -24,6 +24,7 @@ import Web3 from 'web3';
 import { RequestArguments, TransactionConfig } from 'web3-core';
 import { JsonRpcPayload, JsonRpcResponse } from 'web3-core-helpers';
 
+import { ExtDef } from '@polkadot/types/extrinsic/signedExtensions/types';
 import { SignerResult } from '@polkadot/types/types/extrinsic';
 import { HexString } from '@polkadot/util/types';
 import { KeypairType } from '@polkadot/util-crypto/types';
@@ -268,6 +269,8 @@ export interface MetadataItem {
   genesisHash: string;
   specVersion: string;
   hexValue: HexString;
+  types: Record<string, Record<string, string> | string>;
+  userExtensions?: ExtDef;
 }
 
 export interface CrowdloanItem {
@@ -975,6 +978,7 @@ export interface CreateHardwareAccountItem {
   hardwareType: string;
   name: string;
   isEthereum: boolean;
+  isGeneric: boolean;
 }
 
 export interface RequestAccountCreateHardwareMultiple {
@@ -1386,15 +1390,28 @@ export interface ResponseParseEvmContractInput {
 /// Ledger
 
 export interface LedgerNetwork {
-  genesisHash: string; // GenesisHash for substrate app
-  networkName: string; // Display in selector
-  accountName: string; // Name for account(Ledger X Account)
-  appName: string; // Name in Ledger
-  network: string; // network is predefined in ledger lib
-  slug: string; // slug in chain list
-  icon: 'substrate' | 'ethereum'; // Deprecated
-  isDevMode: boolean; // Dev mode on Ledger
-  isEthereum: boolean; // Use for evm account
+  /** GenesisHash for substrate app */
+  genesisHash: string;
+  /** Display in selector */
+  networkName: string;
+  /** Name for account(Ledger X Account) */
+  accountName: string;
+  /** Name in Ledger */
+  appName: string;
+  /** Network is predefined in ledger lib */
+  network: string;
+  /** slug in chain list */
+  slug: string;
+  /** Deprecated */
+  icon: 'substrate' | 'ethereum';
+  /** Dev mode on Ledger */
+  isDevMode: boolean;
+  /** Is use generic Ledger app */
+  isGeneric: boolean;
+  /** Use for evm account */
+  isEthereum: boolean;
+  /** Slip44 in the derivation path */
+  slip44: number;
 }
 
 /// Qr Sign
@@ -1936,6 +1953,8 @@ export interface RequestFindRawMetadata {
 export interface ResponseFindRawMetadata {
   rawMetadata: string;
   specVersion: number;
+  types: Record<string, Record<string, string> | string>;
+  userExtensions?: ExtDef;
 }
 
 export interface ResolveDomainRequest {

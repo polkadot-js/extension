@@ -27,7 +27,8 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
   if (
     message.includes('App does not seem to be open') || // App not open
     message.includes('Unknown Status Code: 28161') || // Substrate stay in dashboard
-    message.includes('CLA_NOT_SUPPORTED (0x6e00)') // Evm wrong app
+    message.includes('Unknown Status Code: 28160') || // Substrate stay in dashboard
+    message.includes('CLA_NOT_SUPPORTED') // Evm wrong app
   ) {
     return {
       status: 'error',

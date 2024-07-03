@@ -71,14 +71,20 @@ const Component = function ({ className }: Props) {
         const _isMessage = isRawPayload(request.request.payload);
 
         account = request.account;
+        const isEthereum = isEthereumAddress(account.address);
 
         if (account.isHardware) {
-          if (_isMessage) {
-            canSign = false;
+          if (account.isGeneric) {
+            canSign = !isEthereum;
           } else {
-            const payload = request.request.payload as SignerPayloadJSON;
+            if (_isMessage) {
+              canSign = true;
+            } else {
+              const payload = request.request.payload as SignerPayloadJSON;
 
-            canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+              // Valid even with evm ledger account (evm - availableGenesisHashes is empty)
+              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+            }
           }
         } else {
           canSign = true;
@@ -132,13 +138,6 @@ const Component = function ({ className }: Props) {
         return (
           <EvmSignatureConfirmation
             request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
-            type={confirmation.type}
-          />
-        );
-      case 'evmWatchTransactionRequest':
-        return (
-          <EvmTransactionConfirmation
-            request={confirmation.item as ConfirmationDefinitions['evmWatchTransactionRequest'][0]}
             type={confirmation.type}
           />
         );

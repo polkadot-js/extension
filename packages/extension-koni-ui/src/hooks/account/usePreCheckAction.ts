@@ -25,7 +25,8 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
     const signMode = getSignMode(account);
 
     switch (signMode) {
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return t('Ledger account');
       case AccountSignMode.ALL_ACCOUNT:
         return t('All account');
@@ -80,7 +81,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
           }
         }
 
-        if (mode === AccountSignMode.LEDGER) {
+        if (mode === AccountSignMode.LEGACY_LEDGER || mode === AccountSignMode.GENERIC_LEDGER) {
           if (!isLedgerCapable) {
             notify({
               message: t(ledgerIncompatible),
@@ -93,14 +94,17 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
 
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
 
-          if (networkBlock.includes('*')) { // Block all network
+          if (networkBlock.includes('*')) { // Block all networks
             block = true;
           } else if ((networkBlock.includes('evm') && isEthereumAccount)) { // Block evm network
             accountTitle = t('Ledger - EVM account');
             block = true;
-          } else if ((networkBlock.includes('substrate') && !isEthereumAccount)) { // Block evm network
+          } else if ((networkBlock.includes('substrate') && !isEthereumAccount)) { // Block substrate network
             accountTitle = t('Ledger - Substrate account');
             block = true;
+          } else if ((networkBlock.includes('substrate_legacy') && !isEthereumAccount)) { // Block substrate legacy network
+            accountTitle = t('Ledger - Substrate account');
+            block = !account.isGeneric;
           } else {
             const ledgerNetwork = PredefinedLedgerNetwork.find((network) => network.genesisHash === account.originGenesisHash);
             const networkName = ledgerNetwork?.accountName || 'Unknown';

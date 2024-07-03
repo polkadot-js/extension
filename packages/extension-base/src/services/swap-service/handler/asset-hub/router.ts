@@ -5,7 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenMinAmount } from '@subwallet/extension-base/services/chain-service/utils';
-import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateActualRate, estimatePriceImpactPct, estimateRateForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
+import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateActualRate, estimatePriceImpactPct1, estimatePriceImpactPct2, estimateRateAfter, estimateRateForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
 import { AssetHubPreValidationMetadata, AssetHubSwapEarlyValidation, SwapErrorType, SwapPair, SwapRequest } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
@@ -53,9 +53,12 @@ export class AssetHubRouter {
     const amounts = estimateTokensForPath(amount, reserves);
     const marketRate = estimateRateForPath(reserves);
     const actualRate = estimateActualRate(amount, reserves);
-    const priceImpactPct = estimatePriceImpactPct(marketRate, actualRate);
+    const marketRateAfter = estimateRateAfter(amount, reserves);
+    const priceImpactPct1 = estimatePriceImpactPct1(marketRate, actualRate);
+    const priceImpactPct2 = estimatePriceImpactPct2(marketRate, marketRateAfter);
 
-    console.log('[i] Price impact (%)', priceImpactPct);
+    console.log('[i] Price impact (%)', priceImpactPct1, priceImpactPct2);
+    console.log('[i] reserves', reserves);
 
     const errors: SwapErrorType[] = [];
 
@@ -84,7 +87,7 @@ export class AssetHubRouter {
       chain: this.chainService.getChainInfoByKey(this.chain),
       toAmount: amounts[amounts.length - 1],
       quoteRate: marketRate,
-      priceImpactPct: priceImpactPct
+      priceImpactPct: priceImpactPct2
     };
 
     return {

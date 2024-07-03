@@ -96,11 +96,30 @@ export const estimateActualRate = (amount: string, reserves: Array<[string, stri
   return result.toString();
 };
 
-export const estimatePriceImpactPct = (marketRate: string, actualRate: string): string => {
+export const estimateRateAfter = (amount: string, reserves: Array<[string, string]>): string => {
+  const m = new BigN(amount);
+
+  const reserve = reserves[0];
+  const x = new BigN(reserve[0]);
+  const y = new BigN(reserve[1]);
+  const n = y.multipliedBy(m).div(x.plus(m));
+  const result = x.plus(m).div(y.minus(n));
+
+  return result.toString();
+}
+
+export const estimatePriceImpactPct1 = (marketRate: string, actualRate: string): string => {
   const bnMarketRate = new BigN(marketRate);
   const bnActualRate = new BigN(actualRate);
 
   return (bnActualRate.div(bnMarketRate).minus(new BigN(1))).multipliedBy(new BigN(100)).toString();
+};
+
+export const estimatePriceImpactPct2 = (marketRate: string, marketRateAfter: string): string => {
+  const bnMarketRate = new BigN(marketRate);
+  const bnActualRate = new BigN(marketRateAfter);
+
+  return (new BigN(1)).minus(bnMarketRate.div(bnActualRate)).multipliedBy(100).toString();
 };
 
 export const checkLiquidityForPool = (amount: string, reserve1: string, reserve2: string): SwapErrorType | undefined => {

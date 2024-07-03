@@ -81,7 +81,7 @@ export const FilterTabsNode = styled(Component)<Props>(({ theme: { token } }: Pr
       borderWidth: 2
     },
     '.-active': {
-      backgroundColor: token.colorBgSecondary
+      backgroundColor: token['gray-2']
     },
 
     '.__tab-item-label': {

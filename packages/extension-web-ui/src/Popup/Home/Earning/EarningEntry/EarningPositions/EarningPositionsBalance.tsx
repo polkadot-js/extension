@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { SpecialYieldPoolInfo, SpecialYieldPositionInfo } from '@subwallet/extension-base/types';
 import { balanceNoPrefixFormater, BN_TEN, formatNumber, isAccountAll } from '@subwallet/extension-base/utils';
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
@@ -27,6 +28,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
   const isShowBalance = useSelector((state: RootState) => state.settings.isShowBalance);
   const { currencyData } = useSelector((state: RootState) => state.price);
   const earningRewards = useSelector((state) => state.earning.earningRewards);
+  const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
 
   const { t } = useTranslation();
@@ -52,11 +54,27 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
     let result = BN_ZERO;
 
     items.forEach((item) => {
-      result = result.plus((new BigN(item.activeStake)).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
+      let rate = 1;
+
+      if ('derivativeToken' in item) {
+        const _item = item as SpecialYieldPositionInfo;
+        const poolInfo = poolInfoMap?.[item.slug];
+
+        const _poolInfo = poolInfo as SpecialYieldPoolInfo;
+        const balanceToken = _item.balanceToken;
+
+        if (_poolInfo) {
+          const asset = _poolInfo.statistic?.assetEarning.find((i) => i.slug === balanceToken);
+
+          rate = asset?.exchangeRate || 1;
+        }
+      }
+
+      result = result.plus((new BigN(item.activeStake)).multipliedBy(rate).div(BN_TEN.pow(item.asset.decimals || 0)).multipliedBy(item.price));
     });
 
     return result;
-  }, [items]);
+  }, [items, poolInfoMap]);
 
   const totalValue = useMemo(() => {
     let result = BN_ZERO;
@@ -244,7 +262,6 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   justifyContent: 'space-between',
   alignItems: 'stretch',
   flexWrap: 'wrap',
-  marginBottom: 32,
 
   '.ant-number .ant-typography': {
     fontSize: 'inherit !important',
@@ -406,9 +423,6 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   '@media screen and (max-width: 1135px)': {
     '.__divider-special': {
       display: 'none'
-    },
-    '.__balance-block': {
-      minHeight: 86
     }
   },
 

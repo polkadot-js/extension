@@ -555,6 +555,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
                       ))
                     }
                     inputPlaceholder={t<string>('Search token')}
+                    onClickFilter={onClickFilterButton}
                     onSearch={setSearchInput}
                     searchValue={searchInput}
                   />

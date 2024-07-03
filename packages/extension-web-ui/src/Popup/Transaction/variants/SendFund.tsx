@@ -5,8 +5,10 @@ import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from
 import { AssetSetting, ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _getXcmUnstableWarning, _isXcmTransferUnstable } from '@subwallet/extension-base/core/substrate/xcm-parser';
-import { _getAssetDecimals, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { getSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { _getAssetDecimals, _getContractAddressOfToken, _getOriginChainOfAsset, _getTokenMinAmount, _isAssetFungibleToken, _isChainEvmCompatible, _isMantaZkAsset, _isNativeToken, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
+import { CommonStepType } from '@subwallet/extension-base/types/service-base';
 import { detectTranslate, isSameAddress } from '@subwallet/extension-base/utils';
 import { AlertBox, AlertModal, HiddenInput } from '@subwallet/extension-web-ui/components';
 import { AccountSelector } from '@subwallet/extension-web-ui/components/Field/AccountSelector';
@@ -15,9 +17,11 @@ import AmountInput from '@subwallet/extension-web-ui/components/Field/AmountInpu
 import { ChainSelector } from '@subwallet/extension-web-ui/components/Field/ChainSelector';
 import { TokenItemType, TokenSelector } from '@subwallet/extension-web-ui/components/Field/TokenSelector';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useHandleSubmitTransaction, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useAlert, useFetchChainAssetInfo, useGetChainPrefixBySlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSetCurrentPage, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { useIsMantaPayEnabled } from '@subwallet/extension-web-ui/hooks/account/useIsMantaPayEnabled';
-import { getMaxTransfer, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
+import useHandleSubmitMultiTransaction from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitMultiTransaction';
+import { approveSpending, getMaxTransfer, getOptimalTransferProcess, makeCrossChainTransfer, makeTransfer } from '@subwallet/extension-web-ui/messaging';
+import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-web-ui/reducer';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-web-ui/types';
 import { findAccountByAddress, formatBalance, noop, reformatAddress, transactionDefaultFilterAccount } from '@subwallet/extension-web-ui/utils';
@@ -27,7 +31,7 @@ import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { PaperPlaneRight, PaperPlaneTilt } from 'phosphor-react';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { useIsFirstRender } from 'usehooks-ts';
@@ -264,12 +268,14 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   const [forceUpdateMaxValue, setForceUpdateMaxValue] = useState<object|undefined>(undefined);
   const chainStatus = useMemo(() => chainStatusMap[chain]?.connectionStatus, [chain, chainStatusMap]);
 
+  const [processState, dispatchProcessState] = useReducer(commonProcessReducer, DEFAULT_COMMON_PROCESS);
+
   const handleTransferAll = useCallback((value: boolean) => {
     setForceUpdateMaxValue({});
     setIsTransferAll(value);
   }, []);
 
-  const { onError, onSuccess } = useHandleSubmitTransaction(handleTransferAll);
+  const { onError, onSuccess } = useHandleSubmitMultiTransaction(dispatchProcessState, handleTransferAll);
 
   const destChainItems = useMemo<ChainItemType[]>(() => {
     return getTokenAvailableDestinations(asset, xcmRefMap, chainInfoMap);
@@ -458,11 +464,9 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
   );
 
   // Submit transaction
-  const doSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
+  const isShowWarningOnSubmit = useCallback((values: TransferParams) => {
     setLoading(true);
-    const { asset, chain, destChain, from: _from, to, value } = values;
-
-    let sendPromise: Promise<SWTransactionResponse>;
+    const { asset, chain, destChain, from: _from } = values;
 
     const account = findAccountByAddress(accounts, _from);
 
@@ -473,12 +477,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         type: 'error'
       });
 
-      return;
+      return true;
     }
-
-    const chainInfo = chainInfoMap[chain];
-    const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
-    const from = reformatAddress(_from, addressPrefix);
 
     const isLedger = !!account.isHardware;
     const isEthereum = isEthereumAddress(account.address);
@@ -494,11 +494,35 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
               type: 'warning'
             });
 
-            return;
+            return true;
           }
         }
       }
+    } else {
+      if (isLedger) {
+        setLoading(false);
+        notification({
+          message: t('This feature is not available for Ledger account'),
+          type: 'warning'
+        });
 
+        return true;
+      }
+    }
+
+    return false;
+  }, [accounts, assetRegistry, notification, t]);
+
+  const handleBasicSubmit = useCallback((values: TransferParams): Promise<SWTransactionResponse> => {
+    const { asset, chain, destChain, from: _from, to, value } = values;
+
+    let sendPromise: Promise<SWTransactionResponse>;
+
+    const chainInfo = chainInfoMap[chain];
+    const addressPrefix = chainInfo?.substrateInfo?.addressPrefix ?? 42;
+    const from = reformatAddress(_from, addressPrefix);
+
+    if (chain === destChain) {
       // Transfer token or send fund
       sendPromise = makeTransfer({
         from,
@@ -509,16 +533,6 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
         transferAll: isTransferAll
       });
     } else {
-      if (isLedger) {
-        setLoading(false);
-        notification({
-          message: t('This feature is not available for Ledger account'),
-          type: 'warning'
-        });
-
-        return;
-      }
-
       // Make cross chain transfer
       sendPromise = makeCrossChainTransfer({
         destinationNetworkKey: destChain,
@@ -531,17 +545,80 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       });
     }
 
+    return sendPromise;
+  }, [chainInfoMap, isTransferAll]);
+
+  // todo: must refactor later, temporary solution to support SnowBridge
+  const handleSnowBridgeSpendingApproval = useCallback((values: TransferParams): Promise<SWTransactionResponse> => {
+    const tokenInfo = assetRegistry[values.asset];
+
+    return approveSpending({
+      amount: values.value,
+      contractAddress: _getContractAddressOfToken(tokenInfo),
+      spenderAddress: getSnowBridgeGatewayContract(values.chain),
+      chain: values.chain,
+      owner: values.from
+    });
+  }, [assetRegistry]);
+
+  // Submit transaction
+  const doSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
+    if (isShowWarningOnSubmit(values)) {
+      return;
+    }
+
+    const submitData = async (step: number): Promise<boolean> => {
+      dispatchProcessState({
+        type: CommonActionType.STEP_SUBMIT,
+        payload: null
+      });
+
+      const isFirstStep = step === 0;
+      const isLastStep = step === processState.steps.length - 1;
+      const needRollback = step === 1;
+
+      try {
+        if (isFirstStep) {
+          // todo: validate process
+          dispatchProcessState({
+            type: CommonActionType.STEP_COMPLETE,
+            payload: true
+          });
+          dispatchProcessState({
+            type: CommonActionType.STEP_SUBMIT,
+            payload: null
+          });
+
+          return await submitData(step + 1);
+        } else {
+          const stepType = processState.steps[step].type;
+          const submitPromise: Promise<SWTransactionResponse> | undefined = stepType === CommonStepType.TOKEN_APPROVAL ? handleSnowBridgeSpendingApproval(values) : handleBasicSubmit(values);
+
+          const rs = await submitPromise;
+          const success = onSuccess(isLastStep, needRollback)(rs);
+
+          if (success) {
+            return await submitData(step + 1);
+          } else {
+            return false;
+          }
+        }
+      } catch (e) {
+        onError(e as Error);
+
+        return false;
+      }
+    };
+
     setTimeout(() => {
       // Handle transfer action
-      sendPromise
-        .then(onSuccess)
+      submitData(processState.currentStep)
         .catch(onError)
         .finally(() => {
           setLoading(false);
-        })
-      ;
+        });
     }, 300);
-  }, [accounts, chainInfoMap, assetRegistry, notification, t, isTransferAll, onSuccess, onError]);
+  }, [handleBasicSubmit, handleSnowBridgeSpendingApproval, isShowWarningOnSubmit, onError, onSuccess, processState.currentStep, processState.steps]);
 
   const onFilterAccountFunc = useMemo(() => filterAccountFunc(chainInfoMap, assetRegistry, multiChainAssetMap, sendFundSlug), [assetRegistry, chainInfoMap, multiChainAssetMap, sendFundSlug]);
 
@@ -552,7 +629,8 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(value);
     }
   }, [maxTransfer]);
-  const onSubmit = useCallback((values: TransferParams) => {
+
+  const onSubmit: FormCallbacks<TransferParams>['onFinish'] = useCallback((values: TransferParams) => {
     if (chain !== destChain) {
       const originChainInfo = chainInfoMap[chain];
       const destChainInfo = chainInfoMap[destChain];
@@ -704,6 +782,28 @@ const _SendFund = ({ className = '', modalContent }: Props): React.ReactElement<
       setIsTransferAll(true);
     }
   }, [maxTransfer, transferAmount]);
+
+  useEffect(() => {
+    getOptimalTransferProcess({
+      amount: transferAmount,
+      address: from,
+      originChain: chain,
+      tokenSlug: asset,
+      destChain
+    })
+      .then((result) => {
+        dispatchProcessState({
+          payload: {
+            steps: result.steps,
+            feeStructure: result.totalFee
+          },
+          type: CommonActionType.STEP_CREATE
+        });
+      })
+      .catch((e) => {
+        console.log('error', e);
+      });
+  }, [asset, chain, destChain, from, transferAmount]);
 
   useRestoreTransaction(form);
   useInitValidateTransaction(validateFields, form, defaultData);

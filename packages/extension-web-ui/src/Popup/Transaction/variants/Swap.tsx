@@ -18,7 +18,7 @@ import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext'
 import { useChainConnection, useNotification, usePreCheckAction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
-import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
+import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-web-ui/reducer';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
@@ -145,7 +145,7 @@ const Component = () => {
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const onPreCheck = usePreCheckAction(fromValue);
 
-  const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
+  const [processState, dispatchProcessState] = useReducer(commonProcessReducer, DEFAULT_COMMON_PROCESS);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
     const result: Record<string, string[]> = {};
@@ -477,9 +477,8 @@ const Component = () => {
         type: 'error',
         duration: 8
       });
-
       dispatchProcessState({
-        type: SwapActionType.STEP_ERROR_ROLLBACK,
+        type: CommonActionType.STEP_ERROR_ROLLBACK,
         payload: error
       });
     },
@@ -513,7 +512,7 @@ const Component = () => {
             return false;
           } else {
             dispatchProcessState({
-              type: needRollback ? SwapActionType.STEP_ERROR_ROLLBACK : SwapActionType.STEP_ERROR,
+              type: needRollback ? CommonActionType.STEP_ERROR_ROLLBACK : CommonActionType.STEP_ERROR,
               payload: _errors[0]
             });
 
@@ -521,7 +520,7 @@ const Component = () => {
           }
         } else if (id) {
           dispatchProcessState({
-            type: SwapActionType.STEP_COMPLETE,
+            type: CommonActionType.STEP_COMPLETE,
             payload: rs
           });
 
@@ -579,7 +578,7 @@ const Component = () => {
 
       const submitData = async (step: number): Promise<boolean> => {
         dispatchProcessState({
-          type: SwapActionType.STEP_SUBMIT,
+          type: CommonActionType.STEP_SUBMIT,
           payload: null
         });
 
@@ -604,11 +603,11 @@ const Component = () => {
               return false;
             } else {
               dispatchProcessState({
-                type: SwapActionType.STEP_COMPLETE,
+                type: CommonActionType.STEP_COMPLETE,
                 payload: true
               });
               dispatchProcessState({
-                type: SwapActionType.STEP_SUBMIT,
+                type: CommonActionType.STEP_SUBMIT,
                 payload: null
               });
 
@@ -953,7 +952,7 @@ const Component = () => {
                   steps: result.process.steps,
                   feeStructure: result.process.totalFee
                 },
-                type: SwapActionType.STEP_CREATE
+                type: CommonActionType.STEP_CREATE
               });
 
               setQuoteOptions(result.quote.quotes);

@@ -81,6 +81,28 @@ export const estimateRateForPath = (reserves: Array<[string, string]>): string =
   return result.toString();
 };
 
+export const estimateActualRate = (amount: string, reserves: Array<[string, string]>): string => {
+  let result = new BigN(1);
+  const m = new BigN(amount);
+
+  // Currently support for direct path swap only
+  for (const reserve of reserves) {
+    const x = new BigN(reserve[0]);
+    const y = new BigN(reserve[1]);
+
+    result = result.times(x.plus(m)).div(y);
+  }
+
+  return result.toString();
+};
+
+export const estimatePriceImpactPct = (marketRate: string, actualRate: string): string => {
+  const bnMarketRate = new BigN(marketRate);
+  const bnActualRate = new BigN(actualRate);
+
+  return (bnActualRate.div(bnMarketRate).minus(new BigN(1))).multipliedBy(new BigN(100)).toString();
+};
+
 export const checkLiquidityForPool = (amount: string, reserve1: string, reserve2: string): SwapErrorType | undefined => {
   if (new BigN(reserve1).eq('0') || new BigN(reserve2).eq('0')) {
     return SwapErrorType.ASSET_NOT_SUPPORTED;

@@ -132,6 +132,7 @@ export interface AssetHubPreValidationMetadata {
   chain: _ChainInfo;
   toAmount: string;
   quoteRate: string;
+  priceImpactPct?: string;
 }
 
 export interface QuoteAskResponse {

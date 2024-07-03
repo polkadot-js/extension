@@ -5,7 +5,7 @@ import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getTokenMinAmount } from '@subwallet/extension-base/services/chain-service/utils';
-import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateRateForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
+import { buildSwapExtrinsic, checkLiquidityForPath, checkMinAmountForPath, estimateActualRate, estimatePriceImpactPct, estimateRateForPath, estimateTokensForPath, getReserveForPath } from '@subwallet/extension-base/services/swap-service/handler/asset-hub/utils';
 import { AssetHubPreValidationMetadata, AssetHubSwapEarlyValidation, SwapErrorType, SwapPair, SwapRequest } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
@@ -51,7 +51,11 @@ export class AssetHubRouter {
     const amount = request.fromAmount;
     const reserves = await getReserveForPath(api, paths);
     const amounts = estimateTokensForPath(amount, reserves);
-    const rate = estimateRateForPath(reserves);
+    const marketRate = estimateRateForPath(reserves);
+    const actualRate = estimateActualRate(amount, reserves);
+    const priceImpactPct = estimatePriceImpactPct(marketRate, actualRate);
+
+    console.log('[i] Price impact (%)', priceImpactPct);
 
     const errors: SwapErrorType[] = [];
 
@@ -79,7 +83,8 @@ export class AssetHubRouter {
     const metadata: AssetHubPreValidationMetadata = {
       chain: this.chainService.getChainInfoByKey(this.chain),
       toAmount: amounts[amounts.length - 1],
-      quoteRate: rate
+      quoteRate: marketRate,
+      priceImpactPct: priceImpactPct
     };
 
     return {

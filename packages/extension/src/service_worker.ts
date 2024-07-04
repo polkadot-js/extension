@@ -40,9 +40,9 @@ function getActiveTabs () {
       .filter((url) => !!url) as string[];
 
     const request: TransportRequestMessage<'pri(activeTabsUrl.update)'> = {
-      id: 'background',
+      id: 'service_worker',
       message: 'pri(activeTabsUrl.update)',
-      origin: 'background',
+      origin: 'service_worker',
       request: { urls }
     };
 

@@ -22,8 +22,8 @@
   "main": "index.js",
   "dependencies": {
     "@metamask/utils": "^9.0.0",
-    "@polkadot/extension-inject": "0.48.2-0-x",
-    "@polkadot/types": "12.0.1",
+    "@polkadot/extension-inject": "0.48.2",
+    "@polkadot/types": "12.1.1",
     "@polkadot/util": "^12.6.2",
     "@polkadot/util-crypto": "^12.6.2",
     "tslib": "^2.6.2"

@@ -16,7 +16,7 @@ import { Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { computeStatus, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { BackgroundIcon, Button, ButtonProps, Icon, Image, ModalContext, SettingItem, SwHeader, SwIconProps, SwModal } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, Parachute, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
+import { ArrowsOut, ArrowSquareOut, Book, BookBookmark, CaretRight, ChatTeardropText, Coin, EnvelopeSimple, FrameCorners, Globe, GlobeHemisphereEast, Lock, Rocket, ShareNetwork, ShieldCheck, X } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
@@ -146,13 +146,13 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           }
         },
         {
-          key: 'mission-pools',
-          leftIcon: Parachute,
+          key: 'crowdloans',
+          leftIcon: Rocket,
           leftIconBgColor: token['cyan-5'],
           rightIcon: CaretRight,
-          title: t('Mission pools'),
+          title: t('Crowdloans'),
           onClick: () => {
-            navigate('/settings/mission-pools', { state: true });
+            navigate('/settings/crowdloans', { state: true });
           }
         }
       ]

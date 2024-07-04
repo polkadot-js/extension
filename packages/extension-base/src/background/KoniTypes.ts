@@ -1255,6 +1255,7 @@ export interface EvmSendTransactionParams {
   maxFeePerGas?: string | number;
   gasPrice?: string | number;
   data?: string;
+  gas?: string | number;
 }
 
 export interface SwitchNetworkRequest {

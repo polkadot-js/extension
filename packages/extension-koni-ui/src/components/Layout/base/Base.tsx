@@ -5,7 +5,7 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
-import { CONFIRM_MISSIONS_POOL_ACTIVE, MISSIONS_POOL_SELECTED } from '@subwallet/extension-koni-ui/constants';
+import { MISSIONS_POOL_LIVE_ID } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,7 +14,7 @@ import { Icon, SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
 import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -30,7 +30,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
   isDisableHeader?: boolean;
 }
-
+type TabBarItem = Omit<SwTabBarItem, 'onClick'> & { url: string };
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
 const Component = ({ children, className, headerIcons, isDisableHeader, onBack, showFooter, ...props }: LayoutBaseProps) => {
@@ -41,21 +41,17 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const { language } = useSelector((state) => state.settings);
   const { missions } = useSelector((state: RootState) => state.missionPool);
 
-  const liveMissionsCount = useMemo(() => {
-    return missions?.filter ? missions.filter((item) => computeStatus(item) === 'live').length : undefined;
-  }, [missions]);
-
-  const [missionPoolIds, setMissionPoolIds] = useLocalStorage(CONFIRM_MISSIONS_POOL_ACTIVE, '');
-  const [isMissionPoolSelected, setIsMissionPoolSelected] = useLocalStorage(MISSIONS_POOL_SELECTED, false);
-  const [hasLiveMissionsChanged, setHasLiveMissionsChanged] = useState(false);
-
-  const liveMissionFilter = useMemo(() => {
-    return missions.filter((item) => computeStatus(item) === 'live');
-  }, [missions]);
+  const [storedLiveMissionIds, setStoredLiveMissionIds] = useLocalStorage<number[]>(MISSIONS_POOL_LIVE_ID, []);
 
   const liveMissionIds = useMemo(() => {
-    return liveMissionFilter.map((mission) => mission.id);
-  }, [liveMissionFilter]);
+    return missions
+      .filter((item) => computeStatus(item) === 'live')
+      .map((mission) => mission.id);
+  }, [missions]);
+
+  const latestLiveMissionIds = useMemo(() => {
+    return liveMissionIds.filter((id) => !storedLiveMissionIds.includes(id));
+  }, [liveMissionIds, storedLiveMissionIds]);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -70,48 +66,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
     return '';
   }, [pathname]);
 
-  useEffect(() => {
-    if (selectedTab === 'mission-pools') {
-      setIsMissionPoolSelected(true);
-    }
-
-    let storedLiveMissionIds: number[] = [];
-
-    if (isMissionPoolSelected) {
-      if (missionPoolIds) {
-        try {
-          const parsedData: unknown = JSON.parse(missionPoolIds);
-
-          if (Array.isArray(parsedData) && parsedData.every((item) => typeof item === 'number')) {
-            storedLiveMissionIds = parsedData as number[];
-          } else {
-            console.error('Parsed data is not an array of numbers:', parsedData);
-            storedLiveMissionIds = [];
-          }
-
-          const hasChanged = storedLiveMissionIds.length !== liveMissionIds.length ||
-            !storedLiveMissionIds.every((id) => liveMissionIds.includes(id));
-
-          if (hasChanged) {
-            setMissionPoolIds(JSON.stringify(liveMissionIds));
-            setHasLiveMissionsChanged(true);
-
-            if (selectedTab !== 'mission-pools') {
-              setIsMissionPoolSelected(false);
-            }
-          } else {
-            setHasLiveMissionsChanged(false);
-          }
-        } catch (error) {
-          console.error('Error parsing missionPoolIds:', error);
-        }
-      } else {
-        setMissionPoolIds(JSON.stringify(liveMissionIds));
-      }
-    }
-  }, [missionPoolIds, liveMissionIds, selectedTab, setMissionPoolIds, setIsMissionPoolSelected, isMissionPoolSelected]);
-
-  const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
+  const tabBarItems = useMemo((): Array<TabBarItem> => ([
     {
       icon: {
         type: 'phosphor',
@@ -153,7 +108,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
               type='phosphor'
               weight='fill'
             />
-            {(hasLiveMissionsChanged || (!isMissionPoolSelected)) && <div className={CN('__active-count')}>{liveMissionsCount}</div>}
+            {(latestLiveMissionIds.length > 0) && <div className={CN('__active-count')}>{latestLiveMissionIds.length}</div>}
           </>
         )
       },
@@ -171,13 +126,17 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       key: 'history',
       url: '/home/history'
     }
-  ]), [hasLiveMissionsChanged, isMissionPoolSelected, liveMissionsCount, t]);
+  ]), [t, latestLiveMissionIds]);
 
   const onSelectTab = useCallback(
-    (url: string) => () => {
-      navigate(url);
+    (item: TabBarItem) => () => {
+      if (item.key === 'mission-pools' && latestLiveMissionIds.length > 0) {
+        setStoredLiveMissionIds(liveMissionIds);
+      }
+
+      navigate(item.url);
     },
-    [navigate]
+    [latestLiveMissionIds.length, navigate, setStoredLiveMissionIds, liveMissionIds]
   );
 
   const defaultOnBack = useCallback(() => {
@@ -195,7 +154,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       selectedTabBarItem={selectedTab}
       tabBarItems={tabBarItems.map((item) => ({
         ...item,
-        onClick: onSelectTab(item.url)
+        onClick: onSelectTab(item)
       }))}
     >
       {children}
@@ -216,17 +175,16 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
   '.__active-count': {
     borderRadius: '50%',
     color: token.colorWhite,
-    fontSize: token.fontSizeXS,
+    fontSize: token.sizeXS,
     fontWeight: token.bodyFontWeight,
-    lineHeight: token.lineHeightXS,
+    lineHeight: token.lineHeightLG,
     paddingTop: 0,
-    paddingRight: token.paddingXXS,
-    paddingLeft: token.paddingXXS,
     paddingBottom: 0,
     backgroundColor: token.colorError,
     position: 'absolute',
-    right: 100,
-    top: 6
+    right: 107,
+    top: 9,
+    minWidth: '12px'
   },
 
   '&.disable-header > .ant-sw-screen-layout-header': {

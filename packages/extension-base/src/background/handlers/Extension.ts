@@ -235,14 +235,14 @@ export default class Extension {
     return true;
   }
 
-  private metadataApprove ({ id }: RequestMetadataApprove): boolean {
+  private async metadataApprove ({ id }: RequestMetadataApprove): Promise<boolean> {
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { request, resolve } = queued;
 
-    this.#state.saveMetadata(request);
+    await this.#state.saveMetadata(request);
 
     resolve(true);
 
@@ -595,7 +595,7 @@ export default class Extension {
         return this.accountsValidate(request as RequestAccountValidate);
 
       case 'pri(metadata.approve)':
-        return this.metadataApprove(request as RequestMetadataApprove);
+        return await this.metadataApprove(request as RequestMetadataApprove);
 
       case 'pri(metadata.get)':
         return this.metadataGet(request as string);

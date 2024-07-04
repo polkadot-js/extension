@@ -49,6 +49,15 @@ chrome.storage.local.get.returns(
     }
   }));
 
+  chrome.storage.local.set.returns(
+    new Promise<void>((resolve, reject) => {
+    try {
+      resolve();
+    } catch (error) {
+      reject(error);
+    }
+  }));
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
 (window as any).chrome = (globalThis as any).chrome = chrome;
 

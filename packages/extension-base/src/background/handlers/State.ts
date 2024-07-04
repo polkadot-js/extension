@@ -551,8 +551,8 @@ export default class State {
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
   }
 
-  public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(meta.genesisHash, meta);
+  public async saveMetadata (meta: MetadataDef): Promise<void> {
+    await this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
   }

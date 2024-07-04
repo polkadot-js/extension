@@ -20,8 +20,8 @@ export default abstract class BaseStore <T> {
     this.#prefix = prefix ? `${prefix}:` : '';
   }
 
-  public all (update: (key: string, value: T) => void): void {
-    this.allMap((map): void => {
+  public async all (update: (key: string, value: T) => void): Promise<void> {
+    await this.allMap((map): void => {
       Object.entries(map).forEach(([key, value]): void => {
         update(key, value);
       });

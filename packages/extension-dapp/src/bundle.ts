@@ -6,8 +6,8 @@ import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, Injec
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-import { SNAPS } from './snap/snapList.js';
 import { injectedMetamaskSnap } from './snap/index.js';
+import { SNAPS } from './snap/snapList.js';
 import { hasMetamask } from './snap/utils.js';
 import { documentReadyPromise } from './util.js';
 

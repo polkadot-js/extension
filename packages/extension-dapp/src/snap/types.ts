@@ -1,35 +1,42 @@
 // Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-export type GetSnapsResponse = Record<string, Snap>;
+import type { Json, JsonRpcError, Opaque, SemVerVersion } from '@metamask/utils';
+
+export type SnapId = Opaque<string, typeof snapIdSymbol>;
+declare const snapIdSymbol: unique symbol;
+
+/**
+ * The result returned by the `wallet_requestSnaps` method.
+ *
+ * It consists of a map of Snap IDs to either the Snap object or an error.
+ */
+export type RequestSnapsResult = Record<string, Snap | { error: JsonRpcError }>;
 
 export interface Snap {
-  permissionName: string;
-  id: string;
-  version: string;
+  id: SnapId;
   initialPermissions: Record<string, unknown>;
+  version: SemVerVersion;
+  enabled: boolean;
+  blocked: boolean;
+}
+
+interface EthereumProvider {
+  isMetaMask: boolean;
+  request(args: { method: string; params?: any }): Promise<any>;
+  // Add more methods and properties as needed
 }
 
 declare global {
   interface Window {
-    ethereum: any; // or a more specific type
+    ethereum: EthereumProvider;
   }
 }
 
 export interface SnapRpcRequestParams {
   snapId?: string;
   method: string;
-  params?: Record<string, any>;
-}
-
-export interface SnapInfo {
-  id: string;
-  name: string;
-  initialPermissions: string[];
-  iconUrl: string;
-  version?: string;
-  enabled: boolean;
-  blocked: boolean;
+  params?: Record<string, unknown>;
 }
 
 export interface SupportedSnap {
@@ -37,8 +44,10 @@ export interface SupportedSnap {
   name: string;
 }
 
-export type SupportedSnaps = {
-  [key: string]: SupportedSnap;
-};
+export type SupportedSnaps = Record<string, SupportedSnap>;
 
-export type SnapObject = Record<string, SnapInfo>;
+/**
+ * The result returned by the `wallet_invokeSnap` method, which is the result
+ * returned by the Snap.
+ */
+export type InvokeSnapResult = Json;

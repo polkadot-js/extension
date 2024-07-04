@@ -5,30 +5,31 @@ import type { SignerResult } from '@polkadot/api/types/index.js';
 import type { InjectedAccount, InjectedExtension, InjectedMetadata, InjectedMetadataKnown, InjectedWindowProvider, MetadataDef } from '@polkadot/extension-inject/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { SnapRpcRequestParams } from './types';
+import type { InvokeSnapResult, RequestSnapsResult, Snap, SnapRpcRequestParams } from './types';
 
 import { SNAPS } from './snapList.js';
 
 export default class Metadata implements InjectedMetadata {
   private snapId: string;
 
-  constructor(snapId: string) {
+  constructor (snapId: string) {
     this.snapId = snapId;
   }
 
-  public get(): Promise<InjectedMetadataKnown[]> {
+  public get (): Promise<InjectedMetadataKnown[]> {
     return getMetaDataList(this.snapId);
   }
 
-  public provide(definition: MetadataDef): Promise<boolean> {
+  public provide (definition: MetadataDef): Promise<boolean> {
     return setMetadata(definition, this.snapId);
   }
 }
 
 /** @internal Requests permission for a dapp to communicate with the specified Snaps and attempts to install them if they're not already installed. */
-const connectSnap = async (origin: string) => {
+const connectSnap = async (origin: string): Promise<RequestSnapsResult> => {
   const { version } = SNAPS[origin];
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return await window.ethereum.request({
     method: 'wallet_requestSnaps',
     params: {
@@ -40,8 +41,8 @@ const connectSnap = async (origin: string) => {
 };
 
 /** @internal Invokes a method on a Snap and returns the result. */
-const invokeSnap = async (args: SnapRpcRequestParams) => {
-  console.info('Args in invoke Snap:', args);
+const invokeSnap = async (args: SnapRpcRequestParams): Promise<InvokeSnapResult> => {
+  console.info('args in invoke Snap:', args);
 
   const snapId = args.snapId;
   const request = {
@@ -49,21 +50,20 @@ const invokeSnap = async (args: SnapRpcRequestParams) => {
     params: args?.params || []
   };
 
-  const result = await window.ethereum.request({
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+  return await window.ethereum.request({
     method: 'wallet_invokeSnap',
     params: {
-      snapId,
-      request
+      request,
+      snapId
     }
   });
-
-  return result as unknown as any;
 };
 
 /** @internal Gets the list of Snap accounts available in the connected wallet. */
 const getSnapAccounts = (
   // anyType?: boolean,
-  snapId: string,
+  snapId: string
 ): () => Promise<InjectedAccount[]> => {
   return async (): Promise<InjectedAccount[]> => {
     const _addressAnyChain = await invokeSnap({
@@ -78,8 +78,8 @@ const getSnapAccounts = (
       type: 'sr25519' as KeypairType
     };
 
-    return [account];
-  }
+    return [account] as InjectedAccount[];
+  };
 };
 
 /** @internal Requests the Snap to sign a JSON payload with the connected wallet. */
@@ -91,9 +91,9 @@ const requestSignJSON = (snapId: string) => {
       method: 'signJSON',
       params: { payload },
       snapId
-    });
-  }
-}
+    }) as unknown as SignerResult;
+  };
+};
 
 /** @internal Requests the Snap to sign a raw payload with the connected wallet. */
 const requestSignRaw = (snapId: string) => {
@@ -104,8 +104,8 @@ const requestSignRaw = (snapId: string) => {
       method: 'signRaw',
       params: { raw },
       snapId
-    });
-  }
+    }) as unknown as SignerResult;
+  };
 };
 
 /**
@@ -120,7 +120,7 @@ export const getMetaDataList = async (snapId: string): Promise<InjectedMetadataK
     method: 'getMetadataList',
     params: {},
     snapId
-  });
+  }) as unknown as InjectedMetadataKnown[];
 };
 
 /**
@@ -135,7 +135,7 @@ export const setMetadata = async (metaData: MetadataDef, snapId: string): Promis
     method: 'setMetadata',
     params: { metaData },
     snapId
-  });
+  }) as boolean;
 };
 
 /** @internal Creates a subscription manager for notifying subscribers about changes in injected accounts. */
@@ -154,15 +154,15 @@ export const snapSubscriptionManager = (snapId: string) => {
           .then(callback)
           .catch(console.error);
       };
-    }
+    };
 
     /** Notify all subscribers about changes in injected accounts. */
     const notifySubscribers = (accounts: InjectedAccount[]) => {
-      subscribers.forEach((callback) => callback(accounts));
+      subscribers.forEach((callback) => callback(accounts) as void);
     };
 
-    return { subscribe, notifySubscribers };
-  }
+    return { notifySubscribers, subscribe };
+  };
 };
 
 /** @internal This object encapsulates the functionality of Metamask Snap for seamless integration with dApps. */
@@ -183,7 +183,7 @@ const metamaskSnap = (snapId: string): InjectedExtension => {
       // update?: (id: number, status: H256 | ISubmittableResult) => void
     },
     version
-  }
+  };
 };
 
 /** @internal Connects to a specified dApp using the Snap API. */
@@ -192,14 +192,20 @@ const connect = (
 ) => {
   return async (appName: string) => {
     const { name } = SNAPS[origin];
+
     console.info(`${name} is connecting to ${appName} ...`);
     const response = await connectSnap(origin);
 
+    if (!response?.[origin]) {
+      throw new Error(`Something went wrong while connecting to the snap:${origin}`);
+    }
+
     return {
       ...metamaskSnap(origin),
-      version: response?.[origin]?.version
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      version: (response[origin] as Snap)?.version
     };
-  }
+  };
 };
 
 /**
@@ -210,9 +216,10 @@ const connect = (
  */
 export const injectedMetamaskSnap = (origin: string): InjectedWindowProvider => {
   const { version } = SNAPS[origin];
+
   return {
     connect: connect(origin),
     enable: connect(origin),
     version
-  }
+  };
 };

@@ -88,7 +88,7 @@ describe('Extension', () => {
     expect(result.exportedJson.encoded).toBeDefined();
   });
 
-  describe('account derivation', async () => {
+  describe('account derivation', () => {
     let address: string;
 
     it('pri(derivation.validate) passes for valid suri', async () => {
@@ -306,7 +306,7 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      await state.saveMetadata(meta);
 
       const payload: SignerPayloadJSON = {
         address,
@@ -381,7 +381,7 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      await state.saveMetadata(meta);
 
       const registry = new TypeRegistry();
 
@@ -437,7 +437,7 @@ describe('Extension', () => {
         userExtensions
       };
 
-      state.saveMetadata(meta);
+      await state.saveMetadata(meta);
 
       const payload = {
         address,

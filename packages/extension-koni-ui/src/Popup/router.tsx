@@ -179,7 +179,6 @@ export const router = createHashRouter([
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
-          Crowdloans.generateRouterObject('crowdloans'),
           // Staking.generateRouterObject('staking'),
           {
             path: 'earning',
@@ -190,6 +189,7 @@ export const router = createHashRouter([
               EarningPositionDetail.generateRouterObject('position-detail')
             ]
           },
+          MissionPools.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId')
         ]
@@ -230,7 +230,7 @@ export const router = createHashRouter([
         children: [
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
-          MissionPools.generateRouterObject('mission-pools'),
+          Crowdloans.generateRouterObject('crowdloans'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),
           ManageWebsiteAccess.generateRouterObject('dapp-access'),

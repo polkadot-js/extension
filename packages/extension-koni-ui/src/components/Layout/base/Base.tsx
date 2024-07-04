@@ -104,7 +104,6 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
           <>
             <Icon
               phosphorIcon={Parachute}
-              size='sm'
               type='phosphor'
               weight='fill'
             />
@@ -182,8 +181,8 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
     paddingBottom: 0,
     backgroundColor: token.colorError,
     position: 'absolute',
-    right: 107,
-    top: 9,
+    right: 108,
+    top: 10,
     minWidth: '12px'
   },
 

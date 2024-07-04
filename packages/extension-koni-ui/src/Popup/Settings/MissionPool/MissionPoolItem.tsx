@@ -169,7 +169,8 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
       marginRight: 4,
       display: 'flex',
       flexDirection: 'row',
-      gap: 4
+      gap: 4,
+      fontWeight: 700
     },
     '.__item-inner': {
       display: 'flex',

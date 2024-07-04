@@ -194,18 +194,18 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               >
                 {data.reward}
               </MetaInfo.Default>
-              {!!timeline && <MetaInfo.Default
+              <MetaInfo.Default
                 label={t('Timeline')}
                 valueColorSchema={'success'}
               >
                 {timeline}
-              </MetaInfo.Default>}
-              {!!data.total_winner && <MetaInfo.Default
+              </MetaInfo.Default>
+              <MetaInfo.Default
                 label={t('Total winners')}
                 valueColorSchema={'gray'}
               >
                 {data.total_winner}
-              </MetaInfo.Default>}
+              </MetaInfo.Default>
             </MetaInfo>
 
             <div className='__modal-footer'>

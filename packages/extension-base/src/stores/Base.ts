@@ -22,10 +22,12 @@ export default abstract class BaseStore <T> {
 
   public async all (update: (key: string, value: T) => void): Promise<void> {
     await this.allMap(async (map): Promise<void> => {
-      Object.entries(map).forEach(async ([key, value]): Promise<void> => {
-        // eslint-ignore-next-line @typescript-eslint/await-thenable
+      const entries = Object.entries(map);
+
+      for (const [key, value] of entries) {
+        // eslint-disable-next-line @typescript-eslint/await-thenable
         await update(key, value);
-      });
+      }
     });
   }
 
@@ -56,7 +58,7 @@ export default abstract class BaseStore <T> {
     await chrome.storage.local.get([prefixedKey]).then(async (result: StoreValue) => {
       lastError('get');
 
-      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       await update(result[prefixedKey] as T);
     }).catch(({ message }: Error) => {
       console.error(`BaseStore error within get: ${message}`);
@@ -69,7 +71,7 @@ export default abstract class BaseStore <T> {
     await chrome.storage.local.remove(prefixedKey).then(async () => {
       lastError('remove');
 
-      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       update && await update();
     }).catch(({ message }: Error) => {
       console.error(`BaseStore error within remove: ${message}`);
@@ -82,7 +84,7 @@ export default abstract class BaseStore <T> {
     await chrome.storage.local.set({ [prefixedKey]: value }).then(async () => {
       lastError('set');
 
-      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      // eslint-disable-next-line @typescript-eslint/await-thenable
       update && await update();
     }).catch(({ message }: Error) => {
       console.error(`BaseStore error within set: ${message}`);

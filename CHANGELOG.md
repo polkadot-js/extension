@@ -1,8 +1,43 @@
 # CHANGELOG
 
-## 0.47.5 May 22, 2024
+## 0.48.2 July 3, 2024
+
+Contributed:
+
+- Fix: forget account for legacy account without authorizedAccounts (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Adjust ui imports for deterministic bundling
+
+
+## 0.48.1 June 27, 2024
 
 - **Important** Not published to the stores, aligns with latest released packages.
+
+Changes:
+
+- Bump @polkadot/api to 12.0.2
+    - NOTE: We are doing a minor bump because the api in this version now gives the option
+    to modify payloads for `signAndSend`, `signAsync`, and `dryRun` which the extension does not use. That being said, for any user that digests that package it will be available to use as a feature.
+- Bump @polkadot/phishing to 0.22.10
+
+
+## 0.47.6 June 18, 2024
+
+Changes:
+
+- Bump @polkadot/api to 11.3.1
+- Bump @polkadot/phishing to 0.22.9
+- Update build process to enable review by Firefox store
+    - Adds `corepack enable` to CI process
+    - Removes hardcoded path to `.yarn/release` in .yarnrc.yml
+    - Updates zip script to ensure correct compression
+
+
+## 0.47.5 May 22, 2024
+
+- **Important** Published only to Chrome store.
 
 Changes:
 

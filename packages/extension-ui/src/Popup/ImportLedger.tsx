@@ -7,7 +7,7 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import settings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 
 import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components/index.js';
 import { useLedger, useTranslation } from '../hooks/index.js';

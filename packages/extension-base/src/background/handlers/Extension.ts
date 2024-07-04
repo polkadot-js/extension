@@ -15,7 +15,7 @@ import type State from './State.js';
 import { ALLOWED_PATH, PASSWORD_EXPIRY_MS } from '@polkadot/extension-base/defaults';
 import { metadataExpand } from '@polkadot/extension-chains';
 import { TypeRegistry } from '@polkadot/types';
-import keyring from '@polkadot/ui-keyring';
+import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
@@ -121,11 +121,11 @@ export default class Extension {
 
     // cycle through authUrls and prepare the array of diff
     Object.entries(this.#state.authUrls).forEach(([url, urlInfo]) => {
-      if (!urlInfo.authorizedAccounts.includes(address)) {
-        return;
+      // Note that urlInfo.authorizedAccounts may be undefined if this website entry
+      // was created before the "account authorization per website" functionality was introduced
+      if (urlInfo.authorizedAccounts?.includes(address)) {
+        authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
       }
-
-      authorizedAccountsDiff.push([url, urlInfo.authorizedAccounts.filter((previousAddress) => previousAddress !== address)]);
     });
 
     await this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);

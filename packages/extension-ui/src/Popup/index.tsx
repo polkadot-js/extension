@@ -9,7 +9,7 @@ import { Route, Switch, useHistory } from 'react-router';
 
 import { PHISHING_PAGE_REDIRECT } from '@polkadot/extension-base/defaults';
 import { canDerive } from '@polkadot/extension-base/utils';
-import uiSettings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts.js';
 import { ErrorBoundary, Loading } from '../components/index.js';
@@ -34,7 +34,7 @@ import PhishingDetected from './PhishingDetected.js';
 import RestoreJson from './RestoreJson.js';
 import Welcome from './Welcome.js';
 
-const startSettings = uiSettings.get();
+const startSettings = settings.get();
 
 // Request permission for video, based on access we can hide/show import
 async function requestMediaAccess (cameraOn: boolean): Promise<boolean> {
@@ -107,9 +107,9 @@ export default function Popup (): React.ReactElement {
       subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
-    uiSettings.on('change', (settings): void => {
-      setSettingsCtx(settings);
-      setCameraOn(settings.camera === 'on');
+    settings.on('change', (uiSettings): void => {
+      setSettingsCtx(uiSettings);
+      setCameraOn(uiSettings.camera === 'on');
     });
 
     _onAction();

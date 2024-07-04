@@ -106,16 +106,9 @@ export const estimateRateAfter = (amount: string, reserves: Array<[string, strin
   const result = x.plus(m).div(y.minus(n));
 
   return result.toString();
-}
-
-export const estimatePriceImpactPct1 = (marketRate: string, actualRate: string): string => {
-  const bnMarketRate = new BigN(marketRate);
-  const bnActualRate = new BigN(actualRate);
-
-  return (bnActualRate.div(bnMarketRate).minus(new BigN(1))).multipliedBy(new BigN(100)).toString();
 };
 
-export const estimatePriceImpactPct2 = (marketRate: string, marketRateAfter: string): string => {
+export const estimatePriceImpactPct = (marketRate: string, marketRateAfter: string): string => {
   const bnMarketRate = new BigN(marketRate);
   const bnActualRate = new BigN(marketRateAfter);
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import chrome from 'sinon-chrome';
+import chrome from './chromeWrapper';
 
 class MessagingFake {
   private listeners: ((...params: unknown[]) => unknown)[] = [];

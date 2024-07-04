@@ -33,31 +33,47 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
     setLoadingChain(true);
 
     if (genesisHash) {
-      const getChainByMetaStore = () => {
-        getMetadata(genesisHash, isPartial)
-          .then(setChain)
-          .catch((error): void => {
-            console.error(error);
-            setChain(null);
-          })
-          .finally(() => {
-            setLoadingChain(false);
-          });
+      const getChainByMetaStore = async () => {
+        try {
+          const chain = await getMetadata(genesisHash, isPartial);
+
+          return chain;
+        } catch (error) {
+          console.error(error);
+
+          return null;
+        }
       };
 
-      getMetadataRaw(chainInfo, genesisHash)
-        .then((chain) => {
-          if (chain) {
-            setChain(chain);
+      const fetchData = async () => {
+        try {
+          const chainFromRaw = await getMetadataRaw(chainInfo, genesisHash);
+          const chainFromMetaStore = await getChainByMetaStore();
+
+          if (chainFromRaw && chainFromMetaStore) {
+            if (chainFromRaw.specVersion >= chainFromMetaStore.specVersion) {
+              setChain(chainFromRaw);
+            } else {
+              setChain(chainFromMetaStore);
+            }
+
             setLoadingChain(false);
           } else {
-            getChainByMetaStore();
+            setChain(chainFromRaw || chainFromMetaStore || null);
+            setLoadingChain(false);
           }
-        })
-        .catch((e) => {
-          console.error(e);
-          getChainByMetaStore();
-        });
+        } catch (error) {
+          console.error(error);
+          setChain(null);
+          setLoadingChain(false);
+        }
+      };
+
+      fetchData().catch((error) => {
+        console.error(error);
+        setChain(null);
+        setLoadingChain(false);
+      });
     } else {
       setLoadingChain(false);
       setChain(null);

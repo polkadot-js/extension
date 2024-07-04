@@ -73,7 +73,7 @@ const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], isEthereumN
   }
 };
 
-export function useLedger (slug?: string, active = true, forceMigration = false): Result {
+export function useLedger (slug?: string, active = true, isSigning = false, forceMigration = false): Result {
   const { t } = useTranslation();
 
   const ledgerChains = useGetSupportedLedger();
@@ -156,7 +156,7 @@ export function useLedger (slug?: string, active = true, forceMigration = false)
   }, []);
 
   const handleError = useCallback((error: Error, expandError = true) => {
-    const convertedError = convertLedgerError(error, t, appName, expandError);
+    const convertedError = convertLedgerError(error, t, appName, isSigning, expandError);
     const message = convertedError.message;
 
     switch (convertedError.status) {
@@ -172,7 +172,7 @@ export function useLedger (slug?: string, active = true, forceMigration = false)
         setWarning(null);
         setError(null);
     }
-  }, [appName, t]);
+  }, [appName, isSigning, t]);
 
   const getAllAddress = useCallback(async (start: number, end: number): Promise<LedgerAddress[]> => {
     const ledger_ = getLedger();

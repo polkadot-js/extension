@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
-      91	Thibaut Sardan                	fix typos (#1343)
-      25	Tarik Gul                     	0.47.5 (#1364)
+      92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
+      32	Tarik Gul                     	0.48.2 (#1384)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

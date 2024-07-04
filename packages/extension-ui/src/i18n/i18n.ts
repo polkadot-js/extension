@@ -4,7 +4,7 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import uiSettings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 
 import Backend from './Backend.js';
 
@@ -19,7 +19,7 @@ i18next
       escapeValue: false
     },
     keySeparator: false,
-    lng: uiSettings.i18nLang,
+    lng: settings.i18nLang,
     load: 'languageOnly',
     nsSeparator: false,
     returnEmptyString: false,
@@ -29,8 +29,8 @@ i18next
     console.log('i18n: failure', error)
   );
 
-uiSettings.on('change', (settings): void => {
-  i18next.changeLanguage(settings.i18nLang
+settings.on('change', (uiSettings): void => {
+  i18next.changeLanguage(uiSettings.i18nLang
   ).catch(console.error);
 });
 

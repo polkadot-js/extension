@@ -4,7 +4,7 @@
 import { faExpand, faTasks } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
-import settings from '@polkadot/ui-settings';
+import { settings } from '@polkadot/ui-settings';
 
 import { ActionContext, ActionText, Checkbox, chooseTheme, Dropdown, Menu, MenuDivider, MenuItem, Switch, ThemeSwitchContext } from '../components/index.js';
 import { useIsPopup, useTranslation } from '../hooks/index.js';

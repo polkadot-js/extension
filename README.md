@@ -1,7 +1,5 @@
 # polkadot{.js} extension
 
-**Important** Please be aware, this repository has not had a release to the google or firefox store in over 2 years which leaves the store version out of sync with the latest release of this extension. 
-
 A very simple scaffolding browser extension that injects a [@polkadot/api](https://github.com/polkadot-js/api) Signer into a page, along with any associated accounts, allowing for use by any dapp. This is an extensible POC implementation of a Polkadot/Substrate browser signer.
 
 As it stands, it does one thing: it _only_ manages accounts and allows the signing of transactions with those accounts. It does not inject providers for use by dapps at this early point, nor does it perform wallet functions where it constructs and submits txs to the network.
@@ -16,11 +14,37 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 ## Documentation and examples
 Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
 
+## Firefox installation from source instructions.
+
+1. Uncompress `master-src.zip`
+2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)
+2. Install dependencies via `yarn install`
+3. Build all packages via `yarn build`
+  - The `/packages/extension/build` directory will contain the exact code used in the add-on, and should exactly match the uncompressed `master-build`.
+  
+NOTE: If you would like to regenerate the compressed `master-build.zip`, and `master-src.zip` files run: `yarn build:zip`
+
+## Ensuring `master-build` and `master-src` dont have any diffs (For maintainers)
+
+Summary: These are the steps to ensure the following builds don't have any diffs so that the firefox review goes smoothly.
+
+1. Run `yarn build`
+2. Run `yarn build:zip` - This will generate a `master-build.zip`, and `master-src.zip`.
+3. Move `master-src.zip`, and `master-build.zip` to its own enviornment/folder.
+4. Uncompress `master-src.zip` to `master-zrc` and inside of `master-src` run `yarn && yarn build`.
+5. Uncompress `master-build.zip` to `master-build`.
+6. Now we can compare the two builds using `diff`, and `comm`
+  - Run `diff -qr <path-to-master-build>/master-build <path-to-master-src>/packages/extension/build | sort`
+7. To sanity check important files (`background.js`, and `extension.js`) you can also run: 
+  - `comm -23 <(sort <path-to-master-build>/background.js) <(sort <path-to-master-src>/packages/extension/build/background.js) > diff`
+  - `comm -23 <(sort <path-to-master-build>/extension.js) <(sort <path-to-master-src>/packages/extension/build/extension.js) > diff`
+
 ## Development version
 
 Steps to build the extension and view your changes in a browser:
 
 1. Build via `yarn build`
+  - NOTE: You may need to enable corepack by running `corepack enable`
 2. Install the extension
   - Chrome:
     - go to `chrome://extensions/`

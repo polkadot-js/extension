@@ -14,7 +14,7 @@ import type { AuthResponse } from './State.js';
 import type State from './State.js';
 
 import { checkIfDenied } from '@polkadot/phishing';
-import keyring from '@polkadot/ui-keyring';
+import { keyring } from '@polkadot/ui-keyring';
 import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/accounts';
 import { assert, isNumber } from '@polkadot/util';
 

@@ -188,7 +188,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       subHeaderBackground={'transparent'}
       subHeaderCenter={false}
       subHeaderPaddingVertical={true}
-      title={t<string>('Missions Pools')}
+      title={t<string>('Mission Pools')}
     >
       <div className={'__tool-area'}>
         <Search

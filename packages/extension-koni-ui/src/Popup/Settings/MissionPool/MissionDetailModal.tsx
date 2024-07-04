@@ -12,6 +12,7 @@ import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension
 import { Button, ButtonProps, Icon, Image, ModalContext, SwModal, Tag } from '@subwallet/react-ui';
 import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
+import Markdown from 'react-markdown';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -143,7 +144,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               {data?.categories && data.categories.length > 0 && (
                 <MetaInfo.Default
                   className='__category-pool'
-                  label={t('Category')}
+                  label={t('Categories')}
                 >
                   {data.categories.map((category, index) => (
                     <Tag
@@ -166,33 +167,33 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 label={t('Description')}
                 valueColorSchema={'gray'}
               >
-                {data.description}
+                <Markdown>{data.description}</Markdown>
               </MetaInfo.Default>
-              <MetaInfo.Default
+              {!!data.total_supply && <MetaInfo.Default
                 className={'__total-token-supply'}
                 label={t('Total token supply')}
                 valueColorSchema={'gray'}
               >
                 {data.total_supply}
-              </MetaInfo.Default>
+              </MetaInfo.Default>}
               <MetaInfo.Default
                 label={t('Total rewards')}
                 valueColorSchema={'gray'}
               >
                 {data.reward}
               </MetaInfo.Default>
-              <MetaInfo.Default
+              {!!timeline && <MetaInfo.Default
                 label={t('Timeline')}
                 valueColorSchema={'success'}
               >
                 {timeline}
-              </MetaInfo.Default>
-              <MetaInfo.Default
+              </MetaInfo.Default>}
+              {!!data.total_winner && <MetaInfo.Default
                 label={t('Total winners')}
                 valueColorSchema={'gray'}
               >
                 {data.total_winner}
-              </MetaInfo.Default>
+              </MetaInfo.Default>}
             </MetaInfo>
 
             <div className='__modal-footer'>
@@ -348,7 +349,7 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       backgroundColor: token.colorBgLayout,
       paddingTop: token.paddingMD,
       position: 'sticky',
-      bottom: -token.size,
+      bottom: -17,
       zIndex: 10
     }
   });

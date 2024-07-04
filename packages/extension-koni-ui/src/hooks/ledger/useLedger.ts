@@ -3,6 +3,7 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { isSameAddress } from '@subwallet/extension-base/utils';
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
 import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -223,9 +224,9 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
 
   const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
-      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset);
+      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
 
-      if (addressOnCurrentLedger.address !== address) {
+      if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
         return new Promise((resolve, reject) => {
           const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
 
@@ -255,9 +256,9 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
 
   const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     if (ledger) {
-      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset);
+      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
 
-      if (addressOnCurrentLedger.address !== address) {
+      if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
         return new Promise((resolve, reject) => {
           const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
 

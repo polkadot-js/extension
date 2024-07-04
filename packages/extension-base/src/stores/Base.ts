@@ -21,15 +21,16 @@ export default abstract class BaseStore <T> {
   }
 
   public async all (update: (key: string, value: T) => void): Promise<void> {
-    await this.allMap((map): void => {
-      Object.entries(map).forEach(([key, value]): void => {
-        update(key, value);
+    await this.allMap(async (map): Promise<void> => {
+      Object.entries(map).forEach(async ([key, value]): Promise<void> => {
+        // eslint-ignore-next-line @typescript-eslint/await-thenable
+        await update(key, value);
       });
     });
   }
 
-  public async allMap (update: (value: Record<string, T>) => void): Promise<void> {
-    await chrome.storage.local.get(null).then((result: StoreValue) => {
+  public async allMap (update: (value: Record<string, T>) => Promise<void>): Promise<void> {
+    await chrome.storage.local.get(null).then(async (result: StoreValue) => {
       lastError('all');
 
       const entries = Object.entries(result);
@@ -43,37 +44,48 @@ export default abstract class BaseStore <T> {
         }
       }
 
-      update(map);
+      await update(map);
+    }).catch(({ message }: Error) => {
+      console.error(`BaseStore error within allMap: ${message}`);
     });
   }
 
   public async get (key: string, update: (value: T) => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    await chrome.storage.local.get([prefixedKey]).then((result: StoreValue) => {
+    await chrome.storage.local.get([prefixedKey]).then(async (result: StoreValue) => {
       lastError('get');
 
-      update(result[prefixedKey] as T);
+      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      await update(result[prefixedKey] as T);
+    }).catch(({ message }: Error) => {
+      console.error(`BaseStore error within get: ${message}`);
     });
   }
 
   public async remove (key: string, update?: () => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    await chrome.storage.local.remove(prefixedKey).then(() => {
+    await chrome.storage.local.remove(prefixedKey).then(async () => {
       lastError('remove');
 
-      update && update();
+      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      update && await update();
+    }).catch(({ message }: Error) => {
+      console.error(`BaseStore error within remove: ${message}`);
     });
   }
 
   public async set (key: string, value: T, update?: () => void): Promise<void> {
     const prefixedKey = `${this.#prefix}${key}`;
 
-    await chrome.storage.local.set({ [prefixedKey]: value }).then(() => {
+    await chrome.storage.local.set({ [prefixedKey]: value }).then(async () => {
       lastError('set');
 
-      update && update();
+      // eslint-ignore-next-line @typescript-eslint/await-thenable
+      update && await update();
+    }).catch(({ message }: Error) => {
+      console.error(`BaseStore error within set: ${message}`);
     });
   }
 }

@@ -49,8 +49,8 @@ chrome.storage.local.get.returns(
     }
   }));
 
-  chrome.storage.local.set.returns(
-    new Promise<void>((resolve, reject) => {
+chrome.storage.local.set.returns(
+  new Promise<void>((resolve, reject) => {
     try {
       resolve();
     } catch (error) {

@@ -210,6 +210,24 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [decimals, forceUpdateMaxValue, maxValue]);
 
+  useEffect(() => {
+    if (inputValue && inputValue.length > (getMaxLengthText(inputValue) || 0)) {
+      let valueStr = inputValue.toString();
+      const decimalPointIndex = valueStr.indexOf('.');
+
+      if (decimalPointIndex !== -1) {
+        valueStr = valueStr.slice(0, decimalPointIndex + decimals + 1);
+        valueStr = valueStr.replace(/0+$/, '');
+
+        if (valueStr.endsWith('.')) {
+          valueStr = valueStr.slice(0, -1);
+        }
+      }
+
+      setInputValue(valueStr);
+    }
+  }, [decimals, getMaxLengthText, inputValue, value]);
+
   return (
     <Input
       className={className}

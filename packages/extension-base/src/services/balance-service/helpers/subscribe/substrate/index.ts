@@ -459,7 +459,7 @@ const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, subst
         const balances: BalanceItem[] = await Promise.all(addresses.map(async (address): Promise<BalanceItem> => {
           try {
             const actor = u8aToHex(decodeAddress(address));
-            const _balanceOf = await contract.balanceOf(actor, address);
+            const _balanceOf = await contract.vft.balanceOf(actor, address);
 
             return {
               address: address,

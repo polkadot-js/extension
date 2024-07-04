@@ -173,9 +173,9 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
 
     const [nameRes, symbolRes, decimalsRes] = await Promise.all([
-      tokenContract.name(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
+      tokenContract.vft.name(DEFAULT_GEAR_ADDRESS.ALICE),
+      tokenContract.vft.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
+      tokenContract.vft.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
     ]);
 
     const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;

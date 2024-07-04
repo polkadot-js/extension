@@ -3,6 +3,7 @@
 
 import sinonChrome from 'sinon-chrome';
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 namespace ChromeWrapper {
   export interface IAction {
     setBadgeText: (content: object) => Promise<void>;

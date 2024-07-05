@@ -5,11 +5,11 @@
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _CrowdloanFund } from '@subwallet/chain-list/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { PolkadotClient } from 'polkadot-api';
 import { BehaviorSubject } from 'rxjs';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
+import { Getters } from '@polkadot/api/base/Getters';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
@@ -81,8 +81,8 @@ export interface _SubstrateApiState {
   defaultFormatBalance?: _SubstrateDefaultFormatBalance;
 }
 
-export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
-  api: ApiPromise | PolkadotClient;
+export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi, _SubstrateApiAdapter {
+  api: ApiPromise;
   isReady: Promise<_SubstrateApi>;
 
   specName: string;
@@ -90,7 +90,18 @@ export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
   systemChain: string;
   systemName: string;
   systemVersion: string;
-  registry: Registry;
+  registry?: Registry;
+}
+
+export interface _SubstrateAdapterArgs {
+  section: keyof Getters<'promise'>,
+  module?: string,
+  method?: string,
+  args?: unknown[]
+}
+
+export interface _SubstrateApiAdapter {
+  makeRpcQuery: (params: _SubstrateAdapterArgs) => Promise<unknown>
 }
 
 export interface _EvmApi extends _ChainBaseApi {

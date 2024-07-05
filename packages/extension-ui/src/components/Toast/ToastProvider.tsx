@@ -21,12 +21,17 @@ const ToastProvider = ({ children }: ToastProviderProps): React.ReactElement<Toa
 
   useEffect(() => {
     const createAlarm = async () => {
-      await chrome.alarms.create(ALARM_NAME, { delayInMinutes: TOAST_TIMEOUT / 60000 });
-      chrome.alarms.onAlarm.addListener((alarm) => {
-        if (alarm.name === ALARM_NAME) {
-          setVisible(false);
-        }
-      });
+      try {
+        await chrome.alarms.create(ALARM_NAME, { delayInMinutes: TOAST_TIMEOUT / 60000 });
+        chrome.alarms.onAlarm.addListener((alarm) => {
+          if (alarm.name === ALARM_NAME) {
+            setVisible(false);
+          }
+        });
+      } catch (error) {
+        console.error('Error creating the alarm:', error);
+        throw error;
+      }
     };
 
     createAlarm().then(async () => {

@@ -25,7 +25,7 @@ import { _PSP22_ABI, _PSP34_ABI } from '../../../koni/api/contract-handler/utils
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 
 export class SubstrateChainHandler extends AbstractChainHandler {
-  private substrateApiMap: Record<string, SubstrateApi> = {};
+  private substrateApiMap: Record<string, _SubstrateApi> = {};
 
   private logger: Logger;
 
@@ -233,7 +233,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
   }
 
-  public setSubstrateApi (chainSlug: string, substrateApi: SubstrateApi) {
+  public setSubstrateApi (chainSlug: string, substrateApi: _SubstrateApi) {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
@@ -243,11 +243,11 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     substrateAPI?.destroy().catch(console.error);
   }
 
-  public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<SubstrateApi> {
+  public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
     const metadata = await this.parent?.getMetadata(chainSlug);
 
-    const updateMetadata = (substrateApi: SubstrateApi) => {
+    const updateMetadata = (substrateApi: _SubstrateApi) => {
       // Update metadata to database with async methods
       substrateApi.api.isReady.then(async (api) => {
         const [runtimeVersion, genesisHash, runtimeMetadata, systemChain, registry] = await Promise.all([

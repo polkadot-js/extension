@@ -312,11 +312,6 @@ export class SubstrateApi implements _SubstrateApi {
 
     // this.apiDefaultTx = api.tx[defaultSection][defaultMethod];
     // this.apiDefaultTxSudo = (api.tx.system && api.tx.system.setCode) || this.apiDefaultTx;
-
-    console.log('consts.balances.existentialDeposit', await this.makeRpcQuery<string>({ section: 'consts', module: 'balances', method: 'existentialDeposit' }));
-    console.log('genesisHash', await this.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }));
-    console.log('rpc.system.chain', await this.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' }));
-    console.log('query.system.account', await this.makeRpcQuery<string>({ section: 'query', module: 'system', method: 'account', args: ['121Rs6fKm8nguHnvPfG1Cq3ctFuNAVZGRmghwkJwHpKxKjbx'] }));
   }
 
   async makeRpcQuery<T> ({ args, method, module, section }: _SubstrateAdapterArgs): Promise<T> {

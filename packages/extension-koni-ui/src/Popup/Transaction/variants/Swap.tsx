@@ -111,6 +111,7 @@ const Component = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
   const [requestUserInteractToContinue, setRequestUserInteractToContinue] = useState<boolean>(false);
+  const [isScrollEnd, setIsScrollEnd] = useState<boolean>(false);
   const continueRefreshQuoteRef = useRef<boolean>(false);
   const { token } = useTheme() as Theme;
 
@@ -768,7 +769,7 @@ const Component = () => {
     return providerId ? [SwapProviderId.KUSAMA_ASSET_HUB, SwapProviderId.POLKADOT_ASSET_HUB, SwapProviderId.ROCOCO_ASSET_HUB].includes(providerId) : false;
   }, [currentQuote?.provider?.id]);
 
-  const renderAlertBox = () => {
+  const renderAlertBox = useCallback(() => {
     const multichainAsset = fromAssetInfo?.multiChainAsset;
     const fromAssetName = multichainAsset && multiChainAssetMap[multichainAsset]?.name;
     const toAssetName = chainInfoMap[toAssetInfo?.originChain]?.name;
@@ -793,7 +794,7 @@ const Component = () => {
         )}
       </>
     );
-  };
+  }, [chainInfoMap, fromAssetInfo?.multiChainAsset, isFormInvalid, isSwapAssetHub, isSwapXCM, multiChainAssetMap, toAssetInfo?.originChain]);
 
   const xcmBalanceTokens = useMemo(() => {
     if (!isSwapXCM || !fromAssetInfo || !currentPair) {
@@ -1095,6 +1096,22 @@ const Component = () => {
   }, [fromValue]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!!renderAlertBox() && !!currentQuote && !isScrollEnd) {
+        setIsScrollEnd(true);
+        const id = '__transaction-swap-wrapper-id';
+        const element = document.getElementById(id);
+
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+        }
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentQuote, isScrollEnd, renderAlertBox]);
+
+  useEffect(() => {
     if (isChainConnected && swapError) {
       notify({
         message: swapError?.message,
@@ -1113,7 +1130,10 @@ const Component = () => {
         })}
         >
           <TransactionContent>
-            <>
+            <div
+              className={'__transaction-swap-wrapper'}
+              id={'__transaction-swap-wrapper-id'}
+            >
               <Form
                 className={'form-container'}
                 form={form}
@@ -1304,7 +1324,7 @@ const Component = () => {
                   </>
                 )
               }
-            </>
+            </div>
           </TransactionContent>
           <TransactionFooter>
             <Button
@@ -1603,7 +1623,7 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     '.__swap-provider .__col': {
       alignItems: 'unset',
       flexDirection: 'row',
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-start'
 
     },
     '.ant-background-icon': {

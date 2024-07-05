@@ -157,10 +157,10 @@ if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
       //   provider: CF_IPFS_GATEWAY,
       //   weight: 4
       // },
-      {
-        provider: PINATA_IPFS_GATEWAY,
-        weight: 1 // Rate limit too low
-      },
+      // {
+      //   provider: PINATA_IPFS_GATEWAY,
+      //   weight: 1 // Rate limit too low
+      // },
       // {
       //   provider: IPFS_IO,
       //   weight: 5

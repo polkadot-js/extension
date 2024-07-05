@@ -9,23 +9,18 @@ import { rpc as oakRpc, types as oakTypes } from '@oak-foundation/types';
 import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } from '@subwallet/extension-base/services/chain-service/constants';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
-import { DEFAULT_AUX } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainConnectionStatus, _SubstrateAdapterArgs, _SubstrateApi, _SubstrateDefaultFormatBalance } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _SubstrateAdapterArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { goldbergRpc, goldbergTypes, spec as availSpec } from 'avail-js-sdk';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
-import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ApiOptions } from '@polkadot/api/types';
 import { typesBundle as _typesBundle } from '@polkadot/apps-config/api';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { OverrideBundleDefinition, Registry } from '@polkadot/types/types';
-import { AnyJson } from '@polkadot/types-codec/types/helpers';
-import { BN, formatBalance } from '@polkadot/util';
-import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
 
 const typesBundle = { ..._typesBundle };
 
@@ -75,9 +70,9 @@ export class SubstrateApi implements _SubstrateApi {
     }
   }
 
-  apiDefaultTx?: SubmittableExtrinsicFunction;
-  apiDefaultTxSudo?: SubmittableExtrinsicFunction;
-  defaultFormatBalance?: _SubstrateDefaultFormatBalance;
+  // apiDefaultTx?: SubmittableExtrinsicFunction;
+  // apiDefaultTxSudo?: SubmittableExtrinsicFunction;
+  // defaultFormatBalance?: _SubstrateDefaultFormatBalance;
 
   registry: Registry;
   specName = '';
@@ -270,47 +265,53 @@ export class SubstrateApi implements _SubstrateApi {
   }
 
   async fillApiInfo (): Promise<void> {
-    const { api, registry } = this;
-    const DEFAULT_DECIMALS = registry.createType('u32', 12);
-    const DEFAULT_SS58 = registry.createType('u32', addressDefaults.prefix);
+    // const { registry } = this;
+    // const DEFAULT_DECIMALS = registry.createType('u32', 12);
+    // const DEFAULT_SS58 = registry.createType('u32', addressDefaults.prefix);
 
     this.specName = this.api.runtimeVersion.specName.toString();
     this.specVersion = this.api.runtimeVersion.specVersion.toString();
 
     const [systemChain, systemName, systemVersion] = await Promise.all([
-      api.rpc.system?.chain(),
-      api.rpc.system?.name(),
-      api.rpc.system?.version()
+      this.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' }),
+      this.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'name' }),
+      this.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'version' })
     ]);
 
     this.systemChain = systemChain.toString();
     this.systemName = systemName.toString();
     this.systemVersion = systemVersion.toString();
 
-    const properties = registry.createType('ChainProperties', {
-      ss58Format: api.registry.chainSS58,
-      tokenDecimals: api.registry.chainDecimals,
-      tokenSymbol: api.registry.chainTokens
-    });
-    const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
-    const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
-    const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
-
-    registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
+    // const [ss58Format, tokenDecimals, tokenSymbol] = await Promise.all([
+    //   this.makeRpcQuery<number | undefined>({ section: 'registry', module: 'chainSS58' }),
+    //   this.makeRpcQuery<number[]>({ section: 'registry', module: 'chainDecimals' }),
+    //   this.makeRpcQuery<string[]>({ section: 'registry', module: 'chainTokens' })
+    // ]);
+    //
+    // const properties = registry.createType('ChainProperties', {
+    //   ss58Format,
+    //   tokenDecimals,
+    //   tokenSymbol
+    // });
+    // const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
+    // const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
+    // const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);
+    //
+    // registry.setChainProperties(registry.createType('ChainProperties', { ss58Format, tokenDecimals, tokenSymbol }));
 
     // first set up the UI helpers
-    this.defaultFormatBalance = {
-      decimals: tokenDecimals.map((b: BN) => {
-        return b.toNumber();
-      }),
-      unit: tokenSymbol[0].toString()
-    };
+    // this.defaultFormatBalance = {
+    //   decimals: tokenDecimals.map((b: BN) => {
+    //     return b.toNumber();
+    //   }),
+    //   unit: tokenSymbol[0].toString()
+    // };
+    //
+    // const defaultSection = Object.keys(api.tx)[0];
+    // const defaultMethod = Object.keys(api.tx[defaultSection])[0];
 
-    const defaultSection = Object.keys(api.tx)[0];
-    const defaultMethod = Object.keys(api.tx[defaultSection])[0];
-
-    this.apiDefaultTx = api.tx[defaultSection][defaultMethod];
-    this.apiDefaultTxSudo = (api.tx.system && api.tx.system.setCode) || this.apiDefaultTx;
+    // this.apiDefaultTx = api.tx[defaultSection][defaultMethod];
+    // this.apiDefaultTxSudo = (api.tx.system && api.tx.system.setCode) || this.apiDefaultTx;
 
     console.log('consts.balances.existentialDeposit', await this.makeRpcQuery<string>({ section: 'consts', module: 'balances', method: 'existentialDeposit' }));
     console.log('genesisHash', await this.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }));
@@ -318,8 +319,8 @@ export class SubstrateApi implements _SubstrateApi {
     console.log('query.system.account', await this.makeRpcQuery<string>({ section: 'query', module: 'system', method: 'account', args: ['121Rs6fKm8nguHnvPfG1Cq3ctFuNAVZGRmghwkJwHpKxKjbx'] }));
   }
 
-  async makeRpcQuery<T extends AnyJson | `0x${string}` | Registry> ({ args, method, module, section }: _SubstrateAdapterArgs): Promise<T> {
-    const isGetterCall = section === 'genesisHash' || section === 'extrinsicVersion' || section === 'runtimeVersion' || section === 'registry';
+  async makeRpcQuery<T> ({ args, method, module, section }: _SubstrateAdapterArgs): Promise<T> {
+    const isGetterCall = section === 'genesisHash' || section === 'extrinsicVersion' || section === 'runtimeVersion' || section === 'runtimeMetadata' || section === 'registry';
     const isRuntimeConstQuery = section === 'consts' && !!method && !!module && !args;
     const isRpcQuery = section === 'rpc' && !!method && !!module && !args;
     const isStateQuery = section === 'query' && method && module;
@@ -331,22 +332,38 @@ export class SubstrateApi implements _SubstrateApi {
         return this.api[section] as T;
       } else if (section === 'runtimeVersion') {
         return this.api[section].toPrimitive() as T;
+      } else if (section === 'runtimeMetadata') {
+        return this.api[section].toHex() as T;
       } else if (section === 'registry') {
         return this.api[section] as T;
       }
     }
 
     if (isRuntimeConstQuery) {
+      if (!this.api[section][module]) {
+        return undefined as T;
+      }
+
       return this.api[section][module][method].toPrimitive() as T;
     }
 
     if (isRpcQuery) {
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+      if (!this.api[section][module]) {
+        return undefined as T;
+      }
+
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       return (await this.api[section][module][method]()).toPrimitive() as T; // todo: improve this
     }
 
     if (isStateQuery) {
+      if (!this.api[section][module]) {
+        return undefined as T;
+      }
+
       if (args) {
         return (await this.api[section][module][method](...args)).toPrimitive() as T;
       } else {

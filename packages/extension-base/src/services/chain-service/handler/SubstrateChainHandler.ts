@@ -13,6 +13,8 @@ import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extens
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
+import { RuntimeVersion } from '@polkadot/types/interfaces';
+import { Registry } from '@polkadot/types/types';
 import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
@@ -91,24 +93,22 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       addressPrefix: -1,
       decimals: 0,
       existentialDeposit: '',
-      genesisHash: substrateApi.api.genesisHash?.toHex(),
+      genesisHash: await substrateApi.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }),
       name: '',
       symbol: '',
       paraId: null
     };
 
-    const { chainDecimals, chainTokens } = substrateApi.api.registry;
+    const { chainDecimals, chainTokens } = await substrateApi.makeRpcQuery<Registry>({ section: 'registry' });
 
-    if (substrateApi.api.query.parachainInfo) {
-      result.paraId = (await substrateApi.api.query.parachainInfo.parachainId()).toPrimitive() as number;
-    }
+    result.paraId = await substrateApi.makeRpcQuery<number | null>({ section: 'query', module: 'parachainInfo', method: 'parachainId' });
 
     // get first token by default, might change
-    result.name = (await substrateApi.api.rpc.system.chain()).toPrimitive();
+    result.name = await substrateApi.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' });
     result.symbol = chainTokens[0];
     result.decimals = chainDecimals[0];
-    result.addressPrefix = substrateApi.api?.consts?.system?.ss58Prefix?.toPrimitive() as number;
-    result.existentialDeposit = substrateApi.api.consts.balances.existentialDeposit.toString();
+    result.addressPrefix = await substrateApi.makeRpcQuery<number>({ section: 'consts', module: 'system', method: 'ss58Prefix' });
+    result.existentialDeposit = await substrateApi.makeRpcQuery<string>({ section: 'consts', module: 'balances', method: 'existentialDeposit' });
 
     return result;
   }
@@ -250,25 +250,29 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const updateMetadata = (substrateApi: SubstrateApi) => {
       // Update metadata to database with async methods
       substrateApi.api.isReady.then(async (api) => {
-        const currentSpecVersion = api.runtimeVersion.specVersion.toString();
-        const genesisHash = api.genesisHash.toHex();
+        const [runtimeVersion, genesisHash, runtimeMetadata, systemChain, registry] = await Promise.all([
+          substrateApi.makeRpcQuery<RuntimeVersion>({ section: 'runtimeVersion' }),
+          substrateApi.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }),
+          substrateApi.makeRpcQuery<`0x${string}`>({ section: 'runtimeMetadata' }),
+          substrateApi.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' }),
+          substrateApi.makeRpcQuery<Registry>({ section: 'registry' })
+        ]);
 
         // Avoid date existed metadata
-        if (metadata && metadata.specVersion === currentSpecVersion && metadata.genesisHash === genesisHash) {
+        if (metadata && metadata.specVersion === runtimeVersion.specVersion.toString() && metadata.genesisHash === genesisHash) {
           return;
         }
 
-        const systemChain = await api.rpc.system.chain();
         // const _metadata: Option<OpaqueMetadata> = await api.call.metadata.metadataAtVersion(15);
         // const metadataHex = _metadata.isSome ? _metadata.unwrap().toHex().slice(2) : ''; // Need unwrap to create metadata object
 
         this.parent?.upsertMetadata(chainSlug, {
           chain: chainSlug,
           genesisHash: genesisHash,
-          specVersion: currentSpecVersion,
-          hexValue: api.runtimeMetadata.toHex(),
-          types: getSpecTypes(api.registry, systemChain, api.runtimeVersion.specName, api.runtimeVersion.specVersion) as unknown as Record<string, string>,
-          userExtensions: getSpecExtensions(api.registry, systemChain, api.runtimeVersion.specName)
+          specVersion: runtimeVersion.toString(),
+          hexValue: runtimeMetadata,
+          types: getSpecTypes(registry, systemChain, runtimeVersion.specName, runtimeVersion.specVersion) as unknown as Record<string, string>,
+          userExtensions: getSpecExtensions(registry, systemChain, runtimeVersion.specName)
         }).catch(console.error);
       }).catch(console.error);
     };

@@ -11,8 +11,9 @@ import Web3 from 'web3';
 import { ApiPromise } from '@polkadot/api';
 import { Getters } from '@polkadot/api/base/Getters';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
+import { ChainProperties, ChainType, RuntimeVersion } from '@polkadot/types/interfaces';
 import { Registry } from '@polkadot/types/types';
+import { AnyJson } from '@polkadot/types-codec/types/helpers';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
@@ -101,7 +102,7 @@ export interface _SubstrateAdapterArgs {
 }
 
 export interface _SubstrateApiAdapter {
-  makeRpcQuery: (params: _SubstrateAdapterArgs) => Promise<unknown>
+  makeRpcQuery<T extends AnyJson | `0x${string}` | Registry | RuntimeVersion>(params: _SubstrateAdapterArgs): Promise<T>
 }
 
 export interface _EvmApi extends _ChainBaseApi {

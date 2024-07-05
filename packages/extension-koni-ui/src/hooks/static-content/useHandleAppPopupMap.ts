@@ -97,7 +97,7 @@ export const useHandleAppPopupMap = (
   }, []);
 
   const filteredAppPopupMap = useMemo(() => {
-    return appPopupData.filter((item) => {
+    return appPopupData?.filter((item) => {
       if (!!Object.keys(item.conditions) && !!Object.keys(item.conditions).length) {
         const isPassValidation: boolean[] = [];
 

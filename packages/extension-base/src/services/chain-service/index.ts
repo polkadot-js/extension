@@ -22,12 +22,23 @@ import Web3 from 'web3';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-const filterChainInfoMap = (data: Record<string, _ChainInfo>): Record<string, _ChainInfo> => {
+const filterChainInfoMap = (data: Record<string, _ChainInfo>, ignoredChains: string[]): Record<string, _ChainInfo> => {
   return Object.fromEntries(
     Object.entries(data)
-      .filter(([, info]) => !info.bitcoinInfo)
+      .filter(([slug, info]) => !info.bitcoinInfo && !ignoredChains.includes(slug))
   );
 };
+
+const ignoredList = [
+  'bevm',
+  'bevmTest',
+  'bevm_testnet',
+  'layerEdge_testnet',
+  'merlinEvm',
+  'botanixEvmTest',
+  'syscoin_evm',
+  'rollux_evm'
+];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
   return Object.fromEntries(
@@ -1039,7 +1050,7 @@ export class ChainService {
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
-    const defaultChainInfoMap = filterChainInfoMap(ChainInfoMap);
+    const defaultChainInfoMap = filterChainInfoMap(ChainInfoMap, ignoredList);
     const storedChainSettingMap: Record<string, IChain> = {};
 
     storedChainSettings.forEach((chainStoredSetting) => {

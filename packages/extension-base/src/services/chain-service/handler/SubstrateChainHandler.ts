@@ -3,7 +3,7 @@
 
 import { GearApi } from '@gear-js/api';
 import { _AssetType } from '@subwallet/chain-list/types';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
@@ -13,11 +13,12 @@ import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extens
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
+import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-import { _PSP22_ABI, _PSP34_ABI } from '../helper';
+import { _PSP22_ABI, _PSP34_ABI } from '../../../koni/api/contract-handler/utils';
 
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 
@@ -163,7 +164,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
     if (!(apiPromise instanceof GearApi)) {
-      console.warn('Cannot subscribe GRC20 balance without GearApi instance');
+      console.warn('Cannot subscribe VFT balance without GearApi instance');
 
       return ['', -1, '', true];
     }
@@ -244,6 +245,33 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
+    const metadata = await this.parent?.getMetadata(chainSlug);
+
+    const updateMetadata = (substrateApi: SubstrateApi) => {
+      // Update metadata to database with async methods
+      substrateApi.api.isReady.then(async (api) => {
+        const currentSpecVersion = api.runtimeVersion.specVersion.toString();
+        const genesisHash = api.genesisHash.toHex();
+
+        // Avoid date existed metadata
+        if (metadata && metadata.specVersion === currentSpecVersion && metadata.genesisHash === genesisHash) {
+          return;
+        }
+
+        const systemChain = await api.rpc.system.chain();
+        // const _metadata: Option<OpaqueMetadata> = await api.call.metadata.metadataAtVersion(15);
+        // const metadataHex = _metadata.isSome ? _metadata.unwrap().toHex().slice(2) : ''; // Need unwrap to create metadata object
+
+        this.parent?.upsertMetadata(chainSlug, {
+          chain: chainSlug,
+          genesisHash: genesisHash,
+          specVersion: currentSpecVersion,
+          hexValue: api.runtimeMetadata.toHex(),
+          types: getSpecTypes(api.registry, systemChain, api.runtimeVersion.specName, api.runtimeVersion.specVersion) as unknown as Record<string, string>,
+          userExtensions: getSpecExtensions(api.registry, systemChain, api.runtimeVersion.specName)
+        }).catch(console.error);
+      }).catch(console.error);
+    };
 
     // Return existed to avoid re-init metadata
     if (existed) {
@@ -253,29 +281,18 @@ export class SubstrateChainHandler extends AbstractChainHandler {
         await existed.updateApiUrl(apiUrl);
       }
 
+      // Update data in case of existed api (if needed - old provider cannot connect)
+      updateMetadata(existed);
+
       return existed;
     }
 
-    const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata, externalApiPromise });
 
     apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));
     onUpdateStatus && apiObject.connectionStatusSubject.subscribe(onUpdateStatus);
 
-    // Update metadata to database with async methods
-    apiObject.isReady.then((api) => {
-      // Avoid date existed metadata
-      if (metadata && metadata.specVersion === api.specVersion && metadata.genesisHash === api.api.genesisHash.toHex()) {
-        return;
-      }
-
-      this.parent?.upsertMetadata(chainSlug, {
-        chain: chainSlug,
-        genesisHash: api.api.genesisHash.toHex(),
-        specVersion: api.specVersion,
-        hexValue: api.api.runtimeMetadata.toHex()
-      }).catch(console.error);
-    }).catch(console.error);
+    updateMetadata(apiObject);
 
     return apiObject;
   }

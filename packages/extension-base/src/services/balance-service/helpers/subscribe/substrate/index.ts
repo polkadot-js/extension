@@ -5,13 +5,14 @@ import { GearApi } from '@gear-js/api';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
-import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
+import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -71,7 +72,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
     }
 
     if (_BALANCE_CHAIN_GROUP.supportBridged.includes(chain)) {
-      unsubBridgedToken = await subscribeBridgedBalance(substrateParams);
+      unsubBridgedToken = await subscribeForeignAssetBalance(substrateParams);
     }
 
     /**
@@ -159,7 +160,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   };
 };
 
-const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
+const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
   const chain = chainInfo.slug;
   const tokenMap = filterAssetsByChainAndType(assetMap, chain, [_AssetType.LOCAL]);
 
@@ -169,35 +170,17 @@ const subscribeBridgedBalance = async ({ addresses, assetMap, callback, chainInf
       const isBridgedToken = _isBridgedToken(tokenInfo);
 
       if (isBridgedToken) {
-        const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+        const assetLocation = _getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo);
 
-        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [onChainInfo, address]), (balances) => {
+        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [assetLocation, address]), (balances) => {
           const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-            const bdata = balance?.toHuman();
-
-            let frozen = BN_ZERO;
-            let total = BN_ZERO;
-
-            if (bdata) {
-              // @ts-ignore
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-argument
-              const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
-
-              // @ts-ignore
-              if (bdata?.isFrozen) {
-                frozen = addressBalance;
-              } else {
-                total = addressBalance;
-              }
-            }
-
-            const free = total.sub(frozen);
+            const accountInfo = balance?.toPrimitive() as PalletAssetsAssetAccount;
 
             return {
               address: addresses[index],
               tokenSlug: tokenInfo.slug,
-              free: free.toString(),
-              locked: frozen.toString(),
+              free: accountInfo ? _getForeignAssetPalletTransferable(accountInfo).toString() : '0',
+              locked: accountInfo ? _getForeignAssetPalletLockedBalance(accountInfo).toString() : '0',
               state: APIItemState.READY
             };
           });
@@ -456,7 +439,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
 
 const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): VoidCallback => {
   if (!(substrateApi instanceof GearApi)) {
-    console.warn('Cannot subscribe GRC20 balance without GearApi instance');
+    console.warn('Cannot subscribe VFT balance without GearApi instance');
 
     return noop;
   }

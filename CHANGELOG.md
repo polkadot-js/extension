@@ -1,5 +1,86 @@
 # CHANGELOG
 
+## 1.2.12
+Build date: Jul 03, 2024.
+
+Features & Update:
+- Update chainlist:
+  - Add support for Berachain testnet
+  - Add support for Atleta Testnet
+- Remove Interlay lending (#3226)
+
+Bugs fixed:
+- Fix bug Cannot read properties of undefined (reading 'includes') (#3259)
+- Fix bug Do not show Interlay's earning position (#3234)
+- Fix bug not showing popup Swap confirmation when swap with Injected account (#3230)
+
+## 1.2.11
+Build date: Jun 29, 2024.
+
+Features & Update:
+- Integrate Polkadot Ledger app from Zondax (#2453)
+
+Bugs fixed:
+- Fix bug Show incorrect screen when perform earning actions with Ledger's EVM account (#3254)
+
+
+## 1.2.10
+Build date: Jun 25, 2024.
+
+Features & Update:
+- Update subwallet-react-ui (#3228)
+- Fix bug Screen flickering error when interacting with extensions (#3131)
+- Fix bug Show incorrect Amount on Transaction history, Transaction confirmation for transfer NFT (#3133)
+
+
+## 1.2.9
+Build date: Jun 24, 2024.
+
+Features & Update:
+- Update chain-list (#3214)
+  - Add support for Analog Testnet
+  - Add support for more tokens on HydraDX
+  - Add support for tokens listed on StellaSwap Pulsar
+  - Add support for Karura assets
+  - Update logo for some tokens
+  - Update chain type for some chains
+- Support SnowBridge (#1984)
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter')
+
+
+## 1.2.8
+Build date: Jun 21, 2024.
+
+Bugs fixed:
+- Fix bug Error can't read properties of undefined (reading 'filter') (#3218)
+
+
+## 1.2.7
+Build date: Jun 20, 2024.
+
+Features & Update:
+- Support MV3 on Firefox (#3108)
+
+
+## 1.2.6
+Build date: Jun 19, 2024.
+
+Features & Update:
+- Improve the Marketing Campaign application mechanism (#2806)
+- Update chain-list (#3185)
+  - Add vASTR token
+  - Remove priceid vETH
+  - Update provider
+- Show nomination pool with block status (#3043)
+- Hide the popup Remind backup seed phrase (#3198)
+- Support transfer between PAH - KAH (#3095)
+
+Bugs fixed:
+- Check error logs in earning feature (#3197)
+- Fixed bug related to earning feature ( Round 5) (#2995)
+
 ## 1.2.5
 Build date: Jun 11, 2024.
 
@@ -287,7 +368,6 @@ Features & Update:
 Build date: Mar 28, 2024.
 
 Features & Update:
-Nội dung release:
 - Integrate asset online (#2790)
 - Add Swap button (#2784)
 - Update chain-list (#2805)

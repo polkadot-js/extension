@@ -15,7 +15,6 @@ export const useGetAppInstructionData = (language: string) => {
         return rs.json();
       })
       .then((data) => {
-        console.log('data', data);
         setAppInstructionData(JSON.stringify(data));
       })
       .catch((e) => console.error(e));

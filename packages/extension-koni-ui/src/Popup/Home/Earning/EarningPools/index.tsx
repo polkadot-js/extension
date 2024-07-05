@@ -81,6 +81,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
+      if (poolInfo.chain === 'interlay' && poolInfo.type === YieldPoolType.LENDING) {
+        return;
+      }
+
       if (poolInfo.type === YieldPoolType.NATIVE_STAKING && _STAKING_CHAIN_GROUP.relay.includes(poolInfo.chain)) {
         let minJoinPool: string;
 

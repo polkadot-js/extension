@@ -939,7 +939,7 @@ const Component = () => {
             setIsFormInvalid(true);
           }
         });
-      }, 300);
+      }, 600);
     }
 
     return () => {
@@ -1097,9 +1097,9 @@ const Component = () => {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      if (!!renderAlertBox() && !!currentQuote && !isScrollEnd) {
+      if (!!currentQuote && !isScrollEnd) {
         setIsScrollEnd(true);
-        const id = '__transaction-swap-wrapper-id';
+        const id = 'transaction-swap-wrapper-id';
         const element = document.getElementById(id);
 
         if (element) {
@@ -1109,7 +1109,7 @@ const Component = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [currentQuote, isScrollEnd, renderAlertBox]);
+  }, [currentQuote, isScrollEnd]);
 
   useEffect(() => {
     if (isChainConnected && swapError) {
@@ -1132,7 +1132,7 @@ const Component = () => {
           <TransactionContent>
             <div
               className={'__transaction-swap-wrapper'}
-              id={'__transaction-swap-wrapper-id'}
+              id={'transaction-swap-wrapper-id'}
             >
               <Form
                 className={'form-container'}

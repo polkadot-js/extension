@@ -18,6 +18,8 @@ import BigN from 'bignumber.js';
 import { SwapBaseHandler, SwapBaseInterface } from '../base-handler';
 import { AssetHubRouter } from './router';
 
+const PAH_LOW_LIQUIDITY_THRESHOLD = 0.15;
+
 export class AssetHubSwapHandler implements SwapBaseInterface {
   private swapBaseHandler: SwapBaseHandler;
   private readonly chain: string;
@@ -202,6 +204,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
 
       const feeTokenOptions = [fromChainNativeTokenSlug];
       const selectedFeeToken = fromChainNativeTokenSlug;
+      const priceImpactPct = earlyValidation.metadata.priceImpactPct || '0';
 
       return {
         pair: request.pair,
@@ -216,7 +219,7 @@ export class AssetHubSwapHandler implements SwapBaseInterface {
           feeOptions: feeTokenOptions, // TODO: enable fee options
           selectedFeeToken
         },
-        isLowLiquidity: false,
+        isLowLiquidity: Math.abs(parseFloat(priceImpactPct)) >= PAH_LOW_LIQUIDITY_THRESHOLD,
         route: {
           path: paths.map((asset) => asset.slug)
         }

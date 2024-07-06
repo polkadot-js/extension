@@ -94,14 +94,17 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
 
           const networkBlock: string[] = BLOCK_ACTION_LEDGER_NETWORKS[action] || [];
 
-          if (networkBlock.includes('*')) { // Block all network
+          if (networkBlock.includes('*')) { // Block all networks
             block = true;
           } else if ((networkBlock.includes('evm') && isEthereumAccount)) { // Block evm network
             accountTitle = t('Ledger - EVM account');
             block = true;
-          } else if ((networkBlock.includes('substrate') && !isEthereumAccount)) { // Block evm network
+          } else if ((networkBlock.includes('substrate') && !isEthereumAccount)) { // Block substrate network
             accountTitle = t('Ledger - Substrate account');
             block = true;
+          } else if ((networkBlock.includes('substrate_legacy') && !isEthereumAccount)) { // Block substrate legacy network
+            accountTitle = t('Ledger - Substrate account');
+            block = !account.isGeneric;
           } else {
             const ledgerNetwork = PredefinedLedgerNetwork.find((network) => network.genesisHash === account.originGenesisHash);
             const networkName = ledgerNetwork?.accountName || 'Unknown';

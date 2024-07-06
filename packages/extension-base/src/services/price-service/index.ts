@@ -129,16 +129,12 @@ export class PriceService implements StoppableServiceInterface, PersistDataServi
       if (priceStored?.exchangeRateMap) {
         exchangeRateData = priceStored.exchangeRateMap;
       }
-
-      return;
     }
 
     if (Object.keys(exchangeRateData).length === 0) {
       if (priceStored?.price24hMap) {
         price24hMap = { ...priceStored.price24hMap };
         priceMap = { ...priceStored.priceMap };
-      } else {
-        return;
       }
     }
 

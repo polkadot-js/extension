@@ -91,8 +91,11 @@ describe('Extension', () => {
   describe('account derivation', () => {
     let address: string;
 
-    it('pri(derivation.validate) passes for valid suri', async () => {
+    beforeEach(async () => {
       address = await createAccount();
+    });
+
+    it('pri(derivation.validate) passes for valid suri', async () => {
       const result = await extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: password,
@@ -106,7 +109,6 @@ describe('Extension', () => {
     });
 
     it('pri(derivation.validate) throws for invalid suri', async () => {
-      address = await createAccount();
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: password,
@@ -115,7 +117,6 @@ describe('Extension', () => {
     });
 
     it('pri(derivation.validate) throws for invalid password', async () => {
-      address = await createAccount();
       await expect(extension.handle('id', 'pri(derivation.validate)', {
         parentAddress: address,
         parentPassword: 'invalid-password',
@@ -124,7 +125,6 @@ describe('Extension', () => {
     });
 
     it('pri(derivation.create) adds a derived account', async () => {
-      address = await createAccount();
       await extension.handle('id', 'pri(derivation.create)', {
         name: 'child',
         parentAddress: address,
@@ -136,7 +136,6 @@ describe('Extension', () => {
     });
 
     it('pri(derivation.create) saves parent address in meta', async () => {
-      address = await createAccount();
       await extension.handle('id', 'pri(derivation.create)', {
         name: 'child',
         parentAddress: address,
@@ -156,7 +155,6 @@ describe('Extension', () => {
     });
 
     it('pri(accounts.changePassword) changes account password', async () => {
-      address = await createAccount();
       const newPass = 'pa55word';
       const wrongPass = 'ZZzzZZzz';
 

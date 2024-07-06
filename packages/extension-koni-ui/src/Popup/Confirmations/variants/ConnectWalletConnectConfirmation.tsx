@@ -3,8 +3,8 @@
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
-import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
+import { AddNetworkWCModal, AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected, WCNetworkSupported } from '@subwallet/extension-koni-ui/components';
+import { ADD_NETWORK_WALLET_CONNECT_MODAL, TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
 import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -48,7 +48,7 @@ function Component ({ className, request }: Props) {
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
     [WALLET_CONNECT_POLKADOT_NAMESPACE]: t('Substrate networks')
   }), [t]);
-  const { inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
 
   useEffect(() => {
     const timeOut = JSON.parse(localStorage.getItem(TIME_OUT_RECORD) || '{}') as Record<string, number>;
@@ -130,6 +130,19 @@ function Component ({ className, request }: Props) {
   }, [onCancelSelectAccounts]);
 
   const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
+
+  useEffect(() => {
+    if (isSupportCase) {
+      Object.values(namespaceAccounts).forEach((value) => {
+        const { networks } = value;
+        const connectedNetworks = networks.filter((network) => network.supported);
+
+        if (connectedNetworks.length === 0) {
+          activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
+        }
+      });
+    }
+  }, [activeModal, isSupportCase, namespaceAccounts]);
 
   return (
     <>
@@ -305,6 +318,7 @@ function Component ({ className, request }: Props) {
             )
         }
       </div>
+      <AddNetworkWCModal cancelRequest={onCancel} />
     </>
   );
 }

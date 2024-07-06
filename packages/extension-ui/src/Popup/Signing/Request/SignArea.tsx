@@ -35,13 +35,18 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
     const lockSigner = async () => {
       setIsLocked(null);
 
-      const { isLocked, remainingTime } = await isSignLocked(signId);
+      try {
+        const { isLocked, remainingTime } = await isSignLocked(signId);
 
-      setIsLocked(isLocked);
-      await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
+        setIsLocked(isLocked);
 
-      if (!isLocked) {
-        setSavePass(true);
+        await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
+
+        if (!isLocked) {
+          setSavePass(true);
+        }
+      } catch (error) {
+        console.error('Error locking signer:', error);
       }
     };
 

@@ -3,9 +3,11 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
+import type { ApiInterfaceRx } from '@polkadot/api/types';
+
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _CrowdloanFund } from '@subwallet/chain-list/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
@@ -96,15 +98,21 @@ export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi, _Subst
   useLightClient: boolean;
 }
 
-export interface _SubstrateAdapterArgs {
+export interface _SubstrateAdapterQueryArgs {
   section: keyof Getters<'promise'>,
   module?: string,
   method?: string,
   args?: unknown[]
 }
 
+export interface _SubstrateAdapterSubscriptionArgs extends Omit<Required<_SubstrateAdapterQueryArgs>, 'section'> {
+  section: keyof Pick<ApiInterfaceRx, 'query'>,
+  isMultiQuery?: boolean
+}
+
 export interface _SubstrateApiAdapter {
-  makeRpcQuery<T extends AnyJson | `0x${string}` | Registry | RuntimeVersion>(params: _SubstrateAdapterArgs): Promise<T>
+  makeRpcQuery<T extends AnyJson | `0x${string}` | Registry | RuntimeVersion>(params: _SubstrateAdapterQueryArgs): Promise<T>,
+  subscribeDataWithMulti(params: _SubstrateAdapterSubscriptionArgs[], callback: (rs: Record<string, AnyJson[]>) => void): Subscription
 }
 
 export interface _EvmApi extends _ChainBaseApi {

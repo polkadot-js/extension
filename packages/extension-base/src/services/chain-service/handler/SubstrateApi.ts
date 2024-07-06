@@ -10,10 +10,10 @@ import { MetadataItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _API_OPTIONS_CHAIN_GROUP, API_AUTO_CONNECT_MS, API_CONNECT_TIMEOUT } from '@subwallet/extension-base/services/chain-service/constants';
 import { getSubstrateConnectProvider } from '@subwallet/extension-base/services/chain-service/handler/light-client';
 import { _ApiOptions } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ChainConnectionStatus, _SubstrateAdapterArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _ChainConnectionStatus, _SubstrateAdapterQueryArgs, _SubstrateAdapterSubscriptionArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { goldbergRpc, goldbergTypes, spec as availSpec } from 'avail-js-sdk';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, Observable, Subscription } from 'rxjs';
 
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { ApiOptions } from '@polkadot/api/types';
@@ -21,6 +21,7 @@ import { typesBundle as _typesBundle } from '@polkadot/apps-config/api';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
 import { OverrideBundleDefinition, Registry } from '@polkadot/types/types';
+import { AnyJson } from '@polkadot/types-codec/types/helpers';
 
 const typesBundle = { ..._typesBundle };
 
@@ -314,7 +315,7 @@ export class SubstrateApi implements _SubstrateApi {
     // this.apiDefaultTxSudo = (api.tx.system && api.tx.system.setCode) || this.apiDefaultTx;
   }
 
-  async makeRpcQuery<T> ({ args, method, module, section }: _SubstrateAdapterArgs): Promise<T> {
+  async makeRpcQuery<T> ({ args, method, module, section }: _SubstrateAdapterQueryArgs): Promise<T> {
     const isGetterCall = section === 'genesisHash' || section === 'extrinsicVersion' || section === 'runtimeVersion' || section === 'runtimeMetadata' || section === 'registry';
     const isRuntimeConstQuery = section === 'consts' && !!method && !!module && !args;
     const isRpcQuery = section === 'rpc' && !!method && !!module && !args;
@@ -367,5 +368,31 @@ export class SubstrateApi implements _SubstrateApi {
     }
 
     return Promise.reject(new Error('Cannot handle query'));
+  }
+
+  subscribeDataWithMulti (params: _SubstrateAdapterSubscriptionArgs[], callback: (rs: Record<string, AnyJson[]>) => void): Subscription {
+    const apiRx = this.api.rx;
+    const observables: Record<string, Observable<AnyJson[]>> = {};
+
+    params.forEach((queryParams) => {
+      const { args, method, module, section } = queryParams;
+      const key = `${section}_${module}_${method}`;
+
+      if (!this.api[section][module][method]) { // if method not found, returns an empty observable
+        observables[key] = new Observable<AnyJson[]>((subscriber) => {
+          subscriber.next([]);
+        });
+      } else {
+        observables[key] = apiRx[section][module][method]
+          .multi(args)
+          .pipe(
+            map((codecs) => codecs.map(
+              (codec) => codec.toPrimitive()
+            ))
+          );
+      }
+    });
+
+    return combineLatest(observables).subscribe(callback);
   }
 }

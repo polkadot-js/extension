@@ -11,15 +11,13 @@ import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystem
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
-import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _EvmApi, _SubstrateAdapterSubscriptionArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
-import { combineLatest, Observable } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
-import { Codec } from '@polkadot/types/types';
 import { BN, BN_ZERO, noop, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
@@ -45,7 +43,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
 
   const substrateParams: SubscribeSubstratePalletBalance = {
     ...baseParams,
-    substrateApi: substrateApi.api
+    substrateApi
   };
 
   if (!_BALANCE_CHAIN_GROUP.kintsugi.includes(chain) && !_BALANCE_CHAIN_GROUP.genshiro.includes(chain) && !_BALANCE_CHAIN_GROUP.equilibrium_parachain.includes(chain)) {
@@ -110,31 +108,31 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
 // handler according to different logic
 // eslint-disable-next-line @typescript-eslint/require-await
 const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo, extrinsicType, substrateApi }: SubscribeSubstratePalletBalance) => {
-  const chainNativeTokenSlug = _getChainNativeTokenSlug(chainInfo);
+  const systemAccountKey = 'query_system_account';
+  const poolMembersKey = 'query_nominationPools_poolMembers';
 
-  const balanceSubscribe: Observable<Codec[]> = substrateApi.rx.query.system.account.multi(addresses);
+  const params: _SubstrateAdapterSubscriptionArgs[] = [
+    {
+      section: 'query',
+      module: systemAccountKey.split('_')[1],
+      method: systemAccountKey.split('_')[2],
+      args: addresses
+    },
+    {
+      section: 'query',
+      module: poolMembersKey.split('_')[1],
+      method: poolMembersKey.split('_')[2],
+      args: addresses
+    }
+  ];
 
-  let poolSubscribe: Observable<Codec[]> | undefined; // add points in nomination pool back to user's balance
+  const subscription = substrateApi.subscribeDataWithMulti(params, (rs) => {
+    const balances = rs[systemAccountKey];
+    const poolMemberInfos = rs[poolMembersKey];
 
-  if ((_isSubstrateRelayChain(chainInfo) && substrateApi.query.nominationPools)) {
-    poolSubscribe = substrateApi.rx.query.nominationPools.poolMembers?.multi(addresses);
-  }
-
-  if (!poolSubscribe) {
-    poolSubscribe = new Observable<Codec[]>((subscriber) => {
-      subscriber.next(addresses.map(() => ({
-        toPrimitive () {
-          return null;
-        }
-      } as Codec)));
-    });
-  }
-
-  const subscription = combineLatest({ balances: balanceSubscribe, poolMemberInfos: poolSubscribe }).subscribe(({ balances, poolMemberInfos }) => {
     const items: BalanceItem[] = balances.map((_balance, index) => {
-      const balanceInfo = _balance.toPrimitive() as unknown as FrameSystemAccountInfo;
-
-      const poolMemberInfo = poolMemberInfos[index].toPrimitive() as unknown as PalletNominationPoolsPoolMember;
+      const balanceInfo = _balance as unknown as FrameSystemAccountInfo;
+      const poolMemberInfo = poolMemberInfos[index] as unknown as PalletNominationPoolsPoolMember;
 
       const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : new BigN(0);
 
@@ -144,7 +142,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
       return ({
         address: addresses[index],
-        tokenSlug: chainNativeTokenSlug,
+        tokenSlug: _getChainNativeTokenSlug(chainInfo),
         free: transferableBalance,
         locked: totalLockedFromTransfer.toFixed(),
         state: APIItemState.READY,
@@ -172,7 +170,7 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
       if (isBridgedToken) {
         const assetLocation = _getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo);
 
-        return await substrateApi.query.foreignAssets.account.multi(addresses.map((address) => [assetLocation, address]), (balances) => {
+        return await substrateApi.api.query.foreignAssets.account.multi(addresses.map((address) => [assetLocation, address]), (balances) => {
           const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
             const accountInfo = balance?.toPrimitive() as PalletAssetsAssetAccount;
 
@@ -220,7 +218,7 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
   const tokenList = filterAssetsByChainAndType(assetMap, chain, [_AssetType.PSP22]);
 
   Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
-    psp22ContractMap[slug] = getPSP22ContractPromise(substrateApi, _getContractAddressOfToken(tokenInfo));
+    psp22ContractMap[slug] = getPSP22ContractPromise(substrateApi.api, _getContractAddressOfToken(tokenInfo));
   });
 
   const getTokenBalances = () => {
@@ -229,7 +227,7 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
         const contract = psp22ContractMap[tokenInfo.slug];
         const balances: BalanceItem[] = await Promise.all(addresses.map(async (address): Promise<BalanceItem> => {
           try {
-            const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(substrateApi) }, address);
+            const _balanceOf = await contract.query['psp22::balanceOf'](address, { gasLimit: getDefaultWeightV2(substrateApi.api) }, address);
             const balanceObj = _balanceOf?.output?.toPrimitive() as Record<string, any>;
             const freeResponse = extractOkResponse(balanceObj) as number | string;
             const free: string = freeResponse ? new BigN(freeResponse).toString() : '0';
@@ -282,7 +280,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
 
       // Get Token Balance
       // @ts-ignore
-      return await substrateApi.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
+      return await substrateApi.api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
         const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
           const tokenBalance = {
             reserved: balance.reserved || new BN(0),
@@ -337,7 +335,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
       }
 
       // Get Token Balance
-      return await substrateApi.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
+      return await substrateApi.api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
         const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
           const bdata = balance?.toPrimitive();
 
@@ -395,7 +393,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
 
       // Get Token Balance
       // @ts-ignore
-      const unsub = await substrateApi.query.ormlTokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
+      const unsub = await substrateApi.api.query.ormlTokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
         const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
           const tokenBalance = {
             reserved: balance.reserved || new BN(0),
@@ -438,7 +436,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
 };
 
 const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): VoidCallback => {
-  if (!(substrateApi instanceof GearApi)) {
+  if (!(substrateApi.api instanceof GearApi)) {
     console.warn('Cannot subscribe GRC20 balance without GearApi instance');
 
     return noop;
@@ -449,7 +447,7 @@ const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, subst
   const tokenList = filterAssetsByChainAndType(assetMap, chain, [_AssetType.GRC20]);
 
   Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
-    psp22ContractMap[slug] = getGRC20ContractPromise(substrateApi, _getContractAddressOfToken(tokenInfo));
+    psp22ContractMap[slug] = getGRC20ContractPromise(substrateApi.api, _getContractAddressOfToken(tokenInfo));
   });
 
   const getTokenBalances = () => {

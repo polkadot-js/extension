@@ -7,8 +7,8 @@ const LEDGER_API_URL = 'https://ledger-api.subwallet.app';
 
 const createUrl = (path: string): string => `${LEDGER_API_URL}/${path}`;
 
-export const _isRuntimeUpdated = (signedExtensions: string[]): boolean => {
-  return signedExtensions.includes('CheckMetadataHash');
+export const _isRuntimeUpdated = (signedExtensions?: string[]): boolean => {
+  return signedExtensions ? signedExtensions.includes('CheckMetadataHash') : false;
 };
 
 export const getMetadataHash = async (chain: string): Promise<string> => {

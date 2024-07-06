@@ -106,7 +106,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
           const info = chainInfoMap[chain];
 
           if (info) {
-            return _isChainEvmCompatible(info);
+            return isEvm === _isChainEvmCompatible(info);
           } else {
             return false;
           }

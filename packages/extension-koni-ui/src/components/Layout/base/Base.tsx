@@ -5,16 +5,20 @@ import type { SwScreenLayoutProps } from '@subwallet/react-ui';
 
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
 import SelectAccount from '@subwallet/extension-koni-ui/components/Layout/parts/SelectAccount';
+import { MISSIONS_POOL_LIVE_ID } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { SwScreenLayout } from '@subwallet/react-ui';
+import { computeStatus } from '@subwallet/extension-koni-ui/utils';
+import { Icon, SwScreenLayout } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
-import { Aperture, Clock, Rocket, Vault, Wallet } from 'phosphor-react';
+import { Aperture, Clock, Parachute, Vault, Wallet } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import Footer from '../parts/Footer';
 
@@ -26,7 +30,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
   isDisableHeader?: boolean;
 }
-
+type TabBarItem = Omit<SwTabBarItem, 'onClick'> & { url: string };
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
 const Component = ({ children, className, headerIcons, isDisableHeader, onBack, showFooter, ...props }: LayoutBaseProps) => {
@@ -35,8 +39,34 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
   const { pathname } = useLocation();
   const { t } = useTranslation();
   const { language } = useSelector((state) => state.settings);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
 
-  const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
+  const [storedLiveMissionIds, setStoredLiveMissionIds] = useLocalStorage<number[]>(MISSIONS_POOL_LIVE_ID, []);
+
+  const liveMissionIds = useMemo(() => {
+    return missions
+      .filter((item) => computeStatus(item) === 'live')
+      .map((mission) => mission.id);
+  }, [missions]);
+
+  const latestLiveMissionIds = useMemo(() => {
+    return liveMissionIds.filter((id) => !storedLiveMissionIds.includes(id));
+  }, [liveMissionIds, storedLiveMissionIds]);
+
+  const selectedTab = useMemo((): string => {
+    const isHomePath = pathname.includes('/home');
+
+    if (isHomePath) {
+      const pathExcludeHome = pathname.split('/home')[1];
+      const currentTab = pathExcludeHome.split('/')[1];
+
+      return currentTab || '';
+    }
+
+    return '';
+  }, [pathname]);
+
+  const tabBarItems = useMemo((): Array<TabBarItem> => ([
     {
       icon: {
         type: 'phosphor',
@@ -69,24 +99,22 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
     },
     {
       icon: {
-        type: 'phosphor',
-        phosphorIcon: Rocket,
-        weight: 'fill'
+        type: 'customIcon',
+        customIcon: (
+          <>
+            <Icon
+              phosphorIcon={Parachute}
+              type='phosphor'
+              weight='fill'
+            />
+            {(latestLiveMissionIds.length > 0) && <div className={CN('__active-count')}>{latestLiveMissionIds.length}</div>}
+          </>
+        )
       },
-      label: t('Crowdloans'),
-      key: 'crowdloans',
-      url: '/home/crowdloans'
+      label: t('Missions'),
+      key: 'mission-pools',
+      url: '/home/mission-pools'
     },
-    // {
-    //   icon: {
-    //     type: 'phosphor',
-    //     phosphorIcon: Database,
-    //     weight: 'fill'
-    //   },
-    //   label: t('Staking'),
-    //   key: 'staking',
-    //   url: '/home/staking'
-    // },
     {
       icon: {
         type: 'phosphor',
@@ -97,26 +125,17 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       key: 'history',
       url: '/home/history'
     }
-  ]), [t]);
-
-  const selectedTab = useMemo((): string => {
-    const isHomePath = pathname.includes('/home');
-
-    if (isHomePath) {
-      const pathExcludeHome = pathname.split('/home')[1];
-      const currentTab = pathExcludeHome.split('/')[1];
-
-      return currentTab || '';
-    }
-
-    return '';
-  }, [pathname]);
+  ]), [t, latestLiveMissionIds]);
 
   const onSelectTab = useCallback(
-    (url: string) => () => {
-      navigate(url);
+    (item: TabBarItem) => () => {
+      if (item.key === 'mission-pools' && latestLiveMissionIds.length > 0) {
+        setStoredLiveMissionIds(liveMissionIds);
+      }
+
+      navigate(item.url);
     },
-    [navigate]
+    [latestLiveMissionIds.length, navigate, setStoredLiveMissionIds, liveMissionIds]
   );
 
   const defaultOnBack = useCallback(() => {
@@ -134,7 +153,7 @@ const Component = ({ children, className, headerIcons, isDisableHeader, onBack, 
       selectedTabBarItem={selectedTab}
       tabBarItems={tabBarItems.map((item) => ({
         ...item,
-        onClick: onSelectTab(item.url)
+        onClick: onSelectTab(item)
       }))}
     >
       {children}
@@ -146,10 +165,25 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
   '.ant-sw-tab-bar-container': {
     padding: `${token.paddingXS}px ${token.paddingSM}px ${token.paddingSM}px`,
     alignItems: 'flex-start',
+    position: 'relative',
 
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
     }
+  },
+  '.__active-count': {
+    borderRadius: '50%',
+    color: token.colorWhite,
+    fontSize: token.sizeXS,
+    fontWeight: token.bodyFontWeight,
+    lineHeight: token.lineHeightLG,
+    paddingTop: 0,
+    paddingBottom: 0,
+    backgroundColor: token.colorError,
+    position: 'absolute',
+    right: 108,
+    top: 10,
+    minWidth: '12px'
   },
 
   '&.disable-header > .ant-sw-screen-layout-header': {

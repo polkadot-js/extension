@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 1.2.13
+Build date: Jul 05, 2024.
+
+Features & Update:
+- Update chain-list
+  - Add support for MYTH token
+  - Add support for WIFD token
+- Update UI for the Signature request screen from dApp (#3260)
+- Update UI for Mission pool feature (#3212)
+- Change token type from GRC-20 to VFT (#3268)
+
+Bugs fixed:
+- Fix bug Do not show account to get address when stand on All accounts mode (#3283)
+
+
+## 1.2.12
+Build date: Jul 03, 2024.
+
+Features & Update:
+- Update chainlist:
+  - Add support for Berachain testnet
+  - Add support for Atleta Testnet
+- Remove Interlay lending (#3226)
+
+Bugs fixed:
+- Fix bug Cannot read properties of undefined (reading 'includes') (#3259)
+- Fix bug Do not show Interlay's earning position (#3234)
+- Fix bug not showing popup Swap confirmation when swap with Injected account (#3230)
+
 ## 1.2.11
 Build date: Jun 29, 2024.
 
@@ -354,7 +383,6 @@ Features & Update:
 Build date: Mar 28, 2024.
 
 Features & Update:
-Nội dung release:
 - Integrate asset online (#2790)
 - Add Swap button (#2784)
 - Update chain-list (#2805)

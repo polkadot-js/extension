@@ -1147,7 +1147,6 @@
   "Submitted": "Gửi thành công",
   "Transaction submitted!": "Gửi giao dịch thành công!",
   "Track transaction progress in the History tab or go back to home": "Vui lòng theo dõi quá trình thực hiện giao dịch trong mục Lịch sử hoặc về trang chủ",
-  "Mission pools": "",
   "Upcoming": "",
   "Live": "",
   "Archived": "",
@@ -1274,5 +1273,10 @@
   "Data attention!": "",
   "Your transaction missing data, please contact dApp or SubWallet support": "",
   "You're using Migration app for signing, please migration asset to new account by Generic App then use it normally": "",
-  "You need to wait {{networkName}} network update runtime": ""
+  "You need to wait {{networkName}} network update runtime": "",
+  "Missions": "",
+  "Defi": "",
+  "Meme": "",
+  "Gaming": "",
+  "Categories": ""
 }

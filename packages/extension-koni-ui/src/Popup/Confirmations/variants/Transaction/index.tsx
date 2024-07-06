@@ -141,6 +141,7 @@ const Component: React.FC<Props> = (props: Props) => {
             account={(item as SigningRequest).account}
             extrinsicType={transaction.extrinsicType}
             id={item.id}
+            isInternal={item.isInternal}
             request={(item as SigningRequest).request}
             txExpirationTime={txExpirationTime}
           />

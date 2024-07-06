@@ -1,11 +1,11 @@
-    2707	AnhMTV                        	Release version 1.2.11
-    2464	Nam Phạm                      	[Issue 1984] fix: handle warning on send fund
-    2121	S2kael                        	[Issue-3254] Fix sign fail substrate request with evm account
-     819	lw-cdm                        	[Issue-3228] Remove modal-viewer support
-     467	nguyentiendung                	
+    2720	AnhMTV                        	Release version 1.2.13
+    2468	Nam Phạm                      	[Issue 3230] fix: estimate gas for snowbridge xcm
+    2124	S2kael                        	[Chainlist] [Issue-259] Update stable version for chain-list
+     821	lw-cdm                        	[Issue-3283] Fix issue related to getting accounts when opening "receive" modal
+     484	nguyentiendung                	[Issue-3212] Improve UI for missionPool modal
      465	Jaco                          	0.42.5 (#969)
+     191	bluezdot                      	[Chainlist] [Hotfix-issue-259] Remove rollux & syscoin
      185	quangdo                       	
-     181	bluezdot                      	[Issue-3214] Update chainlist
      147	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
      135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      117	Automation Bot                	[CI Skip] Auto increase webapp build number

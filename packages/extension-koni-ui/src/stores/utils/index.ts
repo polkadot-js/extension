@@ -65,7 +65,7 @@ export const getMissionPoolData = (() => {
     start: () => {
       fetchStaticData<MissionInfo[]>('airdrop-campaigns')
         .then((data) => {
-          handler.resolve?.(data);
+          handler.resolve?.(data || []);
         })
         .catch(handler.reject);
     }

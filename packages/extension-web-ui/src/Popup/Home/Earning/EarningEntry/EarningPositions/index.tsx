@@ -559,6 +559,19 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
                     onSearch={setSearchInput}
                     searchValue={searchInput}
                   />
+                  <Button
+                    className={'__filter-button'}
+                    icon={(
+                      <Icon
+                        phosphorIcon={FadersHorizontal}
+                        size='sm'
+                      />
+                    )}
+                    onClick={onClickFilterButton}
+                    size={'xs'}
+                    type={'ghost'}
+                  >
+                  </Button>
                 </div>
                 <SwList
                   className={'__desktop-list-container'}
@@ -728,6 +741,10 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     marginBottom: token.marginXS
   },
 
+  '.__filter-button': {
+    display: 'none'
+  },
+
   '.__section-list-container': {
     paddingLeft: 0,
     paddingRight: 0,
@@ -820,6 +837,25 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     '.__empty-list-earning-positions': {
       paddingTop: 32,
       paddingBottom: 62
+    }
+  },
+  '@media screen and (max-width: 1305px)': {
+    '.__filter-button': {
+      display: 'flex',
+      marginBottom: 20
+    },
+    '.ant-input-container': {
+      display: 'none'
+    },
+    '.__desktop-toolbar.__desktop-toolbar': {
+      minWidth: 'fit-content'
+    },
+    '.ant-btn-content-wrapper': {
+      display: 'none'
+    },
+    '.__desktop-toolbar .ant-btn:first-child': {
+      padding: 0,
+      minWidth: 40
     }
   },
   '@media (max-width: 991px)': {

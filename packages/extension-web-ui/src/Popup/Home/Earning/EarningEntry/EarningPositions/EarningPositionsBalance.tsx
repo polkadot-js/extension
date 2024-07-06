@@ -269,6 +269,10 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
     lineHeight: 'inherit'
   },
 
+  '.__balance-block .__block-content': {
+    paddingTop: 8
+  },
+
   '&.-mobile-mode': {
     marginBottom: 0,
     '.__block-item': {
@@ -429,7 +433,11 @@ const EarningPositionBalance = styled(Component)<Props>(({ theme: { token } }: P
   '@media screen and (max-width: 1305px)': {
     '.__balance-value': {
       fontSize: '24px !important',
-      lineHeight: '32px !important'
+      lineHeight: '30px !important'
+    },
+    '.__balance-value .ant-number-decimal': {
+      fontSize: '20px !important',
+      lineHeight: '28px !important'
     },
     '.__total-balance-block': {
       '.__balance-value': {

@@ -32,7 +32,7 @@ function Component ({ cancelRequest, className }: Props): React.ReactElement<Pro
 
   const addNetwork = useCallback(() => {
     inactiveModal(AddNetworkWCModalId);
-    navigate(AddNetworkUrl, { state: '/wallet-connect/connect' });
+    navigate(AddNetworkUrl, { state: { useGoHome: true } });
   }, [inactiveModal, navigate]);
 
   const footerModal = useMemo(() => {

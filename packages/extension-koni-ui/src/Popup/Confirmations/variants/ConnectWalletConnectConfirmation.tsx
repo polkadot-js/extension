@@ -75,6 +75,14 @@ function Component ({ className, request }: Props) {
     return Object.values(namespaceAccounts).every(({ appliedAccounts }) => appliedAccounts.length);
   }, [namespaceAccounts]);
 
+  const isExistNetworkConnected = useMemo(() => {
+    return Object.values(namespaceAccounts).every((value) => {
+      const { networks } = value;
+      const connectedNetworks = networks.filter((network) => network.supported);
+
+      return connectedNetworks.length > 0;
+    });
+  }, [namespaceAccounts]);
   const [loading, setLoading] = useState(false);
 
   const _onSelectAccount = useCallback((namespace: string): ((address: string, applyImmediately?: boolean) => VoidFunction) => {
@@ -132,17 +140,10 @@ function Component ({ className, request }: Props) {
   const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   useEffect(() => {
-    if (isSupportCase) {
-      Object.values(namespaceAccounts).forEach((value) => {
-        const { networks } = value;
-        const connectedNetworks = networks.filter((network) => network.supported);
-
-        if (connectedNetworks.length === 0) {
-          activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
-        }
-      });
+    if (isSupportCase && !isExistNetworkConnected) {
+      activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
     }
-  }, [activeModal, isSupportCase, namespaceAccounts]);
+  }, [activeModal, isExistNetworkConnected, isSupportCase]);
 
   return (
     <>

@@ -178,11 +178,15 @@ function filterDuplicateItems (items: TransactionHistoryItem[]): TransactionHist
   const exclusionMap: Record<string, boolean> = {};
 
   const getExclusionKey = (i: TransactionHistoryItem): string => {
+    if (i.type === ExtrinsicType.TRANSFER_TOKEN) {
+      return `${i.direction}_${i.blockNumber}_${ExtrinsicType.TRANSFER_BALANCE}_${i.from}_${i.to}`.toLowerCase();
+    }
+
     return `${i.direction}_${i.blockNumber}_${i.type}_${i.from}_${i.to}`.toLowerCase();
   };
 
   items.forEach((i) => {
-    if (i.origin === 'app' && i.blockNumber > 0 && i.type === ExtrinsicType.TRANSFER_BALANCE) {
+    if (i.origin === 'app' && i.blockNumber > 0 && (i.type === ExtrinsicType.TRANSFER_BALANCE || i.type === ExtrinsicType.TRANSFER_TOKEN)) {
       exclusionMap[getExclusionKey(i)] = true;
     }
   });
@@ -370,7 +374,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT'),
-    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve'),
+    [ExtrinsicType.TOKEN_SPENDING_APPROVAL]: t('Token approve'),
     [ExtrinsicType.SWAP]: t('Swap'),
     [ExtrinsicType.UNKNOWN]: t('Unknown')
   }), [t]);
@@ -414,7 +418,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [ExtrinsicType.UNSTAKE_LDOT]: t('Unstake LDOT tranasction'),
     [ExtrinsicType.UNSTAKE_SDOT]: t('Unstake sDOT tranasction'),
     [ExtrinsicType.UNSTAKE_STDOT]: t('Unstake stDOT tranasction'),
-    [ExtrinsicType.TOKEN_APPROVE]: t('Token approve transaction'),
+    [ExtrinsicType.TOKEN_SPENDING_APPROVAL]: t('Token approve transaction'),
     [ExtrinsicType.SWAP]: t('Swap transaction'),
     [ExtrinsicType.UNKNOWN]: t('Unknown transaction')
   }), [t]);

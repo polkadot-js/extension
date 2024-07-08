@@ -3,6 +3,8 @@
 
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import { PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { AppOnlineContentContextProvider } from '@subwallet/extension-koni-ui/contexts/AppOnlineContentProvider';
+import { AppPopupModalContextProvider } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
 import ErrorFallback from '@subwallet/extension-koni-ui/Popup/ErrorFallback';
 import { Root } from '@subwallet/extension-koni-ui/Popup/Root';
 import { i18nPromise } from '@subwallet/extension-koni-ui/utils/common/i18n';
@@ -140,12 +142,22 @@ export function Example () {
   </PageWrapper>;
 }
 
+export function RootWrapper () {
+  return (
+    <AppPopupModalContextProvider>
+      <AppOnlineContentContextProvider>
+        <Root />
+      </AppOnlineContentContextProvider>
+    </AppPopupModalContextProvider>
+  );
+}
+
 // Todo: Create error page
 export const router = createHashRouter([
   {
     path: '/',
     loader: () => i18nPromise,
-    element: <Root />,
+    element: <RootWrapper />,
     errorElement: <ErrorFallback />,
     children: [
       Welcome.generateRouterObject('/welcome'),
@@ -167,7 +179,6 @@ export const router = createHashRouter([
               NftItemDetail.generateRouterObject('item-detail')
             ]
           },
-          Crowdloans.generateRouterObject('crowdloans'),
           // Staking.generateRouterObject('staking'),
           {
             path: 'earning',
@@ -178,6 +189,7 @@ export const router = createHashRouter([
               EarningPositionDetail.generateRouterObject('position-detail')
             ]
           },
+          MissionPools.generateRouterObject('mission-pools'),
           History.generateRouterObject('history'),
           History.generateRouterObject('history/:address/:chain/:extrinsicHashOrId')
         ]
@@ -218,7 +230,7 @@ export const router = createHashRouter([
         children: [
           Settings.generateRouterObject('list'),
           GeneralSetting.generateRouterObject('general'),
-          MissionPools.generateRouterObject('mission-pools'),
+          Crowdloans.generateRouterObject('crowdloans'),
           ManageAddressBook.generateRouterObject('address-book'),
           SecurityList.generateRouterObject('security'),
           ManageWebsiteAccess.generateRouterObject('dapp-access'),

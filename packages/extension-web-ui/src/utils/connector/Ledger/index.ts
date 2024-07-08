@@ -27,7 +27,8 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
   if (
     message.includes('App does not seem to be open') || // App not open
     message.includes('Unknown Status Code: 28161') || // Substrate stay in dashboard
-    message.includes('CLA_NOT_SUPPORTED (0x6e00)') // Evm wrong app
+    message.includes('Unknown Status Code: 28160') || // Substrate stay in dashboard
+    message.includes('CLA_NOT_SUPPORTED') // Evm wrong app
   ) {
     return {
       status: 'error',
@@ -40,6 +41,16 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
     return {
       status: 'error',
       message: t('Please open the Ethereum app and enable Blind signing or Contract data')
+    };
+  }
+
+  // Device disconnected
+  if (message.includes('The device was disconnect') ||
+    message.includes('A transfer error has occurred')
+  ) {
+    return {
+      status: 'error',
+      message: t('Your Ledger is disconnected. Reconnect and try again')
     };
   }
 

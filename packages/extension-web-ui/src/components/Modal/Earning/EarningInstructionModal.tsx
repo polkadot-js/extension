@@ -491,6 +491,14 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsScrollEnd(false);
   }, [onCancel, setVisible]);
 
+  const isParallelLiquidStaking = useMemo(() => {
+    if (poolInfo?.chain === 'parallel' && poolInfo?.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    return false;
+  }, [poolInfo?.chain, poolInfo?.type]);
+
   useEffect(() => {
     if (!poolInfo) {
       inactiveModal(modalId);
@@ -557,7 +565,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Button
             block={true}
             className={'__stake-more-button'}
-            disabled={!isWebUI && isDisableEarnButton}
+            disabled={(!isWebUI && isDisableEarnButton) || isParallelLiquidStaking}
             icon={
               <Icon
                 phosphorIcon={PlusCircle}

@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { _PSP22_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { getERC20Contract } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
+import { _PSP22_ABI } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import BigN from 'bignumber.js';

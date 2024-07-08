@@ -69,7 +69,7 @@ const getTransactionComponent = (extrinsicType: ExtrinsicType): typeof BaseTrans
     case ExtrinsicType.UNSTAKE_STDOT:
     case ExtrinsicType.UNSTAKE_VMANTA:
       return DefaultWithdrawTransactionConfirmation;
-    case ExtrinsicType.TOKEN_APPROVE:
+    case ExtrinsicType.TOKEN_SPENDING_APPROVAL:
       return TokenApproveConfirmation;
     case ExtrinsicType.SWAP:
       return SwapTransactionConfirmation;
@@ -141,6 +141,7 @@ const Component: React.FC<Props> = (props: Props) => {
             account={(item as SigningRequest).account}
             extrinsicType={transaction.extrinsicType}
             id={item.id}
+            isInternal={item.isInternal}
             request={(item as SigningRequest).request}
             txExpirationTime={txExpirationTime}
           />

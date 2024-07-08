@@ -24,8 +24,8 @@ export async function approveSignPasswordV2 (request: RequestSigningApprovePassw
   return sendMessage('pri(signing.approve.passwordV2)', request);
 }
 
-export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
-  return sendMessage('pri(signing.approve.signature)', { id, signature });
+export async function approveSignSignature (id: string, signature: HexString, signedTransaction?: HexString): Promise<boolean> {
+  return sendMessage('pri(signing.approve.signature)', { id, signature, signedTransaction });
 }
 
 export async function completeConfirmation<CT extends ConfirmationType> (type: CT, payload: ConfirmationDefinitions[CT][1]): Promise<boolean> {

@@ -1479,37 +1479,40 @@ export default class KoniState {
       from: transactionParams.from,
       to: transactionParams.to,
       value: autoFormatNumber(transactionParams.value),
-      gasPrice: autoFormatNumber(transactionParams.gasPrice),
+      gas: autoFormatNumber(transactionParams.gas),
+      gasPrice: autoFormatNumber(transactionParams.gasPrice || transactionParams.gasLimit),
       maxPriorityFeePerGas: autoFormatNumber(transactionParams.maxPriorityFeePerGas),
       maxFeePerGas: autoFormatNumber(transactionParams.maxFeePerGas),
       data: transactionParams.data
     };
 
-    const getTransactionGas = async () => {
+    if (!transactionParams.gas) {
+      const getTransactionGas = async () => {
+        try {
+          transaction.gas = await web3.eth.estimateGas({ ...transaction });
+        } catch (e) {
+          // @ts-ignore
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+          throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+        }
+      };
+
+      // Calculate transaction data
       try {
-        transaction.gas = await web3.eth.estimateGas({ ...transaction });
+        await Promise.race([
+          getTransactionGas(),
+          wait(3000).then(async () => {
+            if (!transaction.gas) {
+              await this.chainService.initSingleApi(networkKey);
+              await getTransactionGas();
+            }
+          })
+        ]);
       } catch (e) {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
       }
-    };
-
-    // Calculate transaction data
-    try {
-      await Promise.race([
-        getTransactionGas(),
-        wait(3000).then(async () => {
-          if (!transaction.gas) {
-            await this.chainService.initSingleApi(networkKey);
-            await getTransactionGas();
-          }
-        })
-      ]);
-    } catch (e) {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
     }
 
     if (!transaction.gas) {
@@ -1816,6 +1819,7 @@ export default class KoniState {
     this.waitSleeping = sleeping.promise;
 
     // Stopping services
+    this.campaignService.stop();
     await Promise.all([this.cron.stop(), this.subscription.stop()]);
     await this.pauseAllNetworks(undefined, 'IDLE mode');
     await Promise.all([this.historyService.stop(), this.priceService.stop(), this.balanceService.stop(), this.earningService.stop(), this.swapService.stop()]);
@@ -2171,7 +2175,9 @@ export default class KoniState {
 
     return {
       metadata: metadata?.hexValue || '',
-      specVersion: parseInt(metadata?.specVersion || '0')
+      specVersion: parseInt(metadata?.specVersion || '0'),
+      types: metadata?.types || {},
+      userExtensions: metadata?.userExtensions
     };
   }
 

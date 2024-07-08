@@ -116,6 +116,10 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     {
       label: t('Destroying'),
       value: 'Destroying'
+    },
+    {
+      label: t('Blocked'),
+      value: 'Blocked'
     }
   ]), [t]);
 
@@ -138,16 +142,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
         if (filters.length) {
           return filters.includes(value.state);
-        } else { // @ts-ignore
-          if (value.state === 'Blocked') {
-            return false;
-          } else {
-            return true;
-          }
+        } else {
+          return true;
         }
       })
       .map((item) => {
-        const disabled = item.isCrowded;
+        const disabled = item.isCrowded || item.state === 'Blocked';
 
         return { ...item, disabled };
       })
@@ -171,9 +171,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
                 }
               }
 
-              if (a.isCrowded && !b.isCrowded) {
+              if (a.disabled && !b.disabled) {
                 return 1;
-              } else if (!a.isCrowded && b.isCrowded) {
+              } else if (!a.disabled && b.disabled) {
                 return -1;
               }
 
@@ -276,13 +276,35 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           </Tooltip>
         )
         : (
-          <StakingPoolItem
-            {...item}
-            className={'pool-item'}
-            key={item.id}
-            onClickMoreBtn={onClickMore(item)}
-            prefixAddress={networkPrefix}
-          />
+          item.state === 'Blocked'
+            ? (
+              <Tooltip
+                key={item.id}
+                placement={'top'}
+                title={t('This pool is blocked. Select another to continue')}
+              >
+                <div
+                  className={'__pool-item-wrapper'}
+                  key={item.id}
+                >
+                  <StakingPoolItem
+                    {...item}
+                    className={'pool-item'}
+                    onClickMoreBtn={onClickMore(item)}
+                    prefixAddress={networkPrefix}
+                  />
+                </div>
+              </Tooltip>
+            )
+            : (
+              <StakingPoolItem
+                {...item}
+                className={'pool-item'}
+                key={item.id}
+                onClickMoreBtn={onClickMore(item)}
+                prefixAddress={networkPrefix}
+              />
+            )
         )
     );
   }, [networkPrefix, onClickMore, t]);

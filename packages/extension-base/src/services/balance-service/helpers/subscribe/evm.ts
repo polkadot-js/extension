@@ -4,8 +4,8 @@
 import { _AssetType } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
 import { ASTAR_REFRESH_BALANCE_INTERVAL, SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
-import { getEVMBalance } from '@subwallet/extension-base/koni/api/tokens/evm/balance';
-import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
+import { getERC20Contract } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
+import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeEvmPalletBalance } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
@@ -63,6 +63,16 @@ export function subscribeERC20Interval ({ addresses, assetMap, callback, chainIn
   };
 }
 
+async function getEVMBalance (addresses: string[], web3Api: _EvmApi): Promise<string[]> {
+  return await Promise.all(addresses.map(async (address) => {
+    try {
+      return await web3Api.api.eth.getBalance(address);
+    } catch (e) {
+      return '0';
+    }
+  }));
+}
+
 export function subscribeEVMBalance (params: SubscribeEvmPalletBalance) {
   const { addresses, assetMap, callback, chainInfo, evmApi } = params;
   const chain = chainInfo.slug;
@@ -70,7 +80,7 @@ export function subscribeEVMBalance (params: SubscribeEvmPalletBalance) {
   const nativeTokenSlug = Object.values(nativeTokenInfo)[0]?.slug || '';
 
   function getBalance () {
-    getEVMBalance(chain, addresses, evmApi)
+    getEVMBalance(addresses, evmApi)
       .then((balances) => {
         return balances.map((balance, index): BalanceItem => {
           return {

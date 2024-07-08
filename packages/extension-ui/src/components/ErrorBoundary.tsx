@@ -1,76 +1,62 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
-import type { WithTranslation } from 'react-i18next';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
-import React from 'react';
-import { withTranslation } from 'react-i18next';
+import Header from '../partials/Header';
+import Button from './Button';
+import ButtonArea from './ButtonArea';
+import VerticalSpace from './VerticalSpace';
 
-import Header from '../partials/Header.js';
-import Button from './Button.js';
-import ButtonArea from './ButtonArea.js';
-import VerticalSpace from './VerticalSpace.js';
-
-interface Props extends WithTranslation {
+interface ErrorBoundaryProps {
   children: React.ReactNode;
   className?: string;
   error?: Error | null;
   trigger?: string;
 }
 
-interface State {
-  error: Error | null;
-}
+const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children, error: propError, trigger }) => {
+  const { t } = useTranslation();
+  const [error, setError] = useState<Error | null>(null);
 
-const translate = withTranslation();
-
-// NOTE: This is the only way to do an error boundary, via extend
-class ErrorBoundary extends React.Component<Props> {
-  public override state: State = { error: null };
-
-  public static getDerivedStateFromError (error: Error): Partial<State> {
-    return { error };
-  }
-
-  public override componentDidUpdate (prevProps: Props) {
-    const { error } = this.state;
-    const { trigger } = this.props;
-
-    if (error !== null && (prevProps.trigger !== trigger)) {
-      this.setState({ error: null });
+  useEffect(() => {
+    if (error !== null && trigger) {
+      setError(null);
     }
-  }
+  }, [error, trigger]);
 
-  #goHome = () => {
-    this.setState({ error: null });
+  useEffect(() => {
+    if (propError) {
+      setError(propError);
+    }
+  }, [propError]);
+
+  const goHome = useCallback(() => {
+    setError(null);
     window.location.hash = '/';
-  };
+  }, [setError]);
 
-  public override render (): React.ReactNode {
-    const { children, t } = this.props;
-    const { error } = this.state;
-
-    return error
-      ? (
-        <>
-          <Header text={t<string, Record<string, string>, string>('An error occurred')} />
-          <div>
-            {t('Something went wrong with the query and rendering of this component. {{message}}', {
-              replace: { message: error.message }
-            })}
-          </div>
-          <VerticalSpace />
-          <ButtonArea>
-            <Button
-              onClick={this.#goHome}
-            >
-              {t('Back to home')}
-            </Button>
-          </ButtonArea>
-        </>
-      )
-      : children;
+  if (error) {
+    return (
+      <>
+        <Header text={t('An error occurred')} />
+        <div>
+          {t('Something went wrong with the query and rendering of this component. {{message}}', {
+            replace: { message: error.message }
+          })}
+        </div>
+        <VerticalSpace />
+        <ButtonArea>
+          <Button onClick={goHome}>
+            {t('Back to home')}
+          </Button>
+        </ButtonArea>
+      </>
+    );
   }
-}
 
-export default translate(ErrorBoundary);
+  return <>{children}</>;
+};
+
+export default ErrorBoundary;

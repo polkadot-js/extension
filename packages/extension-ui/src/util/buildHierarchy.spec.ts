@@ -1,10 +1,9 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev-test/globals" />
-
 /* eslint-disable jest/expect-expect */
 
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 
 import { buildHierarchy } from './buildHierarchy.js';

@@ -1,12 +1,11 @@
 // Copyright 2019-2024 @polkadot/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev-test/globals" />
-
 /* global chrome */
 
 import '@polkadot/extension-mocks/chrome';
 
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 import type { ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';

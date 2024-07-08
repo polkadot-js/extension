@@ -1,9 +1,8 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev-test/globals" />
-
 import '@polkadot/extension-mocks/chrome';
+import '@polkadot/dev-test/globals.d.ts';
 
 import type { ReactWrapper } from 'enzyme';
 import type { AccountJson, AuthorizeRequest } from '@polkadot/extension-base/background/types';

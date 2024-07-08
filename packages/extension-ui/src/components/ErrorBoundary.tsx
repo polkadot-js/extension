@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributor
 // SPDX-License-Identifier: Apache-2.0
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import Header from '../partials/Header';
@@ -24,7 +24,7 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children, error: propErro
     if (error !== null && trigger) {
       setError(null);
     }
-  }, [trigger]);
+  }, [error, trigger]);
 
   useEffect(() => {
     if (propError) {
@@ -32,10 +32,10 @@ const ErrorBoundary: React.FC<ErrorBoundaryProps> = ({ children, error: propErro
     }
   }, [propError]);
 
-  const goHome = () => {
+  const goHome = useCallback(() => {
     setError(null);
     window.location.hash = '/';
-  };
+  }, [setError]);
 
   if (error) {
     return (

@@ -47,7 +47,7 @@ configure({ adapter: new Adapter() });
 
 describe('Signing requests', () => {
   let wrapper: ReactWrapper;
-  let onActionStub: ReturnType<typeof jest.fn>;
+  let onActionStub: (to?: string) => void;
   let signRequests: SigningRequest[] = [];
 
   const emitter = new EventEmitter();

@@ -2,11 +2,13 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import AutoEnableSomeTokens from '@subwallet/extension-base/services/migration-service/scripts/databases/AutoEnableSomeTokens';
+import ReloadMetadata from '@subwallet/extension-base/services/migration-service/scripts/databases/ReloadMetadata';
 import DeleteEarningData from '@subwallet/extension-base/services/migration-service/scripts/DeleteEarningData';
 import MigrateRemoveGenesisHash from '@subwallet/extension-base/services/migration-service/scripts/MigrateRemoveGenesisHash';
 import MigrateTransactionHistoryBySymbol from '@subwallet/extension-base/services/migration-service/scripts/MigrateTransactionHistoryBySymbol';
 
 import BaseMigrationJob from '../Base';
+import ClearMetadataDatabase from './databases/ClearMetadataDatabase';
 import MigrateAssetSetting from './databases/MigrateAssetSetting';
 import MigrateEarningVersion from './databases/MigrateEarningVersion';
 import MigrateEthProvider from './providers/MigrateEthProvider';
@@ -14,7 +16,6 @@ import MigratePioneerProvider from './providers/MigratePioneerProvider';
 import MigrateProvidersV1M1P24 from './providers/MigrateProvidersV1M1P24';
 import MigratePolygonUSDCProvider from './tokens/MigratePolygonUSDCProvider';
 import AutoEnableChainsTokens from './AutoEnableChainsTokens';
-import ClearMetadataDatabase from './ClearMetadataDatabase';
 import DeleteChain from './DeleteChain';
 import DeleteChainStaking from './DeleteChainStaking';
 import EnableVaraChain from './EnableVaraChain';
@@ -59,7 +60,8 @@ export default <Record<string, typeof BaseMigrationJob>>{
   '1.1.69-03': MigrateAssetSetting,
   '1.1.69-02': MigrateTransactionHistoryBySymbol,
   '1.2.69-01': MigrateRemoveGenesisHash,
-  '1.2.12-01': ClearMetadataDatabase
+  '1.2.1-01': ClearMetadataDatabase,
+  '1.2.13-01': ReloadMetadata
   // [`${EVERYTIME}-1.1.42-02`]: MigrateTransactionHistoryBySymbol
   // [`${EVERYTIME}-1`]: AutoEnableChainsTokens
 };

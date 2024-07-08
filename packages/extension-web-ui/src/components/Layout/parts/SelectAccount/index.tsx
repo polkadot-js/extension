@@ -54,7 +54,7 @@ const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
+  const { activeModal, inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
   const location = useLocation();
   const { goHome } = useDefaultNavigate();
@@ -323,38 +323,22 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     activeModal(multiExportAccountModalId);
   }, [activeModal]);
 
-  const isActiveModal = checkActive(modalId);
-
-  useEffect(() => {
-    const element = document.getElementsByClassName('__tooltip-overlay-remind')[0];
-
-    if (element) {
-      if (element.classList.contains('ant-tooltip-hidden')) {
-        isActiveModal && element.classList.remove('ant-tooltip-hidden');
-      } else {
-        (!isActiveModal) && element.classList.add('ant-tooltip-hidden');
-      }
-    }
-  }, [isActiveModal]);
-
   const rightButton = useMemo((): ButtonProps => {
     return ({
       icon: (
-        <Icon
-          className={CN('__export-remind-btn')}
-          phosphorIcon={Export}
-          weight='fill'
-        />
-      ),
-      children:
-          <Tooltip
-            className={'__icon-export-remind'}
-            open={true}
-            overlayClassName={CN(className, '__tooltip-overlay-remind')}
-            placement={'bottomLeft'}
-            title={t('Export and back up accounts')}
-          >
-            <div>
+        <Tooltip
+          className={'__icon-export-remind'}
+          overlayClassName={CN(className, '__tooltip-overlay-remind')}
+          placement={'bottomLeft'}
+          title={t('Export and back up accounts')}
+        >
+          <div className={'__tooltip-export-wrapper'}>
+            <Icon
+              className={CN('__export-remind-btn')}
+              phosphorIcon={Export}
+              weight='fill'
+            />
+            <div className={'-icon-highlight'}>
               <Icon
                 customSize={'7.39px'}
                 iconColor={token.colorHighlight}
@@ -362,7 +346,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
                 weight={'fill'}
               />
             </div>
-          </Tooltip>,
+          </div>
+        </Tooltip>
+      ),
       onClick: exportAllAccounts,
       size: 'xs',
       type: 'ghost',
@@ -519,6 +505,15 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         color: token.colorTextLight1
       }
     },
+    '.__tooltip-export-wrapper': {
+      display: 'flex',
+      position: 'relative'
+    },
+    '.-icon-highlight': {
+      position: 'absolute',
+      top: '-90%',
+      right: '-40%'
+    },
 
     '.all-account-item': {
       display: 'flex',
@@ -548,12 +543,6 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8
-    },
-
-    '.__icon-export-remind': {
-      position: 'absolute',
-      top: '-35%',
-      left: '40%'
     },
 
     '.anticon.__export-remind-btn': {

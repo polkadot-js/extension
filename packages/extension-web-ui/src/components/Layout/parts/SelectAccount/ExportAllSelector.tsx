@@ -10,9 +10,10 @@ import { EXPORT_ACCOUNTS_PASSWORD_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet
 import { useFilterModal, useGoBackSelectAccount, useSelectAccount } from '@subwallet/extension-web-ui/hooks';
 import { AccountSignMode, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getSignMode, isAccountAll, searchAccountFunction } from '@subwallet/extension-web-ui/utils';
-import { Button, Icon, InputRef, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, InputRef, ModalContext, SwList, Tooltip } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
-import { CaretLeft, Export, FadersHorizontal } from 'phosphor-react';
+import CN from 'classnames';
+import { CaretLeft, Export, FadersHorizontal, Info } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
@@ -184,6 +185,30 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return true;
   }, [changeAccounts]);
 
+  const rightButton = useMemo((): ButtonProps => {
+    return ({
+      icon: (
+        <Tooltip
+          className={'__icon-export-remind'}
+          overlayClassName={CN(className, '__tooltip-overlay-remind')}
+          placement={'bottomLeft'}
+          title={t('Then hover on icon button then show tooltip "SubWallet only supports accounts created and attached directly on the SubWallet Dashboard, does not support exporting accounts connected from the extension."')}
+        >
+          <div className={'__tooltip-info-wrapper'}>
+            <Icon
+              className={CN('__export-remind-btn')}
+              phosphorIcon={Info}
+              weight='fill'
+            />
+          </div>
+        </Tooltip>
+      ),
+      size: 'xs',
+      type: 'ghost',
+      tooltipPlacement: 'topLeft'
+    });
+  }, [className, t]);
+
   return (
     <>
       <BaseModal
@@ -211,6 +236,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         )}
         id={id}
         onCancel={onBack}
+        rightIconProps={rightButton}
         title={t('Export account')}
       >
         <SwList.Section
@@ -251,6 +277,9 @@ const ExportAllSelector = styled(forwardRef(Component))<Props>(({ theme: { token
       display: 'flex',
       flexDirection: 'column',
       paddingBottom: 0
+    },
+    '.__tooltip-info-wrapper': {
+      display: 'flex'
     },
 
     '.ant-sw-modal-footer': {

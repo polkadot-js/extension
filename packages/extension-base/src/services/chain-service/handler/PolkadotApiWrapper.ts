@@ -12,6 +12,7 @@ export class PolkadotApiWrapper implements _SubstrateApi {
   api: PolkadotClient;
   apiUrl: string;
   chainSlug: string;
+  useLightClient?: boolean;
 
   private handleApiReady: PromiseHandler<_SubstrateApi>;
 

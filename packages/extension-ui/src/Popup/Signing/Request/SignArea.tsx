@@ -1,6 +1,8 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+/* global chrome */
+
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
@@ -30,25 +32,46 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   const { t } = useTranslation();
 
   useEffect(() => {
-    setIsLocked(null);
-    let timeout: ReturnType<typeof setTimeout>;
+    const lockSigner = async () => {
+      setIsLocked(null);
 
-    !isExternal && isSignLocked(signId)
-      .then(({ isLocked, remainingTime }) => {
+      try {
+        const { isLocked, remainingTime } = await isSignLocked(signId);
+
         setIsLocked(isLocked);
-        timeout = setTimeout(() => {
-          setIsLocked(true);
-        }, remainingTime);
 
-        // if the account was unlocked check the remember me
-        // automatically to prolong the unlock period
-        !isLocked && setSavePass(true);
-      })
-      .catch((error: Error) => console.error(error));
+        await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
 
-    return () => {
-      !!timeout && clearTimeout(timeout);
+        if (!isLocked) {
+          setSavePass(true);
+        }
+      } catch (error) {
+        console.error('Error locking signer:', error);
+      }
     };
+
+    const resetAlarm = async () => {
+      return new Promise((resolve, reject) => {
+        chrome.alarms.clear('SIGNER_TIMEOUT', (cleared) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(cleared);
+          }
+        });
+      });
+    };
+
+    const executeLockSigner = async () => {
+      if (!isExternal) {
+        await lockSigner();
+        await resetAlarm();
+      }
+    };
+
+    executeLockSigner().then(async () => {
+      return await executeLockSigner();
+    }).catch((error) => console.error('Error clearing the alarm: ', error));
   }, [isExternal, signId]);
 
   const _onSign = useCallback(
@@ -80,7 +103,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   const RememberPasswordCheckbox = () => (
     <Checkbox
       checked={savePass}
-      label={ isLocked
+      label={isLocked
         ? t(
           'Remember my password for the next {{expiration}} minutes',
           { replace: { expiration: PASSWORD_EXPIRY_MIN } }
@@ -130,7 +153,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   );
 }
 
-export default styled(SignArea)<Props>`
+export default styled(SignArea) <Props>`
   flex-direction: column;
   padding: 6px 24px;
 

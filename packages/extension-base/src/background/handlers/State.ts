@@ -59,7 +59,7 @@ interface SignRequest extends Resolver<ResponseSigning> {
   url: string;
 }
 
-const NOTIFICATION_URL = chrome.extension.getURL('notification.html');
+const NOTIFICATION_URL = chrome.runtime.getURL('notification.html');
 
 const POPUP_WINDOW_OPTS: chrome.windows.CreateData = {
   focused: true,
@@ -86,8 +86,8 @@ export enum NotificationOptions {
 const AUTH_URLS_KEY = 'authUrls';
 const DEFAULT_AUTH_ACCOUNTS = 'defaultAuthAccounts';
 
-function extractMetadata (store: MetadataStore): void {
-  store.allMap((map): void => {
+async function extractMetadata (store: MetadataStore): Promise<void> {
+  await store.allMap(async (map): Promise<void> => {
     const knownEntries = Object.entries(knownGenesis);
     const defs: Record<string, { def: MetadataDef, index: number, key: string }> = {};
     const removals: string[] = [];
@@ -117,13 +117,16 @@ function extractMetadata (store: MetadataStore): void {
         }
       });
 
-    removals.forEach((key) => store.remove(key));
+    for (const key of removals) {
+      await store.remove(key);
+    }
+
     Object.values(defs).forEach(({ def }) => addMetadata(def));
   });
 }
 
 export default class State {
-  readonly #authUrls: AuthUrls = {};
+  #authUrls: AuthUrls = {};
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
@@ -155,17 +158,20 @@ export default class State {
 
   constructor (providers: Providers = {}) {
     this.#providers = providers;
+  }
 
-    extractMetadata(this.#metaStore);
-
+  public async init () {
+    await extractMetadata(this.#metaStore);
     // retrieve previously set authorizations
-    const authString = localStorage.getItem(AUTH_URLS_KEY) || '{}';
+    const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
+    const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
     this.#authUrls = previousAuth;
 
     // retrieve previously set default auth accounts
-    const defaultAuthString = localStorage.getItem(DEFAULT_AUTH_ACCOUNTS) || '[]';
+    const storageDefaultAuthAccounts: Record<string, string> = await chrome.storage.local.get(DEFAULT_AUTH_ACCOUNTS);
+    const defaultAuthString: string = storageDefaultAuthAccounts?.[DEFAULT_AUTH_ACCOUNTS] || '[]';
     const previousDefaultAuth = JSON.parse(defaultAuthString) as string[];
 
     this.defaultAuthAccountSelection = previousDefaultAuth;
@@ -209,6 +215,10 @@ export default class State {
     return this.#authUrls;
   }
 
+  private set authUrls (urls: AuthUrls) {
+    this.#authUrls = urls;
+  }
+
   private popupClose (): void {
     this.#windows.forEach((id: number) =>
       withErrorLog(() => chrome.windows.remove(id))
@@ -230,7 +240,7 @@ export default class State {
   }
 
   private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
-    const complete = (authorizedAccounts: string[] = []) => {
+    const complete = async (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
       this.#authUrls[this.stripUrl(url)] = {
@@ -241,19 +251,21 @@ export default class State {
         url
       };
 
-      this.saveCurrentAuthList();
-      this.updateDefaultAuthAccounts(authorizedAccounts);
+      await this.saveCurrentAuthList();
+      await this.updateDefaultAuthAccounts(authorizedAccounts);
       delete this.#authRequests[id];
       this.updateIconAuth(true);
     };
 
     return {
-      reject: (error: Error): void => {
-        complete();
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      reject: async (error: Error): Promise<void> => {
+        await complete();
         reject(error);
       },
-      resolve: ({ authorizedAccounts, result }: AuthResponse): void => {
-        complete(authorizedAccounts);
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      resolve: async ({ authorizedAccounts, result }: AuthResponse): Promise<void> => {
+        await complete(authorizedAccounts);
         resolve({ authorizedAccounts, result });
       }
     };
@@ -289,17 +301,17 @@ export default class State {
     this.updateIconAuth(true);
   }
 
-  private saveCurrentAuthList () {
-    localStorage.setItem(AUTH_URLS_KEY, JSON.stringify(this.#authUrls));
+  private async saveCurrentAuthList () {
+    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(this.#authUrls) });
   }
 
-  private saveDefaultAuthAccounts () {
-    localStorage.setItem(DEFAULT_AUTH_ACCOUNTS, JSON.stringify(this.defaultAuthAccountSelection));
+  private async saveDefaultAuthAccounts () {
+    await chrome.storage.local.set({ [DEFAULT_AUTH_ACCOUNTS]: JSON.stringify(this.defaultAuthAccountSelection) });
   }
 
-  public updateDefaultAuthAccounts (newList: string[]) {
+  public async updateDefaultAuthAccounts (newList: string[]) {
     this.defaultAuthAccountSelection = newList;
-    this.saveDefaultAuthAccounts();
+    await this.saveDefaultAuthAccounts();
   }
 
   private metaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
@@ -358,20 +370,20 @@ export default class State {
           : (signCount ? `${signCount}` : '')
     );
 
-    withErrorLog(() => chrome.browserAction.setBadgeText({ text }));
+    withErrorLog(() => chrome.action.setBadgeText({ text }));
 
     if (shouldClose && text === '') {
       this.popupClose();
     }
   }
 
-  public removeAuthorization (url: string): AuthUrls {
+  public async removeAuthorization (url: string): Promise<AuthUrls> {
     const entry = this.#authUrls[url];
 
     assert(entry, `The source ${url} is not known`);
 
     delete this.#authUrls[url];
-    this.saveCurrentAuthList();
+    await this.saveCurrentAuthList();
 
     return this.#authUrls;
   }
@@ -391,12 +403,12 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): void {
+  public async updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): Promise<void> {
     authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
       this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
     });
 
-    this.saveCurrentAuthList();
+    await this.saveCurrentAuthList();
   }
 
   public async authorizeUrl (url: string, request: RequestAuthorizeTab): Promise<AuthResponse> {
@@ -539,8 +551,8 @@ export default class State {
     return provider.unsubscribe(request.type, request.method, request.subscriptionId);
   }
 
-  public saveMetadata (meta: MetadataDef): void {
-    this.#metaStore.set(meta.genesisHash, meta);
+  public async saveMetadata (meta: MetadataDef): Promise<void> {
+    await this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
   }

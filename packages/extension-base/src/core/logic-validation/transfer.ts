@@ -48,28 +48,42 @@ export function validateTransferRequest (tokenInfo: _ChainAsset, from: _Address,
   return [errors, keypair, transferValue];
 }
 
-export function additionalValidateTransfer (tokenInfo: _ChainAsset, extrinsicType: ExtrinsicType, receiverTransferTokenFreeBalance: string, transferAmount: string, senderTransferTokenTransferable?: string): [TransactionWarning | undefined, TransactionError | undefined] {
+export function additionalValidateTransfer (tokenInfo: _ChainAsset, nativeTokenInfo: _ChainAsset, extrinsicType: ExtrinsicType, receiverTransferTokenFreeBalance: string, transferAmount: string, senderTransferTokenTransferable?: string, receiverNativeTransferable?: string): [TransactionWarning[], TransactionError[]] {
   const minAmount = _getTokenMinAmount(tokenInfo);
-  let warning: TransactionWarning | undefined;
-  let error: TransactionError | undefined;
+  const nativeMinAmount = _getTokenMinAmount(nativeTokenInfo);
+  const warnings: TransactionWarning[] = [];
+  const errors: TransactionError[] = [];
 
-  // Check ed of not native token for sender
+  // Check ed of not native token for sender after sending
   if (extrinsicType === ExtrinsicType.TRANSFER_TOKEN && senderTransferTokenTransferable) {
     if (new BigN(senderTransferTokenTransferable).minus(transferAmount).lt(minAmount)) {
-      warning = new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT);
+      const warning = new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT);
+
+      warnings.push(warning);
     }
   }
 
-  // Check ed for receiver
+  // Check ed for receiver before sending
+  if (extrinsicType === ExtrinsicType.TRANSFER_TOKEN && receiverNativeTransferable) {
+    if (new BigN(receiverNativeTransferable).lt(nativeMinAmount)) {
+      const error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You could not transfer to inactive account (Account has native balance < Existential Deposit) to avoid losing your assets'));
+
+      errors.push(error);
+    }
+  }
+
+  // Check ed for receiver after sending
   if (new BigN(receiverTransferTokenFreeBalance).plus(transferAmount).lt(minAmount)) {
     const atLeast = new BigN(minAmount).minus(receiverTransferTokenFreeBalance).plus((tokenInfo.decimals || 0) === 0 ? 0 : 1);
 
     const atLeastStr = formatNumber(atLeast, tokenInfo.decimals || 0, balanceFormatter, { maxNumberFormat: tokenInfo.decimals || 6 });
 
-    error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } }));
+    const error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You must transfer at least {{amount}} {{symbol}} to keep the destination account alive', { replace: { amount: atLeastStr, symbol: tokenInfo.symbol } }));
+
+    errors.push(error);
   }
 
-  return [warning, error];
+  return [warnings, errors];
 }
 
 // xcm transfer

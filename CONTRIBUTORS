@@ -1,16 +1,16 @@
-    2720	AnhMTV                        	Release version 1.2.13
-    2468	Nam Phạm                      	[Issue 3230] fix: estimate gas for snowbridge xcm
-    2124	S2kael                        	[Chainlist] [Issue-259] Update stable version for chain-list
-     821	lw-cdm                        	[Issue-3283] Fix issue related to getting accounts when opening "receive" modal
-     484	nguyentiendung                	[Issue-3212] Improve UI for missionPool modal
+    2737	AnhMTV                        	
+    2481	Nam Phạm                      	[Issue 3230] fix: estimate gas for snowbridge xcm
+    2139	S2kael                        	[Issue-3300] Update script migration metadata
+     831	lw-cdm                        	
+     532	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     191	bluezdot                      	[Chainlist] [Hotfix-issue-259] Remove rollux & syscoin
+     195	bluezdot                      	[Chainlist] [Hotfix-issue-259] Remove rollux & syscoin
      185	quangdo                       	
-     147	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
+     148	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
+     137	Automation Bot                	[CI Skip] Auto increase webapp build number
      135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
-     117	Automation Bot                	[CI Skip] Auto increase webapp build number
+     105	lw-cdm                        	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-     101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s

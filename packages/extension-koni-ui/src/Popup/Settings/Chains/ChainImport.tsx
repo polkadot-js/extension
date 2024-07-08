@@ -7,6 +7,7 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
@@ -16,7 +17,7 @@ import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
 import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -40,13 +41,19 @@ interface ValidationInfo {
   message?: string
 }
 
+interface LocationState {
+  useGoHome?: boolean
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
+  const locationState = useLocation().state as LocationState;
 
+  const [location] = useState<LocationState>(locationState);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -116,7 +123,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showNotification({
             message: t('Imported chain successfully')
           });
-          navigate(-1);
+          location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
         } else {
           showNotification({
             message: t('An error occurred, please try again')
@@ -129,7 +136,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [existentialDeposit, form, genesisHash, isPureEvmChain, navigate, showNotification, t]);
+  }, [existentialDeposit, form, genesisHash, isPureEvmChain, location, navigate, showNotification, t]);
 
   const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {

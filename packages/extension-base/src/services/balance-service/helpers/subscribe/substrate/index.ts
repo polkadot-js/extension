@@ -439,7 +439,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
 
 const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): VoidCallback => {
   if (!(substrateApi instanceof GearApi)) {
-    console.warn('Cannot subscribe GRC20 balance without GearApi instance');
+    console.warn('Cannot subscribe VFT balance without GearApi instance');
 
     return noop;
   }

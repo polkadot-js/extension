@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from "@subwallet/chain-list/types";
-import {ChainAssetMap, MultiChainAssetMap} from "@subwallet/chain-list";
-import { _TRANSFER_CHAIN_GROUP } from "@subwallet/extension-base/services/chain-service/constants";
+import { ChainAssetMap, MultiChainAssetMap } from '@subwallet/chain-list';
+import { _AssetRef, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
+import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 
 // Check priceId valid in group asset
 
-export function validateAssetGroupPrice (multiChainAsset : _MultiChainAsset, chainAsset: _ChainAsset) {
+export function validateAssetGroupPrice (multiChainAsset: _MultiChainAsset, chainAsset: _ChainAsset) {
   if (chainAsset.multiChainAsset !== multiChainAsset.slug) {
     throw new Error(`Asset ${chainAsset.slug} are not in ${multiChainAsset.slug} group asset`);
   }
 
-  return multiChainAsset.priceId === chainAsset.priceId
+  return multiChainAsset.priceId === chainAsset.priceId;
 }
 
 export function validateAssetsGroupPrice (chainAsset1: _ChainAsset, chainAsset2: _ChainAsset) {
@@ -32,7 +32,7 @@ export function checkMultichainAssetValid (chainAsset: _ChainAsset) {
     return true;
   }
 
-  return Object.keys(MultiChainAssetMap).includes(chainAsset.multiChainAsset)
+  return Object.keys(MultiChainAssetMap).includes(chainAsset.multiChainAsset);
 }
 
 // Check multichainAsset valid
@@ -40,7 +40,7 @@ export function checkMultichainAssetValid (chainAsset: _ChainAsset) {
 // Check slug asset ref
 
 export function checkSwapAssetRef (slug: string, assetRef: _AssetRef) {
-  return slug === `${assetRef.srcAsset}___${assetRef.destAsset}`
+  return slug === `${assetRef.srcAsset}___${assetRef.destAsset}`;
 }
 
 // Check slug asset ref
@@ -51,10 +51,12 @@ export function validateNotDuplicateSmartcontract (chainAsset: _ChainAsset) {
   if (!['ERC20', 'ERC721', 'PSP22', 'PSP34', 'GRC20', 'GRC721'].includes(chainAsset.assetType)) {
     throw new Error(`${chainAsset.slug} is not smart contract asset`);
   }
+
   const slug = chainAsset.slug;
 
   const isDuplicate = Object.entries(ChainAssetMap).some(([key, tokenInfo]) => slug !== key && chainAsset?.metadata?.contractAddress === tokenInfo?.metadata?.contractAddress);
-  return !isDuplicate
+
+  return !isDuplicate;
 }
 
 // Check duplicate smartcontract
@@ -65,7 +67,7 @@ export function validateNotDuplicateSmartcontract (chainAsset: _ChainAsset) {
 
 export function validateNativeLocalTransferMetadata (chainAsset: _ChainAsset) {
   if (!chainAsset.metadata) { // recheck this
-    throw new Error(`Asset ${chainAsset} is lack of metadata`)
+    throw new Error(`Asset ${chainAsset.slug} is lack of metadata`);
   }
 
   const moonbeamGroup = ['moonbeam, moonbase, moonriver'];
@@ -94,7 +96,7 @@ export function validateNativeLocalTransferMetadata (chainAsset: _ChainAsset) {
     return !!chainAsset.metadata.assetId;
   }
 
-  throw new Error(`${chainAsset.slug} is not local or native asset`)
+  throw new Error(`${chainAsset.slug} is not local or native asset`);
 }
 
 // TRANSFER
@@ -107,7 +109,7 @@ export function validateSwapAlterAsset (assetRef: _AssetRef) {
   }
 
   const srcAsset = assetRef.srcAsset;
-  const alterAsset = assetRef.metadata?.alternativeAsset;
+  const alterAsset = assetRef.metadata?.alternativeAsset as string;
 
   if (!alterAsset) {
     throw new Error(`${assetRef.srcAsset}___${assetRef.destAsset} does not has alternativeAsset`);
@@ -136,18 +138,17 @@ export function validateXcmMetadata (assetRef: _AssetRef) {
     throw new Error(`${srcAsset} or ${destAsset} do not exist`);
   }
 
-  return ChainAssetMap[srcAsset].metadata?.multilocation && ChainAssetMap[destAsset].metadata?.multilocation || false;
+  return (ChainAssetMap[srcAsset].metadata?.multilocation && ChainAssetMap[destAsset].metadata?.multilocation) || false;
 }
-
-export function validate()
 
 // XCM
 
 // EARNING
 
+// @ts-ignore
 export function checkValidSupportStaking (chainInfo: _ChainInfo) {
   if (!chainInfo.substrateInfo) {
-    throw new Error(`chain ${chainInfo.slug} is not substrate chain`)
+    throw new Error(`chain ${chainInfo.slug} is not substrate chain`);
   }
 
   if (!chainInfo.substrateInfo.supportStaking) {
@@ -155,7 +156,6 @@ export function checkValidSupportStaking (chainInfo: _ChainInfo) {
   }
 
   // todo: check has related pallet staking
-  return;
 }
 
 // todo: check alternativeAsset

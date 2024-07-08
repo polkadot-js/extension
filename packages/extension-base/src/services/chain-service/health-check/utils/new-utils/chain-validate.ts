@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo, _ChainStatus, _SubstrateChainType } from "@subwallet/chain-list/types";
+import { _ChainInfo, _ChainStatus, _SubstrateChainType } from '@subwallet/chain-list/types';
 
 export function validateChainHasProvider (chainInfo: _ChainInfo) {
   const chainStatus = chainInfo.chainStatus;
@@ -22,9 +22,9 @@ export function validateParaId (chainInfo: _ChainInfo) {
   const chainType = chainInfo.substrateInfo.chainType;
   const relaySlug = chainInfo.substrateInfo.relaySlug;
 
-  return paraId ?
-    (chainType === _SubstrateChainType.PARACHAIN && !!relaySlug) :
-    (chainType === _SubstrateChainType.RELAYCHAIN && !relaySlug);
+  return paraId
+    ? (chainType === _SubstrateChainType.PARACHAIN && !!relaySlug)
+    : (chainType === _SubstrateChainType.RELAYCHAIN && !relaySlug);
 }
 
 export function checkEvmSupportSmartContract (chainInfo: _ChainInfo) {

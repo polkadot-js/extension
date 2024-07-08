@@ -3,7 +3,7 @@
 
 /* eslint-disable jest/expect-expect */
 
-import '@polkadot/dev-test/globals.d.ts';
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import type { AccountJson, AccountWithChildren } from '@polkadot/extension-base/background/types';
 

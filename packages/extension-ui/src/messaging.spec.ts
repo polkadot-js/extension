@@ -4,7 +4,7 @@
 /* global chrome */
 
 import '@polkadot/extension-mocks/chrome';
-import '@polkadot/dev-test/globals.d.ts';
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';

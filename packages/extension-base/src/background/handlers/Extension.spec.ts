@@ -4,7 +4,7 @@
 /* global chrome */
 
 import '@polkadot/extension-mocks/chrome';
-import '@polkadot/dev-test/globals.d.ts';
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import type { ResponseSigning } from '@polkadot/extension-base/background/types';
 import type { MetadataDef } from '@polkadot/extension-inject/types';

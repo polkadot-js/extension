@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-base authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainConnectionStatus } from '@subwallet/extension-base/services/chain-service/types';
+import { SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 
 export const DefaultLogosMap: Record<string, string> = {
   subwallet: './images/projects/subwallet.png',
@@ -21,10 +21,14 @@ export const DefaultLogosMap: Record<string, string> = {
   xtwitter_transparent: './images/projects/xtwitter_transparent.png',
   chain_flip: '/images/projects/chainflip-mainnet.png',
   hydradx: '/images/projects/hydradx.png',
+  polkadot_assethub: '/images/projects/polkadot-asset-hub.png',
+  kusama_assethub: '/images/projects/kusama-asset-hub.png',
+  rococo_assethub: '/images/projects/rococo-asset-hub.png',
   currency_brl: '/images/projects/CurrencyBRL.png',
   currency_cny: '/images/projects/CurrencyCNY.png',
   currency_hkd: '/images/projects/CurrencyHKD.png',
-  currency_vnd: '/images/projects/CurrencyVND.png'
+  currency_vnd: '/images/projects/CurrencyVND.png',
+  [SUBSTRATE_GENERIC_KEY]: './images/projects/polkadot.png'
 };
 
 export const IconMap = {

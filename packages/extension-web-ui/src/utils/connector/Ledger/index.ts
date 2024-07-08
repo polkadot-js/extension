@@ -4,7 +4,7 @@
 import { ConvertLedgerError } from '@subwallet/extension-web-ui/types';
 import { TFunction } from 'i18next';
 
-export const convertLedgerError = (err: Error, t: TFunction, network: string, expandError = true): ConvertLedgerError => {
+export const convertLedgerError = (err: Error, t: TFunction, network: string, isSigning = false, expandError = true): ConvertLedgerError => {
   const error = err;
   const message = error.message;
   const name = error.name;
@@ -17,7 +17,10 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
       };
   }
 
-  if (message.includes('Locked device')) {
+  if (
+    message.includes('Locked device') ||
+    message.includes('Device Locked')
+  ) {
     return {
       status: 'warning',
       message: t('Please unlock your Ledger')
@@ -27,12 +30,20 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, ex
   if (
     message.includes('App does not seem to be open') || // App not open
     message.includes('Unknown Status Code: 28161') || // Substrate stay in dashboard
-    message.includes('CLA_NOT_SUPPORTED (0x6e00)') // Evm wrong app
+    message.includes('Unknown Status Code: 28160') || // Substrate stay in dashboard
+    message.includes('CLA_NOT_SUPPORTED') // Evm wrong app
   ) {
-    return {
-      status: 'error',
-      message: t('Open "{{network}}" on Ledger to connect', { replace: { network: network } })
-    };
+    if (isSigning) {
+      return {
+        status: 'error',
+        message: t('Unable to sign. Open “{{network}}” on Ledger, refresh and approve again', { replace: { network: network } })
+      };
+    } else {
+      return {
+        status: 'error',
+        message: t('Open "{{network}}" on Ledger to connect', { replace: { network: network } })
+      };
+    }
   }
 
   // Required blind signing or sign on a not registry network

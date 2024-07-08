@@ -69,7 +69,11 @@ export const getSignMode = (account: AccountJson | null | undefined): AccountSig
 
       if (account.isExternal) {
         if (account.isHardware) {
-          return AccountSignMode.LEDGER;
+          if (account.isGeneric) {
+            return AccountSignMode.GENERIC_LEDGER;
+          } else {
+            return AccountSignMode.LEGACY_LEDGER;
+          }
         } else if (account.isReadOnly) {
           return AccountSignMode.READ_ONLY;
         } else {

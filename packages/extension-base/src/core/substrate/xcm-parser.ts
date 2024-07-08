@@ -4,7 +4,7 @@
 import { COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { _Address } from '@subwallet/extension-base/background/KoniTypes';
-import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainSubstrateAddressPrefix, _getEvmChainId, _getSubstrateParaId, _getSubstrateRelayParent, _getXcmAssetMultilocation, _isChainEvmCompatible, _isPureEvmChain, _isSubstrateParaChain } from '@subwallet/extension-base/services/chain-service/utils';
 
 import { decodeAddress, evmToAddress } from '@polkadot/util-crypto';
 
@@ -64,7 +64,7 @@ export function _isXcmTransferUnstable (originChainInfo: _ChainInfo, destChainIn
   return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo);
 }
 
-export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
+function getAssetHubBridgeUnstableWarning (originChainInfo: _ChainInfo): string {
   switch (originChainInfo.slug) {
     case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
       return 'Cross-chain transfer of this token is not recommended as it is in beta and incurs a transaction fee of 2 DOT. Continue at your own risk';
@@ -75,11 +75,34 @@ export function _getXcmUnstableWarning (originChainInfo: _ChainInfo): string {
   }
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
+function getSnowBridgeUnstableWarning (originChainInfo: _ChainInfo): string {
+  switch (originChainInfo.slug) {
+    case COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a fee of 70$ and takes up to 1 hour to complete. Continue at your own risk';
+    case COMMON_CHAIN_SLUGS.ETHEREUM:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a fee of 5$ and takes up to 1 hour to complete. Continue at your own risk';
+    default:
+      return 'Cross-chain transfer of this token is not recommended as it is in beta, incurs a high fee and takes up to 1 hour to complete. Continue at your own risk';
+  }
+}
 
-function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
+export function _getXcmUnstableWarning (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): string {
+  if (_isSnowBridgeXcm(originChainInfo, destChainInfo)) {
+    return getSnowBridgeUnstableWarning(originChainInfo);
+  } else {
+    return getAssetHubBridgeUnstableWarning(originChainInfo);
+  }
+}
+
+export function _isXcmWithinSameConsensus (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
   return _getSubstrateRelayParent(originChainInfo) === destChainInfo.slug || _getSubstrateRelayParent(destChainInfo) === originChainInfo.slug || _getSubstrateRelayParent(originChainInfo) === _getSubstrateRelayParent(destChainInfo);
 }
+
+export function _isSnowBridgeXcm (originChainInfo: _ChainInfo, destChainInfo: _ChainInfo): boolean {
+  return !_isXcmWithinSameConsensus(originChainInfo, destChainInfo) && (_isPureEvmChain(originChainInfo) || _isPureEvmChain(destChainInfo));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 function _getMultiLocationParent (originChainInfo: _ChainInfo, isWithinSameConsensus: boolean): number {
   let parent = 0; // how many hops up the hierarchy

@@ -4,6 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { _isSnowBridgeXcm } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { _DEFAULT_ACTIVE_CHAINS, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
@@ -22,12 +23,23 @@ import Web3 from 'web3';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
 
-const filterChainInfoMap = (data: Record<string, _ChainInfo>): Record<string, _ChainInfo> => {
+const filterChainInfoMap = (data: Record<string, _ChainInfo>, ignoredChains: string[]): Record<string, _ChainInfo> => {
   return Object.fromEntries(
     Object.entries(data)
-      .filter(([, info]) => !info.bitcoinInfo)
+      .filter(([slug, info]) => !info.bitcoinInfo && !ignoredChains.includes(slug))
   );
 };
+
+const ignoredList = [
+  'bevm',
+  'bevmTest',
+  'bevm_testnet',
+  'layerEdge_testnet',
+  'merlinEvm',
+  'botanixEvmTest',
+  'syscoin_evm',
+  'rollux_evm'
+];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
   return Object.fromEntries(
@@ -35,6 +47,22 @@ const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Recor
       .filter(([, info]) => chainInfo[info.originChain])
   );
 };
+
+// const rawAssetRefMap = (assetRefMap: Record<string, _AssetRef>) => {
+//   const result: Record<string, _AssetRef> = {};
+//
+//   Object.entries(assetRefMap).forEach(([key, assetRef]) => {
+//     const originChainInfo = ChainInfoMap[assetRef.srcChain];
+//     const destChainInfo = ChainInfoMap[assetRef.destChain];
+//     const isSnowBridgeXcm = assetRef.path === _AssetRefPath.XCM && _isSnowBridgeXcm(originChainInfo, destChainInfo);
+//
+//     if (!isSnowBridgeXcm) {
+//       result[key] = assetRef;
+//     }
+//   });
+//
+//   return result;
+// };
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -591,9 +619,6 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    // const storedAssetRefMap = await this.dbService.getAssetRefMap();
-    //
-    // this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -1039,7 +1064,7 @@ export class ChainService {
 
   private async initChains () {
     const storedChainSettings = await this.dbService.getAllChainStore();
-    const defaultChainInfoMap = filterChainInfoMap(ChainInfoMap);
+    const defaultChainInfoMap = filterChainInfoMap(ChainInfoMap, ignoredList);
     const storedChainSettingMap: Record<string, IChain> = {};
 
     storedChainSettings.forEach((chainStoredSetting) => {

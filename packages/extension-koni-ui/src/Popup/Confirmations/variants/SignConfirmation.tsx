@@ -87,6 +87,7 @@ function Component ({ className, request }: Props) {
       <SubstrateSignArea
         account={account}
         id={request.id}
+        isInternal={request.isInternal}
         request={request.request}
       />
       <BaseDetailModal

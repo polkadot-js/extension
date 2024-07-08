@@ -34,7 +34,7 @@ configure({ adapter: new Adapter() });
 
 describe('Create Account', () => {
   let wrapper: ReactWrapper;
-  let onActionStub: (to?: string) => void;
+  let onActionStub: ReturnType<typeof jest.fn>;
   const exampleAccount = {
     address: 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5',
     seed: 'horse battery staple correct'

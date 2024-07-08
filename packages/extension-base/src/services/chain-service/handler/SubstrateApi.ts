@@ -33,8 +33,14 @@ const _availSpec: OverrideBundleDefinition = {
   signedExtensions: availSpec.signedExtensions
 };
 
+// Override avail goldberg spec for signedExtensions
+const _goldbergSpec: OverrideBundleDefinition = {
+  signedExtensions: availSpec.signedExtensions
+};
+
 if (typesBundle.spec) {
   typesBundle.spec.avail = _availSpec;
+  typesBundle.spec['data-avail'] = _goldbergSpec;
 }
 
 export class SubstrateApi implements _SubstrateApi {

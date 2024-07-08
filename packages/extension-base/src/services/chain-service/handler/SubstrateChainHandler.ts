@@ -164,7 +164,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
     if (!(apiPromise instanceof GearApi)) {
-      console.warn('Cannot subscribe GRC20 balance without GearApi instance');
+      console.warn('Cannot subscribe VFT balance without GearApi instance');
 
       return ['', -1, '', true];
     }

@@ -35,7 +35,9 @@ const ignoredList = [
   'bevm_testnet',
   'layerEdge_testnet',
   'merlinEvm',
-  'botanixEvmTest'
+  'botanixEvmTest',
+  'syscoin_evm',
+  'rollux_evm'
 ];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {

@@ -10,9 +10,9 @@ export const POLKADOT_SLIP_44 = 354;
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    accountName: 'Substrate',
-    appName: 'Substrate Generic',
-    networkName: 'Substrate networks',
+    accountName: 'Polkadot new',
+    appName: 'Polkadot',
+    networkName: 'Polkadot (new)',
     genesisHash: '',
     network: 'polkadot',
     icon: 'substrate',

@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 1.2.13
+Build date: Jul 05, 2024.
+
+Features & Update:
+- Update chain-list
+  - Add support for MYTH token
+  - Add support for WIFD token
+- Update UI for the Signature request screen from dApp (#3260)
+- Update UI for Mission pool feature (#3212)
+- Change token type from GRC-20 to VFT (#3268)
+
+Bugs fixed:
+- Fix bug Do not show account to get address when stand on All accounts mode (#3283)
+
+
 ## 1.2.12
 Build date: Jul 03, 2024.
 

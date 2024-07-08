@@ -111,6 +111,7 @@ const Component = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
   const [requestUserInteractToContinue, setRequestUserInteractToContinue] = useState<boolean>(false);
+  const [isScrollEnd, setIsScrollEnd] = useState<boolean>(false);
   const continueRefreshQuoteRef = useRef<boolean>(false);
   const { token } = useTheme() as Theme;
 
@@ -655,31 +656,19 @@ const Component = () => {
     }
   }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, isChainConnected, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, swapError, t]);
 
-  const destinationSwapValue = useMemo(() => {
-    if (currentQuote) {
-      const decimals = _getAssetDecimals(fromAssetInfo);
-
-      return new BigN(fromAmountValue || 0)
-        .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate);
-    }
-
-    return BN_ZERO;
-  }, [currentQuote, fromAmountValue, fromAssetInfo]);
-
   const minimumReceived = useMemo(() => {
-    const calcMinimumReceived = (value: BigN) => {
+    const calcMinimumReceived = (value: string) => {
       const adjustedValue = supportSlippageSelection
         ? value
-        : value.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
+        : new BigN(value).multipliedBy(new BigN(1).minus(currentSlippage.slippage)).integerValue(BigN.ROUND_DOWN);
 
       return adjustedValue.toString().includes('e')
         ? formatNumberString(adjustedValue.toString())
         : adjustedValue.toString();
     };
 
-    return calcMinimumReceived(destinationSwapValue);
-  }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
+    return calcMinimumReceived(currentQuote?.toAmount || '0');
+  }, [supportSlippageSelection, currentQuote?.toAmount, currentSlippage.slippage]);
 
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');
@@ -774,14 +763,28 @@ const Component = () => {
     return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
 
-  const renderAlertBox = () => {
+  const isSwapAssetHub = useMemo(() => {
+    const providerId = currentQuote?.provider?.id;
+
+    return providerId ? [SwapProviderId.KUSAMA_ASSET_HUB, SwapProviderId.POLKADOT_ASSET_HUB, SwapProviderId.ROCOCO_ASSET_HUB].includes(providerId) : false;
+  }, [currentQuote?.provider?.id]);
+
+  const renderAlertBox = useCallback(() => {
     const multichainAsset = fromAssetInfo?.multiChainAsset;
     const fromAssetName = multichainAsset && multiChainAssetMap[multichainAsset]?.name;
     const toAssetName = chainInfoMap[toAssetInfo?.originChain]?.name;
 
     return (
       <>
-        {isSwapXCM && fromAssetName && toAssetName && (
+        {isSwapAssetHub && !isFormInvalid && (
+          <AlertBox
+            className={'__assethub-notification'}
+            description={'Swapping on Asset Hub is in beta with a limited number of pairs and low liquidity. Continue at your own risk'}
+            title={'Pay attention!'}
+            type='warning'
+          />
+        )}
+        {isSwapXCM && fromAssetName && toAssetName && !isFormInvalid && (
           <AlertBox
             className={'__xcm-notification'}
             description={`The amount you entered is higher than your available balance on ${toAssetName} network. You need to first transfer cross-chain from ${fromAssetName} network to ${toAssetName} network to continue swapping`}
@@ -791,7 +794,7 @@ const Component = () => {
         )}
       </>
     );
-  };
+  }, [chainInfoMap, fromAssetInfo?.multiChainAsset, isFormInvalid, isSwapAssetHub, isSwapXCM, multiChainAssetMap, toAssetInfo?.originChain]);
 
   const xcmBalanceTokens = useMemo(() => {
     if (!isSwapXCM || !fromAssetInfo || !currentPair) {
@@ -1093,6 +1096,22 @@ const Component = () => {
   }, [fromValue]);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!!currentQuote && !isScrollEnd) {
+        setIsScrollEnd(true);
+        const id = 'transaction-swap-wrapper-id';
+        const element = document.getElementById(id);
+
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+        }
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [currentQuote, isScrollEnd]);
+
+  useEffect(() => {
     if (isChainConnected && swapError) {
       notify({
         message: swapError?.message,
@@ -1111,7 +1130,10 @@ const Component = () => {
         })}
         >
           <TransactionContent>
-            <>
+            <div
+              className={'__transaction-swap-wrapper'}
+              id={'transaction-swap-wrapper-id'}
+            >
               <Form
                 className={'form-container'}
                 form={form}
@@ -1163,9 +1185,10 @@ const Component = () => {
                   </div>
 
                   <SwapToField
+                    decimals={_getAssetDecimals(toAssetInfo)}
                     loading={handleRequestLoading && showQuoteArea}
                     onSelectToken={onSelectToToken}
-                    swapValue={destinationSwapValue}
+                    swapValue={currentQuote?.toAmount || 0}
                     toAsset={toAssetInfo}
                     tokenSelectorItems={toTokenItems}
                     tokenSelectorValue={toTokenSlugValue}
@@ -1301,7 +1324,7 @@ const Component = () => {
                   </>
                 )
               }
-            </>
+            </div>
           </TransactionContent>
           <TransactionFooter>
             <Button
@@ -1380,7 +1403,7 @@ const Component = () => {
                       size={24}
                     />
 
-                    {currentQuote.provider.name}
+                    <span className={'__provider-name'}>{currentQuote.provider.name}</span>
                   </MetaInfo.Default>
 
                   <MetaInfo.Default
@@ -1392,7 +1415,7 @@ const Component = () => {
                   <div className={'__minimum-received'}>
                     <MetaInfo.Number
                       customFormatter={swapCustomFormatter}
-                      decimals={0}
+                      decimals={_getAssetDecimals(toAssetInfo)}
                       formatType={'custom'}
                       label={
                         <Tooltip
@@ -1564,6 +1587,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center',
       cursor: 'pointer'
     },
+    '.__xcm-notification, .__assethub-notification': {
+      marginBottom: token.marginSM
+    },
+    '.__provider-name': {
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden'
+    },
     '.__quote-rate .__label-col': {
       flex: '0 1 auto'
     },
@@ -1586,7 +1617,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__swap-provider .__value ': {
       display: 'flex',
-      gap: 8
+      gap: 8,
+      overflow: 'hidden'
+    },
+    '.__swap-provider .__col': {
+      alignItems: 'unset',
+      flexDirection: 'row',
+      justifyContent: 'flex-start'
+
     },
     '.ant-background-icon': {
       width: 24,

@@ -4,6 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { _isSnowBridgeXcm } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { _DEFAULT_ACTIVE_CHAINS, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
@@ -46,6 +47,22 @@ const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Recor
       .filter(([, info]) => chainInfo[info.originChain])
   );
 };
+
+// const rawAssetRefMap = (assetRefMap: Record<string, _AssetRef>) => {
+//   const result: Record<string, _AssetRef> = {};
+//
+//   Object.entries(assetRefMap).forEach(([key, assetRef]) => {
+//     const originChainInfo = ChainInfoMap[assetRef.srcChain];
+//     const destChainInfo = ChainInfoMap[assetRef.destChain];
+//     const isSnowBridgeXcm = assetRef.path === _AssetRefPath.XCM && _isSnowBridgeXcm(originChainInfo, destChainInfo);
+//
+//     if (!isSnowBridgeXcm) {
+//       result[key] = assetRef;
+//     }
+//   });
+//
+//   return result;
+// };
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -602,9 +619,6 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    // const storedAssetRefMap = await this.dbService.getAssetRefMap();
-    //
-    // this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());

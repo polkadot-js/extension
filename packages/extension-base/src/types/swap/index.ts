@@ -51,6 +51,7 @@ export enum SwapErrorType {
   SWAP_EXCEED_ALLOWANCE = 'SWAP_EXCEED_ALLOWANCE',
   SWAP_NOT_ENOUGH_BALANCE = 'SWAP_NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_LIQUIDITY = 'NOT_ENOUGH_LIQUIDITY',
+  MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
   AMOUNT_CANNOT_BE_ZERO = 'AMOUNT_CANNOT_BE_ZERO',
 }
 
@@ -63,13 +64,19 @@ export enum SwapProviderId {
   CHAIN_FLIP_MAINNET = 'CHAIN_FLIP_MAINNET',
   HYDRADX_MAINNET = 'HYDRADX_MAINNET',
   HYDRADX_TESTNET = 'HYDRADX_TESTNET',
+  POLKADOT_ASSET_HUB = 'POLKADOT_ASSET_HUB',
+  KUSAMA_ASSET_HUB = 'KUSAMA_ASSET_HUB',
+  ROCOCO_ASSET_HUB = 'ROCOCO_ASSET_HUB',
 }
 
 export const _SUPPORTED_SWAP_PROVIDERS: SwapProviderId[] = [
   SwapProviderId.CHAIN_FLIP_TESTNET,
   SwapProviderId.CHAIN_FLIP_MAINNET,
   SwapProviderId.HYDRADX_MAINNET,
-  SwapProviderId.HYDRADX_TESTNET
+  SwapProviderId.HYDRADX_TESTNET,
+  SwapProviderId.POLKADOT_ASSET_HUB,
+  SwapProviderId.KUSAMA_ASSET_HUB,
+  SwapProviderId.ROCOCO_ASSET_HUB
 ];
 
 export interface SwapProvider {
@@ -119,6 +126,13 @@ export interface ChainflipPreValidationMetadata {
 export interface HydradxPreValidationMetadata {
   maxSwap: AmountData;
   chain: _ChainInfo;
+}
+
+export interface AssetHubPreValidationMetadata {
+  chain: _ChainInfo;
+  toAmount: string;
+  quoteRate: string;
+  priceImpactPct?: string;
 }
 
 export interface QuoteAskResponse {
@@ -172,7 +186,11 @@ export interface OptimalSwapPathParams {
 
 export interface SwapEarlyValidation {
   error?: SwapErrorType;
-  metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata;
+  metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata | AssetHubPreValidationMetadata;
+}
+
+export interface AssetHubSwapEarlyValidation extends SwapEarlyValidation {
+  metadata: AssetHubPreValidationMetadata;
 }
 
 export interface ValidateSwapProcessParams {

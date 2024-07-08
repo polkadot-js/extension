@@ -51,7 +51,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
   const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: !network.isEthereum ? network.networkName.replace(' network', '') : network.networkName,
+    name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
     slug: network.slug
   })), [supportedLedger]);
 

@@ -20,3 +20,4 @@ export * from './signing';
 export * from './strings';
 export * from './transaction';
 export * from './wallet';
+export * from './error';

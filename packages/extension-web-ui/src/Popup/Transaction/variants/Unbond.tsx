@@ -8,9 +8,8 @@ import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bo
 import { isActionFromValidator } from '@subwallet/extension-base/services/earning-service/utils';
 import { RequestYieldLeave, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AccountSelector, AlertBox, AmountInput, HiddenInput, InstructionItem, NominationSelector } from '@subwallet/extension-web-ui/components';
-import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { BN_ZERO, UNSTAKE_ALERT_DATA } from '@subwallet/extension-web-ui/constants';
-import { useGetBalance, useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
+import { useHandleSubmitTransaction, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
 import { yieldSubmitLeavePool } from '@subwallet/extension-web-ui/messaging';
 import { FormCallbacks, FormFieldData, ThemeProps, UnStakeParams } from '@subwallet/extension-web-ui/types';
 import { convertFieldToObject, getBannerButtonIcon, noop, simpleCheckForm } from '@subwallet/extension-web-ui/utils';
@@ -56,7 +55,6 @@ const Component: React.FC = () => {
 
   const { accounts, isAllAccount } = useSelector((state) => state.accountState);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
-  const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { poolInfoMap } = useSelector((state) => state.earning);
   const poolInfo = poolInfoMap[slug];
   const poolType = poolInfo.type;
@@ -101,17 +99,6 @@ const Component: React.FC = () => {
       return undefined;
     }
   }, [currentValidator, positionInfo]);
-
-  const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
-  const existentialDeposit = useMemo(() => {
-    const assetInfo = Object.values(assetRegistry).find((v) => v.originChain === chainValue);
-
-    if (assetInfo) {
-      return assetInfo.minAmount || '0';
-    }
-
-    return '0';
-  }, [assetRegistry, chainValue]);
 
   // @ts-ignore
   const showFastLeave = useMemo(() => {
@@ -179,13 +166,11 @@ const Component: React.FC = () => {
   const handleDataForInsufficientAlert = useCallback(
     (estimateFee: AmountData) => {
       return {
-        existentialDeposit: getInputValuesFromString(existentialDeposit, estimateFee.decimals),
-        availableBalance: getInputValuesFromString(nativeTokenBalance.value, estimateFee.decimals),
-        maintainBalance: getInputValuesFromString(poolInfo.metadata.maintainBalance || '0', estimateFee.decimals),
+        chainName: chainInfoMap[chainValue]?.name || '',
         symbol: estimateFee.symbol
       };
     },
-    [existentialDeposit, nativeTokenBalance.value, poolInfo.metadata.maintainBalance]
+    [chainInfoMap, chainValue]
   );
 
   const [loading, setLoading] = useState(false);
@@ -291,6 +276,12 @@ const Component: React.FC = () => {
     return [];
   }, [fromValue, positionInfo?.nominations]);
 
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chainValue);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chainValue]);
+
   useEffect(() => {
     if (poolInfo.metadata.availableMethod.defaultUnstake && poolInfo.metadata.availableMethod.fastUnstake) {
       //
@@ -382,7 +373,7 @@ const Component: React.FC = () => {
               chain={chainValue}
               defaultValue={persistValidator}
               disabled={!fromValue}
-              label={t(`Select ${getValidatorLabel(chainValue)}`)}
+              label={t(`Select ${handleValidatorLabel}`)}
               nominators={nominators}
             />
           </Form.Item>

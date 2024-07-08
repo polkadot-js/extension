@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import '@polkadot/extension-mocks/chrome';
-import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import type { ReactWrapper } from 'enzyme';
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 import type { SigningRequest } from '@polkadot/extension-base/background/types';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';

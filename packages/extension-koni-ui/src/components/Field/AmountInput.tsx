@@ -10,7 +10,7 @@ import React, { ChangeEventHandler, ClipboardEventHandler, ForwardedRef, forward
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
-import { BasicInputWrapper } from './Base';
+import { BasicInputEvent, BasicInputWrapper } from './Base';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   decimals: number;
@@ -19,6 +19,7 @@ interface Props extends ThemeProps, BasicInputWrapper {
   showMaxButton?: boolean;
   forceUpdateMaxValue?: object;
   defaultInvalidOutputValue?: string;
+  onChange?: (event: BasicInputEvent<string>, isUserInput?: boolean) => void
 }
 
 const isValidInput = (input: string) => {
@@ -129,7 +130,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     const transformVal = getOutputValuesFromString(value, decimals, defaultInvalidOutputValue);
 
-    onChange && onChange({ target: { value: transformVal } });
+    onChange && onChange({ target: { value: transformVal } }, true);
     onSetMax?.(false);
   }, [decimals, defaultInvalidOutputValue, getMaxLengthText, onChange, onSetMax]);
 

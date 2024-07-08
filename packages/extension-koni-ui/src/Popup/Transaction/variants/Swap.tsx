@@ -939,7 +939,7 @@ const Component = () => {
             setIsFormInvalid(true);
           }
         });
-      }, 600);
+      }, 300);
     }
 
     return () => {

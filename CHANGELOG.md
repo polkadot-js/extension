@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 1.2.14
+Build date: Jul 09, 2024.
+
+Features & Update:
+- Add support Swap Asset Hub (#3272)
+
+Bugs fixed:
+- Fix bug Cannot read properties of undefined (reading 'filter') related to Mission pool (#3289)
+- Hotfix update chain-list stable version
+- Fix bug transaction has a bad signature when transfer AVL token (#3300)
+
 ## 1.2.13
 Build date: Jul 05, 2024.
 

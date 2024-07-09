@@ -34,7 +34,7 @@ describe('test chain asset', () => {
   }
 
   for (const [chain, assets] of Object.entries(assetByChain)) {
-    console.log('[i] Start', chain);
+    console.log('[i] Start chain:', chain);
     const chainInfo = ChainInfoMap[chain];
 
     const providerIndex = chainProvider[chain] || chainProvider.default;
@@ -42,6 +42,7 @@ describe('test chain asset', () => {
 
     if (chainInfo.substrateInfo) {
       test.each(assets)('validate asset %j', async (asset) => {
+        console.log('[i] Start asset:', asset.slug);
         const [isProviderMatchChain, api] = await checkSubstrateProvider(chainInfo, provider) as [boolean, ApiPromise | null];
 
         if (isProviderMatchChain && api) {
@@ -59,7 +60,7 @@ describe('test chain asset', () => {
               const suffix = _suffix.length % 2 === 0 ? _suffix : '0' + _suffix;
               const calcAddress = '0xFFFFFFFF' + suffix;
 
-              // todo: add log
+              console.log(`[i] genesisHash: address - ${address.toLocaleLowerCase()}, re-calculate address - ${calcAddress.toLocaleLowerCase()}`);
 
               expect(address.toLocaleLowerCase() === calcAddress.toLocaleLowerCase());
             }
@@ -76,6 +77,7 @@ describe('test chain asset', () => {
 
     if (chainInfo.evmInfo) {
       test.each(assets)('validate asset %j', async (asset) => {
+        console.log('[i] Start asset:', asset.slug);
         const [isProviderMatchChain, api] = await checkEvmProvider(chainInfo, provider, key) as [boolean, EvmApi | null];
 
         if (isProviderMatchChain && api) {

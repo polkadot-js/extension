@@ -162,10 +162,14 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch((e: Error) => {
           console.log(e);
+          notify({
+            message: e.message,
+            type: 'error'
+          });
           setLoading(false);
         });
     });
-  }, [account.accountIndex, account.address, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, refreshLedger]);
+  }, [account.accountIndex, account.address, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, notify, onApproveSignature, refreshLedger]);
 
   const onConfirmInject = useCallback(() => {
     if (evmWallet) {

@@ -223,6 +223,8 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
   }, [getLedger, ledger, t]);
 
   const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+    setError(null);
+
     if (ledger) {
       const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
 
@@ -255,6 +257,8 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
   }, [handleError, ledger, t]);
 
   const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+    setError(null);
+
     if (ledger) {
       const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
 

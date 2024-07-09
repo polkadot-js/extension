@@ -307,10 +307,6 @@ const Component: React.FC<Props> = (props: Props) => {
           onApproveSignature({ signature });
         } catch (e) {
           console.error(e);
-          notify({
-            message: (e as Error).message,
-            type: 'error'
-          });
         }
 
         setLoading(false);

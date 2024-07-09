@@ -11,5 +11,4 @@ export { default as useGetChainInfoByChainId } from './useGetChainInfoByChainId'
 export { default as useGetChainInfoByGenesisHash } from './useGetChainInfoByGenesisHash';
 export { default as useGetChainPrefixBySlug } from './useGetChainPrefixBySlug';
 export { default as useChainInfoData } from './useChainInfoData';
-export { default as useFetchChainInfoByChainData } from './useFetchChaiInfoByChainId';
 export { default as useChainConnection } from './useChainConnection';

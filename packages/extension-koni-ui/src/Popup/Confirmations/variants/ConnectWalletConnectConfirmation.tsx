@@ -75,7 +75,7 @@ function Component ({ className, request }: Props) {
     return Object.values(namespaceAccounts).every(({ appliedAccounts }) => appliedAccounts.length);
   }, [namespaceAccounts]);
 
-  const checkNetworksConnected = useMemo(() => {
+  const checkNetworksConnected = useMemo((): [boolean, string[]] => {
     const needConnectedNetwork: string[] = [];
 
     const isHasNetworkConnect = Object.values(namespaceAccounts).every((value) => {
@@ -158,19 +158,19 @@ function Component ({ className, request }: Props) {
   const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   useEffect(() => {
-    const [isExistNetworkConnected] = checkNetworksConnected;
+    const [isExistNetworkConnected, needConnectedNetworks] = checkNetworksConnected;
 
-    if (!isExistNetworkConnected) {
+    if (!isExistNetworkConnected && needConnectedNetworks.length > 0 && isSupportCase) {
       activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
     }
-  }, [activeModal, checkNetworksConnected]);
+  }, [activeModal, checkNetworksConnected, isSupportCase]);
 
   return (
     <>
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         {
-          isUnSupportCase && (
+          (isUnSupportCase || (!checkNetworksConnected[0] && checkNetworksConnected[1].length === 0)) && (
             <>
               <AlertBox
                 description={t('There is at least 1 chosen network unavailable')}
@@ -341,7 +341,7 @@ function Component ({ className, request }: Props) {
       </div>
       <AddNetworkWCModal
         cancelRequest={onCancel}
-        networkToAdd={checkNetworksConnected[1] as string[]}
+        networkToAdd={checkNetworksConnected[1]}
       />
     </>
   );

@@ -34,7 +34,7 @@ const filterOptions = [
   },
   {
     label: 'Ledger account',
-    value: AccountSignMode.LEDGER
+    value: AccountSignMode.GENERIC_LEDGER
   },
   {
     label: 'Watch-only account',
@@ -86,7 +86,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           return true;
         }
 
-        if (filter === AccountSignMode.LEDGER && signMode === AccountSignMode.LEDGER) {
+        if (filter === AccountSignMode.GENERIC_LEDGER && (signMode === AccountSignMode.GENERIC_LEDGER || signMode === AccountSignMode.LEGACY_LEDGER)) {
           return true;
         } else if (filter === AccountSignMode.QR && signMode === AccountSignMode.QR) {
           return true;
@@ -102,8 +102,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [selectedFilters]);
 
   const onClickItem = useCallback((value: string) => {
-    onChangeSelectedAccounts(value);
-  }, [onChangeSelectedAccounts]);
+    if (changeAccounts.length === items.length - 1) {
+      onChangeSelectedAccounts(ALL_ACCOUNT_KEY);
+    } else {
+      onChangeSelectedAccounts(value);
+    }
+  }, [changeAccounts, items.length, onChangeSelectedAccounts]);
 
   const onAccountSelect = useCallback((address: string) => {
     return () => {
@@ -140,7 +144,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         showUnSelectedIcon
       />
     );
-  }, [changeAccounts, className, onAccountSelect, onClickItem]);
+  }, [changeAccounts, className, items, onAccountSelect, onClickItem]);
 
   const onClickFilterButton = useCallback(
     (e?: SyntheticEvent) => {

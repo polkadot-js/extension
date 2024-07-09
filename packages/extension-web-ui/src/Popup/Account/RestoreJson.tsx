@@ -31,7 +31,7 @@ import React, { ChangeEventHandler, useCallback, useContext, useEffect, useState
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import {hexToU8a, isHex, u8aToHex, u8aToString} from '@polkadot/util';
+import { hexToU8a, isHex, u8aToHex, u8aToString } from '@polkadot/util';
 import { ethereumEncode, keccakAsU8a, secp256k1Expand } from '@polkadot/util-crypto';
 
 type Props = ThemeProps;
@@ -282,6 +282,8 @@ function Component ({ className }: Props): JSX.Element {
   }, [jsonFile, requirePassword, password, checkUnlock, accountsInfo, navigate, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
+    console.log('account', account);
+
     return (
       <AccountCard
         accountName={account.name}
@@ -289,7 +291,6 @@ function Component ({ className }: Props): JSX.Element {
         addressPreLength={9}
         addressSufLength={9}
         avatarIdentPrefix={42}
-        avatarTheme={account.type === 'ethereum' ? 'ethereum' : 'polkadot'}
         className='account-item'
         key={account.address}
       />

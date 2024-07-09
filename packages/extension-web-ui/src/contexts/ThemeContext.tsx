@@ -98,7 +98,7 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
 
       '.ant-tooltip-inner': {
         padding: `${token.paddingXXS}px ${token.paddingXXS + 2}px`,
-        fontSize: token.fontSizeXS,
+        fontSize: token.fontSizeSM,
         minHeight: 'auto',
         minWidth: 'auto'
       },

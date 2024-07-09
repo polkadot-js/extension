@@ -28,6 +28,8 @@ export function useSelectAccount (getAllAddress: string[], modalId: string, onCh
           result = getAllAddress;
         } else if (isSingleSelect) {
           result = [changeVal];
+        } else if (changeAccounts.length === getAllAddress.length - 2) {
+          result = getAllAddress;
         } else {
           result = [...changeAccounts, changeVal];
         }
@@ -41,7 +43,7 @@ export function useSelectAccount (getAllAddress: string[], modalId: string, onCh
 
       return result;
     });
-  }, [accounts.length, getAllAddress, isSingleSelect]);
+  }, [accounts, getAllAddress, isSingleSelect]);
 
   const onApplyChangeAccounts = useCallback(() => {
     onChange && onChange({ target: { value: changeAccounts.join(',') } });

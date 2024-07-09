@@ -36,7 +36,7 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(ACCOUNT_EXPORT_ALL_MODAL);
   }, [inactiveModal]);
   const contentBlock = (
-    <PageWrapper className={CN(className)}>
+    <PageWrapper className={CN(className, 'modal-content', { '-mobile-mode': !isWebUI })}>
       <Layout.WithSubHeaderOnly
         onBack={goHome}
         rightFooterButton={{
@@ -94,26 +94,52 @@ const Component: React.FC<Props> = (props: Props) => {
         {contentBlock}
       </BaseModal>
     );
+  } else {
+    return contentBlock;
   }
-
-  return contentBlock;
 };
 
 const ExportAllDone = styled(Component)<Props>(({ theme: { token } }: Props) => {
   return {
-    '.body-container': {
-      padding: `0 ${token.padding}px`
+    '&.-mobile-mode': {
+      '.ant-sw-screen-layout-body': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding
+      },
+      '.notice': {
+        marginTop: token.margin
+      },
+      '.ant-sw-screen-layout-footer': {
+        paddingLeft: token.padding,
+        paddingRight: token.padding
+      }
     },
-
     '.notice': {
-      marginTop: token.margin,
-      marginBottom: token.margin
+      marginTop: token.marginXS,
+      marginBottom: token.paddingLG
+    },
+    '.ant-sw-screen-layout-footer-button-container': {
+      padding: 0
+    },
+    '.ant-sw-screen-layout-footer-right-button': {
+      margin: 0
+    },
+    '.ant-sw-modal-header': {
+      paddingTop: token.paddingSM,
+      paddingBottom: token.paddingSM
+    },
+    '.ant-sw-modal-content': {
+      paddingTop: 0
+    },
+    '.ant-sw-header-center-part, .ant-sw-modal-title, .ant-sw-header-container': {
+      minHeight: 56
     },
 
     '.result-content': {
       display: 'flex',
       flexDirection: 'column',
-      gap: token.size
+      gap: token.size,
+      paddingBottom: token.padding
     },
 
     '.page-icon': {
@@ -137,6 +163,7 @@ const ExportAllDone = styled(Component)<Props>(({ theme: { token } }: Props) => 
       fontSize: token.fontSizeHeading5,
       lineHeight: token.lineHeightHeading5
     }
+
   };
 });
 

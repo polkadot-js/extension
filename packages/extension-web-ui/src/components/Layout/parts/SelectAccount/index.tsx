@@ -330,9 +330,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           className={'__icon-export-remind'}
           overlayClassName={CN(className, '__tooltip-overlay-remind')}
           placement={'bottomLeft'}
-          title={t('Export and back up accounts')}
+          title={t(filteredListExportAccount.length ? 'Export and back up accounts' : 'SubWallet only supports accounts created and attached directly on the SubWallet Dashboard, does not support exporting accounts connected from the extension.')}
         >
-          <div className={'__tooltip-export-wrapper'}>
+          <div className={CN(className, '__tooltip-export-wrapper', { '-disable-export': !filteredListExportAccount.length })}>
             <Icon
               className={CN('__export-remind-btn')}
               phosphorIcon={Export}
@@ -349,12 +349,12 @@ function Component ({ className }: Props): React.ReactElement<Props> {
           </div>
         </Tooltip>
       ),
-      onClick: exportAllAccounts,
+      onClick: filteredListExportAccount.length ? exportAllAccounts : undefined,
       size: 'xs',
       type: 'ghost',
       tooltipPlacement: 'topLeft'
     });
-  }, [className, exportAllAccounts, t, token.colorHighlight]);
+  }, [className, exportAllAccounts, filteredListExportAccount.length, t, token.colorHighlight]);
 
   return (
     <div className={CN(className, 'container')}>
@@ -504,6 +504,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-input-container .ant-input': {
         color: token.colorTextLight1
       }
+    },
+    '&.-disable-export': {
+      opacity: 0.4,
+      cursor: 'not-allowed'
     },
     '.__tooltip-export-wrapper': {
       display: 'flex',

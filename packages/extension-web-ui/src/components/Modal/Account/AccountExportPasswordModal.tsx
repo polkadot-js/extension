@@ -190,7 +190,11 @@ const AccountExportPasswordModal = styled(Component)<Props>(({ theme: { token } 
     },
     '&.-mobile': {
       display: 'flex',
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+      width: '100% !important',
+      '.ant-sw-modal-content': {
+        width: '100% !important'
+      }
     },
 
     '.ant-form-item-label': {

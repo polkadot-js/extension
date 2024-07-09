@@ -26,6 +26,9 @@ export default class BaseStore<T> {
     return this.table.bulkPut(records);
   }
 
+  /**
+   * @todo Must update, delete function need the key not the record
+   * */
   public remove (record: T): Promise<void> {
     return this.table.delete(record);
   }

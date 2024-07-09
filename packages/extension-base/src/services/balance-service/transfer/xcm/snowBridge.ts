@@ -43,23 +43,25 @@ export async function getSnowBridgeEvmTransfer (tokenInfo: _ChainAsset, originCh
     getSendFeeToken(snowBridgeContract, tokenContract, destinationChainParaId, destinationFee)
   ]);
 
-  let gasLimit;
-
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
-    gasLimit = await transferCall.estimateGas({ from: sender }) as number;
-  } catch (e) {
-    gasLimit = 200000; // todo: handle this better
-  }
-
-  return {
+  const transactionConfig = {
     from: sender,
     to: snowBridgeContractAddress,
     value: sendTokenFee,
     data: transferEncodedCall,
-    gas: gasLimit,
     gasPrice: priority.gasPrice,
     maxFeePerGas: priority.maxFeePerGas?.toString(),
     maxPriorityFeePerGas: priority.maxPriorityFeePerGas?.toString()
   } as TransactionConfig;
+
+  let gasLimit;
+
+  try {
+    gasLimit = await evmApi.api.eth.estimateGas(transactionConfig);
+  } catch (e) {
+    gasLimit = 200000; // todo: handle this better
+  }
+
+  transactionConfig.gas = gasLimit;
+
+  return transactionConfig;
 }

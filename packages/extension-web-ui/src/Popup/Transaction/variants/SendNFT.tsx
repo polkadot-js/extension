@@ -134,7 +134,7 @@ const Component: React.FC<{ nftDetail?: NftItem, modalContent?: boolean }> = ({ 
           const chainInfo = chainInfoMap[chain];
           const availableGen: string[] = account.availableGenesisHashes || [];
 
-          if (!isEthereumAddress(account.address) && !availableGen.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
+          if (!account.isGeneric && !availableGen.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
             const chainName = chainInfo?.name || 'Unknown';
 
             return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: chainName } }));

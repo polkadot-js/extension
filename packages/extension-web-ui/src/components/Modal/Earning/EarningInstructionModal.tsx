@@ -482,7 +482,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return;
     }
 
-    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - 500);
+    setIsScrollEnd(scrollRef.current.scrollTop >= scrollRef.current.scrollHeight - scrollRef.current.offsetHeight);
   }, []);
 
   const closeModal = useCallback(() => {
@@ -491,8 +491,12 @@ const Component: React.FC<Props> = (props: Props) => {
     setIsScrollEnd(false);
   }, [onCancel, setVisible]);
 
-  const isParallelLiquidStaking = useMemo(() => {
+  const isChainUnsupported = useMemo(() => {
     if (poolInfo?.chain === 'parallel' && poolInfo?.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    if (poolInfo?.chain === 'interlay' && poolInfo?.type === YieldPoolType.LENDING) {
       return true;
     }
 
@@ -506,9 +510,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [inactiveModal, poolInfo]);
 
   useEffect(() => {
-    if (isScrollEnd) {
-      setDisableEarnButton(false);
-    }
+    setDisableEarnButton(!isScrollEnd);
   }, [isScrollEnd]);
 
   if (!poolInfo) {
@@ -534,14 +536,14 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         </div>
 
-        <Button
+        {!isScrollEnd && <Button
           className={'__scroll-to-end-button'}
           disabled={isScrollEnd}
           icon={<Icon phosphorIcon={CaretDown} />}
           onClick={onScrollContent}
           shape={'circle'}
           size={'xs'}
-        />
+        />}
       </div>
 
       <div className={'__buttons'}>
@@ -565,7 +567,7 @@ const Component: React.FC<Props> = (props: Props) => {
           <Button
             block={true}
             className={'__stake-more-button'}
-            disabled={(!isWebUI && isDisableEarnButton) || isParallelLiquidStaking}
+            disabled={(!isWebUI && isDisableEarnButton) || isChainUnsupported}
             icon={
               <Icon
                 phosphorIcon={PlusCircle}

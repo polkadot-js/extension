@@ -3,11 +3,11 @@
 
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-koni-ui/components';
-import { useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
+import { useMetadata, useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-koni-ui/hooks';
 import { enableChain } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isSubstrateMessage, noop } from '@subwallet/extension-koni-ui/utils';
+import { isRawPayload, isSubstrateMessage, noop } from '@subwallet/extension-koni-ui/utils';
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useEffect, useMemo } from 'react';
@@ -28,9 +28,20 @@ interface Props extends ThemeProps {
 function Component ({ className, request }: Props) {
   const { account } = request;
   const { t } = useTranslation();
-  const payload = useParseSubstrateRequestPayload(request.request);
-  const chainInfo = useGetChainInfoByGenesisHash(((payload as ExtrinsicPayload).genesisHash || '').toString());
-  const { chainStateMap } = useSelector((root: RootState) => root.chainStore);
+
+  const { chainInfoMap, chainStateMap } = useSelector((root: RootState) => root.chainStore);
+
+  const genesisHash = useMemo(() => {
+    const _payload = request.request.payload;
+
+    return isRawPayload(_payload)
+      ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
+      : _payload.genesisHash;
+  }, [account, chainInfoMap, request]);
+
+  const { chain } = useMetadata(genesisHash);
+  const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
+  const { payload } = useParseSubstrateRequestPayload(chain, request.request);
   const onClickDetail = useOpenDetailModal();
 
   const isMessage = useMemo(() => isSubstrateMessage(payload), [payload]);
@@ -76,6 +87,7 @@ function Component ({ className, request }: Props) {
       <SubstrateSignArea
         account={account}
         id={request.id}
+        isInternal={request.isInternal}
         request={request.request}
       />
       <BaseDetailModal

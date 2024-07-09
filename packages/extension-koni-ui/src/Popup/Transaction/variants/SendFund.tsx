@@ -62,6 +62,7 @@ function getTokenItems (
   const isLedger = !!account.isHardware;
   const validGen: string[] = account.availableGenesisHashes || [];
   const validLedgerNetwork = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug);
+  const isGenericLedger = !!account.isGeneric;
   const isAccountEthereum = isEthereumAddress(address);
   const isSetTokenSlug = !!tokenGroupSlug && !!assetRegistry[tokenGroupSlug];
   const isSetMultiChainAssetSlug = !!tokenGroupSlug && !!multiChainAssetMap[tokenGroupSlug];
@@ -72,7 +73,7 @@ function getTokenItems (
     }
 
     const chainAsset = assetRegistry[tokenGroupSlug];
-    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
+    const isValidLedger = isLedger ? (isGenericLedger || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
 
     if (isSetTokenSlug) {
       if (isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger) {
@@ -95,7 +96,7 @@ function getTokenItems (
   const items: TokenItemType[] = [];
 
   Object.values(assetRegistry).forEach((chainAsset) => {
-    const isValidLedger = isLedger ? (isAccountEthereum || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
+    const isValidLedger = isLedger ? (isGenericLedger || validLedgerNetwork.includes(chainAsset?.originChain)) : true;
     const isTokenFungible = _isAssetFungibleToken(chainAsset);
 
     if (!(isTokenFungible && isAssetTypeValid(chainAsset, chainInfoMap, isAccountEthereum) && isValidLedger)) {
@@ -372,7 +373,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       const destChainInfo = chainInfoMap[destChain];
       const availableGen: string[] = account.availableGenesisHashes || [];
 
-      if (!isEthereumAddress(account.address) && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
+      if (!account.isGeneric && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
         const destChainName = destChainInfo?.name || 'Unknown';
 
         return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));

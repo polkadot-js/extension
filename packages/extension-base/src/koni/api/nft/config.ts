@@ -140,30 +140,35 @@ if (isFirefox) {
 if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
   // This is for https
   if (RuntimeInfo.protocol.startsWith('https')) {
-    RANDOM_IPFS_GATEWAY_SETTING.push({
-      provider: IPFS_FLEEK,
-      weight: 4
-    },
-    {
-      provider: IPFS_GATEWAY_4EVERLAND,
-      weight: 2
-    },
-    {
-      provider: IPFS_W3S_LINK,
-      weight: 1
-    },
-    {
-      provider: CF_IPFS_GATEWAY,
-      weight: 4
-    },
-    {
-      provider: PINATA_IPFS_GATEWAY,
-      weight: 1 // Rate limit too low
-    },
-    {
-      provider: IPFS_IO,
-      weight: 5
-    }
+    RANDOM_IPFS_GATEWAY_SETTING.push(
+      // {
+      //   provider: IPFS_FLEEK,
+      //   weight: 4
+      // },
+      // {
+      //   provider: IPFS_GATEWAY_4EVERLAND,
+      //   weight: 2
+      // },
+      // {
+      //   provider: IPFS_W3S_LINK,
+      //   weight: 1
+      // },
+      // {
+      //   provider: CF_IPFS_GATEWAY,
+      //   weight: 4
+      // },
+      // {
+      //   provider: PINATA_IPFS_GATEWAY,
+      //   weight: 1 // Rate limit too low
+      // },
+      // {
+      //   provider: IPFS_IO,
+      //   weight: 5
+      // },
+      {
+        provider: SUBWALLET_IPFS,
+        weight: 10
+      }
     );
   }
 } else {

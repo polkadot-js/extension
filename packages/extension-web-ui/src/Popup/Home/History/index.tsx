@@ -162,6 +162,10 @@ function findLedgerChainOfSelectedAccount (
     return undefined;
   }
 
+  if (account.isGeneric) {
+    return undefined;
+  }
+
   const validGen: string[] = account.availableGenesisHashes || [];
   const validLedgerNetworks = validGen.map((genesisHash) => findNetworkJsonByGenesisHash(chainInfoMap, genesisHash)?.slug).filter((i) => !!i);
 

@@ -12,7 +12,7 @@ import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { MinusCircle, PlusCircle } from 'phosphor-react';
-import React, { useCallback, useContext } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -31,6 +31,18 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
   const handleCloseUnstake = useCallback(() => {
     inactiveModal(TRANSACTION_YIELD_UNSTAKE_MODAL);
   }, [inactiveModal]);
+
+  const isChainUnsupported = useMemo(() => {
+    if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    if (poolInfo.chain === 'interlay' && poolInfo.type === YieldPoolType.LENDING) {
+      return true;
+    }
+
+    return false;
+  }, [poolInfo.chain, poolInfo.type]);
 
   return (
     <>
@@ -74,7 +86,7 @@ function Component ({ className, compound, onEarnMore, onLeavePool,
           <Button
             block={true}
             className={'__right-item -ghost-type-3'}
-            disabled={poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING}
+            disabled={isChainUnsupported}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

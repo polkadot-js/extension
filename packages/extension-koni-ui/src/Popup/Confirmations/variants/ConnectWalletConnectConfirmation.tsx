@@ -75,13 +75,31 @@ function Component ({ className, request }: Props) {
     return Object.values(namespaceAccounts).every(({ appliedAccounts }) => appliedAccounts.length);
   }, [namespaceAccounts]);
 
-  const isExistNetworkConnected = useMemo(() => {
-    return Object.values(namespaceAccounts).every((value) => {
+  const checkNetworksConnected = useMemo(() => {
+    const needConnectedNetwork: string[] = [];
+
+    const isHasNetworkConnect = Object.values(namespaceAccounts).every((value) => {
       const { networks } = value;
       const connectedNetworks = networks.filter((network) => network.supported);
 
-      return connectedNetworks.length > 0;
+      const isHasNetworkConnect = connectedNetworks.length > 0;
+
+      !isHasNetworkConnect && networks.forEach(({ slug }) => {
+        const chainData = slug.split(':');
+
+        if (chainData.length > 1) {
+          const [namespace, chainId] = chainData;
+
+          if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
+            needConnectedNetwork.push(chainId);
+          }
+        }
+      });
+
+      return isHasNetworkConnect;
     });
+
+    return [isHasNetworkConnect, needConnectedNetwork];
   }, [namespaceAccounts]);
   const [loading, setLoading] = useState(false);
 
@@ -140,10 +158,12 @@ function Component ({ className, request }: Props) {
   const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   useEffect(() => {
-    if (isSupportCase && !isExistNetworkConnected) {
+    const [isExistNetworkConnected] = checkNetworksConnected;
+
+    if (!isExistNetworkConnected) {
       activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
     }
-  }, [activeModal, isExistNetworkConnected, isSupportCase]);
+  }, [activeModal, checkNetworksConnected]);
 
   return (
     <>
@@ -319,7 +339,10 @@ function Component ({ className, request }: Props) {
             )
         }
       </div>
-      <AddNetworkWCModal cancelRequest={onCancel} />
+      <AddNetworkWCModal
+        cancelRequest={onCancel}
+        networkToAdd={checkNetworksConnected[1] as string[]}
+      />
     </>
   );
 }

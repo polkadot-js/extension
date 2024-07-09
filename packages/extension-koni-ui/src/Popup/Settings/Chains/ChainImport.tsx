@@ -8,15 +8,17 @@ import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
 import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
+import useFetchChaiInfoByChainId from '@subwallet/extension-koni-ui/hooks/chain/useFetchChaiInfoByChainId';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
+import { noop } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
@@ -42,7 +44,8 @@ interface ValidationInfo {
 }
 
 interface LocationState {
-  useGoHome?: boolean
+  useGoHome?: boolean;
+  chainId?: string[];
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -52,6 +55,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
   const locationState = useLocation().state as LocationState;
+  const { fetchChainInfo } = useFetchChaiInfoByChainId();
 
   const [location] = useState<LocationState>(locationState);
   const [loading, setLoading] = useState(false);
@@ -68,8 +72,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
+  }, [location?.useGoHome, navigate]);
 
   const isSubmitDisabled = useCallback(() => {
     return providerValidation.status !== 'success';
@@ -278,6 +282,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
   useFocusFormItem(form, 'provider');
+
+  useEffect(() => {
+    if (location.useGoHome && location.chainId) {
+      fetchChainInfo(location.chainId)
+        .then((chainInfo) => {
+          if (chainInfo) {
+            const { rpcUrls } = chainInfo;
+
+            if (rpcUrls.length > 0) {
+              form.setFieldValue('provider', rpcUrls[0]);
+              providerValidator({} as RuleObject, rpcUrls[0]).then(noop).catch(console.error);
+            }
+          }
+        }).catch(console.error);
+    }
+  }, [fetchChainInfo, form, location, providerValidator]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>

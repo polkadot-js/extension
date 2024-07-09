@@ -1312,6 +1312,8 @@ export interface AddNetworkRequestExternal { // currently only support adding pu
   };
 }
 
+export type AddNetworkToRequestConnect = AddNetworkRequestExternal;
+
 export interface AddTokenRequestExternal {
   slug?: string;
   contractAddress: string;

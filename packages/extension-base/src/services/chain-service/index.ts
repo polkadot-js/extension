@@ -850,7 +850,7 @@ export class ChainService {
       if (isActive && isConnectProblem && !isLightRpc) {
         const reportApiUrl = 'https://api-cache.subwallet.app/api/health-check/report-rpc';
         const requestBody = {
-          chainSLug: slug,
+          chainSlug: slug,
           chainStatus: status,
           rpcReport: {
             [providerName]: endpoint
@@ -861,7 +861,7 @@ export class ChainService {
           }
         };
 
-        fetch(reportApiUrl, {
+        fetch(reportApiUrl, { // can get status from this response
           method: 'POST',
           headers: {
             'X-API-KEY': '9b1c94a5e1f3a2d9f8b2a4d6e1f3a2d9',

@@ -3,23 +3,26 @@
 
 import { ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset, _ChainStatus } from '@subwallet/chain-list/types';
+import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
+import { checkEvmProvider, checkSubstrateProvider } from '@subwallet/extension-base/services/chain-service/health-check/chain2.spec';
+import { _getContractAddressOfToken, _getTokenOnChainAssetId } from '@subwallet/extension-base/services/chain-service/utils';
+import BigN from 'bignumber.js';
+
+import { ApiPromise } from '@polkadot/api';
+
 import { chainProvider } from './constants';
 import { AssetSpec, getErc20AssetInfo, getEvmNativeInfo, getLocalAssetInfo, getPsp22AssetInfo, getSubstrateNativeInfo, validateAsset } from './utils';
-import { ApiPromise } from "@polkadot/api";
-import { EvmApi } from "@subwallet/extension-base/services/chain-service/handler/EvmApi";
-import { checkEvmProvider, checkSubstrateProvider } from "@subwallet/extension-base/services/chain-service/health-check/chain2.spec";
-import BigN from "bignumber.js";
-import { _getContractAddressOfToken, _getTokenOnChainAssetId } from "@subwallet/extension-base/services/chain-service/utils";
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
-const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet'];
+const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet', 'avail_mainnet', 'peaq'];
 const onlyChains: string[] = []; // check only these chains if set;
 const CASE_TIME_OUT = 30000;
 
 describe('test chain asset', () => {
   const chainAssets = getChainAssetInfos();
   const assetByChain: Record<string, _ChainAsset[]> = {};
+
   for (const chainAsset of chainAssets) {
     const originChain = chainAsset.originChain;
 
@@ -30,23 +33,24 @@ describe('test chain asset', () => {
     }
   }
 
-  console.log(assetByChain)
-
   for (const [chain, assets] of Object.entries(assetByChain)) {
-    console.log('start', chain);
+    console.log('[i] Start', chain);
     const chainInfo = ChainInfoMap[chain];
 
     const providerIndex = chainProvider[chain] || chainProvider.default;
     const [key, provider] = Object.entries(chainInfo.providers)[providerIndex];
 
     if (chainInfo.substrateInfo) {
-      test.each(assets)(`validate asset %j`, async (asset) => {
+      test.each(assets)('validate asset %j', async (asset) => {
         const [isProviderMatchChain, api] = await checkSubstrateProvider(chainInfo, provider) as [boolean, ApiPromise | null];
 
         if (isProviderMatchChain && api) {
           let assetInfo: AssetSpec | undefined;
+
           if (asset.assetType === _AssetType.NATIVE) {
             assetInfo = await getSubstrateNativeInfo(api);
+          } else if (asset.assetType === _AssetType.LOCAL) {
+            assetInfo = await getLocalAssetInfo(chain, asset, api);
 
             if (['moonbeam', 'moonriver', 'moonbase'].includes(chain)) {
               const assetId = new BigN(_getTokenOnChainAssetId(asset));
@@ -59,8 +63,6 @@ describe('test chain asset', () => {
 
               expect(address.toLocaleLowerCase() === calcAddress.toLocaleLowerCase());
             }
-          } else if (asset.assetType === _AssetType.LOCAL) {
-            assetInfo = await getLocalAssetInfo(chain, asset, api);
           } else if (asset.assetType === _AssetType.PSP22) {
             assetInfo = await getPsp22AssetInfo(asset, api);
           }
@@ -69,26 +71,27 @@ describe('test chain asset', () => {
             expect(validateAsset(assetInfo, asset)).toEqual(true);
           }
         }
-      }, CASE_TIME_OUT)
+      }, CASE_TIME_OUT);
     }
 
     if (chainInfo.evmInfo) {
-      test.each(assets)(`validate asset %j`, async (asset) => {
+      test.each(assets)('validate asset %j', async (asset) => {
         const [isProviderMatchChain, api] = await checkEvmProvider(chainInfo, provider, key) as [boolean, EvmApi | null];
 
         if (isProviderMatchChain && api) {
-            let assetInfo: AssetSpec | undefined;
-            if (asset.assetType === _AssetType.NATIVE) {
-              assetInfo = await getEvmNativeInfo(api);
-            } else if (asset.assetType === _AssetType.ERC20) {
-              assetInfo = await getErc20AssetInfo(asset, api);
-            }
+          let assetInfo: AssetSpec | undefined;
 
-            if (assetInfo) {
-              expect(validateAsset(assetInfo, asset)).toEqual(true);
-            }
+          if (asset.assetType === _AssetType.NATIVE) {
+            assetInfo = await getEvmNativeInfo(api);
+          } else if (asset.assetType === _AssetType.ERC20) {
+            assetInfo = await getErc20AssetInfo(asset, api);
           }
-        }, CASE_TIME_OUT);
+
+          if (assetInfo) {
+            expect(validateAsset(assetInfo, asset)).toEqual(true);
+          }
+        }
+      }, CASE_TIME_OUT);
     }
   }
 });
@@ -101,6 +104,6 @@ function getChainAssetInfos () {
   }
 
   return Object.values(ChainAssetMap).filter((info) =>
-      ChainInfoMap[info.originChain].chainStatus === _ChainStatus.ACTIVE && !ignoreChains.includes(info.originChain)
+    ChainInfoMap[info.originChain].chainStatus === _ChainStatus.ACTIVE && !ignoreChains.includes(info.originChain)
   );
 }

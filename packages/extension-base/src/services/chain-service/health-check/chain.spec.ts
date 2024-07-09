@@ -8,7 +8,7 @@ import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types'
 import { ApiPromise } from '@polkadot/api';
 
 import { chainProvider, chainProviderBackup } from './constants';
-import { checkNativeAsset, getEvmNativeInfo, getSubstrateNativeInfo, handleEvmProvider, handleSubstrateProvider } from './utils';
+import { compareNativeAsset, getEvmNativeInfo, getSubstrateNativeInfo, handleEvmProvider, handleSubstrateProvider } from './utils';
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
@@ -18,8 +18,8 @@ const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_
 describe('test chain', () => {
   it('chain', async () => {
     const chainInfos = Object.values(ChainInfoMap).filter((info) =>
-      info.chainStatus === _ChainStatus.ACTIVE
-      && !ignoreChains.includes(info.slug)
+      info.chainStatus === _ChainStatus.ACTIVE &&
+      !ignoreChains.includes(info.slug)
       // && onlyChains.includes(info.slug)
     );
     const errorChain: Record<string, string[]> = {};
@@ -51,7 +51,7 @@ describe('test chain', () => {
         if (!ignoreChains.includes(chain)) {
           const nativeToken = await getSubstrateNativeInfo(api);
 
-          checkNativeAsset(nativeToken, {
+          compareNativeAsset(nativeToken, {
             decimals: substrateInfo.decimals,
             existentialDeposit: substrateInfo.existentialDeposit,
             symbol: substrateInfo.symbol
@@ -80,7 +80,7 @@ describe('test chain', () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const evmInfo = chainInfo.evmInfo!;
 
-        checkNativeAsset(nativeToken, {
+        compareNativeAsset(nativeToken, {
           decimals: evmInfo.decimals,
           existentialDeposit: evmInfo.existentialDeposit,
           symbol: evmInfo.symbol

@@ -7,7 +7,7 @@
   "manifest_version": 3,
   "permissions": ["storage", "tabs", "alarms"],
   "background": {
-    "service_worker": "background.js",
+    "scripts": ["background.js"],
     "type": "module"
   },
   "action": {

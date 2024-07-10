@@ -844,18 +844,20 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
       display: 'flex',
       marginBottom: 20
     },
-    '.ant-input-container': {
-      display: 'none'
-    },
     '.__desktop-toolbar.__desktop-toolbar': {
       minWidth: 'fit-content'
     },
-    '.ant-btn-content-wrapper': {
-      display: 'none'
-    },
-    '.__desktop-toolbar .ant-btn:first-child': {
-      padding: 0,
-      minWidth: 40
+    '.__desktop-toolbar': {
+      '.ant-btn-content-wrapper': {
+        display: 'none'
+      },
+      '.ant-input-container': {
+        display: 'none'
+      },
+      '.ant-btn:first-child': {
+        padding: 0,
+        minWidth: 40
+      }
     }
   },
   '@media (max-width: 991px)': {

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AssetRefMap, ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
-import { _AssetRef } from '@subwallet/chain-list/types';
+import { _AssetRef, _AssetRefPath } from '@subwallet/chain-list/types';
 import { createXcmExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
@@ -82,7 +82,9 @@ describe('test token transfer', () => {
     const rawChainsMap: Record<string, string> = {};
 
     Object.values(AssetRefMap).forEach((value) => {
-      rawChainsMap[value.srcChain] = value.srcChain;
+      if (value.path === _AssetRefPath.XCM) {
+        rawChainsMap[value.srcChain] = value.srcChain;
+      }
     });
     const rawSrcChains = Object.keys(rawChainsMap).map((value) => value);
     const errorList: _AssetRef[] = [];
@@ -97,26 +99,28 @@ describe('test token transfer', () => {
     }));
 
     for (const assetRef of Object.values(AssetRefMap)) {
-      const substrateApi = await substrateApiMap[assetRef.srcChain].isReady;
-      const destinationTokenInfo = ChainAssetMap[assetRef.destAsset];
-      const originTokenInfo = ChainAssetMap[assetRef.srcAsset];
-      const isDestChainEvm = _isChainEvmCompatible(ChainInfoMap[assetRef.destChain]);
-      const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
+      if (assetRef.path !== 'SWAP') {
+        const substrateApi = await substrateApiMap[assetRef.srcChain].isReady;
+        const destinationTokenInfo = ChainAssetMap[assetRef.destAsset];
+        const originTokenInfo = ChainAssetMap[assetRef.srcAsset];
+        const isDestChainEvm = _isChainEvmCompatible(ChainInfoMap[assetRef.destChain]);
+        const destAddress = isDestChainEvm ? destAddress2 : destAddress1;
 
-      try {
-        const extrinsic = await createXcmExtrinsic({
-          destinationTokenInfo,
-          originTokenInfo,
-          sendingValue: '0',
-          recipient: destAddress,
-          chainInfoMap: ChainInfoMap,
-          substrateApi
-        });
+        try {
+          const extrinsic = await createXcmExtrinsic({
+            destinationTokenInfo,
+            originTokenInfo,
+            sendingValue: '0',
+            recipient: destAddress,
+            chainInfoMap: ChainInfoMap,
+            substrateApi
+          });
 
-        console.log(assetRef, extrinsic.toHex());
-      } catch (e) {
-        console.log('error', e);
-        errorList.push(assetRef);
+          console.log(assetRef, extrinsic.toHex());
+        } catch (e) {
+          console.log('error', e);
+          errorList.push(assetRef);
+        }
       }
     }
 

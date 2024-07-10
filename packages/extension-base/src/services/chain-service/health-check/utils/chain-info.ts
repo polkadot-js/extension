@@ -5,12 +5,13 @@ import { BIG_TEN } from '@subwallet/extension-base/services/chain-service/health
 import { AssetSpec } from '@subwallet/extension-base/services/chain-service/health-check/utils/asset-info';
 import BigN from 'bignumber.js';
 
-interface NativeAssetInfo {
+export interface NativeAssetInfo {
   decimals: number;
   existentialDeposit: string;
   symbol: string;
 }
 
+// function for old health-check chain
 export const compareNativeAsset = (
   assetInfo: AssetSpec,
   nativeAsset: NativeAssetInfo,
@@ -33,4 +34,26 @@ export const compareNativeAsset = (
   if (decimals !== _decimals) {
     errors.push(`Wrong decimals: current - ${_decimals}, onChain - ${decimals}`);
   }
+};
+
+export const checkNativeAsset = (
+  assetInfo: AssetSpec,
+  nativeAsset: NativeAssetInfo
+): boolean => {
+  const { decimals: _decimals, existentialDeposit: _minAmount, symbol: _symbol } = nativeAsset;
+  const { decimals, minAmount, symbol } = assetInfo;
+
+  return (
+    minAmount === _minAmount &&
+    symbol === _symbol &&
+    decimals === _decimals
+  );
+};
+
+export const checkSs58Prefix = (onchainPrefix: number, chainlistPrefix: number) => {
+  return onchainPrefix === chainlistPrefix;
+};
+
+export const checkParachainId = (onchainPrefix: number | null, chainlistPrefix: number | null) => {
+  return onchainPrefix === chainlistPrefix;
 };

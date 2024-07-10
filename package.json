@@ -28,6 +28,8 @@
     "build:i18n": "i18next-scanner --config i18next-scanner.config.cjs",
     "build:release": "polkadot-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
+    "build:chrome": "mv ./packages/extension/manifest_chrome.json ./packages/extension/manifest.json && yarn build:zip && mv ./packages/extension/chrome.json ./packages/extension/manifest_chrome.json",
+    "build:ff": "mv ./packages/extension/manifest_firefox.json ./packages/extension/manifest.json && yarn build:zip && mv ./packages/extension/manifest.json ./packages/extension/manifest_firefox.json",
     "build:zip": "yarn build:zip:dst && yarn build:zip:src",
     "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
     "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",

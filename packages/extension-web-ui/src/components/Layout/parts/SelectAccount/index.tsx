@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AccountJson, CurrentAccountInfo } from '@subwallet/extension-base/background/types';
+import ExportAllSelector from '@subwallet/extension-web-ui/components/Layout/parts/SelectAccount/ExportAllSelector';
 import { BaseSelectModal, SimpleQrModal } from '@subwallet/extension-web-ui/components/Modal';
 import { DISCONNECT_EXTENSION_MODAL, SELECT_ACCOUNT_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useDefaultNavigate, useGetCurrentAuth, useGetCurrentTab, useGoBackSelectAccount, useIsPopup, useTranslation } from '@subwallet/extension-web-ui/hooks';
@@ -10,13 +11,13 @@ import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { findAccountByAddress, funcSortByName, isAccountAll, searchAccountFunction } from '@subwallet/extension-web-ui/utils';
-import { BackgroundIcon, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
+import { BackgroundIcon, ButtonProps, Icon, ModalContext, Tooltip } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { CaretDown, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
+import { CaretDown, Circle, Export, Plug, Plugs, PlugsConnected, SignOut } from 'phosphor-react';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
@@ -49,6 +50,7 @@ const renderEmpty = () => <GeneralEmptyList />;
 
 const modalId = SELECT_ACCOUNT_MODAL;
 const simpleQrModalId = 'simple-qr-modal-id';
+const multiExportAccountModalId = 'multi-export-account-selector';
 
 function Component ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
@@ -66,6 +68,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
   const isCurrentTabFetched = !!currentTab;
   const currentAuth = useGetCurrentAuth();
   const isPopup = useIsPopup();
+  const { token } = useTheme() as Theme;
   const [selectedQrAddress, setSelectedQrAddress] = useState<string | undefined>();
 
   const accounts = useMemo((): AccountJson[] => {
@@ -94,6 +97,20 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
     return result;
   }, [_accounts, currentAccount?.address]);
+
+  const filteredListExportAccount = useMemo(() => {
+    const accountList = accounts.filter((accountExport) => !accountExport.isInjected);
+
+    if (accountList.length === 1 && isAccountAll(accountList[0].address)) {
+      return [];
+    }
+
+    if (accountList.length === 2) {
+      return accountList.filter((acc) => !isAccountAll(acc.address));
+    }
+
+    return accountList;
+  }, [accounts]);
 
   const noAllAccounts = useMemo(() => {
     return accounts.filter(({ address }) => !isAccountAll(address));
@@ -302,6 +319,43 @@ function Component ({ className }: Props): React.ReactElement<Props> {
     inactiveModal(ConnectWebsiteId);
   }, [inactiveModal]);
 
+  const exportAllAccounts = useCallback(() => {
+    activeModal(multiExportAccountModalId);
+  }, [activeModal]);
+
+  const rightButton = useMemo((): ButtonProps => {
+    return ({
+      icon: (
+        <Tooltip
+          className={'__icon-export-remind'}
+          overlayClassName={CN(className, '__tooltip-overlay-remind')}
+          placement={'bottomLeft'}
+          title={t(filteredListExportAccount.length ? 'Export and back up accounts' : 'SubWallet only supports accounts created and attached directly on the SubWallet Dashboard, does not support exporting accounts connected from the extension.')}
+        >
+          <div className={CN(className, '__tooltip-export-wrapper', { '-disable-export': !filteredListExportAccount.length })}>
+            <Icon
+              className={CN('__export-remind-btn')}
+              phosphorIcon={Export}
+              weight='fill'
+            />
+            <div className={'-icon-highlight'}>
+              <Icon
+                customSize={'7.39px'}
+                iconColor={token.colorHighlight}
+                phosphorIcon={Circle}
+                weight={'fill'}
+              />
+            </div>
+          </div>
+        </Tooltip>
+      ),
+      onClick: filteredListExportAccount.length ? exportAllAccounts : undefined,
+      size: 'xs',
+      type: 'ghost',
+      tooltipPlacement: 'topLeft'
+    });
+  }, [className, exportAllAccounts, filteredListExportAccount.length, t, token.colorHighlight]);
+
   return (
     <div className={CN(className, 'container')}>
       {isPopup && (
@@ -339,6 +393,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         renderItem={renderItem}
         renderSelected={renderSelectedItem}
         renderWhenEmpty={renderEmpty}
+        rightIconProps={rightButton}
         searchFunction={searchAccountFunction}
         searchMinCharactersCount={2}
         searchPlaceholder={t<string>('Account name')}
@@ -367,6 +422,9 @@ function Component ({ className }: Props): React.ReactElement<Props> {
         id={simpleQrModalId}
         onBack={onQrModalBack}
       />
+      <ExportAllSelector
+        items={filteredListExportAccount}
+      />
     </div>
   );
 }
@@ -392,6 +450,10 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       '.ant-select-modal-input-container:hover .account-name': {
         color: token.colorTextLight3
       }
+    },
+    '&.-tooltip-mobile': {
+      left: '193px',
+      top: '46px'
     },
 
     '&.ant-sw-modal': {
@@ -443,6 +505,19 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
         color: token.colorTextLight1
       }
     },
+    '&.-disable-export': {
+      opacity: 0.4,
+      cursor: 'not-allowed'
+    },
+    '.__tooltip-export-wrapper': {
+      display: 'flex',
+      position: 'relative'
+    },
+    '.-icon-highlight': {
+      position: 'absolute',
+      top: '-90%',
+      right: '-40%'
+    },
 
     '.all-account-item': {
       display: 'flex',
@@ -472,6 +547,11 @@ const SelectAccount = styled(Component)<Props>(({ theme }) => {
       flexDirection: 'row',
       alignItems: 'center',
       gap: 8
+    },
+
+    '.anticon.__export-remind-btn': {
+      height: 23,
+      width: 24
     },
 
     '.connect-icon': {

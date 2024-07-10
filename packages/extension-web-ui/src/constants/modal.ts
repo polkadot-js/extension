@@ -35,6 +35,7 @@ export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 
 export const ACCOUNT_EXPORT_MODAL = 'account-export-modal';
+export const ACCOUNT_EXPORT_ALL_MODAL = 'account-export-modal';
 
 export const WALLET_CONNECT_CREATE_MODAL = 'wallet-connect-create-modal';
 export const WALLET_CONNECT_DETAIL_MODAL = 'wallet-connect-detail-modal';
@@ -53,6 +54,7 @@ export const IMPORT_NFT_MODAL = 'import-nft-modal';
 
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 export const SELECT_EXTENSION_MODAL = 'select-extension-modal';
+export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
 
 /* Extension  */
 

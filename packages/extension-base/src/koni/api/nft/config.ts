@@ -105,6 +105,8 @@ export const SUPPORTED_TRANSFER_EVM_CHAIN = [
   SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string
 ];
 
+export const UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME = ['unique_evm'];
+
 export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbase as string]: 1287,
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbeam as string]: 1284,

@@ -23,6 +23,7 @@
     "packages/*"
   ],
   "scripts": {
+    "build": "yarn build:chrome && yarn build:ff",
     "build:chrome": "mv ./packages/extension/manifest_chrome.json ./packages/extension/manifest.json && polkadot-dev-build-ts && yarn build:zip && yarn build:rollup && mv ./packages/extension/manifest.json ./packages/extension/manifest_chrome.json",
     "build:ff": "mv ./packages/extension/manifest_firefox.json ./packages/extension/manifest.json && polkadot-dev-build-ts && yarn build:zip && yarn build:rollup && mv ./packages/extension/manifest.json ./packages/extension/manifest_firefox.json",
     "build:before": "yarn build:i18n",

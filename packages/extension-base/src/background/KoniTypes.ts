@@ -11,7 +11,7 @@ import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCus
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, StorageDataInterface, SubmitYieldStepData, TokenSpendingApprovalParams, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, EarningStatus, HandleYieldStepParams, LeavePoolAdditionalData, NominationPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestMetadataHash, RequestShortenMetadata, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseEarlyValidateYield, ResponseGetYieldPoolTargets, ResponseMetadataHash, ResponseShortenMetadata, StorageDataInterface, SubmitYieldStepData, TokenSpendingApprovalParams, UnlockDotTransactionNft, UnstakingStatus, ValidateYieldProcessParams, YieldPoolInfo, YieldPositionInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { SwapErrorType, SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, SwapTxData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { InjectedAccount, InjectedAccountWithMeta, MetadataDefBase } from '@subwallet/extension-inject/types';
@@ -271,6 +271,7 @@ export interface MetadataItem {
   hexValue: HexString;
   types: Record<string, Record<string, string> | string>;
   userExtensions?: ExtDef;
+  hexV15?: HexString;
 }
 
 export interface CrowdloanItem {
@@ -2377,6 +2378,8 @@ export interface KoniRequestSignatures {
 
   /// Metadata
   'pri(metadata.find)': [RequestFindRawMetadata, ResponseFindRawMetadata];
+  'pri(metadata.hash)': [RequestMetadataHash, ResponseMetadataHash];
+  'pri(metadata.transaction.shorten)': [RequestShortenMetadata, ResponseShortenMetadata];
 
   /* Campaign */
 

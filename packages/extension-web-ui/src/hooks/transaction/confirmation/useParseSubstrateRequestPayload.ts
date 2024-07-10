@@ -4,7 +4,7 @@
 import type { Chain } from '@subwallet/extension-chains/types';
 
 import { RequestSign } from '@subwallet/extension-base/background/types';
-import { _isRuntimeUpdated, getMetadataHash } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, calculateMetadataHash } from '@subwallet/extension-base/utils';
 import { isRawPayload } from '@subwallet/extension-web-ui/utils';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -97,7 +97,7 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
     } else {
       setHashLoading(true);
 
-      getMetadataHash(chainSlug)
+      calculateMetadataHash(chainSlug)
         .then((metadataHash) => {
           setMetadataHash(metadataHash);
         })

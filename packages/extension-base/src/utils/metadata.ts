@@ -3,56 +3,41 @@
 
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { ResponseMetadataHash, ResponseShortenMetadata } from '@subwallet/extension-base/types';
+import { IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 
 import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
+import { u8aToHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
-
-const LEDGER_API_URL = 'https://ledger-api.subwallet.app';
-
-const createUrl = (path: string): string => `${LEDGER_API_URL}/${path}`;
+import { ExtraInfo, merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
 export const _isRuntimeUpdated = (signedExtensions?: string[]): boolean => {
   return signedExtensions ? signedExtensions.includes('CheckMetadataHash') : false;
 };
 
-export const getMetadataHash = async (chain: string): Promise<string> => {
-  const data = {
-    id: chain
-  };
+export const calculateMetadataHash = (extraInfo: Omit<ExtraInfo, 'specVersion'>, metadata: IMetadataItem): string => {
+  if (!metadata.hexV15) {
+    throw Error('Metadata not found');
+  }
 
-  const resp = await fetch(createUrl('node/metadata/hash'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
+  const _merkleizeMetadata = merkleizeMetadata(metadata.hexV15, {
+    ...extraInfo,
+    specVersion: parseInt(metadata.specVersion)
   });
 
-  const rs = await resp.json() as ResponseMetadataHash;
-
-  return rs.metadataHash;
+  return u8aToHex(_merkleizeMetadata.digest());
 };
 
-export const getShortMetadata = async (chain: string, blob: string): Promise<string> => {
-  const data = {
-    chain: {
-      id: chain
-    },
-    txBlob: blob
-  };
+export const getShortMetadata = (blob: HexString, extraInfo: Omit<ExtraInfo, 'specVersion'>, metadata: IMetadataItem): string => {
+  if (!metadata.hexV15) {
+    throw Error('Metadata not found');
+  }
 
-  const resp = await fetch(createUrl('transaction/metadata'), {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
+  const _merkleizeMetadata = merkleizeMetadata(metadata.hexV15, {
+    ...extraInfo,
+    specVersion: parseInt(metadata.specVersion)
   });
 
-  const rs = await resp.json() as ResponseShortenMetadata;
-
-  return rs.txMetadata;
+  return u8aToHex(_merkleizeMetadata.getProofForExtrinsicPayload(blob));
 };
 
 export const cacheMetadata = (

@@ -4205,6 +4205,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/merkleize-metadata@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@polkadot-api/merkleize-metadata@npm:1.1.0"
+  dependencies:
+    "@polkadot-api/substrate-bindings": 0.6.0
+    "@polkadot-api/utils": 0.1.0
+  checksum: 54326e8f8ab98e53eaed1f1fdac1ae32a7c51c71358d1f968f004a488bc57b29066a77c6171ba5e76fe9d41fc42d3e365f591943b93e8c66f5096a7e65946ce0
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/metadata-builders@npm:0.0.1":
   version: 0.0.1
   resolution: "@polkadot-api/metadata-builders@npm:0.0.1"
@@ -4241,6 +4251,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/substrate-bindings@npm:0.6.0":
+  version: 0.6.0
+  resolution: "@polkadot-api/substrate-bindings@npm:0.6.0"
+  dependencies:
+    "@noble/hashes": ^1.3.1
+    "@polkadot-api/utils": 0.1.0
+    "@scure/base": ^1.1.1
+    scale-ts: ^1.6.0
+  checksum: c752d52dbea2b332357652b5475297ee6fa2f1ab8adffa7bd697522df5a42a0c358aec6f558523fd6f38ab20ab54ed0bda284c0c0424d917c1c68ef435dde4a4
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/substrate-client@npm:0.0.1":
   version: 0.0.1
   resolution: "@polkadot-api/substrate-client@npm:0.0.1"
@@ -4252,6 +4274,13 @@ __metadata:
   version: 0.0.1
   resolution: "@polkadot-api/utils@npm:0.0.1"
   checksum: 11e67019cbf6dd39997d772edf14296c1b156d7a59c7726ce117b438ee85a5e50e305514a2a93cba87fdce1380fcf045931f2fb959df3a43bb327e77ac876148
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/utils@npm:0.1.0":
+  version: 0.1.0
+  resolution: "@polkadot-api/utils@npm:0.1.0"
+  checksum: 55f39cf6949e54b763fc67e5132ae7d1095bf28f8413895dcec7e5778d9fe345b1ce9fe08f127c84f79fb9aedd51f045aa8ed84b2a72f4217047a91d2ecb4c27
   languageName: node
   linkType: hard
 
@@ -5995,6 +6024,7 @@ __metadata:
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
     "@oak-foundation/types": ^0.0.23
+    "@polkadot-api/merkleize-metadata": ^1.1.0
     "@polkadot/api": ^11.0.3
     "@polkadot/api-base": ^10.11.2
     "@polkadot/api-contract": ^11.0.3

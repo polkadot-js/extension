@@ -21,7 +21,7 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { _isRuntimeUpdated, anyNumberToBN, getMetadataHash, reformatAddress } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, anyNumberToBN, reformatAddress } from '@subwallet/extension-base/utils';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { BN_ZERO } from '@subwallet/extension-base/utils/number';
@@ -1083,18 +1083,19 @@ export default class TransactionService {
             signature: signing.signature
           } as SignerResult;
         }
-      } as Signer
+      } as Signer,
+      withSignedTransaction: true
     };
 
     if (_isRuntimeUpdated(signedExtensions)) {
-      try {
-        const metadataHash = await getMetadataHash(chain);
+      const metadataHash = await this.state.chainService.calculateMetadataHash(chain);
 
+      if (metadataHash) {
         signerOption.mode = 1;
-        signerOption.metadataHash = `0x${metadataHash}`;
-      } catch (e) {
-
+        signerOption.metadataHash = metadataHash;
       }
+    } else {
+      signerOption.withSignedTransaction = true;
     }
 
     extrinsic.signAsync(address, signerOption).then(async (rs) => {

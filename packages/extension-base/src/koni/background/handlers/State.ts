@@ -1,6 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
+import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, noop, u8aToHex } from '@polkadot/util';
+import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
+import { KeypairType } from '@polkadot/util-crypto/types';
+import { Logger } from '@polkadot/util/types';
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
@@ -52,12 +57,6 @@ import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { TransactionConfig } from 'web3-core';
-
-import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import { assert, hexStripPrefix, hexToU8a, isHex, logger as createLogger, noop, u8aToHex } from '@polkadot/util';
-import { Logger } from '@polkadot/util/types';
-import { base64Decode, isEthereumAddress, keyExtractSuri } from '@polkadot/util-crypto';
-import { KeypairType } from '@polkadot/util-crypto/types';
 
 import { KoniCron } from '../cron';
 import { KoniSubscription } from '../subscription';
@@ -2169,7 +2168,8 @@ export default class KoniState {
     return this.chainService?.mantaPay?.subscribeSyncState();
   }
 
-  // Metadata
+  /* Metadata */
+
   public async findMetadata (hash: string) {
     const metadata = await this.chainService.getMetadataByHash(hash);
 
@@ -2180,6 +2180,16 @@ export default class KoniState {
       userExtensions: metadata?.userExtensions
     };
   }
+
+  public async calculateMetadataHash (chain: string) {
+    return this.chainService.calculateMetadataHash(chain);
+  }
+
+  public async shortenMetadata (chain: string, txBlob: string) {
+    return this.chainService.shortenMetadata(chain, txBlob);
+  }
+
+  /* Metadata */
 
   public getCrowdloanContributions ({ address, page, relayChain }: RequestCrowdloanContributions) {
     return this.subscanService.getCrowdloanContributions(relayChain, address, page);

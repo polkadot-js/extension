@@ -1076,11 +1076,12 @@ export default class TransactionService {
     const signerOption: Partial<SignerOptions> = {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
-          const signing = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
+          const { signature, signedTransaction } = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
 
           return {
             id: (new Date()).getTime(),
-            signature: signing.signature
+            signature,
+            signedTransaction
           } as SignerResult;
         }
       } as Signer,
@@ -1094,8 +1095,6 @@ export default class TransactionService {
         signerOption.mode = 1;
         signerOption.metadataHash = metadataHash;
       }
-    } else {
-      signerOption.withSignedTransaction = true;
     }
 
     extrinsic.signAsync(address, signerOption).then(async (rs) => {

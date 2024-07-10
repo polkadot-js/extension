@@ -35,7 +35,7 @@ const numberMetadata = { maxNumberFormat: 2 };
 
 type DebounceFunc<T extends any[]> = (func: (...args: T) => void, delay: number) => (...args: T) => void;
 
-const debounce: DebounceFunc<[BasicInputEvent]> = (func, delay) => {
+const debounce: DebounceFunc<[string]> = (func, delay) => {
   let timer: NodeJS.Timeout;
 
   return function (event) {
@@ -67,8 +67,16 @@ const Component = (props: Props) => {
     return BN_ZERO;
   }, [amountValue, decimals, priceId, priceMap]);
 
-  const onChangeInput = useCallback((event: BasicInputEvent) => {
-    onChangeAmount(event.target.value);
+  const onChangeInput = useCallback((event: BasicInputEvent, isUserInput?: boolean) => {
+    const { value } = event.target;
+
+    if (isUserInput) {
+      const debouncedOnChangeAmount = debounce(onChangeAmount, 500);
+
+      debouncedOnChangeAmount(value);
+    } else {
+      onChangeAmount(event.target.value);
+    }
   }, [onChangeAmount]);
 
   return (
@@ -100,7 +108,7 @@ const Component = (props: Props) => {
             decimals={decimals}
             defaultInvalidOutputValue={'00'}
             maxValue={'0'} // support later
-            onChange={debounce(onChangeInput, 500)}
+            onChange={onChangeInput}
             showMaxButton={false}
             value={amountValue}
           />

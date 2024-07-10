@@ -447,6 +447,7 @@ function Component (): React.ReactElement {
                         slug={row.slug}
                         subTitle={row.chainDisplayName?.replace(' Relay Chain', '') || ''}
                         symbol={row.symbol}
+                        tokenGroupSlug={tokenGroupSlug}
                       />
                     );
                   }

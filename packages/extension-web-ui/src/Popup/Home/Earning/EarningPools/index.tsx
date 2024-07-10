@@ -86,6 +86,10 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
+      if (poolInfo.chain === 'interlay' && poolInfo.type === YieldPoolType.LENDING) {
+        return;
+      }
+
       if (poolInfo.type === YieldPoolType.NATIVE_STAKING) {
         let minJoinPool: string;
 
@@ -257,7 +261,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
         return;
       }
 
-      if (isNeedToShowInstruction(item)) {
+      if (isNeedToShowInstruction(item) && isWebUI) {
         activeModal(instructionModalId);
 
         return;
@@ -265,7 +269,7 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
 
       navigateToEarnTransaction(item.slug, item.chain);
     };
-  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, navigateToEarnTransaction, onConnectChain, openConnectChainModal]);
+  }, [activeModal, checkChainConnected, getAltChain, isNeedToShowInstruction, isWebUI, navigateToEarnTransaction, onConnectChain, openConnectChainModal]);
 
   const _onConnectChain = useCallback((chain: string) => {
     if (currentAltChain) {

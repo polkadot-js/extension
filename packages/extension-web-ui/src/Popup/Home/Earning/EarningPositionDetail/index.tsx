@@ -158,8 +158,12 @@ function Component ({ compound,
     } as EarningEntryParam });
   }, [navigate]);
 
-  const isParallelLiquidStaking = useMemo(() => {
+  const isChainUnsupported = useMemo(() => {
     if (poolInfo?.chain === 'parallel' && poolInfo?.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    if (poolInfo?.chain === 'interlay' && poolInfo?.type === YieldPoolType.LENDING) {
       return true;
     }
 
@@ -177,10 +181,10 @@ function Component ({ compound,
           />
         ),
         onClick: onEarnMore,
-        disabled: isParallelLiquidStaking
+        disabled: isChainUnsupported
       }
     ];
-  }, [isParallelLiquidStaking, onEarnMore]);
+  }, [isChainUnsupported, onEarnMore]);
 
   return (
     <>
@@ -298,7 +302,7 @@ function Component ({ compound,
 
                 <Button
                   block={true}
-                  disabled={isParallelLiquidStaking}
+                  disabled={isChainUnsupported}
                   icon={(
                     <Icon
                       phosphorIcon={PlusCircle}

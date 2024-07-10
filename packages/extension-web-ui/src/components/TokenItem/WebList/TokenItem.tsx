@@ -17,6 +17,7 @@ type Props = ThemeProps & {
   slug?: string,
   subTitle?: string,
   subContent?: React.ReactNode,
+  tokenGroupSlug?: string,
 } ;
 
 function Component (
@@ -25,11 +26,11 @@ function Component (
     className = '',
     logoKey,
     networkKey,
-    slug = '',
     subContent,
     subSymbol,
     subTitle,
-    symbol } = props;
+    symbol,
+    tokenGroupSlug } = props;
   // todo: Update BalanceItem in react-ui lib
   // - loading
   // - auto detect logo, only use logoKey
@@ -38,7 +39,7 @@ function Component (
   return (
     <div className={classNames('token-item-container', className)}>
       <Logo
-        isShowSubLogo={!!chain && !slug.includes('NATIVE')}
+        isShowSubLogo={!!tokenGroupSlug}
         network={networkKey}
         shape={'squircle'}
         size={40}

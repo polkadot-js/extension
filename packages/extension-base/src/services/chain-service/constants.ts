@@ -52,6 +52,7 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network', 'quartz', 'opal'],
+  unique_evm: ['unique_evm'],
   bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
   vara: ['vara_network']
 };

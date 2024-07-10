@@ -869,7 +869,8 @@ export class ChainService {
           },
           body: JSON.stringify(requestBody)
         })
-          .then(async (response) => console.log(await response.json()))
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .then(() => {})
           .catch((error) => console.error('Error connecting to the report API:', error));
       }
 

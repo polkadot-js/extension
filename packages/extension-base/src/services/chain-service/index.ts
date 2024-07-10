@@ -848,7 +848,6 @@ export class ChainService {
       const isLightRpc = endpoint.startsWith('light');
 
       if (isActive && isConnectProblem && !isLightRpc) {
-        console.log(`[i] ${slug}, ${endpoint}, ${status}`);
         const reportApiUrl = 'https://api-cache.subwallet.app/api/health-check/report-rpc';
         const requestBody = {
           chainSlug: slug,

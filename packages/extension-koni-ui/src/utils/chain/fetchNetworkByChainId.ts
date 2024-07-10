@@ -24,35 +24,39 @@ const getListEVMChainInfo = async () => {
   return onlineMap;
 };
 
-export const fetchChainInfo = async (chainId: string[]) => {
-  let chainData: AddNetworkToRequestConnect | undefined;
+export const fetchChainInfo = async (chainIdList: string[]) => {
+  let chainData: AddNetworkToRequestConnect[] = [];
 
   const onlineMap = await getListEVMChainInfo();
 
   try {
     if (onlineMap) {
-      const exitedChainIdOnline = chainId.find((chainId) => {
+      chainData = chainIdList.map((chainId) => {
         const chainIdDec = parseInt(chainId);
+        const onlineData = onlineMap[chainIdDec];
 
-        return !!onlineMap[chainIdDec];
-      });
-
-      if (exitedChainIdOnline) {
-        const chainId = parseInt(exitedChainIdOnline);
-        const onlineData = onlineMap[chainId];
-
-        chainData = {
-          chainId: chainId.toString(),
+        return {
+          chainId: chainIdDec.toString(),
           rpcUrls: onlineData.rpc.filter((url) => (url.startsWith('https://'))),
-          chainName: onlineData.name,
-          blockExplorerUrls: onlineData.explorers.map((explorer) => explorer.url),
-          nativeCurrency: onlineData.nativeCurrency
+          chainName: onlineData?.name,
+          blockExplorerUrls: onlineData.explorers?.map((explorer) => explorer.url),
+          nativeCurrency: onlineData?.nativeCurrency
         };
-      }
+      });
     }
   } catch (e) {
     console.error(e);
   }
 
   return chainData;
+};
+
+export const detectChanInfo = async (chainId: string[]) => {
+  const onlineMap = await getListEVMChainInfo();
+
+  return chainId.every((chainId) => {
+    const chainIdDec = parseInt(chainId);
+
+    return !!onlineMap[chainIdDec] && !!onlineMap[chainIdDec].rpc && onlineMap[chainIdDec].rpc.length > 0;
+  });
 };

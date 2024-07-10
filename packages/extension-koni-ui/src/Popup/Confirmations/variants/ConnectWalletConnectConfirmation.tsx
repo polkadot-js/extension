@@ -8,7 +8,7 @@ import { ADD_NETWORK_WALLET_CONNECT_MODAL, TIME_OUT_RECORD } from '@subwallet/ex
 import { useNotification, useSelectWalletConnectAccount, useSetSelectedAccountTypes } from '@subwallet/extension-koni-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-koni-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { convertKeyTypes, isAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { convertKeyTypes, detectChanInfo, isAccountAll } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, PlusCircle, XCircle } from 'phosphor-react';
@@ -43,6 +43,7 @@ function Component ({ className, request }: Props) {
   const navigate = useNavigate();
   const notification = useNotification();
   const setSelectedAccountTypes = useSetSelectedAccountTypes(true);
+  const [blockAddNetwork, setBlockAddNetwork] = useState(false);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
@@ -76,31 +77,45 @@ function Component ({ className, request }: Props) {
   }, [namespaceAccounts]);
 
   const checkNetworksConnected = useMemo((): [boolean, string[]] => {
-    const needConnectedNetwork: string[] = [];
+    let needConnectedNetwork: string[] = [];
 
-    const isHasNetworkConnect = Object.values(namespaceAccounts).every((value) => {
+    const isHasNetworkConnect = Object.values(namespaceAccounts).map((value) => {
       const { networks } = value;
-      const connectedNetworks = networks.filter((network) => network.supported);
+      const [unsupportedNetworks, supportedNetworks] = networks.reduce((list, { slug, supported }) => {
+        if (supported) {
+          list[1].push(slug);
+        } else {
+          const chainData = slug.split(':');
 
-      const isHasNetworkConnect = connectedNetworks.length > 0;
+          if (chainData.length > 1) {
+            const [namespace, chainId] = chainData;
 
-      !isHasNetworkConnect && networks.forEach(({ slug }) => {
-        const chainData = slug.split(':');
-
-        if (chainData.length > 1) {
-          const [namespace, chainId] = chainData;
-
-          if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
-            needConnectedNetwork.push(chainId);
+            if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
+              list[0].push(chainId);
+            } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
+              setBlockAddNetwork(true);
+            }
           }
         }
-      });
+
+        return list;
+      }, [[], []] as string[][]);
+
+      let isHasNetworkConnect = false;
+
+      if (isUnSupportCase && unsupportedNetworks.length > 0) {
+        isHasNetworkConnect = true;
+        needConnectedNetwork = [...unsupportedNetworks];
+      } else if (supportedNetworks.length === 0) {
+        isHasNetworkConnect = true;
+        needConnectedNetwork = [...unsupportedNetworks];
+      }
 
       return isHasNetworkConnect;
     });
 
-    return [isHasNetworkConnect, needConnectedNetwork];
-  }, [namespaceAccounts]);
+    return [isHasNetworkConnect.every((item) => item), needConnectedNetwork];
+  }, [isUnSupportCase, namespaceAccounts]);
   const [loading, setLoading] = useState(false);
 
   const _onSelectAccount = useCallback((namespace: string): ((address: string, applyImmediately?: boolean) => VoidFunction) => {
@@ -160,17 +175,25 @@ function Component ({ className, request }: Props) {
   useEffect(() => {
     const [isExistNetworkConnected, needConnectedNetworks] = checkNetworksConnected;
 
-    if (!isExistNetworkConnected && needConnectedNetworks.length > 0 && isSupportCase) {
-      activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
+    if (isExistNetworkConnected && needConnectedNetworks.length > 0 && !blockAddNetwork) {
+      detectChanInfo(needConnectedNetworks).then((rs) => {
+        if (rs) {
+          activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
+        } else {
+          setBlockAddNetwork(true);
+        }
+      }).catch(() => {
+        setBlockAddNetwork(true);
+      });
     }
-  }, [activeModal, checkNetworksConnected, isSupportCase]);
+  }, [activeModal, blockAddNetwork, checkNetworksConnected]);
 
   return (
     <>
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         {
-          (isUnSupportCase || (!checkNetworksConnected[0] && checkNetworksConnected[1].length === 0)) && (
+          (isUnSupportCase || blockAddNetwork) && (
             <>
               <AlertBox
                 description={t('There is at least 1 chosen network unavailable')}
@@ -207,7 +230,7 @@ function Component ({ className, request }: Props) {
           )
         }
         {
-          isSupportCase && (
+          isSupportCase && !blockAddNetwork && (
             <div className='namespaces-list'>
               {
                 Object.entries(namespaceAccounts).map(([namespace, value]) => {

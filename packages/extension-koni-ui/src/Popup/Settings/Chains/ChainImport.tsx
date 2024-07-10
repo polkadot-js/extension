@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AddNetworkRequestExternal } from '@subwallet/extension-base/background/KoniTypes';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _NetworkUpsertParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _generateCustomProviderKey } from '@subwallet/extension-base/services/chain-service/utils';
@@ -56,6 +57,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const locationState = useLocation().state as LocationState;
 
   const [location] = useState<LocationState>(locationState);
+  const [chainImportQueue, setChainImportQueue] = useState<AddNetworkRequestExternal[]>([]);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -125,7 +127,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showNotification({
             message: t('Imported chain successfully')
           });
-          location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
+          location?.useGoHome ? chainImportQueue.length >= 2 ? setChainImportQueue(chainImportQueue.splice(1)) : navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
         } else {
           showNotification({
             message: t('An error occurred, please try again')
@@ -138,7 +140,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [existentialDeposit, form, genesisHash, isPureEvmChain, location, navigate, showNotification, t]);
+  }, [chainImportQueue, existentialDeposit, form, genesisHash, isPureEvmChain, location?.useGoHome, navigate, showNotification, t]);
 
   const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -282,20 +284,34 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   useFocusFormItem(form, 'provider');
 
   useEffect(() => {
-    if (location.useGoHome && location.chainId) {
+    if (location?.useGoHome && location?.chainId && location.chainId.length > 0) {
       fetchChainInfo(location.chainId)
         .then((chainInfo) => {
-          if (chainInfo) {
-            const { rpcUrls } = chainInfo;
+          if (chainInfo.length > 0) {
+            setChainImportQueue(chainInfo);
+            const { rpcUrls } = chainInfo[0];
 
             if (rpcUrls.length > 0) {
               form.setFieldValue('provider', rpcUrls[0]);
               providerValidator({} as RuleObject, rpcUrls[0]).then(noop).catch(console.error);
             }
           }
-        }).catch(console.error);
+        })
+        .catch(console.error);
     }
   }, [form, location, providerValidator]);
+
+  useEffect(() => {
+    if (location?.chainId && chainImportQueue.length > 0 && chainImportQueue.length < location.chainId?.length) {
+      form.resetFields();
+      const { rpcUrls } = chainImportQueue[0];
+
+      if (rpcUrls.length > 0) {
+        form.setFieldValue('provider', rpcUrls[0]);
+        providerValidator({} as RuleObject, rpcUrls[0]).then(noop).catch(console.error);
+      }
+    }
+  }, [chainImportQueue, form, location?.chainId, providerValidator]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>

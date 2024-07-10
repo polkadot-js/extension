@@ -282,8 +282,6 @@ function Component ({ className }: Props): JSX.Element {
   }, [jsonFile, requirePassword, password, checkUnlock, accountsInfo, navigate, onComplete]);
 
   const renderItem = useCallback((account: ResponseJsonGetAccountInfo): React.ReactNode => {
-    console.log('account', account);
-
     return (
       <AccountCard
         accountName={account.name}

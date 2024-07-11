@@ -16,6 +16,8 @@
     { "path": "./packages/extension-inject/tsconfig.spec.json" },
     { "path": "./packages/extension-mocks/tsconfig.build.json" },
     { "path": "./packages/extension-ui/tsconfig.build.json" },
-    { "path": "./packages/extension-ui/tsconfig.spec.json" }
+    { "path": "./packages/extension-ui/tsconfig.spec.json" },
+    { "path": "./packages/extension-rpc/tsconfig.build.json" },
+    { "path": "./packages/extension-rpc/tsconfig.spec.json" }
   ]
 }

@@ -17,6 +17,7 @@ const packages = [
   'extension',
   'extension-base',
   'extension-chains',
+  'extension-rpc',
   'extension-dapp',
   'extension-inject',
   'extension-ui'

@@ -24,7 +24,9 @@
       "@polkadot/extension-inject/*": ["extension-inject/src/*.ts"],
       "@polkadot/extension-mocks/*": ["extension-mocks/src/*.ts"],
       "@polkadot/extension-ui": ["extension-ui/src/index.ts"],
-      "@polkadot/extension-ui/*": ["extension-ui/src/*.ts"]
+      "@polkadot/extension-ui/*": ["extension-ui/src/*.ts"],
+      "@polkadot/extension-rpc": ["extension-rpc/src/index.ts"],
+      "@polkadot/extension-rpc/*": ["extension-rpc/src/*.ts"]
     }
 	}
  }

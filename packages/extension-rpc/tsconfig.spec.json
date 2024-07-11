@@ -11,6 +11,7 @@
     "**/*.spec.ts"
   ],
   "references": [
-    { "path": "./tsconfig.build.json" }
+    { "path": "./tsconfig.build.json" },
+    { "path": "../extension-mocks/tsconfig.build.json" }
   ]
 }

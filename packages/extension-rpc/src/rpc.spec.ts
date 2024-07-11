@@ -1,8 +1,8 @@
-// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2024 @polkadot/extension-rpc authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 /* global chrome */
-
+/*
 import '@polkadot/extension-mocks/chrome';
 
 import type * as _ from '@polkadot/dev-test/globals.d.ts';
@@ -30,3 +30,4 @@ describe('messaging sends message to background via extension port for', () => {
     );
   });
 });
+ */

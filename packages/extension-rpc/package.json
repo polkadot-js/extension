@@ -5,17 +5,21 @@
   "engines": {
     "node": ">=18"
   },
-  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-ui#readme",
+  "homepage": "https://github.com/polkadot-js/extension/tree/master/packages/extension-rpc#readme",
   "license": "Apache-2.0",
-  "name": "@polkadot/extension-ui",
+  "name": "@polkadot/extension-rpc",
   "repository": {
-    "directory": "packages/extension-ui",
+    "directory": "packages/extension-rpc",
     "type": "git",
     "url": "https://github.com/polkadot-js/extension.git"
   },
-  "sideEffects": true,
+  "sideEffects": [
+    "./packageDetect.js",
+    "./packageDetect.cjs"
+  ],
   "type": "module",
   "version": "0.48.3-2-x",
+  "main": "index.js",
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/free-brands-svg-icons": "^6.5.1",
@@ -28,7 +32,6 @@
     "@polkadot/extension-chains": "0.48.3-2-x",
     "@polkadot/extension-dapp": "0.48.3-2-x",
     "@polkadot/extension-inject": "0.48.3-2-x",
-    "@polkadot/extension-rpc": "0.48.3-2-x",
     "@polkadot/hw-ledger": "^12.6.2",
     "@polkadot/keyring": "^12.6.2",
     "@polkadot/networks": "^12.6.2",

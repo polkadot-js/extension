@@ -4,249 +4,55 @@
 /* global chrome */
 /* eslint-disable no-redeclare */
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, ConnectedTabsUrlResponse, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
-import type { Message } from '@polkadot/extension-base/types';
-import type { Chain } from '@polkadot/extension-chains/types';
-import type { MetadataDef } from '@polkadot/extension-inject/types';
-import type { KeyringPair$Json } from '@polkadot/keyring/types';
-import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
-import type { HexString } from '@polkadot/util/types';
-import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { getId } from '@polkadot/extension-base/utils/getId';
-import { metadataExpand } from '@polkadot/extension-chains';
+import { make as makeExtensionRPC } from '@polkadot/extension-rpc';
 
 import allChains from './util/chains.js';
-import { getSavedMeta, setSavedMeta } from './MetadataCache.js';
-
-interface Handler {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolve: (data: any) => void;
-  reject: (error: Error) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  subscriber?: (data: any) => void;
-}
-
-type Handlers = Record<string, Handler>;
+import * as metadataCache from './MetadataCache.js';
 
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
-const handlers: Handlers = {};
+const rpc = makeExtensionRPC({
+  port,
+  allChains,
+  metadataCache
+})
 
-// setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message['data']): void => {
-  const handler = handlers[data.id];
-
-  if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
-
-    return;
-  }
-
-  if (!handler.subscriber) {
-    delete handlers[data.id];
-  }
-
-  if (data.subscription) {
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    (handler.subscriber as Function)(data.subscription);
-  } else if (data.error) {
-    handler.reject(new Error(data.error));
-  } else {
-    handler.resolve(data.response);
-  }
-});
-
-function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypesWithSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType], subscriber: (data: SubscriptionMessageTypes[TMessageType]) => void): Promise<ResponseTypes[TMessageType]>;
-function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, request?: RequestTypes[TMessageType], subscriber?: (data: unknown) => void): Promise<ResponseTypes[TMessageType]> {
-  return new Promise((resolve, reject): void => {
-    const id = getId();
-
-    handlers[id] = { reject, resolve, subscriber };
-
-    port.postMessage({ id, message, request: request || {} });
-  });
-}
-
-export async function editAccount (address: string, name: string): Promise<boolean> {
-  return sendMessage('pri(accounts.edit)', { address, name });
-}
-
-export async function showAccount (address: string, isShowing: boolean): Promise<boolean> {
-  return sendMessage('pri(accounts.show)', { address, isShowing });
-}
-
-export async function tieAccount (address: string, genesisHash: HexString | null): Promise<boolean> {
-  return sendMessage('pri(accounts.tie)', { address, genesisHash });
-}
-
-export async function exportAccount (address: string, password: string): Promise<{ exportedJson: KeyringPair$Json }> {
-  return sendMessage('pri(accounts.export)', { address, password });
-}
-
-export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
-  return sendMessage('pri(accounts.batchExport)', { addresses, password });
-}
-
-export async function validateAccount (address: string, password: string): Promise<boolean> {
-  return sendMessage('pri(accounts.validate)', { address, password });
-}
-
-export async function forgetAccount (address: string): Promise<boolean> {
-  return sendMessage('pri(accounts.forget)', { address });
-}
-
-export async function approveAuthRequest (id: string, authorizedAccounts: string[]): Promise<boolean> {
-  return sendMessage('pri(authorize.approve)', { authorizedAccounts, id });
-}
-
-export async function approveMetaRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(metadata.approve)', { id });
-}
-
-export async function cancelSignRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(signing.cancel)', { id });
-}
-
-export async function isSignLocked (id: string): Promise<ResponseSigningIsLocked> {
-  return sendMessage('pri(signing.isLocked)', { id });
-}
-
-export async function approveSignPassword (id: string, savePass: boolean, password?: string): Promise<boolean> {
-  return sendMessage('pri(signing.approve.password)', { id, password, savePass });
-}
-
-export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
-  return sendMessage('pri(signing.approve.signature)', { id, signature });
-}
-
-export async function createAccountExternal (name: string, address: string, genesisHash: HexString | null): Promise<boolean> {
-  return sendMessage('pri(accounts.create.external)', { address, genesisHash, name });
-}
-
-export async function createAccountHardware (address: string, hardwareType: string, accountIndex: number, addressOffset: number, name: string, genesisHash: HexString): Promise<boolean> {
-  return sendMessage('pri(accounts.create.hardware)', { accountIndex, address, addressOffset, genesisHash, hardwareType, name });
-}
-
-export async function createAccountSuri (name: string, password: string, suri: string, type?: KeypairType, genesisHash?: HexString | null): Promise<boolean> {
-  return sendMessage('pri(accounts.create.suri)', { genesisHash, name, password, suri, type });
-}
-
-export async function createSeed (length?: SeedLengths, seed?: string, type?: KeypairType): Promise<{ address: string; seed: string }> {
-  return sendMessage('pri(seed.create)', { length, seed, type });
-}
-
-export async function getAllMetadata (): Promise<MetadataDef[]> {
-  return sendMessage('pri(metadata.list)');
-}
-
-export async function getMetadata (genesisHash?: string | null, isPartial = false): Promise<Chain | null> {
-  if (!genesisHash) {
-    return null;
-  }
-
-  let request = getSavedMeta(genesisHash);
-
-  if (!request) {
-    request = sendMessage('pri(metadata.get)', genesisHash || null);
-    setSavedMeta(genesisHash, request);
-  }
-
-  const def = await request;
-
-  if (def) {
-    return metadataExpand(def, isPartial);
-  } else if (isPartial) {
-    const chain = allChains.find((chain) => chain.genesisHash === genesisHash);
-
-    if (chain) {
-      return metadataExpand({
-        ...chain,
-        specVersion: 0,
-        tokenDecimals: 15,
-        tokenSymbol: 'Unit',
-        types: {}
-      }, isPartial);
-    }
-  }
-
-  return null;
-}
-
-export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> {
-  return sendMessage('pri(connectedTabsUrl.get)', null);
-}
-
-export async function rejectMetaRequest (id: string): Promise<boolean> {
-  return sendMessage('pri(metadata.reject)', { id });
-}
-
-export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
-  return sendMessage('pri(accounts.subscribe)', null, cb);
-}
-
-export async function subscribeAuthorizeRequests (cb: (accounts: AuthorizeRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(authorize.requests)', null, cb);
-}
-
-export async function getAuthList (): Promise<ResponseAuthorizeList> {
-  return sendMessage('pri(authorize.list)');
-}
-
-export async function removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
-  return sendMessage('pri(authorize.remove)', url);
-}
-
-export async function updateAuthorization (authorizedAccounts: string[], url: string): Promise<void> {
-  return sendMessage('pri(authorize.update)', { authorizedAccounts, url });
-}
-
-export async function deleteAuthRequest (requestId: string): Promise<void> {
-  return sendMessage('pri(authorize.delete.request)', requestId);
-}
-
-export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(metadata.requests)', null, cb);
-}
-
-export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {
-  return sendMessage('pri(signing.requests)', null, cb);
-}
-
-export async function validateSeed (suri: string, type?: KeypairType): Promise<{ address: string; suri: string }> {
-  return sendMessage('pri(seed.validate)', { suri, type });
-}
-
-export async function validateDerivationPath (parentAddress: string, suri: string, parentPassword: string): Promise<ResponseDeriveValidate> {
-  return sendMessage('pri(derivation.validate)', { parentAddress, parentPassword, suri });
-}
-
-export async function deriveAccount (parentAddress: string, suri: string, parentPassword: string, name: string, password: string, genesisHash: HexString | null): Promise<boolean> {
-  return sendMessage('pri(derivation.create)', { genesisHash, name, parentAddress, parentPassword, password, suri });
-}
-
-export async function windowOpen (path: AllowedPath): Promise<boolean> {
-  return sendMessage('pri(window.open)', path);
-}
-
-export async function jsonGetAccountInfo (json: KeyringPair$Json): Promise<ResponseJsonGetAccountInfo> {
-  return sendMessage('pri(json.account.info)', json);
-}
-
-export async function jsonRestore (file: KeyringPair$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.restore)', { file, password });
-}
-
-export async function batchRestore (file: KeyringPairs$Json, password: string): Promise<void> {
-  return sendMessage('pri(json.batchRestore)', { file, password });
-}
-
-export async function setNotification (notification: string): Promise<boolean> {
-  return sendMessage('pri(settings.notification)', notification);
-}
-
-export async function ping (): Promise<boolean> {
-  return sendMessage('pri(ping)', null);
-}
+export const editAccount = rpc.editAccount
+export const showAccount = rpc.showAccount
+export const tieAccount = rpc.tieAccount
+export const exportAccount = rpc.exportAccount
+export const exportAccounts = rpc.exportAccounts
+export const validateAccount = rpc.validateAccount
+export const forgetAccount = rpc.forgetAccount
+export const approveAuthRequest = rpc.approveAuthRequest
+export const approveMetaRequest = rpc.approveMetaRequest
+export const cancelSignRequest = rpc.cancelSignRequest
+export const isSignLocked = rpc.isSignLocked
+export const approveSignPassword = rpc.approveSignPassword
+export const approveSignSignature = rpc.approveSignSignature
+export const createAccountExternal = rpc.createAccountExternal
+export const createAccountHardware = rpc.createAccountHardware
+export const createAccountSuri = rpc.createAccountSuri
+export const createSeed = rpc.createSeed
+export const getAllMetadata = rpc.getAllMetadata
+export const getMetadata = rpc.getMetadata
+export const getConnectedTabsUrl = rpc.getConnectedTabsUrl
+export const rejectMetaRequest = rpc.rejectMetaRequest
+export const subscribeAccounts = rpc.subscribeAccounts
+export const subscribeAuthorizeRequests = rpc.subscribeAuthorizeRequests
+export const getAuthList = rpc.getAuthList
+export const removeAuthorization = rpc.removeAuthorization
+export const updateAuthorization = rpc.updateAuthorization
+export const deleteAuthRequest = rpc.deleteAuthRequest
+export const subscribeMetadataRequests = rpc.subscribeMetadataRequests
+export const subscribeSigningRequests = rpc.subscribeSigningRequests
+export const validateSeed = rpc.validateSeed
+export const validateDerivationPath = rpc.validateDerivationPath
+export const deriveAccount = rpc.deriveAccount
+export const windowOpen = rpc.windowOpen
+export const jsonGetAccountInfo = rpc.jsonGetAccountInfo
+export const jsonRestore = rpc.jsonRestore
+export const batchRestore = rpc.batchRestore
+export const setNotification = rpc.setNotification
+export const ping = rpc.ping

@@ -224,9 +224,12 @@ function _getAssetIdentifier (tokenInfo: _ChainAsset, version: number) {
 
 function _adaptX1Interior (assetIdentifier: Record<string, any>, version: number): Record<string, any> {
   const interior = assetIdentifier.interior as Record<string, any>;
+  const isInteriorObj = typeof interior === 'object' && interior !== null;
+  const isX1 = 'X1' in interior;
+  const needModifyX1 = version <= 4 && Array.isArray(interior.X1);
 
-  if ('X1' in interior && version <= 4 && Array.isArray(interior.X1)) { // X1 is an object for version < 4. From V4, it's an array
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  if (isInteriorObj && isX1 && needModifyX1) { // X1 is an object for version < 4. From V4, it's an array
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
     interior.X1 = interior.X1[0];
   }
 

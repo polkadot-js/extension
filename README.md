@@ -16,23 +16,23 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
 
 ## Firefox installation from source instructions.
 
-1. Uncompress `master-src.zip`
+1. Uncompress `master-ff-src.zip`
 2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)
 2. Install dependencies via `yarn install`
 3. Build all packages via `yarn build`
-  - The `/packages/extension/build` directory will contain the exact code used in the add-on, and should exactly match the uncompressed `master-build`.
+  - The `/packages/extension/build` directory will contain the exact code used in the add-on, and should exactly match the uncompressed `master-ff-build`.
   
-NOTE: If you would like to regenerate the compressed `master-build.zip`, and `master-src.zip` files run: `yarn build:zip`
+NOTE: If you would like to regenerate the compressed `master-ff-build.zip`, and `master-ff-src.zip` files run: `yarn build:zip:ff`
 
-## Ensuring `master-build` and `master-src` dont have any diffs (For maintainers)
+## Ensuring `master-<TARGET-BROWSER>-build` and `master-<TARGET_BROWSER>-src` dont have any diffs (For maintainers)
 
 Summary: These are the steps to ensure the following builds don't have any diffs so that the firefox review goes smoothly.
 
-1. Run `yarn build`
-2. Run `yarn build:zip` - This will generate a `master-build.zip`, and `master-src.zip`.
-3. Move `master-src.zip`, and `master-build.zip` to its own enviornment/folder.
-4. Uncompress `master-src.zip` to `master-zrc` and inside of `master-src` run `yarn && yarn build`.
-5. Uncompress `master-build.zip` to `master-build`.
+1. Run `yarn build:ff` or `yarn build:chrome`, depending on your target browser.
+2. Run `yarn build:zip:ff` or `yarn build:zip:chrome` - This will generate a `master-<TARGET_BROWSER>-build.zip`, and `master-<TARGET_BROWSER>-src.zip`.
+3. Move `master-<TARGET_BROWSER>-src.zip`, and `master-<TARGET_BROWSER>-build.zip` to its own enviornment/folder.
+4. Uncompress `master-<TARGET_BROWSER>-src.zip` to `master-src` and inside of `master-src` run `yarn && yarn build:<ff|chrome>`, depending on your target browser.
+5. Uncompress `master-<TARGET_BROWSER>-build.zip` to `master-build`.
 6. Now we can compare the two builds using `diff`, and `comm`
   - Run `diff -qr <path-to-master-build>/master-build <path-to-master-src>/packages/extension/build | sort`
 7. To sanity check important files (`background.js`, and `extension.js`) you can also run: 
@@ -43,19 +43,22 @@ Summary: These are the steps to ensure the following builds don't have any diffs
 
 Steps to build the extension and view your changes in a browser:
 
-1. Build via `yarn build`
-  - NOTE: You may need to enable corepack by running `corepack enable`
-2. Install the extension
-  - Chrome:
-    - go to `chrome://extensions/`
-    - ensure you have the Development flag set
-    - "Load unpacked" and point to `packages/extension/build`
-    - if developing, after making changes - refresh the extension
-  - Firefox:
-    - go to `about:debugging#addons`
-    - check "Enable add-on debugging"
-    - click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
-    - if developing, after making changes - reload the extension
+1. Chrome:
+    1. Build via `yarn build:chrome`
+      - NOTE: You may need to enable corepack by running `corepack enable`
+    2. Install the extension
+      - go to `chrome://extensions/`
+      - ensure you have the Development flag set
+      - "Load unpacked" and point to `packages/extension/build`
+      - if developing, after making changes - refresh the extension
+2. Firefox
+    1. Build via `yarn build:ff`
+      - NOTE: You may need to enable corepack by running `corepack enable`
+    2. Install the extension
+      - go to `about:debugging#addons`
+      - check "Enable add-on debugging"
+      - click on "Load Temporary Add-on" and point to `packages/extension/build/manifest.json`
+      - if developing, after making changes - reload the extension
 3. When visiting `https://polkadot.js.org/apps/` it will inject the extension
 
 Once added, you can create an account (via a generated seed) or import via an existing seed. The [apps UI](https://github.com/polkadot-js/apps/), when loaded, will show these accounts as `<account name> (extension)`
@@ -68,6 +71,8 @@ The repo is split into a number of packages -
 - [extension-ui](packages/extension-ui/) - The UI components for the extension, to build up the popup
 - [extension-dapp](packages/extension-dapp/) - A convenience wrapper to work with the injected objects, simplifying data extraction for any dapp that wishes to integrate the extension (or any extension that supports the interface)
 - [extension-inject](packages/extension-inject/) - A convenience wrapper that allows extension developers to inject their extension for use by any dapp
+
+It also contains a [`manifest_chrome.json`](packages/extension/manifest_chrome.json) file which contains the manifest configuration for Chrome and another [`manifest_firefox.json`](packages/extension/manifest_firefox.json) with the configuration for Firefox, for compatibility reasons, and a dummy `manifest.json` file that's only used by the build.
 
 ## Dapp developers
 

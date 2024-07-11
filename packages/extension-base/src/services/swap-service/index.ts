@@ -8,11 +8,13 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { ServiceStatus, ServiceWithProcessInterface, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { AssetHubSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/asset-hub';
 import { SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
 import { HydradxHandler } from '@subwallet/extension-base/services/swap-service/handler/hydradx-handler';
-import { _PROVIDER_TO_SUPPORTED_PAIR_MAP, DEFAULT_SWAP_FIRST_STEP, getSwapAltToken, MOCK_SWAP_FEE, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
-import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPath, OptimalSwapPathParams, QuoteAskResponse, SwapErrorType, SwapPair, SwapProviderId, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { _PROVIDER_TO_SUPPORTED_PAIR_MAP, getSwapAltToken, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { CommonOptimalPath, DEFAULT_FIRST_STEP, MOCK_STEP_FEE } from '@subwallet/extension-base/types/service-base';
+import { _SUPPORTED_SWAP_PROVIDERS, OptimalSwapPathParams, QuoteAskResponse, SwapErrorType, SwapPair, SwapProviderId, SwapQuote, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { createPromiseHandler, PromiseHandler } from '@subwallet/extension-base/utils';
 import { BehaviorSubject } from 'rxjs';
 
@@ -63,10 +65,10 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     return availableQuotes; // todo: need to propagate error for further handling
   }
 
-  private getDefaultProcess (params: OptimalSwapPathParams): OptimalSwapPath {
-    const result: OptimalSwapPath = {
-      totalFee: [MOCK_SWAP_FEE],
-      steps: [DEFAULT_SWAP_FIRST_STEP]
+  private getDefaultProcess (params: OptimalSwapPathParams): CommonOptimalPath {
+    const result: CommonOptimalPath = {
+      totalFee: [MOCK_STEP_FEE],
+      steps: [DEFAULT_FIRST_STEP]
     };
 
     result.totalFee.push({
@@ -83,7 +85,7 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
     return result;
   }
 
-  public async generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+  public async generateOptimalProcess (params: OptimalSwapPathParams): Promise<CommonOptimalPath> {
     if (!params.selectedQuote) {
       return this.getDefaultProcess(params);
     } else {
@@ -111,8 +113,6 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
       request,
       selectedQuote: swapQuoteResponse.optimalQuote
     });
-
-    console.log('optimalProcess', optimalProcess);
 
     return {
       process: optimalProcess,
@@ -171,6 +171,16 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
         case SwapProviderId.HYDRADX_MAINNET:
           this.handlers[providerId] = new HydradxHandler(this.chainService, this.state.balanceService, false);
+          break;
+
+        case SwapProviderId.POLKADOT_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'statemint');
+          break;
+        case SwapProviderId.KUSAMA_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'statemine');
+          break;
+        case SwapProviderId.ROCOCO_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'rococo_assethub');
           break;
 
         default:

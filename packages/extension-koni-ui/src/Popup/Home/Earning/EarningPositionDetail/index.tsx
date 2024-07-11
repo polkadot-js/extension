@@ -146,6 +146,18 @@ function Component ({ compound,
     } as EarningEntryParam });
   }, [navigate]);
 
+  const isChainUnsupported = useMemo(() => {
+    if (poolInfo.chain === 'parallel' && poolInfo.type === YieldPoolType.LIQUID_STAKING) {
+      return true;
+    }
+
+    if (poolInfo.chain === 'interlay' && poolInfo.type === YieldPoolType.LENDING) {
+      return true;
+    }
+
+    return false;
+  }, [poolInfo.chain, poolInfo.type]);
+
   const subHeaderButtons: ButtonProps[] = useMemo(() => {
     return [
       {
@@ -156,10 +168,11 @@ function Component ({ compound,
             type='phosphor'
           />
         ),
-        onClick: onEarnMore
+        onClick: onEarnMore,
+        disabled: isChainUnsupported
       }
     ];
-  }, [onEarnMore]);
+  }, [isChainUnsupported, onEarnMore]);
 
   return (
     <>
@@ -224,6 +237,7 @@ function Component ({ compound,
 
           <Button
             block={true}
+            disabled={isChainUnsupported}
             icon={(
               <Icon
                 phosphorIcon={PlusCircle}

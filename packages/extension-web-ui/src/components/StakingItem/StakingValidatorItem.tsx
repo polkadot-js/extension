@@ -23,10 +23,11 @@ type Props = ThemeProps & {
   showUnSelectedIcon?: boolean;
   isNominated?: boolean;
   disabled?: boolean;
+  prefixAddress?: number
 }
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, showUnSelectedIcon = true, validatorInfo } = props;
+  const { apy, className, disabled, isNominated, isSelected, onClick, onClickMoreBtn, prefixAddress, showUnSelectedIcon = true, validatorInfo } = props;
   const { token } = useTheme() as Theme;
 
   const { t } = useTranslation();
@@ -46,6 +47,7 @@ const Component: React.FC<Props> = (props: Props) => {
         className={'validator-item-content'}
         leftItem={
           <SwAvatar
+            identPrefix={prefixAddress}
             isShowSubIcon={validatorInfo.isVerified}
             size={40}
             subIcon={<BackgroundIcon

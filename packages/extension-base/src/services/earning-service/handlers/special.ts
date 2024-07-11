@@ -4,9 +4,9 @@
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { AmountData, BasicTxErrorType, ChainType, ExtrinsicType, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
-import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
 import { YIELD_POOL_STAT_REFRESH_INTERVAL } from '@subwallet/extension-base/koni/api/yield/helper/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { createXcmExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
 import { BaseYieldStepDetail, HandleYieldStepData, OptimalYieldPath, OptimalYieldPathParams, RequestEarlyValidateYield, ResponseEarlyValidateYield, RuntimeDispatchInfo, SpecialYieldPoolInfo, SpecialYieldPoolMetadata, SubmitYieldJoinData, SubmitYieldStepData, TransactionData, UnstakingInfo, YieldPoolInfo, YieldPoolTarget, YieldPoolType, YieldProcessValidation, YieldStepBaseInfo, YieldStepType, YieldTokenBaseInfo, YieldValidationStatus } from '@subwallet/extension-base/types';
 import { createPromiseHandler, formatNumber, PromiseHandler } from '@subwallet/extension-base/utils';
@@ -349,12 +349,12 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
 
     const bnAltInputTokenBalance = new BN(altInputTokenBalance.value || '0');
 
-    if (!bnAltInputTokenBalance.sub(xcmAmount).gt(BN_ZERO)) {
+    if (!bnAltInputTokenBalance.sub(xcmAmount).sub(xcmFee).gt(BN_ZERO)) {
       processValidation.failedStep = path.steps[1];
       processValidation.ok = false;
       processValidation.status = YieldValidationStatus.NOT_ENOUGH_BALANCE;
 
-      const maxBn = bnInputTokenBalance.add(new BN(altInputTokenBalance.value)).sub(xcmFee);
+      const maxBn = bnInputTokenBalance.add(new BN(altInputTokenBalance.value)).sub(xcmFee).sub(xcmFee);
       const maxValue = formatNumber(maxBn.toString(), inputTokenInfo.decimals || 0);
 
       const altInputTokenInfo = this.state.getAssetBySlug(altInputTokenSlug);
@@ -363,7 +363,7 @@ export default abstract class BaseSpecialStakingPoolHandler extends BasePoolHand
       const inputNetworkName = this.chainInfo.name;
       const altNetworkName = altNetwork.name;
       const currentValue = formatNumber(bnInputTokenBalance.toString(), inputTokenInfo.decimals || 0);
-      const bnMaxXCM = new BN(altInputTokenBalance.value).sub(xcmFee);
+      const bnMaxXCM = new BN(altInputTokenBalance.value).sub(xcmFee).sub(xcmFee);
       const maxXCMValue = formatNumber(bnMaxXCM.toString(), inputTokenInfo.decimals || 0);
 
       processValidation.message = t(

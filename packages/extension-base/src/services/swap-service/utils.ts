@@ -5,7 +5,7 @@ import { Asset, Assets, Chain, Chains } from '@chainflip/sdk/swap';
 import { COMMON_ASSETS, COMMON_CHAIN_SLUGS } from '@subwallet/chain-list';
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { SwapFeeInfo, SwapPair, SwapProviderId, SwapStepDetail, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { SwapPair, SwapProviderId } from '@subwallet/extension-base/types/swap';
 import BigN from 'bignumber.js';
 
 export const CHAIN_FLIP_TESTNET_EXPLORER = 'https://blocks-perseverance.chainflip.io';
@@ -39,23 +39,14 @@ export const SWAP_QUOTE_TIMEOUT_MAP: Record<string, number> = { // in millisecon
   [SwapProviderId.CHAIN_FLIP_MAINNET]: 30000
 };
 
-export const DEFAULT_SWAP_FIRST_STEP: SwapStepDetail = {
-  id: 0,
-  name: 'Fill information',
-  type: SwapStepType.DEFAULT
-};
-
-export const MOCK_SWAP_FEE: SwapFeeInfo = {
-  feeComponent: [],
-  defaultFeeToken: '',
-  feeOptions: []
-};
-
 export const _PROVIDER_TO_SUPPORTED_PAIR_MAP: Record<string, string[]> = {
   [SwapProviderId.HYDRADX_MAINNET]: [COMMON_CHAIN_SLUGS.HYDRADX],
   [SwapProviderId.HYDRADX_TESTNET]: [COMMON_CHAIN_SLUGS.HYDRADX_TESTNET],
   [SwapProviderId.CHAIN_FLIP_MAINNET]: [COMMON_CHAIN_SLUGS.POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM],
-  [SwapProviderId.CHAIN_FLIP_TESTNET]: [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM_SEPOLIA]
+  [SwapProviderId.CHAIN_FLIP_TESTNET]: [COMMON_CHAIN_SLUGS.CHAINFLIP_POLKADOT, COMMON_CHAIN_SLUGS.ETHEREUM_SEPOLIA],
+  [SwapProviderId.POLKADOT_ASSET_HUB]: [COMMON_CHAIN_SLUGS.POLKADOT_ASSET_HUB],
+  [SwapProviderId.KUSAMA_ASSET_HUB]: [COMMON_CHAIN_SLUGS.KUSAMA_ASSET_HUB],
+  [SwapProviderId.ROCOCO_ASSET_HUB]: [COMMON_CHAIN_SLUGS.ROCOCO_ASSET_HUB]
 };
 
 export function getSwapAlternativeAsset (swapPair: SwapPair): string | undefined {
@@ -74,4 +65,11 @@ export function calculateSwapRate (fromAmount: string, toAmount: string, fromAss
   const bnRate = bnFromAmount.div(bnToAmount);
 
   return 1 / bnRate.times(10 ** decimalDiff).toNumber();
+}
+
+export function convertSwapRate (rate: string, fromAsset: _ChainAsset, toAsset: _ChainAsset) {
+  const decimalDiff = _getAssetDecimals(toAsset) - _getAssetDecimals(fromAsset);
+  const bnRate = new BigN(rate);
+
+  return bnRate.times(10 ** decimalDiff).pow(-1).toNumber();
 }

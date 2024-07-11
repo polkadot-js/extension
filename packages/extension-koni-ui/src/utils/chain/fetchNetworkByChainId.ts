@@ -54,7 +54,7 @@ export const fetchChainInfo = async (chainIdList: string[]) => {
 export const detectChanInfo = async (chainId: string[]) => {
   const onlineMap = await getListEVMChainInfo();
 
-  return chainId.every((chainId) => {
+  return chainId.find((chainId) => {
     const chainIdDec = parseInt(chainId);
 
     return !!onlineMap[chainIdDec] && !!onlineMap[chainIdDec].rpc && onlineMap[chainIdDec].rpc.length > 0;

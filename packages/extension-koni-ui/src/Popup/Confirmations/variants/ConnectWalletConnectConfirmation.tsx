@@ -44,6 +44,7 @@ function Component ({ className, request }: Props) {
   const notification = useNotification();
   const setSelectedAccountTypes = useSetSelectedAccountTypes(true);
   const [blockAddNetwork, setBlockAddNetwork] = useState(false);
+  const [networkNeedToImport, setNetworkNeedToImport] = useState<string[]>([]);
 
   const nameSpaceNameMap = useMemo((): Record<string, string> => ({
     [WALLET_CONNECT_EIP155_NAMESPACE]: t('EVM networks'),
@@ -60,7 +61,8 @@ function Component ({ className, request }: Props) {
     localStorage.setItem(TIME_OUT_RECORD, JSON.stringify(timeOut));
   }, [inactiveModal]);
 
-  const { isExpired,
+  const { isExitedAnotherUnsupportedNamespace,
+    isExpired,
     isUnSupportCase,
     missingType,
     namespaceAccounts,
@@ -76,14 +78,14 @@ function Component ({ className, request }: Props) {
     return Object.values(namespaceAccounts).every(({ appliedAccounts }) => appliedAccounts.length);
   }, [namespaceAccounts]);
 
-  const checkNetworksConnected = useMemo((): [boolean, string[]] => {
+  const checkNetworksConnected = useMemo((): string[] => {
     let needConnectedNetwork: string[] = [];
 
-    const isHasNetworkConnect = Object.values(namespaceAccounts).map((value) => {
+    Object.values(namespaceAccounts).forEach((value) => {
       const { networks } = value;
-      const [unsupportedNetworks, supportedNetworks] = networks.reduce((list, { slug, supported }) => {
+      const [unsupportedNetworks, supportedNetworks] = networks.reduce<[string[], string[]]>(([unsupportedNetworks_, supportedNetworks_], { slug, supported }) => {
         if (supported) {
-          list[1].push(slug);
+          supportedNetworks_.push(slug);
         } else {
           const chainData = slug.split(':');
 
@@ -91,30 +93,26 @@ function Component ({ className, request }: Props) {
             const [namespace, chainId] = chainData;
 
             if (namespace === WALLET_CONNECT_EIP155_NAMESPACE) {
-              list[0].push(chainId);
+              unsupportedNetworks_.push(chainId);
             } else if (namespace === WALLET_CONNECT_POLKADOT_NAMESPACE) {
               setBlockAddNetwork(true);
             }
           }
         }
 
-        return list;
-      }, [[], []] as string[][]);
+        return [unsupportedNetworks_, supportedNetworks_];
+      }, [[], []]);
 
-      let isHasNetworkConnect = false;
-
-      if (isUnSupportCase && unsupportedNetworks.length > 0) {
-        isHasNetworkConnect = true;
+      // When the network to be imported is a required network, only one network import is allowed.
+      if (isUnSupportCase && unsupportedNetworks.length === 1) {
         needConnectedNetwork = [...unsupportedNetworks];
-      } else if (supportedNetworks.length === 0) {
-        isHasNetworkConnect = true;
+      } else if (!isUnSupportCase && supportedNetworks.length === 0) {
+        // When networks to be imported are optional networks, and only allow the import if there is no network required by the Dapp that the extension supports.
         needConnectedNetwork = [...unsupportedNetworks];
       }
-
-      return isHasNetworkConnect;
     });
 
-    return [isHasNetworkConnect.every((item) => item), needConnectedNetwork];
+    return needConnectedNetwork;
   }, [isUnSupportCase, namespaceAccounts]);
   const [loading, setLoading] = useState(false);
 
@@ -173,11 +171,10 @@ function Component ({ className, request }: Props) {
   const isSupportCase = !isUnSupportCase && !isExpired && !noNetwork;
 
   useEffect(() => {
-    const [isExistNetworkConnected, needConnectedNetworks] = checkNetworksConnected;
-
-    if (isExistNetworkConnected && needConnectedNetworks.length > 0 && !blockAddNetwork) {
-      detectChanInfo(needConnectedNetworks).then((rs) => {
+    if (checkNetworksConnected.length > 0 && !blockAddNetwork && !isExitedAnotherUnsupportedNamespace) {
+      detectChanInfo(checkNetworksConnected).then((rs) => {
         if (rs) {
+          setNetworkNeedToImport([rs]);
           activeModal(ADD_NETWORK_WALLET_CONNECT_MODAL);
         } else {
           setBlockAddNetwork(true);
@@ -186,7 +183,7 @@ function Component ({ className, request }: Props) {
         setBlockAddNetwork(true);
       });
     }
-  }, [activeModal, blockAddNetwork, checkNetworksConnected]);
+  }, [activeModal, blockAddNetwork, checkNetworksConnected, isExitedAnotherUnsupportedNamespace]);
 
   return (
     <>
@@ -364,7 +361,7 @@ function Component ({ className, request }: Props) {
       </div>
       <AddNetworkWCModal
         cancelRequest={onCancel}
-        networkToAdd={checkNetworksConnected[1]}
+        networkToAdd={networkNeedToImport}
       />
     </>
   );

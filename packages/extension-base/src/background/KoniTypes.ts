@@ -267,6 +267,7 @@ export interface NftCollectionJson {
 
 export interface MetadataItem {
   genesisHash: string;
+  specName: string;
   specVersion: string;
   hexValue: HexString;
   types: Record<string, Record<string, string> | string>;

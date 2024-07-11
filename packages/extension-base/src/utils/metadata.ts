@@ -3,7 +3,6 @@
 
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { IMetadataItem } from '@subwallet/extension-base/services/storage-service/databases';
 
 import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
 import { u8aToHex } from '@polkadot/util';
@@ -14,28 +13,14 @@ export const _isRuntimeUpdated = (signedExtensions?: string[]): boolean => {
   return signedExtensions ? signedExtensions.includes('CheckMetadataHash') : false;
 };
 
-export const calculateMetadataHash = (extraInfo: Omit<ExtraInfo, 'specVersion'>, metadata: IMetadataItem): string => {
-  if (!metadata.hexV15) {
-    throw Error('Metadata not found');
-  }
-
-  const _merkleizeMetadata = merkleizeMetadata(metadata.hexV15, {
-    ...extraInfo,
-    specVersion: parseInt(metadata.specVersion)
-  });
+export const calculateMetadataHash = (extraInfo: ExtraInfo, metadataV15: HexString): string => {
+  const _merkleizeMetadata = merkleizeMetadata(metadataV15, extraInfo);
 
   return u8aToHex(_merkleizeMetadata.digest());
 };
 
-export const getShortMetadata = (blob: HexString, extraInfo: Omit<ExtraInfo, 'specVersion'>, metadata: IMetadataItem): string => {
-  if (!metadata.hexV15) {
-    throw Error('Metadata not found');
-  }
-
-  const _merkleizeMetadata = merkleizeMetadata(metadata.hexV15, {
-    ...extraInfo,
-    specVersion: parseInt(metadata.specVersion)
-  });
+export const getShortMetadata = (blob: HexString, extraInfo: ExtraInfo, metadata: HexString): string => {
+  const _merkleizeMetadata = merkleizeMetadata(metadata, extraInfo);
 
   return u8aToHex(_merkleizeMetadata.getProofForExtrinsicPayload(blob));
 };
@@ -48,6 +33,7 @@ export const cacheMetadata = (
   // Update metadata to database with async methods
   substrateApi.api.isReady.then(async (api) => {
     const currentSpecVersion = api.runtimeVersion.specVersion.toString();
+    const specName = api.runtimeVersion.specName.toString();
     const genesisHash = api.genesisHash.toHex();
     const metadata = await chainService?.getMetadata(chain);
 
@@ -70,6 +56,7 @@ export const cacheMetadata = (
     chainService?.upsertMetadata(chain, {
       chain: chain,
       genesisHash: genesisHash,
+      specName: specName,
       specVersion: currentSpecVersion,
       hexValue: api.runtimeMetadata.toHex(),
       types: getSpecTypes(api.registry, systemChain, api.runtimeVersion.specName, api.runtimeVersion.specVersion) as unknown as Record<string, string>,

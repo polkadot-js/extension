@@ -1979,17 +1979,13 @@ export class ChainService {
     return this.dbService.stores.metadata.getMetadataByGenesisHash(hash);
   }
 
-  getExtraInfo (chain: string): Omit<ExtraInfo, 'specVersion'> {
+  getExtraInfo (chain: string): Omit<ExtraInfo, 'specVersion' | 'specName'> {
     const chainInfo = this.getChainInfoByKey(chain);
-    const substrateApi = this.getSubstrateApi(chain);
-
-    const specName = substrateApi.specName;
 
     return {
       decimals: chainInfo.substrateInfo?.decimals || 0,
       tokenSymbol: chainInfo.substrateInfo?.symbol || 'Unit',
-      base58Prefix: chainInfo.substrateInfo?.addressPrefix || 42,
-      specName
+      base58Prefix: chainInfo.substrateInfo?.addressPrefix || 42
     };
   }
 
@@ -2001,8 +1997,11 @@ export class ChainService {
     }
 
     const extraInfo = this.getExtraInfo(chain);
+    const specVersion = parseInt(metadata.specVersion);
+    const specName = metadata.specName;
+    const hexV15 = metadata.hexV15;
 
-    return calculateMetadataHash(extraInfo, metadata);
+    return calculateMetadataHash({ ...extraInfo, specVersion, specName }, hexV15);
   }
 
   async shortenMetadata (chain: string, txBlob: string): Promise<string | undefined> {
@@ -2013,8 +2012,11 @@ export class ChainService {
     }
 
     const extraInfo = this.getExtraInfo(chain);
+    const specVersion = parseInt(metadata.specVersion);
+    const specName = metadata.specName;
+    const hexV15 = metadata.hexV15;
 
-    return getShortMetadata(txBlob as HexString, extraInfo, metadata);
+    return getShortMetadata(txBlob as HexString, { ...extraInfo, specVersion, specName }, hexV15);
   }
 
   /* Metadata */

@@ -3,7 +3,7 @@
 
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { isSameAddress } from '@subwallet/extension-base/utils';
+import { createPromiseHandler, isSameAddress } from '@subwallet/extension-base/utils';
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
 import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -224,70 +224,58 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
 
   const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     setError(null);
+    const { promise, reject, resolve } = createPromiseHandler<LedgerSignature>();
 
     if (ledger) {
-      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
-
-      if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
-        return new Promise((resolve, reject) => {
-          const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
-
+      ledger.getAddress(false, accountOffset, addressOffset, accountOption)
+        .then((addressOnCurrentLedger) => {
+          if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
+            throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+          }
+        })
+        .then(() => {
+          return ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption);
+        }).then((result) => {
+          resolve(result);
+        })
+        .catch((error: Error) => {
           handleError(error);
           reject(error);
         });
-      }
-
-      return new Promise((resolve, reject) => {
-        setError(null);
-
-        ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption)
-          .then((result) => {
-            resolve(result);
-          })
-          .catch((error: Error) => {
-            handleError(error);
-            reject(error);
-          });
-      });
     } else {
-      return new Promise((resolve, reject) => {
-        reject(new Error(t("Can't find Ledger device")));
-      });
+      reject(new Error(t("Can't find Ledger device")));
+      handleError(new Error(t("Can't find Ledger device")));
     }
+
+    return promise;
   }, [handleError, ledger, t]);
 
   const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
     setError(null);
+    const { promise, reject, resolve } = createPromiseHandler<LedgerSignature>();
 
     if (ledger) {
-      const addressOnCurrentLedger = await ledger.getAddress(false, accountOffset, addressOffset, accountOption);
-
-      if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
-        return new Promise((resolve, reject) => {
-          const error = new Error(t('Wrong device. Connect your previously used Ledger and try again'));
-
+      ledger.getAddress(false, accountOffset, addressOffset, accountOption)
+        .then((addressOnCurrentLedger) => {
+          if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
+            throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+          }
+        })
+        .then(() => {
+          return ledger.signMessage(message, accountOffset, addressOffset, accountOption);
+        }).then((result) => {
+          resolve(result);
+        })
+        .catch((error: Error) => {
           handleError(error);
           reject(error);
         });
-      }
-
-      return new Promise((resolve, reject) => {
-        setError(null);
-
-        ledger.signMessage(message, accountOffset, addressOffset, accountOption)
-          .then((result) => {
-            resolve(result);
-          })
-          .catch((error: Error) => {
-            handleError(error);
-            reject(error);
-          });
-      });
     } else {
-      return new Promise((resolve, reject) => {
-        reject(new Error(t("Can't find Ledger device")));
-      });
+      reject(new Error(t("Can't find Ledger device")));
+      handleError(new Error(t("Can't find Ledger device")));
     }
+
+    return promise;
   }, [handleError, ledger, t]);
 
   useEffect(() => {

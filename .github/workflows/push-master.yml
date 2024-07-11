@@ -24,7 +24,7 @@ jobs:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         GH_PAT: ${{ secrets.GH_PAT_BOT }}
         GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT_BOT }}
-        GH_RELEASE_FILES: master-build.zip,master-src.zip
+        GH_RELEASE_FILES: master-ff-build.zip,master-ff-src.zip,master-chrome-build.zip,master-chrome-src.zip
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       run: |
         corepack enable

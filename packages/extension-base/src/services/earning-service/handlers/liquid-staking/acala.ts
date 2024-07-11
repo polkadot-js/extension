@@ -196,7 +196,8 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
           unstakings.push({
             chain: this.chain,
             status: UnstakingStatus.UNLOCKING,
-            claimable: redeemAmount.toString()
+            claimable: redeemAmount.toString(),
+            waitingTime: 28 * _STAKING_ERA_LENGTH_MAP.polkadot // up to 29 day (in case non-fast-match
           });
         }
 

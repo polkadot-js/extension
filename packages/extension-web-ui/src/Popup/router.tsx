@@ -69,6 +69,7 @@ const NftItemDetail = new LazyLoader('NftItemDetail', () => import('@subwallet/e
 const NftCollections = new LazyLoader('NftCollections', () => import('@subwallet/extension-web-ui/Popup/Home/Nfts/NftCollections'));
 const NftCollectionDetail = new LazyLoader('NftCollectionDetail', () => import('@subwallet/extension-web-ui/Popup/Home/Nfts/NftCollectionDetail'));
 const NftImport = new LazyLoader('NftImport', () => import('@subwallet/extension-web-ui/Popup/Home/Nfts/NftImport'));
+const NftEntry = new LazyLoader('NftEntry', () => import('@subwallet/extension-web-ui/Popup/Home/Nfts/NftEntry'));
 
 const InscriptionItems = new LazyLoader('InscriptionItems', () => import('@subwallet/extension-web-ui/Popup/Home/Inscriptions/InscriptionItemList'));
 const InscriptionItemDetail = new LazyLoader('InscriptionItemDetail', () => import('@subwallet/extension-web-ui/Popup/Home/Inscriptions/InscriptionItemDetail'));
@@ -192,8 +193,7 @@ export const router = createBrowserRouter([
           Statistics.generateRouterObject('statistics'),
           TokenDetailList.generateRouterObject('tokens/detail/:slug'),
           {
-            path: 'nfts',
-            element: <NestedOutlet />,
+            ...NftEntry.generateRouterObject('nfts'),
             children: [
               NftCollections.generateRouterObject('collections'),
               NftCollectionDetail.generateRouterObject('collection-detail'),

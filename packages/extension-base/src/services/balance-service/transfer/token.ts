@@ -63,7 +63,7 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
   } else if (_isTokenGearSmartContract(tokenInfo) && (api instanceof GearApi)) {
     const contractPromise = getGRC20ContractPromise(api, _getContractAddressOfToken(tokenInfo));
     const transaction = await contractPromise
-      .vft
+      .service
       .transfer(u8aToHex(decodeAddress(to)), value) // Create transfer transaction
       .withAccount(from) // Set sender account
       .calculateGas(); // Add account arg to extrinsic

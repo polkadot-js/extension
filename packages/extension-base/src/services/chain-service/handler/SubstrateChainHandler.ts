@@ -9,7 +9,7 @@ import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-s
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
+import { GEAR_DEFAULT_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -173,9 +173,9 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
 
     const [nameRes, symbolRes, decimalsRes] = await Promise.all([
-      tokenContract.vft.name(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.vft.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.vft.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
+      tokenContract.service.name(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.symbol(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.decimals(GEAR_DEFAULT_ADDRESS)
     ]);
 
     const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;

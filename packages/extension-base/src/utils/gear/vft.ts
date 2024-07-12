@@ -11,8 +11,7 @@ export class VFT {
   public readonly service: VftService;
 
   constructor (public api: GearApi, public programId: `0x${string}` = '0x') {
-    const types: Record<string, any> = {
-    };
+    const types: Record<string, any> = {};
 
     this.registry = new TypeRegistry();
     this.registry.setKnownTypes({ types });
@@ -70,7 +69,7 @@ export class VftService {
       this._program.api,
       this._program.registry,
       'send_message',
-      ['Service', 'Approve', spender, value],
+      ['Vft', 'Approve', spender, value],
       '(String, String, [u8;32], U256)',
       'bool',
       this._program.programId
@@ -86,7 +85,7 @@ export class VftService {
       this._program.api,
       this._program.registry,
       'send_message',
-      ['Service', 'Transfer', to, value],
+      ['Vft', 'Transfer', to, value],
       '(String, String, [u8;32], U256)',
       'bool',
       this._program.programId
@@ -102,7 +101,7 @@ export class VftService {
       this._program.api,
       this._program.registry,
       'send_message',
-      ['Service', 'TransferFrom', from, to, value],
+      ['Vft', 'TransferFrom', from, to, value],
       '(String, String, [u8;32], [u8;32], U256)',
       'bool',
       this._program.programId
@@ -110,7 +109,7 @@ export class VftService {
   }
 
   public async allowance (owner: ActorId, spender: ActorId, originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<bigint> {
-    const payload = this._program.registry.createType('(String, String, [u8;32], [u8;32])', ['Service', 'Allowance', owner, spender]).toHex();
+    const payload = this._program.registry.createType('(String, String, [u8;32], [u8;32])', ['Vft', 'Allowance', owner, spender]).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -125,7 +124,7 @@ export class VftService {
   }
 
   public async balanceOf (account: ActorId, originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<bigint> {
-    const payload = this._program.registry.createType('(String, String, [u8;32])', ['Service', 'BalanceOf', account]).toHex();
+    const payload = this._program.registry.createType('(String, String, [u8;32])', ['Vft', 'BalanceOf', account]).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -140,7 +139,7 @@ export class VftService {
   }
 
   public async decimals (originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<number> {
-    const payload = this._program.registry.createType('(String, String)', ['Service', 'Decimals']).toHex();
+    const payload = this._program.registry.createType('(String, String)', ['Vft', 'Decimals']).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -155,7 +154,7 @@ export class VftService {
   }
 
   public async name (originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<string> {
-    const payload = this._program.registry.createType('(String, String)', ['Service', 'Name']).toHex();
+    const payload = this._program.registry.createType('(String, String)', ['Vft', 'Name']).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -170,7 +169,7 @@ export class VftService {
   }
 
   public async symbol (originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<string> {
-    const payload = this._program.registry.createType('(String, String)', ['Service', 'Symbol']).toHex();
+    const payload = this._program.registry.createType('(String, String)', ['Vft', 'Symbol']).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -185,7 +184,7 @@ export class VftService {
   }
 
   public async totalSupply (originAddress: string, value?: number | string | bigint, atBlock?: `0x${string}`): Promise<bigint> {
-    const payload = this._program.registry.createType('(String, String)', ['Service', 'TotalSupply']).toHex();
+    const payload = this._program.registry.createType('(String, String)', ['Vft', 'TotalSupply']).toHex();
     const reply = await this._program.api.message.calculateReply({
       destination: this._program.programId,
       origin: decodeAddress(originAddress),
@@ -207,7 +206,7 @@ export class VftService {
 
       const payload = message.payload.toHex();
 
-      if (getServiceNamePrefix(payload) === 'Service' && getFnNamePrefix(payload) === 'Approval') {
+      if (getServiceNamePrefix(payload) === 'Vft' && getFnNamePrefix(payload) === 'Approval') {
         // eslint-disable-next-line node/no-callback-literal,@typescript-eslint/no-floating-promises
         callback(this._program.registry.createType('(String, String, {"owner":"[u8;32]","spender":"[u8;32]","value":"U256"})', message.payload)[2].toJSON() as unknown as { owner: ActorId; spender: ActorId; value: number | string | bigint });
       }

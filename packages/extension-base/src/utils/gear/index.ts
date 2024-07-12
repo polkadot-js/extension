@@ -3,4 +3,4 @@
 
 export * from './combine';
 export * from './grc20';
-export * from './vft';
+export * from './vftService';

@@ -7,14 +7,14 @@ import { ApiPromise } from '@polkadot/api';
 import { HexString } from '@polkadot/util/types';
 
 import { GRC20 } from './grc20';
-import { VFT } from './vft';
+import { VFT } from './vftService';
 
 export const DEFAULT_GEAR_ADDRESS = {
   ALICE: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
   BOB: '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty'
 };
 
-export const GEAR_DEFAULT_ADDRESS = 'kGi1Ui7VXBFmNxTVDbryg6seURUV3fKBSeDkky8nP3Pjwf6EG';
+export const GEAR_DEFAULT_ADDRESS = '5EYCAe5ijiYfAXEth5DGRKiKuVjTXQKr877tUPz6eLz2t9aG';
 
 export function getGRC20ContractPromise (apiPromise: ApiPromise, contractAddress: string) {
   const gearApi = apiPromise as GearApi;

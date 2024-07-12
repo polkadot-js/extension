@@ -93,7 +93,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
   const isSelectGRC20 = useMemo(() => {
-    return selectedTokenType === _AssetType.GRC20;
+    return [_AssetType.GRC20, _AssetType.VFT].includes(selectedTokenType);
   }, [selectedTokenType]);
 
   const tokenTypeOptions = useMemo(() => {
@@ -108,7 +108,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             const selectedTokenType = getFieldValue('type') as _AssetType;
             const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType) && isEthereumAddress(contractAddress);
             const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
-            const isValidGrc20Contract = [_AssetType.GRC20].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
+            const isValidGrc20Contract = [_AssetType.GRC20, _AssetType.VFT].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
             const reformattedAddress = isValidGrc20Contract ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
             if (isValidEvmContract || isValidWasmContract || isValidGrc20Contract) {
@@ -190,7 +190,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
     const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
 
-    const reformattedAddress = type === _AssetType.GRC20 ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
+    const reformattedAddress = [_AssetType.GRC20, _AssetType.VFT].includes(type) ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 

@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { SpecialYieldPoolInfo, SpecialYieldPositionInfo } from '@subwallet/extension-base/types';
-import { balanceNoPrefixFormater, BN_TEN, formatNumber, isAccountAll } from '@subwallet/extension-base/utils';
+import { EarningRewardItem, SpecialYieldPoolInfo, SpecialYieldPositionInfo } from '@subwallet/extension-base/types';
+import { balanceNoPrefixFormater, BN_TEN, formatNumber, isAccountAll, isSameAddress } from '@subwallet/extension-base/utils';
 import { BN_ZERO } from '@subwallet/extension-web-ui/constants';
 import { HomeContext } from '@subwallet/extension-web-ui/contexts/screen/HomeContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
@@ -11,6 +11,7 @@ import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { saveShowBalance } from '@subwallet/extension-web-ui/messaging';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { findAccountByAddress } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, Number, Tooltip } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
@@ -29,7 +30,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
   const { currencyData } = useSelector((state: RootState) => state.price);
   const earningRewards = useSelector((state) => state.earning.earningRewards);
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
-  const { currentAccount } = useSelector((state) => state.accountState);
+  const { accounts, currentAccount } = useSelector((state) => state.accountState);
 
   const { t } = useTranslation();
   const { accountBalance: { totalBalanceInfo } } = useContext(HomeContext);
@@ -91,26 +92,28 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
     const address = currentAccount?.address || '';
     const isAll = isAccountAll(address);
 
-    if (isAll) {
-      earningRewards.forEach((item) => {
+    const checkAddress = (item: EarningRewardItem) => {
+      if (isAll) {
+        const account = findAccountByAddress(accounts, item.address);
+
+        return !!account;
+      } else {
+        return isSameAddress(address, item.address);
+      }
+    };
+
+    earningRewards
+      .filter(checkAddress)
+      .forEach((item) => {
         const rewardItem = items.find((reward) => reward.slug === item.slug);
 
         if (rewardItem && item.unclaimedReward) {
           result = result.plus((new BigN(item.unclaimedReward)).div(BN_TEN.pow(rewardItem.asset.decimals || 0)).multipliedBy(rewardItem.price));
         }
       });
-    } else {
-      earningRewards.forEach((item) => {
-        const rewardItem = items.find((reward) => reward.slug === item.slug && item.address === address);
-
-        if (rewardItem && item.unclaimedReward) {
-          result = result.plus((new BigN(item.unclaimedReward)).div(BN_TEN.pow(rewardItem.asset.decimals || 0)).multipliedBy(rewardItem.price));
-        }
-      });
-    }
 
     return result;
-  }, [currentAccount?.address, earningRewards, items]);
+  }, [currentAccount?.address, earningRewards, items, accounts]);
 
   useEffect(() => {
     const backgroundColor = isTotalBalanceDecrease ? BackgroundColorMap.DECREASE : BackgroundColorMap.INCREASE;

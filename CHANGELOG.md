@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 1.2.15
+Build date: Jul 12, 2024.
+
+Features & Update:
+- Update chain-list
+  - Add support for Aura Network
+  - Update SQD token logo
+  - Support Decoded collection from Unique
+  - Add multi-chain asset for some token
+- Update chain-list health-check and report RPC connect status (#3243)
+- Update fallback API for SubWallet API (Price, Exchange rate) (#3183)
+- Add validate account in case sign transaction with Ledger account (#3263)
+
+Bugs fixed:
+- Fix bug calculating balance for relaychain (#3312)
+- Fix bug show withdraw information for the Acala liquid staking (#2965)
+
+
 ## 1.2.14
 Build date: Jul 09, 2024.
 

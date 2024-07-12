@@ -186,9 +186,9 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
-          const [devirativeRedeemAmount, _] = redeemRequest;
+          const [derivativeRedeemAmount, _] = redeemRequest;
 
-          const redeemAmount = convertDerivativeToken(new BN(devirativeRedeemAmount), exchangeRate, this.rateDecimals);
+          const redeemAmount = convertDerivativeToken(new BN(derivativeRedeemAmount), exchangeRate, this.rateDecimals);
 
           totalBalance = totalBalance.add(redeemAmount);
           unlockingBalance = unlockingBalance.add(redeemAmount);

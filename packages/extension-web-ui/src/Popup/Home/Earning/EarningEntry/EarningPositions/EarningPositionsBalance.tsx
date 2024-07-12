@@ -155,7 +155,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
                   decimal={0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
-                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  prefix={`${totalValue.isZero() ? '' : '~'}${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
                   subFloatNumber
                   value={totalValue}
                 />
@@ -188,7 +188,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
                   decimal={0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
-                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  prefix={`${totalActiveStake.isZero() ? '' : '~'}${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
                   subFloatNumber
                   value={totalActiveStake}
                 />
@@ -218,7 +218,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
                   decimal={0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
-                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  prefix={`${totalUnstake.isZero() ? '' : '~'}${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
                   subFloatNumber
                   value={totalUnstake}
                 />
@@ -247,7 +247,7 @@ function Component ({ className, items }: Props): React.ReactElement<Props> {
                   decimal={0}
                   decimalOpacity={0.45}
                   hide={!isShowBalance}
-                  prefix={`~${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
+                  prefix={`${totalUnclaimReward.isZero() ? '' : '~'}${(currencyData?.isPrefix && currencyData.symbol) || ''}`}
                   subFloatNumber
                   value={totalUnclaimReward}
                 />

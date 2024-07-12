@@ -84,6 +84,7 @@ class InjectHandler {
   hasInjected: boolean;
   isInitEnable: boolean;
   enableSubject: BehaviorSubject<boolean>;
+  noFindAccounts: BehaviorSubject<boolean>;
   loadingSubject: BehaviorSubject<boolean>;
   successSubject: BehaviorSubject<number>;
   errorSubject = new BehaviorSubject<InjectErrorMap>({});
@@ -112,6 +113,7 @@ class InjectHandler {
     this.selectedWallet = localStorage.getItem(ENABLE_INJECT) || null;
     const walletInfo = PREDEFINED_WALLETS[this.selectedWallet || ''];
 
+    this.noFindAccounts = new BehaviorSubject<boolean>(false);
     this.enableSubject = new BehaviorSubject<boolean>(!!this.selectedWallet);
     this.successSubject = new BehaviorSubject<number>(0);
     this.isInitEnable = this.enableSubject.value;
@@ -218,8 +220,8 @@ class InjectHandler {
     this.evmAccounts = [];
     this.substrateEnableCompleted = false;
     this.evmEnableCompleted = false;
-    this.substrateKey && this.updateInjectedAccount(this.substrateKey, []);
-    this.evmKey && this.updateInjectedAccount(this.evmKey, []);
+    this.substrateKey && this.updateInjectedAccount(this.substrateKey, [], true);
+    this.evmKey && this.updateInjectedAccount(this.evmKey, [], true);
     this.substrateWallet = undefined;
     this.evmWallet = undefined;
     this.successSubject.next(0);
@@ -303,7 +305,7 @@ class InjectHandler {
     this.evmAccountUnsubcall?.();
   }
 
-  updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[]) {
+  updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[], isDisale?: boolean) {
     const oldArray = parseAccountMap(this.oldAccountArrayMap);
 
     if (accounts.length === 0) {
@@ -363,7 +365,8 @@ class InjectHandler {
       // Promise.all(promises).finally(callback);
       this.oldAccountArrayMap = { ...this.accountArrayMap };
 
-      if (Object.keys(this.accountArrayMap).length === 0) {
+      if (Object.values(this.accountArrayMap).flat().length === 0) {
+        !isDisale && this.noFindAccounts.next(true);
         this.disable();
       }
     }, 300, 900, false);
@@ -381,6 +384,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [evmWallet, setEvmWallet] = useState(injectHandler.evmWallet);
   const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
+  const notify = useNotification();
 
   const selectWallet = useCallback(() => {
     // Auto active injected on mobile
@@ -435,6 +439,20 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     });
     injectHandler.loadingSubject.subscribe(setLoadingInject);
   }, []);
+
+  useEffect(() => {
+    injectHandler.noFindAccounts.subscribe((v) => {
+      if (v) {
+        notify({
+          message: t('No account found, please add account in your wallet extension or unlock it!'),
+          type: 'warning',
+          duration: 8
+
+        });
+        injectHandler.noFindAccounts.next(false);
+      }
+    });
+  }, [notify, t]);
 
   useEffect(() => {
     injectHandler.successSubject.subscribe(setWallet);

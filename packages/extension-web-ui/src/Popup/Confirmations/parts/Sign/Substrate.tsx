@@ -390,12 +390,18 @@ const Component: React.FC<Props> = (props: Props) => {
         })
         .catch((e) => {
           console.error(e);
+          notify({
+            message: (e as Error).message,
+            type: 'error',
+            duration: 8
+          });
+          onCancel();
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [account.address, isMessage, onApproveSignature, payload, request.payload, substrateWallet]);
+  }, [account.address, isMessage, notify, onApproveSignature, onCancel, payload, request.payload, substrateWallet]);
 
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);

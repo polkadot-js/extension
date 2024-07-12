@@ -188,7 +188,15 @@ const Component: React.FC<Props> = (props: Props) => {
             .then((value) => {
               resolve(value);
             })
-            .catch(reject);
+            .catch((e) => {
+              console.error(e);
+              notify({
+                message: (e as Error).message,
+                type: 'error'
+              });
+              onCancel();
+              reject(e);
+            });
         });
       }
 
@@ -204,7 +212,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }
-  }, [account.address, chainId, evmWallet, isMessage, onApproveSignature, payload.payload]);
+  }, [account.address, chainId, evmWallet, isMessage, notify, onApproveSignature, onCancel, payload.payload]);
 
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
@@ -215,7 +223,8 @@ const Component: React.FC<Props> = (props: Props) => {
       if (currentTime >= txExpirationTime) {
         notify({
           message: t('Transaction expired'),
-          type: 'error'
+          type: 'error',
+          duration: 8
         });
         onCancel();
       }

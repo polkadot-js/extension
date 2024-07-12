@@ -17,10 +17,16 @@
   "type": "module",
   "version": "0.48.3-3-x",
   "dependencies": {
+    "@polkadot-api/pjs-signer": "^0.2.1",
+    "@polkadot-api/utils": "^0.1.0",
     "@polkadot/api": "^12.0.2",
     "@polkadot/extension-base": "0.48.3-3-x",
     "@polkadot/extension-inject": "0.48.3-3-x",
     "@polkadot/extension-ui": "0.48.3-3-x",
+    "@substrate/connect-discovery": "^0.0.6",
+    "@substrate/light-client-extension-helpers": "./substrate-light-client-extension-helpers-2.0.3.tgz",
+    "@substrate/smoldot-discovery": "^0.0.7",
+    "smoldot": "^2.0.29",
     "tslib": "^2.6.2"
   },
   "devDependencies": {

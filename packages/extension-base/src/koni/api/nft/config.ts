@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils';
+import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils/environment'; // do not change to shorten path, avoid circle import
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -104,6 +104,8 @@ export const SUPPORTED_TRANSFER_EVM_CHAIN = [
   SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shiden as string,
   SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string
 ];
+
+export const UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME = ['unique_evm'];
 
 export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbase as string]: 1287,

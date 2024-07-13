@@ -6,6 +6,9 @@
   "short_name": "polkadot{.js}",
   "manifest_version": 3,
   "permissions": ["storage", "tabs", "alarms"],
+  "browser_specific_settings": {
+    "gecko_android": {}
+  }  
   "background": {
     "scripts": ["background.js"],
     "type": "module"

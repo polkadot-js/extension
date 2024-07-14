@@ -14,6 +14,12 @@
     "default_title": "polkadot{.js}",
     "default_popup": "index.html"
   },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "polkadotjavascript@gmail.com",
+      "strict_min_version": "42.0"
+    }
+  },
   "content_scripts": [{
     "js": ["content.js"],
     "matches": ["http://*/*", "https://*/*"],

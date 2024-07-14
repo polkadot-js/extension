@@ -1,6 +1,10 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// This is to ensure the legacy `class Ledger` doesn't throw linting errors.
+//
+/* eslint-disable deprecation/deprecation */
+
 import type { Network } from '@polkadot/networks/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';

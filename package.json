@@ -50,13 +50,13 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^12.0.2",
-    "@polkadot/keyring": "^12.6.2",
-    "@polkadot/networks": "^12.6.2",
-    "@polkadot/types": "^12.0.2",
-    "@polkadot/util": "^12.6.2",
-    "@polkadot/util-crypto": "^12.6.2",
-    "@polkadot/x-fetch": "^12.6.2",
+    "@polkadot/api": "^12.2.1",
+    "@polkadot/keyring": "^13.0.2",
+    "@polkadot/networks": "^13.0.2",
+    "@polkadot/types": "^12.2.1",
+    "@polkadot/util": "^13.0.2",
+    "@polkadot/util-crypto": "^13.0.2",
+    "@polkadot/x-fetch": "^13.0.2",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.3.3"
   }

@@ -1,19 +1,16 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-// This is to ensure the legacy `class Ledger` doesn't throw linting errors.
-//
-/* eslint-disable deprecation/deprecation */
-
 import type { Network } from '@polkadot/networks/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Ledger } from '@polkadot/hw-ledger';
+import { LedgerGeneric } from '@polkadot/hw-ledger';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import ledgerChains from '../util/legerChains.js';
+import useMetadata from './useMetadata.js';
 import useTranslation from './useTranslation.js';
 
 interface StateBase {
@@ -26,7 +23,7 @@ interface State extends StateBase {
   error: string | null;
   isLoading: boolean;
   isLocked: boolean;
-  ledger: Ledger | null;
+  ledger: LedgerGeneric | null;
   refresh: () => void;
   warning: string | null;
 }
@@ -44,8 +41,8 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): Ledger {
-  let ledger: Ledger | null = null;
+function retrieveLedger (genesis: string): LedgerGeneric {
+  let ledger: LedgerGeneric | null = null;
 
   const { isLedgerCapable } = getState();
 
@@ -55,7 +52,9 @@ function retrieveLedger (genesis: string): Ledger {
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  ledger = new Ledger('webusb', def.network);
+  assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
+
+  ledger = new LedgerGeneric('webusb', def.network, def.slip44);
 
   return ledger;
 }
@@ -67,6 +66,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const chainInfo = useMetadata(genesis);
   const { t } = useTranslation();
   const ledger = useMemo(() => {
     setError(null);
@@ -102,7 +102,9 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    ledger.getAddress(false, accountIndex, addressOffset)
+    // TODO - consider ensuring ss58 address is no longer an optional input for the metadata information.
+    // Also this should be an opportunity to ensure we include any data needed.
+    ledger.getAddress(chainInfo?.ss58Format || 0, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

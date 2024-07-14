@@ -17,7 +17,7 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "polkadotjavascript@gmail.com",
-      "strict_min_version": "42.0"
+      "strict_min_version": "108.0.2"
     }
   },
   "content_scripts": [{

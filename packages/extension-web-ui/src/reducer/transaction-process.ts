@@ -7,7 +7,7 @@ import { simpleDeepClone } from '@subwallet/extension-web-ui/utils';
 
 // todo: review this file again and remove unnecessary logic
 
-export enum SwapStepStatus {
+export enum CommonStepStatus {
   QUEUED = 'QUEUED',
   PROCESSING = 'PROCESSING',
   SUBMITTING = 'SUBMITTING',
@@ -17,17 +17,17 @@ export enum SwapStepStatus {
 
 interface StepResult {
   result: SWTransactionResponse | Error | boolean | undefined;
-  status: SwapStepStatus;
+  status: CommonStepStatus;
 }
 
-export interface SwapProcessState {
+export interface CommonProcessState {
   steps: CommonStepDetail[]; // list steps
   feeStructure: CommonStepFeeInfo[];
   currentStep: number; // Current step
   stepResults: Record<number, StepResult>;
 }
 
-export enum SwapActionType {
+export enum CommonActionType {
   INIT = 'INIT', // init data
   STEP_CREATE = 'STEP_CREATE', // init step struct
   STEP_COMPLETE = 'STEP_COMPLETE', // complete current step and processing next step
@@ -36,32 +36,32 @@ export enum SwapActionType {
   STEP_SUBMIT = 'STEP_SUBMIT', // submit current step
 }
 
-interface AbstractSwapAction {
-  type: SwapActionType;
+interface CommonStepAction {
+  type: CommonActionType;
   payload: unknown;
 }
 
-type ActionHandler<T extends AbstractSwapAction> = (oldState: SwapProcessState, action: T) => SwapProcessState;
+type ActionHandler<T extends CommonStepAction> = (oldState: CommonProcessState, action: T) => CommonProcessState;
 
-export const DEFAULT_SWAP_PROCESS: SwapProcessState = {
+export const DEFAULT_COMMON_PROCESS: CommonProcessState = {
   steps: [],
   feeStructure: [],
   currentStep: 0,
   stepResults: {}
 };
 
-interface InitAction extends AbstractSwapAction {
-  type: SwapActionType.INIT;
-  payload: SwapProcessState;
+interface InitAction extends CommonStepAction {
+  type: CommonActionType.INIT;
+  payload: CommonProcessState;
 }
 
 const handleInitAction: ActionHandler<InitAction> = () => {
-  return simpleDeepClone(DEFAULT_SWAP_PROCESS);
+  return simpleDeepClone(DEFAULT_COMMON_PROCESS);
 };
 
-interface StepCreateAction extends AbstractSwapAction {
-  type: SwapActionType.STEP_CREATE;
-  payload: Pick<SwapProcessState, 'steps' | 'feeStructure'>;
+interface StepCreateAction extends CommonStepAction {
+  type: CommonActionType.STEP_CREATE;
+  payload: Pick<CommonProcessState, 'steps' | 'feeStructure'>;
 }
 
 const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { payload }) => {
@@ -69,7 +69,7 @@ const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { pay
   const oldSteps = oldState.steps.map(convertKey).join('_');
   const newSteps = payload.steps.map(convertKey).join('_');
 
-  const result: SwapProcessState = {
+  const result: CommonProcessState = {
     ...oldState,
     ...payload
   };
@@ -81,44 +81,44 @@ const handleStepCreateAction: ActionHandler<StepCreateAction> = (oldState, { pay
       if (!result.stepResults[step.id]) {
         result.stepResults[step.id] = {
           result: undefined,
-          status: SwapStepStatus.QUEUED
+          status: CommonStepStatus.QUEUED
         };
       }
     }
   }
 
   const firstStep = Math.min(...Object.keys(result.stepResults).map((key) => parseInt(key)));
-  const allQueued = Object.values(result.stepResults).every((_result) => _result.status === SwapStepStatus.QUEUED);
+  const allQueued = Object.values(result.stepResults).every((_result) => _result.status === CommonStepStatus.QUEUED);
 
   if (allQueued) {
-    result.stepResults[firstStep].status = SwapStepStatus.PROCESSING;
+    result.stepResults[firstStep].status = CommonStepStatus.PROCESSING;
   }
 
   return result;
 };
 
-interface StepSubmitAction extends AbstractSwapAction {
-  type: SwapActionType.STEP_SUBMIT;
+interface StepSubmitAction extends CommonStepAction {
+  type: CommonActionType.STEP_SUBMIT;
   payload: null;
 }
 
 const handleStepSubmitAction: ActionHandler<StepSubmitAction> = (oldState) => {
-  const result: SwapProcessState = { ...oldState };
+  const result: CommonProcessState = { ...oldState };
   const currentStep = oldState.currentStep;
 
   result.stepResults = { ...oldState.stepResults };
-  result.stepResults[currentStep].status = SwapStepStatus.SUBMITTING;
+  result.stepResults[currentStep].status = CommonStepStatus.SUBMITTING;
 
   return result;
 };
 
-interface StepCompleteAction extends AbstractSwapAction {
-  type: SwapActionType.STEP_COMPLETE;
+interface StepCompleteAction extends CommonStepAction {
+  type: CommonActionType.STEP_COMPLETE;
   payload: StepResult['result'];
 }
 
 const handleStepCompleteAction: ActionHandler<StepCompleteAction> = (oldState, { payload }) => {
-  const result: SwapProcessState = { ...oldState };
+  const result: CommonProcessState = { ...oldState };
   const currentStep = oldState.currentStep;
   const steps = oldState.steps.length;
   const haveNextStep = currentStep < steps - 1;
@@ -126,7 +126,7 @@ const handleStepCompleteAction: ActionHandler<StepCompleteAction> = (oldState, {
   result.stepResults = { ...oldState.stepResults };
   result.stepResults[currentStep] = {
     result: payload,
-    status: SwapStepStatus.SUCCESS
+    status: CommonStepStatus.SUCCESS
   };
 
   if (haveNextStep) {
@@ -136,31 +136,31 @@ const handleStepCompleteAction: ActionHandler<StepCompleteAction> = (oldState, {
   return result;
 };
 
-interface StepErrorAction extends AbstractSwapAction {
-  type: SwapActionType.STEP_ERROR;
+interface StepErrorAction extends CommonStepAction {
+  type: CommonActionType.STEP_ERROR;
   payload: StepResult['result'];
 }
 
 const handleStepErrorAction: ActionHandler<StepErrorAction> = (oldState, { payload }) => {
-  const result: SwapProcessState = { ...oldState };
+  const result: CommonProcessState = { ...oldState };
   const currentStep = oldState.currentStep;
 
   result.stepResults = { ...oldState.stepResults };
   result.stepResults[currentStep] = {
     result: payload,
-    status: SwapStepStatus.ERROR
+    status: CommonStepStatus.ERROR
   };
 
   return result;
 };
 
-interface StepErrorRollbackAction extends AbstractSwapAction {
-  type: SwapActionType.STEP_ERROR_ROLLBACK;
+interface StepErrorRollbackAction extends CommonStepAction {
+  type: CommonActionType.STEP_ERROR_ROLLBACK;
   payload: StepResult['result'];
 }
 
 const handleStepErrorRollbackAction: ActionHandler<StepErrorRollbackAction> = (oldState, { payload }) => {
-  const result: SwapProcessState = { ...oldState };
+  const result: CommonProcessState = { ...oldState };
   const currentStep = oldState.currentStep;
   const haveNextStep = currentStep > 0;
 
@@ -169,36 +169,36 @@ const handleStepErrorRollbackAction: ActionHandler<StepErrorRollbackAction> = (o
   result.stepResults = { ...oldState.stepResults };
   result.stepResults[currentStep] = {
     result: payload,
-    status: SwapStepStatus.QUEUED
+    status: CommonStepStatus.QUEUED
   };
 
-  result.stepResults[previousStep].status = SwapStepStatus.PROCESSING;
+  result.stepResults[previousStep].status = CommonStepStatus.PROCESSING;
   result.currentStep = previousStep;
 
   return result;
 };
 
-type SwapAction =
-  | InitAction
-  | StepCreateAction
-  | StepSubmitAction
-  | StepCompleteAction
-  | StepErrorAction
-  | StepErrorRollbackAction;
+export type CommonProcessAction =
+    | InitAction
+    | StepCreateAction
+    | StepSubmitAction
+    | StepCompleteAction
+    | StepErrorAction
+    | StepErrorRollbackAction;
 
-export const swapReducer = (oldState: SwapProcessState, action: SwapAction): SwapProcessState => {
+export const commonProcessReducer = (oldState: CommonProcessState, action: CommonProcessAction): CommonProcessState => {
   switch (action.type) {
-    case SwapActionType.INIT:
+    case CommonActionType.INIT:
       return handleInitAction(oldState, action);
-    case SwapActionType.STEP_CREATE:
+    case CommonActionType.STEP_CREATE:
       return handleStepCreateAction(oldState, action);
-    case SwapActionType.STEP_SUBMIT:
+    case CommonActionType.STEP_SUBMIT:
       return handleStepSubmitAction(oldState, action);
-    case SwapActionType.STEP_COMPLETE:
+    case CommonActionType.STEP_COMPLETE:
       return handleStepCompleteAction(oldState, action);
-    case SwapActionType.STEP_ERROR:
+    case CommonActionType.STEP_ERROR:
       return handleStepErrorAction(oldState, action);
-    case SwapActionType.STEP_ERROR_ROLLBACK:
+    case CommonActionType.STEP_ERROR_ROLLBACK:
       return handleStepErrorRollbackAction(oldState, action);
     default:
       throw new Error("Can't handle action");

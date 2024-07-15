@@ -8,6 +8,7 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { ServiceStatus, ServiceWithProcessInterface, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { EventService } from '@subwallet/extension-base/services/event-service';
+import { AssetHubSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/asset-hub';
 import { SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
 import { ChainflipSwapHandler } from '@subwallet/extension-base/services/swap-service/handler/chainflip-handler';
 import { HydradxHandler } from '@subwallet/extension-base/services/swap-service/handler/hydradx-handler';
@@ -113,8 +114,6 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
       selectedQuote: swapQuoteResponse.optimalQuote
     });
 
-    console.log('optimalProcess', optimalProcess);
-
     return {
       process: optimalProcess,
       quote: swapQuoteResponse
@@ -172,6 +171,16 @@ export class SwapService implements ServiceWithProcessInterface, StoppableServic
 
         case SwapProviderId.HYDRADX_MAINNET:
           this.handlers[providerId] = new HydradxHandler(this.chainService, this.state.balanceService, false);
+          break;
+
+        case SwapProviderId.POLKADOT_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'statemint');
+          break;
+        case SwapProviderId.KUSAMA_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'statemine');
+          break;
+        case SwapProviderId.ROCOCO_ASSET_HUB:
+          this.handlers[providerId] = new AssetHubSwapHandler(this.chainService, this.state.balanceService, 'rococo_assethub');
           break;
 
         default:

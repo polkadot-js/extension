@@ -15,7 +15,9 @@ export function _getActiveStakeInNominationPool (memberInfo: PalletNominationPoo
 }
 
 export function _getUnbondingStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {
-  return new BigN(Object.values(memberInfo.unbondingEras).reduce((a, b) => a + b, 0));
+  const unbondingValues: BigN[] = Object.values(memberInfo.unbondingEras).map((unbonding) => new BigN(unbonding));
+
+  return new BigN(Object.values(unbondingValues).reduce((a, b) => a.plus(b), new BigN(0)));
 }
 
 export function _getTotalStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {

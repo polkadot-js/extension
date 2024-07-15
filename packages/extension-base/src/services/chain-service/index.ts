@@ -4,6 +4,7 @@
 import { AssetLogoMap, AssetRefMap, ChainAssetMap, ChainInfoMap, ChainLogoMap, MultiChainAssetMap } from '@subwallet/chain-list';
 import { _AssetRef, _AssetRefPath, _AssetType, _ChainAsset, _ChainInfo, _ChainStatus, _EvmInfo, _MultiChainAsset, _SubstrateChainType, _SubstrateInfo } from '@subwallet/chain-list/types';
 import { AssetSetting, ValidateNetworkResponse } from '@subwallet/extension-base/background/KoniTypes';
+import { _isSnowBridgeXcm } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { _DEFAULT_ACTIVE_CHAINS, _ZK_ASSET_PREFIX, LATEST_CHAIN_DATA_FETCHING_INTERVAL } from '@subwallet/extension-base/services/chain-service/constants';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { MantaPrivateHandler } from '@subwallet/extension-base/services/chain-service/handler/manta/MantaPrivateHandler';
@@ -37,7 +38,11 @@ const ignoredList = [
   'merlinEvm',
   'botanixEvmTest',
   'syscoin_evm',
-  'rollux_evm'
+  'syscoin_evm_testnet',
+  'rollux_evm',
+  'rollux_testnet',
+  'boolAlpha',
+  'boolBeta_testnet'
 ];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
@@ -46,6 +51,22 @@ const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Recor
       .filter(([, info]) => chainInfo[info.originChain])
   );
 };
+
+// const rawAssetRefMap = (assetRefMap: Record<string, _AssetRef>) => {
+//   const result: Record<string, _AssetRef> = {};
+//
+//   Object.entries(assetRefMap).forEach(([key, assetRef]) => {
+//     const originChainInfo = ChainInfoMap[assetRef.srcChain];
+//     const destChainInfo = ChainInfoMap[assetRef.destChain];
+//     const isSnowBridgeXcm = assetRef.path === _AssetRefPath.XCM && _isSnowBridgeXcm(originChainInfo, destChainInfo);
+//
+//     if (!isSnowBridgeXcm) {
+//       result[key] = assetRef;
+//     }
+//   });
+//
+//   return result;
+// };
 
 export class ChainService {
   private dataMap: _DataMap = {
@@ -602,9 +623,6 @@ export class ChainService {
 
     // TODO: reconsider the flow of initiation
     this.multiChainAssetMapSubject.next(MultiChainAssetMap);
-    // const storedAssetRefMap = await this.dbService.getAssetRefMap();
-    //
-    // this.dataMap.assetRefMap = storedAssetRefMap && Object.values(storedAssetRefMap).length > 0 ? storedAssetRefMap : AssetRefMap;
 
     await this.initChains();
     this.chainInfoMapSubject.next(this.getChainInfoMap());
@@ -829,6 +847,36 @@ export class ChainService {
 
     const onUpdateStatus = (status: _ChainConnectionStatus) => {
       const slug = chainInfo.slug;
+      const isActive = this.getChainStateByKey(slug).active;
+      const isConnectProblem = status !== _ChainConnectionStatus.CONNECTING && status !== _ChainConnectionStatus.CONNECTED;
+      const isLightRpc = endpoint.startsWith('light');
+
+      if (isActive && isConnectProblem && !isLightRpc) {
+        const reportApiUrl = 'https://api-cache.subwallet.app/api/health-check/report-rpc';
+        const requestBody = {
+          chainSlug: slug,
+          chainStatus: status,
+          rpcReport: {
+            [providerName]: endpoint
+          },
+          configStatus: {
+            countUnstable: 10,
+            countDie: 20
+          }
+        };
+
+        fetch(reportApiUrl, { // can get status from this response
+          method: 'POST',
+          headers: {
+            'X-API-KEY': '9b1c94a5e1f3a2d9f8b2a4d6e1f3a2d9',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
+          .then(() => {})
+          .catch((error) => console.error('Error connecting to the report API:', error));
+      }
 
       this.updateChainConnectionStatus(slug, status);
     };
@@ -840,6 +888,7 @@ export class ChainService {
       //
       //   this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);
       // } else {
+
       const chainApi = await this.substrateChainHandler.initApi(chainInfo.slug, endpoint, { providerName, onUpdateStatus });
 
       this.substrateChainHandler.setSubstrateApi(chainInfo.slug, chainApi);

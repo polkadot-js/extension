@@ -7,7 +7,7 @@ import { ApiPromise } from '@polkadot/api';
 import { HexString } from '@polkadot/util/types';
 
 import { GRC20 } from './grc20';
-import { VFT } from './vftService';
+import { VFT } from './vft';
 
 export const DEFAULT_GEAR_ADDRESS = {
   ALICE: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',

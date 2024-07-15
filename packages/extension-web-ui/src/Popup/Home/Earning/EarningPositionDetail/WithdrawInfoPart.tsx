@@ -125,7 +125,7 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
           return (
             <>
-              <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>
+              <div className={'__withdraw-time-label'}>{t(item.chain === 'acala' ? 'Available for withdrawal' : 'Waiting for withdrawal')}</div>
               {item.status === UnstakingStatus.CLAIMABLE && (
                 <Icon
                   iconColor={token.colorSecondary}

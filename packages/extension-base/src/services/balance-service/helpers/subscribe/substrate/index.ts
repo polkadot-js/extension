@@ -13,7 +13,7 @@ import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/cont
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateAdapterSubscriptionArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getAssetExistentialDeposit, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -269,7 +269,7 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
   };
 };
 
-const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, chainInfo, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance) => {
+const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, chainInfo, extrinsicType, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance) => {
   const tokensAccountsKey = 'query_tokens_accounts';
 
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
@@ -290,7 +290,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
         const balances = rs[tokensAccountsKey];
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as OrmlTokensAccountData;
-          const transferableBalance = _getTokensPalletTransferable(balanceInfo);
+          const transferableBalance = _getTokensPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
           const totalLockedFromTransfer = _getTokensPalletLocked(balanceInfo);
 
           return {

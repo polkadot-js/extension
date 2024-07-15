@@ -384,7 +384,7 @@ export class SubstrateApi implements _SubstrateApi {
       const { args, method, module, section } = queryParams;
       const key = `${section}_${module}_${method}`;
 
-      if (!this.api[section][module][method]) { // if method not found, returns an empty observable
+      if (!this.api[section][module] || !this.api[section][module][method]) { // if method not found, returns an empty observable
         observables[key] = new Observable<AnyJson[]>((subscriber) => {
           subscriber.next([]);
         });

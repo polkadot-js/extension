@@ -8,11 +8,12 @@ import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/co
 import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
+import { _getTokensPalletLocked, _getTokensPalletTransferable, OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/tokens-pallet';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateAdapterSubscriptionArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
+import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
@@ -278,25 +279,18 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
       const onChainInfo = _getTokenOnChainInfo(tokenInfo);
       const assetId = _getTokenOnChainAssetId(tokenInfo);
 
-      // Get Token Balance
-      // @ts-ignore
-      return await substrateApi.api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances: TokenBalanceRaw[]) => {
-        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-          const tokenBalance = {
-            reserved: balance.reserved || new BN(0),
-            frozen: balance.frozen || new BN(0),
-            free: balance.free || new BN(0) // free is actually total balance
-          };
-
-          const freeBalance = tokenBalance.free.sub(tokenBalance.frozen);
-          const lockedBalance = tokenBalance.frozen.add(tokenBalance.reserved);
+      return await substrateApi.api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances) => {
+        const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
+          const balanceInfo = _balance as unknown as OrmlTokensAccountData;
+          const transferableBalance = _getTokensPalletTransferable(balanceInfo);
+          const totalLockedFromTransfer = _getTokensPalletLocked(balanceInfo);
 
           return {
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
-            free: freeBalance.toString(),
-            locked: lockedBalance.toString()
+            free: transferableBalance.toString(),
+            locked: totalLockedFromTransfer.toString()
           };
         });
 

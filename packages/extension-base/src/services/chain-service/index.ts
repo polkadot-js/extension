@@ -2018,9 +2018,9 @@ export class ChainService {
     const chainInfo = this.getChainInfoByKey(chain);
 
     return {
-      decimals: chainInfo.substrateInfo?.decimals || 0,
-      tokenSymbol: chainInfo.substrateInfo?.symbol || 'Unit',
-      base58Prefix: chainInfo.substrateInfo?.addressPrefix || 42
+      decimals: chainInfo.substrateInfo?.decimals ?? 0,
+      tokenSymbol: chainInfo.substrateInfo?.symbol ?? 'Unit',
+      base58Prefix: chainInfo.substrateInfo?.addressPrefix ?? 42
     };
   }
 

@@ -44,6 +44,7 @@ const migratePasswordUrl = '/keyring/migrate-password';
 const accountNewSeedPhrase = '/accounts/new-seed-phrase';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
+const settingImportNetwork = '/settings/chains/import';
 
 const baseAccountPath = '/accounts';
 const allowImportAccountPaths = ['new-seed-phrase', 'import-seed-phrase', 'import-private-key', 'restore-json', 'import-by-qr', 'attach-read-only', 'connect-polkadot-vault', 'connect-keystone', 'connect-ledger'];
@@ -205,6 +206,8 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
         redirectTarget = DEFAULT_ROUTER_PATH;
       }
     } else if (hasInternalConfirmations && pathName === accountNewSeedPhrase) {
+      openPModal(null);
+    } else if (hasInternalConfirmations && pathName === settingImportNetwork) {
       openPModal(null);
     } else if (hasInternalConfirmations) {
       openPModal('confirmations');

@@ -29,6 +29,7 @@ export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 export const REMIND_BACKUP_SEED_PHRASE_MODAL = 'remind-backup-seed-phrase-modal';
 export const REMIND_UPGRADE_FIREFOX_VERSION = 'remind-update-firefox-version';
 export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
+export const ADD_NETWORK_WALLET_CONNECT_MODAL = 'add-network-wallet-connect-modal';
 
 /* Campaign */
 export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';

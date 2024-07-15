@@ -7,16 +7,18 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import InfoIcon from '@subwallet/extension-koni-ui/components/Icon/InfoIcon';
+import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
 import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
+import { fetchChainInfo, noop } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -40,13 +42,20 @@ interface ValidationInfo {
   message?: string
 }
 
+interface LocationState {
+  useGoHome?: boolean;
+  chainId?: string[];
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
+  const locationState = useLocation().state as LocationState;
 
+  const [location] = useState<LocationState>(locationState);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
@@ -61,8 +70,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
+  }, [location?.useGoHome, navigate]);
 
   const isSubmitDisabled = useCallback(() => {
     return providerValidation.status !== 'success';
@@ -116,7 +125,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showNotification({
             message: t('Imported chain successfully')
           });
-          navigate(-1);
+          location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
         } else {
           showNotification({
             message: t('An error occurred, please try again')
@@ -129,7 +138,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           message: t('An error occurred, please try again')
         });
       });
-  }, [existentialDeposit, form, genesisHash, isPureEvmChain, navigate, showNotification, t]);
+  }, [existentialDeposit, form, genesisHash, isPureEvmChain, location, navigate, showNotification, t]);
 
   const blockExplorerValidator = useCallback((rule: RuleObject, value: string): Promise<void> => {
     return new Promise((resolve, reject) => {
@@ -271,6 +280,22 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
   useFocusFormItem(form, 'provider');
+
+  useEffect(() => {
+    if (location?.useGoHome && location?.chainId) {
+      fetchChainInfo(location.chainId)
+        .then((chainInfo) => {
+          if (chainInfo.length > 0) {
+            const { rpcUrls } = chainInfo[0];
+
+            if (rpcUrls.length > 0) {
+              form.setFieldValue('provider', rpcUrls[0]);
+              providerValidator({} as RuleObject, rpcUrls[0]).then(noop).catch(console.error);
+            }
+          }
+        }).catch(console.error);
+    }
+  }, [form, location, providerValidator]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>

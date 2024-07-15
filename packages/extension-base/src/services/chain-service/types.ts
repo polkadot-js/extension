@@ -27,6 +27,12 @@ export enum _ChainConnectionStatus {
   CONNECTING = 'CONNECTING',
 }
 
+export interface ReportRpc {
+  runningRpc: Record<string, string>,
+  unstableRpc: Record<string, string>,
+  dieRpc: Record<string, string>
+}
+
 export interface _ChainState {
   slug: string;
   active: boolean;

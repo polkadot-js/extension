@@ -18,6 +18,7 @@ import { getERC20SpendingApprovalTx } from '@subwallet/extension-base/koni/api/c
 import { isSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
+import { UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME } from '@subwallet/extension-base/koni/api/nft/config';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
 import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
@@ -1934,6 +1935,18 @@ export default class KoniExtension {
     const { networkKey, params, recipientAddress, senderAddress } = inputData;
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
+
+    if (UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME.includes(networkKey)) {
+      return await this.#koniState.transactionService.handleTransaction({
+        address: senderAddress,
+        chain: networkKey,
+        chainType: ChainType.EVM,
+        data: inputData,
+        extrinsicType: ExtrinsicType.SEND_NFT,
+        transaction: null,
+        url: EXTENSION_REQUEST_URL
+      });
+    }
 
     const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
 

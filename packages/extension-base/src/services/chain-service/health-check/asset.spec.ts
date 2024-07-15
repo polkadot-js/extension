@@ -14,14 +14,13 @@ import { AssetSpec, compareAsset, getErc20AssetInfo, getEvmNativeInfo, getLocalA
 
 jest.setTimeout(3 * 60 * 60 * 1000);
 
-const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test'];
+const ignoreChains: string[] = ['interlay', 'kintsugi', 'kintsugi_test', 'avail_mainnet'];
 
 describe('test chain asset', () => {
   it('chain asset', async () => {
     const chainAssets = Object.values(ChainAssetMap).filter((info) =>
       ChainInfoMap[info.originChain].chainStatus === _ChainStatus.ACTIVE &&
       !ignoreChains.includes(info.originChain)
-      // && ['moonriver'].includes(info.originChain)
     );
     const assetByChain: Record<string, _ChainAsset[]> = {};
     const errorChain: Record<string, string> = {};

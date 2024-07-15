@@ -20,8 +20,7 @@ import { ApiOptions } from '@polkadot/api/types';
 import { typesBundle as _typesBundle } from '@polkadot/apps-config/api';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
-import { OverrideBundleDefinition, Registry } from '@polkadot/types/types';
-import { AnyJson } from '@polkadot/types-codec/types/helpers';
+import { AnyJson, OverrideBundleDefinition, Registry } from '@polkadot/types/types';
 
 const typesBundle = { ..._typesBundle };
 

@@ -19,11 +19,12 @@ import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@sub
 import BigN from 'bignumber.js';
 
 import { ContractPromise } from '@polkadot/api-contract';
-import { BN, BN_ZERO, noop, u8aToHex } from '@polkadot/util';
+import { BN, noop, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';
+import { _getAssetsPalletLockedBalance, _getAssetsPalletTransferable } from "@subwallet/extension-base/core/substrate/assets-pallet";
 
 export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void, extrinsicType?: ExtrinsicType) => {
   let unsubNativeToken: () => void;
@@ -318,9 +319,10 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
   };
 };
 
-const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, chainInfo, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance) => {
-  const chain = chainInfo.slug;
-  const tokenMap = filterAssetsByChainAndType(assetMap, chain, [_AssetType.LOCAL]);
+const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
+  const assetsAccountKey = 'query_assets_account';
+
+  const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
 
   Object.values(tokenMap).forEach((token) => {
     if (_MANTA_ZK_CHAIN_GROUP.includes(token.originChain) && token.symbol.startsWith(_ZK_ASSET_PREFIX)) {
@@ -328,7 +330,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
     }
   });
 
-  const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
+  const unsubList = await Promise.all(Object.values(tokenMap).map((tokenInfo) => {
     try {
       const assetIndex = _getTokenOnChainAssetId(tokenInfo);
 
@@ -336,33 +338,28 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
         return undefined;
       }
 
+      const params: _SubstrateAdapterSubscriptionArgs[] = [
+        {
+          section: 'query',
+          module: assetsAccountKey.split('_')[1],
+          method: assetsAccountKey.split('_')[2],
+          args: addresses.map((address) => [assetIndex, address])
+        }
+      ];
+
       // Get Token Balance
-      return await substrateApi.api.query.assets.account.multi(addresses.map((address) => [assetIndex, address]), (balances) => {
-        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-          const bdata = balance?.toPrimitive();
-
-          let frozen = BN_ZERO;
-          let total = BN_ZERO;
-
-          if (bdata) {
-            // @ts-ignore
-            const addressBalance = new BN(String(bdata?.balance).replaceAll(',', '') || '0');
-
-            // @ts-ignore
-            if (bdata?.isFrozen || ['Blocked', 'Frozen'].includes(bdata?.status as string)) { // Status 'Frozen' and 'Blocked' are for frozen balance
-              frozen = addressBalance;
-            }
-
-            total = addressBalance;
-          }
-
-          const free = total.sub(frozen);
+      return substrateApi.subscribeDataWithMulti(params, (rs) => {
+        const balances = rs[assetsAccountKey];
+        const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
+          const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
+          const transferableBalance = _getAssetsPalletTransferable(balanceInfo);
+          const totalLockedFromTransfer = _getAssetsPalletLockedBalance(balanceInfo);
 
           return {
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
-            free: free.toString(),
-            locked: frozen.toString(),
+            free: transferableBalance,
+            locked: totalLockedFromTransfer,
             state: APIItemState.READY
           };
         });
@@ -378,7 +375,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
 
   return () => {
     unsubList.forEach((unsub) => {
-      unsub && unsub();
+      unsub && unsub.unsubscribe();
     });
   };
 };

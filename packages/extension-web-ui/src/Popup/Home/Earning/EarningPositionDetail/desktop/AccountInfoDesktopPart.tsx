@@ -6,7 +6,7 @@ import { SpecialYieldPositionInfo, YieldPoolType, YieldPositionInfo } from '@sub
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { Avatar, EarningNominationModal, EmptyList, MetaInfo } from '@subwallet/extension-web-ui/components';
 import Table from '@subwallet/extension-web-ui/components/Table/Table';
-import { BN_ZERO, EARNING_NOMINATION_MODAL, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
+import { EARNING_NOMINATION_MODAL, EarningStatusUi } from '@subwallet/extension-web-ui/constants';
 import { useGetAccountByAddress, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { findNetworkJsonByGenesisHash, reformatAddress, toShort } from '@subwallet/extension-web-ui/utils';
@@ -147,7 +147,7 @@ const Component: React.FC<Props> = ({ className, compound,
                 className={'__active-stake-account-value'}
                 decimal={inputAsset?.decimals || 0}
                 suffix={inputAsset?.symbol}
-                value={BigN(row.totalStake).minus(row.unstakeBalance).isLessThan(0) ? BN_ZERO : BigN(row.totalStake).minus(row.unstakeBalance)}
+                value={isSpecial ? BigN(row.totalStake).minus(row.unstakeBalance) : row.activeStake}
               />
             </div>
 

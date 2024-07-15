@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## 0.49.1 July 15, 2024
+
+Breaking Changes:
+
+- Update from Manifest v2 to v3 for Chrome
+- Update from Manifest v2 to v3 for Firefox
+
+Note: These are very large breaking changes. Please review the following PR's to see exactly what has changed and for any additional information that can assist you in your migration.
+
+([#1367](https://github.com/polkadot-js/extension/pull/1367))
+([#1388](https://github.com/polkadot-js/extension/pull/1388))
+([#1399](https://github.com/polkadot-js/extension/pull/1399))
+
+Changes:
+
+- Update xcm analyzer to 1.3.0
+- Upgrade Polkadot.js Deps
+    - @polkadot/common -> 13.0.2 (Introduces the interface for the new ledger app. This will be implemented in the next release)
+    - @polkadot/api -> 12.2.1
+    - @polkadot/phishing -> 0.23.1
+    - @polkadot/ui -> 3.7.1
+- Update module resolution to bundler
+- Clean the manifest build process
+
+
 ## 0.48.2 July 3, 2024
 
 Contributed:

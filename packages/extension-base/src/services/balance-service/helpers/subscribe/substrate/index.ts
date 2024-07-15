@@ -270,16 +270,24 @@ const subscribePSP22Balance = ({ addresses, assetMap, callback, chainInfo, subst
 };
 
 const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, chainInfo, includeNativeToken, substrateApi }: SubscribeSubstratePalletBalance) => {
-  const chain = chainInfo.slug;
+  const tokensAccountsKey = 'query_tokens_accounts';
+
   const tokenTypes = includeNativeToken ? [_AssetType.NATIVE, _AssetType.LOCAL] : [_AssetType.LOCAL];
-  const tokenMap = filterAssetsByChainAndType(assetMap, chain, tokenTypes);
+  const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, tokenTypes);
 
-  const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
+  const unsubList = await Promise.all(Object.values(tokenMap).map((tokenInfo) => {
     try {
-      const onChainInfo = _getTokenOnChainInfo(tokenInfo);
-      const assetId = _getTokenOnChainAssetId(tokenInfo);
+      const params: _SubstrateAdapterSubscriptionArgs[] = [
+        {
+          section: 'query',
+          module: tokensAccountsKey.split('_')[1],
+          method: tokensAccountsKey.split('_')[2],
+          args: addresses.map((address) => [address, _getTokenOnChainInfo(tokenInfo) || _getTokenOnChainAssetId(tokenInfo)])
+        }
+      ];
 
-      return await substrateApi.api.query.tokens.accounts.multi(addresses.map((address) => [address, onChainInfo || assetId]), (balances) => {
+      return substrateApi.subscribeDataWithMulti(params, (rs) => {
+        const balances = rs[tokensAccountsKey];
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as OrmlTokensAccountData;
           const transferableBalance = _getTokensPalletTransferable(balanceInfo);
@@ -305,7 +313,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
 
   return () => {
     unsubList.forEach((unsub) => {
-      unsub && unsub();
+      unsub && unsub.unsubscribe();
     });
   };
 };

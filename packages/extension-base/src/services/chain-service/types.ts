@@ -14,7 +14,7 @@ import { ApiPromise } from '@polkadot/api';
 import { Getters } from '@polkadot/api/base/Getters';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ChainProperties, ChainType, RuntimeVersion } from '@polkadot/types/interfaces';
-import { AnyJson, Registry} from '@polkadot/types/types';
+import { AnyJson, Registry } from '@polkadot/types/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,

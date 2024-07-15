@@ -11,7 +11,7 @@ export type OrmlTokensAccountData = {
 }
 
 export function _getTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
-  const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN].includes(extrinsicType);
+  const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN, ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);
   const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(existentialDeposit, strictMode));
 
   const bnFrozen = new BigN(accountInfo.frozen);

@@ -5,6 +5,7 @@ import { GearApi } from '@gear-js/api';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
+import { _getAssetsPalletLockedBalance, _getAssetsPalletTransferable } from '@subwallet/extension-base/core/substrate/assets-pallet';
 import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
@@ -24,7 +25,6 @@ import { decodeAddress } from '@polkadot/util-crypto';
 
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';
-import { _getAssetsPalletLockedBalance, _getAssetsPalletTransferable } from "@subwallet/extension-base/core/substrate/assets-pallet";
 
 export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void, extrinsicType?: ExtrinsicType) => {
   let unsubNativeToken: () => void;
@@ -319,7 +319,7 @@ const subscribeTokensAccountsPallet = async ({ addresses, assetMap, callback, ch
   };
 };
 
-const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
+const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, chainInfo, extrinsicType, substrateApi }: SubscribeSubstratePalletBalance) => {
   const assetsAccountKey = 'query_assets_account';
 
   const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
@@ -352,7 +352,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
         const balances = rs[assetsAccountKey];
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
-          const transferableBalance = _getAssetsPalletTransferable(balanceInfo);
+          const transferableBalance = _getAssetsPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
           const totalLockedFromTransfer = _getAssetsPalletLockedBalance(balanceInfo);
 
           return {

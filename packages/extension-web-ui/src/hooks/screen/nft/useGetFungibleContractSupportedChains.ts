@@ -6,7 +6,7 @@ import { _isChainSupportEvmERC20, _isChainSupportVFT, _isChainSupportWasmPSP22 }
 import { useChainInfoData } from '@subwallet/extension-web-ui/hooks';
 import { useMemo } from 'react';
 
-function filterNftContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
+function filterFungibleContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
   const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
   Object.values(chainInfoMap).forEach((chainInfo) => {
@@ -22,6 +22,6 @@ export default function useGetFungibleContractSupportedChains (): Record<string,
   const chainInfoMap = useChainInfoData().chainInfoMap;
 
   return useMemo(() => {
-    return filterNftContractTypes(chainInfoMap);
+    return filterFungibleContractTypes(chainInfoMap);
   }, [chainInfoMap]);
 }

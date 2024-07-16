@@ -46,38 +46,44 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
   return ledgerChains.find((network) => network.slug === slug || (network.isEthereum && isEthereumNetwork));
 };
 
-const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean): Ledger => {
+const retrieveLedger = (rawSlug: string, ledgerChains: LedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slip44?: number): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, ledgerIncompatible);
 
-  const def = getNetwork(ledgerChains, slug, isEthereumNetwork);
+  const slugList = rawSlug.split(':');
+  let def = getNetwork(ledgerChains, slugList[0], isEthereumNetwork);
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  if (def.isGeneric) {
+  if (def.isGeneric && slugList.length !== 2) {
     if (def.isEthereum) {
       return new EVMLedger('webusb', def.slip44);
     } else {
-      return new SubstrateGenericLedger('webusb', def.slip44);
+      return new SubstrateGenericLedger('webusb', slip44 || def.slip44);
     }
   } else {
     if (!forceMigration) {
       return new SubstrateLegacyLedger('webusb', def.network);
     } else {
       if (NotNeedMigrationGens.includes(def.genesisHash)) {
-        return new SubstrateGenericLedger('webusb', def.slip44);
+        return new SubstrateGenericLedger('webusb', slip44 || def.slip44);
       } else {
-        return new SubstrateMigrationLedger('webusb', def.slip44);
+        if (slugList.length === 2 && !slip44) {
+          def = getNetwork(ledgerChains, slugList[1], isEthereumNetwork);
+          assert(def, 'There is no known Ledger app available for this chain');
+        }
+
+        return new SubstrateMigrationLedger('webusb', slip44 || def.slip44);
       }
     }
   }
 };
 
-export function useLedger (slug?: string, active = true, isSigning = false, forceMigration = false): Result {
+export function useLedger (slug?: string, active = true, isSigning = false, forceMigration = false, slip44?: number): Result {
   const { t } = useTranslation();
 
-  const ledgerChains = useGetSupportedLedger();
+  const [ledgerChains] = useGetSupportedLedger();
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const isEvmNetwork = useMemo(() => {
@@ -121,14 +127,14 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
       }
 
       try {
-        return retrieveLedger(slug, ledgerChains, isEvmNetwork, forceMigration);
+        return retrieveLedger(slug, ledgerChains, isEvmNetwork, forceMigration, slip44);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [refreshLock, slug, active, ledgerChains, isEvmNetwork, forceMigration]);
+  }, [refreshLock, slug, active, ledgerChains, isEvmNetwork, forceMigration, slip44]);
 
   const appName = useMemo(() => {
     const unknownNetwork = 'unknown network';

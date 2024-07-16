@@ -80,5 +80,7 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
     }
   }, [chainInfo, genesisHash, isPartial]);
 
+  console.log(loadingChain, 'loading');
+
   return useMemo(() => ({ chain, loadingChain }), [chain, loadingChain]);
 }

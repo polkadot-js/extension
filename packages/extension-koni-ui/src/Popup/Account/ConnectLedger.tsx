@@ -4,15 +4,15 @@
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { ATTACH_ACCOUNT_MODAL, SUBSTRATE_MIGRATION_KEY } from '@subwallet/extension-koni-ui/constants';
 import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { BackgroundIcon, Button, Icon, Image, SwList } from '@subwallet/react-ui';
+import { BackgroundIcon, Button, Icon, Image, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, CircleNotch, Swatches } from 'phosphor-react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -36,6 +36,8 @@ const FooterIcon = (
   />
 );
 
+const MigrateChainSelectModalId = 'migrate-chain-modal-select-id';
+
 const Component: React.FC<Props> = (props: Props) => {
   useAutoNavigateToCreatePassword();
 
@@ -44,32 +46,40 @@ const Component: React.FC<Props> = (props: Props) => {
   const { t } = useTranslation();
   const { goHome } = useDefaultNavigate();
 
-  const supportedLedger = useGetSupportedLedger();
+  const [supportedLedger, migrationSupportedLedger] = useGetSupportedLedger();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
-
-  const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
-    slug: network.slug
-  })), [supportedLedger]);
+  const { activeModal, checkActive } = useContext(ModalContext);
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
+  const [migrateChain, setMigrateChain] = useState(migrationSupportedLedger[0].slug);
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
   const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
+  const [isSelectMigrationMode, setIsSelectMigrationMode] = useState<boolean>(false);
+  const [chainSubmit, setChainSubmit] = useState(supportedLedger[0].slug);
   const [page, setPage] = useState(0);
   const [selectedAccounts, setSelectedAccounts] = useState<ImportLedgerItem[]>([]);
   const loadingFlag = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isMigrateChainSelectModalActive = useMemo(() => checkActive(MigrateChainSelectModalId), [checkActive]);
+  const networks = useMemo((): ChainItemType[] => (isSelectMigrationMode ? migrationSupportedLedger : supportedLedger).map((network) => ({
+    name: !(network as LedgerNetwork).isGeneric ? network.networkName.replace(' network', '') : network.networkName,
+    slug: network.slug
+  })), [isSelectMigrationMode, migrationSupportedLedger, supportedLedger]);
+
   const selectedChain = useMemo((): LedgerNetwork | undefined => {
-    return supportedLedger.find((n) => n.slug === chain);
-  }, [chain, supportedLedger]);
+    const slugKeys = chainSubmit.split(':');
+
+    return supportedLedger.find((n) => n.slug === (slugKeys.length === 2 ? slugKeys[1] : slugKeys[0]));
+  }, [chainSubmit, supportedLedger]);
 
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
+  const isSelectedMigrateChainMode = useMemo(() => chain === SUBSTRATE_MIGRATION_KEY, [chain]);
 
-  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chainSubmit, true, false, isSelectedMigrateChainMode);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
@@ -79,7 +89,24 @@ const Component: React.FC<Props> = (props: Props) => {
   const onChainChange: BasicOnChangeFunction = useCallback((event) => {
     const value = event.target.value;
 
+    if (value === SUBSTRATE_MIGRATION_KEY) {
+      setIsSelectMigrationMode(true);
+      activeModal(MigrateChainSelectModalId);
+      setChainSubmit(`${SUBSTRATE_MIGRATION_KEY}:${migrateChain}`);
+    } else {
+      setChainSubmit(value);
+    }
+
     setChain(value);
+  }, [activeModal, migrateChain]);
+
+  const onMigrateChainChange: BasicOnChangeFunction = useCallback((event) => {
+    const value = event.target.value;
+
+    setMigrateChain(value);
+    setChain(SUBSTRATE_MIGRATION_KEY);
+    setIsSelectMigrationMode(false);
+    setChainSubmit(`${SUBSTRATE_MIGRATION_KEY}:${value}`);
   }, []);
 
   const onLoadMore = useCallback(async () => {
@@ -207,8 +234,9 @@ const Component: React.FC<Props> = (props: Props) => {
           genesisHash: selectedChain.genesisHash,
           hardwareType: 'ledger',
           name: item.name,
+          slip44: selectedChain.slip44,
           isEthereum: selectedChain.isEthereum,
-          isGeneric: selectedChain.isGeneric
+          isGeneric: selectedChain.isGeneric || isSelectedMigrateChainMode
         }))
       })
         .then(() => {
@@ -221,13 +249,19 @@ const Component: React.FC<Props> = (props: Props) => {
           setIsSubmitting(false);
         });
     }, 300);
-  }, [selectedAccounts, selectedChain, onComplete]);
+  }, [selectedAccounts, selectedChain, isSelectedMigrateChainMode, onComplete]);
 
   useEffect(() => {
     setSelectedAccounts([]);
     setLedgerAccounts([]);
     setPage(0);
-  }, [chain]);
+  }, [chainSubmit]);
+
+  useEffect(() => {
+    if (!isMigrateChainSelectModalActive) {
+      setIsSelectMigrationMode(false);
+    }
+  }, [isMigrateChainSelectModalActive]);
 
   const isConnected = !isLocked && !isLoading && !!ledger;
 
@@ -284,6 +318,16 @@ const Component: React.FC<Props> = (props: Props) => {
                   placeholder={t('Select network')}
                   value={chain}
                 />
+
+                {isSelectMigrationMode && <ChainSelector
+                  id={MigrateChainSelectModalId}
+                  items={networks}
+                  label={t('Select network')}
+                  onChange={onMigrateChainChange}
+                  placeholder={t('Select network')}
+                  value={migrateChain}
+                />}
+
                 <Button
                   block={true}
                   className={CN('ledger-button', { connected: isConnected, loading: isLoading })}

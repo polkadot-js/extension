@@ -979,6 +979,7 @@ export interface CreateHardwareAccountItem {
   genesisHash: string;
   hardwareType: string;
   name: string;
+  slip44: number;
   isEthereum: boolean;
   isGeneric: boolean;
 }
@@ -1417,6 +1418,10 @@ export interface LedgerNetwork {
   isEthereum: boolean;
   /** Slip44 in the derivation path */
   slip44: number;
+}
+
+export interface MigrationLedgerNetwork extends Omit<LedgerNetwork, 'isGeneric' | 'isEthereum' | 'isDevMode' | 'icon' > {
+  ss58_addr_type: number
 }
 
 /// Qr Sign

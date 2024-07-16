@@ -79,6 +79,8 @@ export interface AccountJson extends AbstractAddressJson {
   isInjected?: boolean;
   /** Is generic ledger account */
   isGeneric?: boolean;
+  /** Is polkadot migration ledger account */
+  slip44?: number;
   /** Is master account - account has seed */
   isMasterAccount?: boolean;
   /** Account has migrated with wallet password */

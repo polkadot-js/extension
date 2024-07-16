@@ -2305,7 +2305,7 @@ export default class KoniExtension {
     const slugMap: Record<string, string> = {};
 
     for (const account of accounts) {
-      const { accountIndex, address, addressOffset, genesisHash, hardwareType, isEthereum, isGeneric, name } = account;
+      const { accountIndex, address, addressOffset, genesisHash, hardwareType, isEthereum, isGeneric, name, slip44 } = account;
 
       let result: KeyringPair;
 
@@ -2316,7 +2316,8 @@ export default class KoniExtension {
         addressOffset,
         genesisHash,
         originGenesisHash: genesisHash,
-        isGeneric
+        isGeneric,
+        slip44
       };
 
       if (isEthereum) {

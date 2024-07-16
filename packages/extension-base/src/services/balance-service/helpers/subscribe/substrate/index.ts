@@ -161,26 +161,33 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 };
 
 const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
-  const chain = chainInfo.slug;
-  const tokenMap = filterAssetsByChainAndType(assetMap, chain, [_AssetType.LOCAL]);
+  const foreignAssetsAccountKey = 'query_foreignAssets_account';
+  const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
 
-  // @ts-ignore
-  const unsubList = await Promise.all(Object.values(tokenMap).map(async (tokenInfo) => {
+  const unsubList = await Promise.all(Object.values(tokenMap).map((tokenInfo) => {
     try {
-      const isBridgedToken = _isBridgedToken(tokenInfo);
+      if (_isBridgedToken(tokenInfo)) {
+        const params: _SubstrateAdapterSubscriptionArgs[] = [
+          {
+            section: 'query',
+            module: foreignAssetsAccountKey.split('_')[1],
+            method: foreignAssetsAccountKey.split('_')[2],
+            args: addresses.map((address) => [_getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo), address])
+          }
+        ];
 
-      if (isBridgedToken) {
-        const assetLocation = _getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo);
-
-        return await substrateApi.api.query.foreignAssets.account.multi(addresses.map((address) => [assetLocation, address]), (balances) => {
-          const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-            const accountInfo = balance?.toPrimitive() as PalletAssetsAssetAccount;
+        return substrateApi.subscribeDataWithMulti(params, (rs) => {
+          const balances = rs[foreignAssetsAccountKey];
+          const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
+            const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
+            const transferableBalance = _getForeignAssetPalletTransferable(balanceInfo);
+            const totalLockedFromTransfer = _getForeignAssetPalletLockedBalance(balanceInfo);
 
             return {
               address: addresses[index],
               tokenSlug: tokenInfo.slug,
-              free: accountInfo ? _getForeignAssetPalletTransferable(accountInfo).toString() : '0',
-              locked: accountInfo ? _getForeignAssetPalletLockedBalance(accountInfo).toString() : '0',
+              free: transferableBalance,
+              locked: totalLockedFromTransfer,
               state: APIItemState.READY
             };
           });
@@ -197,7 +204,7 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
 
   return () => {
     unsubList.forEach((unsub) => {
-      unsub && unsub();
+      unsub && unsub.unsubscribe();
     });
   };
 };

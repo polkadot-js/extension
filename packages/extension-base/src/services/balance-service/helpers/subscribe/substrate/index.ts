@@ -138,17 +138,17 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
       const balanceInfo = _balance as unknown as FrameSystemAccountInfo;
       const poolMemberInfo = poolMemberInfos[index] as unknown as PalletNominationPoolsPoolMember;
 
-      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : new BigN(0);
+      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : 0n;
 
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), extrinsicType);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
-      const totalLockedFromTransfer = new BigN(totalBalance).minus(transferableBalance).plus(nominationPoolBalance);
+      const totalLockedFromTransfer = totalBalance - transferableBalance + nominationPoolBalance;
 
       return ({
         address: addresses[index],
         tokenSlug: _getChainNativeTokenSlug(chainInfo),
-        free: transferableBalance,
-        locked: totalLockedFromTransfer.toFixed(),
+        free: transferableBalance.toString(),
+        locked: totalLockedFromTransfer.toString(),
         state: APIItemState.READY,
         metadata: balanceInfo
       });
@@ -188,8 +188,8 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
             return {
               address: addresses[index],
               tokenSlug: tokenInfo.slug,
-              free: transferableBalance,
-              locked: totalLockedFromTransfer,
+              free: transferableBalance.toString(),
+              locked: totalLockedFromTransfer.toString(),
               state: APIItemState.READY
             };
           });
@@ -367,8 +367,8 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
           return {
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
-            free: transferableBalance,
-            locked: totalLockedFromTransfer,
+            free: transferableBalance.toString(),
+            locked: totalLockedFromTransfer.toString(),
             state: APIItemState.READY
           };
         });
@@ -417,8 +417,8 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
-            free: transferableBalance,
-            locked: totalLockedFromTransfer
+            free: transferableBalance.toString(),
+            locked: totalLockedFromTransfer.toString()
           };
         });
 

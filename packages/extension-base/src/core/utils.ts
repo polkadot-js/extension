@@ -19,3 +19,11 @@ export function getStrictMode (type: string, extrinsicType?: ExtrinsicType) {
 
   return true;
 }
+
+export function _getAppliedExistentialDeposit (existentialDeposit: string, strictMode?: boolean): bigint {
+  return strictMode ? BigInt(existentialDeposit) : 0n;
+}
+
+export function getMaxBigint (a: bigint, b: bigint): bigint {
+  return a > b ? a : b;
+}

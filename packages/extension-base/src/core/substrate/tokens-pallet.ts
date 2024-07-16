@@ -3,38 +3,19 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceAccountType, OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/types';
-import { getStrictMode } from '@subwallet/extension-base/core/utils';
-import BigN from 'bignumber.js';
+import { _getAppliedExistentialDeposit, getMaxBigint, getStrictMode } from '@subwallet/extension-base/core/utils';
 
-export function _getTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
+export function _getTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
   const strictMode = getStrictMode(BalanceAccountType.OrmlTokensAccountData, extrinsicType);
-  const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(existentialDeposit, strictMode));
+  const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
 
-  const bnFrozen = new BigN(accountInfo.frozen);
-  const bnFree = new BigN(accountInfo.free);
-  const bnTransferableBalance = bnFree.minus(BigN.max(bnFrozen, bnAppliedExistentialDeposit));
-
-  return BigN.max(bnTransferableBalance, 0).toFixed();
+  return BigInt(accountInfo.free) - getMaxBigint(BigInt(accountInfo.frozen), bnAppliedExistentialDeposit);
 }
 
-export function _getTokensPalletLocked (accountInfo: OrmlTokensAccountData): string {
-  const bnFrozen = new BigN(accountInfo.frozen);
-  const bnReserved = new BigN(accountInfo.reserved);
-  const bnLocked = bnReserved.plus(bnFrozen);
-
-  return BigN.max(bnLocked, 0).toFixed();
+export function _getTokensPalletLocked (accountInfo: OrmlTokensAccountData): bigint {
+  return BigInt(accountInfo.reserved) + BigInt(accountInfo.frozen);
 }
 
-export function _getTokensPalletTotalBalance (accountInfo: OrmlTokensAccountData): string {
-  const bnReserved = new BigN(accountInfo.reserved);
-  const bnFree = new BigN(accountInfo.free);
-  const bnTotalBalance = bnFree.plus(bnReserved);
-
-  return BigN.max(bnTotalBalance, 0).toFixed();
-}
-
-// ----------------------------------------------------------------------
-
-function _getAppliedExistentialDeposit (existentialDeposit: string, strictMode?: boolean): string {
-  return strictMode ? existentialDeposit : '0';
+export function _getTokensPalletTotalBalance (accountInfo: OrmlTokensAccountData): bigint {
+  return BigInt(accountInfo.free) + BigInt(accountInfo.reserved);
 }

@@ -3,42 +3,35 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceAccountType, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
-import { getStrictMode } from '@subwallet/extension-base/core/utils';
-import BigN from 'bignumber.js';
+import { _getAppliedExistentialDeposit, getStrictMode } from '@subwallet/extension-base/core/utils';
 
-export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
+export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
   const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
-  const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(existentialDeposit, strictMode));
+  const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
 
-  let bnTransferable = new BigN(0);
+  let bnTransferable = 0n;
 
   if (!accountInfo) {
-    return '0';
+    return 0n;
   }
 
   if (['Liquid'].includes(accountInfo.status as string)) {
-    bnTransferable = new BigN(accountInfo.balance).minus(bnAppliedExistentialDeposit);
+    bnTransferable = BigInt(accountInfo.balance) - bnAppliedExistentialDeposit;
   }
 
-  return BigN.max(bnTransferable, 0).toFixed();
+  return bnTransferable;
 }
 
-export function _getAssetsPalletLockedBalance (accountInfo: PalletAssetsAssetAccount | undefined): string {
-  let bnFrozen = new BigN(0);
+export function _getAssetsPalletLockedBalance (accountInfo: PalletAssetsAssetAccount | undefined): bigint {
+  let bnLocked = 0n;
 
   if (!accountInfo) {
-    return '0';
+    return bnLocked;
   }
 
   if (!['Liquid'].includes(accountInfo.status as string)) { // todo: check case accountInfo has isFrozen?
-    bnFrozen = new BigN(accountInfo.balance);
+    bnLocked = BigInt(accountInfo.balance);
   }
 
-  return BigN.max(bnFrozen, 0).toFixed();
-}
-
-// ----------------------------------------------------------------------
-
-export function _getAppliedExistentialDeposit (existentialDeposit: string, strictMode?: boolean): string {
-  return strictMode ? existentialDeposit : '0';
+  return bnLocked;
 }

@@ -8,6 +8,7 @@ import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/co
 import { _getAssetsPalletLockedBalance, _getAssetsPalletTransferable } from '@subwallet/extension-base/core/substrate/assets-pallet';
 import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
+import { _getOrmlTokensPalletLockedBalance, _getOrmlTokensPalletTransferable } from '@subwallet/extension-base/core/substrate/ormlTokens-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { _getTokensPalletLocked, _getTokensPalletTransferable, OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/tokens-pallet';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
@@ -15,12 +16,12 @@ import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateAdapterSubscriptionArgs, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getAssetExistentialDeposit, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
+import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance } from '@subwallet/extension-base/types';
 import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
 import { ContractPromise } from '@polkadot/api-contract';
-import { BN, noop, u8aToHex } from '@polkadot/util';
+import { noop, u8aToHex } from '@polkadot/util';
 import { decodeAddress } from '@polkadot/util-crypto';
 
 import { subscribeERC20Interval } from '../evm';
@@ -389,42 +390,39 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
 
 // eslint-disable-next-line @typescript-eslint/require-await
 const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): Promise<() => void> => {
-  const chain = chainInfo.slug;
-  const tokenTypes = [_AssetType.LOCAL];
-  const tokenMap = filterAssetsByChainAndType(assetMap, chain, tokenTypes);
+  const ormlTokensAccountsKey = 'query_ormlTokens_accounts';
+  const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
 
-  const unsubList = Object.values(tokenMap).map(async (tokenInfo) => {
+  const unsubList = Object.values(tokenMap).map((tokenInfo) => {
     try {
-      const onChainInfo = _getTokenOnChainInfo(tokenInfo);
+      const params: _SubstrateAdapterSubscriptionArgs[] = [
+        {
+          section: 'query',
+          module: ormlTokensAccountsKey.split('_')[1],
+          method: ormlTokensAccountsKey.split('_')[2],
+          args: addresses.map((address) => [address, _getTokenOnChainInfo(tokenInfo)])
+        }
+      ];
 
-      // Get Token Balance
       // @ts-ignore
-      const unsub = await substrateApi.api.query.ormlTokens.accounts.multi(addresses.map((address) => [address, onChainInfo]), (balances: TokenBalanceRaw[]) => {
-        const items: BalanceItem[] = balances.map((balance, index): BalanceItem => {
-          const tokenBalance = {
-            reserved: balance.reserved || new BN(0),
-            frozen: balance.frozen || new BN(0),
-            free: balance.free || new BN(0) // free is actually total balance
-          };
-
-          // free balance = total balance - frozen misc
-          // locked balance = reserved + frozen misc
-          const freeBalance = tokenBalance.free.sub(tokenBalance.frozen);
-          const lockedBalance = tokenBalance.frozen.add(tokenBalance.reserved);
+      return substrateApi.subscribeDataWithMulti(params, (rs) => {
+        const balances = rs[ormlTokensAccountsKey];
+        const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
+          const balanceInfo = _balance as unknown as OrmlTokensAccountData;
+          const transferableBalance = _getOrmlTokensPalletTransferable(balanceInfo);
+          const totalLockedFromTransfer = _getOrmlTokensPalletLockedBalance(balanceInfo);
 
           return {
             address: addresses[index],
             tokenSlug: tokenInfo.slug,
             state: APIItemState.READY,
-            free: freeBalance.toString(),
-            locked: lockedBalance.toString()
+            free: transferableBalance,
+            locked: totalLockedFromTransfer
           };
         });
 
         callback(items);
       });
-
-      return unsub;
     } catch (err) {
       console.warn(err);
 
@@ -433,10 +431,8 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
   });
 
   return () => {
-    unsubList.forEach((subProm) => {
-      subProm.then((unsub) => {
-        unsub && unsub();
-      }).catch(console.error);
+    unsubList.forEach((unsub) => {
+      unsub && unsub.unsubscribe();
     });
   };
 };

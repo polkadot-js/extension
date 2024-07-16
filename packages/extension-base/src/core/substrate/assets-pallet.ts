@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { ExtrinsicType } from "@subwallet/extension-base/background/KoniTypes";
-import BigN from "bignumber.js";
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import BigN from 'bignumber.js';
 
 export type PalletAssetsAssetAccount = {
   balance: number | string,
@@ -44,6 +44,6 @@ export function _getAssetsPalletLockedBalance (accountInfo: PalletAssetsAssetAcc
 
 // ----------------------------------------------------------------------
 
-function _getAppliedExistentialDeposit (existentialDeposit: string, strictMode?: boolean): string {
+export function _getAppliedExistentialDeposit (existentialDeposit: string, strictMode?: boolean): string {
   return strictMode ? existentialDeposit : '0';
 }

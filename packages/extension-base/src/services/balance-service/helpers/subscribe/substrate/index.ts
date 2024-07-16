@@ -160,7 +160,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   };
 };
 
-const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance) => {
+const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, chainInfo, extrinsicType, substrateApi }: SubscribeSubstratePalletBalance) => {
   const foreignAssetsAccountKey = 'query_foreignAssets_account';
   const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
 
@@ -180,7 +180,7 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
           const balances = rs[foreignAssetsAccountKey];
           const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
             const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
-            const transferableBalance = _getForeignAssetPalletTransferable(balanceInfo);
+            const transferableBalance = _getForeignAssetPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
             const totalLockedFromTransfer = _getForeignAssetPalletLockedBalance(balanceInfo);
 
             return {

@@ -2,14 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
 import BigN from 'bignumber.js';
-
-export type PalletAssetsAssetAccount = {
-  balance: number | string,
-  status: 'Frozen' | 'Liquid' | 'Blocked',
-  reason: Record<string, unknown>,
-  extra: unknown
-}
 
 export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
   const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN, ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);

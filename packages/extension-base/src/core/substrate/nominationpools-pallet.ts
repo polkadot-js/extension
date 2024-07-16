@@ -1,14 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 import BigN from 'bignumber.js';
-
-export type PalletNominationPoolsPoolMember = {
-  poolId: number,
-  points: number,
-  lastRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
-}
 
 export function _getActiveStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {
   return new BigN(memberInfo.points.toString());

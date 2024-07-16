@@ -2,33 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
 import BigN from 'bignumber.js';
-
-// https://crates.parity.io/frame_system/struct.AccountInfo.html
-// https://wiki.polkadot.network/docs/learn-account-balances
-export type FrameSystemAccountInfoV2 = Omit<FrameSystemAccountInfoV1, 'data'> & {
-  data: {
-    free: number,
-    reserved: number,
-    frozen: number,
-    flags: number
-  }
-}
-
-export type FrameSystemAccountInfoV1 = {
-  nonce: number,
-  consumers: number,
-  providers: number,
-  sufficients: number,
-  data: {
-    free: number | string,
-    reserved: number,
-    miscFrozen: number,
-    feeFrozen: number
-  }
-}
-
-export type FrameSystemAccountInfo = FrameSystemAccountInfoV1 | FrameSystemAccountInfoV2;
 
 function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
   return (accountInfo as FrameSystemAccountInfoV1).data.miscFrozen !== undefined && (accountInfo as FrameSystemAccountInfoV1).data.feeFrozen !== undefined;

@@ -3,13 +3,8 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAppliedExistentialDeposit } from '@subwallet/extension-base/core/substrate/assets-pallet';
+import { OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/types';
 import BigN from 'bignumber.js';
-
-export type OrmlTokensAccountData = {
-  free: number,
-  reserved: number,
-  frozen: number
-}
 
 export function _getOrmlTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
   const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN].includes(extrinsicType);

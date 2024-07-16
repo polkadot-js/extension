@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ChainStakingMetadata, NominationInfo, NominatorMetadata, StakingTxErrorType, StakingType, UnstakingInfo, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { MAX_NOMINATIONS } from '@subwallet/extension-base/constants';
-import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 import { calculateAlephZeroValidatorReturn, calculateChainStakedReturn, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getCommission, getExistUnstakeErrorMessage, getMaxValidatorErrorMessage, getMinStakeErrorMessage, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _EXPECTED_BLOCK_TIME, _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';

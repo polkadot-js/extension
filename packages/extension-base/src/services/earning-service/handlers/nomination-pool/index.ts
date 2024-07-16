@@ -3,7 +3,7 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { APIItemState, BasicTxErrorType, ChainType, ExtrinsicType, NominationInfo, StakingTxErrorType, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 import { calculateChainStakedReturnV2, calculateInflation, getAvgValidatorEraReward, getExistUnstakeErrorMessage, getMinStakeErrorMessage, getSupportedDaysByHistoryDepth, parsePoolStashAddress } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';

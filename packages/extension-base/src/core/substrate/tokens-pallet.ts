@@ -2,13 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/types';
 import BigN from 'bignumber.js';
-
-export type OrmlTokensAccountData = {
-  free: number,
-  reserved: number,
-  frozen: number
-}
 
 export function _getTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
   const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN, ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);

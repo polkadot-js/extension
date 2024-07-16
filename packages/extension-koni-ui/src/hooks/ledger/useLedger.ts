@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerNetwork, MigrationLedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createPromiseHandler, isSameAddress } from '@subwallet/extension-base/utils';
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
@@ -46,59 +46,65 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
   return ledgerChains.find((network) => network.slug === slug || (network.isEthereum && isEthereumNetwork));
 };
 
-const retrieveLedger = (rawSlug: string, ledgerChains: LedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slip44?: number): Ledger => {
+const getNetworkBySlug = (ledgerChains: MigrationLedgerNetwork[], slug: string): MigrationLedgerNetwork | undefined => {
+  return ledgerChains.find((network) => network.slug === slug);
+};
+
+const retrieveLedger = (slugApp: string, ledgerChains: LedgerNetwork[], migrateLedgerChains: MigrationLedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slugNetwork?: string): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, ledgerIncompatible);
 
-  const slugList = rawSlug.split(':');
-  let def = getNetwork(ledgerChains, slugList[0], isEthereumNetwork);
+  const def = getNetwork(ledgerChains, slugApp, isEthereumNetwork);
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  if (def.isGeneric && slugList.length !== 2) {
+  if (def.isGeneric) {
     if (def.isEthereum) {
       return new EVMLedger('webusb', def.slip44);
     } else {
-      return new SubstrateGenericLedger('webusb', slip44 || def.slip44);
+      if (slugNetwork) {
+        const def = getNetworkBySlug(migrateLedgerChains, slugNetwork);
+
+        assert(def, 'There is no known Ledger app available for this chain');
+
+        return new SubstrateMigrationLedger('webusb', def.slip44, def.ss58_addr_type);
+      } else {
+        return new SubstrateGenericLedger('webusb', def.slip44);
+      }
     }
   } else {
     if (!forceMigration) {
       return new SubstrateLegacyLedger('webusb', def.network);
     } else {
       if (NotNeedMigrationGens.includes(def.genesisHash)) {
-        return new SubstrateGenericLedger('webusb', slip44 || def.slip44);
+        return new SubstrateGenericLedger('webusb', def.slip44);
       } else {
-        if (slugList.length === 2 && !slip44) {
-          def = getNetwork(ledgerChains, slugList[1], isEthereumNetwork);
-          assert(def, 'There is no known Ledger app available for this chain');
-        }
-
-        return new SubstrateMigrationLedger('webusb', slip44 || def.slip44);
+        return new SubstrateMigrationLedger('webusb', def.slip44);
       }
     }
   }
 };
 
-export function useLedger (slug?: string, active = true, isSigning = false, forceMigration = false, slip44?: number): Result {
+export function useLedger (slugApp?: string, active = true, isSigning = false, forceMigration = false, slugNetwork?: string): Result {
   const { t } = useTranslation();
 
-  const [ledgerChains] = useGetSupportedLedger();
+  const [ledgerChains, migrateLedgerChains] = useGetSupportedLedger();
   const { chainInfoMap } = useSelector((state) => state.chainStore);
 
   const isEvmNetwork = useMemo(() => {
-    if (!slug) {
+    if (!slugApp) {
       return false;
     }
 
-    const chainInfo = chainInfoMap[slug];
+    const chainInfo = chainInfoMap[slugApp];
 
     if (!chainInfo) {
       return false;
     }
 
     return _isChainEvmCompatible(chainInfo);
-  }, [chainInfoMap, slug]);
+  }, [chainInfoMap, slugApp]);
 
   const timeOutRef = useRef<NodeJS.Timer>();
   const destroyRef = useRef<VoidFunction>();
@@ -121,31 +127,31 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
     // this trick allows to refresh the ledger on demand
     // when it is shown as locked and the user has actually
     // unlocked it, which we can't know.
-    if (refreshLock || slug) {
-      if (!slug || !active) {
+    if (refreshLock || slugApp) {
+      if (!slugApp || !active) {
         return null;
       }
 
       try {
-        return retrieveLedger(slug, ledgerChains, isEvmNetwork, forceMigration, slip44);
+        return retrieveLedger(slugApp, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, slugNetwork);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [refreshLock, slug, active, ledgerChains, isEvmNetwork, forceMigration, slip44]);
+  }, [refreshLock, slugApp, active, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, slugNetwork]);
 
   const appName = useMemo(() => {
     const unknownNetwork = 'unknown network';
 
-    if (!slug) {
+    if (!slugApp) {
       return unknownNetwork;
     }
 
-    const chainInfo = chainInfoMap[slug];
+    const chainInfo = chainInfoMap[slugApp];
     const isEthereumNetwork = chainInfo ? _isChainEvmCompatible(chainInfo) : false;
-    const { appName, isEthereum, isGeneric } = getNetwork(ledgerChains, slug, isEthereumNetwork) || { appName: unknownNetwork, isGeneric: true };
+    const { appName, isEthereum, isGeneric } = getNetwork(ledgerChains, slugApp, isEthereumNetwork) || { appName: unknownNetwork, isGeneric: true };
 
     if (!isGeneric && forceMigration && !isEthereum) {
       if (NotNeedMigrationGens.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
@@ -156,7 +162,7 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
     }
 
     return appName;
-  }, [chainInfoMap, forceMigration, ledgerChains, slug]);
+  }, [chainInfoMap, forceMigration, ledgerChains, slugApp]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);
@@ -285,7 +291,7 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
   }, [handleError, ledger, t]);
 
   useEffect(() => {
-    if (!slug || !active) {
+    if (!slugApp || !active) {
       return;
     }
 
@@ -313,7 +319,7 @@ export function useLedger (slug?: string, active = true, isSigning = false, forc
           console.error(error);
         });
     }, 300);
-  }, [slug, t, active, handleError, getLedger]);
+  }, [slugApp, t, active, handleError, getLedger]);
 
   useEffect(() => {
     destroyRef.current = () => {

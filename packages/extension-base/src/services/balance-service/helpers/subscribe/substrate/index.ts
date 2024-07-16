@@ -389,7 +389,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
 };
 
 // eslint-disable-next-line @typescript-eslint/require-await
-const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): Promise<() => void> => {
+const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainInfo, extrinsicType, substrateApi }: SubscribeSubstratePalletBalance): Promise<() => void> => {
   const ormlTokensAccountsKey = 'query_ormlTokens_accounts';
   const tokenMap = filterAssetsByChainAndType(assetMap, chainInfo.slug, [_AssetType.LOCAL]);
 
@@ -409,7 +409,7 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
         const balances = rs[ormlTokensAccountsKey];
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as OrmlTokensAccountData;
-          const transferableBalance = _getOrmlTokensPalletTransferable(balanceInfo);
+          const transferableBalance = _getOrmlTokensPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
           const totalLockedFromTransfer = _getOrmlTokensPalletLockedBalance(balanceInfo);
 
           return {

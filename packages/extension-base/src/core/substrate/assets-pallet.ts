@@ -2,11 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
+import { BalanceAccountType, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
+import { getStrictMode } from '@subwallet/extension-base/core/utils';
 import BigN from 'bignumber.js';
 
 export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
-  const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN, ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);
+  const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
   const bnAppliedExistentialDeposit = new BigN(_getAppliedExistentialDeposit(existentialDeposit, strictMode));
 
   let bnTransferable = new BigN(0);

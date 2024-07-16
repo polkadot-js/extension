@@ -46,3 +46,10 @@ export type PalletNominationPoolsPoolMember = {
   lastRecordedRewardCounter: number,
   unbondingEras: Record<string, number>
 }
+
+// export type BalanceAccountType = 'FrameSystemAccountInfo' | 'OrmlTokensAccountData' | 'PalletAssetsAssetAccount' | 'PalletNominationPoolsPoolMember';
+export const BalanceAccountType = {
+  FrameSystemAccountInfo: 'FrameSystemAccountInfo',
+  OrmlTokensAccountData: 'OrmlTokensAccountData',
+  PalletAssetsAssetAccount: 'PalletAssetsAssetAccount'
+};

@@ -3,11 +3,12 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAppliedExistentialDeposit } from '@subwallet/extension-base/core/substrate/assets-pallet';
-import { PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
+import { BalanceAccountType, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
+import { getStrictMode } from '@subwallet/extension-base/core/utils';
 import BigN from 'bignumber.js';
 
 export function _getForeignAssetPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
-  const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_TOKEN, ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType);
+  const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
 
   if (!accountInfo || accountInfo.status !== 'Liquid') {
     return '0';

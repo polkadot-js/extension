@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
+import { BalanceAccountType, FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
+import { getStrictMode } from '@subwallet/extension-base/core/utils';
 import BigN from 'bignumber.js';
 
 function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
@@ -10,7 +11,7 @@ function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemA
 }
 
 export function _getSystemPalletTransferable (accountInfo: FrameSystemAccountInfo, existentialDeposit: string, extrinsicType?: ExtrinsicType): string {
-  const strictMode = !extrinsicType || ![ExtrinsicType.TRANSFER_BALANCE].includes(extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
+  const strictMode = getStrictMode(BalanceAccountType.FrameSystemAccountInfo, extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
 
   if (isV1(accountInfo)) {
     return _getSystemPalletTransferableV1(accountInfo, existentialDeposit, strictMode);

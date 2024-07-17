@@ -318,7 +318,7 @@ const Component: React.FC<Props> = (props: Props) => {
     setTimeout(async () => {
       if (typeof payload === 'string') {
         try {
-          const { signature } = await ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset);
+          const { signature } = await ledgerSignMessage(u8aToU8a(payload), account.accountIndex, account.addressOffset, account.address);
 
           onApproveSignature({ signature });
         } catch (e) {
@@ -351,7 +351,7 @@ const Component: React.FC<Props> = (props: Props) => {
         }
 
         try {
-          const { signature } = await ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset);
+          const { signature } = await ledgerSignTransaction(payloadU8a, metadata, account.accountIndex, account.addressOffset, account.address);
 
           if (addExtraData) {
             const extrinsic = payload.registry.createType(

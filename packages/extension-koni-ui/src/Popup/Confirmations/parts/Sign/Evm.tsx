@@ -153,8 +153,8 @@ const Component: React.FC<Props> = (props: Props) => {
 
     setTimeout(() => {
       const signPromise = isMessage
-        ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset)
-        : ledgerSignTransaction(hexToU8a(hashPayload), new Uint8Array(0), account.accountIndex, account.addressOffset);
+        ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset, account.address)
+        : ledgerSignTransaction(hexToU8a(hashPayload), new Uint8Array(0), account.accountIndex, account.addressOffset, account.address);
 
       signPromise
         .then(({ signature }) => {
@@ -165,7 +165,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     });
-  }, [account.accountIndex, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, refreshLedger]);
+  }, [account.accountIndex, account.address, account.addressOffset, hashPayload, isLedgerConnected, isMessage, ledger, ledgerSignMessage, ledgerSignTransaction, onApproveSignature, refreshLedger]);
 
   const onConfirmInject = useCallback(() => {
     if (evmWallet) {

@@ -15,12 +15,13 @@ import styled, { useTheme } from 'styled-components';
 interface Props extends ThemeProps {
   cancelRequest: () => void;
   networkToAdd: string[];
+  requestId: string;
 }
 
 const AddNetworkWCModalId = ADD_NETWORK_WALLET_CONNECT_MODAL;
 const AddNetworkUrl = '/settings/chains/import';
 
-function Component ({ cancelRequest, className, networkToAdd }: Props): React.ReactElement<Props> {
+function Component ({ cancelRequest, className, networkToAdd, requestId }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { inactiveModal } = useContext(ModalContext);
   const navigate = useNavigate();
@@ -33,8 +34,8 @@ function Component ({ cancelRequest, className, networkToAdd }: Props): React.Re
 
   const addNetwork = useCallback(() => {
     inactiveModal(AddNetworkWCModalId);
-    navigate(AddNetworkUrl, { state: { useGoHome: true, chainId: networkToAdd } });
-  }, [inactiveModal, navigate, networkToAdd]);
+    navigate(AddNetworkUrl, { state: { useGoHome: true, chainId: networkToAdd, id: requestId } });
+  }, [inactiveModal, navigate, networkToAdd, requestId]);
 
   const footerModal = useMemo(() => {
     return (

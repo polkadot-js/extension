@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { BalanceAccountType, FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
+import { FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
 import { getMaxBigint, getStrictMode } from '@subwallet/extension-base/core/utils';
 
 function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
@@ -10,7 +10,7 @@ function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemA
 }
 
 export function _getSystemPalletTransferable (accountInfo: FrameSystemAccountInfo, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
-  const strictMode = getStrictMode(BalanceAccountType.FrameSystemAccountInfo, extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
+  const strictMode = getStrictMode(typeof accountInfo, extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
 
   if (isV1(accountInfo)) {
     return _getSystemPalletTransferableV1(accountInfo, existentialDeposit, strictMode);
@@ -36,7 +36,7 @@ export function _getSystemPalletTotalBalance (accountInfo: FrameSystemAccountInf
 }
 
 export function _getAppliedExistentialDepositWithExtrinsicType (accountInfo: FrameSystemAccountInfo, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
-  const strictMode = getStrictMode(BalanceAccountType.FrameSystemAccountInfo, extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
+  const strictMode = getStrictMode(typeof accountInfo, extrinsicType); // always apply strict mode to keep account alive unless explicitly specified otherwise
 
   return _getAppliedExistentialDeposit(accountInfo, existentialDeposit, strictMode);
 }

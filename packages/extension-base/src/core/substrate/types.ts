@@ -48,6 +48,7 @@ export type PalletNominationPoolsPoolMember = {
 }
 
 // export type BalanceAccountType = 'FrameSystemAccountInfo' | 'OrmlTokensAccountData' | 'PalletAssetsAssetAccount' | 'PalletNominationPoolsPoolMember';
+
 export const BalanceAccountType = {
   FrameSystemAccountInfo: 'FrameSystemAccountInfo',
   OrmlTokensAccountData: 'OrmlTokensAccountData',

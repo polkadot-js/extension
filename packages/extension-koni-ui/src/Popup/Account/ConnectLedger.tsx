@@ -27,6 +27,10 @@ interface ImportLedgerItem {
   name: string;
 }
 
+export const funcSortByName = (a: ChainItemType, b: ChainItemType) => {
+  return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
+};
+
 const LIMIT_PER_PAGE = 5;
 
 const FooterIcon = (
@@ -60,7 +64,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger.map((network) => ({
     name: network.networkName.replace(' network', ''),
     slug: network.slug
-  })), [migrateSupportLedger]);
+  })).sort(funcSortByName), [migrateSupportLedger]);
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
   const [chainMigrateMode, setChainMigrateMode] = useState<string | undefined>();
@@ -80,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const accountMigrateNetworkName = useMemo(() => {
     const selectedChain = migrateSupportLedger.find((n) => n.slug === chainMigrateMode);
 
-    return chainMigrateMode && selectedChain ? `(${selectedChain.accountName})` : '';
+    return chainMigrateMode && selectedChain ? `${selectedChain.accountName}` : '';
   }, [chainMigrateMode, migrateSupportLedger]);
 
   const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain, true, false, false, chainMigrateMode);
@@ -129,7 +133,7 @@ const Component: React.FC<Props> = (props: Props) => {
         (await getAllAddress(start, end)).forEach(({ address }, index) => {
           rs[start + index] = {
             accountIndex: start + index,
-            name: `Ledger ${accountName}${accountMigrateNetworkName} ${start + index + 1}`,
+            name: `Ledger ${accountMigrateNetworkName} ${accountMigrateNetworkName ? `(${accountName})` : accountName} ${start + index + 1}`,
             address: address
           };
         });

@@ -305,14 +305,24 @@ export const PredefinedMigrationLedgerNetwork: MigrationLedgerNetwork[] = [
     ss58_addr_type: 42
   },
   {
-    accountName: 'Aleph Zero Testnet',
-    appName: 'Aleph Zero',
-    networkName: 'Aleph Zero Testnet network',
-    genesisHash: ChainInfoMap.alephTest.substrateInfo?.genesisHash || '0x05d5279c52c484cc80396535a316add7d47b1c5b9e0398dd1f584149341460c5',
-    network: 'aleph-node',
-    slug: ChainInfoMap.alephTest.slug,
-    slip44: 643,
-    ss58_addr_type: 42
+    accountName: 'Ajuna',
+    appName: 'Ajuna',
+    networkName: 'Ajuna network',
+    genesisHash: ChainInfoMap.ajunaPolkadot.substrateInfo?.genesisHash || '0xe358eb1d11b31255a286c12e44fe6780b7edb171d657905a97e39f71d9c6c3ee',
+    network: 'ajuna',
+    slug: ChainInfoMap.ajunaPolkadot.slug,
+    slip44: 354,
+    ss58_addr_type: 1328
+  },
+  {
+    accountName: 'Bifrost',
+    appName: 'Bifrost',
+    networkName: 'Bifrost network',
+    genesisHash: ChainInfoMap.bifrost_dot.substrateInfo?.genesisHash || '0x262e1b2ad728475fd6fe88e62d34c200abe6fd693931ddad144059b1eb884e5b',
+    network: 'ajuna',
+    slug: ChainInfoMap.bifrost_dot.slug,
+    slip44: 788,
+    ss58_addr_type: 6
   },
   {
     accountName: 'Astar',
@@ -373,7 +383,97 @@ export const PredefinedMigrationLedgerNetwork: MigrationLedgerNetwork[] = [
     slug: ChainInfoMap.polkadex.slug,
     slip44: 799,
     ss58_addr_type: 88
+  },
+  {
+    accountName: 'Centrifuge',
+    appName: 'Centrifuge',
+    networkName: 'Centrifuge network',
+    genesisHash: ChainInfoMap.centrifuge.substrateInfo?.genesisHash || '0xb3db41421702df9a7fcac62b53ffeac85f7853cc4e689e0b93aeb3db18c09d82',
+    network: 'centrifuge',
+    slug: ChainInfoMap.centrifuge.slug,
+    slip44: 747,
+    ss58_addr_type: 36
+  },
+  {
+    accountName: 'Darwinia',
+    appName: 'darwinia',
+    networkName: 'Darwinia network',
+    genesisHash: ChainInfoMap.darwinia2.substrateInfo?.genesisHash || '0xf0b8924b12e8108550d28870bc03f7b45a947e1b2b9abf81bfb0b89ecb60570e',
+    network: 'darwinia',
+    slug: ChainInfoMap.darwinia2.slug,
+    slip44: 354,
+    ss58_addr_type: 36
+  },
+  {
+    accountName: 'HydraDX',
+    appName: 'HydraDX',
+    networkName: 'HydraDX network',
+    genesisHash: ChainInfoMap.hydradx_main.substrateInfo?.genesisHash || '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
+    network: 'hydradx',
+    slug: ChainInfoMap.hydradx_main.slug,
+    slip44: 354,
+    ss58_addr_type: 63
+  },
+  {
+    accountName: 'Khala',
+    appName: 'khala',
+    networkName: 'Khala network',
+    genesisHash: ChainInfoMap.khala.substrateInfo?.genesisHash || '0xd43540ba6d3eb4897c28a77d48cb5b729fea37603cbbfc7a86a73b72adb3be8d',
+    network: 'khala',
+    slug: ChainInfoMap.khala.slug,
+    slip44: 434,
+    ss58_addr_type: 30
+  },
+  {
+    accountName: 'Nodle',
+    appName: 'nodle',
+    networkName: 'Nodle network',
+    genesisHash: ChainInfoMap.nodle.substrateInfo?.genesisHash || '0x97da7ede98d7bad4e36b4d734b6055425a3be036da2a332ea5a7037656427a21',
+    network: 'nodle',
+    slug: ChainInfoMap.nodle.slug,
+    slip44: 1003,
+    ss58_addr_type: 37
+  },
+  {
+    accountName: 'Parallel',
+    appName: 'parallel',
+    networkName: 'Parallel network',
+    genesisHash: ChainInfoMap.parallel.substrateInfo?.genesisHash || '0xe61a41c53f5dcd0beb09df93b34402aada44cb05117b71059cce40a2723a4e97',
+    network: 'parallel',
+    slug: ChainInfoMap.parallel.slug,
+    slip44: 354,
+    ss58_addr_type: 172
+  },
+  {
+    accountName: 'Phala',
+    appName: 'phala',
+    networkName: 'Phala network',
+    genesisHash: ChainInfoMap.phala.substrateInfo?.genesisHash || '0x1bb969d85965e4bb5a651abbedf21a54b6b31a21f66b5401cc3f1e286268d736',
+    network: 'phala',
+    slug: ChainInfoMap.phala.slug,
+    slip44: 354,
+    ss58_addr_type: 30
+  },
+  {
+    accountName: 'Pendulum',
+    appName: 'pendulum',
+    networkName: 'Pendulum network',
+    genesisHash: ChainInfoMap.pendulum.substrateInfo?.genesisHash || '0x5d3c298622d5634ed019bf61ea4b71655030015bde9beb0d6a24743714462c86',
+    network: 'pendulum',
+    slug: ChainInfoMap.pendulum.slug,
+    slip44: 354,
+    ss58_addr_type: 56
   }
+  // {
+  //   accountName: 'Unique',
+  //   appName: 'unique',
+  //   networkName: 'Unique network',
+  //   genesisHash: ChainInfoMap.unique_network.substrateInfo?.genesisHash || '0x84322d9cddbf35088f1e54e9a85c967a41a56a4f43445768125e61af166c7d31',
+  //   network: 'unique',
+  //   slug: ChainInfoMap.unique_network.slug,
+  //   slip44: 661,
+  //   ss58_addr_type: 7391
+  // }
 ];
 
 export const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;

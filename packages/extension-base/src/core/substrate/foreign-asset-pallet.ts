@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
-import { PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
+import { BalanceAccountType, PalletAssetsAssetAccount } from '@subwallet/extension-base/core/substrate/types';
 import { _getAppliedExistentialDeposit, getStrictMode } from '@subwallet/extension-base/core/utils';
 
 export function _getForeignAssetPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
-  const strictMode = getStrictMode(typeof accountInfo, extrinsicType);
+  const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
 
   if (!accountInfo || accountInfo.status !== 'Liquid') {
     return 0n;

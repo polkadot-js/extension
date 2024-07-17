@@ -1416,6 +1416,8 @@ export interface LedgerNetwork {
   isGeneric: boolean;
   /** Use for evm account */
   isEthereum: boolean;
+  /** Hide networks that are supported by the dot migration app */
+  isHide?: boolean;
   /** Slip44 in the derivation path */
   slip44: number;
 }

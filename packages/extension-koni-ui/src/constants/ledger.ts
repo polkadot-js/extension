@@ -25,7 +25,7 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   },
   {
     accountName: 'Polkadot Migration',
-    appName: 'Polkadot',
+    appName: 'Polkadot Migration',
     networkName: 'Polkadot Migration',
     genesisHash: '',
     network: 'polkadot',
@@ -48,6 +48,48 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isGeneric: true,
     isEthereum: true,
     slip44: 60
+  },
+  {
+    accountName: 'Polkadot',
+    appName: 'Polkadot',
+    networkName: 'Polkadot network',
+    genesisHash: ChainInfoMap.polkadot.substrateInfo?.genesisHash || '0x91b171bb158e2d3848fa23a9f1c25182fb8e20313b2c1eb49219da7a70ce90c3',
+    icon: 'substrate',
+    network: 'polkadot',
+    slug: ChainInfoMap.polkadot.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false,
+    slip44: 354,
+    isHide: true
+  },
+  {
+    accountName: 'Statemint',
+    appName: 'Statemint',
+    networkName: 'Polkadot Assets Hub (Statemint) network',
+    genesisHash: ChainInfoMap.statemint.substrateInfo?.genesisHash || '0x68d56f15f85d3136970ec16946040bc1752654e906147f7e43e9d539d7c3de2f',
+    icon: 'substrate',
+    network: 'statemint',
+    slug: ChainInfoMap.statemint.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false,
+    slip44: 354,
+    isHide: true
+  },
+  {
+    accountName: 'Statemine',
+    appName: 'Statemine',
+    networkName: 'Kusama Assets Hub (Statemine) network',
+    genesisHash: ChainInfoMap.statemine.substrateInfo?.genesisHash || '0x48239ef607d7928874027a43a67689209727dfb3d3dc5e5b03a39bdc2eda771a',
+    icon: 'substrate',
+    network: 'statemine',
+    slug: ChainInfoMap.statemine.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false,
+    slip44: 434,
+    isHide: true
   },
   {
     accountName: 'Kusama',
@@ -99,7 +141,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isDevMode: false,
     isGeneric: false,
     isEthereum: false,
-    slip44: 643
+    slip44: 643,
+    isHide: true
   },
   {
     accountName: 'Astar',

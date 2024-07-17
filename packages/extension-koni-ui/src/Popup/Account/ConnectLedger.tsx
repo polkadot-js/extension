@@ -50,13 +50,15 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
-  const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
-    slug: network.slug
-  })), [supportedLedger]);
+  const networks = useMemo((): ChainItemType[] => supportedLedger
+    .filter(({ isHide }) => !isHide)
+    .map((network) => ({
+      name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
+      slug: network.slug
+    })), [supportedLedger]);
 
   const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger.map((network) => ({
-    name: network.networkName,
+    name: network.networkName.replace(' network', ''),
     slug: network.slug
   })), [migrateSupportLedger]);
 

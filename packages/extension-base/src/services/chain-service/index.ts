@@ -42,7 +42,10 @@ const ignoredList = [
   'rollux_evm',
   'rollux_testnet',
   'boolAlpha',
-  'boolBeta_testnet'
+  'boolBeta_testnet',
+  'core',
+  'satoshivm',
+  'satoshivm_testnet'
 ];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {

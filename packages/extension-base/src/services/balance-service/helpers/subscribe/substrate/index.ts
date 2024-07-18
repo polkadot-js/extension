@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { GearApi } from '@gear-js/api';
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
@@ -14,17 +13,17 @@ import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _checkSmartContractSupportByChain, _getChainExistentialDeposit, _getChainNativeTokenSlug, _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getTokenTypesSupportedByChain, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isSubstrateRelayChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { BalanceItem, SubscribeBasePalletBalance, SubscribeSubstratePalletBalance, TokenBalanceRaw } from '@subwallet/extension-base/types';
-import { filterAssetsByChainAndType, getGRC20ContractPromise, GRC20 } from '@subwallet/extension-base/utils';
+import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { combineLatest, Observable } from 'rxjs';
 
 import { ContractPromise } from '@polkadot/api-contract';
 import { Codec } from '@polkadot/types/types';
-import { BN, BN_ZERO, noop, u8aToHex } from '@polkadot/util';
-import { decodeAddress } from '@polkadot/util-crypto';
+import { BN, BN_ZERO } from '@polkadot/util';
 
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';
+import { subscribeGRC20Balance, subscribeVftBalance } from './gear';
 
 export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: _ChainInfo, assetMap: Record<string, _ChainAsset>, substrateApi: _SubstrateApi, evmApi: _EvmApi, callback: (rs: BalanceItem[]) => void, extrinsicType?: ExtrinsicType) => {
   let unsubNativeToken: () => void;
@@ -33,6 +32,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
   let unsubWasmContractToken: () => void;
   let unsubBridgedToken: () => void;
   let unsubGrcToken: () => void;
+  let unsubVftToken: () => void;
 
   const chain = chainInfo.slug;
   const baseParams: SubscribeBasePalletBalance = {
@@ -93,6 +93,10 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
     if (_checkSmartContractSupportByChain(chainInfo, _AssetType.GRC20)) { // Get sub-token for substrate-based chains
       unsubGrcToken = subscribeGRC20Balance(substrateParams);
     }
+
+    if (_checkSmartContractSupportByChain(chainInfo, _AssetType.VFT)) { // Get sub-token for substrate-based chains
+      unsubVftToken = subscribeVftBalance(substrateParams);
+    }
   } catch (err) {
     console.warn(err);
   }
@@ -104,6 +108,7 @@ export const subscribeSubstrateBalance = async (addresses: string[], chainInfo: 
     unsubWasmContractToken && unsubWasmContractToken();
     unsubBridgedToken && unsubBridgedToken();
     unsubGrcToken?.();
+    unsubVftToken?.();
   };
 };
 
@@ -434,65 +439,5 @@ const subscribeOrmlTokensPallet = async ({ addresses, assetMap, callback, chainI
         unsub && unsub();
       }).catch(console.error);
     });
-  };
-};
-
-const subscribeGRC20Balance = ({ addresses, assetMap, callback, chainInfo, substrateApi }: SubscribeSubstratePalletBalance): VoidCallback => {
-  if (!(substrateApi instanceof GearApi)) {
-    console.warn('Cannot subscribe VFT balance without GearApi instance');
-
-    return noop;
-  }
-
-  const chain = chainInfo.slug;
-  const psp22ContractMap = {} as Record<string, GRC20>;
-  const tokenList = filterAssetsByChainAndType(assetMap, chain, [_AssetType.GRC20]);
-
-  Object.entries(tokenList).forEach(([slug, tokenInfo]) => {
-    psp22ContractMap[slug] = getGRC20ContractPromise(substrateApi, _getContractAddressOfToken(tokenInfo));
-  });
-
-  const getTokenBalances = () => {
-    Object.values(tokenList).map(async (tokenInfo) => {
-      try {
-        const contract = psp22ContractMap[tokenInfo.slug];
-        const balances: BalanceItem[] = await Promise.all(addresses.map(async (address): Promise<BalanceItem> => {
-          try {
-            const actor = u8aToHex(decodeAddress(address));
-            const _balanceOf = await contract.balanceOf(actor, address);
-
-            return {
-              address: address,
-              tokenSlug: tokenInfo.slug,
-              free: _balanceOf.toString(10),
-              locked: '0',
-              state: APIItemState.READY
-            };
-          } catch (err) {
-            console.error(`Error on get balance of account ${address} for token ${tokenInfo.slug}`, err);
-
-            return {
-              address: address,
-              tokenSlug: tokenInfo.slug,
-              free: '0',
-              locked: '0',
-              state: APIItemState.READY
-            };
-          }
-        }));
-
-        callback(balances);
-      } catch (err) {
-        console.warn(tokenInfo.slug, err); // TODO: error createType
-      }
-    });
-  };
-
-  getTokenBalances();
-
-  const interval = setInterval(getTokenBalances, SUB_TOKEN_REFRESH_BALANCE_INTERVAL);
-
-  return () => {
-    clearInterval(interval);
   };
 };

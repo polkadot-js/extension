@@ -25,7 +25,6 @@ type Props = ThemeProps & {
   fromAsset: _ChainAsset | undefined;
   amountMaxValue?: string;
   amountValue?: string;
-  isButtonClicked?: boolean;
   onSetMax?: (value: boolean) => void;
   onChangeAmount: (value: string) => void;
 }
@@ -34,7 +33,7 @@ type Props = ThemeProps & {
 const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
-  const { amountValue, className, fromAsset, isButtonClicked,
+  const { amountValue, className, fromAsset,
     label, onChangeAmount, onSelectToken,
     tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
@@ -92,7 +91,6 @@ const Component = (props: Props) => {
             onChange={onChangeInput}
             showMaxButton={false}
             value={amountValue}
-            isButtonClicked={isButtonClicked}
           />
 
           {

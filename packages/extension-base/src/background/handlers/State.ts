@@ -3,18 +3,18 @@
 
 /* global chrome */
 
-import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { MetadataDef, ProviderMeta, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
+import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RawMetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
+import { addMetadata, addMetadataRaw, knownMetadata, knownMetadataRaw } from '@polkadot/extension-chains';
 import { knownGenesis } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import { MetadataStore } from '../../stores/index.js';
+import { MetadataStore, RawMetadataStore } from '../../stores/index.js';
 import { getId } from '../../utils/getId.js';
 import { withErrorLog } from './helpers.js';
 
@@ -35,6 +35,12 @@ export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlIn
 interface MetaRequest extends Resolver<boolean> {
   id: string;
   request: MetadataDef;
+  url: string;
+}
+
+interface MetaRequestRaw extends Resolver<boolean> {
+  id: string;
+  request: RawMetadataDef;
   url: string;
 }
 
@@ -125,17 +131,59 @@ async function extractMetadata (store: MetadataStore): Promise<void> {
   });
 }
 
+async function extractMetadataRaw (store: RawMetadataStore): Promise<void> {
+  await store.allMap(async (map): Promise<void> => {
+    const knownEntries = Object.entries(knownGenesis);
+    const defs: Record<string, { def: RawMetadataDef, index: number, key: string }> = {};
+    const removals: string[] = [];
+
+    Object
+      .entries(map)
+      .forEach(([key, def]): void => {
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash));
+
+        if (entry) {
+          const [name, hashes] = entry;
+          const index = hashes.indexOf(def.genesisHash);
+
+          // flatten the known metadata based on the genesis index
+          // (lower is better/newer)
+          if (!defs[name] || (defs[name].index > index)) {
+            if (defs[name]) {
+              // remove the old version of the metadata
+              removals.push(defs[name].key);
+            }
+
+            defs[name] = { def, index, key };
+          }
+        } else {
+          // this is not a known entry, so we will just apply it
+          defs[key] = { def, index: 0, key };
+        }
+      });
+
+    for (const key of removals) {
+      await store.remove(key);
+    }
+
+    Object.values(defs).forEach(({ def }) => addMetadataRaw(def));
+  });
+}
+
 export default class State {
   #authUrls: AuthUrls = {};
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
   readonly #metaStore = new MetadataStore();
+  readonly #metaStoreRaw = new RawMetadataStore();
 
   // Map of providers currently injected in tabs
   readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
 
   readonly #metaRequests: Record<string, MetaRequest> = {};
+  readonly #metaRequestsRaw: Record<string, MetaRequestRaw> = {};
+
 
   #notification = settings.notification;
 
@@ -152,6 +200,8 @@ export default class State {
 
   public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
 
+  public readonly metaRawSubject: BehaviorSubject<RawMetadataRequest[]> = new BehaviorSubject<RawMetadataRequest[]>([]);
+
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
   public defaultAuthAccountSelection: string[] = [];
@@ -162,6 +212,8 @@ export default class State {
 
   public async init () {
     await extractMetadata(this.#metaStore);
+    await extractMetadataRaw(this.#metaStoreRaw);
+    console.log('check this out', this.#metaStoreRaw)
     // retrieve previously set authorizations
     const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
     const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
@@ -179,6 +231,10 @@ export default class State {
 
   public get knownMetadata (): MetadataDef[] {
     return knownMetadata();
+  }
+
+  public get knownMetadataRaw (): RawMetadataDef[] {
+    return knownMetadataRaw();
   }
 
   public get numAuthRequests (): number {
@@ -203,6 +259,12 @@ export default class State {
     return Object
       .values(this.#metaRequests)
       .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
+  }
+
+  public get allMetaRequestsRaw (): RawMetadataRequest[] {
+    return Object
+      .values(this.#metaRequestsRaw)
+      .map(({ id, request, url }): RawMetadataRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
@@ -395,6 +457,7 @@ export default class State {
 
   private updateIconMeta (shouldClose?: boolean): void {
     this.metaSubject.next(this.allMetaRequests);
+    this.metaRawSubject.next(this.allMetaRequestsRaw);
     this.updateIcon(shouldClose);
   }
 
@@ -555,6 +618,12 @@ export default class State {
     await this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
+  }
+
+  public async saveMetadataRaw (meta: RawMetadataDef): Promise<void> {
+    await this.#metaStoreRaw.set(meta.genesisHash, meta);
+
+    addMetadataRaw(meta);
   }
 
   public setNotification (notification: string): boolean {

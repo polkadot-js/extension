@@ -176,5 +176,8 @@
   "Is your ledger locked?": "",
   "App \"{{network}}\" does not seem to be open": "",
   "Ledger error: {{errorMessage}}": "",
-  "assetId": ""
+  "assetId": "",
+  "rawMetadata": "",
+  "This approval will add the raw metadata to your extension instance, allowing signign with the Generic Polkadot Ledger App.": "",
+  "Yes, add this raw metadata": ""
 }

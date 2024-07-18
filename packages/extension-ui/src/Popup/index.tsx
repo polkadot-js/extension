@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, RawMetadataRequest, SigningRequest } from '@polkadot/extension-base/background/types';
 import type { SettingsStruct } from '@polkadot/ui-settings/types';
 
 import React, { useCallback, useEffect, useState } from 'react';
@@ -14,7 +14,7 @@ import { settings } from '@polkadot/ui-settings';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts.js';
 import { ErrorBoundary, Loading } from '../components/index.js';
 import ToastProvider from '../components/Toast/ToastProvider.js';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging.js';
+import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeRawMetadataRequests, subscribeSigningRequests } from '../messaging.js';
 import { buildHierarchy } from '../util/buildHierarchy.js';
 import Accounts from './Accounts/index.js';
 import AccountManagement from './AuthManagement/AccountManagement.js';
@@ -24,6 +24,7 @@ import CreateAccount from './CreateAccount/index.js';
 import Derive from './Derive/index.js';
 import ImportSeed from './ImportSeed/index.js';
 import Metadata from './Metadata/index.js';
+import RawMetadata from './RawMetadata/index.js';
 import Signing from './Signing/index.js';
 import Export from './Export.js';
 import ExportAll from './ExportAll.js';
@@ -74,6 +75,7 @@ export default function Popup (): React.ReactElement {
   const [cameraOn, setCameraOn] = useState(startSettings.camera === 'on');
   const [mediaAllowed, setMediaAllowed] = useState(false);
   const [metaRequests, setMetaRequests] = useState<null | MetadataRequest[]>(null);
+  const [rawMetaRequests, setRawMetaRequests] = useState<null | RawMetadataRequest[]>(null);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
@@ -104,6 +106,7 @@ export default function Popup (): React.ReactElement {
       subscribeAccounts(setAccounts),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
+      subscribeRawMetadataRequests(setRawMetaRequests),
       subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
@@ -135,6 +138,8 @@ export default function Popup (): React.ReactElement {
       ? wrapWithErrorBoundary(<Authorize />, 'authorize')
       : metaRequests?.length
         ? wrapWithErrorBoundary(<Metadata />, 'metadata')
+        : rawMetaRequests?.length
+        ? wrapWithErrorBoundary(<RawMetadata/>, 'rawMetadata')
         : signRequests?.length
           ? wrapWithErrorBoundary(<Signing />, 'signing')
           : wrapWithErrorBoundary(<Accounts />, 'accounts')

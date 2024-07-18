@@ -24,10 +24,16 @@ interface Props {
 }
 
 function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
+  console.log('signing with ledger');
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const { chainInfo, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, rawMetadata, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
 
+  console.log('chainInfo: ', chainInfo);
+  console.log('raw: ', rawMetadata)
+  const raw = rawMetadata ? rawMetadata : '0x00';
+  const metaBuff = Buffer.from(raw, 'hex');
+  console.log('metaBuff: ', metaBuff);
   useEffect(() => {
     if (ledgerError) {
       setError(ledgerError);
@@ -41,13 +47,14 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
 
   const _onSignLedger = useCallback(
     (): void => {
+    console.log('signing with ledger');
       if (!ledger || !payload || !onSignature) {
         return;
       }
 
       setError(null);
       setIsBusy(true);
-      ledger.sign(payload.toU8a(true), accountIndex, addressOffset)
+      ledger.signWithMetadata(payload.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
         .then((signature) => {
           onSignature(signature);
         }).catch((e: Error) => {

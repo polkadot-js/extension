@@ -69,6 +69,11 @@ export interface MetadataDef extends MetadataDefBase {
   userExtensions?: ExtDef;
 }
 
+export interface RawMetadataDef {
+  genesisHash: HexString;
+  rawMetadata: HexString;
+}
+
 export interface InjectedMetadataKnown {
   genesisHash: string;
   specVersion: number;

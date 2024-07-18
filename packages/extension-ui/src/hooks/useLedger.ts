@@ -9,12 +9,16 @@ import type { Network } from '@polkadot/networks/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Ledger } from '@polkadot/hw-ledger';
+import { LedgerGeneric } from '@polkadot/hw-ledger';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import ledgerChains from '../util/legerChains.js';
 import useTranslation from './useTranslation.js';
+import useMetadata from './useMetadata.js';
+import useRawMetadata from './useRawMetadata.js';
+import type { HexString } from '@polkadot/util/types';
+import type { Chain } from '@polkadot/extension-chains/types';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -23,19 +27,21 @@ interface StateBase {
 
 interface State extends StateBase {
   address: string | null;
+  chainInfo: Chain | null;
   error: string | null;
   isLoading: boolean;
   isLocked: boolean;
-  ledger: Ledger | null;
+  ledger: LedgerGeneric | null;
+  rawMetadata: HexString | null;
   refresh: () => void;
   warning: string | null;
 }
 
-function getNetwork (genesisHash: string): Network | undefined {
+function getNetwork(genesisHash: string): Network | undefined {
   return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
 }
 
-function getState (): StateBase {
+function getState(): StateBase {
   const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
 
   return {
@@ -44,8 +50,8 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): Ledger {
-  let ledger: Ledger | null = null;
+function retrieveLedger(genesis: string): LedgerGeneric {
+  let ledger: LedgerGeneric | null = null;
 
   const { isLedgerCapable } = getState();
 
@@ -54,19 +60,22 @@ function retrieveLedger (genesis: string): Ledger {
   const def = getNetwork(genesis);
 
   assert(def, 'There is no known Ledger app available for this chain');
+  assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
 
-  ledger = new Ledger('webusb', def.network);
+  ledger = new LedgerGeneric('webusb', def.network, def.slip44);
 
   return ledger;
 }
 
-export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export default function useLedger(genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const chainInfo = useMetadata(genesis);
+  const rawMetadata = useRawMetadata(genesis);
   const { t } = useTranslation();
   const ledger = useMemo(() => {
     setError(null);
@@ -102,7 +111,9 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    ledger.getAddress(false, accountIndex, addressOffset)
+    // TODO - consider ensuring ss58 address is no longer an optional input for the metadata information.
+    // Also this should be an opportunity to ensure we include any data needed.
+    ledger.getAddress(chainInfo?.ss58Format || 0, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);
@@ -127,9 +138,9 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
         console.error(e);
         setAddress(null);
       });
-  // If the dependency array is exhaustive, with t, the translation function, it
-  // triggers a useless re-render when ledger device is connected.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // If the dependency array is exhaustive, with t, the translation function, it
+    // triggers a useless re-render when ledger device is connected.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountIndex, addressOffset, genesis, ledger]);
 
   const refresh = useCallback(() => {
@@ -138,5 +149,5 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setWarning(null);
   }, []);
 
-  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning });
+  return ({ ...getState(), address, chainInfo, error, isLoading, isLocked, ledger, rawMetadata, refresh, warning });
 }

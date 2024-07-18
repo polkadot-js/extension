@@ -3,7 +3,7 @@
 
 /* global chrome */
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
@@ -29,13 +29,13 @@ const SEED_DEFAULT_LENGTH = 12;
 const SEED_LENGTHS = [12, 15, 18, 21, 24];
 const ETH_DERIVE_DEFAULT = "/m/44'/60'/0'/0/0";
 
-function getSuri (seed: string, type?: KeypairType): string {
+function getSuri(seed: string, type?: KeypairType): string {
   return type === 'ethereum'
     ? `${seed}${ETH_DERIVE_DEFAULT}`
     : seed;
 }
 
-function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
+function isJsonPayload(value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
   return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 
@@ -44,12 +44,12 @@ export default class Extension {
 
   readonly #state: State;
 
-  constructor (state: State) {
+  constructor(state: State) {
     this.#cachedUnlocks = {};
     this.#state = state;
   }
 
-  private transformAccounts (accounts: SubjectInfo): AccountJson[] {
+  private transformAccounts(accounts: SubjectInfo): AccountJson[] {
     return Object.values(accounts).map(({ json: { address, meta }, type }): AccountJson => ({
       address,
       isDefaultAuthSelected: this.#state.defaultAuthAccountSelection.includes(address),
@@ -58,25 +58,25 @@ export default class Extension {
     }));
   }
 
-  private accountsCreateExternal ({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
+  private accountsCreateExternal({ address, genesisHash, name }: RequestAccountCreateExternal): boolean {
     keyring.addExternal(address, { genesisHash, name });
 
     return true;
   }
 
-  private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
+  private accountsCreateHardware({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
     keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name });
 
     return true;
   }
 
-  private accountsCreateSuri ({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
+  private accountsCreateSuri({ genesisHash, name, password, suri, type }: RequestAccountCreateSuri): boolean {
     keyring.addUri(getSuri(suri, type), password, { genesisHash, name }, type);
 
     return true;
   }
 
-  private accountsChangePassword ({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
+  private accountsChangePassword({ address, newPass, oldPass }: RequestAccountChangePassword): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -96,7 +96,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsEdit ({ address, name }: RequestAccountEdit): boolean {
+  private accountsEdit({ address, name }: RequestAccountEdit): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -106,17 +106,17 @@ export default class Extension {
     return true;
   }
 
-  private accountsExport ({ address, password }: RequestAccountExport): ResponseAccountExport {
+  private accountsExport({ address, password }: RequestAccountExport): ResponseAccountExport {
     return { exportedJson: keyring.backupAccount(keyring.getPair(address), password) };
   }
 
-  private async accountsBatchExport ({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
+  private async accountsBatchExport({ addresses, password }: RequestAccountBatchExport): Promise<ResponseAccountsExport> {
     return {
       exportedJson: await keyring.backupAccounts(addresses, password)
     };
   }
 
-  private async accountsForget ({ address }: RequestAccountForget): Promise<boolean> {
+  private async accountsForget({ address }: RequestAccountForget): Promise<boolean> {
     const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
 
     // cycle through authUrls and prepare the array of diff
@@ -140,7 +140,7 @@ export default class Extension {
     return true;
   }
 
-  private refreshAccountPasswordCache (pair: KeyringPair): number {
+  private refreshAccountPasswordCache(pair: KeyringPair): number {
     const { address } = pair;
 
     const savedExpiry = this.#cachedUnlocks[address] || 0;
@@ -156,7 +156,7 @@ export default class Extension {
     return remainingTime;
   }
 
-  private accountsShow ({ address, isShowing }: RequestAccountShow): boolean {
+  private accountsShow({ address, isShowing }: RequestAccountShow): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -166,7 +166,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsTie ({ address, genesisHash }: RequestAccountTie): boolean {
+  private accountsTie({ address, genesisHash }: RequestAccountTie): boolean {
     const pair = keyring.getPair(address);
 
     assert(pair, 'Unable to find pair');
@@ -176,7 +176,7 @@ export default class Extension {
     return true;
   }
 
-  private accountsValidate ({ address, password }: RequestAccountValidate): boolean {
+  private accountsValidate({ address, password }: RequestAccountValidate): boolean {
     try {
       keyring.backupAccount(keyring.getPair(address), password);
 
@@ -186,7 +186,7 @@ export default class Extension {
     }
   }
 
-  private accountsSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private accountsSubscribe(id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(accounts.subscribe)'>(id, port);
     const subscription = accountsObservable.subject.subscribe((accounts: SubjectInfo): void =>
       cb(this.transformAccounts(accounts))
@@ -200,7 +200,7 @@ export default class Extension {
     return true;
   }
 
-  private authorizeApprove ({ authorizedAccounts, id }: RequestAuthorizeApprove): boolean {
+  private authorizeApprove({ authorizedAccounts, id }: RequestAuthorizeApprove): boolean {
     const queued = this.#state.getAuthRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -212,16 +212,16 @@ export default class Extension {
     return true;
   }
 
-  private async authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
+  private async authorizeUpdate({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
     return await this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
-  private getAuthList (): ResponseAuthorizeList {
+  private getAuthList(): ResponseAuthorizeList {
     return { list: this.#state.authUrls };
   }
 
   // FIXME This looks very much like what we have in accounts
-  private authorizeSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private authorizeSubscribe(id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(authorize.requests)'>(id, port);
     const subscription = this.#state.authSubject.subscribe((requests: AuthorizeRequest[]): void =>
       cb(requests)
@@ -235,7 +235,7 @@ export default class Extension {
     return true;
   }
 
-  private async metadataApprove ({ id }: RequestMetadataApprove): Promise<boolean> {
+  private async metadataApprove({ id }: RequestMetadataApprove): Promise<boolean> {
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -249,15 +249,19 @@ export default class Extension {
     return true;
   }
 
-  private metadataGet (genesisHash: string | null): MetadataDef | null {
+  private metadataGet(genesisHash: string | null): MetadataDef | null {
     return this.#state.knownMetadata.find((result) => result.genesisHash === genesisHash) || null;
   }
 
-  private metadataList (): MetadataDef[] {
+  private metadataGetRaw(genesisHash: string | null): RawMetadataDef | null {
+    return this.#state.knownMetadataRaw.find((result) => result.genesisHash === genesisHash) || null;
+  }
+
+  private metadataList(): MetadataDef[] {
     return this.#state.knownMetadata;
   }
 
-  private metadataReject ({ id }: RequestMetadataReject): boolean {
+  private metadataReject({ id }: RequestMetadataReject): boolean {
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -269,7 +273,7 @@ export default class Extension {
     return true;
   }
 
-  private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private metadataSubscribe(id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
       cb(requests)
@@ -283,7 +287,7 @@ export default class Extension {
     return true;
   }
 
-  private jsonRestore ({ file, password }: RequestJsonRestore): void {
+  private jsonRestore({ file, password }: RequestJsonRestore): void {
     try {
       keyring.restoreAccount(file, password);
     } catch (error) {
@@ -291,7 +295,7 @@ export default class Extension {
     }
   }
 
-  private batchRestore ({ file, password }: RequestBatchRestore): void {
+  private batchRestore({ file, password }: RequestBatchRestore): void {
     try {
       keyring.restoreAccounts(file, password);
     } catch (error) {
@@ -299,7 +303,7 @@ export default class Extension {
     }
   }
 
-  private jsonGetAccountInfo (json: KeyringPair$Json): ResponseJsonGetAccountInfo {
+  private jsonGetAccountInfo(json: KeyringPair$Json): ResponseJsonGetAccountInfo {
     try {
       const { address, meta: { genesisHash, name }, type } = keyring.createFromJson(json);
 
@@ -315,7 +319,7 @@ export default class Extension {
     }
   }
 
-  private seedCreate ({ length = SEED_DEFAULT_LENGTH, seed: _seed, type }: RequestSeedCreate): ResponseSeedCreate {
+  private seedCreate({ length = SEED_DEFAULT_LENGTH, seed: _seed, type }: RequestSeedCreate): ResponseSeedCreate {
     const seed = _seed || mnemonicGenerate(length);
 
     return {
@@ -324,7 +328,7 @@ export default class Extension {
     };
   }
 
-  private seedValidate ({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
+  private seedValidate({ suri, type }: RequestSeedValidate): ResponseSeedValidate {
     const { phrase } = keyExtractSuri(suri);
 
     if (isHex(phrase)) {
@@ -341,7 +345,7 @@ export default class Extension {
     };
   }
 
-  private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
+  private signingApprovePassword({ id, password, savePass }: RequestSigningApprovePassword): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -409,7 +413,7 @@ export default class Extension {
     return true;
   }
 
-  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
+  private signingApproveSignature({ id, signature }: RequestSigningApproveSignature): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -421,7 +425,7 @@ export default class Extension {
     return true;
   }
 
-  private signingCancel ({ id }: RequestSigningCancel): boolean {
+  private signingCancel({ id }: RequestSigningCancel): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -433,7 +437,7 @@ export default class Extension {
     return true;
   }
 
-  private signingIsLocked ({ id }: RequestSigningIsLocked): ResponseSigningIsLocked {
+  private signingIsLocked({ id }: RequestSigningIsLocked): ResponseSigningIsLocked {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -452,7 +456,7 @@ export default class Extension {
   }
 
   // FIXME This looks very much like what we have in authorization
-  private signingSubscribe (id: string, port: chrome.runtime.Port): boolean {
+  private signingSubscribe(id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(signing.requests)'>(id, port);
     const subscription = this.#state.signSubject.subscribe((requests: SigningRequest[]): void =>
       cb(requests)
@@ -466,7 +470,7 @@ export default class Extension {
     return true;
   }
 
-  private windowOpen (path: AllowedPath): boolean {
+  private windowOpen(path: AllowedPath): boolean {
     const url = `${chrome.runtime.getURL('index.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
@@ -480,7 +484,7 @@ export default class Extension {
     return true;
   }
 
-  private derive (parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
+  private derive(parentAddress: string, suri: string, password: string, metadata: KeyringPair$Meta): KeyringPair {
     const parentPair = keyring.getPair(parentAddress);
 
     try {
@@ -496,7 +500,7 @@ export default class Extension {
     }
   }
 
-  private derivationValidate ({ parentAddress, parentPassword, suri }: RequestDeriveValidate): ResponseDeriveValidate {
+  private derivationValidate({ parentAddress, parentPassword, suri }: RequestDeriveValidate): ResponseDeriveValidate {
     const childPair = this.derive(parentAddress, suri, parentPassword, {});
 
     return {
@@ -505,7 +509,7 @@ export default class Extension {
     };
   }
 
-  private derivationCreate ({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
+  private derivationCreate({ genesisHash, name, parentAddress, parentPassword, password, suri }: RequestDeriveCreate): boolean {
     const childPair = this.derive(parentAddress, suri, parentPassword, {
       genesisHash,
       name,
@@ -518,27 +522,27 @@ export default class Extension {
     return true;
   }
 
-  private async removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
+  private async removeAuthorization(url: string): Promise<ResponseAuthorizeList> {
     const remAuth = await this.#state.removeAuthorization(url);
 
     return { list: remAuth };
   }
 
-  private deleteAuthRequest (requestId: string): void {
+  private deleteAuthRequest(requestId: string): void {
     return this.#state.deleteAuthRequest(requestId);
   }
 
-  private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
+  private updateCurrentTabs({ urls }: RequestActiveTabsUrlUpdate) {
     this.#state.udateCurrentTabsUrl(urls);
   }
 
-  private getConnectedTabsUrl () {
+  private getConnectedTabsUrl() {
     return this.#state.getConnectedTabsUrl();
   }
 
   // Weird thought, the eslint override is not needed in Tabs
   // eslint-disable-next-line @typescript-eslint/require-await
-  public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port?: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
+  public async handle<TMessageType extends MessageTypes>(id: string, type: TMessageType, request: RequestTypes[TMessageType], port?: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
     switch (type) {
       case 'pri(authorize.approve)':
         return this.authorizeApprove(request as RequestAuthorizeApprove);
@@ -600,6 +604,9 @@ export default class Extension {
       case 'pri(metadata.get)':
         return this.metadataGet(request as string);
 
+      case 'pri(metadata.getRaw)':
+        return this.metadataGetRaw(request as string);
+
       case 'pri(metadata.list)':
         return this.metadataList();
 
@@ -607,6 +614,9 @@ export default class Extension {
         return this.metadataReject(request as RequestMetadataReject);
 
       case 'pri(metadata.requests)':
+        return port && this.metadataSubscribe(id, port);
+
+      case 'pri(metadata.requestsRaw)':
         return port && this.metadataSubscribe(id, port);
 
       case 'pri(activeTabsUrl.update)':

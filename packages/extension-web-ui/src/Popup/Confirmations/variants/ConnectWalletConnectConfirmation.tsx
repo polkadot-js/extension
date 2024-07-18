@@ -3,7 +3,7 @@
 
 import { WALLET_CONNECT_EIP155_NAMESPACE, WALLET_CONNECT_POLKADOT_NAMESPACE } from '@subwallet/extension-base/services/wallet-connect-service/constants';
 import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { AddNetworkWcModal, AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-web-ui/components';
+import { AddNetworkWCModal, AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-web-ui/components';
 import SeedPhraseModal from '@subwallet/extension-web-ui/components/Modal/Account/SeedPhraseModal';
 import WCNetworkSupported from '@subwallet/extension-web-ui/components/WalletConnect/Network/WCNetworkSupported';
 import { ADD_NETWORK_WALLET_CONNECT_MODAL, DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
@@ -353,7 +353,7 @@ function Component ({ className, request }: Props) {
         <SeedPhraseModal
           modalId={createMissingAccountModalId}
         />
-        <AddNetworkWcModal
+        <AddNetworkWCModal
           cancelRequest={onCancel}
           networkToAdd={networkNeedToImport}
           requestId={request.id}

@@ -59,7 +59,7 @@ const parseAccountMap = (values: AccountArrayMap): InjectedAccountWithMeta[] => 
       if (addedAccount) {
         const shortedAddress = toShort(account.address, 4, 4);
 
-        if (addedAccount.meta.name && addedAccount.meta.name !== shortedAddress) {
+        if (addedAccount.meta.name && addedAccount.meta.name !== shortedAddress && addedAccount.meta.source === account.meta.source) {
           account = { ...account, meta: { ...account.meta, name: addedAccount.meta.name } };
         }
       }
@@ -133,10 +133,14 @@ class InjectHandler {
     this.substrateKey = walletInfo?.substrateKey || null;
 
     // Start to connect with injected wallet
-    if (this.enableSubject.value && this.selectedWallet) {
+    if (this.selectedWallet) {
       this.enable(this.selectedWallet).then(() => {
         this.loadingPromiseHandler.resolve(this.enableSubject.value);
-      }).catch(console.error);
+      }).catch(() => {
+        this.disable();
+        this.loadingPromiseHandler.resolve(this.enableSubject.value);
+        this.loadingSubject.next(false);
+      });
     } else {
       this.disable();
       this.loadingPromiseHandler.resolve(this.enableSubject.value);
@@ -222,21 +226,21 @@ class InjectHandler {
     });
   }
 
-  disable () {
-    this.unsubscribeSubstrateAccount();
-    this.unsubscribeEvmAccount();
-    this.selectedWallet = null;
+  disable (isNotDisable?: boolean) {
+    !isNotDisable && this.unsubscribeSubstrateAccount();
+    !isNotDisable && this.unsubscribeEvmAccount();
     this.substrateAccounts = [];
     this.evmAccounts = [];
     this.substrateEnableCompleted = false;
     this.evmEnableCompleted = false;
+    this.selectedWallet = null;
     this.substrateKey && this.updateInjectedAccount(this.substrateKey, [], true);
     this.evmKey && this.updateInjectedAccount(this.evmKey, [], true);
     this.substrateWallet = undefined;
     this.evmWallet = undefined;
     this.successSubject.next(0);
     this.enableSubject.next(false);
-    localStorage.removeItem(ENABLE_INJECT);
+    !isNotDisable && localStorage.removeItem(ENABLE_INJECT);
   }
 
   async enableSubstrate () {
@@ -315,7 +319,7 @@ class InjectHandler {
     this.evmAccountUnsubcall?.();
   }
 
-  updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[], isDisale?: boolean) {
+  updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[], isDisable?: boolean) {
     const oldArray = parseAccountMap(this.oldAccountArrayMap);
 
     if (accounts.length === 0) {
@@ -376,8 +380,12 @@ class InjectHandler {
       this.oldAccountArrayMap = { ...this.accountArrayMap };
 
       if (Object.values(this.accountArrayMap).flat().length === 0) {
-        // !isDisale && this.noFindAccounts.next(true);
-        this.disable();
+        // !isDisable && this.noFindAccounts.next(true);
+        this.disable(true);
+      } else {
+        this.enableSubject.next(true);
+        this.selectedWallet = localStorage.getItem(ENABLE_INJECT) || null;
+        // injectHandler.noFindAccounts.next(false);
       }
     }, 300, 900, false);
   }
@@ -459,7 +467,6 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   //         duration: 8
   //
   //       });
-  //       injectHandler.noFindAccounts.next(false);
   //     }
   //   });
   // }, [notify, t]);

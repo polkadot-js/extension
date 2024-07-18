@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
-import { BaseModal, MetaInfo } from '@subwallet/extension-web-ui/components';
+import { BaseModal, InfoItemBase, MetaInfo } from '@subwallet/extension-web-ui/components';
 import NetworkGroup from '@subwallet/extension-web-ui/components/MetaInfo/parts/NetworkGroup';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
-import { missionCategoryMap, MissionCategoryType } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
+import { missionCategoryMap, MissionCategoryType, tagMap } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
 import { capitalize, customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, ButtonProps, Icon, Image, ModalContext } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, Image, ModalContext, Tag } from '@subwallet/react-ui';
 import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
+import Markdown from 'react-markdown';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -79,6 +80,18 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
     return '';
   }, [data?.status, t]);
 
+  const valueColorSchema = useMemo<InfoItemBase['valueColorSchema']>(() => {
+    const missionStatus = data?.status;
+
+    if (missionStatus != null && tagMap[missionStatus]?.theme) {
+      const statusColorSchema = tagMap[missionStatus]?.theme as InfoItemBase['valueColorSchema'];
+
+      return statusColorSchema;
+    } else {
+      return 'default';
+    }
+  }, [data?.status]);
+
   return (
     <BaseModal
       className={`${className}`}
@@ -137,23 +150,45 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
               }
               <MetaInfo.Default
                 label={t('Status')}
-                valueColorSchema={data.status === MissionCategoryType.ARCHIVED ? 'warning' : 'success'}
+                valueColorSchema={valueColorSchema}
               >
                 {status}
               </MetaInfo.Default>
+
+              {data?.categories && data.categories.length > 0 && (
+                <MetaInfo.Default
+                  className='__category-pool'
+                  label={t('Categories')}
+                >
+                  {data.categories.map((category, index) => (
+                    <Tag
+                      className='__item-tag'
+                      color={category.color}
+                      key={index}
+                    >
+                      <Icon
+                        className='__item-tag-icon'
+                        customSize='12px'
+                      />
+                      {category.name}
+                    </Tag>
+                  ))}
+                </MetaInfo.Default>
+              )}
+
               <MetaInfo.Default
                 className={'-vertical'}
                 label={t('Description')}
                 valueColorSchema={'gray'}
               >
-                {data.description}
+                <Markdown>{data.description}</Markdown>
               </MetaInfo.Default>
-              <MetaInfo.Default
+              {!!data.total_supply && <MetaInfo.Default
                 label={t('Total token supply')}
                 valueColorSchema={'gray'}
               >
                 {data.total_supply}
-              </MetaInfo.Default>
+              </MetaInfo.Default>}
               <MetaInfo.Default
                 label={t('Total rewards')}
                 valueColorSchema={'gray'}

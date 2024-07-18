@@ -33,3 +33,5 @@ export const DAPPS_FAVORITE = 'dapps.favorite';
 export const CREATE_RETURN = 'account.create-return';
 
 export const CROWDLOAN_UNLOCK_TIME = 'event.crowdloan-unlock-time';
+
+export const MISSIONS_POOL_LIVE_ID = 'mission-pool-live-id';

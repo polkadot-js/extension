@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
-import { _isChainSupportEvmERC20, _isChainSupportGRC20, _isChainSupportWasmPSP22 } from '@subwallet/extension-base/services/chain-service/utils';
+import { _isChainSupportEvmERC20, _isChainSupportVFT, _isChainSupportWasmPSP22 } from '@subwallet/extension-base/services/chain-service/utils';
 import { useChainInfoData } from '@subwallet/extension-web-ui/hooks';
 import { useMemo } from 'react';
 
-function filterNftContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
+function filterFungibleContractTypes (chainInfoMap: Record<string, _ChainInfo>) {
   const filteredChainInfoMap: Record<string, _ChainInfo> = {};
 
   Object.values(chainInfoMap).forEach((chainInfo) => {
-    if (_isChainSupportEvmERC20(chainInfo) || _isChainSupportWasmPSP22(chainInfo) || _isChainSupportGRC20(chainInfo)) {
+    if (_isChainSupportEvmERC20(chainInfo) || _isChainSupportWasmPSP22(chainInfo) || _isChainSupportVFT(chainInfo)) {
       filteredChainInfoMap[chainInfo.slug] = chainInfo;
     }
   });
@@ -22,6 +22,6 @@ export default function useGetFungibleContractSupportedChains (): Record<string,
   const chainInfoMap = useChainInfoData().chainInfoMap;
 
   return useMemo(() => {
-    return filterNftContractTypes(chainInfoMap);
+    return filterFungibleContractTypes(chainInfoMap);
   }, [chainInfoMap]);
 }

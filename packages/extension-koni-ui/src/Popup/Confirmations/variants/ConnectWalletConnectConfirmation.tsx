@@ -362,6 +362,7 @@ function Component ({ className, request }: Props) {
       <AddNetworkWCModal
         cancelRequest={onCancel}
         networkToAdd={networkNeedToImport}
+        requestId={request.id}
       />
     </>
   );

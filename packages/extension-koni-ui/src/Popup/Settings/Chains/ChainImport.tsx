@@ -11,7 +11,7 @@ import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-koni-ui/constants';
 import useNotification from '@subwallet/extension-koni-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-koni-ui/hooks/form/useFocusFormItem';
-import { upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
+import { rejectWalletConnectSession, upsertChain, validateCustomChain } from '@subwallet/extension-koni-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-koni-ui/types';
 import { fetchChainInfo, noop } from '@subwallet/extension-koni-ui/utils';
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
@@ -45,6 +45,13 @@ interface ValidationInfo {
 interface LocationState {
   useGoHome?: boolean;
   chainId?: string[];
+  id?: string;
+}
+
+async function handleWCCancel (id: string) {
+  return await rejectWalletConnectSession({
+    id
+  });
 }
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
@@ -70,8 +77,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const onBack = useCallback(() => {
-    location?.useGoHome ? navigate(DEFAULT_ROUTER_PATH) : navigate(-1);
-  }, [location?.useGoHome, navigate]);
+    if (location?.useGoHome) {
+      location?.id
+        ? handleWCCancel(location.id).finally(() => {
+          navigate('/wallet-connect/list');
+        })
+        : navigate(DEFAULT_ROUTER_PATH);
+    } else {
+      navigate(-1);
+    }
+  }, [location, navigate]);
 
   const isSubmitDisabled = useCallback(() => {
     return providerValidation.status !== 'success';
@@ -290,12 +305,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
 
             if (rpcUrls.length > 0) {
               form.setFieldValue('provider', rpcUrls[0]);
-              providerValidator({} as RuleObject, rpcUrls[0]).then(noop).catch(console.error);
+              setTimeout(() => {
+                form.validateFields(['provider']).catch(noop);
+              }, 300);
             }
           }
         }).catch(console.error);
     }
-  }, [form, location, providerValidator]);
+  }, [form, location]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>

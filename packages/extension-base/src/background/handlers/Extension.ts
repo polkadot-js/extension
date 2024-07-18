@@ -3,12 +3,12 @@
 
 /* global chrome */
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RawMetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
 import type { AuthorizedAccountsDiff } from './State.js';
 import type State from './State.js';
 
@@ -249,8 +249,26 @@ export default class Extension {
     return true;
   }
 
+  private async rawMetadataApprove ({ id }: RequestMetadataApprove): Promise<boolean> {
+    const queued = this.#state.getRawMetaRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { request, resolve } = queued;
+
+    await this.#state.saveRawMetadata(request);
+
+    resolve(true);
+
+    return true;
+  }
+
   private metadataGet (genesisHash: string | null): MetadataDef | null {
     return this.#state.knownMetadata.find((result) => result.genesisHash === genesisHash) || null;
+  }
+
+  private metadataGetRaw (genesisHash: string | null): RawMetadataDef | null {
+    return this.#state.knownRawMetadata.find((result) => result.genesisHash === genesisHash) || null;
   }
 
   private metadataList (): MetadataDef[] {
@@ -272,6 +290,20 @@ export default class Extension {
   private metadataSubscribe (id: string, port: chrome.runtime.Port): boolean {
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
+  private metadataSubscribeRaw (id: string, port: chrome.runtime.Port): boolean {
+    const cb = createSubscription<'pri(metadata.requestsRaw)'>(id, port);
+    const subscription = this.#state.rawMetaSubject.subscribe((requests: RawMetadataRequest[]): void =>
       cb(requests)
     );
 
@@ -596,9 +628,15 @@ export default class Extension {
 
       case 'pri(metadata.approve)':
         return await this.metadataApprove(request as RequestMetadataApprove);
+      
+        case 'pri(metadata.approveRaw)':
+        return await this.rawMetadataApprove(request as RequestMetadataApprove);
 
       case 'pri(metadata.get)':
         return this.metadataGet(request as string);
+
+      case 'pri(metadata.getRaw)':
+        return this.metadataGetRaw(request as string);
 
       case 'pri(metadata.list)':
         return this.metadataList();
@@ -608,6 +646,9 @@ export default class Extension {
 
       case 'pri(metadata.requests)':
         return port && this.metadataSubscribe(id, port);
+
+      case 'pri(metadata.requestsRaw)':
+        return port && this.metadataSubscribeRaw(id, port);
 
       case 'pri(activeTabsUrl.update)':
         return this.updateCurrentTabs(request as RequestActiveTabsUrlUpdate);

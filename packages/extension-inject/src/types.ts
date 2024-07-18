@@ -69,6 +69,11 @@ export interface MetadataDef extends MetadataDefBase {
   userExtensions?: ExtDef;
 }
 
+export interface RawMetadataDef {
+  genesisHash: string;
+  rawMetadata: HexString;
+}
+
 export interface InjectedMetadataKnown {
   genesisHash: string;
   specVersion: number;
@@ -77,6 +82,11 @@ export interface InjectedMetadataKnown {
 export interface InjectedMetadata {
   get: () => Promise<InjectedMetadataKnown[]>;
   provide: (definition: MetadataDef) => Promise<boolean>;
+}
+
+export interface InjectedRawMetadata {
+  get: () => Promise<InjectedMetadataKnown[]>;
+  provide: (definition: RawMetadataDef) => Promise<boolean>;
 }
 
 export type ProviderList = Record<string, ProviderMeta>

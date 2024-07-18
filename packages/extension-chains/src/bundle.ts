@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension-chains authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { ChainProperties } from '@polkadot/types/interfaces';
 import type { Chain } from './types.js';
 
@@ -16,7 +16,7 @@ export { packageInfo } from './packageInfo.js';
 const definitions = new Map<string, MetadataDef>(
   // [kusama].map((def) => [def.genesisHash, def])
 );
-
+const rawDefinitions = new Map<string, RawMetadataDef>();
 const expanded = new Map<string, Chain>();
 
 export function metadataExpand (definition: MetadataDef, isPartial = false): Chain {
@@ -82,6 +82,14 @@ export function addMetadata (def: MetadataDef): void {
   definitions.set(def.genesisHash, def);
 }
 
+export function addRawMetadata (def: RawMetadataDef): void {
+  rawDefinitions.set(def.genesisHash, def);
+}
+
 export function knownMetadata (): MetadataDef[] {
   return [...definitions.values()];
+}
+
+export function knownRawMetadata (): RawMetadataDef[] {
+  return [...rawDefinitions.values()];
 }

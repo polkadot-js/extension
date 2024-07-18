@@ -4,10 +4,10 @@
 /* global chrome */
 /* eslint-disable no-redeclare */
 
-import type { AccountJson, AllowedPath, AuthorizeRequest, ConnectedTabsUrlResponse, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
+import type { AccountJson, AllowedPath, AuthorizeRequest, ConnectedTabsUrlResponse, MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNullRequest, MessageTypesWithSubscriptions, MetadataRequest, RawMetadataRequest, RequestTypes, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSigningIsLocked, ResponseTypes, SeedLengths, SigningRequest, SubscriptionMessageTypes } from '@polkadot/extension-base/background/types';
 import type { Message } from '@polkadot/extension-base/types';
 import type { Chain } from '@polkadot/extension-chains/types';
-import type { MetadataDef } from '@polkadot/extension-inject/types';
+import type { MetadataDef, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair$Json } from '@polkadot/keyring/types';
 import type { KeyringPairs$Json } from '@polkadot/ui-keyring/types';
 import type { HexString } from '@polkadot/util/types';
@@ -18,7 +18,7 @@ import { getId } from '@polkadot/extension-base/utils/getId';
 import { metadataExpand } from '@polkadot/extension-chains';
 
 import allChains from './util/chains.js';
-import { getSavedMeta, setSavedMeta } from './MetadataCache.js';
+import { getSavedMeta, getSavedRawMeta, setSavedMeta, setSavedRawMeta } from './MetadataCache.js';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -106,6 +106,10 @@ export async function approveMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.approve)', { id });
 }
 
+export async function approveRawMetaRequest (id: string): Promise<boolean> {
+  return sendMessage('pri(metadata.approveRaw)', { id });
+}
+
 export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
@@ -175,6 +179,23 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
+export async function getRawMetadata (genesisHash: string): Promise<RawMetadataDef | null> {
+  if (!genesisHash) {
+    return null;
+  }
+  
+  let request = getSavedRawMeta(genesisHash);
+
+  if (!request) {
+    request = sendMessage('pri(metadata.getRaw)', genesisHash || null);
+    setSavedRawMeta(genesisHash, request);
+  }
+
+  const def = await request;
+
+  return def
+}
+
 export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> {
   return sendMessage('pri(connectedTabsUrl.get)', null);
 }
@@ -209,6 +230,10 @@ export async function deleteAuthRequest (requestId: string): Promise<void> {
 
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(metadata.requests)', null, cb);
+}
+
+export async function subscribeRawMetadataRequests (cb: (accounts: RawMetadataRequest[]) => void): Promise<boolean> {
+  return sendMessage('pri(metadata.requestsRaw)', null, cb);
 }
 
 export async function subscribeSigningRequests (cb: (accounts: SigningRequest[]) => void): Promise<boolean> {

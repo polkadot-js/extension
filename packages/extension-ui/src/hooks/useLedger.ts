@@ -12,6 +12,8 @@ import { assert } from '@polkadot/util';
 import ledgerChains from '../util/legerChains.js';
 import useMetadata from './useMetadata.js';
 import useTranslation from './useTranslation.js';
+import useRawMetadata from './useRawMetadata.js';
+import type { RawMetadataDef } from '@polkadot/extension-inject/types';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -24,6 +26,7 @@ interface State extends StateBase {
   isLoading: boolean;
   isLocked: boolean;
   ledger: LedgerGeneric | null;
+  rawMetadata: RawMetadataDef | null;
   refresh: () => void;
   warning: string | null;
 }
@@ -67,6 +70,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const chainInfo = useMetadata(genesis);
+  const rawMetadata = useRawMetadata(genesis);
   const { t } = useTranslation();
   const ledger = useMemo(() => {
     setError(null);
@@ -140,5 +144,5 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setWarning(null);
   }, []);
 
-  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning });
+  return ({ ...getState(), address, error, isLoading, isLocked, ledger, rawMetadata, refresh, warning });
 }

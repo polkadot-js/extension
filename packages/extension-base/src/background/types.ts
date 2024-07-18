@@ -3,7 +3,7 @@
 
 /* eslint-disable no-use-before-define */
 
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderList, ProviderMeta, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -67,6 +67,12 @@ export interface MetadataRequest {
   url: string;
 }
 
+export interface RawMetadataRequest {
+  id: string;
+  request: RawMetadataDef;
+  url: string;
+}
+
 export interface SigningRequest {
   account: AccountJson;
   id: string;
@@ -106,9 +112,12 @@ export interface RequestSignatures {
   'pri(json.batchRestore)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
+  'pri(metadata.approveRaw)': [RequestMetadataApprove, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
+  'pri(metadata.getRaw)': [string | null, RawMetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
+  'pri(metadata.requestsRaw)': [RequestMetadataSubscribe, boolean, RawMetadataRequest[]];
   'pri(metadata.list)': [null, MetadataDef[]];
   'pri(ping)': [null, boolean];
   'pri(seed.create)': [RequestSeedCreate, ResponseSeedCreate];
@@ -129,6 +138,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
+  'pub(metadata.provideRaw)': [RawMetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(ping)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];

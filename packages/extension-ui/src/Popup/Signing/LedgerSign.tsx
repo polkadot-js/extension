@@ -26,7 +26,9 @@ interface Props {
 function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, rawMetadata, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const rawMeta = rawMetadata ? rawMetadata.rawMetadata : '0x';
+  const metaBuff = Buffer.from(rawMeta);
 
   useEffect(() => {
     if (ledgerError) {
@@ -47,7 +49,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
 
       setError(null);
       setIsBusy(true);
-      ledger.sign(payload.toU8a(true), accountIndex, addressOffset)
+      ledger.signWithMetadata(payload.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff})
         .then((signature) => {
           onSignature(signature);
         }).catch((e: Error) => {

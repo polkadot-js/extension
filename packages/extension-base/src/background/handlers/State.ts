@@ -3,20 +3,21 @@
 
 /* global chrome */
 
-import type { MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { MetadataDef, ProviderMeta, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
-import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
+import type { AccountJson, AuthorizeRequest, AuthUrlInfo, AuthUrls, MetadataRequest, RawMetadataRequest, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning, SigningRequest } from '../types.js';
 
 import { BehaviorSubject } from 'rxjs';
 
-import { addMetadata, knownMetadata } from '@polkadot/extension-chains';
+import { addMetadata, addRawMetadata, knownMetadata, knownRawMetadata } from '@polkadot/extension-chains';
 import { knownGenesis } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import { MetadataStore } from '../../stores/index.js';
+import { MetadataStore, RawMetadataStore } from '../../stores/index.js';
 import { getId } from '../../utils/getId.js';
 import { withErrorLog } from './helpers.js';
+import type { HexString } from '@polkadot/util/types';
 
 interface Resolver<T> {
   reject: (error: Error) => void;
@@ -35,6 +36,12 @@ export type AuthorizedAccountsDiff = [url: string, authorizedAccounts: AuthUrlIn
 interface MetaRequest extends Resolver<boolean> {
   id: string;
   request: MetadataDef;
+  url: string;
+}
+
+interface RawMetaRequest extends Resolver<boolean> {
+  id: string;
+  request: RawMetadataDef;
   url: string;
 }
 
@@ -125,6 +132,45 @@ async function extractMetadata (store: MetadataStore): Promise<void> {
   });
 }
 
+async function extractRawMetadata (store: RawMetadataStore): Promise<void> {
+  await store.allMap(async (map): Promise<void> => {
+    const knownEntries = Object.entries(knownGenesis);
+    const defs: Record<string, { def: RawMetadataDef, index: number, key: string }> = {};
+    const removals: string[] = [];
+
+    Object
+      .entries(map)
+      .forEach(([key, def]): void => {
+        const entry = knownEntries.find(([, hashes]) => hashes.includes(def.genesisHash as HexString));
+
+        if (entry) {
+          const [name, hashes] = entry;
+          const index = hashes.indexOf(def.genesisHash as HexString);
+
+          // flatten the known metadata based on the genesis index
+          // (lower is better/newer)
+          if (!defs[name] || (defs[name].index > index)) {
+            if (defs[name]) {
+              // remove the old version of the metadata
+              removals.push(defs[name].key);
+            }
+
+            defs[name] = { def, index, key };
+          }
+        } else {
+          // this is not a known entry, so we will just apply it
+          defs[key] = { def, index: 0, key };
+        }
+      });
+
+    for (const key of removals) {
+      await store.remove(key);
+    }
+
+    Object.values(defs).forEach(({ def }) => addRawMetadata(def));
+  });
+}
+
 export default class State {
   #authUrls: AuthUrls = {};
 
@@ -132,10 +178,14 @@ export default class State {
 
   readonly #metaStore = new MetadataStore();
 
+  readonly #rawMetaStore = new RawMetadataStore();
+
   // Map of providers currently injected in tabs
   readonly #injectedProviders = new Map<chrome.runtime.Port, ProviderInterface>();
 
   readonly #metaRequests: Record<string, MetaRequest> = {};
+
+  readonly #rawMetaRequests: Record<string, RawMetaRequest> = {};
 
   #notification = settings.notification;
 
@@ -152,6 +202,8 @@ export default class State {
 
   public readonly metaSubject: BehaviorSubject<MetadataRequest[]> = new BehaviorSubject<MetadataRequest[]>([]);
 
+  public readonly rawMetaSubject: BehaviorSubject<RawMetadataRequest[]> = new BehaviorSubject<RawMetadataRequest[]>([]);
+
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
   public defaultAuthAccountSelection: string[] = [];
@@ -162,6 +214,7 @@ export default class State {
 
   public async init () {
     await extractMetadata(this.#metaStore);
+    await extractRawMetadata(this.#rawMetaStore);
     // retrieve previously set authorizations
     const storageAuthUrls: Record<string, string> = await chrome.storage.local.get(AUTH_URLS_KEY);
     const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
@@ -181,12 +234,20 @@ export default class State {
     return knownMetadata();
   }
 
+  public get knownRawMetadata (): RawMetadataDef[] {
+    return knownRawMetadata();
+  }
+
   public get numAuthRequests (): number {
     return Object.keys(this.#authRequests).length;
   }
 
   public get numMetaRequests (): number {
     return Object.keys(this.#metaRequests).length;
+  }
+
+  public get numRawMetaRequests (): number {
+    return Object.keys(this.#rawMetaRequests).length;
   }
 
   public get numSignRequests (): number {
@@ -203,6 +264,12 @@ export default class State {
     return Object
       .values(this.#metaRequests)
       .map(({ id, request, url }): MetadataRequest => ({ id, request, url }));
+  }
+
+  public get allRawMetaRequests (): RawMetadataRequest[] {
+    return Object
+      .values(this.#rawMetaRequests)
+      .map(({ id, request, url }): RawMetadataRequest => ({ id, request, url }));
   }
 
   public get allSignRequests (): SigningRequest[] {
@@ -332,6 +399,24 @@ export default class State {
     };
   };
 
+  private rawMetaComplete = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
+    const complete = (): void => {
+      delete this.#rawMetaRequests[id];
+      this.updateIconMeta(true);
+    };
+
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: boolean): void => {
+        complete();
+        resolve(result);
+      }
+    };
+  };
+
   private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
     const complete = (): void => {
       delete this.#signRequests[id];
@@ -361,13 +446,14 @@ export default class State {
   private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
     const metaCount = this.numMetaRequests;
+    const rawMetaCount = this.numRawMetaRequests;
     const signCount = this.numSignRequests;
     const text = (
       authCount
         ? 'Auth'
         : metaCount
           ? 'Meta'
-          : (signCount ? `${signCount}` : '')
+          : (signCount ? `${signCount + rawMetaCount}` : '')
     );
 
     withErrorLog(() => chrome.action.setBadgeText({ text }));
@@ -471,12 +557,32 @@ export default class State {
     });
   }
 
+  public injectRawMetadata (url: string, request: RawMetadataDef): Promise<boolean> {
+    return new Promise((resolve, reject): void => {
+      const id = getId();
+
+      this.#rawMetaRequests[id] = {
+        ...this.rawMetaComplete(id, resolve, reject),
+        id,
+        request,
+        url
+      };
+
+      this.updateIconMeta();
+      this.popupOpen();
+    });
+  }
+
   public getAuthRequest (id: string): AuthRequest {
     return this.#authRequests[id];
   }
 
   public getMetaRequest (id: string): MetaRequest {
     return this.#metaRequests[id];
+  }
+
+  public getRawMetaRequest (id: string): RawMetaRequest {
+    return this.#rawMetaRequests[id];
   }
 
   public getSignRequest (id: string): SignRequest {
@@ -555,6 +661,12 @@ export default class State {
     await this.#metaStore.set(meta.genesisHash, meta);
 
     addMetadata(meta);
+  }
+
+  public async saveRawMetadata (meta: RawMetadataDef): Promise<void> {
+    await this.#rawMetaStore.set(meta.genesisHash, meta);
+
+    addRawMetadata(meta);
   }
 
   public setNotification (notification: string): boolean {

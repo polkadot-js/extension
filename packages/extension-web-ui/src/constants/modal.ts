@@ -31,6 +31,7 @@ export const EDIT_UNLOCK_TYPE_MODAL = 'edit-unlock-type-modal';
 export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const SEED_PHRASE_MODAL = 'seed-phrase-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
+export const ADD_NETWORK_WALLET_CONNECT_MODAL = 'add-network-wallet-connect-modal';
 
 export const TRANSFER_NFT_MODAL = 'transfer-nft-modal';
 

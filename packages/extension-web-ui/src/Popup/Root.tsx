@@ -43,6 +43,7 @@ const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
+const settingImportNetwork = '/settings/chains/import';
 
 // Campaign
 const earningOptionsPreviewUrl = '/earning-preview';
@@ -205,6 +206,8 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (!allowPreventWelcomeUrls.includes(pathName) && !redirectHandlePage) {
         redirectObj.redirect = welcomeUrl;
       }
+    } else if (hasConfirmations && pathName === settingImportNetwork) {
+      redirectObj.modal = `close:${CONFIRMATION_MODAL}`;
     } else if (hasConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {

@@ -5,7 +5,7 @@
 Changes:
 
 - Fix ID used in manifest_firefox.json
-    - This is internal, and is only neceessary for publishing to the store
+    - This is internal, and is only necessary for publishing to the store
 
 
 ## 0.49.1 July 15, 2024

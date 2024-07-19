@@ -40,12 +40,11 @@ export class BlobInscriptionApi extends BaseNftApi {
     super(chain, undefined, addresses);
   }
 
-  // @typescript-eslint/restrict-template-expressions
   private static parseNftRequest (address: string, isJson = true) {
     return {
       query: `
         query MyQuery {
-          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: ${isJson}}) {
+          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: "${isJson ? 'true' : 'false'}"}) {
             id
             extrinsicHash
             dataRaw

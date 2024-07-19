@@ -3,12 +3,12 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
-import { _isRuntimeUpdated, detectTranslate, getShortMetadata } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertBox } from '@subwallet/extension-web-ui/components';
 import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-web-ui/constants';
 import { InjectContext } from '@subwallet/extension-web-ui/contexts/InjectContext';
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-web-ui/hooks';
-import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-web-ui/messaging';
+import { approveSignPasswordV2, approveSignSignature, cancelSignRequest, shortenMetadata } from '@subwallet/extension-web-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
@@ -318,7 +318,7 @@ const Component: React.FC<Props> = (props: Props) => {
         if (isRuntimeUpdated) {
           try {
             const blob = u8aToHex(payloadU8a);
-            const shortener = await getShortMetadata(chainInfo?.slug || '', blob);
+            const { txMetadata: shortener } = await shortenMetadata(chainInfo?.slug || '', blob);
 
             metadata = hexToU8a(shortener);
           } catch (e) {

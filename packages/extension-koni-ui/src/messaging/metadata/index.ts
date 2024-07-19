@@ -129,3 +129,11 @@ export async function getChainMetadata (genesisHash?: string | null): Promise<Ch
 
   return null;
 }
+
+export const getMetadataHash = async (chain: string) => {
+  return sendMessage('pri(metadata.hash)', { chain });
+};
+
+export const shortenMetadata = async (chain: string, txBlob: string) => {
+  return sendMessage('pri(metadata.transaction.shorten)', { chain, txBlob });
+};

@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import { BaseRequestSign, ChainType, ExtrinsicType, InternalRequestSign } from '@subwallet/extension-base/background/KoniTypes';
+import { _Address, BaseRequestSign, ChainType, ExtrinsicType, InternalRequestSign } from '@subwallet/extension-base/background/KoniTypes';
 
 import { TransactionData } from '../../../transaction';
 import { NominationPoolInfo, ValidatorInfo, YieldPositionInfo } from '../../info';
@@ -47,9 +47,12 @@ export interface HandleYieldStepParams extends BaseRequestSign {
   currentStep: number;
 }
 
-export interface TokenApproveData {
-  inputTokenSlug: string;
-  spenderTokenSlug: string;
+export interface TokenSpendingApprovalParams {
+  chain: string;
+  contractAddress: _Address;
+  spenderAddress: _Address;
+  owner: _Address;
+  amount?: string;
 }
 
 export type RequestYieldStepSubmit = InternalRequestSign<HandleYieldStepParams>;

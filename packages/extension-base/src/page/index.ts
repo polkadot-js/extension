@@ -65,7 +65,7 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
+    // console.error(`Unknown response: ${JSON.stringify(data)}`);
 
     return;
   }

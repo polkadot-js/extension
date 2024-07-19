@@ -51,7 +51,7 @@ const Component = () => {
 
   const { closeAlert, defaultData, goBack, onDone,
     openAlert, persistData,
-    setBackProps, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
+    setBackProps, setIsDisableHeader, setSubHeaderRightButtons } = useTransactionContext<EarnParams>();
 
   const { slug } = defaultData;
 
@@ -393,6 +393,7 @@ const Component = () => {
 
   const onSubmit: FormCallbacks<EarnParams>['onFinish'] = useCallback((values: EarnParams) => {
     setSubmitLoading(true);
+    setIsDisableHeader(true);
     const { from, slug, target, value: _currentAmount } = values;
 
     const getData = (submitStep: number): SubmitYieldJoinData => {
@@ -489,9 +490,10 @@ const Component = () => {
         .catch(onError)
         .finally(() => {
           setSubmitLoading(false);
+          setIsDisableHeader(false);
         });
     }, 300);
-  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps]);
+  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps, setIsDisableHeader]);
 
   const renderMetaInfo = useCallback(() => {
     const value = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;
@@ -966,6 +968,7 @@ const Component = () => {
                   >
                     <EarningPoolSelector
                       chain={poolChain}
+                      defaultValue={defaultData.target}
                       disabled={submitLoading}
                       from={fromValue}
                       label={t('Pool')}

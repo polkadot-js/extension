@@ -3,6 +3,7 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { _handleDisplayInsufficientEarningError } from '@subwallet/extension-base/core/logic-validation/earning';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _getAssetDecimals, _getAssetSymbol, _getSubstrateGenesisHash, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
@@ -14,11 +15,10 @@ import { AccountSelector, AlertBox, AmountInput, EarningPoolSelector, EarningVal
 import { EarningProcessItem } from '@subwallet/extension-web-ui/components/Earning';
 import { getInputValuesFromString } from '@subwallet/extension-web-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-web-ui/components/Modal/Earning';
-import { BN_ZERO, CREATE_RETURN, DEFAULT_ROUTER_PATH, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
+import { CREATE_RETURN, DEFAULT_ROUTER_PATH, EARNING_INSTRUCTION_MODAL, EVM_ACCOUNT_TYPE, STAKE_ALERT_DATA, SUBSTRATE_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
 import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, usePreCheckAction, useRestoreTransaction, useSelector, useSetSelectedAccountTypes, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-web-ui/hooks';
-import { insufficientMessages } from '@subwallet/extension-web-ui/hooks/transaction/useHandleSubmitTransaction';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-web-ui/messaging';
 // import { unlockDotCheckCanMint } from '@subwallet/extension-web-ui/messaging/campaigns';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-web-ui/reducer';
@@ -55,12 +55,12 @@ const instructionModalId = EARNING_INSTRUCTION_MODAL;
 export const insufficientXCMMessages = ['You can only enter a maximum'];
 
 const earningTypeLabelMap = {
-  [YieldPoolType.NATIVE_STAKING]: 'direct nomination',
-  [YieldPoolType.NOMINATION_POOL]: 'nomination pool',
-  [YieldPoolType.LENDING]: 'lending',
-  [YieldPoolType.LIQUID_STAKING]: 'liquid staking',
-  [YieldPoolType.PARACHAIN_STAKING]: 'direct nomination',
-  [YieldPoolType.SINGLE_FARMING]: 'single farming'
+  [YieldPoolType.NATIVE_STAKING]: 'Direct nomination',
+  [YieldPoolType.NOMINATION_POOL]: 'Nomination pool',
+  [YieldPoolType.LENDING]: 'Lending',
+  [YieldPoolType.LIQUID_STAKING]: 'Liquid staking',
+  [YieldPoolType.PARACHAIN_STAKING]: 'Direct nomination',
+  [YieldPoolType.SINGLE_FARMING]: 'Single farming'
 };
 
 type LocationStateRW = {
@@ -195,7 +195,7 @@ const Component = ({ className }: ComponentProps) => {
     [chainAsset, poolInfo?.metadata?.inputAsset]
   );
 
-  const nativeAsset = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
+  const nativeAsset: _ChainAsset | undefined = useMemo(() => chainAsset[nativeTokenSlug], [chainAsset, nativeTokenSlug]);
 
   const assetDecimals = inputAsset ? _getAssetDecimals(inputAsset) : 0;
   const priceValue = priceMap[inputAsset?.priceId || ''] || 0;
@@ -307,45 +307,32 @@ const Component = ({ className }: ComponentProps) => {
   }, [persistData]);
 
   const handleDataForInsufficientAlert = useCallback(() => {
-    const _assetDecimals = nativeAsset.decimals || 0;
-    const existentialDeposit = nativeAsset.minAmount || '0';
+    const _assetDecimals = nativeAsset?.decimals || 0;
 
     return {
-      existentialDeposit: getInputValuesFromString(existentialDeposit, _assetDecimals),
-      availableBalance: getInputValuesFromString(nativeTokenBalance.value, _assetDecimals),
-      maintainBalance: getInputValuesFromString(poolInfo?.metadata.maintainBalance || '0', _assetDecimals),
-      symbol: nativeAsset.symbol
+      minJoinPool: getInputValuesFromString(poolInfo?.statistic?.earningThreshold.join || '0', _assetDecimals),
+      symbol: nativeAsset?.symbol || '',
+      chain: chainInfoMap[poolChain].name,
+      isXCM: poolInfo?.type === YieldPoolType.LENDING || poolInfo?.type === YieldPoolType.LIQUID_STAKING
     };
-  }, [nativeAsset, nativeTokenBalance.value, poolInfo?.metadata.maintainBalance]);
+  }, [chainInfoMap, nativeAsset?.decimals, nativeAsset?.symbol, poolChain, poolInfo?.statistic?.earningThreshold.join, poolInfo?.type]);
 
   const onError = useCallback(
     (error: Error) => {
-      if (insufficientMessages.some((v) => error.message.includes(v))) {
-        const availableBalanceBN = new BigN(nativeTokenBalance.value || 0);
+      const { chain, isXCM, minJoinPool, symbol } = handleDataForInsufficientAlert();
+      const balanceDisplayInfo = _handleDisplayInsufficientEarningError(error, isXCM, nativeTokenBalance.value || '0', amountValue || '0', minJoinPool);
 
-        if (availableBalanceBN.gt(BN_ZERO) && new BigN(amountValue || 0).gt(availableBalanceBN)) {
-          openAlert({
-            title: t('Insufficient balance'),
-            type: NotificationType.ERROR,
-            content: t('Insufficient balance. Amount must be smaller than available balance'),
-            okButton: {
-              text: t('I understand'),
-              onClick: closeAlert,
-              icon: CheckCircle
-            }
-          });
-        } else {
-          openAlert({
-            title: t('Insufficient balance'),
-            type: NotificationType.ERROR,
-            content: t('Your available balance is {{availableBalance}} {{symbol}}, you need to leave {{existentialDeposit}} {{symbol}} as minimal balance (existential deposit) and pay network fees. Make sure you have at least {{maintainBalance}} {{symbol}} in your transferable balance to proceed.', { replace: { ...handleDataForInsufficientAlert() } }),
-            okButton: {
-              text: t('I understand'),
-              onClick: closeAlert,
-              icon: CheckCircle
-            }
-          });
-        }
+      if (balanceDisplayInfo) {
+        openAlert({
+          title: t(balanceDisplayInfo.title),
+          type: NotificationType.ERROR,
+          content: t(balanceDisplayInfo.message, { replace: { minJoinPool, symbol, chain } }),
+          okButton: {
+            text: t('I understand'),
+            onClick: closeAlert,
+            icon: CheckCircle
+          }
+        });
 
         dispatchProcessState({
           type: EarningActionType.STEP_ERROR_ROLLBACK,
@@ -717,7 +704,7 @@ const Component = ({ className }: ComponentProps) => {
     const _shortName = poolInfo.metadata.shortName;
     const _type = t(earningTypeLabelMap[poolInfo.type]);
 
-    return t('{{shortName}} {{type}} process:', { replace: { shortName: _shortName, type: _type } });
+    return t('{{type}} process on {{shortName}} :', { replace: { shortName: _shortName, type: _type } });
   })();
 
   const onCancelInstructionModal = useCallback(() => {

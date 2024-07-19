@@ -96,7 +96,9 @@ function Component ({ poolGroup, symbol }: ComponentProps) {
       return [];
     }
 
-    const result = pools.filter((item) => !(item.chain === 'parallel' && item.type === YieldPoolType.LIQUID_STAKING));
+    const result = pools.filter((item) => !(
+      (item.chain === 'parallel' && item.type === YieldPoolType.LIQUID_STAKING) ||
+      (item.chain === 'interlay' && item.type === YieldPoolType.LENDING)));
 
     result.sort((a, b) => {
       const getType = (pool: YieldPoolInfo) => {

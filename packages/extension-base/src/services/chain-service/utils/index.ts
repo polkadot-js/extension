@@ -206,6 +206,10 @@ export function _isChainSupportGRC20 (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.GRC20) || false;
 }
 
+export function _isChainSupportVFT (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.VFT) || false;
+}
+
 export const _isSupportOrdinal = (chain: string) => {
   const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 
@@ -239,7 +243,7 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
 
   if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
     chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
-      if ([_AssetType.PSP22, _AssetType.GRC20].includes(assetType)) {
+      if ([_AssetType.PSP22, _AssetType.GRC20, _AssetType.VFT].includes(assetType)) {
         result.push(assetType);
       }
     });
@@ -307,7 +311,7 @@ export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
 }
 
 export function _isTokenGearSmartContract (tokenInfo: _ChainAsset) {
-  return [_AssetType.GRC20, _AssetType.GRC721].includes(tokenInfo.assetType);
+  return [_AssetType.GRC20, _AssetType.GRC721, _AssetType.VFT].includes(tokenInfo.assetType);
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {

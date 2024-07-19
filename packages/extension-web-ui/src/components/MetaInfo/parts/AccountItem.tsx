@@ -80,6 +80,7 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
                 <>
                   <Avatar
                     className={'__account-avatar'}
+                    identPrefix={addressPrefix}
                     size={24}
                     value={address}
                   />

@@ -58,13 +58,17 @@ const filterAddress = (addresses: string[], chainInfo: _ChainInfo): [string[], s
 
       if (account) {
         if (account.isHardware) {
-          const availGen = account.availableGenesisHashes || [];
-          const gen = _getSubstrateGenesisHash(chainInfo);
-
-          if (availGen.includes(gen)) {
+          if (account.isGeneric) {
             fetchList.push(address);
           } else {
-            unfetchList.push(address);
+            const availGen = account.availableGenesisHashes || [];
+            const gen = _getSubstrateGenesisHash(chainInfo);
+
+            if (availGen.includes(gen)) {
+              fetchList.push(address);
+            } else {
+              unfetchList.push(address);
+            }
           }
         } else {
           fetchList.push(address);
@@ -100,7 +104,7 @@ export function subscribeBalance (
     const [useAddresses, notSupportAddresses] = filterAddress(addresses, chainInfo);
 
     if (notSupportAddresses.length) {
-      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL, _AssetType.GRC20]);
+      const tokens = filterAssetsByChainAndType(chainAssetMap, chainSlug, [_AssetType.NATIVE, _AssetType.ERC20, _AssetType.PSP22, _AssetType.LOCAL, _AssetType.GRC20, _AssetType.VFT]);
 
       const now = new Date().getTime();
 

@@ -68,7 +68,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const checkUnlock = useUnlockChecker();
 
   const signMode = useMemo(() => getSignMode(account), [account]);
-  const isLedger = useMemo(() => signMode === AccountSignMode.LEDGER, [signMode]);
+  const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const isMessage = isEvmMessage(payload);
 
   const [loading, setLoading] = useState(false);
@@ -81,7 +81,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chain?.slug, isLedger);
+    warning: ledgerWarning } = useLedger(chain?.slug, isLedger, true);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
     isLedgerLoading,
@@ -93,7 +93,8 @@ const Component: React.FC<Props> = (props: Props) => {
     switch (signMode) {
       case AccountSignMode.QR:
         return QrCode;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         return Swatches;
       case AccountSignMode.INJECTED:
         return Wallet;
@@ -151,7 +152,9 @@ const Component: React.FC<Props> = (props: Props) => {
     setLoading(true);
 
     setTimeout(() => {
-      const signPromise = isMessage ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset) : ledgerSignTransaction(hexToU8a(hashPayload), account.accountIndex, account.addressOffset);
+      const signPromise = isMessage
+        ? ledgerSignMessage(u8aToU8a(hashPayload), account.accountIndex, account.addressOffset)
+        : ledgerSignTransaction(hexToU8a(hashPayload), new Uint8Array(0), account.accountIndex, account.addressOffset);
 
       signPromise
         .then(({ signature }) => {
@@ -222,7 +225,8 @@ const Component: React.FC<Props> = (props: Props) => {
       case AccountSignMode.QR:
         onConfirmQr();
         break;
-      case AccountSignMode.LEDGER:
+      case AccountSignMode.LEGACY_LEDGER:
+      case AccountSignMode.GENERIC_LEDGER:
         onConfirmLedger();
         break;
       case AccountSignMode.INJECTED:
@@ -294,7 +298,13 @@ const Component: React.FC<Props> = (props: Props) => {
         loading={loading}
         onClick={onConfirm}
       >
-        {t('Approve')}
+        {
+          !isLedger
+            ? t('Approve')
+            : !isLedgerConnected
+              ? t('Refresh')
+              : t('Approve')
+        }
       </Button>
       {
         signMode === AccountSignMode.QR && (

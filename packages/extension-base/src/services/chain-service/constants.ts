@@ -52,6 +52,7 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network', 'quartz', 'opal'],
+  unique_evm: ['unique_evm'],
   bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
   vara: ['vara_network'],
   avail: ['availTuringTest']
@@ -248,7 +249,7 @@ export const _DEFAULT_MANTA_ZK_CHAIN = 'calamari';
 
 export const _XCM_CHAIN_GROUP = {
   polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint', 'equilibrium_parachain', 'rococo_assethub'],
-  xcmPallet: ['polkadot', 'kusama']
+  xcmPallet: ['polkadot', 'kusama', 'rococo']
   // default is xTokens pallet
 };
 

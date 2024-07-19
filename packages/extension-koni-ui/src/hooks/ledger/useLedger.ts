@@ -1,14 +1,13 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { _ChainInfo } from '@subwallet/chain-list/types';
 import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
-import { EVMLedger, SubstrateLedger } from '@subwallet/extension-koni-ui/connector';
-import { isLedgerCapable, ledgerIncompatible } from '@subwallet/extension-koni-ui/constants';
+import { createPromiseHandler, isSameAddress } from '@subwallet/extension-base/utils';
+import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
+import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
-import useGetSupportedLedger from '@subwallet/extension-koni-ui/hooks/ledger/useGetSupportedLedger';
-import { Ledger } from '@subwallet/extension-koni-ui/types';
+import { Ledger, SignMessageLedger, SignTransactionLedger } from '@subwallet/extension-koni-ui/types';
 import { convertLedgerError } from '@subwallet/extension-koni-ui/utils';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -16,6 +15,7 @@ import { AccountOptions, LedgerAddress, LedgerSignature } from '@polkadot/hw-led
 import { assert } from '@polkadot/util';
 
 import useTranslation from '../common/useTranslation';
+import useGetSupportedLedger from './useGetSupportedLedger';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -31,8 +31,8 @@ interface Result extends StateBase {
   warning: string | null;
   getAddress: (accountIndex: number, accountLimit: number) => Promise<LedgerAddress>;
   getAllAddress: (start: number, end: number) => Promise<LedgerAddress[]>;
-  signTransaction: Ledger['signTransaction'];
-  signMessage: Ledger['signMessage'];
+  signTransaction: SignTransactionLedger;
+  signMessage: SignMessageLedger;
 }
 
 const baseState: StateBase = {
@@ -46,7 +46,7 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
   return ledgerChains.find((network) => network.slug === slug || (network.isEthereum && isEthereumNetwork));
 };
 
-const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], isEthereumNetwork: boolean): Ledger => {
+const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, ledgerIncompatible);
@@ -55,14 +55,26 @@ const retrieveLedger = (slug: string, ledgerChains: LedgerNetwork[], isEthereumN
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  if (def.isEthereum) {
-    return new EVMLedger('webusb');
+  if (def.isGeneric) {
+    if (def.isEthereum) {
+      return new EVMLedger('webusb', def.slip44);
+    } else {
+      return new SubstrateGenericLedger('webusb', def.slip44);
+    }
   } else {
-    return new SubstrateLedger('webusb', def.network);
+    if (!forceMigration) {
+      return new SubstrateLegacyLedger('webusb', def.network);
+    } else {
+      if (NotNeedMigrationGens.includes(def.genesisHash)) {
+        return new SubstrateGenericLedger('webusb', def.slip44);
+      } else {
+        return new SubstrateMigrationLedger('webusb', def.slip44);
+      }
+    }
   }
 };
 
-export function useLedger (slug?: string, active = true): Result {
+export function useLedger (slug?: string, active = true, isSigning = false, forceMigration = false): Result {
   const { t } = useTranslation();
 
   const ledgerChains = useGetSupportedLedger();
@@ -74,6 +86,10 @@ export function useLedger (slug?: string, active = true): Result {
     }
 
     const chainInfo = chainInfoMap[slug];
+
+    if (!chainInfo) {
+      return false;
+    }
 
     return _isChainEvmCompatible(chainInfo);
   }, [chainInfoMap, slug]);
@@ -105,14 +121,14 @@ export function useLedger (slug?: string, active = true): Result {
       }
 
       try {
-        return retrieveLedger(slug, ledgerChains, isEvmNetwork);
+        return retrieveLedger(slug, ledgerChains, isEvmNetwork, forceMigration);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [refreshLock, slug, active, ledgerChains, isEvmNetwork]);
+  }, [refreshLock, slug, active, ledgerChains, isEvmNetwork, forceMigration]);
 
   const appName = useMemo(() => {
     const unknownNetwork = 'unknown network';
@@ -122,18 +138,26 @@ export function useLedger (slug?: string, active = true): Result {
     }
 
     const chainInfo = chainInfoMap[slug];
-    const isEthereumNetwork = _isChainEvmCompatible(chainInfo);
-    const { appName } = getNetwork(ledgerChains, slug, isEthereumNetwork) || { appName: unknownNetwork };
+    const isEthereumNetwork = chainInfo ? _isChainEvmCompatible(chainInfo) : false;
+    const { appName, isEthereum, isGeneric } = getNetwork(ledgerChains, slug, isEthereumNetwork) || { appName: unknownNetwork, isGeneric: true };
+
+    if (!isGeneric && forceMigration && !isEthereum) {
+      if (NotNeedMigrationGens.includes(chainInfo?.substrateInfo?.genesisHash || '')) {
+        return ledgerChains[0].appName;
+      } else {
+        return 'Polkadot Migration';
+      }
+    }
 
     return appName;
-  }, [chainInfoMap, ledgerChains, slug]);
+  }, [chainInfoMap, forceMigration, ledgerChains, slug]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);
   }, []);
 
   const handleError = useCallback((error: Error, expandError = true) => {
-    const convertedError = convertLedgerError(error, t, appName, expandError);
+    const convertedError = convertLedgerError(error, t, appName, isSigning, expandError);
     const message = convertedError.message;
 
     switch (convertedError.status) {
@@ -149,7 +173,7 @@ export function useLedger (slug?: string, active = true): Result {
         setWarning(null);
         setError(null);
     }
-  }, [appName, t]);
+  }, [appName, t, isSigning]);
 
   const getAllAddress = useCallback(async (start: number, end: number): Promise<LedgerAddress[]> => {
     const ledger_ = getLedger();
@@ -198,46 +222,60 @@ export function useLedger (slug?: string, active = true): Result {
       });
   }, [getLedger, ledger, t]);
 
-  const signTransaction = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
-    if (ledger) {
-      return new Promise((resolve, reject) => {
-        setError(null);
+  const signTransaction = useCallback(async (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+    setError(null);
+    const { promise, reject, resolve } = createPromiseHandler<LedgerSignature>();
 
-        ledger.signTransaction(message, accountOffset, addressOffset, accountOption)
-          .then((result) => {
-            resolve(result);
-          })
-          .catch((error: Error) => {
-            handleError(error);
-            reject(error);
-          });
-      });
+    if (ledger) {
+      ledger.getAddress(false, accountOffset, addressOffset, accountOption)
+        .then((addressOnCurrentLedger) => {
+          if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
+            throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+          }
+        })
+        .then(() => {
+          return ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption);
+        }).then((result) => {
+          resolve(result);
+        })
+        .catch((error: Error) => {
+          handleError(error);
+          reject(error);
+        });
     } else {
-      return new Promise((resolve, reject) => {
-        reject(new Error(t("Can't find Ledger device")));
-      });
+      reject(new Error(t("Can't find Ledger device")));
+      handleError(new Error(t("Can't find Ledger device")));
     }
+
+    return promise;
   }, [handleError, ledger, t]);
 
-  const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
-    if (ledger) {
-      return new Promise((resolve, reject) => {
-        setError(null);
+  const signMessage = useCallback(async (message: Uint8Array, accountOffset?: number, addressOffset?: number, address?: string, accountOption?: Partial<AccountOptions>): Promise<LedgerSignature> => {
+    setError(null);
+    const { promise, reject, resolve } = createPromiseHandler<LedgerSignature>();
 
-        ledger.signMessage(message, accountOffset, addressOffset, accountOption)
-          .then((result) => {
-            resolve(result);
-          })
-          .catch((error: Error) => {
-            handleError(error);
-            reject(error);
-          });
-      });
+    if (ledger) {
+      ledger.getAddress(false, accountOffset, addressOffset, accountOption)
+        .then((addressOnCurrentLedger) => {
+          if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
+            throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
+          }
+        })
+        .then(() => {
+          return ledger.signMessage(message, accountOffset, addressOffset, accountOption);
+        }).then((result) => {
+          resolve(result);
+        })
+        .catch((error: Error) => {
+          handleError(error);
+          reject(error);
+        });
     } else {
-      return new Promise((resolve, reject) => {
-        reject(new Error(t("Can't find Ledger device")));
-      });
+      reject(new Error(t("Can't find Ledger device")));
+      handleError(new Error(t("Can't find Ledger device")));
     }
+
+    return promise;
   }, [handleError, ledger, t]);
 
   useEffect(() => {

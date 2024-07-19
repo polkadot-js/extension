@@ -19,12 +19,29 @@ import { BehaviorSubject } from 'rxjs';
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
 import { ApiOptions } from '@polkadot/api/types';
-import { typesBundle } from '@polkadot/apps-config/api';
+import { typesBundle as _typesBundle } from '@polkadot/apps-config/api';
 import { ProviderInterface } from '@polkadot/rpc-provider/types';
 import { TypeRegistry } from '@polkadot/types/create';
-import { Registry } from '@polkadot/types/types';
+import { OverrideBundleDefinition, Registry } from '@polkadot/types/types';
 import { BN, formatBalance } from '@polkadot/util';
 import { defaults as addressDefaults } from '@polkadot/util-crypto/address/defaults';
+
+const typesBundle = { ..._typesBundle };
+
+// Override avail spec for signedExtensions
+const _availSpec: OverrideBundleDefinition = {
+  signedExtensions: availSpec.signedExtensions
+};
+
+// Override avail goldberg spec for signedExtensions
+const _goldbergSpec: OverrideBundleDefinition = {
+  signedExtensions: availSpec.signedExtensions
+};
+
+if (typesBundle.spec) {
+  typesBundle.spec.avail = _availSpec;
+  typesBundle.spec['data-avail'] = _goldbergSpec;
+}
 
 export class SubstrateApi implements _SubstrateApi {
   chainSlug: string;
@@ -90,7 +107,7 @@ export class SubstrateApi implements _SubstrateApi {
     const apiOption: ApiOptions = {
       provider,
       typesBundle,
-      registry: this.registry,
+      registry: this.registry, // This line makes this object registry to be the same as the api registry
       noInitWarn: true
     };
 
@@ -109,29 +126,26 @@ export class SubstrateApi implements _SubstrateApi {
     if (externalApiPromise) {
       api = externalApiPromise;
     } else if (_API_OPTIONS_CHAIN_GROUP.acala.includes(this.chainSlug)) {
-      api = new ApiPromise(acalaOptions({ provider, noInitWarn: true }));
+      api = new ApiPromise(acalaOptions(apiOption));
     } else if (_API_OPTIONS_CHAIN_GROUP.turing.includes(this.chainSlug)) {
       api = new ApiPromise({
-        provider,
+        ...apiOption,
         rpc: oakRpc,
-        types: oakTypes,
-        noInitWarn: true
+        types: oakTypes
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.avail.includes(this.chainSlug)) {
       api = new ApiPromise({
-        provider,
+        ...apiOption,
         rpc: availSpec.rpc,
         types: availSpec.types,
-        signedExtensions: availSpec.signedExtensions,
-        noInitWarn: true
+        signedExtensions: availSpec.signedExtensions
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.goldberg.includes(this.chainSlug)) {
       api = new ApiPromise({
-        provider,
+        ...apiOption,
         rpc: goldbergRpc,
         types: goldbergTypes,
-        signedExtensions: availSpec.signedExtensions,
-        noInitWarn: true
+        signedExtensions: availSpec.signedExtensions
       });
     } else if (_API_OPTIONS_CHAIN_GROUP.gear.includes(this.chainSlug)) {
       api = new GearApi({
@@ -185,9 +199,10 @@ export class SubstrateApi implements _SubstrateApi {
     this.api = this.createApi(this.provider);
   }
 
-  connect (): void {
+  connect (_callbackUpdateMetadata?: (substrateApi: _SubstrateApi) => void): void {
     if (this.api.isConnected) {
       this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+      _callbackUpdateMetadata?.(this);
     } else {
       this.updateConnectionStatus(_ChainConnectionStatus.CONNECTING);
 
@@ -195,6 +210,7 @@ export class SubstrateApi implements _SubstrateApi {
         .then(() => {
           this.api.isReady.then(() => {
             this.updateConnectionStatus(_ChainConnectionStatus.CONNECTED);
+            _callbackUpdateMetadata?.(this);
           }).catch(console.error);
         }).catch(console.error);
     }
@@ -278,7 +294,11 @@ export class SubstrateApi implements _SubstrateApi {
     this.systemName = systemName.toString();
     this.systemVersion = systemVersion.toString();
 
-    const properties = registry.createType('ChainProperties', { ss58Format: api.registry.chainSS58, tokenDecimals: api.registry.chainDecimals, tokenSymbol: api.registry.chainTokens });
+    const properties = registry.createType('ChainProperties', {
+      ss58Format: api.registry.chainSS58,
+      tokenDecimals: api.registry.chainDecimals,
+      tokenSymbol: api.registry.chainTokens
+    });
     const ss58Format = properties.ss58Format.unwrapOr(DEFAULT_SS58).toNumber();
     const tokenSymbol = properties.tokenSymbol.unwrapOr([formatBalance.getDefaults().unit, ...DEFAULT_AUX]);
     const tokenDecimals = properties.tokenDecimals.unwrapOr([DEFAULT_DECIMALS]);

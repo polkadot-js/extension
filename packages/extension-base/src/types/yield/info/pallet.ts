@@ -125,7 +125,7 @@ export interface ValidatorExtraInfo {
 
 export interface PalletNominationPoolsBondedPoolInner {
   points: number;
-  state: 'Open' | 'Destroying' | 'Locked';
+  state: 'Open' | 'Destroying' | 'Locked' | 'Blocked';
   memberCounter: number;
   roles: {
     depositor: string;

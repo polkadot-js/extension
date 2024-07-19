@@ -57,10 +57,10 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
       } else {
         accountType = 'SUBSTRATE';
       }
-    } else {
-      if (currentAccount?.type === 'ethereum') {
+    } else if (currentAccount?.type) {
+      if (currentAccount.type === 'ethereum') {
         accountType = 'ETHEREUM';
-      } else if (currentAccount?.type === 'sr25519') {
+      } else if (['ed25519', 'sr25519', 'ecdsa'].includes(currentAccount.type)) {
         accountType = 'SUBSTRATE';
       }
     }
@@ -76,9 +76,7 @@ export function useGetChainSlugsByAccountType (address?: string): string[] {
     }
 
     if (account?.isHardware) {
-      const isEthereum = isEthereumAddress(account.address || '');
-
-      if (isEthereum) {
+      if (account?.isGeneric) {
         return undefined;
       } else {
         const availableGen: string[] = account.availableGenesisHashes || [];

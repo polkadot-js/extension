@@ -5,11 +5,11 @@ import BigN from 'bignumber.js';
 
 export const chainProvider: Record<string, number> = {
   default: 0,
-  ethereum: 1,
+  ethereum: 0,
   polygon: 2,
-  shidenEvm: 2,
-  shiden: 2,
-  ajunaPolkadot: 1,
+  shidenEvm: 1,
+  shiden: 1,
+  ajunaPolkadot: 0,
   crabParachain: 1,
   astarEvm: 1,
   shibuya: 1,

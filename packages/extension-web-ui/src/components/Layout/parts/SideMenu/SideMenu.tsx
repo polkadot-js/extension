@@ -63,62 +63,114 @@ function Component ({ className,
       {
         label: t('Portfolio'),
         value: '/home',
-        icon: Wallet
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Wallet,
+          weight: 'fill'
+        }
       },
       {
         label: t('Earning'),
         value: '/home/earning',
-        icon: Vault
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Vault,
+          weight: 'fill'
+        }
       },
       {
         label: t('Swap'),
         value: '/transaction/swap',
-        icon: ArrowsLeftRight
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: ArrowsLeftRight,
+          weight: 'fill'
+        }
       },
       {
         label: t('dApps'),
         value: '/home/dapps',
-        icon: Globe
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Globe,
+          weight: 'fill'
+        }
       },
       {
         label: t('Mission Pools'),
         value: '/home/mission-pools',
-        icon: Parachute
+        icon: {
+          type: 'customIcon',
+          customIcon: (
+            <>
+              <Icon
+                phosphorIcon={Parachute}
+                type='phosphor'
+                weight='fill'
+              />
+              {(latestLiveMissionIds.length > 0) && <div className={CN('__active-count')}>{latestLiveMissionIds.length}</div>}
+            </>
+          )
+        }
       },
       {
         label: t('Crowdloans'),
         value: '/home/crowdloans',
-        icon: Rocket
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Rocket,
+          weight: 'fill'
+        }
       },
       {
         label: t('History'),
         value: '/home/history',
-        icon: Clock
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Clock,
+          weight: 'fill'
+        }
       },
       {
         label: t('Settings'),
         value: '/settings',
-        icon: Gear
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Gear,
+          weight: 'fill'
+        }
       }
     ];
-  }, [t]);
+  }, [latestLiveMissionIds.length, t]);
 
   const staticMenuItems = useMemo<MenuItemType[]>(() => {
     return [
       {
         label: t('FAQs'),
         value: 'faqs',
-        icon: Info
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: Info,
+          weight: 'fill'
+        }
       },
       {
         label: t('Contact'),
         value: 'contact',
-        icon: MessengerLogo
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: MessengerLogo,
+          weight: 'fill'
+        }
       },
       {
         label: t('Terms of services'),
         value: 'tos',
-        icon: ArrowSquareUpRight
+        icon: {
+          type: 'phosphor',
+          phosphorIcon: ArrowSquareUpRight,
+          weight: 'fill'
+        }
       }
     ];
   }, [t]);

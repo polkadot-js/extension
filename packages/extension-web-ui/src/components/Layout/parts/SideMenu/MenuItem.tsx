@@ -10,8 +10,7 @@ import styled from 'styled-components';
 export type MenuItemType = {
   label: string;
   value: string;
-  icon: SwIconProps['phosphorIcon'];
-
+  icon: SwIconProps;
 };
 
 type Props = MenuItemType & ThemeProps & {
@@ -21,7 +20,7 @@ type Props = MenuItemType & ThemeProps & {
   onClick: (key: string) => void;
 };
 
-function Component ({ className = '', icon, isActivated, label, latestLiveMissionLength, onClick, showToolTip, value }: Props): React.ReactElement<Props> {
+function Component ({ className = '', icon, isActivated, label, onClick, showToolTip, value }: Props): React.ReactElement<Props> {
   const _onClick = useCallback(() => {
     onClick(value);
   }, [value, onClick]);
@@ -35,31 +34,13 @@ function Component ({ className = '', icon, isActivated, label, latestLiveMissio
       tabIndex={-1}
     >
 
-      {value === '/home/mission-pools'
-        ? (
-          <Icon
-            className={'__icon'}
-            customIcon={
-              <>
-                <Icon
-                  phosphorIcon={icon}
-                  type='phosphor'
-                  weight='fill'
-                />
-                {(!!latestLiveMissionLength) && <div className={CN('__active-count')}>{latestLiveMissionLength}</div>}
-              </>
-            }
-            type={'customIcon'}
-            weight='fill'
-          />
-        )
-        : (
-          <Icon
-            className={'__icon'}
-            phosphorIcon={icon}
-            weight='fill'
-          />
-        )}
+      <Icon
+        className={'__icon'}
+        size={'md'}
+        weight={'fill'}
+        {...icon}
+      />
+
       <div className={'__label'}>
         {label}
       </div>
@@ -130,7 +111,7 @@ export const MenuItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       paddingBottom: 0,
       backgroundColor: token.colorError,
       position: 'absolute',
-      right: 194,
+      right: 202,
       top: 14,
       minWidth: '12px'
     },

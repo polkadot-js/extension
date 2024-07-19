@@ -245,6 +245,10 @@ export default class State {
     return Object.keys(this.#metaRequests).length;
   }
 
+  public get numMetaRequestsRaw (): number {
+    return Object.keys(this.#metaRequestsRaw).length;
+  }
+
   public get numSignRequests (): number {
     return Object.keys(this.#signRequests).length;
   }
@@ -394,6 +398,24 @@ export default class State {
     };
   };
 
+  private metaCompleteRaw = (id: string, resolve: (result: boolean) => void, reject: (error: Error) => void): Resolver<boolean> => {
+    const complete = (): void => {
+      delete this.#metaRequestsRaw[id];
+      this.updateIconMeta(true);
+    };
+
+    return {
+      reject: (error: Error): void => {
+        complete();
+        reject(error);
+      },
+      resolve: (result: boolean): void => {
+        complete();
+        resolve(result);
+      }
+    };
+  };
+
   private signComplete = (id: string, resolve: (result: ResponseSigning) => void, reject: (error: Error) => void): Resolver<ResponseSigning> => {
     const complete = (): void => {
       delete this.#signRequests[id];
@@ -423,13 +445,14 @@ export default class State {
   private updateIcon (shouldClose?: boolean): void {
     const authCount = this.numAuthRequests;
     const metaCount = this.numMetaRequests;
+    const metaRawCount = this.numMetaRequestsRaw;
     const signCount = this.numSignRequests;
     const text = (
       authCount
         ? 'Auth'
         : metaCount
           ? 'Meta'
-          : (signCount ? `${signCount}` : '')
+          : metaRawCount ? 'MetaRaw' : (signCount ? `${signCount}` : '')
     );
 
     withErrorLog(() => chrome.action.setBadgeText({ text }));
@@ -457,6 +480,10 @@ export default class State {
 
   private updateIconMeta (shouldClose?: boolean): void {
     this.metaSubject.next(this.allMetaRequests);
+    this.updateIcon(shouldClose);
+  }
+
+  private updateIconMetaRaw (shouldClose?: boolean): void {
     this.metaRawSubject.next(this.allMetaRequestsRaw);
     this.updateIcon(shouldClose);
   }
@@ -521,6 +548,7 @@ export default class State {
   public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
     return new Promise((resolve, reject): void => {
       const id = getId();
+      console.log('id:', id)
 
       this.#metaRequests[id] = {
         ...this.metaComplete(id, resolve, reject),
@@ -534,12 +562,32 @@ export default class State {
     });
   }
 
+  public injectMetadataRaw (url: string, request: RawMetadataDef): Promise<boolean> {
+    return new Promise((resolve, reject): void => {
+      const id = getId();
+      console.log('id raw:', id)
+
+      this.#metaRequestsRaw[id] = {
+        ...this.metaCompleteRaw(id, resolve, reject),
+        id,
+        request,
+        url
+      };
+
+      this.updateIconMetaRaw();
+    });
+  }
+
   public getAuthRequest (id: string): AuthRequest {
     return this.#authRequests[id];
   }
 
   public getMetaRequest (id: string): MetaRequest {
     return this.#metaRequests[id];
+  }
+
+  public getMetaRequestRaw (id: string): MetaRequestRaw {
+    return this.#metaRequestsRaw[id];
   }
 
   public getSignRequest (id: string): SignRequest {
@@ -622,6 +670,7 @@ export default class State {
 
   public async saveMetadataRaw (meta: RawMetadataDef): Promise<void> {
     await this.#metaStoreRaw.set(meta.genesisHash, meta);
+    console.log('meta: ', meta)
 
     addMetadataRaw(meta);
   }

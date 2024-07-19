@@ -112,9 +112,11 @@ export interface RequestSignatures {
   'pri(json.batchRestore)': [RequestBatchRestore, void];
   'pri(json.account.info)': [KeyringPair$Json, ResponseJsonGetAccountInfo];
   'pri(metadata.approve)': [RequestMetadataApprove, boolean];
+  'pri(metadata.approveRaw)': [RequestMetadataApproveRaw, boolean];
   'pri(metadata.get)': [string | null, MetadataDef | null];
   'pri(metadata.getRaw)': [string | null, RawMetadataDef | null];
   'pri(metadata.reject)': [RequestMetadataReject, boolean];
+  'pri(metadata.rejectRaw)': [RequestMetadataRejectRaw, boolean];
   'pri(metadata.requests)': [RequestMetadataSubscribe, boolean, MetadataRequest[]];
   'pri(metadata.requestsRaw)': [RequestMetadataSubscribe, boolean, RawMetadataRequest[]];
   'pri(metadata.list)': [null, MetadataDef[]];
@@ -137,6 +139,7 @@ export interface RequestSignatures {
   'pub(extrinsic.sign)': [SignerPayloadJSON, ResponseSigning];
   'pub(metadata.list)': [null, InjectedMetadataKnown[]];
   'pub(metadata.provide)': [MetadataDef, boolean];
+  'pub(metadata.provideRaw)': [RawMetadataDef, boolean];
   'pub(phishing.redirectIfDenied)': [null, boolean];
   'pub(ping)': [null, boolean];
   'pub(rpc.listProviders)': [void, ResponseRpcListProviders];
@@ -184,7 +187,15 @@ export interface RequestMetadataApprove {
   id: string;
 }
 
+export interface RequestMetadataApproveRaw {
+  id: string;
+}
+
 export interface RequestMetadataReject {
+  id: string;
+}
+
+export interface RequestMetadataRejectRaw {
   id: string;
 }
 

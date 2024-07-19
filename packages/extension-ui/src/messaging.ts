@@ -106,6 +106,10 @@ export async function approveMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.approve)', { id });
 }
 
+export async function approveMetaRequestRaw (id: string): Promise<boolean> {
+  return sendMessage('pri(metadata.approveRaw)', { id });
+}
+
 export async function cancelSignRequest (id: string): Promise<boolean> {
   return sendMessage('pri(signing.cancel)', { id });
 }
@@ -188,6 +192,7 @@ export async function getRawMetadata (genesisHash?: string | null): Promise<HexS
   }
 
   const def = await request;
+  console.log('deef: ', def);
 
   if (def) { return def.rawMetadata } 
 
@@ -200,6 +205,10 @@ export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> 
 
 export async function rejectMetaRequest (id: string): Promise<boolean> {
   return sendMessage('pri(metadata.reject)', { id });
+}
+
+export async function rejectMetaRequestRaw (id: string): Promise<boolean> {
+  return sendMessage('pri(metadata.rejectRaw)', { id });
 }
 
 export async function subscribeAccounts (cb: (accounts: AccountJson[]) => void): Promise<boolean> {
@@ -231,6 +240,7 @@ export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[
 }
 
 export async function subscribeRawMetadataRequests (cb: (accounts: RawMetadataRequest[]) => void): Promise<boolean> {
+  console.log('executing pri(metadata.requestsRaw)');
   return sendMessage('pri(metadata.requestsRaw)', null, cb);
 }
 

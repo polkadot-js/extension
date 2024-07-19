@@ -7,28 +7,36 @@ import React, { useCallback, useContext } from 'react';
 
 import { ActionBar, ActionContext, Button, Link, Table, Warning } from '../../components/index.js';
 import { useMetadata, useTranslation } from '../../hooks/index.js';
-import { approveMetaRequest, rejectMetaRequest } from '../../messaging.js';
+import { approveMetaRequest, approveMetaRequestRaw, rejectMetaRequest, rejectMetaRequestRaw } from '../../messaging.js';
 import { styled } from '../../styled.js';
 
 interface Props {
   className?: string;
+  rawRequest: string;
   request: MetadataDef;
   metaId: string;
   url: string;
 }
 
-function Request ({ className, metaId, request, url }: Props): React.ReactElement<Props> {
+function Request({ className, metaId, rawRequest, request, url }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const chain = useMetadata(request.genesisHash);
   const onAction = useContext(ActionContext);
 
+  console.log('rawRequestIOd: ', rawRequest)
+
   const _onApprove = useCallback(
     (): void => {
+      console.log('once')
       approveMetaRequest(metaId)
         .then(() => onAction())
         .catch(console.error);
+
+      approveMetaRequestRaw(rawRequest)
+      .then(() => onAction())
+      .catch(console.error);
     },
-    [metaId, onAction]
+    [metaId, rawRequest, onAction]
   );
 
   const _onReject = useCallback(
@@ -36,8 +44,12 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
       rejectMetaRequest(metaId)
         .then(() => onAction())
         .catch(console.error);
+      rejectMetaRequestRaw(rawRequest)
+        .then(() => onAction())
+        .catch(console.error);
+      
     },
-    [metaId, onAction]
+    [metaId, rawRequest, onAction]
   );
 
   return (
@@ -91,7 +103,7 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
   );
 }
 
-export default styled(Request)<Props>`
+export default styled(Request) <Props>`
   .btnAccept {
     margin: 25px auto 0;
     width: 90%;

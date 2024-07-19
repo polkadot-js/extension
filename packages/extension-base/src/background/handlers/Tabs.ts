@@ -4,7 +4,7 @@
 /* global chrome */
 
 import type { Subscription } from 'rxjs';
-import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@polkadot/extension-inject/types';
+import type { InjectedAccount, InjectedMetadataKnown, MetadataDef, ProviderMeta, RawMetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair } from '@polkadot/keyring/types';
 import type { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
@@ -136,6 +136,10 @@ export default class Tabs {
     return this.#state.injectMetadata(url, request);
   }
 
+  private metadataProvideRaw (url: string, request: RawMetadataDef): Promise<boolean> {
+    return this.#state.injectMetadataRaw(url, request);
+  }
+
   private metadataList (_url: string): InjectedMetadataKnown[] {
     return this.#state.knownMetadata.map(({ genesisHash, specVersion }) => ({
       genesisHash,
@@ -245,6 +249,9 @@ export default class Tabs {
 
       case 'pub(metadata.provide)':
         return this.metadataProvide(url, request as MetadataDef);
+      
+      case 'pub(metadata.provideRaw)':
+        return this.metadataProvideRaw(url, request as RawMetadataDef);
 
       case 'pub(ping)':
         return Promise.resolve(true);

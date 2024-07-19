@@ -8,7 +8,7 @@ import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/
 import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
-import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
+import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RawMetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataApproveRaw, RequestMetadataReject, RequestMetadataRejectRaw, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
 import type { AuthorizedAccountsDiff } from './State.js';
 import type State from './State.js';
 
@@ -236,6 +236,7 @@ export default class Extension {
   }
 
   private async metadataApprove({ id }: RequestMetadataApprove): Promise<boolean> {
+    console.log('asking for approval')
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -249,11 +250,29 @@ export default class Extension {
     return true;
   }
 
+  private async metadataApproveRaw({ id }: RequestMetadataApproveRaw): Promise<boolean> {
+    console.log('asking for raw approval')
+    console.log('asking: ', this.#state.allMetaRequestsRaw)
+    const queued = this.#state.getMetaRequestRaw(id);
+
+    console.log('queued: ',queued)
+
+    assert(queued, 'Unable to find request');
+
+    const { request, resolve } = queued;
+
+    await this.#state.saveMetadataRaw(request);
+
+    resolve(true);
+
+    return true;
+  }
   private metadataGet(genesisHash: string | null): MetadataDef | null {
     return this.#state.knownMetadata.find((result) => result.genesisHash === genesisHash) || null;
   }
 
   private metadataGetRaw(genesisHash: string | null): RawMetadataDef | null {
+    console.log('metadataGetRaw: ',this.#state.knownMetadataRaw.find((result) => result.genesisHash === genesisHash))
     return this.#state.knownMetadataRaw.find((result) => result.genesisHash === genesisHash) || null;
   }
 
@@ -262,6 +281,7 @@ export default class Extension {
   }
 
   private metadataReject({ id }: RequestMetadataReject): boolean {
+    console.log('rejecting')
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
@@ -273,9 +293,38 @@ export default class Extension {
     return true;
   }
 
+  private metadataRejectRaw({ id }: RequestMetadataRejectRaw): boolean {
+    console.log('rejecting')
+    const queued = this.#state.getMetaRequestRaw(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { reject } = queued;
+
+    reject(new Error('Rejected'));
+
+    return true;
+  }
+
   private metadataSubscribe(id: string, port: chrome.runtime.Port): boolean {
+    console.log('subscribing')
     const cb = createSubscription<'pri(metadata.requests)'>(id, port);
     const subscription = this.#state.metaSubject.subscribe((requests: MetadataRequest[]): void =>
+      cb(requests)
+    );
+
+    port.onDisconnect.addListener((): void => {
+      unsubscribe(id);
+      subscription.unsubscribe();
+    });
+
+    return true;
+  }
+
+  private metadataSubscribeRaw(id: string, port: chrome.runtime.Port): boolean {
+    console.log('subscribing')
+    const cb = createSubscription<'pri(metadata.requestsRaw)'>(id, port);
+    const subscription = this.#state.metaRawSubject.subscribe((requests: RawMetadataRequest[]): void =>
       cb(requests)
     );
 
@@ -601,6 +650,9 @@ export default class Extension {
       case 'pri(metadata.approve)':
         return await this.metadataApprove(request as RequestMetadataApprove);
 
+      case 'pri(metadata.approveRaw)':
+        return await this.metadataApproveRaw(request as RequestMetadataApproveRaw);
+
       case 'pri(metadata.get)':
         return this.metadataGet(request as string);
 
@@ -612,12 +664,16 @@ export default class Extension {
 
       case 'pri(metadata.reject)':
         return this.metadataReject(request as RequestMetadataReject);
+      
+      case 'pri(metadata.rejectRaw)':
+        return this.metadataRejectRaw(request as RequestMetadataRejectRaw);
+
 
       case 'pri(metadata.requests)':
         return port && this.metadataSubscribe(id, port);
 
       case 'pri(metadata.requestsRaw)':
-        return port && this.metadataSubscribe(id, port);
+        return port && this.metadataSubscribeRaw(id, port);
 
       case 'pri(activeTabsUrl.update)':
         return this.updateCurrentTabs(request as RequestActiveTabsUrlUpdate);

@@ -90,8 +90,10 @@ export function knownMetadata (): MetadataDef[] {
 
 export function addMetadataRaw (def: RawMetadataDef): void {
   rawDefinitions.set(def.genesisHash, def);
+  rawDefinitions.forEach((v) => console.log('raw added: ',v));
 }
 
 export function knownMetadataRaw (): RawMetadataDef[] {
+  rawDefinitions.forEach((v) => console.log('raw values: ',v));
   return [...rawDefinitions.values()];
 }

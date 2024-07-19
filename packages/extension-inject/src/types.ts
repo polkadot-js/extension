@@ -82,6 +82,7 @@ export interface InjectedMetadataKnown {
 export interface InjectedMetadata {
   get: () => Promise<InjectedMetadataKnown[]>;
   provide: (definition: MetadataDef) => Promise<boolean>;
+  provideRaw: (definition: RawMetadataDef) => Promise<boolean>;
 }
 
 export type ProviderList = Record<string, ProviderMeta>

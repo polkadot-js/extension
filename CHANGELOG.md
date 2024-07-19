@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.49.3 July 19, 2024
+
+Changes:
+
+- Fix ID used in manifest_firefox.json by adding brackets
+    - The previous patch required brackets arount the ID...
+    
+
 ## 0.49.2 July 18, 2024
 
 Changes:

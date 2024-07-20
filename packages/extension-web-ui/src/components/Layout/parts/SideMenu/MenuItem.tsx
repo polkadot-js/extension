@@ -111,7 +111,7 @@ export const MenuItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       paddingBottom: 0,
       backgroundColor: token.colorError,
       position: 'absolute',
-      right: 202,
+      right: 194,
       top: 14,
       minWidth: '12px'
     },

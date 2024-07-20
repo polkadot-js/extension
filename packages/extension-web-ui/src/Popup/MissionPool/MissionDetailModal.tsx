@@ -14,6 +14,7 @@ import { Button, ButtonProps, Icon, Image, ModalContext, Tag } from '@subwallet/
 import { CaretLeft, GlobeHemisphereWest, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import styled, { ThemeContext } from 'styled-components';
 
 type Props = ThemeProps & {
@@ -181,7 +182,7 @@ function Component ({ className = '', data }: Props): React.ReactElement<Props> 
                 label={t('Description')}
                 valueColorSchema={'gray'}
               >
-                <Markdown>{data.description}</Markdown>
+                <Markdown remarkPlugins={[remarkGfm]}>{data.description}</Markdown>
               </MetaInfo.Default>
               {!!data.total_supply && <MetaInfo.Default
                 label={t('Total token supply')}
@@ -287,6 +288,9 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       backgroundSize: 'cover',
       filter: 'blur(7.5px)'
     },
+    '.__category-pool .__item-tag:last-child': {
+      marginRight: 0
+    },
 
     '.__modal-separator': {
       height: 2,
@@ -344,6 +348,7 @@ export const MissionDetailModal = styled(Component)<Props>(({ theme: { token } }
       '.__row.-vertical': {
         flexDirection: 'column',
         gap: token.sizeXS,
+        marginBottom: -14,
 
         '.__value-col': {
           textAlign: 'left'

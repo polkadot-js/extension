@@ -254,7 +254,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage, account.originLedgerSlug);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage, account.originGenesisHash);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 

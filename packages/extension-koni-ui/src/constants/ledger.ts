@@ -402,7 +402,7 @@ export const PredefinedMigrationLedgerNetwork: MigrationLedgerNetwork[] = [
     network: 'darwinia',
     slug: ChainInfoMap.darwinia2.slug,
     slip44: 354,
-    ss58_addr_type: 36
+    ss58_addr_type: 18
   },
   {
     accountName: 'HydraDX',

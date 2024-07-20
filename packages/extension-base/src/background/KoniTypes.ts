@@ -977,7 +977,7 @@ export interface CreateHardwareAccountItem {
   address: string;
   addressOffset: number;
   genesisHash: string;
-  originLedgerSlug?: string;
+  originGenesisHash: string;
   hardwareType: string;
   name: string;
   isEthereum: boolean;

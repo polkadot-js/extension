@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerNetwork, MigrationLedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
 import { ATTACH_ACCOUNT_MODAL, SUBSTRATE_MIGRATION_KEY } from '@subwallet/extension-koni-ui/constants';
@@ -79,6 +79,10 @@ const Component: React.FC<Props> = (props: Props) => {
     return supportedLedger.find((n) => n.slug === chain);
   }, [chain, supportedLedger]);
 
+  const selectedChainMigrateMode = useMemo((): MigrationLedgerNetwork | undefined => {
+    return migrateSupportLedger.find((n) => n.slug === chainMigrateMode);
+  }, [chainMigrateMode, migrateSupportLedger]);
+
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
   const accountMigrateNetworkName = useMemo(() => {
@@ -87,7 +91,7 @@ const Component: React.FC<Props> = (props: Props) => {
     return chainMigrateMode && selectedChain ? `${selectedChain.accountName}` : '';
   }, [chainMigrateMode, migrateSupportLedger]);
 
-  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain, true, false, false, chainMigrateMode);
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain, true, false, false, selectedChainMigrateMode?.genesisHash);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
@@ -203,12 +207,14 @@ const Component: React.FC<Props> = (props: Props) => {
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
 
-      const disabled = !!accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
+      const existedAccount = accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
+      const disabled = !!existedAccount;
+      const accountName = chainMigrateMode && existedAccount?.name ? existedAccount.name : item.name;
 
       return (
         <AccountItemWithName
-          accountName={item.name}
-          address={item.address}
+          accountName={accountName}
+          address={chainMigrateMode ? originAddress : item.address}
           className={CN({ disabled: disabled })}
           direction='vertical'
           genesisHash={selectedChain?.genesisHash}
@@ -219,7 +225,7 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       );
     };
-  }, [accounts, onClickItem, selectedChain?.genesisHash]);
+  }, [accounts, chainMigrateMode, onClickItem, selectedChain?.genesisHash]);
 
   const onSubmit = useCallback(() => {
     if (!selectedAccounts.length || !selectedChain) {
@@ -235,7 +241,7 @@ const Component: React.FC<Props> = (props: Props) => {
           address: item.address,
           addressOffset: 0, // don't change
           genesisHash: selectedChain.genesisHash,
-          originLedgerSlug: chainMigrateMode,
+          originGenesisHash: selectedChainMigrateMode?.genesisHash || selectedChain.genesisHash,
           hardwareType: 'ledger',
           name: item.name,
           isEthereum: selectedChain.isEthereum,
@@ -252,7 +258,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setIsSubmitting(false);
         });
     }, 300);
-  }, [selectedAccounts, selectedChain, chainMigrateMode, onComplete]);
+  }, [selectedAccounts, selectedChain, selectedChainMigrateMode?.genesisHash, onComplete]);
 
   useEffect(() => {
     setSelectedAccounts([]);

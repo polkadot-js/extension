@@ -4,7 +4,7 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { detectTranslate } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertModal } from '@subwallet/extension-koni-ui/components';
 import { isProductionMode, NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useAlert, useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -44,8 +44,18 @@ const Component = function ({ className }: Props) {
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-
   const { transactionRequest } = useSelector((state) => state.requestState);
+
+  const isRuntimeUpdated = useMemo(() => {
+    const request = confirmation?.item as SigningRequest;
+    const _payload = request?.request?.payload;
+
+    if (isRawPayload(_payload)) {
+      return false;
+    } else {
+      return _isRuntimeUpdated(_payload?.signedExtensions);
+    }
+  }, [confirmation]);
 
   const nextConfirmation = useCallback(() => {
     setIndex((val) => Math.min(val + 1, numberOfConfirmations - 1));
@@ -82,7 +92,7 @@ const Component = function ({ className }: Props) {
               const payload = request.request.payload as SignerPayloadJSON;
 
               // Valid even with evm ledger account (evm - availableGenesisHashes is empty)
-              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash) || isRuntimeUpdated;
             }
           }
         } else {
@@ -168,7 +178,7 @@ const Component = function ({ className }: Props) {
     }
 
     return null;
-  }, [closeAlert, confirmation, openAlert]);
+  }, [closeAlert, confirmation, isRuntimeUpdated, openAlert]);
 
   const headerTitle = useMemo((): string => {
     if (!confirmation) {

@@ -5,7 +5,7 @@ import { LedgerNetwork, MigrationLedgerNetwork } from '@subwallet/extension-base
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createPromiseHandler, isSameAddress } from '@subwallet/extension-base/utils';
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
-import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
+import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens, SUBSTRATE_MIGRATION_KEY } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { Ledger, SignMessageLedger, SignTransactionLedger } from '@subwallet/extension-koni-ui/types';
 import { convertLedgerError } from '@subwallet/extension-koni-ui/utils';
@@ -46,16 +46,22 @@ const getNetwork = (ledgerChains: LedgerNetwork[], slug: string, isEthereumNetwo
   return ledgerChains.find((network) => network.slug === slug || (network.isEthereum && isEthereumNetwork));
 };
 
-const getNetworkBySlug = (ledgerChains: MigrationLedgerNetwork[], slug: string): MigrationLedgerNetwork | undefined => {
-  return ledgerChains.find((network) => network.slug === slug);
+const getNetworkByGenesisHash = (ledgerChains: MigrationLedgerNetwork[], genesisHash: string): MigrationLedgerNetwork | undefined => {
+  return ledgerChains.find((network) => network.genesisHash === genesisHash);
 };
 
-const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrateLedgerChains: MigrationLedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slugNetwork?: string): Ledger => {
+const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrateLedgerChains: MigrationLedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slugNetwork?: string | null): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, ledgerIncompatible);
 
-  const def = getNetwork(ledgerChains, chainSlug, isEthereumNetwork);
+  console.log(chainSlug, slugNetwork);
+
+  let def = getNetwork(ledgerChains, chainSlug, isEthereumNetwork);
+
+  if (!def && !isEthereumNetwork) {
+    def = getNetwork(ledgerChains, SUBSTRATE_MIGRATION_KEY, isEthereumNetwork);
+  }
 
   assert(def, 'There is no known Ledger app available for this chain');
 
@@ -64,7 +70,7 @@ const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrat
       return new EVMLedger('webusb', def.slip44);
     } else {
       if (slugNetwork) {
-        const def = getNetworkBySlug(migrateLedgerChains, slugNetwork);
+        const def = getNetworkByGenesisHash(migrateLedgerChains, slugNetwork);
 
         assert(def, 'There is no known Ledger app available for this chain');
 
@@ -86,7 +92,7 @@ const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrat
   }
 };
 
-export function useLedger (chainSlug?: string, active = true, isSigning = false, forceMigration = false, slugNetwork?: string): Result {
+export function useLedger (chainSlug?: string, active = true, isSigning = false, forceMigration = false, originGenesisHash?: string | null): Result {
   const { t } = useTranslation();
 
   const [ledgerChains, migrateLedgerChains] = useGetSupportedLedger();
@@ -133,14 +139,14 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
       }
 
       try {
-        return retrieveLedger(chainSlug, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, slugNetwork);
+        return retrieveLedger(chainSlug, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, originGenesisHash);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [refreshLock, chainSlug, active, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, slugNetwork]);
+  }, [refreshLock, chainSlug, active, ledgerChains, migrateLedgerChains, isEvmNetwork, forceMigration, originGenesisHash]);
 
   const appName = useMemo(() => {
     const unknownNetwork = 'unknown network';
@@ -151,7 +157,7 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
 
     const chainInfo = chainInfoMap[chainSlug];
     const isEthereumNetwork = chainInfo ? _isChainEvmCompatible(chainInfo) : false;
-    const { appName, isEthereum, isGeneric } = getNetwork(ledgerChains, chainSlug, isEthereumNetwork) || { appName: unknownNetwork, isGeneric: true };
+    const { appName, isEthereum, isGeneric } = getNetwork(ledgerChains, chainSlug, isEthereumNetwork) || { appName: 'Polkadot Migration', isGeneric: true };
 
     if (!isGeneric && forceMigration && !isEthereum) {
       if (NotNeedMigrationGens.includes(chainInfo?.substrateInfo?.genesisHash || '')) {

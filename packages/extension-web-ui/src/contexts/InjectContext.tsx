@@ -94,7 +94,7 @@ class InjectHandler {
   hasInjected: boolean;
   isInitEnable: boolean;
   enableSubject: BehaviorSubject<boolean>;
-  // noFindAccounts: BehaviorSubject<boolean>;
+  noFindAccounts: BehaviorSubject<boolean>;
   loadingSubject: BehaviorSubject<boolean>;
   successSubject: BehaviorSubject<number>;
   errorSubject = new BehaviorSubject<InjectErrorMap>({});
@@ -123,7 +123,7 @@ class InjectHandler {
     this.selectedWallet = localStorage.getItem(ENABLE_INJECT) || null;
     const walletInfo = PREDEFINED_WALLETS[this.selectedWallet || ''];
 
-    // this.noFindAccounts = new BehaviorSubject<boolean>(false);
+    this.noFindAccounts = new BehaviorSubject<boolean>(false);
     this.enableSubject = new BehaviorSubject<boolean>(!!this.selectedWallet);
     this.successSubject = new BehaviorSubject<number>(0);
     this.isInitEnable = this.enableSubject.value;
@@ -155,6 +155,8 @@ class InjectHandler {
   }
 
   async enable (walletKey: string) {
+    this.disable(); // clear data of previous wallet
+
     const walletInfo = PREDEFINED_WALLETS[walletKey || ''];
 
     if (!walletInfo) {
@@ -180,6 +182,7 @@ class InjectHandler {
 
       const finishAction = () => {
         success++;
+        this.noFindAccounts.next(false);
         this.enableSubject.next(true);
         this.successSubject.next(success);
         localStorage.setItem(ENABLE_INJECT, walletKey);
@@ -226,9 +229,9 @@ class InjectHandler {
     });
   }
 
-  disable (isNotDisable?: boolean) {
-    !isNotDisable && this.unsubscribeSubstrateAccount();
-    !isNotDisable && this.unsubscribeEvmAccount();
+  disable () {
+    this.unsubscribeSubstrateAccount();
+    this.unsubscribeEvmAccount();
     this.substrateAccounts = [];
     this.evmAccounts = [];
     this.substrateEnableCompleted = false;
@@ -236,11 +239,13 @@ class InjectHandler {
     this.selectedWallet = null;
     this.substrateKey && this.updateInjectedAccount(this.substrateKey, [], true);
     this.evmKey && this.updateInjectedAccount(this.evmKey, [], true);
+    this.substrateKey = null;
+    this.evmKey = null;
     this.substrateWallet = undefined;
     this.evmWallet = undefined;
     this.successSubject.next(0);
     this.enableSubject.next(false);
-    !isNotDisable && localStorage.removeItem(ENABLE_INJECT);
+    localStorage.removeItem(ENABLE_INJECT);
   }
 
   async enableSubstrate () {
@@ -266,6 +271,8 @@ class InjectHandler {
   }
 
   subscribeSubstrateAccount () {
+    const key = this.substrateKey;
+
     this.substrateAccountUnsubcall = this.substrateWallet?.accounts.subscribe((accounts) => {
       this.substrateAccounts = accounts.map((account) => ({
         address: account.address,
@@ -276,7 +283,7 @@ class InjectHandler {
         },
         type: account.type
       }));
-      this.substrateKey && this.updateInjectedAccount(this.substrateKey, this.substrateAccounts);
+      key && this.updateInjectedAccount(key, this.substrateAccounts);
     });
   }
 
@@ -299,9 +306,11 @@ class InjectHandler {
   }
 
   subscribeEvmAccount () {
+    const key = this.evmKey;
+
     const listener = (addresses: string[]) => {
       this.evmAccounts = addresses.map((adr) => evmConvertToInject(adr));
-      this.evmKey && this.updateInjectedAccount(this.evmKey, this.evmAccounts);
+      key && this.updateInjectedAccount(key, this.evmAccounts);
     };
 
     if (this.evmWallet) {
@@ -321,6 +330,10 @@ class InjectHandler {
 
   updateInjectedAccount (key: string, accounts: InjectedAccountWithMeta[], isDisable?: boolean) {
     const oldArray = parseAccountMap(this.oldAccountArrayMap);
+
+    if (key !== this.substrateKey && key !== this.evmKey) {
+      return;
+    }
 
     if (accounts.length === 0) {
       if (key === this.evmKey) {
@@ -379,13 +392,9 @@ class InjectHandler {
       // Promise.all(promises).finally(callback);
       this.oldAccountArrayMap = { ...this.accountArrayMap };
 
-      if (Object.values(this.accountArrayMap).flat().length === 0) {
-        // !isDisable && this.noFindAccounts.next(true);
-        this.disable(true);
-      } else {
-        this.enableSubject.next(true);
-        this.selectedWallet = localStorage.getItem(ENABLE_INJECT) || null;
-        // injectHandler.noFindAccounts.next(false);
+      if (Object.values(this.accountArrayMap).flat().length === 0) { // If listener get a empty account list
+        !isDisable && this.noFindAccounts.next(true);
+        this.disable();
       }
     }, 300, 900, false);
   }
@@ -402,7 +411,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
   const [evmWallet, setEvmWallet] = useState(injectHandler.evmWallet);
   const [substrateWallet, setSubstrateWallet] = useState(injectHandler.substrateWallet);
   const [loadingInject, setLoadingInject] = useState(injectHandler.loadingSubject.value);
-  // const notify = useNotification();
+  const notify = useNotification();
 
   const selectWallet = useCallback(() => {
     // Auto active injected on mobile
@@ -458,18 +467,18 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     injectHandler.loadingSubject.subscribe(setLoadingInject);
   }, []);
 
-  // useEffect(() => {
-  //   injectHandler.noFindAccounts.subscribe((v) => {
-  //     if (v) {
-  //       notify({
-  //         message: t('No account found, please add account in your wallet extension or unlock it!'),
-  //         type: 'warning',
-  //         duration: 8
-  //
-  //       });
-  //     }
-  //   });
-  // }, [notify, t]);
+  useEffect(() => {
+    injectHandler.noFindAccounts.subscribe((v) => {
+      if (v) {
+        notify({
+          message: t('No account found, please add account in your wallet extension or unlock it!'),
+          type: 'warning',
+          duration: 8
+
+        });
+      }
+    });
+  }, [notify, t]);
 
   useEffect(() => {
     injectHandler.successSubject.subscribe(setWallet);

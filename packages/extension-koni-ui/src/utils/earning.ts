@@ -68,21 +68,30 @@ export function autoSelectValidatorOptimally (validators: ValidatorInfo[], maxCo
 
   const preSelectValidatorAddresses = preSelectValidators ? preSelectValidators.split(',') : [];
 
-  const shuffleValidators = [...validators];
-
-  shuffle<ValidatorInfo>(shuffleValidators);
-
   const result: ValidatorInfo[] = [];
+  const notPreSelected: ValidatorInfo[] = [];
 
-  for (const v of shuffleValidators) {
-    if (result.length === maxCount) {
-      break;
-    }
-
+  for (const v of validators) {
     if (preSelectValidatorAddresses.includes(v.address)) {
       result.push(v);
+    } else {
+      notPreSelected.push(v);
+    }
+  }
 
-      continue;
+  if (result.length >= maxCount) {
+    shuffle<ValidatorInfo>(result);
+
+    return result.slice(0, maxCount);
+  }
+
+  const remain = maxCount - result.length;
+
+  shuffle<ValidatorInfo>(notPreSelected);
+
+  for (const v of notPreSelected) {
+    if (result.length === remain) {
+      break;
     }
 
     if (v.commission !== 100 && !v.blocked && (!simple ? v.identity && v.topQuartile : true)) {

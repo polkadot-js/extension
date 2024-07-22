@@ -546,24 +546,26 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
 
     for (const waitingValidator of Object.keys(waitingValidatorList)) {
-      allValidatorAddresses.push(waitingValidator);
+      if (!allValidatorAddresses.includes(waitingValidator)) {
+        allValidatorAddresses.push(waitingValidator);
 
-      validatorInfoList.push({
-        address: waitingValidator,
-        totalStake: waitingValidatorList[waitingValidator],
-        ownStake: waitingValidatorList[waitingValidator],
-        otherStake: '0',
-        nominatorCount: 0,
-        // to be added later
-        commission: 0,
-        expectedReturn: 0,
-        blocked: false,
-        isVerified: false,
-        minBond: minBond.toString(),
-        isCrowded: false,
-        eraRewardPoint: '0',
-        topQuartile: false
-      } as ValidatorInfo);
+        validatorInfoList.push({
+          address: waitingValidator,
+          totalStake: waitingValidatorList[waitingValidator],
+          ownStake: waitingValidatorList[waitingValidator],
+          otherStake: '0',
+          nominatorCount: 0,
+          // to be added later
+          commission: 0,
+          expectedReturn: 0,
+          blocked: false,
+          isVerified: false,
+          minBond: minBond.toString(),
+          isCrowded: false,
+          eraRewardPoint: '0',
+          topQuartile: false
+        } as ValidatorInfo);
+      }
     }
 
     return [totalStakeMap, allValidatorAddresses, validatorInfoList];

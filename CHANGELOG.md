@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 1.2.16
+Build date: Jul 19, 2024.
+
+Features & Update:
+- Move step shorten metadata and calculate metadataHash to client (#3305)
+- Add support Ledger for Polkadex (#3231)
+- Improve the staking reward information retrieval (#3326)
+- Update Vara token sdk version (#3270)
+- Update chain-list
+  - Remove Avail Goldberg testnet
+  - Add support for Aleph Zero EVM testnet
+  - Add support for Cere Network
+  - Add KOL / Kolkadot on PAH, Hydration
+
+Bugs fixed:
+- Fix bug connecting to uquid dapp with Wallet Connect (#3275)
+
+
 ## 1.2.15
 Build date: Jul 12, 2024.
 

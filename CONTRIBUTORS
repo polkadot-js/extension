@@ -1,12 +1,12 @@
-    2745	AnhMTV                        	Release version 1.2.15
+    2755	AnhMTV                        	Release version 1.2.16
     2483	Nam Phạm                      	[Issue 3312] fix: update balance calculation for relaychain
-    2140	S2kael                        	[Chain-list] [Issue-275] Update stable version for chain-list
+    2160	S2kael                        	
      831	lw-cdm                        	
-     532	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
+     537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     220	bluezdot                      	[Issue-2965] fix: Handle earning status for claimable unstake amount
+     221	bluezdot                      	[Issue-279-Chainlist] Update chainlist
      185	quangdo                       	
-     158	Thiendekaco                   	[Issue 3263] [fix] Extension - handle promise flow
+     170	Thiendekaco                   	[Issue 3275] [fix] Extension - Handle provider validate
      137	Automation Bot                	[CI Skip] Auto increase webapp build number
      135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      105	lw-cdm                        	

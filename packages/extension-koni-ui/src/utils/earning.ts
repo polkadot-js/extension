@@ -82,15 +82,13 @@ export function autoSelectValidatorOptimally (validators: ValidatorInfo[], maxCo
   if (result.length >= maxCount) {
     shuffle<ValidatorInfo>(result);
 
-    return result.slice(0, maxCount);
+    return result.slice(0, maxCount - 1);
   }
-
-  const remain = maxCount - result.length;
 
   shuffle<ValidatorInfo>(notPreSelected);
 
   for (const v of notPreSelected) {
-    if (result.length === remain) {
+    if (result.length === maxCount) {
       break;
     }
 

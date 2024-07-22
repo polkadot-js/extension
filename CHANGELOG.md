@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.2.17
+Build date: Jul 22, 2024.
+
+Features & Update:
+- Set default pool and default validator for Avail (#3365)
+
+
 ## 1.2.16
 Build date: Jul 19, 2024.
 

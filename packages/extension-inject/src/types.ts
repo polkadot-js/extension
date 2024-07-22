@@ -66,6 +66,7 @@ export interface MetadataDef extends MetadataDefBase {
   tokenSymbol: string;
   types: Record<string, Record<string, string> | string>;
   metaCalls?: string;
+  rawMetadata?: HexString;
   userExtensions?: ExtDef;
 }
 

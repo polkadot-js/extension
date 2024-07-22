@@ -11,6 +11,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Warning } from '../../components/index.js';
 import { useLedger, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
+import useRawMetadata from '@polkadot/extension-ui/hooks/useRawMetadata';
 
 interface Props {
   accountIndex?: number;
@@ -27,6 +28,8 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const raw = useRawMetadata(genesisHash);
+  const metaBuff = Buffer.from(raw ? raw : '0x00');
 
   useEffect(() => {
     if (ledgerError) {
@@ -47,7 +50,10 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
 
       setError(null);
       setIsBusy(true);
-      ledger.sign(payload.toU8a(true), accountIndex, addressOffset)
+      console.log('metadata on ledger', raw);
+      console.log('metadata buffer', metaBuff);
+      console.log('payload', payload.toJSON());
+      ledger.signWithMetadata(payload.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff})
         .then((signature) => {
           onSignature(signature);
         }).catch((e: Error) => {

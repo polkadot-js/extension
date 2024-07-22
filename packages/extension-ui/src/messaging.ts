@@ -155,6 +155,8 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   }
 
   const def = await request;
+  console.log('old request', def)
+
 
   if (def) {
     return metadataExpand(def, isPartial);
@@ -173,6 +175,32 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   }
 
   return null;
+}
+
+export async function getRawMetadata ( genesisHash?: string | null ): Promise<HexString | null> {
+  if (!genesisHash) {
+    return null;
+  }
+
+  let request = getSavedMeta(genesisHash);
+
+  console.log('request exists? ', request)
+
+  if (!request) {
+    request = sendMessage('pri(metadata.get)', genesisHash || null);
+    setSavedMeta(genesisHash, request);
+  }
+
+  const def = await request;
+
+  console.log('request', def)
+
+  
+  if (def) { 
+    const raw = def.rawMetadata ? def.rawMetadata : null;
+    return raw
+  }
+  return null
 }
 
 export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> {

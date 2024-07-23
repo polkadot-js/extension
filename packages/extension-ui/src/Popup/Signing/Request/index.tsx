@@ -39,11 +39,11 @@ export const CMD_SIGN_MESSAGE = 3;
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-function isRawPayload(payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
+function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
@@ -68,8 +68,8 @@ export default function Request({ account: { accountIndex, addressOffset, genesi
   }, [request]);
 
   const _onSignature = useCallback(
-    ({ signature }: { signature: HexString }): void => {
-      approveSignSignature(signId, signature)
+    ({ signature }: { signature: HexString }, signedTransaction?: HexString): void => {
+      approveSignSignature(signId, signature, signedTransaction!)
         .then(() => onAction())
         .catch((error: Error): void => {
           setError(error.message);

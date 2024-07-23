@@ -118,8 +118,8 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
-export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
-  return sendMessage('pri(signing.approve.signature)', { id, signature });
+export async function approveSignSignature (id: string, signature: HexString, signedTransaction: HexString): Promise<boolean> {
+  return sendMessage('pri(signing.approve.signature)', { id, signature, signedTransaction });
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: HexString | null): Promise<boolean> {
@@ -149,18 +149,12 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
 
   let request = getSavedMeta(genesisHash);
 
-  console.log('first request: ', request)
-  
-
   if (!request) {
     request = sendMessage('pri(metadata.get)', genesisHash || null);
-    console.log('setting meta: ', request)
     setSavedMeta(genesisHash, request);
   }
 
   const def = await request;
-  console.log('old request', def)
-
 
   if (def) {
     return metadataExpand(def, isPartial);
@@ -181,14 +175,12 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function getRawMetadata ( genesisHash?: string | null ): Promise<HexString | null> {
+export async function getRawMetadata (genesisHash?: string | null): Promise<HexString | null> {
   if (!genesisHash) {
     return null;
   }
 
   let request = getSavedMeta(genesisHash);
-
-  console.log('request exists? ', request)
 
   if (!request) {
     request = sendMessage('pri(metadata.get)', genesisHash || null);
@@ -197,14 +189,13 @@ export async function getRawMetadata ( genesisHash?: string | null ): Promise<He
 
   const def = await request;
 
-  console.log('request', def)
-
-  
-  if (def) { 
+  if (def) {
     const raw = def.rawMetadata ? def.rawMetadata : null;
-    return raw
+
+    return raw;
   }
-  return null
+
+  return null;
 }
 
 export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> {

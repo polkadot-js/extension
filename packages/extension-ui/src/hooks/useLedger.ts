@@ -14,8 +14,8 @@ import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
 import ledgerChains from '../util/legerChains.js';
-import useTranslation from './useTranslation.js';
 import useMetadata from './useMetadata.js';
+import useTranslation from './useTranslation.js';
 
 interface StateBase {
   isLedgerCapable: boolean;
@@ -59,7 +59,7 @@ function retrieveLedger (genesis: string): LedgerGeneric {
   assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
 
   ledger = new LedgerGeneric('webusb', def.network, def.slip44);
-  
+
   return ledger;
 }
 
@@ -106,7 +106,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    ledger.getAddress(chainInfo?.ss58Format || 0 , false, accountIndex, addressOffset)
+    ledger.getAddress(chainInfo?.ss58Format || 0, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

@@ -457,7 +457,8 @@ export default class State {
   }
 
   public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
-    console.log('njectedMetadata', request)
+    console.log('njectedMetadata', request);
+
     return new Promise((resolve, reject): void => {
       const id = getId();
 

@@ -9,7 +9,7 @@ import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-s
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { cacheMetadata, DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
+import { cacheMetadata, GEAR_DEFAULT_ADDRESS, getGRC20ContractPromise, getVFTContractPromise } from '@subwallet/extension-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
@@ -163,7 +163,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
     if (!(apiPromise instanceof GearApi)) {
-      console.warn('Cannot subscribe VFT balance without GearApi instance');
+      console.warn('Cannot subscribe GRC20 balance without GearApi instance');
 
       return ['', -1, '', true];
     }
@@ -172,9 +172,34 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
 
     const [nameRes, symbolRes, decimalsRes] = await Promise.all([
-      tokenContract.name(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
+      tokenContract.service.name(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.symbol(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.decimals(GEAR_DEFAULT_ADDRESS)
+    ]);
+
+    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
+
+    if (!nameRes || !symbolRes) {
+      contractError = true;
+    }
+
+    return [nameRes, decimals, symbolRes, contractError];
+  }
+
+  private async getVftTokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
+    if (!(apiPromise instanceof GearApi)) {
+      console.warn('Cannot subscribe VFT balance without GearApi instance');
+
+      return ['', -1, '', true];
+    }
+
+    let contractError = false;
+    const tokenContract = getVFTContractPromise(apiPromise, contractAddress);
+
+    const [nameRes, symbolRes, decimalsRes] = await Promise.all([
+      tokenContract.service.name(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.symbol(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.decimals(GEAR_DEFAULT_ADDRESS)
     ]);
 
     const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
@@ -200,17 +225,15 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       switch (tokenType) {
         case _AssetType.PSP22:
           [name, decimals, symbol, contractError] = await this.getPsp22TokenInfo(apiPromise, contractAddress, contractCaller);
-
           break;
-
         case _AssetType.PSP34:
           [name, decimals, symbol, contractError] = await this.getPsp34TokenInfo(apiPromise, contractAddress, contractCaller);
-
           break;
-
         case _AssetType.GRC20:
           [name, decimals, symbol, contractError] = await this.getGrc20TokenInfo(apiPromise, contractAddress);
-
+          break;
+        case _AssetType.VFT:
+          [name, decimals, symbol, contractError] = await this.getVftTokenInfo(apiPromise, contractAddress);
           break;
       }
 

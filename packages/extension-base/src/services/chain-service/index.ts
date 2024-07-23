@@ -42,7 +42,10 @@ const ignoredList = [
   'rollux_evm',
   'rollux_testnet',
   'boolAlpha',
-  'boolBeta_testnet'
+  'boolBeta_testnet',
+  'core',
+  'satoshivm',
+  'satoshivm_testnet'
 ];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
@@ -324,7 +327,7 @@ export class ChainService {
   }
 
   public getSupportedSmartContractTypes () {
-    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721];
+    return [_AssetType.ERC20, _AssetType.ERC721, _AssetType.PSP22, _AssetType.PSP34, _AssetType.GRC20, _AssetType.GRC721, _AssetType.VFT];
   }
 
   public getActiveChainInfoMap () {
@@ -1733,7 +1736,7 @@ export class ChainService {
   private async getSmartContractTokenInfo (contractAddress: string, tokenType: _AssetType, originChain: string, contractCaller?: string): Promise<_SmartContractTokenInfo> {
     if ([_AssetType.ERC721, _AssetType.ERC20].includes(tokenType)) {
       return await this.evmChainHandler.getEvmContractTokenInfo(contractAddress, tokenType, originChain);
-    } else if ([_AssetType.PSP34, _AssetType.PSP22, _AssetType.GRC20].includes(tokenType)) {
+    } else if ([_AssetType.PSP34, _AssetType.PSP22, _AssetType.GRC20, _AssetType.VFT].includes(tokenType)) {
       return await this.substrateChainHandler.getSubstrateContractTokenInfo(contractAddress, tokenType, originChain, contractCaller);
     }
 

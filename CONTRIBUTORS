@@ -1,6 +1,6 @@
-    2755	AnhMTV                        	Release version 1.2.16
-    2483	Nam Phạm                      	[Issue 3312] fix: update balance calculation for relaychain
-    2160	S2kael                        	
+    2757	AnhMTV                        	Release version 1.2.17
+    2487	Nam Phạm                      	[Issue 3365] feat: update fetching waiting validators
+    2165	S2kael                        	[Issue-3365] Rollback fetch earning targets online only
      831	lw-cdm                        	
      537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)

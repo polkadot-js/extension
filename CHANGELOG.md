@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.2.18
+Build date: Jul 23, 2024.
+
+Features & Update:
+- Update chain-list for Avail (#3369)
+
 ## 1.2.17
 Build date: Jul 22, 2024.
 

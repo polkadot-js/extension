@@ -3,6 +3,7 @@
 
 import { ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { fakeAddress } from '@subwallet/extension-base/services/earning-service/constants';
 import { BaseYieldStepDetail, EarningStatus, HandleYieldStepData, LiquidYieldPoolInfo, OptimalYieldPath, OptimalYieldPathParams, RuntimeDispatchInfo, SubmitYieldJoinData, TokenBalanceRaw, TransactionData, UnstakingInfo, UnstakingStatus, YieldPoolMethodInfo, YieldPositionInfo, YieldStepType, YieldTokenBaseInfo } from '@subwallet/extension-base/types';
@@ -29,6 +30,10 @@ type AcalaLiquidStakingRedeemRequest = [number, boolean];
 const GRAPHQL_API = 'https://api.polkawallet.io/acala-liquid-staking-subql';
 const EXCHANGE_RATE_REQUEST = 'query { dailySummaries(first:30, orderBy:TIMESTAMP_DESC) {nodes { exchangeRate timestamp }}}';
 
+function convertDerivativeToken (amount: BN, exchangeRate: number, decimals: number) {
+  return amount.mul(new BN(exchangeRate)).div(BN_TEN.pow(new BN(decimals)));
+}
+
 export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPoolHandler {
   protected readonly name: string;
   protected readonly shortName: string;
@@ -45,7 +50,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
     defaultUnstake: true,
     fastUnstake: true,
     cancelUnstake: false,
-    withdraw: false, // TODO: Change after verify unstake info
+    withdraw: true,
     claimReward: false
   };
 
@@ -160,36 +165,70 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
       }
 
       const balances = _balances as unknown as TokenBalanceRaw[];
-      const redeemRequests = await substrateApi.api.query.homa.redeemRequests.multi(useAddresses);
-      // This rate is multiple with decimals
-      const exchangeRate = await this.getExchangeRate();
-      const decimals = BN_TEN.pow(new BN(this.rateDecimals));
+      const [redeemRequests, exchangeRate, _currentEra] = await Promise.all([
+        substrateApi.api.query.homa.redeemRequests.multi(useAddresses),
+        this.getExchangeRate(),
+        substrateApi.api.query.homa.relayChainCurrentEra()
+      ]);
+
+      const currentEra = _currentEra.toPrimitive() as number;
 
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
         const activeTotalBalance = balanceItem.free || BN_ZERO;
-        let totalBalance = activeTotalBalance.mul(new BN(exchangeRate)).div(decimals);
+        let totalBalance = convertDerivativeToken(activeTotalBalance, exchangeRate, this.rateDecimals);
         let unlockingBalance = BN_ZERO;
 
         const unstakings: UnstakingInfo[] = [];
 
+        // Handle redeem request
         const redeemRequest = redeemRequests[i].toPrimitive() as unknown as AcalaLiquidStakingRedeemRequest;
 
         if (redeemRequest) {
-          // If withdrawable = false, redeem request is claimed
-          const [redeemAmount, withdrawable] = redeemRequest;
+          const [derivativeRedeemAmount, _] = redeemRequest;
 
-          // Redeem amount in derivative token
-          const amount = new BN(redeemAmount).mul(new BN(exchangeRate)).div(decimals);
+          const redeemAmount = convertDerivativeToken(new BN(derivativeRedeemAmount), exchangeRate, this.rateDecimals);
 
-          totalBalance = totalBalance.add(amount);
-          unlockingBalance = unlockingBalance.add(amount);
+          totalBalance = totalBalance.add(redeemAmount);
+          unlockingBalance = unlockingBalance.add(redeemAmount);
 
           unstakings.push({
             chain: this.chain,
-            status: withdrawable ? UnstakingStatus.CLAIMABLE : UnstakingStatus.UNLOCKING,
-            claimable: amount.toString()
+            status: UnstakingStatus.UNLOCKING,
+            claimable: redeemAmount.toString(),
+            waitingTime: 28 * _STAKING_ERA_LENGTH_MAP.polkadot // up to 29 day (in case non-fast-match
+          });
+        }
+
+        // Handle unbondings
+        const unbondings = await substrateApi.api.query.homa.unbondings.entries(address);
+
+        if (unbondings.length > 0) {
+          unbondings.forEach(([unbondingInfo, unbondingValue]) => {
+            // @ts-ignore
+            const _targetEra = unbondingInfo.toHuman()[1] as string;
+            const targetEra = parseInt(_targetEra.replaceAll(',', ''));
+
+            const amount = new BN(unbondingValue.toPrimitive() as number);
+
+            totalBalance = totalBalance.add(amount);
+            unlockingBalance = unlockingBalance.add(amount);
+
+            if (targetEra > currentEra) {
+              unstakings.push({
+                chain: this.chain,
+                status: UnstakingStatus.UNLOCKING,
+                claimable: amount.toString(),
+                waitingTime: (targetEra - currentEra) * _STAKING_ERA_LENGTH_MAP.polkadot // Todo: Handle exact timestamp?
+              });
+            } else {
+              unstakings.push({
+                chain: this.chain,
+                status: UnstakingStatus.CLAIMABLE,
+                claimable: amount.toString()
+              });
+            }
           });
         }
 
@@ -293,7 +332,7 @@ export default class AcalaLiquidStakingPoolHandler extends BaseLiquidStakingPool
 
   override async handleYieldUnstake (amount: string, address: string, selectedTarget?: string): Promise<[ExtrinsicType, TransactionData]> {
     const chainApi = await this.substrateApi.isReady;
-    const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, false);
+    const extrinsic = chainApi.api.tx.homa.requestRedeem(amount, true); // set true to allow fast match
 
     return [ExtrinsicType.UNSTAKE_LDOT, extrinsic];
   }

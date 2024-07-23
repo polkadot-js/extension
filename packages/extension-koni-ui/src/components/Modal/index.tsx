@@ -7,6 +7,7 @@ export { default as RequestCreatePasswordModal } from './RequestCreatePasswordMo
 export { default as ResetWalletModal } from './ResetWalletModal';
 export { default as RemindBackupSeedPhraseModal } from './RemindBackupSeedPhraseModal';
 export { default as RemindUpgradeVersionModal } from './RemindUpgradeFirefoxVersion';
+export { default as AddNetworkWCModal } from './AddNetworkWCModal';
 export { SortingModal } from './SortingModal';
 
 export * from './Account';

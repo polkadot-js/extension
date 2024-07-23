@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { GearApi } from '@gear-js/api';
-import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
+import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
 import { getWasmContractGasLimit } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo, _getXcmAssetMultilocation, _isBridgedToken, _isChainEvmCompatible, _isNativeToken, _isTokenGearSmartContract, _isTokenTransferredByEvm, _isTokenWasmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
-import { getGRC20ContractPromise } from '@subwallet/extension-base/utils';
+import { getGRC20ContractPromise, getVFTContractPromise } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 import { TransactionConfig } from 'web3-core';
 
@@ -61,13 +61,16 @@ export const createTransferExtrinsic = async ({ from, networkKey, substrateApi, 
     transfer = contractPromise.tx['psp22::transfer']({ gasLimit }, to, value, {});
     transferAmount = value;
   } else if (_isTokenGearSmartContract(tokenInfo) && (api instanceof GearApi)) {
-    const contractPromise = getGRC20ContractPromise(api, _getContractAddressOfToken(tokenInfo));
+    const contractPromise = tokenInfo.assetType === _AssetType.GRC20
+      ? getGRC20ContractPromise(api, _getContractAddressOfToken(tokenInfo))
+      : getVFTContractPromise(api, _getContractAddressOfToken(tokenInfo));
     const transaction = await contractPromise
-      .transfer(u8aToHex(decodeAddress(to)), BigInt(value)) // Create transfer transaction
+      .service
+      .transfer(u8aToHex(decodeAddress(to)), value) // Create transfer transaction
       .withAccount(from) // Set sender account
       .calculateGas(); // Add account arg to extrinsic
 
-    transfer = transaction.tx;
+    transfer = transaction.extrinsic;
     transferAmount = value;
   } else if (_TRANSFER_CHAIN_GROUP.acala.includes(networkKey)) {
     if (!_isNativeToken(tokenInfo)) {

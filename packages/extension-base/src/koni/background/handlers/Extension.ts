@@ -18,6 +18,7 @@ import { getERC20SpendingApprovalTx } from '@subwallet/extension-base/koni/api/c
 import { isSnowBridgeGatewayContract } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { resolveAzeroAddressToDomain, resolveAzeroDomainToAddress } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { parseSubstrateTransaction } from '@subwallet/extension-base/koni/api/dotsama/parseTransaction';
+import { UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME } from '@subwallet/extension-base/koni/api/nft/config';
 import { getNftTransferExtrinsic, isRecipientSelf } from '@subwallet/extension-base/koni/api/nft/transfer';
 import { getBondingExtrinsic, getCancelWithdrawalExtrinsic, getClaimRewardExtrinsic, getNominationPoolsInfo, getUnbondingExtrinsic, getValidatorsInfo, validateBondingCondition, validateUnbondingCondition } from '@subwallet/extension-base/koni/api/staking/bonding';
 import { getTuringCancelCompoundingExtrinsic, getTuringCompoundExtrinsic } from '@subwallet/extension-base/koni/api/staking/bonding/paraChain';
@@ -40,7 +41,7 @@ import { isProposalExpired, isSupportWalletConnectChain, isSupportWalletConnectN
 import { ResultApproveWalletConnectSession, WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { SWStorage } from '@subwallet/extension-base/storage';
 import { AccountsStore } from '@subwallet/extension-base/stores';
-import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, StorageDataInterface, TokenSpendingApprovalParams, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
+import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardJson, NominationPoolInfo, OptimalYieldPathParams, RequestEarlyValidateYield, RequestGetYieldPoolTargets, RequestMetadataHash, RequestShortenMetadata, RequestStakeCancelWithdrawal, RequestStakeClaimReward, RequestUnlockDotCheckCanMint, RequestUnlockDotSubscribeMintedData, RequestYieldLeave, RequestYieldStepSubmit, RequestYieldWithdrawal, ResponseGetYieldPoolTargets, ResponseMetadataHash, ResponseShortenMetadata, StorageDataInterface, TokenSpendingApprovalParams, ValidateYieldProcessParams, YieldPoolType } from '@subwallet/extension-base/types';
 import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { SwapPair, SwapQuoteResponse, SwapRequest, SwapRequestResult, SwapSubmitParams, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { BN_ZERO, convertSubjectInfoToAddresses, createTransactionFromRLP, isSameAddress, MODULE_SUPPORT, reformatAddress, signatureToHex, Transaction as QrTransaction, uniqueStringArray } from '@subwallet/extension-base/utils';
@@ -1934,6 +1935,18 @@ export default class KoniExtension {
     const { networkKey, params, recipientAddress, senderAddress } = inputData;
     const contractAddress = params.contractAddress as string;
     const tokenId = params.tokenId as string;
+
+    if (UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME.includes(networkKey)) {
+      return await this.#koniState.transactionService.handleTransaction({
+        address: senderAddress,
+        chain: networkKey,
+        chainType: ChainType.EVM,
+        data: inputData,
+        extrinsicType: ExtrinsicType.SEND_NFT,
+        transaction: null,
+        url: EXTENSION_REQUEST_URL
+      });
+    }
 
     const transaction = await getERC721Transaction(this.#koniState.getEvmApi(networkKey), networkKey, contractAddress, senderAddress, recipientAddress, tokenId);
 
@@ -3924,7 +3937,7 @@ export default class KoniExtension {
     };
   }
 
-  /// Metadata
+  /* Metadata */
 
   private async findRawMetadata ({ genesisHash }: RequestFindRawMetadata): Promise<ResponseFindRawMetadata> {
     const { metadata, specVersion, types, userExtensions } = await this.#koniState.findMetadata(genesisHash);
@@ -3936,6 +3949,24 @@ export default class KoniExtension {
       userExtensions
     };
   }
+
+  private async calculateMetadataHash ({ chain }: RequestMetadataHash): Promise<ResponseMetadataHash> {
+    const hash = await this.#koniState.calculateMetadataHash(chain);
+
+    return {
+      metadataHash: hash || ''
+    };
+  }
+
+  private async shortenMetadata ({ chain, txBlob }: RequestShortenMetadata): Promise<ResponseShortenMetadata> {
+    const shorten = await this.#koniState.shortenMetadata(chain, txBlob);
+
+    return {
+      txMetadata: shorten || ''
+    };
+  }
+
+  /* Metadata */
 
   private async resolveDomainByAddress (request: ResolveDomainRequest) {
     const chainApi = this.#koniState.getSubstrateApi(request.chain);
@@ -4963,8 +4994,12 @@ export default class KoniExtension {
       // Metadata
       case 'pri(metadata.find)':
         return this.findRawMetadata(request as RequestFindRawMetadata);
+      case 'pri(metadata.hash)':
+        return this.calculateMetadataHash(request as RequestMetadataHash);
+      case 'pri(metadata.transaction.shorten)':
+        return this.shortenMetadata(request as RequestShortenMetadata);
 
-        /* Campaign */
+      /* Campaign */
       case 'pri(campaign.banner.subscribe)':
         return this.subscribeProcessingBanner(id, port);
       case 'pri(campaign.banner.complete)':

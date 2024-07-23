@@ -12,8 +12,8 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, is
   switch (name) {
     case 'TransportInterfaceNotAvailable':
       return {
-        status: 'error',
-        message: t('Please make sure that this browser tab is the only tab connecting to Ledger')
+        message: t('Please make sure that this browser tab is the only tab connecting to Ledger'),
+        status: 'error'
       };
   }
 

@@ -305,7 +305,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     const unsub = await substrateApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -352,7 +352,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 

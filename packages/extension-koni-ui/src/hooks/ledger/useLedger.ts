@@ -5,7 +5,7 @@ import { LedgerNetwork, MigrationLedgerNetwork } from '@subwallet/extension-base
 import { _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { createPromiseHandler, isSameAddress } from '@subwallet/extension-base/utils';
 import { EVMLedger, SubstrateGenericLedger, SubstrateLegacyLedger, SubstrateMigrationLedger } from '@subwallet/extension-koni-ui/connector';
-import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens, SUBSTRATE_MIGRATION_KEY } from '@subwallet/extension-koni-ui/constants';
+import { isLedgerCapable, ledgerIncompatible, NotNeedMigrationGens } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { Ledger, SignMessageLedger, SignTransactionLedger } from '@subwallet/extension-koni-ui/types';
 import { convertLedgerError } from '@subwallet/extension-koni-ui/utils';
@@ -55,11 +55,7 @@ const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrat
 
   assert(isLedgerCapable, ledgerIncompatible);
 
-  let def = getNetwork(ledgerChains, chainSlug, isEthereumNetwork);
-
-  if (!def && !isEthereumNetwork) {
-    def = getNetwork(ledgerChains, SUBSTRATE_MIGRATION_KEY, isEthereumNetwork);
-  }
+  const def = getNetwork(ledgerChains, chainSlug, isEthereumNetwork);
 
   assert(def, 'There is no known Ledger app available for this chain');
 

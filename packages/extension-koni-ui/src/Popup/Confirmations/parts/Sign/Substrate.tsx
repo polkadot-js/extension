@@ -5,7 +5,7 @@ import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/backg
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
 import { _isRuntimeUpdated, detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertBox, AlertModal } from '@subwallet/extension-koni-ui/components';
-import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
+import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY, SUBSTRATE_MIGRATION_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useAlert, useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest, shortenMetadata } from '@subwallet/extension-koni-ui/messaging';
@@ -76,6 +76,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const { chain, loadingChain } = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
+  const accountChainInfo = useGetChainInfoByGenesisHash(account.genesisHash || '');
   const { addExtraData, hashLoading, isMissingData, payload } = useParseSubstrateRequestPayload(chain, request, isLedger);
 
   const isMessage = isSubstrateMessage(payload);
@@ -93,7 +94,7 @@ const Component: React.FC<Props> = (props: Props) => {
         return CheckCircle;
     }
   }, [signMode]);
-  const chainSlug = useMemo(() => signMode === AccountSignMode.GENERIC_LEDGER ? SUBSTRATE_GENERIC_KEY : (chainInfo?.slug || ''), [chainInfo?.slug, signMode]);
+  const chainSlug = useMemo(() => signMode === AccountSignMode.GENERIC_LEDGER ? account.originGenesisHash ? SUBSTRATE_MIGRATION_KEY : SUBSTRATE_GENERIC_KEY : (accountChainInfo?.slug || ''), [account.originGenesisHash, accountChainInfo?.slug, signMode]);
   const networkName = useMemo(() => chainInfo?.name || chain?.name || toShort(genesisHash), [chainInfo, genesisHash, chain]);
   const isRuntimeUpdated = useMemo(() => {
     const _payload = request.payload;

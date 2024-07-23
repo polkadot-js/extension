@@ -61,7 +61,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const unsub = await (substrateApi.api.query.staking?.currentEra(async (_currentEra: Codec) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -152,7 +152,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 
@@ -301,7 +301,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const unsub = await substrateApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -355,7 +355,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 

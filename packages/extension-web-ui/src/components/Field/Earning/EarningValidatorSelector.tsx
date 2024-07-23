@@ -342,7 +342,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
     defaultValueRef.current = { _default, selected };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators, isSingleSelect, defaultValue]);
+  }, [nominations, onInitValidators, isSingleSelect, defaultValue, autoValidator]);
 
   useEffect(() => {
     if (!isActive) {

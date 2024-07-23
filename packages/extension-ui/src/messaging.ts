@@ -19,7 +19,6 @@ import { metadataExpand } from '@polkadot/extension-chains';
 
 import allChains from './util/chains.js';
 import { getSavedMeta, setSavedMeta } from './MetadataCache.js';
-import type { GenericExtrinsicPayload } from '@polkadot/types';
 
 interface Handler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,8 +118,8 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
-export async function approveSignSignature (id: string, signature: HexString, payload?: GenericExtrinsicPayload): Promise<boolean> {
-  return sendMessage('pri(signing.approve.signature)', { id, signature, payload });
+export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
+  return sendMessage('pri(signing.approve.signature)', { id, signature });
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: HexString | null): Promise<boolean> {

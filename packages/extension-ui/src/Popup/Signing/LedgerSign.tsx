@@ -78,12 +78,25 @@ function LedgerSign({ accountIndex, addressOffset, className, error, genesisHash
 
       const { newPayload, raw, txMetadata } = getMetadataProof(chain, payload);
 
+      console.log(newPayload)
+
       const metaBuff = Buffer.from(txMetadata);
 
       setError(null);
       setIsBusy(true);
       ledger.signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
         .then((signature) => {
+          const extrinsic = chain.registry.createType(
+            'Extrinsic',
+            { method: raw.method },
+            { version: 4 }
+          );
+
+          ledger.getAddress(chain.ss58Format, false, accountIndex, addressOffset)
+            .then(({ address }) => { 
+              extrinsic.addSignature(address, signature.signature, raw.toHex()) 
+            })
+
           onSignature(signature);
         }).catch((e: Error) => {
           setError(e.message);

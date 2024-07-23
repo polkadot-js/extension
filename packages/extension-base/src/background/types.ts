@@ -12,7 +12,7 @@ import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { ALLOWED_PATH } from '../defaults.js';
 import type { AuthResponse } from './handlers/State.js';
-import type { GenericExtrinsicPayload } from '@polkadot/types';
+import type { GenericExtrinsic } from '@polkadot/types';
 
 type KeysWithDefinedValues<T> = {
   [K in keyof T]: T[K] extends undefined ? never : K
@@ -300,7 +300,7 @@ export interface RequestSigningApprovePassword {
 export interface RequestSigningApproveSignature {
   id: string;
   signature: HexString;
-  payload?: GenericExtrinsicPayload;
+  signedTx?: GenericExtrinsic;
 }
 
 export interface RequestSigningCancel {
@@ -360,7 +360,7 @@ export type TransportResponseMessage<TMessageType extends MessageTypes> =
 export interface ResponseSigning {
   id: string;
   signature: HexString;
-  payload?: GenericExtrinsicPayload;
+  signedTx?: GenericExtrinsic;
 }
 
 export interface ResponseDeriveValidate {

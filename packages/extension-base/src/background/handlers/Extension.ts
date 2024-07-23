@@ -342,7 +342,6 @@ export default class Extension {
   }
 
   private signingApprovePassword ({ id, password, savePass }: RequestSigningApprovePassword): boolean {
-    console.log('calling signingApprovePassword');
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');

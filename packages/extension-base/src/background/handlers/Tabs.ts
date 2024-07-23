@@ -129,8 +129,6 @@ export default class Tabs {
     const address = request.address;
     const pair = this.getSigningPair(address);
 
-    console.log('extrinsicSign request: ', request);
-
     return this.#state.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
   }
 

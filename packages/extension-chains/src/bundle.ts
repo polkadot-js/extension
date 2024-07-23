@@ -22,8 +22,6 @@ const expanded = new Map<string, Chain>();
 export function metadataExpand (definition: MetadataDef, isPartial = false): Chain {
   const cached = expanded.get(definition.genesisHash);
 
-  console.log('Cached?: ', cached);
-
   if (cached && cached.specVersion === definition.specVersion) {
     return cached;
   }
@@ -64,8 +62,6 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     tokenDecimals,
     tokenSymbol
   };
-
-  console.log('result', result);
 
   if (result.genesisHash && !isPartial) {
     expanded.set(result.genesisHash, result);

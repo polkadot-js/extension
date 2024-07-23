@@ -69,7 +69,7 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
 
   const _onSignature = useCallback(
     ({ signature }: { signature: HexString }, signedTransaction?: HexString): void => {
-      approveSignSignature(signId, signature, signedTransaction!)
+      approveSignSignature(signId, signature, signedTransaction)
         .then(() => onAction())
         .catch((error: Error): void => {
           setError(error.message);

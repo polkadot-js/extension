@@ -87,6 +87,10 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
             .then(({ address }) => {
               extrinsic.addSignature(address, signature.signature, raw.toHex());
               onSignature(signature, extrinsic.toHex());
+            })
+            .catch((e: Error) => {
+              setError(e.message);
+              setIsBusy(false);
             });
         }).catch((e: Error) => {
           setError(e.message);

@@ -6050,14 +6050,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@subwallet/chain-list@npm:0.2.76":
-  version: 0.2.76
-  resolution: "@subwallet/chain-list@npm:0.2.76"
+"@subwallet/chain-list@file:/Users/truongnguyen/Workspace/SubWallet-ChainList/packages/chain-list/build::locator=root-workspace-0b6124%40workspace%3A.":
+  version: 0.2.76-beta.0
+  resolution: "@subwallet/chain-list@file:/Users/truongnguyen/Workspace/SubWallet-ChainList/packages/chain-list/build#/Users/truongnguyen/Workspace/SubWallet-ChainList/packages/chain-list/build::hash=41fdce&locator=root-workspace-0b6124%40workspace%3A."
   dependencies:
     "@polkadot/dev": 0.67.167
     "@polkadot/util": ^12.5.1
     eventemitter3: ^5.0.1
-  checksum: b0db28a4d3ac00cceff9a8224b47724c27991b720389ee9755d5ac39fc6b5d92540f9db928f1d8916c0f83c261f01af3a8e3c6248dd9f0f2aa1d2e9305e280b2
+  checksum: b884d4e9c6f53543c09bf0ea39c018469c9f5b9673883ae0f46482c6481a4a2fd69aa66276d6dcaf50b2d3b2f408efc209c3a1029a24aae9283f3678dfc96bf0
   languageName: node
   linkType: hard
 

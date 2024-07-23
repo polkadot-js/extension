@@ -55,7 +55,7 @@ export const _NFT_CHAIN_GROUP = {
   unique_evm: ['unique_evm'],
   bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
   vara: ['vara_network'],
-  avail: ['availTuringTest']
+  avail: ['avail_mainnet']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------

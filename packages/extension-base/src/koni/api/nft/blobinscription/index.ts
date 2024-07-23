@@ -4,7 +4,6 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AVAIL_LIGHT_CLIENT_NFT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
-import BigNumber from 'bignumber.js';
 
 interface NftResponse {
   data: {
@@ -29,8 +28,9 @@ interface ALC { // need confirm
   p: string,
   op: string,
   tick: string,
-  amt: BigNumber,
-  val: BigNumber
+  imgUrl: string,
+  name: string,
+  traits: Record<string, any>
 }
 
 export class BlobInscriptionApi extends BaseNftApi {
@@ -44,7 +44,7 @@ export class BlobInscriptionApi extends BaseNftApi {
     return {
       query: `
         query MyQuery {
-          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: "${isJson ? 'true' : 'false'}"}) {
+          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: ${isJson}}) {
             id
             extrinsicHash
             dataRaw
@@ -59,6 +59,22 @@ export class BlobInscriptionApi extends BaseNftApi {
     };
   }
 
+  private handleProperties (data: ALC) {
+    const propertiesMap: Record<string, any> = {};
+    const attRecord = data.traits;
+
+    if (attRecord) {
+      for (const [name, value] of Object.entries(attRecord)) {
+        console.log(name, value);
+        propertiesMap[name] = {
+          value: value as string
+        };
+      }
+    }
+
+    return propertiesMap;
+  }
+
   private async getBalances (address: string) {
     const response = await fetch(this.endpoint, {
       method: 'POST',
@@ -71,35 +87,6 @@ export class BlobInscriptionApi extends BaseNftApi {
     const result = await response.json() as NftResponse;
 
     return result?.data?.dataAvailabilities;
-
-    // const testResult = [
-    //   {
-    //     isJson: false,
-    //     id: '0000116353-c5fc0-000001',
-    //     extrinsicHash: '0x2b0a2945216f79032606a2cb10b7f846931f8016ff786e3eee3f0a15463e4548',
-    //     dataValue: 'example data',
-    //     dataRaw: '0x6578616d706c652064617461',
-    //     blockNumber: 116353,
-    //     action: 'DataAvailability.submit_data',
-    //     sender: {
-    //       address: '5GgRqSNN1zTsjA6N7cofcdP9yewA6JG83S649HbuBut8MG4o'
-    //     }
-    //   },
-    //   {
-    //     isJson: true,
-    //     id: '0000116822-9e7a8-000001',
-    //     extrinsicHash: '0x45489cf02dd047f95242576829a5373231049b290c8354a4d8615bae02e5c05b',
-    //     dataValue: '{"p":"pdc-20","op":"LIST","tick":"TEST","val":"100","amt":"100000"}',
-    //     dataRaw: '0x6578616d706c652064617461',
-    //     blockNumber: 116822,
-    //     action: 'DataAvailability.submit_data',
-    //     sender: {
-    //       address: '5GgRqSNN1zTsjA6N7cofcdP9yewA6JG83S649HbuBut8MG4o'
-    //     }
-    //   }
-    // ];
-    //
-    // return testResult;
   }
 
   public async handleNfts (params: HandleNftParams) {
@@ -115,21 +102,26 @@ export class BlobInscriptionApi extends BaseNftApi {
               if (nft.isJson) {
                 const _data = JSON.parse(nft.dataValue) as ALC | number;
 
-                if (_data === Infinity) {
+                if (_data === Infinity) { // check truly json
                   continue;
                 }
 
                 const data = _data as ALC;
 
+                if (data.op === 'create_collection') { // skip extrinsic creat collection
+                  continue;
+                }
+
+                const propertiesMap = this.handleProperties(data);
+
                 const parsedNft: NftItem = {
-                  id: data.tick, // is distinct?
+                  id: nft.id, // is distinct?
                   chain: this.chain,
                   owner: address, // is submitter = owner? '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
                   name: data.tick,
-                  image: 'https://ipfs.uniquenetwork.dev/ipfs/Qmap7uz7JKZNovCdLfdDE3p4XA6shghdADS7EsHvLjL6jT/nft_image_43.png', // recheck
-                  description: 'abc', // recheck
-                  collectionId: COLLECT_ID
-                  // properties: data
+                  image: data.imgUrl, // recheck
+                  collectionId: COLLECT_ID,
+                  properties: propertiesMap
                 };
 
                 params.updateItem(this.chain, parsedNft, address); // '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'

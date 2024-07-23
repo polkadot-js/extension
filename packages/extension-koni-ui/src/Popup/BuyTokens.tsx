@@ -153,8 +153,8 @@ function Component ({ className }: Props) {
   const ledgerNetwork = useMemo((): string | undefined => {
     const account = findAccountByAddress(accounts, selectedAddress);
 
-    if (account?.originGenesisHash) {
-      return findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash)?.slug;
+    if (account?.genesisHash) {
+      return findNetworkJsonByGenesisHash(chainInfoMap, account.genesisHash)?.slug;
     }
 
     return undefined;

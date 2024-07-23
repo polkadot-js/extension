@@ -696,8 +696,8 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
       if (!asset) {
         const account = findAccountByAddress(accounts, from);
 
-        if (account?.originGenesisHash) {
-          const network = findNetworkJsonByGenesisHash(chainInfoMap, account.originGenesisHash);
+        if (account?.genesisHash) {
+          const network = findNetworkJsonByGenesisHash(chainInfoMap, account.genesisHash);
 
           if (network) {
             const token = tokenItems.find((item) => item.originChain === network.slug);

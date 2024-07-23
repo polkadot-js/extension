@@ -12,7 +12,7 @@ import { isEthereumAddress } from '@polkadot/util-crypto';
 
 const defaultAccountFilter = (poolType: YieldPoolType, chain?: _ChainInfo): ((account: AccountJson) => boolean) => {
   return (account: AccountJson) => {
-    if (account.originGenesisHash && chain && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
+    if (account.genesisHash && chain && _getSubstrateGenesisHash(chain) !== account.genesisHash) {
       return false;
     }
 

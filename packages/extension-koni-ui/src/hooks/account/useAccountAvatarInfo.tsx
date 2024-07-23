@@ -12,23 +12,23 @@ interface Result {
 }
 
 const useAccountAvatarInfo = (address: string, preventPrefix?: boolean, genesisHash?: string | null, givenType: KeypairType = 'sr25519'): Result => {
-  const { formatted, originGenesisHash, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
+  const { formatted, genesisHash: genesisHash_, prefix } = useAccountRecoded(address || '', genesisHash, givenType);
 
   const avatarAddress = useMemo((): string => {
-    if (originGenesisHash) {
+    if (genesisHash_) {
       return formatted || '';
     } else {
       return (preventPrefix ? address : formatted) || '';
     }
-  }, [address, formatted, originGenesisHash, preventPrefix]);
+  }, [address, formatted, genesisHash_, preventPrefix]);
 
   const avatarIdentPrefix = useMemo((): number | undefined => {
-    if (originGenesisHash) {
+    if (genesisHash_) {
       return prefix;
     } else {
       return !preventPrefix ? prefix : undefined;
     }
-  }, [originGenesisHash, prefix, preventPrefix]);
+  }, [genesisHash_, prefix, preventPrefix]);
 
   return useMemo(() => ({
     address: avatarAddress ?? '',

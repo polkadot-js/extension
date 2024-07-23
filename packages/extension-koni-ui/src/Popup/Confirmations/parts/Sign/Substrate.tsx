@@ -68,9 +68,9 @@ const Component: React.FC<Props> = (props: Props) => {
     const _payload = request.payload;
 
     return isRawPayload(_payload)
-      ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
+      ? (account.genesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
       : _payload.genesisHash;
-  }, [account.originGenesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, request.payload]);
+  }, [account.genesisHash, chainInfoMap.polkadot.substrateInfo?.genesisHash, request.payload]);
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
 

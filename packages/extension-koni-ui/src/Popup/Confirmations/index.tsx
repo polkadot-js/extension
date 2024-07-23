@@ -46,17 +46,6 @@ const Component = function ({ className }: Props) {
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
   const { transactionRequest } = useSelector((state) => state.requestState);
 
-  const isRuntimeUpdated = useMemo(() => {
-    const request = confirmation?.item as SigningRequest;
-    const _payload = request?.request?.payload;
-
-    if (isRawPayload(_payload)) {
-      return false;
-    } else {
-      return _isRuntimeUpdated(_payload?.signedExtensions);
-    }
-  }, [confirmation]);
-
   const nextConfirmation = useCallback(() => {
     setIndex((val) => Math.min(val + 1, numberOfConfirmations - 1));
   }, [numberOfConfirmations]);
@@ -92,7 +81,7 @@ const Component = function ({ className }: Props) {
               const payload = request.request.payload as SignerPayloadJSON;
 
               // Valid even with evm ledger account (evm - availableGenesisHashes is empty)
-              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash) || isRuntimeUpdated;
+              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash) || _isRuntimeUpdated(payload?.signedExtensions);
             }
           }
         } else {
@@ -178,7 +167,7 @@ const Component = function ({ className }: Props) {
     }
 
     return null;
-  }, [closeAlert, confirmation, isRuntimeUpdated, openAlert]);
+  }, [closeAlert, confirmation, openAlert]);
 
   const headerTitle = useMemo((): string => {
     if (!confirmation) {

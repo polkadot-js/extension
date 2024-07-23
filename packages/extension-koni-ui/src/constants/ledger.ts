@@ -102,7 +102,8 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isDevMode: false,
     isGeneric: false,
     isEthereum: false,
-    slip44: 434
+    slip44: 434,
+    isHide: true
   },
   {
     accountName: 'Acala',

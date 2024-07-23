@@ -50,12 +50,10 @@ const getNetworkByGenesisHash = (ledgerChains: MigrationLedgerNetwork[], genesis
   return ledgerChains.find((network) => network.genesisHash === genesisHash);
 };
 
-const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrateLedgerChains: MigrationLedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, slugNetwork?: string | null): Ledger => {
+const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrateLedgerChains: MigrationLedgerNetwork[], isEthereumNetwork: boolean, forceMigration: boolean, originGenesisHash?: string | null): Ledger => {
   const { isLedgerCapable } = baseState;
 
   assert(isLedgerCapable, ledgerIncompatible);
-
-  console.log(chainSlug, slugNetwork);
 
   let def = getNetwork(ledgerChains, chainSlug, isEthereumNetwork);
 
@@ -69,8 +67,8 @@ const retrieveLedger = (chainSlug: string, ledgerChains: LedgerNetwork[], migrat
     if (def.isEthereum) {
       return new EVMLedger('webusb', def.slip44);
     } else {
-      if (slugNetwork) {
-        const def = getNetworkByGenesisHash(migrateLedgerChains, slugNetwork);
+      if (originGenesisHash) {
+        const def = getNetworkByGenesisHash(migrateLedgerChains, originGenesisHash);
 
         assert(def, 'There is no known Ledger app available for this chain');
 

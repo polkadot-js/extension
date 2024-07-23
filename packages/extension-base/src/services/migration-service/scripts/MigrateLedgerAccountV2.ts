@@ -16,7 +16,7 @@ export default class MigrateLedgerAccountV2 extends BaseMigrationJob {
         const store = new AccountsStore();
 
         const update = (key: string, value: KeyringJson) => {
-          if (key.startsWith('account:') && value.meta && isString(value.meta?.originGenesisHash)) {
+          if (key.startsWith('account:') && value.meta && isString(value.meta?.genesisHash)) {
             const newValue = { ...value };
 
             if (value.meta.isHardware) {
@@ -25,11 +25,11 @@ export default class MigrateLedgerAccountV2 extends BaseMigrationJob {
               if (isEther) {
                 newValue.meta.isGeneric = true;
               } else {
-                newValue.meta.isGeneric = !newValue.meta.originGenesisHash;
+                newValue.meta.isGeneric = !newValue.meta.genesisHash;
               }
             }
 
-            newValue.meta.availableGenesisHashes = [value.meta.originGenesisHash];
+            newValue.meta.availableGenesisHashes = [value.meta.genesisHash];
             store.set(key, newValue);
           }
         };

@@ -2266,13 +2266,14 @@ export default class KoniExtension {
     genesisHash,
     hardwareType,
     isAllowed,
-    name }: RequestAccountCreateHardwareV2): Promise<boolean> {
+    name,
+    originGenesisHash }: RequestAccountCreateHardwareV2): Promise<boolean> {
     const key = keyring.addHardware(address, hardwareType, {
       accountIndex,
       addressOffset,
       genesisHash,
       name,
-      originGenesisHash: genesisHash
+      originGenesisHash
     });
 
     const result = key.pair;

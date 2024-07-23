@@ -967,6 +967,7 @@ export interface RequestAccountCreateHardwareV2 {
   address: string;
   addressOffset: number;
   genesisHash: string;
+  originGenesisHash: string;
   hardwareType: string;
   name: string;
   isAllowed?: boolean;

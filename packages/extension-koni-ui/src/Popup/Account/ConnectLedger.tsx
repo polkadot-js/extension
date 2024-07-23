@@ -209,7 +209,7 @@ const Component: React.FC<Props> = (props: Props) => {
 
       const existedAccount = accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
       const disabled = !!existedAccount;
-      const accountName = chainMigrateMode && existedAccount?.name ? existedAccount.name : item.name;
+      const accountName = existedAccount?.name ? existedAccount.name : item.name;
 
       return (
         <AccountItemWithName

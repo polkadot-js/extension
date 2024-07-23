@@ -14,9 +14,15 @@ export default class Signer implements SignerInterface {
     sendRequest = _sendRequest;
   }
 
+  async delay(ms: number) {
+    return new Promise( resolve => setTimeout(resolve, ms) );
+  }
+
   public async signPayload (payload: SignerPayloadJSON): Promise<SignerResult> {
     const id = ++nextId;
     const result = await sendRequest('pub(extrinsic.sign)', payload);
+    console.log('result for payload: ', result);
+
 
     // we add an internal id (number) - should have a mapping from the
     // extension id (string) -> internal id (number) if we wish to provide
@@ -30,6 +36,7 @@ export default class Signer implements SignerInterface {
   public async signRaw (payload: SignerPayloadRaw): Promise<SignerResult> {
     const id = ++nextId;
     const result = await sendRequest('pub(bytes.sign)', payload);
+    console.log('result for raw: ', result);
 
     return {
       ...result,

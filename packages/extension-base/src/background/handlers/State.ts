@@ -344,6 +344,7 @@ export default class State {
         reject(error);
       },
       resolve: (result: ResponseSigning): void => {
+        console.log('result responseSigning: ', result);
         complete();
         resolve(result);
       }
@@ -456,6 +457,7 @@ export default class State {
   }
 
   public injectMetadata (url: string, request: MetadataDef): Promise<boolean> {
+    console.log('njectedMetadata', request)
     return new Promise((resolve, reject): void => {
       const id = getId();
 

@@ -641,6 +641,25 @@ export function getRelayBlockedValidatorList (validators: any[]) {
   return blockValidatorList;
 }
 
+export function getRelayWaitingValidatorList (validators: any[]) {
+  const waitingValidators: string[] = [];
+
+  for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (!isBlocked) {
+      waitingValidators.push(validatorAddress);
+    }
+  }
+
+  return waitingValidators;
+}
+
 export function getRelayEraRewardMap (eraRewardPointArray: Codec[], startEraForPoints: number) {
   const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
 

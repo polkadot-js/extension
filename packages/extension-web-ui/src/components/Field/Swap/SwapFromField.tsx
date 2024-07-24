@@ -87,6 +87,7 @@ const Component = (props: Props) => {
           <AmountInput
             decimals={decimals}
             defaultInvalidOutputValue={'00'}
+            isButtonClicked={isButtonClicked}
             maxValue={'0'} // support later
             onChange={onChangeInput}
             showMaxButton={false}

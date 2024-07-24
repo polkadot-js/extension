@@ -175,29 +175,6 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function getRawMetadata (genesisHash?: string | null): Promise<HexString | null> {
-  if (!genesisHash) {
-    return null;
-  }
-
-  let request = getSavedMeta(genesisHash);
-
-  if (!request) {
-    request = sendMessage('pri(metadata.get)', genesisHash || null);
-    setSavedMeta(genesisHash, request);
-  }
-
-  const def = await request;
-
-  if (def) {
-    const raw = def.rawMetadata ? def.rawMetadata : null;
-
-    return raw;
-  }
-
-  return null;
-}
-
 export async function getConnectedTabsUrl (): Promise<ConnectedTabsUrlResponse> {
   return sendMessage('pri(connectedTabsUrl.get)', null);
 }

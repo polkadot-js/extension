@@ -1,10 +1,10 @@
-    2761	AnhMTV                        	Release version 1.2.18
-    2487	Nam Phạm                      	[Issue 3365] feat: update fetching waiting validators
-    2168	S2kael                        	[Avail] Update stable version for chain-list
+    2767	AnhMTV                        	
+    2496	Nam Phạm                      	[Issue 3378] feat: update chainlist
+    2169	S2kael                        	[Issue-3378] Fix bug when displaying tip value of confirmation
      831	lw-cdm                        	
      537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     221	bluezdot                      	[Issue-279-Chainlist] Update chainlist
+     230	bluezdot                      	[Issue-3378] fix: add filter for extrinsicHash when retrive Avail OG NFTs
      185	quangdo                       	
      170	Thiendekaco                   	[Issue 3275] [fix] Extension - Handle provider validate
      137	Automation Bot                	[CI Skip] Auto increase webapp build number

@@ -154,6 +154,8 @@ export default class State {
 
   public readonly signSubject: BehaviorSubject<SigningRequest[]> = new BehaviorSubject<SigningRequest[]>([]);
 
+  public readonly authUrlSubjects: Record<string, BehaviorSubject<AuthUrlInfo>> = {};
+
   public defaultAuthAccountSelection: string[] = [];
 
   constructor (providers: Providers = {}) {
@@ -168,6 +170,11 @@ export default class State {
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
     this.#authUrls = previousAuth;
+
+    // Initialize authUrlSubjects for each URL
+    Object.entries(previousAuth).forEach(([url, authInfo]) => {
+      this.authUrlSubjects[url] = new BehaviorSubject<AuthUrlInfo>(authInfo);
+    });
 
     // retrieve previously set default auth accounts
     const storageDefaultAuthAccounts: Record<string, string> = await chrome.storage.local.get(DEFAULT_AUTH_ACCOUNTS);
@@ -215,10 +222,6 @@ export default class State {
     return this.#authUrls;
   }
 
-  private set authUrls (urls: AuthUrls) {
-    this.#authUrls = urls;
-  }
-
   private popupClose (): void {
     this.#windows.forEach((id: number) =>
       withErrorLog(() => chrome.windows.remove(id))
@@ -243,13 +246,23 @@ export default class State {
     const complete = async (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
-      this.#authUrls[this.stripUrl(url)] = {
+      const strippedUrl = this.stripUrl(url);
+
+      const authInfo: AuthUrlInfo = {
         authorizedAccounts,
         count: 0,
         id: idStr,
         origin,
         url
       };
+
+      this.#authUrls[strippedUrl] = authInfo;
+
+      if (!this.authUrlSubjects[strippedUrl]) {
+        this.authUrlSubjects[strippedUrl] = new BehaviorSubject<AuthUrlInfo>(authInfo);
+      } else {
+        this.authUrlSubjects[strippedUrl].next(authInfo);
+      }
 
       await this.saveCurrentAuthList();
       await this.updateDefaultAuthAccounts(authorizedAccounts);
@@ -271,7 +284,7 @@ export default class State {
     };
   };
 
-  public udateCurrentTabsUrl (urls: string[]) {
+  public updateCurrentTabsUrl (urls: string[]) {
     const connectedTabs = urls.map((url) => {
       let strippedUrl = '';
 
@@ -385,6 +398,11 @@ export default class State {
     delete this.#authUrls[url];
     await this.saveCurrentAuthList();
 
+    if (this.authUrlSubjects[url]) {
+      entry.authorizedAccounts = [];
+      this.authUrlSubjects[url].next(entry);
+    }
+
     return this.#authUrls;
   }
 
@@ -403,9 +421,10 @@ export default class State {
     this.updateIcon(shouldClose);
   }
 
-  public async updateAuthorizedAccounts (authorizedAccountDiff: AuthorizedAccountsDiff): Promise<void> {
-    authorizedAccountDiff.forEach(([url, authorizedAccountDiff]) => {
+  public async updateAuthorizedAccounts (authorizedAccountsDiff: AuthorizedAccountsDiff): Promise<void> {
+    authorizedAccountsDiff.forEach(([url, authorizedAccountDiff]) => {
       this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
+      this.authUrlSubjects[url].next(this.#authUrls[url]);
     });
 
     await this.saveCurrentAuthList();

@@ -529,7 +529,7 @@ export default class Extension {
   }
 
   private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
-    this.#state.udateCurrentTabsUrl(urls);
+    this.#state.updateCurrentTabsUrl(urls);
   }
 
   private getConnectedTabsUrl () {

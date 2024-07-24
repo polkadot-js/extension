@@ -106,7 +106,6 @@ export class BlobInscriptionApi extends BaseNftApi {
 
     if (attRecord) {
       for (const [name, value] of Object.entries(attRecord)) {
-        console.log(name, value);
         propertiesMap[name] = {
           value: value as string
         };

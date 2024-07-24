@@ -254,8 +254,6 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     if (rootLoading || redirectPath) {
       if (redirectPath && currentPage !== redirectPath && allowBlackScreenWS.includes(redirectPath)) {
         setStorage(redirectPath);
-        window.location.href = `index.html#${redirectPath}`;
-      } else {
         setShouldRedirect(true);
       }
     } else {

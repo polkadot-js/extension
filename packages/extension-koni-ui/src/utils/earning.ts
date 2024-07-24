@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { YieldPoolType } from '@subwallet/extension-base/types';
+import { ValidatorInfo, YieldPoolType } from '@subwallet/extension-base/types';
 import { EarningTagType } from '@subwallet/extension-koni-ui/types';
+import { shuffle } from '@subwallet/extension-koni-ui/utils';
 import { Database, HandsClapping, Leaf, User, Users } from 'phosphor-react';
 
 // todo: after supporting Astar v3, remove this
@@ -59,3 +60,42 @@ export const createEarningTypeTags = (chain: string): Record<YieldPoolType, Earn
     }
   };
 };
+
+export function autoSelectValidatorOptimally (validators: ValidatorInfo[], maxCount = 1, simple = false, preSelectValidators?: string): ValidatorInfo[] {
+  if (!validators.length) {
+    return [];
+  }
+
+  const preSelectValidatorAddresses = preSelectValidators ? preSelectValidators.split(',') : [];
+
+  const result: ValidatorInfo[] = [];
+  const notPreSelected: ValidatorInfo[] = [];
+
+  for (const v of validators) {
+    if (preSelectValidatorAddresses.includes(v.address)) {
+      result.push(v);
+    } else {
+      notPreSelected.push(v);
+    }
+  }
+
+  if (result.length >= maxCount) {
+    shuffle<ValidatorInfo>(result);
+
+    return result.slice(0, maxCount - 1);
+  }
+
+  shuffle<ValidatorInfo>(notPreSelected);
+
+  for (const v of notPreSelected) {
+    if (result.length === maxCount) {
+      break;
+    }
+
+    if (v.commission !== 100 && !v.blocked && (!simple ? v.identity && v.topQuartile : true)) {
+      result.push(v);
+    }
+  }
+
+  return result;
+}

@@ -80,9 +80,9 @@ const Component: React.FC<AccountInfoItem> = (props: AccountInfoItem) => {
                 <>
                   <Avatar
                     className={'__account-avatar'}
+                    identPrefix={addressPrefix}
                     size={24}
                     value={address}
-                    identPrefix={addressPrefix}
                   />
                   <div className={'__account-name ml-xs'}>
                     {name || toShort(address)}

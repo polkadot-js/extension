@@ -70,7 +70,7 @@ function Request ({ className, metaId, request, url }: Props): React.ReactElemen
       </Table>
       <div className='requestInfo'>
         <Warning className='requestWarning'>
-          {t('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.')}
+          {t('This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata. It will also allow the use of Ledger\'s Generic Polkadot App.')}
         </Warning>
         <Button
           className='btnAccept'

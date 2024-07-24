@@ -68,7 +68,6 @@
   "decimals": "",
   "symbol": "",
   "upgrade": "",
-  "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata.": "",
   "Yes, do this metadata update": "",
   "Reject": "",
   "Restore from JSON": "",
@@ -176,5 +175,6 @@
   "Is your ledger locked?": "",
   "App \"{{network}}\" does not seem to be open": "",
   "Ledger error: {{errorMessage}}": "",
-  "assetId": ""
+  "assetId": "",
+  "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata. It will also allow the use of Ledger's Generic Polkadot App.": ""
 }

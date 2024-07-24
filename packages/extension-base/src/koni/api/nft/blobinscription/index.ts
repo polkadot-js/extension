@@ -22,8 +22,9 @@ export class BlobInscriptionApi extends BaseNftApi {
     return {
       query: `
         query MyQuery {
-          remarks(where: {sender: {address_eq: "5CvsA5aWiDLfnxg7fdyvXzPx6tdrNp2rcqigTMKCSEZTHaWn"}}, limit: 9000) {
+          remarks(limit: 10000, where: {extrinsicHash_eq: "0xa3974497d44d0e1e5a06dc6ceb6cae48dcd9ef2a0369e89d01276830096d32d8", OR: {extrinsicHash_eq: "0x0b789bc0ebe0505700c41cec5986948530e59f444c9383b5ff5d6d3daa14cece", OR: {extrinsicHash_eq: "0x37b0aaee83e907d445f41f769731cf8f1bc17c2c211cdb47262f6ca220e9f976"}}}) {
             dataRaw
+            extrinsicHash
           }
         }
       `

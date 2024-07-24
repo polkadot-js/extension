@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
@@ -28,6 +29,7 @@ interface Props extends ThemeProps {
   payload: ConfirmationDefinitions[EvmSignatureSupportType][0];
   extrinsicType?: ExtrinsicType;
   txExpirationTime?: number;
+  errors?: TransactionError[];
 }
 
 const handleConfirm = async (type: EvmSignatureSupportType, id: string, payload: string) => {
@@ -54,7 +56,7 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, extrinsicType, id, payload, txExpirationTime, type } = props;
+  const { className, errors, extrinsicType, id, payload, txExpirationTime, type } = props;
   const { payload: { account, canSign, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
@@ -71,7 +73,7 @@ const Component: React.FC<Props> = (props: Props) => {
   const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);
   const isMessage = isEvmMessage(payload);
-
+  const isErrorTransaction = useMemo(() => errors && errors.length > 0, [errors]);
   const [loading, setLoading] = useState(false);
 
   const { error: ledgerError,
@@ -286,7 +288,7 @@ const Component: React.FC<Props> = (props: Props) => {
       >
         {t('Cancel')}
       </Button>
-      <Button
+      {!isErrorTransaction && <Button
         disabled={showQuoteExpired || !canSign}
         icon={(
           <Icon
@@ -304,9 +306,9 @@ const Component: React.FC<Props> = (props: Props) => {
               ? t('Refresh')
               : t('Approve')
         }
-      </Button>
+      </Button>}
       {
-        signMode === AccountSignMode.QR && (
+        !isErrorTransaction && signMode === AccountSignMode.QR && (
           <DisplayPayloadModal>
             <EvmQr
               address={account.address}
@@ -316,7 +318,7 @@ const Component: React.FC<Props> = (props: Props) => {
           </DisplayPayloadModal>
         )
       }
-      {signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
+      {!isErrorTransaction && signMode === AccountSignMode.QR && <ScanSignature onSignature={onApproveSignature} />}
     </div>
   );
 };

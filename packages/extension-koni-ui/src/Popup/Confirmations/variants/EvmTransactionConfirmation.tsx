@@ -30,7 +30,7 @@ const convertToBigN = (num: EvmSendTransactionRequest['value']): string | number
 };
 
 function Component ({ className, request, type }: Props) {
-  const { id, payload: { account, chainId, to } } = request;
+  const { id, payload: { account, chainId, errors, to } } = request;
   const { t } = useTranslation();
 
   const { transactionRequest } = useSelector((state: RootState) => state.requestState);
@@ -104,6 +104,7 @@ function Component ({ className, request, type }: Props) {
         </div>
       </div>
       <EvmSignArea
+        errors={errors}
         id={id}
         payload={request}
         type={type}

@@ -1228,7 +1228,8 @@ export interface EvmAppState {
   chainId?: string,
   isConnected?: boolean,
   web3?: Web3,
-  listenEvents?: string[]
+  listenEvents?: string[],
+  error?: Error;
 }
 
 export type RequestEvmProviderSend = JsonRpcPayload;
@@ -1281,6 +1282,7 @@ export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignReq
   estimateGas: string;
   parseData: EvmTransactionData;
   isToContract: boolean;
+  errors?: TransactionError[]
 }
 
 export type EvmWatchTransactionRequest = EvmSendTransactionRequest;

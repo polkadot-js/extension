@@ -164,9 +164,11 @@ export default class TransactionService {
     // Fill transaction default info
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
-    // Add Transaction
-    transactions[transaction.id] = transaction;
-    this.transactionSubject.next({ ...transactions });
+    if (!transaction.errors || transaction.errors.length === 0) {
+      // Add Transaction
+      transactions[transaction.id] = transaction;
+      this.transactionSubject.next({ ...transactions });
+    }
 
     return await this.sendTransaction(transaction);
   }
@@ -237,6 +239,7 @@ export default class TransactionService {
   }
 
   private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
+    console.log(transaction, 'transaction');
     // Send Transaction
     const emitter = await (transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction));
 
@@ -1061,6 +1064,8 @@ export default class TransactionService {
   }
 
   private async signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
+    console.log(transaction, 'transaction');
+
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,

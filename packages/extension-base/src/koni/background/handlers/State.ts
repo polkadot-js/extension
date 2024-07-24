@@ -3,6 +3,7 @@
 
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _MultiChainAsset } from '@subwallet/chain-list/types';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
+import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { withErrorLog } from '@subwallet/extension-base/background/handlers/helpers';
 import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/background/handlers/subscriptions';
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
@@ -14,6 +15,7 @@ import BuyService from '@subwallet/extension-base/services/buy-service';
 import CampaignService from '@subwallet/extension-base/services/campaign-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _PREDEFINED_SINGLE_MODES } from '@subwallet/extension-base/services/chain-service/constants';
+import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
 import { _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest } from '@subwallet/extension-base/services/chain-service/types';
 import { _getEvmChainId, _getSubstrateGenesisHash, _getTokenOnChainAssetId, _isAssetFungibleToken, _isChainEnabled, _isChainTestNet, _parseMetadataForSmartContractAsset } from '@subwallet/extension-base/services/chain-service/utils';
 import EarningService from '@subwallet/extension-base/services/earning-service/service';
@@ -51,6 +53,7 @@ import SimpleKeyring from 'eth-simple-keyring';
 import { t } from 'i18next';
 import { interfaces } from 'manta-extension-sdk';
 import { BehaviorSubject, Subject } from 'rxjs';
+import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 
 import { JsonRpcResponse, ProviderInterface, ProviderInterfaceCallback } from '@polkadot/rpc-provider/types';
@@ -1456,10 +1459,15 @@ export default class KoniState {
     return Object.fromEntries(await Promise.all(promiseList));
   }
 
-  public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
-    const evmApi = this.getEvmApi(networkKey);
-    const evmNetwork = this.getChainInfo(networkKey);
-    const web3 = evmApi.api;
+  private async validationEvmTransactionRequestMiddleware (
+    evmApi: EvmApi,
+    web3: Web3,
+    transactionParams: EvmSendTransactionParams,
+    allowedAccounts: string[],
+    networkKey: string
+  ) {
+    const errors: TransactionError[] = [];
+    let estimateGas = '';
 
     const autoFormatNumber = (val?: string | number): string | undefined => {
       if (typeof val === 'string' && val.startsWith('0x')) {
@@ -1470,10 +1478,6 @@ export default class KoniState {
 
       return val;
     };
-
-    if (transactionParams.from === transactionParams.to) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address'));
-    }
 
     const transaction: TransactionConfig = {
       from: transactionParams.from,
@@ -1486,14 +1490,25 @@ export default class KoniState {
       data: transactionParams.data
     };
 
-    if (!transactionParams.gas) {
+    if (transaction.from === transaction.to) {
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address')));
+    }
+
+    // Address is validated in before step
+    const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase())) || '';
+
+    if (!fromAddress) {
+      errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet')));
+    }
+
+    if (!transaction.gas) {
       const getTransactionGas = async () => {
         try {
           transaction.gas = await web3.eth.estimateGas({ ...transaction });
         } catch (e) {
           // @ts-ignore
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+          errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, e?.message));
         }
       };
 
@@ -1511,73 +1526,98 @@ export default class KoniState {
       } catch (e) {
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, e?.message);
+        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, e?.message));
       }
     }
 
     if (!transaction.gas) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS);
-    }
-
-    let estimateGas: string;
-
-    // TODO: Review, If not override, transaction maybe fail because fee too low
-    if (transactionParams.maxPriorityFeePerGas && transactionParams.maxFeePerGas) {
-      const maxFee = new BigN(transactionParams.maxFeePerGas);
-
-      estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
-    } else if (transactionParams.gasPrice) {
-      estimateGas = new BigN(transactionParams.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
     } else {
-      const priority = await calculateGasFeeParams(evmApi, networkKey);
-
-      if (priority.baseGasFee) {
-        transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
-        transaction.maxFeePerGas = priority.maxFeePerGas.toString();
-
-        const maxFee = priority.maxFeePerGas;
+      // TODO: Review, If not override, transaction maybe fail because fee too low
+      if (transactionParams.maxPriorityFeePerGas && transactionParams.maxFeePerGas) {
+        const maxFee = new BigN(transactionParams.maxFeePerGas);
 
         estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+      } else if (transactionParams.gasPrice) {
+        estimateGas = new BigN(transactionParams.gasPrice).multipliedBy(transaction.gas).toFixed(0);
       } else {
-        transaction.gasPrice = priority.gasPrice;
-        estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+        try {
+          const priority = await calculateGasFeeParams(evmApi, networkKey);
+
+          if (priority.baseGasFee) {
+            transaction.maxPriorityFeePerGas = priority.maxPriorityFeePerGas.toString();
+            transaction.maxFeePerGas = priority.maxFeePerGas.toString();
+
+            const maxFee = priority.maxFeePerGas;
+
+            estimateGas = maxFee.multipliedBy(transaction.gas).toFixed(0);
+          } else {
+            transaction.gasPrice = priority.gasPrice;
+            estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
+          }
+        } catch (e) {
+          errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error)?.message));
+        }
       }
-    }
 
-    // Address is validated in before step
-    const fromAddress = allowedAccounts.find((account) => (account.toLowerCase() === (transaction.from as string).toLowerCase()));
+      try {
+        // Validate balance
+        const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
-    if (!fromAddress) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
+        if (!estimateGas) {
+          errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Can\'t calculate estimate gas fee')));
+        } else if (balance.lt(new BN(estimateGas).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
+          errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, t('Insufficient balance')));
+        }
+      } catch (e) {
+        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+      }
     }
 
     const pair = keyring.getPair(fromAddress);
 
     if (!pair) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unable to find account'));
+      errors.push(new TransactionError(BasicTxErrorType.UNABLE_TO_SIGN, t('Unable to find account')));
     }
 
     const account: AccountJson = { address: pair.address, ...pair.meta };
 
-    // Validate balance
-    const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
-
-    if (balance.lt(new BN(estimateGas).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
-      throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Insufficient balance'));
+    try {
+      transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
+    } catch (e) {
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
     }
 
-    transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
+    return {
+      errors,
+      transaction,
+      account,
+      estimateGas
+    };
+  }
 
-    const hashPayload = this.transactionService.generateHashPayload(networkKey, transaction);
-    const isToContract = await isContractAddress(transaction.to || '', evmApi);
+  public async evmSendTransaction (id: string, url: string, networkKey: string, allowedAccounts: string[], transactionParams: EvmSendTransactionParams): Promise<string | undefined> {
+    const evmApi = this.getEvmApi(networkKey);
+    const evmNetwork = this.getChainInfo(networkKey);
+    const web3 = evmApi.api;
+
+    const { account, errors, estimateGas, transaction: transactionValidated } = await this.validationEvmTransactionRequestMiddleware(evmApi,
+      web3,
+      transactionParams,
+      allowedAccounts,
+      networkKey);
+
+    const hashPayload = this.transactionService.generateHashPayload(networkKey, transactionValidated);
+    const isToContract = await isContractAddress(transactionValidated.to || '', evmApi);
     const parseData = isToContract
-      ? transaction.data
-        ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
+      ? transactionValidated.data
+        ? (await parseContractInput(transactionValidated.data, transactionValidated.to || '', evmNetwork)).result
         : ''
-      : transaction.data || '';
+      : transactionValidated.data || '';
 
     const requestPayload: EvmSendTransactionRequest = {
-      ...transaction,
+      ...transactionValidated,
+      errors,
       estimateGas,
       hashPayload,
       isToContract,
@@ -1586,9 +1626,9 @@ export default class KoniState {
       canSign: true
     };
 
-    const eType = transaction.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
+    const eType = transactionValidated.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
 
-    const transactionData = { ...transaction };
+    const transactionData = { ...transactionValidated };
     const token = this.chainService.getNativeTokenInfo(networkKey);
 
     if (eType === ExtrinsicType.TRANSFER_BALANCE) {
@@ -1603,6 +1643,7 @@ export default class KoniState {
       chain: networkKey,
       url,
       data: transactionData,
+      errors,
       extrinsicType: eType,
       chainType: ChainType.EVM,
       estimateFee: {

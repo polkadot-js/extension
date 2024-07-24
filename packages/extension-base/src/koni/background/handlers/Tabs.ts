@@ -23,7 +23,7 @@ import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/
 import { canDerive, getEVMChainInfo, stripUrl } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { KeyringPair } from '@subwallet/keyring/types';
-import keyring from '@subwallet/ui-keyring';
+import { keyring } from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
 import { t } from 'i18next';
 import { Subscription } from 'rxjs';
@@ -34,7 +34,7 @@ import { JsonRpcPayload } from 'web3-core-helpers';
 import { checkIfDenied } from '@polkadot/phishing';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import { assert, isNumber } from '@polkadot/util';
+import { assert, isNumber, isString } from '@polkadot/util';
 
 interface AccountSub {
   subscription: Subscription;
@@ -132,36 +132,26 @@ export default class KoniTabs {
   }
 
   /// Clone from Polkadot.js
-  private getSigningPair (address: string): KeyringPair {
-    const pair = keyring.getPair(address);
-
-    assert(pair, t('Unable to find account'));
-
-    return pair;
-  }
-
   private async bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
-    const pair = this.getSigningPair(address);
-    const authInfo = await this.getAuthInfo(url);
+    const [errors, pair] = await this.validationAuthMiddleware(url, address);
 
-    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
-      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    if (errors.length > 0) {
+      throw errors[0];
     }
 
-    return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair.meta });
+    return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair?.meta });
   }
 
   private async extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
-    const pair = this.getSigningPair(address);
-    const authInfo = await this.getAuthInfo(url);
+    const [errors, pair] = await this.validationAuthMiddleware(url, address);
 
-    if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[pair.address]) {
-      throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+    if (errors.length > 0) {
+      throw errors[0];
     }
 
-    return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair.meta });
+    return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair?.meta });
   }
 
   private metadataProvide (url: string, request: MetadataDef): Promise<boolean> {
@@ -239,6 +229,30 @@ export default class KoniTabs {
     const result = this.#passPhishing[url];
 
     return result ? !result.pass : true;
+  }
+
+  private async validationAuthMiddleware (url: string, address?: string): Promise<[Error[], KeyringPair | undefined]> {
+    const errors: Error[] = [];
+    let keypair: KeyringPair | undefined;
+
+    if (!address || !isString(address)) {
+      errors.push(new Error(''));
+    } else {
+      try {
+        keypair = keyring.getPair(address);
+        assert(keypair, t('Unable to find account'));
+
+        const authInfo = await this.getAuthInfo(url);
+
+        if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[keypair.address]) {
+          throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
+        }
+      } catch (e) {
+        errors.push(e as Error);
+      }
+    }
+
+    return [errors, keypair];
   }
 
   protected async checkPhishing (url: string): Promise<boolean> {
@@ -376,6 +390,7 @@ export default class KoniTabs {
   private async getEvmState (url?: string): Promise<EvmAppState> {
     let currentChain: string | undefined;
     let autoActiveChain = false;
+    let error: Error | undefined;
 
     if (url) {
       const authInfo = await this.getAuthInfo(url);
@@ -420,6 +435,7 @@ export default class KoniTabs {
                 setTimeout(() => poll(resolve), 900);
               } else {
                 console.log(`Max retry, stop checking [${slug}]`);
+                error = new Error(`${slug} is disconnected`);
                 resolve(false);
               }
             }
@@ -432,7 +448,8 @@ export default class KoniTabs {
       return {
         networkKey: slug,
         chainId: `0x${(evmInfo?.evmChainId || 0).toString(16)}`,
-        web3
+        web3,
+        error
       };
     } else {
       return {};
@@ -886,20 +903,24 @@ export default class KoniTabs {
 
   public async evmSendTransaction (id: string, url: string, { params }: RequestArguments) {
     const transactionParams = (params as EvmSendTransactionParams[])[0];
-    const canUseAccount = transactionParams.from && this.canUseAccount(transactionParams.from, url);
+    const [errors, pair] = await this.validationAuthMiddleware(url, transactionParams.from);
+
+    if (!errors) {
+      throw errors[0];
+    }
+
     const evmState = await this.getEvmState(url);
     const networkKey = evmState.networkKey;
 
-    if (!canUseAccount) {
-      throw new Error(t('You have rescinded allowance for this account in wallet'));
+    if (evmState.error) {
+      throw evmState.error;
     }
 
     if (!networkKey) {
       throw new Error('Network unavailable. Please switch network or manually add network to wallet');
     }
 
-    const allowedAccounts = await this.getEvmCurrentAccount(url);
-    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, allowedAccounts, transactionParams);
+    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, [pair?.address || ''], transactionParams);
 
     if (!transactionHash) {
       throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);

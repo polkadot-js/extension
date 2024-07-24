@@ -2,36 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { COLLECT_ID } from '@subwallet/extension-base/koni/api/nft/blobinscription/consts';
+import { ALC, getNftDetail, NftResponse, RemarkData, transferPayload } from '@subwallet/extension-base/koni/api/nft/blobinscription/types';
 import { AVAIL_LIGHT_CLIENT_NFT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 
-interface NftResponse {
-  data: {
-    dataAvailabilities: NftData[]
-  }
-}
-
-const COLLECT_ID = 'ALC_NFT';
-
-interface NftData {
-  isJson: boolean,
-  id: string,
-  extrinsicHash: string,
-  dataValue: string,
-  dataRaw: string,
-  sender: {
-    address: string
-  }
-}
-
-interface ALC { // need confirm
-  p: string,
-  op: string,
-  tick: string,
-  imgUrl: string,
-  name: string,
-  traits: Record<string, any>
-}
+import { hexToString } from '@polkadot/util';
 
 export class BlobInscriptionApi extends BaseNftApi {
   endpoint = AVAIL_LIGHT_CLIENT_NFT;
@@ -40,11 +16,61 @@ export class BlobInscriptionApi extends BaseNftApi {
     super(chain, undefined, addresses);
   }
 
-  private static parseNftRequest (address: string, isJson = true) {
+  // Get all NFTs //
+
+  private static parseNftRequestRemark () {
     return {
       query: `
         query MyQuery {
-          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: ${isJson}}) {
+          remarks(where: {sender: {address_eq: "5CvsA5aWiDLfnxg7fdyvXzPx6tdrNp2rcqigTMKCSEZTHaWn"}}, limit: 9000) {
+            dataRaw
+          }
+        }
+      `
+    };
+  }
+
+  private async getAllInscriptions () {
+    const response = await fetch(this.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(BlobInscriptionApi.parseNftRequestRemark())
+    });
+
+    const result = await response.json() as RemarkData;
+
+    return result.data.remarks;
+  }
+
+  private async getNftMap () {
+    const nftMap: Record<string, string[]> = {};
+    const rawList = await this.getAllInscriptions();
+
+    rawList.forEach((item) => {
+      const jsonData = JSON.parse(hexToString(item.dataRaw)) as transferPayload;
+
+      if (nftMap[jsonData.to]) {
+        nftMap[jsonData.to].push(jsonData.tick);
+      }
+
+      nftMap[jsonData.to] = [jsonData.tick];
+    });
+
+    return nftMap;
+  }
+
+  // Get all NFTs //
+
+  // Deprecated: Old get NFTs balance //
+
+  private static parseNftRequest (address: string, isJson = true) {
+    // noted: check to handle isJson
+    return {
+      query: `
+        query MyQuery {
+          dataAvailabilities(where: {sender: {address_eq: "${address}"}, isJson_eq: ${isJson.toString()}}) {
             id
             extrinsicHash
             dataRaw
@@ -57,6 +83,21 @@ export class BlobInscriptionApi extends BaseNftApi {
         }
       `
     };
+  }
+
+  // @ts-ignore
+  private async getBalances (address: string) {
+    const response = await fetch(this.endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(BlobInscriptionApi.parseNftRequest(address))
+    });
+
+    const result = await response.json() as NftResponse;
+
+    return result?.data?.dataAvailabilities;
   }
 
   private handleProperties (data: ALC) {
@@ -75,70 +116,47 @@ export class BlobInscriptionApi extends BaseNftApi {
     return propertiesMap;
   }
 
-  private async getBalances (address: string) {
-    const response = await fetch(this.endpoint, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(BlobInscriptionApi.parseNftRequest(address))
-    });
-
-    const result = await response.json() as NftResponse;
-
-    return result?.data?.dataAvailabilities;
-  }
-
   public async handleNfts (params: HandleNftParams) {
-    try {
-      await Promise.all(this.addresses.map(async (address) => {
-        const balances = await this.getBalances(address);
+    const allInscriptionsMap = await this.getNftMap();
 
-        if (balances.length > 0) {
+    try {
+      // eslint-disable-next-line array-callback-return
+      await Promise.all(this.addresses.map((address) => {
+        const nfts = allInscriptionsMap[address];
+
+        if (nfts) {
           const collectionMap: Record <string, NftCollection> = {};
 
-          for (const nft of balances) {
-            try {
-              if (nft.isJson) {
-                const _data = JSON.parse(nft.dataValue) as ALC | number;
+          for (const nft of nfts) {
+            const nftDetail = getNftDetail(nft);
 
-                if (_data === Infinity) { // check truly json
-                  continue;
-                }
+            if (!nftDetail) {
+              continue;
+            }
 
-                const data = _data as ALC;
+            const propertiesMap = this.handleProperties(nftDetail);
 
-                if (data.op === 'create_collection') { // skip extrinsic creat collection
-                  continue;
-                }
+            const parsedNft: NftItem = {
+              id: address, // is distinct?
+              chain: this.chain,
+              owner: address,
+              name: nftDetail.name,
+              image: nftDetail.imgUrl,
+              collectionId: nftDetail.tick,
+              properties: propertiesMap
+            };
 
-                const propertiesMap = this.handleProperties(data);
+            params.updateItem(this.chain, parsedNft, address);
 
-                const parsedNft: NftItem = {
-                  id: nft.id, // is distinct?
-                  chain: this.chain,
-                  owner: address, // is submitter = owner? '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
-                  name: data.tick,
-                  image: data.imgUrl, // recheck
-                  collectionId: COLLECT_ID,
-                  properties: propertiesMap
-                };
+            if (!collectionMap[nftDetail.tick]) {
+              const parsedCollection: NftCollection = {
+                collectionId: nftDetail.tick,
+                chain: this.chain,
+                collectionName: COLLECT_ID
+              };
 
-                params.updateItem(this.chain, parsedNft, address); // '5Hawkn8oUeSTB3LesTh5nGjfnpor2ZWBArdQ64d6BxgD5Pgm'
-
-                if (!collectionMap[COLLECT_ID]) {
-                  const parsedCollection: NftCollection = {
-                    collectionId: COLLECT_ID,
-                    chain: this.chain,
-                    collectionName: COLLECT_ID
-                  };
-
-                  collectionMap[COLLECT_ID] = parsedCollection;
-                  params.updateCollection(this.chain, parsedCollection);
-                }
-              }
-            } catch (e) {
-              console.error(`Failed to fetch blob inscription ${nft.dataValue}`, e);
+              collectionMap[nftDetail.tick] = parsedCollection;
+              params.updateCollection(this.chain, parsedCollection);
             }
           }
         }

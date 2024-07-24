@@ -108,5 +108,7 @@ export default function nftParamsHandler (nftItem: NftItem, chain: string) {
     }
   }
 
-  return {};
+  return {
+    networkKey: nftItem.chain
+  };
 }

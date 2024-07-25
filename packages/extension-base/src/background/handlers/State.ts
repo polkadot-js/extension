@@ -284,6 +284,13 @@ export default class State {
     };
   };
 
+  /**
+ * @deprecated This method is deprecated in favor of {@link updateCurrentTabs} and will be removed in a future release.
+ */
+  public udateCurrentTabsUrl (urls: string[]) {
+    this.updateCurrentTabsUrl(urls)
+  }
+
   public updateCurrentTabsUrl (urls: string[]) {
     const connectedTabs = urls.map((url) => {
       let strippedUrl = '';

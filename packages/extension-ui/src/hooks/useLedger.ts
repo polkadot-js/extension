@@ -6,6 +6,7 @@
 /* eslint-disable deprecation/deprecation */
 
 import type { Network } from '@polkadot/networks/types';
+import type { HexString } from '@polkadot/util/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -13,8 +14,8 @@ import { LedgerGeneric } from '@polkadot/hw-ledger';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
+import chains from '../../../extension-ui/src/util/chains';
 import ledgerChains from '../util/legerChains.js';
-import useMetadata from './useMetadata.js';
 import useTranslation from './useTranslation.js';
 
 interface StateBase {
@@ -70,7 +71,6 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
-  const chainInfo = useMetadata(genesis);
   const { t } = useTranslation();
   const ledger = useMemo(() => {
     setError(null);
@@ -106,9 +106,15 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    assert(chainInfo, 'To use Ledger\'s Polkadot Generic App, the metadata must be present in the extension.');
+    // This is used with a genesisHash only when importing the Ledger account
+    // and when signing with Ledger. In both cases, the genesisHash is known and
+    // will be in this array.
+    const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
 
-    ledger.getAddress(chainInfo.ss58Format, false, accountIndex, addressOffset)
+    // Just in case, but this shouldn't be triggered
+    assert(chosenNetwork, 'This network is not available, please report an issue to update the known chains');
+
+    ledger.getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

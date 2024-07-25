@@ -9,7 +9,7 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { objectSpread, u8aToHex } from '@polkadot/util';
+import { assert, objectSpread, u8aToHex } from '@polkadot/util';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
 import { Button, Warning } from '../../components/index.js';
@@ -28,7 +28,10 @@ interface Props {
 }
 
 function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
-  const m = chain.definition.rawMetadata || '0x00';
+  const m = chain.definition.rawMetadata;
+
+  assert(m, 'To sign with Ledger\'s Polkadot Generic App, the metadata must be present in the extension.');
+
   const merkleizedMetadata = merkleizeMetadata(m, {
     base58Prefix: chain.ss58Format,
     decimals: chain.tokenDecimals,

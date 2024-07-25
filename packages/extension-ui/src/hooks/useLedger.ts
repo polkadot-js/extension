@@ -106,7 +106,9 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    ledger.getAddress(chainInfo?.ss58Format || 0, false, accountIndex, addressOffset)
+    assert(chainInfo, 'To use Ledger\'s Polkadot Generic App, the metadata must be present in the extension.');
+
+    ledger.getAddress(chainInfo.ss58Format, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

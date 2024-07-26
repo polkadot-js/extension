@@ -52,14 +52,14 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
 function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
   const chain = useMetadata(genesisHash);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
 
   useEffect(() => {
     if (ledgerError) {
       setError(ledgerError);
     }
-  }, [ledgerError, setError]);
+  }, [chain, ledgerError, setError]);
 
   const _onRefresh = useCallback(() => {
     refresh();
@@ -70,6 +70,10 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
     (): void => {
       if (!ledger || !payload || !onSignature || !chain) {
         return;
+      }
+
+      if (!chain?.definition.rawMetadata) {
+        setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
       }
 
       const { raw, txMetadata } = getMetadataProof(chain, payload);

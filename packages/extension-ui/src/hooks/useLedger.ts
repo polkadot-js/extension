@@ -11,6 +11,7 @@ import type { HexString } from '@polkadot/util/types';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { LedgerGeneric } from '@polkadot/hw-ledger';
+import { knownLedger } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
@@ -59,7 +60,9 @@ function retrieveLedger (genesis: string): LedgerGeneric {
 
   assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
 
-  ledger = new LedgerGeneric('webusb', def.network, def.slip44);
+  // All chains use the `slip44` from polkadot in their derivation path in ledger.
+  // This interface is specific to the underlying PolkadotGenericApp.
+  ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
 
   return ledger;
 }
@@ -72,6 +75,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const { t } = useTranslation();
+
   const ledger = useMemo(() => {
     setError(null);
     setIsLocked(false);
@@ -112,7 +116,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
 
     // Just in case, but this shouldn't be triggered
-    assert(chosenNetwork, 'This network is not available, please report an issue to update the known chains');
+    assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
 
     ledger.getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
       .then((res) => {

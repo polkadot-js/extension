@@ -209,11 +209,10 @@ const Component: React.FC<Props> = (props: Props) => {
 
       const existedAccount = accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
       const disabled = !!existedAccount;
-      const accountName = existedAccount?.name ? existedAccount.name : item.name;
 
       return (
         <AccountItemWithName
-          accountName={accountName}
+          accountName={item.name}
           address={chainMigrateMode ? originAddress : item.address}
           className={CN({ disabled: disabled })}
           direction='vertical'
@@ -316,9 +315,9 @@ const Component: React.FC<Props> = (props: Props) => {
                 </div>
                 <ChainSelector
                   items={networks}
-                  label={t('Select Ledger App')}
+                  label={t('Select Ledger app')}
                   onChange={onChainChange}
-                  placeholder={t('Select Ledger App')}
+                  placeholder={t('Select Ledger app')}
                   value={chain}
                 />
                 {

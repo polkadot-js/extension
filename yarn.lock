@@ -645,12 +645,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@paraspell/xcm-analyser@npm:^1.3.0":
-  version: 1.3.0
-  resolution: "@paraspell/xcm-analyser@npm:1.3.0"
+"@paraspell/xcm-analyser@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "@paraspell/xcm-analyser@npm:1.3.1"
   dependencies:
     zod: "npm:^3.22.4"
-  checksum: 10/c0229a3e99c923e6ef5642a0148c1549a818813b2135c85a3ca0e46f42dff45124edcde1bc35a504752d13f1f92c1612adf7c4145d62648213035ca4e599acf4
+  checksum: 10/f0b4a9049cdfb627e9263f8ebda2c4c17b747079ccde25d5b3856ecca6f805ba16ebd672256cd176eecc879525e01ba98cee6db0ac97b391b66bab353eb30cf0
   languageName: node
   linkType: hard
 
@@ -995,7 +995,7 @@ __metadata:
     "@fortawesome/free-regular-svg-icons": "npm:^6.5.1"
     "@fortawesome/free-solid-svg-icons": "npm:^6.5.1"
     "@fortawesome/react-fontawesome": "npm:^0.2.0"
-    "@paraspell/xcm-analyser": "npm:^1.3.0"
+    "@paraspell/xcm-analyser": "npm:^1.3.1"
     "@polkadot/api": "npm:^12.2.1"
     "@polkadot/dev-test": "npm:^0.79.3"
     "@polkadot/extension-base": "npm:0.49.3"

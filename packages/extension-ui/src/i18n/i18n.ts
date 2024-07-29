@@ -29,8 +29,8 @@ i18next
     console.log('i18n: failure', error)
   );
 
-settings.on('change', (uiSettings): void => {
-  i18next.changeLanguage(uiSettings.i18nLang
+settings.on('change', (settings): void => {
+  i18next.changeLanguage(settings.i18nLang
   ).catch(console.error);
 });
 

@@ -107,9 +107,9 @@ export default function Popup (): React.ReactElement {
       subscribeSigningRequests(setSignRequests)
     ]).catch(console.error);
 
-    settings.on('change', (uiSettings): void => {
-      setSettingsCtx(uiSettings);
-      setCameraOn(uiSettings.camera === 'on');
+    settings.on('change', (settings): void => {
+      setSettingsCtx(settings);
+      setCameraOn(settings.camera === 'on');
     });
 
     _onAction();

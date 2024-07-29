@@ -9,6 +9,7 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import settings from '@polkadot/ui-settings';
 import { assert, objectSpread, u8aToHex } from '@polkadot/util';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
@@ -119,6 +120,11 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           {error}
         </Warning>
       )}
+      {
+        <Warning>
+          {`You are using the Ledger ${settings.ledgerApp.toUpperCase()} App. If you would like to switch it, please go to "MANAGE LEDGER APP" in the extension's settings.`}
+        </Warning>
+      }
       {(ledgerLocked || error)
         ? (
           <Button

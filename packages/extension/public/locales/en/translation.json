@@ -178,5 +178,6 @@
   "assetId": "",
   "This approval will add the metadata to your extension instance, allowing future requests to be decoded using this metadata. It will also allow the use of Ledger's Generic Polkadot App.": "",
   "No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.": "",
-  "This network is not available, please report an issue to update the known chains": ""
+  "This network is not available, please report an issue to update the known chains": "",
+  "Ledger App": ""
 }

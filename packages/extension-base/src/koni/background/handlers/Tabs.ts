@@ -138,7 +138,7 @@ export default class KoniTabs {
       payloadAfterValidated: request
     };
 
-    const { pair } = await validationAuthMiddleware.bind(this.#koniState)(url, payloadValidate);
+    const { pair } = await validationAuthMiddleware(this.#koniState, url, payloadValidate);
 
     return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair?.meta });
   }
@@ -151,7 +151,7 @@ export default class KoniTabs {
       payloadAfterValidated: request
     };
 
-    const { pair } = await validationAuthMiddleware.bind(this.#koniState)(url, payloadValidate);
+    const { pair } = await validationAuthMiddleware(this.#koniState, url, payloadValidate);
 
     return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair?.meta });
   }

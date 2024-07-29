@@ -239,7 +239,6 @@ export default class TransactionService {
   }
 
   private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
-    console.log(transaction, 'transaction');
     // Send Transaction
     const emitter = await (transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction));
 
@@ -879,11 +878,11 @@ export default class TransactionService {
     if (!payload.nonce) {
       const evmApi = this.state.chainService.getEvmApi(chain);
 
-      payload.nonce = await evmApi.api.eth.getTransactionCount(address);
+      payload.nonce = await evmApi?.api.eth.getTransactionCount(address);
     }
 
     if (!payload.chainId) {
-      payload.chainId = chainInfo.evmInfo?.evmChainId ?? 1;
+      payload.chainId = chainInfo?.evmInfo?.evmChainId ?? 1;
     }
 
     // Autofill from
@@ -894,8 +893,10 @@ export default class TransactionService {
     const isExternal = !!account.isExternal;
     const isInjected = !!account.isInjected;
 
-    // generate hashPayload for EVM transaction
-    payload.hashPayload = this.generateHashPayload(chain, payload);
+    if (!payload.errors || payload.errors.length === 0) {
+      // generate hashPayload for EVM transaction
+      payload.hashPayload = this.generateHashPayload(chain, payload);
+    }
 
     const emitter = new EventEmitter<TransactionEventMap>();
 
@@ -1064,8 +1065,6 @@ export default class TransactionService {
   }
 
   private async signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
-    console.log(transaction, 'transaction');
-
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,

@@ -42,7 +42,7 @@ function Component ({ className, request, type }: Props) {
           className='account-item'
           isSelected={true}
         />
-        <div>
+        {(!errors || errors.length === 0) && <div>
           <Button
             icon={<ViewDetailIcon />}
             onClick={onClickDetail}
@@ -52,6 +52,7 @@ function Component ({ className, request, type }: Props) {
             {t('View details')}
           </Button>
         </div>
+        }
       </div>
       <EvmSignArea
         id={id}

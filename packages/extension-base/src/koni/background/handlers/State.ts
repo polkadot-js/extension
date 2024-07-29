@@ -1358,7 +1358,7 @@ export default class KoniState {
         validationEvmSignMessageMiddleware
       ];
 
-    const result = await generateValidationProcess.bind(this)(url, payloadValidation, validationSteps, topic);
+    const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const payloadAfterValidated: EvmSignatureRequest = {
       ...result.payloadAfterValidated as EvmSignatureRequest,
       errors: result.errors,
@@ -1433,13 +1433,13 @@ export default class KoniState {
         validationEvmDataTransactionMiddleware
       ];
 
-    const result = await generateValidationProcess.bind(this)(url, payloadValidation, validationSteps, topic);
+    const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const { errors, networkKey: networkKey_ } = result;
     const { account, estimateGas, transaction: transactionValidated } = result.payloadAfterValidated as TransactionValidate;
     const networkKey = networkKey_ || '';
     const evmApi = this.getEvmApi(networkKey);
     const evmNetwork = this.getChainInfo(networkKey);
-    const hashPayload = this.transactionService.generateHashPayload(networkKey, transactionValidated);
+    const hashPayload = result.errors && result.errors.length > 0 ? '' : this.transactionService.generateHashPayload(networkKey, transactionValidated);
     const isToContract = await isContractAddress(transactionValidated.to || '', evmApi);
     const parseData = isToContract
       ? transactionValidated.data

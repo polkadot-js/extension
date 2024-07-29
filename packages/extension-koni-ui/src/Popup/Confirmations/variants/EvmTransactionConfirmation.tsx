@@ -92,7 +92,7 @@ function Component ({ className, request, type }: Props) {
             type='warning'
           />
         )}
-        <div>
+        {(!errors || errors.length === 0) && <div>
           <Button
             icon={<ViewDetailIcon />}
             onClick={onClickDetail}
@@ -102,6 +102,7 @@ function Component ({ className, request, type }: Props) {
             {t('View details')}
           </Button>
         </div>
+        }
       </div>
       <EvmSignArea
         errors={errors}

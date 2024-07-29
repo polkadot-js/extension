@@ -13,6 +13,7 @@ import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesS
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
+import { PayloadValidated, validationAuthMiddleware } from '@subwallet/extension-base/core/logic-validation';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -22,10 +23,7 @@ import { AuthUrls } from '@subwallet/extension-base/services/request-service/typ
 import { DEFAULT_CHAIN_PATROL_ENABLE } from '@subwallet/extension-base/services/setting-service/constants';
 import { canDerive, getEVMChainInfo, stripUrl } from '@subwallet/extension-base/utils';
 import { InjectedMetadataKnown, MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
-import { KeyringPair } from '@subwallet/keyring/types';
-import { keyring } from '@subwallet/ui-keyring';
 import { SingleAddress, SubjectInfo } from '@subwallet/ui-keyring/observable/types';
-import { t } from 'i18next';
 import { Subscription } from 'rxjs';
 import Web3 from 'web3';
 import { HttpProvider, RequestArguments, WebsocketProvider } from 'web3-core';
@@ -34,7 +32,7 @@ import { JsonRpcPayload } from 'web3-core-helpers';
 import { checkIfDenied } from '@polkadot/phishing';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
-import { assert, isNumber, isString } from '@polkadot/util';
+import { isNumber } from '@polkadot/util';
 
 interface AccountSub {
   subscription: Subscription;
@@ -134,22 +132,26 @@ export default class KoniTabs {
   /// Clone from Polkadot.js
   private async bytesSign (url: string, request: SignerPayloadRaw): Promise<ResponseSigning> {
     const address = request.address;
-    const [errors, pair] = await this.validationAuthMiddleware(url, address);
+    const payloadValidate: PayloadValidated = {
+      address,
+      errors: [],
+      payloadAfterValidated: request
+    };
 
-    if (errors.length > 0) {
-      throw errors[0];
-    }
+    const { pair } = await validationAuthMiddleware.bind(this.#koniState)(url, payloadValidate);
 
     return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair?.meta });
   }
 
   private async extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
     const address = request.address;
-    const [errors, pair] = await this.validationAuthMiddleware(url, address);
+    const payloadValidate: PayloadValidated = {
+      address,
+      errors: [],
+      payloadAfterValidated: request
+    };
 
-    if (errors.length > 0) {
-      throw errors[0];
-    }
+    const { pair } = await validationAuthMiddleware.bind(this.#koniState)(url, payloadValidate);
 
     return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair?.meta });
   }
@@ -229,30 +231,6 @@ export default class KoniTabs {
     const result = this.#passPhishing[url];
 
     return result ? !result.pass : true;
-  }
-
-  private async validationAuthMiddleware (url: string, address?: string): Promise<[Error[], KeyringPair | undefined]> {
-    const errors: Error[] = [];
-    let keypair: KeyringPair | undefined;
-
-    if (!address || !isString(address)) {
-      errors.push(new Error(''));
-    } else {
-      try {
-        keypair = keyring.getPair(address);
-        assert(keypair, t('Unable to find account'));
-
-        const authInfo = await this.getAuthInfo(url);
-
-        if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[keypair.address]) {
-          throw new Error('Account {{address}} not in allowed list'.replace('{{address}}', address));
-        }
-      } catch (e) {
-        errors.push(e as Error);
-      }
-    }
-
-    return [errors, keypair];
   }
 
   protected async checkPhishing (url: string): Promise<boolean> {
@@ -390,7 +368,6 @@ export default class KoniTabs {
   private async getEvmState (url?: string): Promise<EvmAppState> {
     let currentChain: string | undefined;
     let autoActiveChain = false;
-    let error: Error | undefined;
 
     if (url) {
       const authInfo = await this.getAuthInfo(url);
@@ -435,7 +412,6 @@ export default class KoniTabs {
                 setTimeout(() => poll(resolve), 900);
               } else {
                 console.log(`Max retry, stop checking [${slug}]`);
-                error = new Error(`${slug} is disconnected`);
                 resolve(false);
               }
             }
@@ -448,8 +424,7 @@ export default class KoniTabs {
       return {
         networkKey: slug,
         chainId: `0x${(evmInfo?.evmChainId || 0).toString(16)}`,
-        web3,
-        error
+        web3
       };
     } else {
       return {};
@@ -891,8 +866,7 @@ export default class KoniTabs {
   }
 
   private async evmSign (id: string, url: string, { method, params }: RequestArguments) {
-    const allowedAccounts = (await this.getEvmCurrentAccount(url));
-    const signResult = await this.#koniState.evmSign(id, url, method, params, allowedAccounts);
+    const signResult = await this.#koniState.evmSign(id, url, method, params);
 
     if (signResult) {
       return signResult;
@@ -903,24 +877,8 @@ export default class KoniTabs {
 
   public async evmSendTransaction (id: string, url: string, { params }: RequestArguments) {
     const transactionParams = (params as EvmSendTransactionParams[])[0];
-    const [errors, pair] = await this.validationAuthMiddleware(url, transactionParams.from);
 
-    if (!errors) {
-      throw errors[0];
-    }
-
-    const evmState = await this.getEvmState(url);
-    const networkKey = evmState.networkKey;
-
-    if (evmState.error) {
-      throw evmState.error;
-    }
-
-    if (!networkKey) {
-      throw new Error('Network unavailable. Please switch network or manually add network to wallet');
-    }
-
-    const transactionHash = await this.#koniState.evmSendTransaction(id, url, networkKey, [pair?.address || ''], transactionParams);
+    const transactionHash = await this.#koniState.evmSendTransaction(id, url, transactionParams);
 
     if (!transactionHash) {
       throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);

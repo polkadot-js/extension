@@ -84,7 +84,7 @@ function Component ({ className, request, type }: Props) {
                 value={request.payload.estimateGas || '0'}
               />}
         </MetaInfo>
-        {!!transaction.estimateFee?.tooHigh && (
+        {!!transaction?.estimateFee?.tooHigh && (
           <AlertBox
             className='network-box'
             description={t('Gas fees on {{networkName}} are high due to high demands, so gas estimates are less accurate.', { replace: { networkName: chainInfo?.name } })}

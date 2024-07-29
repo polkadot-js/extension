@@ -1228,8 +1228,7 @@ export interface EvmAppState {
   chainId?: string,
   isConnected?: boolean,
   web3?: Web3,
-  listenEvents?: string[],
-  error?: Error;
+  listenEvents?: string[]
 }
 
 export type RequestEvmProviderSend = JsonRpcPayload;

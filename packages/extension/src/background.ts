@@ -15,6 +15,7 @@ import { AccountsStore } from '@polkadot/extension-base/stores';
 import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { runHeartbeat, startHeartbeat } from './heartbeat';
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
@@ -76,6 +77,27 @@ chrome.tabs.onActivated.addListener(() => {
 chrome.tabs.onRemoved.addListener(() => {
   getActiveTabs();
 });
+
+// add heartbeat using alarms to prevent the service worker from being killed as
+// much as possible.
+chrome.alarms.onAlarm.addListener(async () => {
+  await runHeartbeat()
+});
+
+chrome.runtime.onInstalled.addListener(({ reason }) => {
+  if (
+    reason !== chrome.runtime.OnInstalledReason.INSTALL &&
+    reason !== chrome.runtime.OnInstalledReason.UPDATE
+  ) {
+    return;
+  }
+
+  chrome.alarms.create('heartbeat', {
+    periodInMinutes: 0.5
+  });
+});
+
+startHeartbeat();
 
 // initial setup
 cryptoWaitReady()

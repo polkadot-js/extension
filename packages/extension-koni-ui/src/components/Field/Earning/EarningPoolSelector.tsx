@@ -1,9 +1,9 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PREDEFINED_EARNING_POOL } from '@subwallet/extension-base/constants';
 import { getValidatorLabel } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { YieldPoolType } from '@subwallet/extension-base/types';
+import { fetchStaticData } from '@subwallet/extension-base/utils';
 import { StakingPoolItem } from '@subwallet/extension-koni-ui/components';
 import EmptyValidator from '@subwallet/extension-koni-ui/components/Account/EmptyValidator';
 import { Avatar } from '@subwallet/extension-koni-ui/components/Avatar';
@@ -51,8 +51,6 @@ interface FilterOption {
 const SORTING_MODAL_ID = 'pool-sorting-modal';
 const FILTER_MODAL_ID = 'pool-filter-modal';
 
-const defaultPoolMap = Object.assign({}, PREDEFINED_EARNING_POOL);
-
 const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { chain, className = '', defaultValue, disabled,
     from,
@@ -78,6 +76,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { compound } = useYieldPositionDetail(slug, from);
   const { poolInfoMap } = useSelector((state) => state.earning);
+  const [defaultPoolMap, setDefaultPoolMap] = useState<Record<string, number[]>>({});
 
   const maxPoolMembersValue = useMemo(() => {
     const poolInfo = poolInfoMap[slug];
@@ -130,7 +129,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     return compound?.nominations.map((item) => item.validatorAddress) || [];
   }, [compound?.nominations]);
 
-  const defaultSelectPool = defaultPoolMap[chain];
+  const defaultSelectPool = defaultPoolMap?.[chain];
 
   const resultList = useMemo((): NominationPoolDataType[] => {
     const recommendedSessionHeader: NominationPoolDataType = { address: '', bondedAmount: '', decimals: 0, id: -1, idStr: '-1', isProfitable: false, memberCounter: 0, roles: { bouncer: '', depositor: '', nominator: '', root: '' }, state: 'Open', symbol: '', name: 'Recommended', isSessionHeader: true, disabled: true };
@@ -160,9 +159,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
           default:
             if (sortSelection === SortKey.DEFAULT) {
-              if (PREDEFINED_EARNING_POOL[chain] && PREDEFINED_EARNING_POOL[chain].length) {
-                const isRecommendedA = PREDEFINED_EARNING_POOL[chain].includes(a.id);
-                const isRecommendedB = PREDEFINED_EARNING_POOL[chain].includes(b.id);
+              if (defaultPoolMap?.[chain] && defaultPoolMap?.[chain].length) {
+                const isRecommendedA = defaultPoolMap?.[chain].includes(a.id);
+                const isRecommendedB = defaultPoolMap?.[chain].includes(b.id);
 
                 if (isRecommendedA && !isRecommendedB) {
                   return -1;
@@ -184,7 +183,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         }
       })
       .map((item) => {
-        if (PREDEFINED_EARNING_POOL[chain] && PREDEFINED_EARNING_POOL[chain].includes(item.id)) {
+        if (defaultPoolMap?.[chain] && defaultPoolMap?.[chain].includes(item.id)) {
           return { ...item, isRecommend: true };
         }
 
@@ -203,7 +202,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     } else {
       return [];
     }
-  }, [chain, items, selectedFilters, sortSelection]);
+  }, [chain, defaultPoolMap, items, selectedFilters, sortSelection]);
 
   const isDisabled = useMemo(() =>
     disabled ||
@@ -320,7 +319,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [chain, items.length, setForceFetchValidator, t]);
 
   const renderSelected = useCallback((item: NominationPoolDataType) => {
-    const isCheckRecommend = PREDEFINED_EARNING_POOL[chain]?.includes(item.id);
+    const isCheckRecommend = defaultPoolMap?.[chain]?.includes(item.id);
 
     return (
       <div className={'__selected-item'}>
@@ -338,7 +337,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         </div>
       </div>
     );
-  }, [chain]);
+  }, [chain, defaultPoolMap]);
 
   const onChangeSortOpt = useCallback((value: string) => {
     setSortSelection(value as SortKey);
@@ -355,6 +354,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   const onCloseDetail = useCallback(() => {
     inactiveModal(EarningPoolDetailModalId);
   }, [inactiveModal]);
+
+  useEffect(() => {
+    fetchStaticData<Record<string, number[]>>('nomination-pool-recommendation').then((earningPoolRecommendation) => {
+      setDefaultPoolMap(earningPoolRecommendation);
+    }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const defaultSelectedPool = defaultValue || nominationPoolValueList[0] || `${defaultSelectPool?.[0] || ''}`;

@@ -9,6 +9,7 @@ import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
+import settings from '@polkadot/ui-settings';
 import { assert, objectSpread, u8aToHex } from '@polkadot/util';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
@@ -27,7 +28,7 @@ interface Props {
   setError: (value: string | null) => void;
 }
 
-function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
+function getMetadataProof(chain: Chain, payload: SignerPayloadJSON) {
   const m = chain.definition.rawMetadata;
 
   assert(m, 'To sign with Ledger\'s Polkadot Generic App, the metadata must be present in the extension.');
@@ -49,7 +50,7 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
+function LedgerSign({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
@@ -119,6 +120,11 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           {error}
         </Warning>
       )}
+      {
+        <Warning>
+          {`You are using the Ledger ${settings.ledgerApp.toUpperCase()} App. If you would like to switch it, please go to "MANAGE LEDGER APP" in the extension's settings.`}
+        </Warning>
+      }
       {(ledgerLocked || error)
         ? (
           <Button
@@ -130,12 +136,12 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           </Button>
         )
         : (
-          <Button
-            isBusy={isBusy || ledgerLoading}
-            onClick={_onSignLedger}
-          >
-            {t('Sign on Ledger')}
-          </Button>
+            <Button
+              isBusy={isBusy || ledgerLoading}
+              onClick={_onSignLedger}
+            >
+              {t('Sign on Ledger')}
+            </Button>
         )
       }
     </div>

@@ -50,6 +50,8 @@ function getState (): StateBase {
 function retrieveLedger (genesis: string): LedgerGeneric {
   let ledger: LedgerGeneric | null = null;
 
+  const currApp = settings.get().ledgerApp;
+
   const { isLedgerCapable } = getState();
 
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
@@ -63,6 +65,17 @@ function retrieveLedger (genesis: string): LedgerGeneric {
   // All chains use the `slip44` from polkadot in their derivation path in ledger.
   // This interface is specific to the underlying PolkadotGenericApp.
   ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+
+  if (currApp === 'generic') {
+    // All chains use the `slip44` from polkadot in their derivation path in ledger.
+    // This interface is specific to the underlying PolkadotGenericApp.
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+  } else if (currApp === 'migration') {
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger[def.network]);
+  } else {
+    // This will never get touched since it will always hit the above two. This satisfies the compiler.
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+  }
 
   return ledger;
 }

@@ -3,6 +3,7 @@
 
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useGetChainInfoByChainId, useLedger, useNotification } from '@subwallet/extension-koni-ui/hooks';
@@ -275,6 +276,17 @@ const Component: React.FC<Props> = (props: Props) => {
 
   return (
     <div className={CN(className, 'confirmation-footer')}>
+      {
+        isErrorTransaction && errors && (
+          <AlertBox
+            className={CN(className, 'alert-box')}
+            description={errors[0].message}
+            title={'Error'}
+            type={'error'}
+          />
+        )
+      }
+
       <Button
         disabled={loading}
         icon={(

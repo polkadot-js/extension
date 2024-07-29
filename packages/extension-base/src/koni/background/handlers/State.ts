@@ -1361,6 +1361,7 @@ export default class KoniState {
     const result = await generateValidationProcess.bind(this)(url, payloadValidation, validationSteps, topic);
     const payloadAfterValidated: EvmSignatureRequest = {
       ...result.payloadAfterValidated as EvmSignatureRequest,
+      errors: result.errors,
       id
     };
 

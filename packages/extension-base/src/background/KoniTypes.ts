@@ -1275,6 +1275,7 @@ export interface EvmSignatureRequest extends EvmSignRequest {
   id: string;
   type: string;
   payload: unknown;
+  errors?: Error[]
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {

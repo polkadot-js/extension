@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
 function Component ({ className, request, type }: Props) {
   const { id, payload } = request;
   const { t } = useTranslation();
-  const { account } = payload;
+  const { account, errors } = payload;
 
   const onClickDetail = useOpenDetailModal();
 
@@ -58,11 +58,11 @@ function Component ({ className, request, type }: Props) {
         payload={request}
         type={type}
       />
-      <BaseDetailModal
+      {(!errors || errors.length === 0) && <BaseDetailModal
         title={t('Message details')}
       >
         <EvmMessageDetail payload={request.payload} />
-      </BaseDetailModal>
+      </BaseDetailModal>}
     </>
   );
 }

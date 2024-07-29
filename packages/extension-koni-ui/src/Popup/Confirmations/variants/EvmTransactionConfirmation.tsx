@@ -109,14 +109,16 @@ function Component ({ className, request, type }: Props) {
         payload={request}
         type={type}
       />
-      <BaseDetailModal
-        title={t('Transaction details')}
-      >
-        <EvmTransactionDetail
-          account={account}
-          request={request.payload}
-        />
-      </BaseDetailModal>
+      {(!errors || errors.length === 0) &&
+        <BaseDetailModal
+          title={t('Transaction details')}
+        >
+          <EvmTransactionDetail
+            account={account}
+            request={request.payload}
+          />
+        </BaseDetailModal>
+      }
     </>
   );
 }

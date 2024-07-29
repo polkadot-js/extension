@@ -1269,5 +1269,8 @@
   "Search pool": "",
   "Your staked funds will be locked": "",
   "{{type}} process on {{shortName}} :": "",
-  "Wrong device. Connect your previously used Ledger and try again": ""
+  "Wrong device. Connect your previously used Ledger and try again": "",
+  "Add network to connect": "",
+  " The network you're connecting to is not yet supported on SubWallet. Add the network first, then connect with WalletConnect again.": "",
+  "{{number}} networks supported": ""
 }

@@ -138,7 +138,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
       const minPoolJoin = _minPoolJoin?.toString() || undefined;
-      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, true);
+      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, new BigN(inflation), true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[this.chain] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
 
@@ -305,7 +305,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     const unsub = await substrateApi.api.query?.nominationPools?.poolMembers.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -352,7 +352,7 @@ export default class NominationPoolHandler extends BasePoolHandler {
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 

@@ -190,18 +190,17 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, inflation: BigNumber, isCompound?: boolean) {
   const DAYS_PER_YEAR = 365;
-  // @ts-ignore
-  const DECIMAL = chainInfo.substrateInfo.decimals;
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
-  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
-  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** decimals));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** decimals));
   const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
 
   const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
 
-  let inflationToStakers: BigNumber = new BigNumber(0);
+  let inflationToStakers: BigNumber;
 
   if (!isCompound) {
     inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
@@ -211,7 +210,7 @@ export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuan
     inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
   }
 
-  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+  const averageRewardRate = (['avail_mainnet'].includes(chainInfo.slug) ? inflation : inflationToStakers).dividedBy(supplyStaked);
 
   return averageRewardRate.toNumber();
 }
@@ -639,6 +638,25 @@ export function getRelayBlockedValidatorList (validators: any[]) {
   }
 
   return blockValidatorList;
+}
+
+export function getRelayWaitingValidatorList (validators: any[]) {
+  const waitingValidators: string[] = [];
+
+  for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (!isBlocked) {
+      waitingValidators.push(validatorAddress);
+    }
+  }
+
+  return waitingValidators;
 }
 
 export function getRelayEraRewardMap (eraRewardPointArray: Codec[], startEraForPoints: number) {

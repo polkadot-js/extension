@@ -28,7 +28,7 @@ interface Props {
   setError: (value: string | null) => void;
 }
 
-function getMetadataProof(chain: Chain, payload: SignerPayloadJSON) {
+function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   const m = chain.definition.rawMetadata;
 
   assert(m, 'To sign with Ledger\'s Polkadot Generic App, the metadata must be present in the extension.');
@@ -50,7 +50,7 @@ function getMetadataProof(chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
-function LedgerSign({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payload, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
@@ -136,12 +136,12 @@ function LedgerSign({ accountIndex, addressOffset, className, error, genesisHash
           </Button>
         )
         : (
-            <Button
-              isBusy={isBusy || ledgerLoading}
-              onClick={_onSignLedger}
-            >
-              {t('Sign on Ledger')}
-            </Button>
+          <Button
+            isBusy={isBusy || ledgerLoading}
+            onClick={_onSignLedger}
+          >
+            {t('Sign on Ledger')}
+          </Button>
         )
       }
     </div>

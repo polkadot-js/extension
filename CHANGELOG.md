@@ -1,5 +1,29 @@
 # CHANGELOG
 
+## 1.2.21
+Build date: Jul 24, 2024.
+
+Bugs fixed:
+Fix a few bugs for Avail (#3378)
+  - Add AVAIL token on Ethereum
+  - Integrate Avail OG NFT
+  - Setup default nomination pool online
+  - Update Avail staking APY
+  - Fix bug when click "View details" on the Sign transaction from dApp
+
+## 1.2.20
+Build date: Jul 24, 2024.
+
+Features & Update:
+- Update chain-list for Avail
+
+
+## 1.2.19
+Build date: Jul 23, 2024.
+
+Features & Update:
+- Update chain-list for Avail
+
 ## 1.2.18
 Build date: Jul 23, 2024.
 

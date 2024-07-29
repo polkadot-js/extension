@@ -6,6 +6,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { AcalaNftApi } from '@subwallet/extension-base/koni/api/nft/acala_nft';
 import AssetHubUniquesPalletApi from '@subwallet/extension-base/koni/api/nft/assethub_unique';
 import { BitCountryNftApi } from '@subwallet/extension-base/koni/api/nft/bit.country';
+import { BlobInscriptionApi } from '@subwallet/extension-base/koni/api/nft/blobinscription';
 import { EvmNftApi } from '@subwallet/extension-base/koni/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-base/koni/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
@@ -43,6 +44,8 @@ function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | nul
     return [new BitCountryNftApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {
     return [new VaraNftApi(chain, substrateAddresses)];
+  } else if (_NFT_CHAIN_GROUP.avail.includes(chain)) {
+    return [new BlobInscriptionApi(chain, substrateAddresses)];
   }
 
   return null;

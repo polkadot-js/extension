@@ -18,6 +18,8 @@ export async function fetchStaticData<T> (slug: string, targetFile?: string, isJ
       return await fetchText<T>(`https://static-data.subwallet.app/${slug}/${fetchFile}`);
     }
   } catch (e) {
+    console.log('error fetching static data', e);
+
     return staticData[slug as StaticKey] as T;
   }
 }

@@ -229,7 +229,7 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
       textAlign: 'center'
     }
   },
-  '.ant-sw-tab-bar-item': {
+  '.ant-sw-tab-bar-item-icon': {
     position: 'relative'
   },
   '.__active-count': {
@@ -242,8 +242,8 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
     paddingBottom: 0,
     backgroundColor: token.colorError,
     position: 'absolute',
-    right: 13,
-    top: 9,
+    right: -2,
+    top: -1,
     minWidth: '12px'
   },
 

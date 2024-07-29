@@ -409,14 +409,14 @@ export default class Extension {
     return true;
   }
 
-  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
+  private signingApproveSignature ({ id, signature, signedTransaction }: RequestSigningApproveSignature): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { resolve } = queued;
 
-    resolve({ id, signature });
+    resolve({ id, signature, signedTransaction });
 
     return true;
   }

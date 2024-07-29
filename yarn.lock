@@ -668,6 +668,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/merkleize-metadata@npm:^1.1.0":
+  version: 1.1.1
+  resolution: "@polkadot-api/merkleize-metadata@npm:1.1.1"
+  dependencies:
+    "@polkadot-api/substrate-bindings": "npm:0.6.1"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/dc0d1aa9e15049fdf263451ea1a8d7a4c5c5907e8b9b7ac8861f2e3281a82e99b5b07619a2c5cab105d8c14253007a006a7bc9d44fcaef1eb1d0356fc63d0485
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/metadata-builders@npm:0.0.1":
   version: 0.0.1
   resolution: "@polkadot-api/metadata-builders@npm:0.0.1"
@@ -704,6 +714,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/substrate-bindings@npm:0.6.1":
+  version: 0.6.1
+  resolution: "@polkadot-api/substrate-bindings@npm:0.6.1"
+  dependencies:
+    "@noble/hashes": "npm:^1.3.1"
+    "@polkadot-api/utils": "npm:0.1.1"
+    "@scure/base": "npm:^1.1.1"
+    scale-ts: "npm:^1.6.0"
+  checksum: 10/bce8bd7758174302b9e72da1addce04103ab0e9d0626ff2eacffdfb28c7a058071edaf4b47a7569bd7c8c73dd1595e1d78f90d419abafb86a6eadf078c83d1e4
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/substrate-client@npm:0.0.1":
   version: 0.0.1
   resolution: "@polkadot-api/substrate-client@npm:0.0.1"
@@ -715,6 +737,13 @@ __metadata:
   version: 0.0.1
   resolution: "@polkadot-api/utils@npm:0.0.1"
   checksum: 10/4bf89955ccf4dafb2ef34f007fc0a12bd6d983a10c4219464a6b1c07e7bfe80ff26f156fa201b3f11ad53adca0abb261fc7ee43b86dcdc10fa0f5325788359ae
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/utils@npm:0.1.1":
+  version: 0.1.1
+  resolution: "@polkadot-api/utils@npm:0.1.1"
+  checksum: 10/ffd30039cd91396abb5528132bea9a72465eae9cdd088ecbd463ce962aa51c01b9e8c7d3e64c16c8438c0e55966c4d36fe4d18744a01b2b61f7e778f61dbf2b0
   languageName: node
   linkType: hard
 
@@ -996,6 +1025,7 @@ __metadata:
     "@fortawesome/free-solid-svg-icons": "npm:^6.5.1"
     "@fortawesome/react-fontawesome": "npm:^0.2.0"
     "@paraspell/xcm-analyser": "npm:^1.3.0"
+    "@polkadot-api/merkleize-metadata": "npm:^1.1.0"
     "@polkadot/api": "npm:^12.2.1"
     "@polkadot/dev-test": "npm:^0.79.3"
     "@polkadot/extension-base": "npm:0.49.4-0-x"

@@ -39,6 +39,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   const isPopup = useIsPopup();
   const languageOptions = useMemo(() => getLanguageOptions(), []);
   const onAction = useContext(ActionContext);
+  const _ledgerAppOptions = settings.availableLedgerApp;
 
   useEffect(() => {
     settings.set({ camera: camera ? 'on' : 'off' });
@@ -82,6 +83,12 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
     }, []
   );
 
+  const _onChangeLedgerApp = useCallback(
+    (value: string): void => {
+      settings.set({ ledgerApp: value });
+    }, []
+  );
+
   const _goToAuthList = useCallback(
     () => {
       onAction('auth-list');
@@ -114,6 +121,18 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
           onChange={_onChangePrefix}
           options={prefixOptions}
           value={`${prefix}`}
+        />
+      </MenuItem>
+      <MenuItem
+        className='setting'
+        title={t('Ledger App')}
+      >
+        <Dropdown
+          className='dropdown'
+          label=''
+          onChange={_onChangeLedgerApp}
+          options={_ledgerAppOptions}
+          value={settings.ledgerApp}
         />
       </MenuItem>
       <MenuItem

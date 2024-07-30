@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.50.1 July 30, 2024
+
+Contributed:
+
+- Update subscribed accounts when connected site authorizations are modified (Thanks to https://github.com/F-OBrien)
+    - Deprecates `public udateCurrentTabsUrl` in `class State` in favor of `public updateCurrentTabsUrl`.
+
+Changes:
+
+- Add support for the Ledger Generic App (Thanks to https://github.com/bee344)
+- Add support for the Ledger Migration App (Thanks to https://github.com/bee344)
+    - Note: In order to use the ledger migration app, you must toggle the setting inside of settings. That will enable the migration app for use.
+- Fix extension stuck in ... loading ... screen after service_worker got terminated (Thanks to https://github.com/bee344)
+
+
 ## 0.49.3 July 19, 2024
 
 Changes:

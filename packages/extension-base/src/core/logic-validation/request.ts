@@ -34,6 +34,9 @@ export interface PayloadValidated {
   errors: Error[]
 }
 
+const IS_NETWORK_ERROR = 'is_network_error';
+const IS_INTERNAL_ERROR = 'is_internal_error';
+
 export async function generateValidationProcess (koni: KoniState, url: string, payloadValidate: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
   let resultValidated = payloadValidate;
 
@@ -135,6 +138,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
   const { address: fromAddress, networkKey, pair } = payload;
   const evmApi = koni.getEvmApi(networkKey || '');
   const web3 = evmApi?.api;
+  let hasNetworkError = false;
 
   const autoFormatNumber = (val?: string | number): string | undefined => {
     if (typeof val === 'string' && val.startsWith('0x')) {
@@ -183,7 +187,10 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         console.error(e);
-        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, handleErrorMessage(e as Error)));
+        const [errorType, errorMessage] = handleErrorMessage(e as Error);
+
+        hasNetworkError = errorType === IS_NETWORK_ERROR;
+        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, errorMessage));
       }
     };
 
@@ -199,10 +206,11 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         })
       ]);
     } catch (e) {
-      // @ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       console.error(e);
-      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
+      const [errorType, errorMessage] = handleErrorMessage(e as Error);
+
+      hasNetworkError = errorType === IS_NETWORK_ERROR;
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, errorMessage));
     }
   }
 
@@ -232,7 +240,10 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         }
       } catch (e) {
         console.error(e);
-        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
+        const [errorType, errorMessage] = handleErrorMessage(e as Error);
+
+        hasNetworkError = errorType === IS_NETWORK_ERROR;
+        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, errorMessage));
       }
     }
 
@@ -247,7 +258,10 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
       }
     } catch (e) {
       console.error(e);
-      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
+      const [errorType, errorMessage] = handleErrorMessage(e as Error);
+
+      hasNetworkError = errorType === IS_NETWORK_ERROR;
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, errorMessage));
     }
   }
 
@@ -258,15 +272,18 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
   } catch (e) {
     console.error(e);
-    errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
+    const [errorType, errorMessage] = handleErrorMessage(e as Error);
+
+    hasNetworkError = errorType === IS_NETWORK_ERROR;
+    errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, errorMessage));
   }
 
   const hasError = (errors && errors.length > 0) || !networkKey;
-  const hashPayload = hasError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
-  const isToContract = !hasError && await isContractAddress(transaction.to || '', evmApi);
+  const hashPayload = hasNetworkError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
+  const isToContract = !hasNetworkError && await isContractAddress(transaction.to || '', evmApi);
   const evmNetwork = koni.getChainInfo(networkKey || '');
   const parseData = isToContract
-    ? transaction.data && !hasError
+    ? transaction.data && !hasNetworkError
       ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
       : ''
     : transaction.data || '';
@@ -389,7 +406,7 @@ export function validationAuthWCMiddleware (koni: KoniState, url: string, payloa
   return promise;
 }
 
-export function handleErrorMessage (err: Error) {
+export function handleErrorMessage (err: Error): string[] {
   const message = err.message.toLowerCase();
 
   if (
@@ -397,8 +414,8 @@ export function handleErrorMessage (err: Error) {
     message.includes('connection not open') ||
     message.includes('connection timeout')
   ) {
-    return 'Unable to process this request. Please re-enable the network';
+    return [IS_NETWORK_ERROR, 'Unable to process this request. Please re-enable the network'];
   }
 
-  return err.message;
+  return [IS_INTERNAL_ERROR, err.message];
 }

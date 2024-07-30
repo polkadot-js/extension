@@ -9,7 +9,7 @@ import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/ba
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
-import { generateValidationProcess, PayloadValidated, TransactionValidate, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
+import { generateValidationProcess, PayloadValidated, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -42,7 +42,6 @@ import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceMap, EvmFeeInfo, StorageDataInterface } from '@subwallet/extension-base/types';
 import { isAccountAll, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
-import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -1349,7 +1348,8 @@ export default class KoniState {
       address,
       payloadAfterValidated: payload,
       method,
-      errors: []
+      errors: [],
+      networkKey: ''
     };
 
     const validationSteps: ValidateStepFunction[] =
@@ -1365,10 +1365,7 @@ export default class KoniState {
       id
     };
 
-    return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', payloadAfterValidated, {
-      requiredPassword: false,
-      address
-    })
+    return this.requestService.addConfirmation(id, url, 'evmSignatureRequest', payloadAfterValidated, {})
       .then(({ isApproved, payload }) => {
         if (isApproved) {
           if (payload) {
@@ -1422,7 +1419,7 @@ export default class KoniState {
   public async evmSendTransaction (id: string, url: string, transactionParams: EvmSendTransactionParams, networkKeyInit?: string, topic?: string): Promise<string | undefined> {
     const payloadValidation: PayloadValidated = {
       errors: [],
-      networkKey: networkKeyInit,
+      networkKey: networkKeyInit || '',
       payloadAfterValidated: transactionParams,
       address: transactionParams.from
     };
@@ -1435,27 +1432,12 @@ export default class KoniState {
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const { errors, networkKey: networkKey_ } = result;
-    const { account, estimateGas, transaction: transactionValidated } = result.payloadAfterValidated as TransactionValidate;
+    const transactionValidated = result.payloadAfterValidated as EvmSendTransactionRequest;
     const networkKey = networkKey_ || '';
-    const evmApi = this.getEvmApi(networkKey);
-    const evmNetwork = this.getChainInfo(networkKey);
-    const hashPayload = result.errors && result.errors.length > 0 ? '' : this.transactionService.generateHashPayload(networkKey, transactionValidated);
-    const isToContract = await isContractAddress(transactionValidated.to || '', evmApi);
-    const parseData = isToContract
-      ? transactionValidated.data
-        ? (await parseContractInput(transactionValidated.data, transactionValidated.to || '', evmNetwork)).result
-        : ''
-      : transactionValidated.data || '';
 
     const requestPayload: EvmSendTransactionRequest = {
       ...transactionValidated,
-      errors: errors as TransactionError[],
-      estimateGas,
-      hashPayload,
-      isToContract,
-      parseData,
-      account,
-      canSign: true
+      errors: errors as TransactionError[]
     };
 
     const eType = transactionValidated.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
@@ -1479,7 +1461,7 @@ export default class KoniState {
       extrinsicType: eType,
       chainType: ChainType.EVM,
       estimateFee: {
-        value: estimateGas,
+        value: transactionValidated.estimateGas,
         symbol: token.symbol,
         decimals: token.decimals || 18
       },

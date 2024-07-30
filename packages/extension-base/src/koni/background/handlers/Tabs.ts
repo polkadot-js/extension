@@ -13,7 +13,7 @@ import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesS
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
-import { PayloadValidated, validationAuthMiddleware } from '@subwallet/extension-base/core/logic-validation';
+import { generateValidationProcess, PayloadValidated, validationAuthMiddleware } from '@subwallet/extension-base/core/logic-validation';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -134,11 +134,12 @@ export default class KoniTabs {
     const address = request.address;
     const payloadValidate: PayloadValidated = {
       address,
+      networkKey: '',
       errors: [],
       payloadAfterValidated: request
     };
 
-    const { pair } = await validationAuthMiddleware(this.#koniState, url, payloadValidate);
+    const { pair } = await generateValidationProcess(this.#koniState, url, payloadValidate, [validationAuthMiddleware]);
 
     return this.#koniState.sign(url, new RequestBytesSign(request), { address, ...pair?.meta });
   }
@@ -147,11 +148,12 @@ export default class KoniTabs {
     const address = request.address;
     const payloadValidate: PayloadValidated = {
       address,
+      networkKey: '',
       errors: [],
       payloadAfterValidated: request
     };
 
-    const { pair } = await validationAuthMiddleware(this.#koniState, url, payloadValidate);
+    const { pair } = await generateValidationProcess(this.#koniState, url, payloadValidate, [validationAuthMiddleware]);
 
     return this.#koniState.sign(url, new RequestExtrinsicSign(request), { address, ...pair?.meta });
   }

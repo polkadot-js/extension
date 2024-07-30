@@ -9,21 +9,23 @@ import KoniState from '@subwallet/extension-base/koni/background/handlers/State'
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { AuthUrlInfo } from '@subwallet/extension-base/services/request-service/types';
 import { createPromiseHandler, isSameAddress, stripUrl, wait } from '@subwallet/extension-base/utils';
+import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { KeyringPair } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
 import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import BN from 'bn.js';
 import { t } from 'i18next';
+import Web3 from 'web3';
 import { TransactionConfig } from 'web3-core';
 
 import { assert, isString } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export type ValidateStepFunction = (koni: KoniState, url: string, payload: PayloadValidated, topic?: string) => Promise<PayloadValidated>
+export type ValidateStepFunction = (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string) => Promise<PayloadValidated>
 
 export interface PayloadValidated {
-  networkKey?: string,
+  networkKey: string,
   address: string,
   pair?: KeyringPair,
   authInfo?: AuthUrlInfo,
@@ -32,24 +34,17 @@ export interface PayloadValidated {
   errors: Error[]
 }
 
-export interface TransactionValidate {
-  transaction: TransactionConfig;
-  estimateGas: string;
-  account: AccountJson;
-}
-
 export async function generateValidationProcess (koni: KoniState, url: string, payloadValidate: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
   let resultValidated = payloadValidate;
 
-  for (let i = 0; i < validationMiddlewareSteps.length;) {
-    resultValidated = await validationMiddlewareSteps[i](koni, url, resultValidated, topic);
-    i++;
+  for (const step of validationMiddlewareSteps) {
+    resultValidated = await step(koni, url, resultValidated, validationMiddlewareSteps, topic);
   }
 
   return resultValidated;
 }
 
-export async function validationAuthMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
+export async function validationAuthMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
   let keypair: KeyringPair | undefined;
   const { address } = payload;
 
@@ -74,7 +69,7 @@ export async function validationAuthMiddleware (koni: KoniState, url: string, pa
   return payload;
 }
 
-export async function validationConnectMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
+export async function validationConnectMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
   let currentChain: string | undefined;
   let autoActiveChain = false;
   let { authInfo, errors, networkKey } = { ...payload };
@@ -94,7 +89,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
     url
   });
 
-  networkKey = networkKey || currentEvmNetwork?.slug;
+  networkKey = networkKey || currentEvmNetwork?.slug || '';
 
   if (networkKey) {
     const chainStatus = koni.getChainStateByKey(networkKey);
@@ -105,6 +100,21 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
         await koni.chainService.enableChain(networkKey);
       } catch (e) {
         errors.push(new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, ' Can not active chain: ' + chainInfo.name));
+      }
+    }
+
+    if (chainStatus.active) {
+      const evmApi = koni.getEvmApi(networkKey);
+      const web3 = evmApi?.api;
+
+      if (web3?.currentProvider instanceof Web3.providers.WebsocketProvider) {
+        if (!web3.currentProvider.connected) {
+          errors.unshift(new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, 'Unable to process this request. Please re-enable the network'));
+        }
+      } else if (web3?.currentProvider instanceof Web3.providers.HttpProvider) {
+        if (!web3.currentProvider.connected) {
+          errors.unshift(new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, 'Unable to process this request. Please re-enable the network'));
+        }
       }
     }
   } else {
@@ -118,7 +128,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
   };
 }
 
-export async function validationEvmDataTransactionMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
+export async function validationEvmDataTransactionMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
   const errors: Error[] = payload.errors || [];
   let estimateGas = '';
   const transactionParams = payload.payloadAfterValidated as EvmSendTransactionParams;
@@ -173,7 +183,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         // @ts-ignore
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         console.error(e);
-        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS));
+        errors.push(new TransactionError(BasicTxErrorType.INVALID_PARAMS, handleErrorMessage(e as Error)));
       }
     };
 
@@ -192,7 +202,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
       // @ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       console.error(e);
-      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
     }
   }
 
@@ -222,7 +232,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         }
       } catch (e) {
         console.error(e);
-        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+        errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
       }
     }
 
@@ -237,7 +247,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
       }
     } catch (e) {
       console.error(e);
-      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+      errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
     }
   }
 
@@ -248,21 +258,35 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
   } catch (e) {
     console.error(e);
-    errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, handleErrorMessage(e as Error)));
   }
+
+  const hasError = (errors && errors.length > 0) || !networkKey;
+  const hashPayload = hasError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
+  const isToContract = !hasError && await isContractAddress(transaction.to || '', evmApi);
+  const evmNetwork = koni.getChainInfo(networkKey || '');
+  const parseData = isToContract
+    ? transaction.data && !hasError
+      ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
+      : ''
+    : transaction.data || '';
 
   return {
     ...payload,
     errors,
     payloadAfterValidated: {
-      transaction,
+      ...transaction,
       account,
-      estimateGas
+      estimateGas,
+      hashPayload,
+      isToContract,
+      parseData,
+      canSign: !hasError
     }
   };
 }
 
-export async function validationEvmSignMessageMiddleware (koni: KoniState, url: string, payload_: PayloadValidated): Promise<PayloadValidated> {
+export async function validationEvmSignMessageMiddleware (koni: KoniState, url: string, payload_: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
   const { address, errors, method, pair: pair_ } = payload_;
   let payload = payload_.payloadAfterValidated as string;
   const { promise, resolve } = createPromiseHandler<PayloadValidated>();
@@ -329,7 +353,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
   return promise;
 }
 
-export function validationAuthWCMiddleware (koni: KoniState, url: string, payload: PayloadValidated, topic?: string): Promise<PayloadValidated> {
+export function validationAuthWCMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
   if (!topic) {
     throw new Error(getSdkError('UNAUTHORIZED_EXTEND_REQUEST').message);
   }
@@ -363,4 +387,18 @@ export function validationAuthWCMiddleware (koni: KoniState, url: string, payloa
   }
 
   return promise;
+}
+
+export function handleErrorMessage (err: Error) {
+  const message = err.message.toLowerCase();
+
+  if (
+    message.includes('connection error') ||
+    message.includes('connection not open') ||
+    message.includes('connection timeout')
+  ) {
+    return 'Unable to process this request. Please re-enable the network';
+  }
+
+  return err.message;
 }

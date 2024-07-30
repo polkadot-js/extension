@@ -841,7 +841,7 @@ export default class TransactionService {
     const payload = (transaction as EvmSendTransactionRequest);
     const evmApi = this.state.chainService.getEvmApi(chain);
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
-
+    const hasError = !!(payload.errors && payload.errors.length > 0);
     const accountPair = keyring.getPair(address);
     const account: AccountJson = { address, ...accountPair.meta };
 
@@ -854,7 +854,7 @@ export default class TransactionService {
 
     // Fill contract info
     if (!payload.parseData) {
-      const isToContract = await isContractAddress(payload.to || '', evmApi);
+      const isToContract = !hasError && await isContractAddress(payload.to || '', evmApi);
 
       payload.isToContract = isToContract;
 
@@ -878,7 +878,9 @@ export default class TransactionService {
     if (!payload.nonce) {
       const evmApi = this.state.chainService.getEvmApi(chain);
 
-      payload.nonce = await evmApi?.api.eth.getTransactionCount(address);
+      if (evmApi.isApiConnected) {
+        payload.nonce = await evmApi?.api.eth.getTransactionCount(address);
+      }
     }
 
     if (!payload.chainId) {
@@ -893,7 +895,7 @@ export default class TransactionService {
     const isExternal = !!account.isExternal;
     const isInjected = !!account.isInjected;
 
-    if (!payload.errors || payload.errors.length === 0) {
+    if (!hasError) {
       // generate hashPayload for EVM transaction
       payload.hashPayload = this.generateHashPayload(chain, payload);
     }

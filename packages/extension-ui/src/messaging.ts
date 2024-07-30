@@ -30,33 +30,34 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-
-async function wakeupBackground(): Promise<Error | null> {
+async function wakeupBackground (): Promise<Error | null> {
   try {
-    await chrome.runtime.sendMessage({ type: "wakeup" })
-    return null
+    await chrome.runtime.sendMessage({ type: 'wakeup' });
+
+    return null;
   } catch (cause) {
-    return cause instanceof Error ? cause : new Error(String(cause))
+    return cause instanceof Error ? cause : new Error(String(cause));
   }
 }
 
 async function createPort (name: string, maxAttempts: number, delayMs: number): Promise<chrome.runtime.Port> {
-  let lastError: Error | null = null
+  let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const error = await wakeupBackground()
+    const error = await wakeupBackground();
+
     if (error) {
-      lastError = error
-      await new Promise((resolve) => setTimeout(resolve, delayMs))
-      continue
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      continue;
     }
 
-    const port = chrome.runtime.connect({ name })
+    const port = chrome.runtime.connect({ name });
 
-    return port
+    return port;
   }
 
-  throw new Error("Failed to create port after multiple attempts", { cause: lastError })
+  throw new Error('Failed to create port after multiple attempts', { cause: lastError });
 }
 
 const port = await createPort(PORT_EXTENSION, 5, 1000);

@@ -50,11 +50,11 @@ function getActiveTabs () {
   });
 }
 
-chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
-  if (message.type === "wakeup") {
-    sendResponse({ status: "awake" })
+chrome.runtime.onMessage.addListener((message: { type: string }, _, sendResponse) => {
+  if (message.type === 'wakeup') {
+    sendResponse({ status: 'awake' });
   }
-})
+});
 
 // listen to tab updates this is fired on url change
 chrome.tabs.onUpdated.addListener((_, changeInfo) => {

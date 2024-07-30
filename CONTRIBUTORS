@@ -2,7 +2,7 @@
       92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
       40	Tarik Gul                     	0.49.3 (#1406)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       4	Alberto Nicolas Penayo        	feat: add support for Ledger Migration App (#1422)
+       5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	Ryan Lee                      	chore: update module resolution to bundler (#1387)

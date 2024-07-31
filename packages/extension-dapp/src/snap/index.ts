@@ -36,7 +36,7 @@ const connectSnap = async (origin: string): Promise<RequestSnapsResult> => {
         version
       }
     }
-  });
+  }) as RequestSnapsResult;
 };
 
 /** @internal Invokes a method on a Snap and returns the result. */
@@ -56,7 +56,7 @@ const invokeSnap = async (args: SnapRpcRequestParams): Promise<InvokeSnapResult>
       request,
       snapId
     }
-  });
+  }) as InvokeSnapResult;
 };
 
 /** @internal Gets the list of Snap accounts available in the connected wallet. */

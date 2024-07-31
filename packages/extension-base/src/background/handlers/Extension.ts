@@ -116,7 +116,7 @@ export default class Extension {
     };
   }
 
-  private accountsForget ({ address }: RequestAccountForget): boolean {
+  private async accountsForget ({ address }: RequestAccountForget): Promise<boolean> {
     const authorizedAccountsDiff: AuthorizedAccountsDiff = [];
 
     // cycle through authUrls and prepare the array of diff
@@ -128,12 +128,12 @@ export default class Extension {
       }
     });
 
-    this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
+    await this.#state.updateAuthorizedAccounts(authorizedAccountsDiff);
 
     // cycle through default account selection for auth and remove any occurrence of the account
     const newDefaultAuthAccounts = this.#state.defaultAuthAccountSelection.filter((defaultSelectionAddress) => defaultSelectionAddress !== address);
 
-    this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
+    await this.#state.updateDefaultAuthAccounts(newDefaultAuthAccounts);
 
     keyring.forgetAccount(address);
 
@@ -212,8 +212,8 @@ export default class Extension {
     return true;
   }
 
-  private authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): void {
-    return this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
+  private async authorizeUpdate ({ authorizedAccounts, url }: RequestUpdateAuthorizedAccounts): Promise<void> {
+    return await this.#state.updateAuthorizedAccounts([[url, authorizedAccounts]]);
   }
 
   private getAuthList (): ResponseAuthorizeList {
@@ -235,14 +235,14 @@ export default class Extension {
     return true;
   }
 
-  private metadataApprove ({ id }: RequestMetadataApprove): boolean {
+  private async metadataApprove ({ id }: RequestMetadataApprove): Promise<boolean> {
     const queued = this.#state.getMetaRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { request, resolve } = queued;
 
-    this.#state.saveMetadata(request);
+    await this.#state.saveMetadata(request);
 
     resolve(true);
 
@@ -409,14 +409,14 @@ export default class Extension {
     return true;
   }
 
-  private signingApproveSignature ({ id, signature }: RequestSigningApproveSignature): boolean {
+  private signingApproveSignature ({ id, signature, signedTransaction }: RequestSigningApproveSignature): boolean {
     const queued = this.#state.getSignRequest(id);
 
     assert(queued, 'Unable to find request');
 
     const { resolve } = queued;
 
-    resolve({ id, signature });
+    resolve({ id, signature, signedTransaction });
 
     return true;
   }
@@ -467,7 +467,7 @@ export default class Extension {
   }
 
   private windowOpen (path: AllowedPath): boolean {
-    const url = `${chrome.extension.getURL('index.html')}#${path}`;
+    const url = `${chrome.runtime.getURL('index.html')}#${path}`;
 
     if (!ALLOWED_PATH.includes(path)) {
       console.error('Not allowed to open the url:', url);
@@ -518,8 +518,10 @@ export default class Extension {
     return true;
   }
 
-  private removeAuthorization (url: string): ResponseAuthorizeList {
-    return { list: this.#state.removeAuthorization(url) };
+  private async removeAuthorization (url: string): Promise<ResponseAuthorizeList> {
+    const remAuth = await this.#state.removeAuthorization(url);
+
+    return { list: remAuth };
   }
 
   private deleteAuthRequest (requestId: string): void {
@@ -527,7 +529,7 @@ export default class Extension {
   }
 
   private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
-    this.#state.udateCurrentTabsUrl(urls);
+    this.#state.updateCurrentTabsUrl(urls);
   }
 
   private getConnectedTabsUrl () {
@@ -593,7 +595,7 @@ export default class Extension {
         return this.accountsValidate(request as RequestAccountValidate);
 
       case 'pri(metadata.approve)':
-        return this.metadataApprove(request as RequestMetadataApprove);
+        return await this.metadataApprove(request as RequestMetadataApprove);
 
       case 'pri(metadata.get)':
         return this.metadataGet(request as string);

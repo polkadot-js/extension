@@ -17,7 +17,7 @@ import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 // setup the notification (same a FF default background, white text)
-withErrorLog(() => chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' }));
+withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
 
 // listen to all messages and handle appropriately
 chrome.runtime.onConnect.addListener((port): void => {
@@ -49,6 +49,12 @@ function getActiveTabs () {
     handlers(request);
   });
 }
+
+chrome.runtime.onMessage.addListener((message: { type: string }, _, sendResponse) => {
+  if (message.type === 'wakeup') {
+    sendResponse({ status: 'awake' });
+  }
+});
 
 // listen to tab updates this is fired on url change
 chrome.tabs.onUpdated.addListener((_, changeInfo) => {

@@ -1,14 +1,21 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+// This is to ensure the legacy `class Ledger` doesn't throw linting errors.
+//
+/* eslint-disable deprecation/deprecation */
+
 import type { Network } from '@polkadot/networks/types';
+import type { HexString } from '@polkadot/util/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { Ledger } from '@polkadot/hw-ledger';
+import { LedgerGeneric } from '@polkadot/hw-ledger';
+import { knownLedger } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
+import chains from '../../../extension-ui/src/util/chains';
 import ledgerChains from '../util/legerChains.js';
 import useTranslation from './useTranslation.js';
 
@@ -22,7 +29,7 @@ interface State extends StateBase {
   error: string | null;
   isLoading: boolean;
   isLocked: boolean;
-  ledger: Ledger | null;
+  ledger: LedgerGeneric | null;
   refresh: () => void;
   warning: string | null;
 }
@@ -40,8 +47,10 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): Ledger {
-  let ledger: Ledger | null = null;
+function retrieveLedger (genesis: string): LedgerGeneric {
+  let ledger: LedgerGeneric | null = null;
+
+  const currApp = settings.get().ledgerApp;
 
   const { isLedgerCapable } = getState();
 
@@ -51,7 +60,22 @@ function retrieveLedger (genesis: string): Ledger {
 
   assert(def, 'There is no known Ledger app available for this chain');
 
-  ledger = new Ledger('webusb', def.network);
+  assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
+
+  // All chains use the `slip44` from polkadot in their derivation path in ledger.
+  // This interface is specific to the underlying PolkadotGenericApp.
+  ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+
+  if (currApp === 'generic') {
+    // All chains use the `slip44` from polkadot in their derivation path in ledger.
+    // This interface is specific to the underlying PolkadotGenericApp.
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+  } else if (currApp === 'migration') {
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger[def.network]);
+  } else {
+    // This will never get touched since it will always hit the above two. This satisfies the compiler.
+    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+  }
 
   return ledger;
 }
@@ -64,6 +88,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const { t } = useTranslation();
+
   const ledger = useMemo(() => {
     setError(null);
     setIsLocked(false);
@@ -98,7 +123,15 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setError(null);
     setWarning(null);
 
-    ledger.getAddress(false, accountIndex, addressOffset)
+    // This is used with a genesisHash only when importing the Ledger account
+    // and when signing with Ledger. In both cases, the genesisHash is known and
+    // will be in this array.
+    const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
+
+    // Just in case, but this shouldn't be triggered
+    assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
+
+    ledger.getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
       .then((res) => {
         setIsLoading(false);
         setAddress(res.address);

@@ -68,8 +68,8 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
   }, [request]);
 
   const _onSignature = useCallback(
-    ({ signature }: { signature: HexString }): void => {
-      approveSignSignature(signId, signature)
+    ({ signature }: { signature: HexString }, signedTransaction?: HexString): void => {
+      approveSignSignature(signId, signature, signedTransaction)
         .then(() => onAction())
         .catch((error: Error): void => {
           setError(error.message);
@@ -117,7 +117,7 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             error={error}
             genesisHash={json.genesisHash}
             onSignature={_onSignature}
-            payload={payload}
+            payload={json}
             setError={setError}
           />
         )}

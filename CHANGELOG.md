@@ -1,5 +1,61 @@
 # CHANGELOG
 
+## 0.50.1 July 30, 2024
+
+Contributed:
+
+- Update subscribed accounts when connected site authorizations are modified (Thanks to https://github.com/F-OBrien)
+    - Deprecates `public udateCurrentTabsUrl` in `class State` in favor of `public updateCurrentTabsUrl`.
+
+Changes:
+
+- Add support for the Ledger Generic App (Thanks to https://github.com/bee344)
+- Add support for the Ledger Migration App (Thanks to https://github.com/bee344)
+    - Note: In order to use the ledger migration app, you must toggle the setting inside of settings. That will enable the migration app for use.
+- Fix extension stuck in ... loading ... screen after service_worker got terminated (Thanks to https://github.com/bee344)
+
+
+## 0.49.3 July 19, 2024
+
+Changes:
+
+- Fix ID used in manifest_firefox.json by adding brackets
+    - The previous patch required brackets arount the ID...
+    
+
+## 0.49.2 July 18, 2024
+
+Changes:
+
+- Fix ID used in manifest_firefox.json
+    - This is internal, and is only necessary for publishing to the store
+
+
+## 0.49.1 July 15, 2024
+
+Breaking Changes:
+
+- Update from Manifest v2 to v3 for Chrome
+- Update from Manifest v2 to v3 for Firefox
+
+Note: These are very large breaking changes. Please review the following PR's to see exactly what has changed and for any additional information that can assist you in your migration.
+
+([#1367](https://github.com/polkadot-js/extension/pull/1367))
+([#1388](https://github.com/polkadot-js/extension/pull/1388))
+([#1399](https://github.com/polkadot-js/extension/pull/1399))
+
+Changes:
+
+- Update xcm analyzer to 1.3.0
+- Upgrade Polkadot.js Deps
+    - @polkadot/common -> 13.0.2 (Introduces the interface for the new ledger app. This will be implemented in the next release)
+    - @polkadot/api -> 12.2.1
+    - @polkadot/phishing -> 0.23.1
+    - @polkadot/ui -> 3.7.1
+- Update module resolution to bundler
+- Clean the manifest build process
+
+
 ## 0.48.2 July 3, 2024
 
 Contributed:

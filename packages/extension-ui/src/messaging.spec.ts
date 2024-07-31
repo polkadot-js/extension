@@ -1,11 +1,11 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev-test/globals" />
-
 /* global chrome */
 
 import '@polkadot/extension-mocks/chrome';
+
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import Adapter from '@wojtekmaj/enzyme-adapter-react-17';
 import enzyme from 'enzyme';

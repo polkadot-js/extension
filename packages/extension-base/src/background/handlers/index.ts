@@ -15,6 +15,8 @@ import Tabs from './Tabs.js';
 export { withErrorLog } from './helpers.js';
 
 const state = new State();
+
+await state.init();
 const extension = new Extension(state);
 const tabs = new Tabs(state);
 

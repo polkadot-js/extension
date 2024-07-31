@@ -1,7 +1,7 @@
 // Copyright 2019-2024 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/// <reference types="@polkadot/dev-test/globals" />
+import type * as _ from '@polkadot/dev-test/globals.d.ts';
 
 import { u8aConcat, u8aEq, u8aToString } from '@polkadot/util';
 

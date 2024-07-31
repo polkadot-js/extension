@@ -6,7 +6,7 @@
   },
   "homepage": "https://github.com/polkadot-js/extension#readme",
   "license": "Apache-2.0",
-  "packageManager": "yarn@4.1.1",
+  "packageManager": "yarn@4.3.1",
   "private": true,
   "repository": {
     "type": "git",
@@ -14,23 +14,29 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.48.2",
+  "version": "0.50.2-1-x",
   "versions": {
-    "git": "0.48.2",
-    "npm": "0.48.2"
+    "git": "0.50.2-1-x",
+    "npm": "0.50.1"
   },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "polkadot-dev-build-ts && yarn build:zip && yarn build:rollup",
+    "build": "yarn build:chrome && yarn build:ff",
     "build:before": "yarn build:i18n",
+    "build:chrome": "cp ./packages/extension/manifest_chrome.json ./packages/extension/manifest.json && polkadot-dev-build-ts && yarn build:zip:chrome && yarn build:rollup",
+    "build:ff": "cp ./packages/extension/manifest_firefox.json ./packages/extension/manifest.json && polkadot-dev-build-ts && yarn build:zip:ff && yarn build:rollup",
     "build:i18n": "i18next-scanner --config i18next-scanner.config.cjs",
     "build:release": "polkadot-ci-ghact-build",
     "build:rollup": "polkadot-exec-rollup --config",
-    "build:zip": "yarn build:zip:dst && yarn build:zip:src",
-    "build:zip:dst": "rm -rf ./master-build.zip && cd packages/extension/build && zip -r -FS ../../../master-build.zip .",
-    "build:zip:src": "rm -rf ./master-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
+    "build:zip": "yarn build:zip:chrome && yarn build:zip:ff",
+    "build:zip:chrome": "cp ./packages/extension/manifest_chrome.json ./packages/extension/manifest.json && yarn build:zip:dst:chrome && yarn build:zip:src:chrome",
+    "build:zip:dst:chrome": "rm -rf ./master-chrome-build.zip && cd packages/extension/build && zip -r -FS ../../../master-chrome-build.zip .",
+    "build:zip:dst:ff": "rm -rf ./master-ff-build.zip && cd packages/extension/build && zip -r -FS ../../../master-ff-build.zip .",
+    "build:zip:ff": "cp ./packages/extension/manifest_firefox.json ./packages/extension/manifest.json && yarn build:zip:dst:ff && yarn build:zip:src:ff",
+    "build:zip:src:chrome": "rm -rf ./master-chrome-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-chrome-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
+    "build:zip:src:ff": "rm -rf ./master-ff-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-ff-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
     "clean": "polkadot-dev-clean-build",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
@@ -44,13 +50,13 @@
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^12.0.2",
-    "@polkadot/keyring": "^12.6.2",
-    "@polkadot/networks": "^12.6.2",
-    "@polkadot/types": "^12.0.2",
-    "@polkadot/util": "^12.6.2",
-    "@polkadot/util-crypto": "^12.6.2",
-    "@polkadot/x-fetch": "^12.6.2",
+    "@polkadot/api": "^12.2.1",
+    "@polkadot/keyring": "^13.0.2",
+    "@polkadot/networks": "^13.0.2",
+    "@polkadot/types": "^12.2.1",
+    "@polkadot/util": "^13.0.2",
+    "@polkadot/util-crypto": "^13.0.2",
+    "@polkadot/x-fetch": "^13.0.2",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.3.3"
   }

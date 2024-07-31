@@ -30,7 +30,37 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+async function wakeupBackground (): Promise<Error | null> {
+  try {
+    await chrome.runtime.sendMessage({ type: 'wakeup' });
+
+    return null;
+  } catch (cause) {
+    return cause instanceof Error ? cause : new Error(String(cause));
+  }
+}
+
+async function createPort (name: string, maxAttempts: number, delayMs: number): Promise<chrome.runtime.Port> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const error = await wakeupBackground();
+
+    if (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      continue;
+    }
+
+    const port = chrome.runtime.connect({ name });
+
+    return port;
+  }
+
+  throw new Error('Failed to create port after multiple attempts', { cause: lastError });
+}
+
+const port = await createPort(PORT_EXTENSION, 5, 1000);
 const handlers: Handlers = {};
 
 // setup a listener for messages, any incoming resolves the promise
@@ -118,8 +148,8 @@ export async function approveSignPassword (id: string, savePass: boolean, passwo
   return sendMessage('pri(signing.approve.password)', { id, password, savePass });
 }
 
-export async function approveSignSignature (id: string, signature: HexString): Promise<boolean> {
-  return sendMessage('pri(signing.approve.signature)', { id, signature });
+export async function approveSignSignature (id: string, signature: HexString, signedTransaction?: HexString): Promise<boolean> {
+  return sendMessage('pri(signing.approve.signature)', { id, signature, signedTransaction });
 }
 
 export async function createAccountExternal (name: string, address: string, genesisHash: HexString | null): Promise<boolean> {

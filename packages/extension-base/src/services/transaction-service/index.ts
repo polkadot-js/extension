@@ -164,11 +164,9 @@ export default class TransactionService {
     // Fill transaction default info
     const transaction = this.fillTransactionDefaultInfo(inputTransaction);
 
-    if (!transaction.errors || transaction.errors.length === 0) {
-      // Add Transaction
-      transactions[transaction.id] = transaction;
-      this.transactionSubject.next({ ...transactions });
-    }
+    // Add Transaction
+    transactions[transaction.id] = transaction;
+    this.transactionSubject.next({ ...transactions });
 
     return await this.sendTransaction(transaction);
   }

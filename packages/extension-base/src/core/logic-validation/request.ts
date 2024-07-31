@@ -21,7 +21,7 @@ import { TransactionConfig } from 'web3-core';
 import { isString } from '@polkadot/util';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
-export type ValidateStepFunction = (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string) => Promise<PayloadValidated>
+export type ValidateStepFunction = (koni: KoniState, url: string, payload: PayloadValidated, topic?: string) => Promise<PayloadValidated>
 
 export interface PayloadValidated {
   networkKey: string,
@@ -39,7 +39,7 @@ export async function generateValidationProcess (koni: KoniState, url: string, p
   let resultValidated = payloadValidate;
 
   for (const step of validationMiddlewareSteps) {
-    resultValidated = await step(koni, url, resultValidated, validationMiddlewareSteps, topic);
+    resultValidated = await step(koni, url, resultValidated, topic);
 
     if (resultValidated.errorPosition === 'dApp') {
       throw resultValidated.errors[0];
@@ -51,7 +51,7 @@ export async function generateValidationProcess (koni: KoniState, url: string, p
   return resultValidated;
 }
 
-export async function validationAuthMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
+export async function validationAuthMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
   const { address, errors } = payload;
 
   if (!address || !isString(address)) {
@@ -80,7 +80,7 @@ export async function validationAuthMiddleware (koni: KoniState, url: string, pa
   return payload;
 }
 
-export async function validationConnectMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
+export async function validationConnectMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
   let currentChain: string | undefined;
   let autoActiveChain = false;
   let { address, authInfo, errors, networkKey } = { ...payload };
@@ -157,7 +157,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
   };
 }
 
-export async function validationEvmDataTransactionMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
+export async function validationEvmDataTransactionMiddleware (koni: KoniState, url: string, payload: PayloadValidated): Promise<PayloadValidated> {
   const errors: Error[] = payload.errors || [];
   let estimateGas = '';
   const transactionParams = payload.payloadAfterValidated as EvmSendTransactionParams;
@@ -317,7 +317,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
   };
 }
 
-export async function validationEvmSignMessageMiddleware (koni: KoniState, url: string, payload_: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[]): Promise<PayloadValidated> {
+export async function validationEvmSignMessageMiddleware (koni: KoniState, url: string, payload_: PayloadValidated): Promise<PayloadValidated> {
   const { address, errors, method, pair: pair_ } = payload_;
   let payload = payload_.payloadAfterValidated as string;
   const { promise, resolve } = createPromiseHandler<PayloadValidated>();
@@ -390,7 +390,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
   return promise;
 }
 
-export function validationAuthWCMiddleware (koni: KoniState, url: string, payload: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
+export function validationAuthWCMiddleware (koni: KoniState, url: string, payload: PayloadValidated, topic?: string): Promise<PayloadValidated> {
   const { promise, resolve } = createPromiseHandler<PayloadValidated>();
   const { address, errors } = payload;
 

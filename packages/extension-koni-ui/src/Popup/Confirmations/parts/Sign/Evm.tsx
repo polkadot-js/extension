@@ -84,7 +84,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chain?.slug, isLedger, true);
+    warning: ledgerWarning } = useLedger(chain?.slug, isLedger && !isErrorTransaction, true);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [
     isLedgerLoading,
@@ -296,7 +296,7 @@ const Component: React.FC<Props> = (props: Props) => {
           />
         )}
         onClick={onCancel}
-        schema={'secondary'}
+        schema={isErrorTransaction ? 'primary' : 'secondary'}
       >
         {t('Cancel')}
       </Button>

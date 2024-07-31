@@ -23,7 +23,7 @@ export interface Snap {
 
 interface EthereumProvider {
   isMetaMask: boolean;
-  request(args: { method: string; params?: any }): Promise<any>;
+  request(args: { method: string; params?: unknown }): Promise<unknown>;
   // Add more methods and properties as needed
 }
 

@@ -63,7 +63,6 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 
 /** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
-
   /** Since web3Enable enables all available extensions, which is the default behavior
    *  for Polkadot JS apps, some dapps, like the Staking dashboard, provide an extension
    *  list where users can choose specific extensions to enable. Therefore, we utilize

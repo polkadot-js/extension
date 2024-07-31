@@ -25,8 +25,8 @@ compare_directories() {
     fi
 }
 
-move_unzip() {
-    mv ./master-ff-src.zip ./master-ff-build.zip $FILE_PATH && cd $FILE_PATH
+unzip_ff() {
+
     unzip -o master-ff-src.zip -d master-ff-src
     unzip -o master-ff-build.zip -d master-ff-build
 
@@ -37,14 +37,17 @@ if [ "$OS" == "Darwin" ]; then
     echo "Running on macOS"
     # macOS-specific commands go here
 
-    move_unzip
+    mv ./master-ff-src.zip ./master-ff-build.zip $FILE_PATH && cd $FILE_PATH
+
+    unzip_ff
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
 elif [ "$OS" == "Linux" ]; then
     echo "Running on Linux"
     # Linux-specific commands go here
 
-    move_unzip
+    mv -t $FILE_PATH ./master-ff-src.zip ./master-ff-build.zip && cd $FILE_PATH
+    unzip_ff
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
 else

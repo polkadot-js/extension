@@ -12,21 +12,16 @@ mkdir ff-diff
 OS=$(uname)
 FILE_PATH="./ff-diff"
 
-echo $OS
-
-# TODO check if corepack needs to be enabled.
-# Might need unzip
-
 compare_directories() {
     local dir1=$1
     local dir2=$2
 
     if diff -qr "$dir1" "$dir2" | sort; then
         echo "Builds are identical"
-        return 0
+        exit 0
     else
         echo "Builds are not identical"
-        return 1
+        exit 1
     fi
 }
 

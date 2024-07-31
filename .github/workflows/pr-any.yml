@@ -6,7 +6,7 @@ jobs:
     continue-on-error: true
     strategy:
       matrix:
-        step: ['lint', 'test', 'build']
+        step: ['lint', 'test', 'build', diff]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

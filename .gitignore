@@ -30,3 +30,6 @@ docs/html
 .idea
 .vscode
 packages/extension/manifest.json
+
+# Diff script generates ff-diff
+ff-diff

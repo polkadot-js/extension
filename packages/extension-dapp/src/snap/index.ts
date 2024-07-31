@@ -1,9 +1,8 @@
 // Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SignerResult } from '@polkadot/api/types/index.js';
 import type { InjectedAccount, InjectedExtension, InjectedMetadata, InjectedMetadataKnown, InjectedWindowProvider, MetadataDef } from '@polkadot/extension-inject/types';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { SignerPayloadJSON, SignerPayloadRaw, SignerResult } from '@polkadot/types/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { InvokeSnapResult, RequestSnapsResult, Snap, SnapRpcRequestParams } from './types';
 

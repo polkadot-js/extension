@@ -6,6 +6,9 @@ import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, Injec
 import { isPromise, objectSpread, u8aEq } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
+import { injectedMetamaskSnap } from './snap/index.js';
+import { SNAPS } from './snap/snapList.js';
+import { hasMetamask } from './snap/utils.js';
 import { documentReadyPromise } from './util.js';
 
 // expose utility functions
@@ -60,10 +63,51 @@ function filterAccounts (list: InjectedAccount[], genesisHash?: string | null, t
 
 /** @internal retrieves all the extensions available on the window */
 function getWindowExtensions (originName: string): Promise<InjectedExtension[]> {
+  /** Since web3Enable enables all available extensions, which is the default behavior
+   *  for Polkadot JS apps, some dapps, like the Staking dashboard, provide an extension
+   *  list where users can choose specific extensions to enable. Therefore, we utilize
+   *  "Snap only" to inject snaps as an additional feature, suitable for such dapps.
+   * */
+  const isSnapOnlyRequested = ['onlysnap', 'only_snap', 'snaponly', 'snap_only'].includes(originName.toLowerCase());
+  const extensions = isSnapOnlyRequested
+    ? Object.fromEntries(
+      Object.entries(SNAPS).map(([origin, { name }]) => [
+        name,
+        injectedMetamaskSnap(origin),
+      ])
+    )
+    : win.injectedWeb3;
+
+  /** inject snaps into window */
+  if (hasMetamask) {
+    Object.entries(SNAPS).map(([origin, { name }]) => {
+      win.injectedWeb3[name] = injectedMetamaskSnap(origin)
+    })
+  }
+
+  if (isSnapOnlyRequested) {
+    return Promise
+      .all(
+        Object
+          .entries(extensions)
+          .map(([nameOrHash, { version }]): Promise<(InjectedExtension | void)> =>
+            Promise
+              .resolve()
+              .then(() =>
+                objectSpread<InjectedExtension>({ name: nameOrHash, version: version || 'unknown' })
+              )
+              .catch(({ message }: Error): void => {
+                console.error(`Error injecting ${nameOrHash}: ${message}`);
+              })
+          )
+      )
+      .then((exts) => exts.filter((e): e is InjectedExtension => !!e));
+  }
+
   return Promise
     .all(
       Object
-        .entries(win.injectedWeb3)
+        .entries(extensions)
         .map(([nameOrHash, { connect, enable, version }]): Promise<(InjectedExtension | void)> =>
           Promise
             .resolve()
@@ -130,7 +174,7 @@ export function web3Enable (originName: string, compatInits: (() => Promise<bool
                     .catch(console.error);
 
                   return (): void => {
-                    // no ubsubscribe needed, this is a single-shot
+                    // no unsubscribe needed, this is a single-shot
                   };
                 };
               }

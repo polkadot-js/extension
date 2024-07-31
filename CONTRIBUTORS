@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
       92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
-      42	Tarik Gul                     	Bump yarn to 4.3.1 (#1426)
+      43	Tarik Gul                     	Add CI script to check for diffs in src vs build for store release (#1429)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)

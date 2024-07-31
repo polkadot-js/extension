@@ -38,7 +38,7 @@
     "build:zip:src:chrome": "rm -rf ./master-chrome-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-chrome-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
     "build:zip:src:ff": "rm -rf ./master-ff-src.zip && zip -r -x '*build/*' -x '*node_modules*' -FS ./master-ff-src.zip packages .editorconfig eslint.config.js rollup.config.js CHANGELOG.md CONTRIBUTING.md i18next-scanner.config.cjs LICENSE package.json README.md tsconfig.json yarn.lock .yarnrc.yml tsconfig.base.json tsconfig.build.json tsconfig.eslint.json tsconfig.webpack.json",
     "clean": "polkadot-dev-clean-build",
-    "diff": "rm -rf ff-diff && sh ./scripts/diff-ci.sh",
+    "diff": "rm -rf ff-diff && sh ./scripts/diff.sh",
     "lint": "polkadot-dev-run-lint",
     "postinstall": "polkadot-dev-yarn-only",
     "test": "EXTENSION_PREFIX='test' polkadot-dev-run-test --loader ./packages/extension-mocks/src/loader-empty.js --env browser ^:.spec.tsx",

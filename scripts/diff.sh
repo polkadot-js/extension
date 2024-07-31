@@ -12,6 +12,8 @@ mkdir ff-diff
 OS=$(uname)
 FILE_PATH="./ff-diff"
 
+echo $OS
+
 # TODO check if corepack needs to be enabled.
 # Might need unzip
 

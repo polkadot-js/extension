@@ -33,7 +33,7 @@ unzip_ff() {
     cd ./master-ff-src && yarn install && yarn build:ff && cd ..
 }
 
-if [ "$OS" == "Darwin" ]; then
+if [ "$OS" == "Darwin" || "$RUNNER_OS" == "Linux" ]; then
     echo "Running on macOS"
     # macOS-specific commands go here
 
@@ -42,7 +42,7 @@ if [ "$OS" == "Darwin" ]; then
     unzip_ff
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
-elif [ "$OS" == "Linux" ]; then
+elif [ "$OS" == "Linux" || "$RUNNER_OS" == "Linux" ]; then
     echo "Running on Linux"
     # Linux-specific commands go here
 

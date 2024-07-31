@@ -3,8 +3,6 @@
 
 #!/bin/bash
 
-# NOTE THIS WILL ONLY WORK ON LINUX DISTROS - AND IS MEANT FOR THE CI
-
 # build firefox target
 yarn build:ff
 
@@ -49,11 +47,7 @@ elif [ "$OS" == "Linux" ]; then
     echo "Running on Linux"
     # Linux-specific commands go here
 
-    mv -t $FILE_PATH ./master-ff-src.zip ./master-ff-build.zip && cd $FILE_PATH
-    unzip -o master-ff-src.zip -d master-ff-src
-    unzip -o master-ff-build.zip -d master-ff-build
-  
-    cd ./master-ff-src && yarn install && yarn build:ff && cd ..
+    move_unzip
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
 else

@@ -19,10 +19,9 @@ import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isNoAccount, removeStorage } from '@subwallet/extension-koni-ui/utils';
 import { changeHeaderLogo } from '@subwallet/react-ui';
 import { NotificationProps } from '@subwallet/react-ui/es/notification/NotificationProvider';
-import CN from 'classnames';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
@@ -103,6 +102,8 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
   const noAccount = useMemo(() => isNoAccount(accounts), [accounts]);
   const { isUILocked } = useUILock();
   const needUnlock = isUILocked || (isLocked && unlockType === WalletUnlockType.ALWAYS_REQUIRED);
+  const [shouldRedirect, setShouldRedirect] = useState(false);
+  const navigate = useNavigate();
 
   const needMigrate = useMemo(
     () => !!accounts
@@ -249,20 +250,33 @@ function DefaultRoute ({ children }: { children: React.ReactNode }): React.React
     }
   }, [currentAccount, dataLoaded, initAccount]);
 
-  if (rootLoading || redirectPath) {
-    if (redirectPath && currentPage !== redirectPath && allowBlackScreenWS.includes(redirectPath)) {
-      setStorage(redirectPath);
-      window.location.href = `index.html#${redirectPath}`;
+  useEffect(() => {
+    if (rootLoading || redirectPath) {
+      if (redirectPath && currentPage !== redirectPath && allowBlackScreenWS.includes(redirectPath)) {
+        setStorage(redirectPath);
+      }
 
-      return <></>;
+      setShouldRedirect(true);
+    } else {
+      setShouldRedirect(false);
     }
+  }, [rootLoading, redirectPath, currentPage, setStorage]);
 
-    return <>{redirectPath && <Navigate to={redirectPath} />}</>;
+  useEffect(() => {
+    if (shouldRedirect && redirectPath) {
+      navigate(redirectPath);
+    }
+  }, [shouldRedirect, redirectPath, navigate]);
+
+  if (rootLoading || shouldRedirect) {
+    return <></>;
   } else {
-    return <MainWrapper className={CN('main-page-container')}>
-      {children}
-      <BackgroundExpandView />
-    </MainWrapper>;
+    return (
+      <MainWrapper className='main-page-container'>
+        {children}
+        <BackgroundExpandView />
+      </MainWrapper>
+    );
   }
 }
 

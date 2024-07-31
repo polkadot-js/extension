@@ -1,10 +1,10 @@
-    2768	AnhMTV                        	Release version 1.2.21
+    2773	AnhMTV                        	Release version 1.2.22
     2496	Nam Phạm                      	[Issue 3378] feat: update chainlist
-    2169	S2kael                        	[Issue-3378] Fix bug when displaying tip value of confirmation
-     831	lw-cdm                        	
+    2173	S2kael                        	[Issue-2982] Handle case sign message for avail
+     832	lw-cdm                        	[Issue-3148] Refactor the navigation code in the Root component
      537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     230	bluezdot                      	[Issue-3378] fix: add filter for extrinsicHash when retrive Avail OG NFTs
+     231	bluezdot                      	[Issue-3385] Update chainlist
      185	quangdo                       	
      170	Thiendekaco                   	[Issue 3275] [fix] Extension - Handle provider validate
      137	Automation Bot                	[CI Skip] Auto increase webapp build number
@@ -24,6 +24,7 @@
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        5	anhnhu                        	[issue-2231]: add condition branch_name webapp-dev auto increase run scripts change build number
+       5	Frenkie Nguyen                	[Issue-3148] Fix blank screen when import account
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	

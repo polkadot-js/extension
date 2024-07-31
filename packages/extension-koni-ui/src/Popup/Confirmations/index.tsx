@@ -19,7 +19,7 @@ import { SignerPayloadJSON } from '@polkadot/types/types';
 import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, ErrorRequestConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
@@ -33,8 +33,11 @@ const titleMap: Record<ConfirmationType, string> = {
   signingRequest: detectTranslate('Signature request'),
   switchNetworkRequest: detectTranslate('Add network request'),
   connectWCRequest: detectTranslate('WalletConnect'),
-  notSupportWCRequest: detectTranslate('WalletConnect')
+  notSupportWCRequest: detectTranslate('WalletConnect'),
+  errorConnectNetwork: detectTranslate('Request Error')
 } as Record<ConfirmationType, string>;
+
+const ERROR_CONFIRMATION_TYPE = ['errorConnectNetwork'];
 
 const alertModalId = 'confirmation-alert-modal';
 
@@ -44,7 +47,6 @@ const Component = function ({ className }: Props) {
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-
   const { transactionRequest } = useSelector((state) => state.requestState);
 
   const nextConfirmation = useCallback(() => {
@@ -126,6 +128,10 @@ const Component = function ({ className }: Props) {
           openAlert={openAlert}
         />
       );
+    }
+
+    if (ERROR_CONFIRMATION_TYPE.includes(confirmation.type)) {
+      return <ErrorRequestConfirmation confirmation={confirmation} />;
     }
 
     switch (confirmation.type) {

@@ -66,6 +66,8 @@ const passworder = require('browser-passworder');
 
 const ETH_DERIVE_DEFAULT = '/m/44\'/60\'/0\'/0/0';
 
+const ERROR_CONFIRMATION_TYPE = ['errorConnectNetwork'];
+
 // List of providers passed into constructor. This is the list of providers
 // exposed by the extension.
 type Providers = Record<string, {
@@ -1431,7 +1433,17 @@ export default class KoniState {
       ];
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
-    const { errors, networkKey: networkKey_ } = result;
+    const { confirmationType, errors, networkKey: networkKey_ } = result;
+
+    if (errors && errors.length > 0 && confirmationType) {
+      if (ERROR_CONFIRMATION_TYPE.includes(confirmationType)) {
+        return this.requestService.addConfirmation(id, url, confirmationType, result, {})
+          .then(() => {
+            throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
+          });
+      }
+    }
+
     const transactionValidated = result.payloadAfterValidated as EvmSendTransactionRequest;
     const networkKey = networkKey_ || '';
 

@@ -42,7 +42,7 @@ if [ "$OS" == "Darwin" || "$RUNNER_OS" == "Linux" ]; then
     unzip_ff
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
-elif [ "$OS" == "Linux" || "$RUNNER_OS" == "Linux" ]; then
+else # Assuming it will be Linux
     echo "Running on Linux"
     # Linux-specific commands go here
 
@@ -50,7 +50,4 @@ elif [ "$OS" == "Linux" || "$RUNNER_OS" == "Linux" ]; then
     unzip_ff
     
     compare_directories ./master-ff-build ./master-ff-src/packages/extension/build
-else
-    echo "Unsupported OS: $OS"
-    exit 1
 fi

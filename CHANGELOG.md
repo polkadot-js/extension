@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 1.2.22
+Build date: Jul 31, 2024.
+
+Features & Update:
+- Update chain-list (#3385)
+- Integrate Avail Ledger app (#2982)
+
+Bugs fixed:
+- Fix bug Show incorrect withdrawal information of the Bifrost liquid staking when all accounts mode (#3327)
+- Fix bug do not show root screen after remove account (#3148)
+- Fix bug Show blank screen when attach account (#3054)
+
+
 ## 1.2.21
 Build date: Jul 24, 2024.
 

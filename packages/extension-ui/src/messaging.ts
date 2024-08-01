@@ -15,6 +15,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { getId } from '@polkadot/extension-base/utils/getId';
+import { ensurePortConnection } from '@polkadot/extension-base/utils/portUtils';
 import { metadataExpand } from '@polkadot/extension-chains';
 
 import allChains from './util/chains.js';
@@ -30,41 +31,11 @@ interface Handler {
 
 type Handlers = Record<string, Handler>;
 
-async function wakeupBackground (): Promise<Error | null> {
-  try {
-    await chrome.runtime.sendMessage({ type: 'wakeup' });
-
-    return null;
-  } catch (cause) {
-    return cause instanceof Error ? cause : new Error(String(cause));
-  }
-}
-
-async function createPort (name: string, maxAttempts: number, delayMs: number): Promise<chrome.runtime.Port> {
-  let lastError: Error | null = null;
-
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const error = await wakeupBackground();
-
-    if (error) {
-      lastError = error;
-      await new Promise((resolve) => setTimeout(resolve, delayMs));
-      continue;
-    }
-
-    const port = chrome.runtime.connect({ name });
-
-    return port;
-  }
-
-  throw new Error('Failed to create port after multiple attempts', { cause: lastError });
-}
-
-const port = await createPort(PORT_EXTENSION, 5, 1000);
 const handlers: Handlers = {};
 
-// setup a listener for messages, any incoming resolves the promise
-port.onMessage.addListener((data: Message['data']): void => {
+let port: chrome.runtime.Port | undefined;
+
+function onPortMessageHandler (data: Message['data']): void {
   const handler = handlers[data.id];
 
   if (!handler) {
@@ -85,7 +56,18 @@ port.onMessage.addListener((data: Message['data']): void => {
   } else {
     handler.resolve(data.response);
   }
-});
+}
+
+function onPortDisconnectHandler (): void {
+  port = undefined;
+}
+
+const portConfig = {
+  onPortDisconnectHandler,
+  onPortMessageHandler,
+  portName: PORT_EXTENSION
+};
+
 
 function sendMessage<TMessageType extends MessageTypesWithNullRequest>(message: TMessageType): Promise<ResponseTypes[TMessageType]>;
 function sendMessage<TMessageType extends MessageTypesWithNoSubscriptions>(message: TMessageType, request: RequestTypes[TMessageType]): Promise<ResponseTypes[TMessageType]>;
@@ -96,7 +78,13 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     handlers[id] = { reject, resolve, subscriber };
 
-    port.postMessage({ id, message, request: request || {} });
+    ensurePortConnection(port, portConfig).then((connectedPort) => {
+      connectedPort.postMessage({ id, message, request: request || {} });
+      port = connectedPort;
+    }).catch((error) => {
+      console.error(`Failed to send message: ${(error as Error).message}`);
+      reject(error);
+    });
   });
 }
 

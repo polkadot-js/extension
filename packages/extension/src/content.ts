@@ -4,15 +4,24 @@
 import type { Message } from '@polkadot/extension-base/types';
 
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
+import { ensurePortConnection } from '@polkadot/extension-base/utils/portUtils';
 import { chrome } from '@polkadot/extension-inject/chrome';
 
-// connect to the extension
-const port = chrome.runtime.connect({ name: PORT_CONTENT });
+let port: chrome.runtime.Port | undefined;
 
-// send any messages from the extension back to the page
-port.onMessage.addListener((data): void => {
+function onPortMessageHandler (data: Message['data']): void {
   window.postMessage({ ...data, origin: MESSAGE_ORIGIN_CONTENT }, '*');
-});
+}
+
+function onPortDisconnectHandler (): void {
+  port = undefined;
+}
+
+const portConfig = {
+  onPortDisconnectHandler,
+  onPortMessageHandler,
+  portName: PORT_CONTENT
+};
 
 // all messages from the page, pass them to the extension
 window.addEventListener('message', ({ data, source }: Message): void => {
@@ -21,7 +30,10 @@ window.addEventListener('message', ({ data, source }: Message): void => {
     return;
   }
 
-  port.postMessage(data);
+  ensurePortConnection(port, portConfig).then((connectedPort) => {
+    connectedPort.postMessage(data);
+    port = connectedPort;
+  }).catch((error) => console.error(`Failed to send message: ${(error as Error).message}`));
 });
 
 // inject our data injector

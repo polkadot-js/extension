@@ -54,7 +54,8 @@ export const _NFT_CHAIN_GROUP = {
   unique_network: ['unique_network', 'quartz', 'opal'],
   unique_evm: ['unique_evm'],
   bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
-  vara: ['vara_network']
+  vara: ['vara_network'],
+  avail: ['avail_mainnet']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
@@ -212,7 +213,8 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
   polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
   vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
-  vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 }
+  vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
+  avail_mainnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, maxInflation: 0.05, minInflation: 0.01 }
 };
 
 // Send fund------------------------------------------------------------------------------------------------------------

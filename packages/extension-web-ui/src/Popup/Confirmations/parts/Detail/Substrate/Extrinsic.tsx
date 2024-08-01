@@ -151,7 +151,7 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
           decimals={chainInfo?.substrateInfo?.decimals || 0}
           label={t<string>('Tip')}
           suffix={chainInfo?.substrateInfo?.symbol}
-          value={tip.toNumber()}
+          value={tip.toPrimitive() as string | number}
         />
       )}
       {renderMethod(method, decoded, t)}

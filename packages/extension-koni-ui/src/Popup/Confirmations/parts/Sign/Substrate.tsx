@@ -3,12 +3,12 @@
 
 import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestSign } from '@subwallet/extension-base/background/types';
-import { _isRuntimeUpdated, detectTranslate, getShortMetadata } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertBox, AlertModal } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL, NotNeedMigrationGens, SUBSTRATE_GENERIC_KEY } from '@subwallet/extension-koni-ui/constants';
 import { InjectContext } from '@subwallet/extension-koni-ui/contexts/InjectContext';
 import { useAlert, useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-koni-ui/hooks';
-import { approveSignPasswordV2, approveSignSignature, cancelSignRequest } from '@subwallet/extension-koni-ui/messaging';
+import { approveSignPasswordV2, approveSignSignature, cancelSignRequest, shortenMetadata } from '@subwallet/extension-koni-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-koni-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
@@ -246,6 +246,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [addExtraData, chain, isMessage, isMetadataOutdated, isMissingData, isRuntimeUpdated, loadingChain, networkName, signMode, t]);
 
   const activeLedger = useMemo(() => isLedger && !loadingChain && alertData?.type !== 'error', [isLedger, loadingChain, alertData?.type]);
+  const forceUseMigrationApp = useMemo(() => isRuntimeUpdated || (isMessage && chainSlug !== 'avail_mainnet'), [isRuntimeUpdated, isMessage, chainSlug]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -254,7 +255,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, forceUseMigrationApp);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 
@@ -334,7 +335,7 @@ const Component: React.FC<Props> = (props: Props) => {
         if (isRuntimeUpdated) {
           try {
             const blob = u8aToHex(payloadU8a);
-            const shortener = await getShortMetadata(chainInfo?.slug || '', blob);
+            const { txMetadata: shortener } = await shortenMetadata(chainInfo?.slug || '', blob);
 
             metadata = hexToU8a(shortener);
           } catch (e) {

@@ -1,5 +1,78 @@
 # CHANGELOG
 
+## 1.2.21
+Build date: Jul 24, 2024.
+
+Bugs fixed:
+Fix a few bugs for Avail (#3378)
+  - Add AVAIL token on Ethereum
+  - Integrate Avail OG NFT
+  - Setup default nomination pool online
+  - Update Avail staking APY
+  - Fix bug when click "View details" on the Sign transaction from dApp
+
+## 1.2.20
+Build date: Jul 24, 2024.
+
+Features & Update:
+- Update chain-list for Avail
+
+
+## 1.2.19
+Build date: Jul 23, 2024.
+
+Features & Update:
+- Update chain-list for Avail
+
+## 1.2.18
+Build date: Jul 23, 2024.
+
+Features & Update:
+- Update chain-list for Avail (#3369)
+
+## 1.2.17
+Build date: Jul 22, 2024.
+
+Features & Update:
+- Set default pool and default validator for Avail (#3365)
+
+
+## 1.2.16
+Build date: Jul 19, 2024.
+
+Features & Update:
+- Move step shorten metadata and calculate metadataHash to client (#3305)
+- Add support Ledger for Polkadex (#3231)
+- Improve the staking reward information retrieval (#3326)
+- Update Vara token sdk version (#3270)
+- Update chain-list
+  - Remove Avail Goldberg testnet
+  - Add support for Aleph Zero EVM testnet
+  - Add support for Cere Network
+  - Add KOL / Kolkadot on PAH, Hydration
+
+Bugs fixed:
+- Fix bug connecting to uquid dapp with Wallet Connect (#3275)
+
+
+## 1.2.15
+Build date: Jul 12, 2024.
+
+Features & Update:
+- Update chain-list
+  - Add support for Aura Network
+  - Update SQD token logo
+  - Support Decoded collection from Unique
+  - Add multi-chain asset for some token
+- Update chain-list health-check and report RPC connect status (#3243)
+- Update fallback API for SubWallet API (Price, Exchange rate) (#3183)
+- Add validate account in case sign transaction with Ledger account (#3263)
+
+Bugs fixed:
+- Fix bug calculating balance for relaychain (#3312)
+- Fix bug show withdraw information for the Acala liquid staking (#2965)
+
+
 ## 1.2.14
 Build date: Jul 09, 2024.
 

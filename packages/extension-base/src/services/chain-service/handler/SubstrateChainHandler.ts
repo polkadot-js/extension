@@ -9,13 +9,10 @@ import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-s
 import { SubstrateApi } from '@subwallet/extension-base/services/chain-service/handler/SubstrateApi';
 import { _ApiOptions, _SubstrateChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _SmartContractTokenInfo, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
-import { DEFAULT_GEAR_ADDRESS, getGRC20ContractPromise } from '@subwallet/extension-base/utils';
+import { cacheMetadata, GEAR_DEFAULT_ADDRESS, getGRC20ContractPromise, getVFTContractPromise } from '@subwallet/extension-base/utils';
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
-import { RuntimeVersion } from '@polkadot/types/interfaces';
-import { Registry } from '@polkadot/types/types';
-import { getSpecExtensions, getSpecTypes } from '@polkadot/types-known';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
@@ -164,7 +161,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   private async getGrc20TokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
     if (!(apiPromise instanceof GearApi)) {
-      console.warn('Cannot subscribe VFT balance without GearApi instance');
+      console.warn('Cannot subscribe GRC20 balance without GearApi instance');
 
       return ['', -1, '', true];
     }
@@ -173,9 +170,34 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     const tokenContract = getGRC20ContractPromise(apiPromise, contractAddress);
 
     const [nameRes, symbolRes, decimalsRes] = await Promise.all([
-      tokenContract.name(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.symbol(DEFAULT_GEAR_ADDRESS.ALICE),
-      tokenContract.decimals(DEFAULT_GEAR_ADDRESS.ALICE)
+      tokenContract.service.name(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.symbol(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.decimals(GEAR_DEFAULT_ADDRESS)
+    ]);
+
+    const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
+
+    if (!nameRes || !symbolRes) {
+      contractError = true;
+    }
+
+    return [nameRes, decimals, symbolRes, contractError];
+  }
+
+  private async getVftTokenInfo (apiPromise: ApiPromise, contractAddress: string): Promise<[string, number, string, boolean]> {
+    if (!(apiPromise instanceof GearApi)) {
+      console.warn('Cannot subscribe VFT balance without GearApi instance');
+
+      return ['', -1, '', true];
+    }
+
+    let contractError = false;
+    const tokenContract = getVFTContractPromise(apiPromise, contractAddress);
+
+    const [nameRes, symbolRes, decimalsRes] = await Promise.all([
+      tokenContract.service.name(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.symbol(GEAR_DEFAULT_ADDRESS),
+      tokenContract.service.decimals(GEAR_DEFAULT_ADDRESS)
     ]);
 
     const decimals = typeof decimalsRes === 'string' ? parseInt(decimalsRes) : decimalsRes;
@@ -201,17 +223,15 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       switch (tokenType) {
         case _AssetType.PSP22:
           [name, decimals, symbol, contractError] = await this.getPsp22TokenInfo(apiPromise, contractAddress, contractCaller);
-
           break;
-
         case _AssetType.PSP34:
           [name, decimals, symbol, contractError] = await this.getPsp34TokenInfo(apiPromise, contractAddress, contractCaller);
-
           break;
-
         case _AssetType.GRC20:
           [name, decimals, symbol, contractError] = await this.getGrc20TokenInfo(apiPromise, contractAddress);
-
+          break;
+        case _AssetType.VFT:
+          [name, decimals, symbol, contractError] = await this.getVftTokenInfo(apiPromise, contractAddress);
           break;
       }
 
@@ -245,36 +265,10 @@ export class SubstrateChainHandler extends AbstractChainHandler {
 
   public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
-    const metadata = await this.parent?.getMetadata(chainSlug);
 
     const updateMetadata = (substrateApi: _SubstrateApi) => {
       // Update metadata to database with async methods
-      substrateApi.api.isReady.then(async (api) => {
-        const [runtimeVersion, genesisHash, runtimeMetadata, systemChain, registry] = await Promise.all([
-          substrateApi.makeRpcQuery<RuntimeVersion>({ section: 'runtimeVersion' }),
-          substrateApi.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }),
-          substrateApi.makeRpcQuery<`0x${string}`>({ section: 'runtimeMetadata' }),
-          substrateApi.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' }),
-          substrateApi.makeRpcQuery<Registry>({ section: 'registry' })
-        ]);
-
-        // Avoid date existed metadata
-        if (metadata && metadata.specVersion === runtimeVersion.specVersion.toString() && metadata.genesisHash === genesisHash) {
-          return;
-        }
-
-        // const _metadata: Option<OpaqueMetadata> = await api.call.metadata.metadataAtVersion(15);
-        // const metadataHex = _metadata.isSome ? _metadata.unwrap().toHex().slice(2) : ''; // Need unwrap to create metadata object
-
-        this.parent?.upsertMetadata(chainSlug, {
-          chain: chainSlug,
-          genesisHash: genesisHash,
-          specVersion: runtimeVersion.toString(),
-          hexValue: runtimeMetadata,
-          types: getSpecTypes(registry, systemChain, runtimeVersion.specName, runtimeVersion.specVersion) as unknown as Record<string, string>,
-          userExtensions: getSpecExtensions(registry, systemChain, runtimeVersion.specName)
-        }).catch(console.error);
-      }).catch(console.error);
+      cacheMetadata(chainSlug, substrateApi, this.parent);
     };
 
     // Return existed to avoid re-init metadata
@@ -291,6 +285,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       return existed;
     }
 
+    const metadata = await this.parent?.getMetadata(chainSlug);
     const apiObject = new SubstrateApi(chainSlug, apiUrl, { providerName, metadata, externalApiPromise });
 
     apiObject.connectionStatusSubject.subscribe(this.handleConnection.bind(this, chainSlug));

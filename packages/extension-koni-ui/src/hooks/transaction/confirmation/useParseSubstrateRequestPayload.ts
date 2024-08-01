@@ -4,13 +4,15 @@
 import type { Chain } from '@subwallet/extension-chains/types';
 
 import { RequestSign } from '@subwallet/extension-base/background/types';
-import { _isRuntimeUpdated, getMetadataHash } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated } from '@subwallet/extension-base/utils';
+import { getMetadataHash } from '@subwallet/extension-koni-ui/messaging';
 import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
 import { useEffect, useMemo, useState } from 'react';
 
 import { TypeRegistry } from '@polkadot/types';
 import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import { HexString } from '@polkadot/util/types';
 
 import { useGetChainInfoByGenesisHash } from '../../chain';
 
@@ -78,7 +80,7 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
 
         if (metadataHash) {
           _payload.mode = 1;
-          _payload.metadataHash = `0x${metadataHash}`;
+          _payload.metadataHash = metadataHash as HexString;
         }
 
         return _registry.createType('ExtrinsicPayload', _payload, { version: _payload.version });
@@ -98,7 +100,7 @@ const useParseSubstrateRequestPayload = (chain: Chain | null, request?: RequestS
       setHashLoading(true);
 
       getMetadataHash(chainSlug)
-        .then((metadataHash) => {
+        .then(({ metadataHash }) => {
           setMetadataHash(metadataHash);
         })
         .catch(console.log)

@@ -6,3 +6,4 @@ export * from './chainAndAsset';
 export * from './defaultChains';
 export * from './getNetworkJsonByGenesisHash';
 export * from './getNetworkMap';
+export * from './fetchNetworkByChainId';

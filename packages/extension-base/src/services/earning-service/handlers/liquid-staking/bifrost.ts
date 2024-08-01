@@ -264,10 +264,9 @@ export default class BifrostLiquidStakingPoolHandler extends BaseLiquidStakingPo
         }
       }
 
-      const unstakingList: UnstakingInfo[] = [];
-
       useAddresses.forEach((address) => {
         const formattedAddress = reformatAddress(address);
+        const unstakingList: UnstakingInfo[] = [];
 
         const bnActiveBalance = activeBalanceMap[formattedAddress];
         const unlockings = unlockingMap[formattedAddress];

@@ -2169,7 +2169,8 @@ export default class KoniState {
     return this.chainService?.mantaPay?.subscribeSyncState();
   }
 
-  // Metadata
+  /* Metadata */
+
   public async findMetadata (hash: string) {
     const metadata = await this.chainService.getMetadataByHash(hash);
 
@@ -2180,6 +2181,16 @@ export default class KoniState {
       userExtensions: metadata?.userExtensions
     };
   }
+
+  public async calculateMetadataHash (chain: string) {
+    return this.chainService.calculateMetadataHash(chain);
+  }
+
+  public async shortenMetadata (chain: string, txBlob: string) {
+    return this.chainService.shortenMetadata(chain, txBlob);
+  }
+
+  /* Metadata */
 
   public getCrowdloanContributions ({ address, page, relayChain }: RequestCrowdloanContributions) {
     return this.subscanService.getCrowdloanContributions(relayChain, address, page);

@@ -123,7 +123,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
                   className='connectedAccounts'
                   to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
                 >
-                  <span className='greenDot'>•</span>Connected
+                  <span className='greenDot'>•</span>Connect Accounts
                 </Link>
               </div>
             )}

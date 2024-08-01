@@ -230,6 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, isMetadataOutdated, t, networkName, isMissingData, addExtraData]);
 
   const activeLedger = useMemo(() => isLedger && !loadingChain && alertData?.type !== 'error', [isLedger, loadingChain, alertData?.type]);
+  const forceUseMigrationApp = useMemo(() => isRuntimeUpdated || (isMessage && chainSlug !== 'avail_mainnet'), [isRuntimeUpdated, isMessage, chainSlug]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -238,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, forceUseMigrationApp);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 

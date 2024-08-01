@@ -142,7 +142,7 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
       const balanceInfo = _balance as unknown as FrameSystemAccountInfo;
       const poolMemberInfo = poolMemberInfos[index] as unknown as PalletNominationPoolsPoolMember;
 
-      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : 0n;
+      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : BigInt(0);
 
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), extrinsicType);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);

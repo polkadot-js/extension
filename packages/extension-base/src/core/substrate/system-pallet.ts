@@ -51,7 +51,7 @@ function _getAppliedExistentialDeposit (accountInfo: FrameSystemAccountInfo, exi
     return bnExistentialDeposit;
   }
 
-  return _canAccountBeReaped(accountInfo) ? 0n : bnExistentialDeposit; // account for ED here will go better with max transfer logic
+  return _canAccountBeReaped(accountInfo) ? BigInt(0) : bnExistentialDeposit; // account for ED here will go better with max transfer logic
 }
 
 function _getSystemPalletTransferableV2 (accountInfo: FrameSystemAccountInfoV2, existentialDeposit: string, strictMode?: boolean): bigint {

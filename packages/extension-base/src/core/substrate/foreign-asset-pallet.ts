@@ -9,7 +9,7 @@ export function _getForeignAssetPalletTransferable (accountInfo: PalletAssetsAss
   const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
 
   if (!accountInfo || accountInfo.status !== 'Liquid') {
-    return 0n;
+    return BigInt(0);
   }
 
   const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
@@ -19,7 +19,7 @@ export function _getForeignAssetPalletTransferable (accountInfo: PalletAssetsAss
 
 export function _getForeignAssetPalletLockedBalance (accountInfo: PalletAssetsAssetAccount | undefined): bigint {
   if (!accountInfo || accountInfo.status === 'Liquid') {
-    return 0n;
+    return BigInt(0);
   }
 
   return BigInt(accountInfo.balance);

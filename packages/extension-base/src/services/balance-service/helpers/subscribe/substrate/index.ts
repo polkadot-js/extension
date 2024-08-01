@@ -21,8 +21,6 @@ import { filterAssetsByChainAndType } from '@subwallet/extension-base/utils';
 import BigN from 'bignumber.js';
 
 import { ContractPromise } from '@polkadot/api-contract';
-import { noop, u8aToHex } from '@polkadot/util';
-import { decodeAddress } from '@polkadot/util-crypto';
 
 import { subscribeERC20Interval } from '../evm';
 import { subscribeEquilibriumTokenBalance } from './equilibrium';

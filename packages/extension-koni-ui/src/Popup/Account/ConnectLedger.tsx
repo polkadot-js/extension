@@ -61,7 +61,9 @@ const Component: React.FC<Props> = (props: Props) => {
       slug: network.slug
     })), [supportedLedger]);
 
-  const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger.map((network) => ({
+  const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger
+    .filter(({ isHide }) => !isHide)
+    .map((network) => ({
     name: network.networkName.replace(' network', ''),
     slug: network.slug
   })).sort(funcSortByName), [migrateSupportLedger]);

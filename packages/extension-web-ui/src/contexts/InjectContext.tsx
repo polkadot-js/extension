@@ -471,7 +471,7 @@ export const InjectContextProvider: React.FC<Props> = ({ children }: Props) => {
     injectHandler.noFindAccounts.subscribe((v) => {
       if (v) {
         notify({
-          message: t('No account found, please add account in your wallet extension or unlock it!'),
+          message: t('{{wallet}} extension disconnected. Re-connect the {{wallet}} extension and select accounts you want to connect.', { replace: { wallet: injectHandler.selectedWallet } }),
           type: 'warning',
           duration: 8
 

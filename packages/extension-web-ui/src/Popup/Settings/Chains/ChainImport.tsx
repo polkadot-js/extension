@@ -7,7 +7,7 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import InfoIcon from '@subwallet/extension-web-ui/components/Icon/InfoIcon';
-import { DEFAULT_ROUTER_PATH } from '@subwallet/extension-web-ui/constants';
+import { DEFAULT_ROUTER_PATH, WALLET_CONNECT_CREATE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-web-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
@@ -82,7 +82,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     if (location?.useGoHome) {
       location?.id
         ? handleWCCancel(location.id).finally(() => {
-          navigate(DEFAULT_ROUTER_PATH);
+          navigate(DEFAULT_ROUTER_PATH, { state: { useOpenModal: WALLET_CONNECT_CREATE_MODAL } });
         })
         : navigate(DEFAULT_ROUTER_PATH);
     } else {

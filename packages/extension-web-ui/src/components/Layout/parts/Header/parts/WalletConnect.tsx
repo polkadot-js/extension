@@ -18,7 +18,6 @@ import styled, { useTheme } from 'styled-components';
 const Component: React.FC<ThemeProps> = ({ className }: ThemeProps) => {
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { token } = useTheme() as Theme;
-
   const { t } = useTranslation();
 
   const sessions = useSelector((state) => state.walletConnect.sessions);

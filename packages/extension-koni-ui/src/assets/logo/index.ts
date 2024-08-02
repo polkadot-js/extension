@@ -29,7 +29,7 @@ export const DefaultLogosMap: Record<string, string> = {
   currency_hkd: '/images/projects/CurrencyHKD.png',
   currency_vnd: '/images/projects/CurrencyVND.png',
   [SUBSTRATE_GENERIC_KEY]: './images/projects/polkadot.png',
-  [SUBSTRATE_MIGRATION_KEY]: './images/projects/polkadot.png'
+  [SUBSTRATE_MIGRATION_KEY]: './images/projects/polkadot-migration.png'
 };
 
 export const IconMap = {

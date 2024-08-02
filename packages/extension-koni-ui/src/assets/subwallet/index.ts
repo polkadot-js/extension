@@ -22,7 +22,7 @@ const SwLogosMap: Record<string, string> = {
   hydradx_mainnet: DefaultLogosMap.hydradx,
   hydradx_testnet: DefaultLogosMap.hydradx,
   [SUBSTRATE_GENERIC_KEY]: DefaultLogosMap[SUBSTRATE_GENERIC_KEY],
-  [SUBSTRATE_MIGRATION_KEY]: DefaultLogosMap[SUBSTRATE_GENERIC_KEY],
+  [SUBSTRATE_MIGRATION_KEY]: DefaultLogosMap[SUBSTRATE_MIGRATION_KEY],
   [SwapProviderId.POLKADOT_ASSET_HUB.toLowerCase()]: DefaultLogosMap.polkadot_assethub,
   [SwapProviderId.KUSAMA_ASSET_HUB.toLowerCase()]: DefaultLogosMap.kusama_assethub,
   [SwapProviderId.ROCOCO_ASSET_HUB.toLowerCase()]: DefaultLogosMap.rococo_assethub

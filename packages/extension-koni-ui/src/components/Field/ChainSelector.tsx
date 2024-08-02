@@ -53,10 +53,10 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         className='chain-logo'
         network={value}
         shape='circle'
-        size={token.controlHeightSM}
+        size={token.sizeMD}
       />
     );
-  }, [value, token.controlHeightSM]);
+  }, [value, token.sizeMD]);
 
   const renderItem = useCallback((item: ChainItemType, selected: boolean) => {
     if (item.disabled && !!messageTooltip) {
@@ -168,9 +168,13 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     },
 
     '.ant-network-item.disabled': {
-      opacity: 0.4,
+      opacity: token.opacityDisable,
       '.ant-network-item-content': {
-        cursor: 'not-allowed'
+        cursor: 'not-allowed',
+
+        '&:hover': {
+          backgroundColor: token.colorBgSecondary
+        }
       }
     }
   });

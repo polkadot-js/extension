@@ -11,9 +11,9 @@ export const POLKADOT_SLIP_44 = 354;
 
 export const PredefinedLedgerNetwork: LedgerNetwork[] = [
   {
-    accountName: 'Polkadot new',
+    accountName: 'Polkadot',
     appName: 'Polkadot',
-    networkName: 'Polkadot (new)',
+    networkName: 'Polkadot',
     genesisHash: '',
     network: 'polkadot',
     icon: 'substrate',
@@ -421,9 +421,9 @@ export const PredefinedMigrationLedgerNetwork: MigrationLedgerNetwork[] = [
     isHide: true
   },
   {
-    accountName: 'HydraDX',
-    appName: 'HydraDX',
-    networkName: 'HydraDX network',
+    accountName: 'Hydration',
+    appName: 'Hydration',
+    networkName: 'Hydration network',
     genesisHash: ChainInfoMap.hydradx_main.substrateInfo?.genesisHash || '0xafdc188f45c71dacbaa0b62e16a91f726c7b8699a9748cdf715459de6b7f366d',
     network: 'hydradx',
     slug: ChainInfoMap.hydradx_main.slug,

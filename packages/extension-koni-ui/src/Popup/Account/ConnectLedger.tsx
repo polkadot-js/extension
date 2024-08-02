@@ -62,8 +62,8 @@ const Component: React.FC<Props> = (props: Props) => {
     })), [supportedLedger]);
 
   const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger
-    .filter(({ isHide }) => !isHide)
     .map((network) => ({
+      disabled: network.isHide,
       name: network.networkName.replace(' network', ''),
       slug: network.slug
     })).sort(funcSortByName), [migrateSupportLedger]);
@@ -215,7 +215,7 @@ const Component: React.FC<Props> = (props: Props) => {
       return (
         <AccountItemWithName
           accountName={item.name}
-          address={chainMigrateMode ? originAddress : item.address}
+          address={item.address}
           className={CN({ disabled: disabled })}
           direction='vertical'
           genesisHash={selectedChain?.genesisHash}
@@ -226,7 +226,7 @@ const Component: React.FC<Props> = (props: Props) => {
         />
       );
     };
-  }, [accounts, chainMigrateMode, onClickItem, selectedChain?.genesisHash]);
+  }, [accounts, onClickItem, selectedChain?.genesisHash]);
 
   const onSubmit = useCallback(() => {
     if (!selectedAccounts.length || !selectedChain) {
@@ -328,6 +328,7 @@ const Component: React.FC<Props> = (props: Props) => {
                     id={'migrate-chain-select-modal-id'}
                     items={networkMigrates}
                     label={t('Select network')}
+                    messageTooltip={'Please connect this network using the Polkadot (new) app'}
                     onChange={onMigrateChainChange}
                     placeholder={t('Select network')}
                     value={chainMigrateMode}

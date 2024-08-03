@@ -20,7 +20,7 @@ export function convertErrorMessage (err: Error): string {
     message.includes('connection not open') ||
     message.includes('connection timeout')
   ) {
-    return 'No Internet connection. Check your connection and try again';
+    return 'Unstable network connection. Re-enable the network or change RPC and try again';
   }
 
   return err.message;

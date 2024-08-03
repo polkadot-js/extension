@@ -447,7 +447,6 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
-      fontSize: token.fontSizeHeading5,
       alignItems: 'center',
       flex: 1,
       overflow: 'hidden'

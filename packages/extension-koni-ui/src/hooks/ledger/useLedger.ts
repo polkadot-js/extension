@@ -168,8 +168,8 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
     setRefreshLock(true);
   }, []);
 
-  const handleError = useCallback((error: Error, expandError = true) => {
-    const convertedError = convertLedgerError(error, t, appName, isSigning, expandError);
+  const handleError = useCallback((error: Error, expandError = true, isGetAddress = false) => {
+    const convertedError = convertLedgerError(error, t, appName, isSigning, expandError, isGetAddress);
     const message = convertedError.message;
 
     switch (convertedError.status) {
@@ -244,14 +244,18 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
           if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
             throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
           }
-        })
-        .then(() => {
-          return ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption);
-        }).then((result) => {
-          resolve(result);
+
+          ledger.signTransaction(message, metadata, accountOffset, addressOffset, accountOption)
+            .then((result) => {
+              resolve(result);
+            })
+            .catch((error: Error) => {
+              handleError(error);
+              reject(error);
+            });
         })
         .catch((error: Error) => {
-          handleError(error);
+          handleError(error, true, true);
           reject(error);
         });
     } else {
@@ -272,14 +276,18 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
           if (address && !isSameAddress(addressOnCurrentLedger.address, address)) {
             throw new Error(t('Wrong device. Connect your previously used Ledger and try again'));
           }
-        })
-        .then(() => {
-          return ledger.signMessage(message, accountOffset, addressOffset, accountOption);
-        }).then((result) => {
-          resolve(result);
+
+          ledger.signMessage(message, accountOffset, addressOffset, accountOption)
+            .then((result) => {
+              resolve(result);
+            })
+            .catch((error: Error) => {
+              handleError(error);
+              reject(error);
+            });
         })
         .catch((error: Error) => {
-          handleError(error);
+          handleError(error, true, true);
           reject(error);
         });
     } else {
@@ -314,7 +322,7 @@ export function useLedger (chainSlug?: string, active = true, isSigning = false,
         })
         .catch((error: Error) => {
           setIsLoading(false);
-          handleError(error, false);
+          handleError(error, false, true);
           setIsLocked(true);
           console.error(error);
         });

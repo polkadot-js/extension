@@ -8,7 +8,6 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
   const { appBannerMap,
     bannerHistoryMap,
     checkBannerVisible,
-    checkPopupExistTime,
     checkPositionParam,
     handleButtonClick,
     updateBannerHistoryMap } = useContext(AppOnlineContentContext);
@@ -30,12 +29,13 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
   );
 
   const banners = useMemo(() => {
+    console.log('appBannerMap Ui', appBannerMap);
     const displayedBanner = appBannerMap[screen];
 
     if (displayedBanner && displayedBanner.length) {
       return displayedBanner.filter((banner) => {
         const bannerHistory = bannerHistoryMap[`${banner.position}-${banner.id}`];
-        const isBannerVisible = checkBannerVisible(bannerHistory?.showTimes) && checkPopupExistTime(banner.info);
+        const isBannerVisible = checkBannerVisible(bannerHistory?.showTimes);
 
         if (compareValue) {
           return checkPositionParam(screen, banner.position_params, compareValue) && isBannerVisible;
@@ -51,7 +51,6 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
     screen,
     bannerHistoryMap,
     checkBannerVisible,
-    checkPopupExistTime,
     compareValue,
     checkPositionParam
   ]);

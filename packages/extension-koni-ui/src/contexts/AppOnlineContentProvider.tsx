@@ -1,16 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { fetchStaticData } from '@subwallet/extension-base/utils';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { AppPopupModalContext, AppPopupModalInfo } from '@subwallet/extension-koni-ui/contexts/AppPopupModalContext';
-import { useGroupYieldPosition } from '@subwallet/extension-koni-ui/hooks';
 import { useGetAppInstructionData } from '@subwallet/extension-koni-ui/hooks/static-content/useGetAppInstructionData';
 import { useHandleAppBannerMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppBannerMap';
 import { useHandleAppConfirmationMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppConfirmationMap';
 import { useHandleAppPopupMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppPopupMap';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EarningPoolsParam, EarningPositionDetailParam } from '@subwallet/extension-koni-ui/types';
-import { AppBannerData, AppBasicInfoData, AppConfirmationData, AppPopupData, OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -31,7 +30,6 @@ interface AppOnlineContentContextType {
   updatePopupHistoryMap: (id: string) => void;
   updateBannerHistoryMap: (ids: string[]) => void;
   updateConfirmationHistoryMap: (id: string) => void;
-  checkPopupExistTime: (info: AppBasicInfoData) => boolean;
   checkPopupVisibleByFrequency: (
     repeat: PopupFrequency,
     lastShowTime: number,
@@ -72,7 +70,6 @@ const getPositionByRouteName = (currentRoute?: string) => {
 
 export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentContextProviderProps) => {
   const appPopupModalContext = useContext(AppPopupModalContext);
-  const yieldPositionList = useGroupYieldPosition();
   const language = useSelector((state: RootState) => state.settings.language);
   const { getAppInstructionData } = useGetAppInstructionData(language);
   const navigate = useNavigate();
@@ -80,27 +77,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
   const { bannerHistoryMap,
     confirmationHistoryMap,
     popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
-
-  const getAppContentData = useCallback(async (dataType: OnlineContentDataType) => {
-    return await fetchStaticData(`app-${dataType}s`);
-  }, []);
-
-  // check popup exist time
-  const checkPopupExistTime = useCallback((info: AppBasicInfoData) => {
-    if (info.start_time && info.stop_time) {
-      const now = new Date();
-      const startTime = new Date(info.start_time);
-      const endTime = new Date(info.stop_time);
-
-      if (now >= startTime && now <= endTime) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }, []);
 
   // check popup frequency
   const checkPopupVisibleByFrequency = useCallback(
@@ -157,36 +133,13 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
     []
   );
 
-  const { appPopupMap, setAppPopupData, updatePopupHistoryMap } = useHandleAppPopupMap(yieldPositionList, checkPopupExistTime);
-  const { appBannerMap, setAppBannerData, updateBannerHistoryMap } = useHandleAppBannerMap(
-    yieldPositionList,
-    checkPopupExistTime
-  );
-  const { appConfirmationMap, setAppConfirmationData, updateConfirmationHistoryMap } = useHandleAppConfirmationMap(yieldPositionList);
+  const { appPopupMap, updatePopupHistoryMap } = useHandleAppPopupMap();
+  const { appBannerMap, updateBannerHistoryMap } = useHandleAppBannerMap();
+  const { appConfirmationMap, updateConfirmationHistoryMap } = useHandleAppConfirmationMap();
 
   useEffect(() => {
     getAppInstructionData();
   }, [getAppInstructionData]);
-
-  useEffect(() => {
-    const popupPromise = getAppContentData('popup');
-    const bannerPromise = getAppContentData('banner');
-    const confirmationPromise = getAppContentData('confirmation');
-
-    Promise.all([popupPromise, bannerPromise, confirmationPromise])
-      .then((values) => {
-        // @ts-ignore
-        setAppPopupData((values[0] || []) as AppPopupData[]);
-        // @ts-ignore
-        setAppBannerData((values[1] || []) as AppBannerData[]);
-        // @ts-ignore
-        setAppConfirmationData((values[2] || []) as AppConfirmationData[]);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const handleButtonClick = useCallback(
     (id: string) => {
@@ -268,7 +221,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
           const result: AppPopupModalInfo[] = filteredPopupList.map((item) => ({
             type: 'popup',
             repeat: item.repeat,
-            title: item.info.name,
+            title: item.info?.name,
             message: item.content || '',
             buttons: item.buttons,
             onPressBtn: (url?: string) => {
@@ -296,7 +249,6 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
         updatePopupHistoryMap,
         updateBannerHistoryMap,
         updateConfirmationHistoryMap,
-        checkPopupExistTime,
         checkPopupVisibleByFrequency,
         handleButtonClick,
         checkBannerVisible,

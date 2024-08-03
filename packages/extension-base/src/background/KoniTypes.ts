@@ -8,6 +8,7 @@ import { AccountAuthType, AccountJson, AddressJson, AuthorizeRequest, Confirmati
 import { RequestOptimalTransferProcess } from '@subwallet/extension-base/services/balance-service/helpers';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
 import { _ChainState, _EvmApi, _NetworkUpsertParams, _SubstrateApi, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { CrowdloanContributionsResponse } from '@subwallet/extension-base/services/subscan-service/types';
 import { SWTransactionResponse, SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
@@ -2395,6 +2396,9 @@ export interface KoniRequestSignatures {
   'pri(campaign.banner.subscribe)': [null, CampaignBanner[], CampaignBanner[]];
   'pri(campaign.popup.subscribeVisibility)': [null, ShowCampaignPopupRequest, ShowCampaignPopupRequest];
   'pri(campaign.popup.toggle)': [ShowCampaignPopupRequest, null];
+  'pri(campaign.popup.getData)': [null, AppPopupData[]];
+  'pri(campaign.banner.getData)': [null, AppBannerData[]];
+  'pri(campaign.confirmation.getData)': [null, AppConfirmationData[]];
   'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
   /* Campaign */
 

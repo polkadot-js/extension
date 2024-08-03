@@ -32,6 +32,7 @@ import { createSnowBridgeExtrinsic, createXcmExtrinsic, getXcmMockTxFee } from '
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isPureEvmChain, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -4319,6 +4320,18 @@ export default class KoniExtension {
     return null;
   }
 
+  private async getAppPopupData (): Promise<AppPopupData[]> {
+    return this.#koniState.mktCampaignService.fetchPopupData();
+  }
+
+  private async getAppBannerData (): Promise<AppBannerData[]> {
+    return this.#koniState.mktCampaignService.fetchBannerData();
+  }
+
+  private async getAppConfirmationData (): Promise<AppConfirmationData[]> {
+    return this.#koniState.mktCampaignService.fetchConfirmationData();
+  }
+
   /* Campaign */
 
   /* Buy service */
@@ -4988,6 +5001,12 @@ export default class KoniExtension {
         return this.subscribeCampaignPopupVisibility(id, port);
       case 'pri(campaign.popup.toggle)':
         return this.toggleCampaignPopup(request as ShowCampaignPopupRequest);
+      case 'pri(campaign.popup.getData)':
+        return this.getAppPopupData();
+      case 'pri(campaign.banner.getData)':
+        return this.getAppBannerData();
+      case 'pri(campaign.confirmation.getData)':
+        return this.getAppConfirmationData();
 
         /* Campaign */
 

@@ -17,6 +17,7 @@ import YieldPositionStore from '@subwallet/extension-base/services/storage-servi
 import { BalanceItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { reformatAddress } from '@subwallet/extension-base/utils';
 import keyring from '@subwallet/ui-keyring';
+import BigN from 'bignumber.js';
 import { Subscription } from 'dexie';
 import { DexieExportJsonStructure, exportDB } from 'dexie-export-import';
 
@@ -88,6 +89,66 @@ export default class DatabaseService {
 
     // Filter not exist address
     return this.stores.balance.table.filter((obj) => addresses.includes(obj.address)).toArray();
+  }
+
+  async checkBalanceByTokens (tokens: string[], comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount?: string) {
+    const filterFunc = (item: IBalance): boolean => {
+      const freeBalance = item?.free;
+      const lockedBalance = item?.locked;
+      const value = new BigN(freeBalance).plus(lockedBalance);
+
+      if (!addresses.includes(item.address)) {
+        return false;
+      }
+
+      switch (comparison) {
+        case 'eq':
+          return value.eq(amount || 0);
+        case 'gt':
+          return value.gt(amount || 0);
+        case 'gte':
+          return value.gte(amount || 0);
+        case 'lt':
+          return value.lt(amount || 0);
+        case 'lte':
+          return value.lte(amount || 0);
+      }
+    };
+
+    return this.stores.balance.checkBalanceByTokens(tokens, filterFunc);
+  }
+
+  async checkEarningByTokens (slug: string, comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount?: string) {
+    const filterFunc = (item: YieldPositionInfo): boolean => {
+      if (!addresses.includes(item.address)) {
+        return false;
+      }
+
+      const value = new BigN(item.activeStake);
+
+      switch (comparison) {
+        case 'eq':
+          return value.eq(amount || 0);
+        case 'gt':
+          return value.gt(amount || 0);
+        case 'gte':
+          return value.gte(amount || 0);
+        case 'lt':
+          return value.lt(amount || 0);
+        case 'lte':
+          return value.lte(amount || 0);
+      }
+    };
+
+    return this.stores.yieldPosition.checkPositionByPoolSlug(slug, filterFunc);
+  }
+
+  async checkNftByTokens (chain: string, collectionId: string) {
+    return this.stores.nftCollection.checkNftByChainOrCollectionId(chain, collectionId);
+  }
+
+  async checkCrowdloanByChain (chain: string) {
+    return this.stores.crowdloan.checkCrowdloanByChain(chain);
   }
 
   async updateBalanceStore (item: BalanceItem) {

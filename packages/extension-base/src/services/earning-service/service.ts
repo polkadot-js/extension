@@ -176,6 +176,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
             removedAddresses.push(event.data[0] as string);
           }
 
+          if (event.type === 'account.add') {
+            delayReload = true;
+          }
+
           if (event.type === 'chain.updateState') {
             const chainState = this.state.getChainStateByKey(event.data[0] as string);
 

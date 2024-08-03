@@ -89,6 +89,7 @@ export interface _SubstrateApiState {
 export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
   api: ApiPromise;
   isReady: Promise<_SubstrateApi>;
+  connect: (_callbackUpdateMetadata?: (substrateApi: _SubstrateApi) => void) => void;
 
   specName: string;
   specVersion: string;
@@ -169,7 +170,8 @@ export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
 export const _FUNGIBLE_CONTRACT_STANDARDS = [
   _AssetType.ERC20,
   _AssetType.PSP22,
-  _AssetType.GRC20
+  _AssetType.GRC20,
+  _AssetType.VFT
 ];
 
 export const _NFT_CONTRACT_STANDARDS = [

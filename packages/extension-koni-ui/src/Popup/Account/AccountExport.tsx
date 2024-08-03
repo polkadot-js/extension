@@ -666,8 +666,8 @@ const AccountExport = styled(Component)<Props>(({ theme: { token } }: Props) => 
     '.json-done-description': {
       padding: `0 ${token.controlHeightLG - token.padding}px`,
       color: token.colorTextLabel,
-      textAlign: 'center',
       fontSize: token.fontSizeHeading5,
+      textAlign: 'center',
       lineHeight: token.lineHeightHeading5
     }
   };

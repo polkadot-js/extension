@@ -39,15 +39,20 @@ export function injectEvmExtension (evmProvider: EvmProvider): void {
     windowInject.SubWallet = evmProvider;
   }
 
+  if (!windowInject.ethereum) {
+    windowInject.ethereum = evmProvider;
+    windowInject.dispatchEvent(new Event('ethereum#initialized'));
+  }
+
   windowInject.dispatchEvent(new Event('subwallet#initialized'));
 
-  // Publish to global if window.ethereum is not available
-  windowInject.addEventListener('load', () => {
-    if (!windowInject.ethereum) {
-      windowInject.ethereum = evmProvider;
-      windowInject.dispatchEvent(new Event('ethereum#initialized'));
-    }
-  });
+  // // Publish to global if window.ethereum is not available
+  // windowInject.addEventListener('load', () => {
+  //   if (!windowInject.ethereum) {
+  //     windowInject.ethereum = evmProvider;
+  //     windowInject.dispatchEvent(new Event('ethereum#initialized'));
+  //   }
+  // });
 
   inject6963EIP(evmProvider);
 }

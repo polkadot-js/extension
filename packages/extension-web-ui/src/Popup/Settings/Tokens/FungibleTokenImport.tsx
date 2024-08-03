@@ -46,10 +46,12 @@ function getTokenTypeSupported (chainInfo: _ChainInfo) {
   const result: TokenTypeOption[] = [];
 
   tokenTypes.forEach((tokenType) => {
-    result.push({
-      label: tokenType.toString(),
-      value: tokenType
-    });
+    if (tokenType !== _AssetType.GRC20) {
+      result.push({
+        label: tokenType.toString(),
+        value: tokenType
+      });
+    }
   });
 
   return result;
@@ -92,8 +94,8 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const chainChecker = useChainChecker();
   const chainNetworkPrefix = useGetChainPrefixBySlug(selectedChain);
 
-  const isSelectGRC20 = useMemo(() => {
-    return selectedTokenType === _AssetType.GRC20;
+  const isSelectGearToken = useMemo(() => {
+    return selectedTokenType === _AssetType.VFT;
   }, [selectedTokenType]);
 
   const tokenTypeOptions = useMemo(() => {
@@ -108,10 +110,10 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
             const selectedTokenType = getFieldValue('type') as _AssetType;
             const isValidEvmContract = [_AssetType.ERC20].includes(selectedTokenType) && isEthereumAddress(contractAddress);
             const isValidWasmContract = [_AssetType.PSP22].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
-            const isValidGrc20Contract = [_AssetType.GRC20].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
-            const reformattedAddress = isValidGrc20Contract ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
+            const isValidGearContract = [_AssetType.VFT].includes(selectedTokenType) && isValidSubstrateAddress(contractAddress);
+            const reformattedAddress = isValidGearContract ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
-            if (isValidEvmContract || isValidWasmContract || isValidGrc20Contract) {
+            if (isValidEvmContract || isValidWasmContract || isValidGearContract) {
               setLoading(true);
               validateCustomToken({
                 contractAddress: reformattedAddress,
@@ -190,7 +192,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const onSubmit: FormCallbacks<TokenImportFormType>['onFinish'] = useCallback((formValues: TokenImportFormType) => {
     const { chain, contractAddress, decimals, priceId, symbol, tokenName, type } = formValues;
 
-    const reformattedAddress = type === _AssetType.GRC20 ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
+    const reformattedAddress = type === _AssetType.VFT ? contractAddress : reformatAddress(contractAddress, chainNetworkPrefix);
 
     setLoading(true);
 
@@ -313,7 +315,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
               <AddressInput
                 addressPrefix={chainNetworkPrefix}
                 disabled={!selectedTokenType}
-                label={isSelectGRC20 ? t('Program ID') : t('Contract address')}
+                label={isSelectGearToken ? t('Program ID') : t('Contract address')}
                 showScanner={true}
               />
             </Form.Item>

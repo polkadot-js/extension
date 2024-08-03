@@ -1,12 +1,12 @@
-    2738	AnhMTV                        	Release version 1.2.14
-    2481	Nam Phạm                      	[Issue 3230] fix: estimate gas for snowbridge xcm
-    2139	S2kael                        	[Issue-3300] Update script migration metadata
+    2768	AnhMTV                        	Release version 1.2.21
+    2496	Nam Phạm                      	[Issue 3378] feat: update chainlist
+    2169	S2kael                        	[Issue-3378] Fix bug when displaying tip value of confirmation
      831	lw-cdm                        	
-     532	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
+     537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     195	bluezdot                      	[Chainlist] [Hotfix-issue-259] Remove rollux & syscoin
+     230	bluezdot                      	[Issue-3378] fix: add filter for extrinsicHash when retrive Avail OG NFTs
      185	quangdo                       	
-     148	Thiendekaco                   	[Issue 3133] [update] Extension - merge newest code of subwallet-dev branch
+     170	Thiendekaco                   	[Issue 3275] [fix] Extension - Handle provider validate
      137	Automation Bot                	[CI Skip] Auto increase webapp build number
      135	dominhquang                   	[Issue-3218] Extension - Error can't read properties of undefined (reading 'filter')
      105	lw-cdm                        	
@@ -14,9 +14,9 @@
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
+      63	bluedot                       	[Issue-2965] fix: Handle earning status for request redeem
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
-      48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	

@@ -13,7 +13,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const chainsByAccountType = useGetChainSlugsByCurrentAccount();
   const { tokenGroupMap } = useTokenGroup(chainsByAccountType);
-  const { tokenBalanceMap, tokenGroupBalanceMap } = useAccountBalance(tokenGroupMap, true);
+  const { tokenBalanceMap } = useAccountBalance(tokenGroupMap, true);
 
   return useMemo(() => {
     const result: Record<string, YieldGroupInfo> = {};
@@ -45,6 +45,20 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
 
           exists.isTestnet = exists.isTestnet || chainInfo.isTestnet;
           exists.poolSlugs.push(pool.slug);
+
+          const inputAsset = pool.metadata.inputAsset;
+
+          if (!exists.assetSlugs.includes(inputAsset)) {
+            exists.assetSlugs.push(inputAsset);
+
+            const balanceItem = tokenBalanceMap[inputAsset];
+
+            if (balanceItem) {
+              exists.balance.value = exists.balance.value.plus(balanceItem.free.value);
+              exists.balance.convertedValue = exists.balance.convertedValue.plus(balanceItem.free.convertedValue);
+              exists.balance.pastConvertedValue = exists.balance.pastConvertedValue.plus(balanceItem.free.pastConvertedValue);
+            }
+          }
         } else {
           const token = multiChainAssetMap[group] || assetRegistry[group];
 
@@ -52,8 +66,7 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             continue;
           }
 
-          const balance = tokenGroupBalanceMap[group] || tokenBalanceMap[group];
-          const freeBalance: BalanceValueInfo = balance?.free || {
+          const freeBalance: BalanceValueInfo = {
             value: BN_ZERO,
             convertedValue: BN_ZERO,
             pastConvertedValue: BN_ZERO
@@ -69,6 +82,15 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             apy = calculateReward(pool.statistic?.totalApr).apy;
           }
 
+          const inputAsset = pool.metadata.inputAsset;
+          const balanceItem = tokenBalanceMap[inputAsset];
+
+          if (balanceItem) {
+            freeBalance.value = freeBalance.value.plus(balanceItem.free.value);
+            freeBalance.convertedValue = freeBalance.convertedValue.plus(balanceItem.free.convertedValue);
+            freeBalance.pastConvertedValue = freeBalance.pastConvertedValue.plus(balanceItem.free.pastConvertedValue);
+          }
+
           result[group] = {
             group: group,
             token: token.slug,
@@ -79,22 +101,15 @@ const useYieldGroupInfo = (): YieldGroupInfo[] => {
             name: token.name,
             chain: chain,
             poolListLength: 1,
-            poolSlugs: [pool.slug]
+            poolSlugs: [pool.slug],
+            assetSlugs: [pool.metadata.inputAsset]
           };
         }
       }
     }
 
     return Object.values(result);
-  }, [
-    assetRegistry,
-    chainInfoMap,
-    chainsByAccountType,
-    multiChainAssetMap,
-    poolInfoMap,
-    tokenBalanceMap,
-    tokenGroupBalanceMap
-  ]);
+  }, [assetRegistry, chainInfoMap, chainsByAccountType, multiChainAssetMap, poolInfoMap, tokenBalanceMap]);
 };
 
 export default useYieldGroupInfo;

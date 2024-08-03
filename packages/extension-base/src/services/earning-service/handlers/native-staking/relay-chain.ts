@@ -4,7 +4,7 @@
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ExtrinsicType, NominationInfo, StakingTxErrorType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getRelayBlockedValidatorList, getRelayEraRewardMap, getRelayMaxNominations, getRelayTopValidatorByPoints, getRelayValidatorPointsMap, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
+import { calculateAlephZeroValidatorReturn, calculateChainStakedReturnV2, calculateInflation, calculateTernoaValidatorReturn, calculateValidatorStakedReturn, getAvgValidatorEraReward, getCommission, getMaxValidatorErrorMessage, getMinStakeErrorMessage, getRelayBlockedValidatorList, getRelayEraRewardMap, getRelayMaxNominations, getRelayTopValidatorByPoints, getRelayValidatorPointsMap, getRelayWaitingValidatorList, getSupportedDaysByHistoryDepth } from '@subwallet/extension-base/koni/api/staking/bonding/utils';
 import { _STAKING_ERA_LENGTH_MAP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainSubstrateAddressPrefix } from '@subwallet/extension-base/services/chain-service/utils';
@@ -61,7 +61,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const unsub = await (substrateApi.api.query.staking?.currentEra(async (_currentEra: Codec) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -108,7 +108,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       const bnTotalIssuance = new BN(rawTotalIssuance);
 
       const inflation = calculateInflation(bnTotalEraStake, bnTotalIssuance, numAuctions, chainInfo.slug);
-      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, true);
+      const expectedReturn = calculateChainStakedReturnV2(chainInfo, rawTotalIssuance, erasPerDay, lastTotalStaked, validatorEraReward, new BigN(inflation), true);
       const eraTime = _STAKING_ERA_LENGTH_MAP[chainInfo.slug] || _STAKING_ERA_LENGTH_MAP.default; // in hours
       const unlockingPeriod = parseInt(unlockingEras) * eraTime; // in hours
       const farmerCount = _counterForNominators.toPrimitive() as number;
@@ -152,7 +152,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 
@@ -301,7 +301,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const unsub = await substrateApi.api.query.staking?.ledger.multi(useAddresses, async (ledgers: Codec[]) => {
       if (cancel) {
-        unsub();
+        unsub?.();
 
         return;
       }
@@ -355,7 +355,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     return () => {
       cancel = true;
-      unsub();
+      unsub?.();
     };
   }
 
@@ -406,7 +406,21 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const topValidatorList = getRelayTopValidatorByPoints(validatorPointsMap);
 
     const validators = _validators as any[];
+
     const blockedValidatorList = getRelayBlockedValidatorList(validators);
+    const waitingValidatorList = getRelayWaitingValidatorList(validators);
+
+    const _waitingValidatorLedger = await chainApi.api.query.staking.ledger.multi(waitingValidatorList);
+
+    const waitingValidatorLedger: Record<string, string> = {};
+
+    if (_waitingValidatorLedger) {
+      waitingValidatorList.forEach((validator, i) => {
+        const validatorLedger = _waitingValidatorLedger[i].toPrimitive() as unknown as PalletStakingStakingLedger;
+
+        waitingValidatorLedger[validator] = new BigN(validatorLedger.total).toFixed();
+      });
+    }
 
     const unlimitedNominatorRewarded = chainApi.api.consts.staking.maxExposurePageSize !== undefined;
     const maxNominatorRewarded = (chainApi.api.consts.staking.maxNominatorRewardedPerValidator || 0).toString();
@@ -414,7 +428,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const minBond = _minBond.toPrimitive() as number;
 
-    const [totalStakeMap, allValidatorAddresses, validatorInfoList] = this.parseEraStakerData(_eraStakers, blockedValidatorList, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded);
+    const [totalStakeMap, allValidatorAddresses, validatorInfoList] = this.parseEraStakerData(_eraStakers, blockedValidatorList, waitingValidatorLedger, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded);
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
 
@@ -462,13 +476,17 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
       return calculateTernoaValidatorReturn(rewardPerValidator.toNumber(), validatorStake, commission);
     } else {
-      const bnValidatorStake = applyDecimal(totalStakeMap[validator.address], decimals);
+      if (!totalStakeMap[validator.address]) {
+        return totalApy;
+      } else {
+        const bnValidatorStake = applyDecimal(totalStakeMap[validator.address], decimals);
 
-      return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, commission);
+        return calculateValidatorStakedReturn(totalApy, bnValidatorStake, bnAvgStake, commission);
+      }
     }
   }
 
-  private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
+  private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], waitingValidatorList: Record<string, string>, topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
     const totalStakeMap: Record<string, BN> = {};
     const allValidatorAddresses: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
@@ -523,6 +541,29 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
           isCrowded: unlimitedNominatorRewarded ? false : nominatorCount > parseInt(maxNominatorRewarded),
           eraRewardPoint: (validatorPointsMap[validatorAddress] ?? BN_ZERO).toString(),
           topQuartile: isTopQuartile
+        } as ValidatorInfo);
+      }
+    }
+
+    for (const waitingValidator of Object.keys(waitingValidatorList)) {
+      if (!allValidatorAddresses.includes(waitingValidator)) {
+        allValidatorAddresses.push(waitingValidator);
+
+        validatorInfoList.push({
+          address: waitingValidator,
+          totalStake: waitingValidatorList[waitingValidator],
+          ownStake: waitingValidatorList[waitingValidator],
+          otherStake: '0',
+          nominatorCount: 0,
+          // to be added later
+          commission: 0,
+          expectedReturn: 0,
+          blocked: false,
+          isVerified: false,
+          minBond: minBond.toString(),
+          isCrowded: false,
+          eraRewardPoint: '0',
+          topQuartile: false
         } as ValidatorInfo);
       }
     }

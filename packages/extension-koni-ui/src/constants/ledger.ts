@@ -88,6 +88,19 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     slip44: 434
   },
   {
+    accountName: 'Avail',
+    appName: 'Avail',
+    networkName: 'Avail network',
+    genesisHash: ChainInfoMap.avail_mainnet.substrateInfo?.genesisHash || '0xb91746b45e0346cc2f815a520b9c6cb4d5c0902af848db0a80f85932d2e8276a',
+    icon: 'substrate',
+    network: 'avail',
+    slug: ChainInfoMap.avail_mainnet.slug,
+    isDevMode: false,
+    isGeneric: false,
+    isEthereum: false,
+    slip44: 709
+  },
+  {
     accountName: 'Acala',
     appName: 'Acala',
     networkName: 'Acala network',
@@ -190,6 +203,19 @@ export const PredefinedLedgerNetwork: LedgerNetwork[] = [
     isGeneric: false,
     isEthereum: false,
     slip44: 595
+  },
+  {
+    accountName: 'Polkadex',
+    appName: 'Polkadex',
+    networkName: 'Polkadex network',
+    genesisHash: ChainInfoMap.polkadex.substrateInfo?.genesisHash || '0x3920bcb4960a1eef5580cd5367ff3f430eef052774f78468852f7b9cb39f8a3c',
+    icon: 'substrate',
+    network: 'polkadex',
+    slug: ChainInfoMap.polkadex.slug,
+    isGeneric: false,
+    isDevMode: false,
+    isEthereum: false,
+    slip44: 799
   }
   // {
   //   displayName: 'Centrifuge',
@@ -247,7 +273,7 @@ export const BLOCK_DEFAULT_LEDGER_NETWORKS: string[] = ['*'];
 export const BLOCK_TRANSFER_NATIVE_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_TOKEN_LEDGER_NETWORKS: string[] = [];
 export const BLOCK_TRANSFER_XCM_LEDGER_NETWORKS: string[] = ['*'];
-export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar'];
+export const BLOCK_TRANSFER_NFT_LEDGER_NETWORKS: string[] = ['astar', 'avail_mainnet'];
 /* TRANSFER */
 
 /* STAKING */

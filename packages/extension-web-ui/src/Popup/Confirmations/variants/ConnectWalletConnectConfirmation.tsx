@@ -6,7 +6,7 @@ import { WalletConnectSessionRequest } from '@subwallet/extension-base/services/
 import { AddNetworkWCModal, AlertBox, ConfirmationGeneralInfo, WCAccountSelect, WCNetworkSelected } from '@subwallet/extension-web-ui/components';
 import SeedPhraseModal from '@subwallet/extension-web-ui/components/Modal/Account/SeedPhraseModal';
 import WCNetworkSupported from '@subwallet/extension-web-ui/components/WalletConnect/Network/WCNetworkSupported';
-import { ADD_NETWORK_WALLET_CONNECT_MODAL, DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE } from '@subwallet/extension-web-ui/constants';
+import { ADD_NETWORK_WALLET_CONNECT_MODAL, DEFAULT_ACCOUNT_TYPES, SELECTED_ACCOUNT_TYPE, WALLET_CONNECT_CREATE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { useNotification, useSelectWalletConnectAccount } from '@subwallet/extension-web-ui/hooks';
 import { approveWalletConnectSession, rejectWalletConnectSession } from '@subwallet/extension-web-ui/messaging';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -125,6 +125,13 @@ function Component ({ className, request }: Props) {
     });
   }, [request]);
 
+  const onCancelForAddNetworkModal = useCallback(() => {
+    setLoading(true);
+    handleCancel(request).finally(() => {
+      setLoading(false);
+      activeModal(WALLET_CONNECT_CREATE_MODAL);
+    });
+  }, [activeModal, request]);
   const onConfirm = useCallback(() => {
     setLoading(true);
     const selectedAccounts = Object.values(namespaceAccounts).map(({ appliedAccounts }) => appliedAccounts).flat();
@@ -354,7 +361,7 @@ function Component ({ className, request }: Props) {
           modalId={createMissingAccountModalId}
         />
         <AddNetworkWCModal
-          cancelRequest={onCancel}
+          cancelRequest={onCancelForAddNetworkModal}
           networkToAdd={networkNeedToImport}
           requestId={request.id}
         />

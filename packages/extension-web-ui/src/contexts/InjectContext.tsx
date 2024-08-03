@@ -155,8 +155,6 @@ class InjectHandler {
   }
 
   async enable (walletKey: string) {
-    this.disable(); // clear data of previous wallet
-
     const walletInfo = PREDEFINED_WALLETS[walletKey || ''];
 
     if (!walletInfo) {

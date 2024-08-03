@@ -2087,7 +2087,7 @@ export default class KoniExtension {
 
     if (destinationTokenInfo) {
       const [bnMockFee, { value }] = await Promise.all([
-        getXcmMockTxFee(substrateApi, chainInfoMap, address, originTokenInfo, destinationTokenInfo),
+        getXcmMockTxFee(substrateApi, chainInfoMap, originTokenInfo, destinationTokenInfo),
         this.getAddressTransferableBalance({ extrinsicType: ExtrinsicType.TRANSFER_XCM, address, networkKey: originTokenInfo.originChain, token: originTokenInfo.slug })
       ]);
 

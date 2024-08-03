@@ -323,6 +323,7 @@ const Component: React.FC<Props> = (props: Props) => {
                         width={52}
                       />
                     )}
+                    innerSize={52}
                     sizeLinkIcon={36}
                     sizeSquircleBorder={108}
                   />
@@ -446,6 +447,7 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       display: 'flex',
       flexDirection: 'row',
       justifyContent: 'space-between',
+      fontSize: token.fontSizeHeading5,
       alignItems: 'center',
       flex: 1,
       overflow: 'hidden'

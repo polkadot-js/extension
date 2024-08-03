@@ -142,14 +142,21 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     },
 
     '&.chain-selector-input': {
+      paddingTop: token.paddingXXS,
       '.__selected-item, .__loading-text': {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
       },
 
+      '.ant-select-modal-input-label': {
+        lineHeight: token.lineHeightSuper2
+      },
+
       '.__selected-item': {
-        color: token.colorText
+        color: token.colorText,
+        fontWeight: 500,
+        lineHeight: token.lineHeightHeading6
       },
 
       '.__loading-text': {

@@ -14,8 +14,9 @@ import LogoWithSquircleBorder from './LogoWithSquircleBorder';
 interface Props extends ThemeProps {
   leftLogo?: React.ReactNode;
   rightLogo?: React.ReactNode;
-  sizeSquircleBorder?: number
-  sizeLinkIcon?: number
+  sizeSquircleBorder?: number;
+  innerSize?: number;
+  sizeLinkIcon?: number;
   linkIcon?: React.ReactNode;
   linkIconBg?: string;
 }
@@ -29,16 +30,16 @@ const defaultLinkIcon = (
 
 const defaultLogo = <Logo2D />;
 
-const Component = ({ className, leftLogo = defaultLogo, linkIcon = defaultLinkIcon, rightLogo = defaultLogo, sizeSquircleBorder }: Props) => {
+const Component = ({ className, leftLogo = defaultLogo, linkIcon = defaultLinkIcon, rightLogo = defaultLogo, sizeSquircleBorder, innerSize }: Props) => {
   return (
     <div className={CN(className, 'dual-logo-container')}>
-      <LogoWithSquircleBorder size={sizeSquircleBorder}>
+      <LogoWithSquircleBorder size={sizeSquircleBorder} innerSize={innerSize}>
         {leftLogo}
       </LogoWithSquircleBorder>
       <div className='link-icon'>
         {linkIcon}
       </div>
-      <LogoWithSquircleBorder size={sizeSquircleBorder}>
+      <LogoWithSquircleBorder size={sizeSquircleBorder} innerSize={innerSize}>
         {rightLogo}
       </LogoWithSquircleBorder>
     </div>

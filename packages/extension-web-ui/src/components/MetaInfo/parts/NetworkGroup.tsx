@@ -18,58 +18,34 @@ const Component: React.FC<NetworkGroupProps> = (props: NetworkGroupProps) => {
 
   return (
     <div className={CN('chain-logos', className)}>
-      <div className='container'>
-        <div className='content-container'>
-          {
-            chains.slice(0, 3).map((chain, index) => {
-              return (
-                <div
-                  className={CN(
-                    'avatar-content',
-                    {
-                      'avatar-blur': index === 2 && countMore > 0
-                    }
-                  )}
-                  key={index}
-                >
-                  <Logo
-                    className={'__chain-logo'}
-                    network={chain}
-                    shape='circle'
-                    size={16}
-                  />
-                </div>
-              );
-            })
-          }
-          {
-            countMore > 0 && (
-              <div className='cont-more'>+{countMore}</div>
-            )
-          }
-        </div>
-        <div className={'content-container-hover'}>
-          {
-            chains.slice(0, chains.length).map((chain, index) => {
-              return (
-                <div
-                  className={CN('avatar-content')}
-                  key={index}
-                  style={{
-                    transitionDelay: `${index * 0.1}s`
-                  }}
-                >
-                  <Logo
-                    className={'__chain-logo'}
-                    network={chain}
-                    shape='circle'
-                    size={16}
-                  />
-                </div>
-              );
-            })
-          }
-        </div>
+      <div className='content-container'>
+        {
+          chains.slice(0, 3).map((chain, index) => {
+            return (
+              <div
+                className={CN(
+                  'avatar-content',
+                  {
+                    'avatar-blur': index === 2 && countMore > 0
+                  }
+                )}
+                key={index}
+              >
+                <Logo
+                  className={'__chain-logo'}
+                  network={chain}
+                  shape='circle'
+                  size={16}
+                />
+              </div>
+            );
+          })
+        }
+        {
+          countMore > 0 && (
+            <div className='cont-more'>+{countMore}</div>
+          )
+        }
       </div>
     </div>
   );
@@ -78,7 +54,6 @@ const Component: React.FC<NetworkGroupProps> = (props: NetworkGroupProps) => {
 const NetworkGroup = styled(Component)<NetworkGroupProps>(({ theme: { token } }: NetworkGroupProps) => {
   return {
     width: 'fit-content',
-    position: 'relative',
 
     '.ant-image, .ant-image-img': {
       display: 'block'
@@ -92,73 +67,23 @@ const NetworkGroup = styled(Component)<NetworkGroupProps>(({ theme: { token } }:
       }
     },
 
-    '.container': {
-      maxHeight: 20,
+    '.content-container': {
+      display: 'flex',
+      height: token.sizeMD,
+      alignItems: 'center',
+      flexDirection: 'row',
+      position: 'relative',
 
-      '.content-container, .content-container-hover': {
-        display: 'flex',
-        height: token.sizeMD,
-        alignItems: 'center',
-        flexDirection: 'row',
-        position: 'relative',
-        transition: 'opacity 0.3s ease-in-out, visibility 0.3s ease-in-out'
-      },
-
-      '.content-container': {
-        display: 'inline-flex',
-        opacity: 1,
-        visibility: 'visible',
-
-        '.avatar-content': {
-          marginLeft: -8,
-          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out',
-
-          '.ant-image-img': {
-            boxSizing: 'content-box'
-          }
-        },
-
-        '&.ml-strong': {
-          '.avatar-content': {
-            marginLeft: -10
-          }
+      '.avatar-content': {
+        marginLeft: -8,
+        '.ant-image-img': {
+          boxSizing: 'content-box'
         }
       },
 
-      '.content-container-hover': {
-        opacity: 0,
-        visibility: 'hidden',
-        gap: 4,
-        position: 'absolute',
-        top: 0,
-
+      '&.ml-strong': {
         '.avatar-content': {
-          opacity: 0,
-          transition: 'opacity 0.3s ease-in-out, transform 0.3s ease-in-out'
-        },
-
-        '&.ml-strong': {
-          '.avatar-content': {
-            marginLeft: -10
-          }
-        }
-      },
-
-      '&:hover': {
-        '.content-container': {
-          opacity: 0,
-          visibility: 'hidden'
-        },
-        '.content-container-hover': {
-          position: 'absolute',
-          top: 0,
-          opacity: 1,
-          visibility: 'visible',
-
-          '.avatar-content': {
-            opacity: 1,
-            transform: 'translateY(0)'
-          }
+          marginLeft: -10
         }
       }
     },

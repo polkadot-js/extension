@@ -57,8 +57,8 @@ const handleSignature = async (type: EvmSignatureSupportType, id: string, signat
 };
 
 const Component: React.FC<Props> = (props: Props) => {
-  const { className, errors, extrinsicType, id, payload, txExpirationTime, type } = props;
-  const { payload: { account, canSign, hashPayload } } = payload;
+  const { className, extrinsicType, id, payload, txExpirationTime, type } = props;
+  const { payload: { account, canSign, errors, hashPayload } } = payload;
   const chainId = (payload.payload as EvmSendTransactionRequest)?.chainId || 1;
 
   const { t } = useTranslation();
@@ -69,7 +69,6 @@ const Component: React.FC<Props> = (props: Props) => {
 
   const chain = useGetChainInfoByChainId(chainId);
   const checkUnlock = useUnlockChecker();
-
   const signMode = useMemo(() => getSignMode(account), [account]);
   const isLedger = useMemo(() => signMode === AccountSignMode.LEGACY_LEDGER || signMode === AccountSignMode.GENERIC_LEDGER, [signMode]);
   const [showQuoteExpired, setShowQuoteExpired] = useState<boolean>(false);

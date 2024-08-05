@@ -852,11 +852,11 @@ export default class TransactionService {
 
     // Fill contract info
     if (!payload.parseData) {
-      const isToContract = await isContractAddress(payload.to || '', evmApi);
-
-      payload.isToContract = isToContract;
-
       try {
+        const isToContract = await isContractAddress(payload.to || '', evmApi);
+
+        payload.isToContract = isToContract;
+
         payload.parseData = isToContract
           ? payload.data
             ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result

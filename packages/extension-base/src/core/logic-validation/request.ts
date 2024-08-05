@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ConfirmationType, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ConfirmationType, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
@@ -200,8 +200,8 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address')));
   }
 
-  if (!transaction.to) {
-    handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Can\'t find receiving address')));
+  if (transaction.to && !isEthereumAddress(transaction.to)) {
+    handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('The receiving address is not a valid Ethereum address')));
   }
 
   // Address is validated in before step
@@ -294,13 +294,21 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
 
   const hasError = (errors && errors.length > 0) || !networkKey;
   const hashPayload = hasError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
-  const isToContract = await isContractAddress(transaction.to || '', evmApi);
   const evmNetwork = koni.getChainInfo(networkKey || '');
-  const parseData = isToContract
-    ? transaction.data && !hasError
-      ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
-      : ''
-    : transaction.data || '';
+  let isToContract = false;
+  let parseData: EvmTransactionData = '';
+
+  try {
+    isToContract = await isContractAddress(transaction.to || '', evmApi);
+    parseData = isToContract
+      ? transaction.data && !hasError
+        ? (await parseContractInput(transaction.data, transaction.to || '', evmNetwork)).result
+        : ''
+      : transaction.data || '';
+  } catch (e) {
+    console.error(e);
+    handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+  }
 
   return {
     ...payload,

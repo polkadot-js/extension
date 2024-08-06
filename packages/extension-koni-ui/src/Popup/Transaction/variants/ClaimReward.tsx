@@ -47,7 +47,7 @@ const filterAccount = (
       return false;
     }
 
-    if (account.originGenesisHash && _getSubstrateGenesisHash(chain) !== account.originGenesisHash) {
+    if (account.genesisHash && _getSubstrateGenesisHash(chain) !== account.genesisHash) {
       return false;
     }
 

@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { LedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
+import { LedgerNetwork, MigrationLedgerNetwork } from '@subwallet/extension-base/background/KoniTypes';
 import { reformatAddress } from '@subwallet/extension-base/utils';
-import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, CloseIcon, DualLogo, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
-import { ATTACH_ACCOUNT_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useDefaultNavigate, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
+import { AccountItemWithName, AccountWithNameSkeleton, BasicOnChangeFunction, ChainSelector, DualLogo, InfoIcon, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { ATTACH_ACCOUNT_MODAL, SUBSTRATE_MIGRATION_KEY, USER_GUIDE_URL } from '@subwallet/extension-koni-ui/constants';
+import { useAutoNavigateToCreatePassword, useCompleteCreateAccount, useGetSupportedLedger, useGoBackFromCreateAccount, useLedger } from '@subwallet/extension-koni-ui/hooks';
 import { createAccountHardwareMultiple } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -27,7 +27,12 @@ interface ImportLedgerItem {
   name: string;
 }
 
+export const funcSortByName = (a: ChainItemType, b: ChainItemType) => {
+  return ((a?.name || '').toLowerCase() > (b?.name || '').toLowerCase()) ? 1 : -1;
+};
+
 const LIMIT_PER_PAGE = 5;
+const CONNECT_LEDGER_USER_GUIDE_URL = `${USER_GUIDE_URL}/account-management/connect-ledger-device`;
 
 const FooterIcon = (
   <Icon
@@ -42,20 +47,29 @@ const Component: React.FC<Props> = (props: Props) => {
   const { className } = props;
 
   const { t } = useTranslation();
-  const { goHome } = useDefaultNavigate();
 
-  const supportedLedger = useGetSupportedLedger();
+  const [supportedLedger, migrateSupportLedger] = useGetSupportedLedger();
   const onComplete = useCompleteCreateAccount();
   const onBack = useGoBackFromCreateAccount(ATTACH_ACCOUNT_MODAL);
 
   const { accounts } = useSelector((state: RootState) => state.accountState);
 
-  const networks = useMemo((): ChainItemType[] => supportedLedger.map((network) => ({
-    name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
-    slug: network.slug
-  })), [supportedLedger]);
+  const networks = useMemo((): ChainItemType[] => supportedLedger
+    .filter(({ isHide }) => !isHide)
+    .map((network) => ({
+      name: !network.isGeneric ? network.networkName.replace(' network', '') : network.networkName,
+      slug: network.slug
+    })), [supportedLedger]);
+
+  const networkMigrates = useMemo((): ChainItemType[] => migrateSupportLedger
+    .map((network) => ({
+      disabled: network.isHide,
+      name: network.networkName.replace(' network', ''),
+      slug: network.slug
+    })).sort(funcSortByName), [migrateSupportLedger]);
 
   const [chain, setChain] = useState(supportedLedger[0].slug);
+  const [chainMigrateMode, setChainMigrateMode] = useState<string | undefined>();
   const [ledgerAccounts, setLedgerAccounts] = useState<Array<ImportLedgerItem | null>>([]);
   const [firstStep, setFirstStep] = useState(ledgerAccounts.length === 0);
   const [page, setPage] = useState(0);
@@ -67,19 +81,45 @@ const Component: React.FC<Props> = (props: Props) => {
     return supportedLedger.find((n) => n.slug === chain);
   }, [chain, supportedLedger]);
 
+  const selectedChainMigrateMode = useMemo((): MigrationLedgerNetwork | undefined => {
+    return migrateSupportLedger.find((n) => n.slug === chainMigrateMode);
+  }, [chainMigrateMode, migrateSupportLedger]);
+
   const accountName = useMemo(() => selectedChain?.accountName || 'Unknown', [selectedChain]);
 
-  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain);
+  const accountMigrateNetworkName = useMemo(() => {
+    const selectedChain = migrateSupportLedger.find((n) => n.slug === chainMigrateMode);
+
+    return chainMigrateMode && selectedChain ? `${selectedChain.accountName}` : '';
+  }, [chainMigrateMode, migrateSupportLedger]);
+
+  const { error, getAllAddress, isLoading, isLocked, ledger, refresh, warning } = useLedger(chain, true, false, false, selectedChainMigrateMode?.genesisHash);
 
   const onPreviousStep = useCallback(() => {
     setFirstStep(true);
     setSelectedAccounts([]);
   }, []);
 
+  const goUserGuide = useCallback(() => {
+    window.open(CONNECT_LEDGER_USER_GUIDE_URL);
+  }, []);
+
   const onChainChange: BasicOnChangeFunction = useCallback((event) => {
     const value = event.target.value;
 
+    if (value === SUBSTRATE_MIGRATION_KEY) {
+      setChainMigrateMode(networkMigrates[0].slug);
+    } else {
+      setChainMigrateMode(undefined);
+    }
+
     setChain(value);
+  }, [networkMigrates]);
+
+  const onMigrateChainChange: BasicOnChangeFunction = useCallback((event) => {
+    const value = event.target.value;
+
+    setChainMigrateMode(value);
   }, []);
 
   const onLoadMore = useCallback(async () => {
@@ -103,7 +143,7 @@ const Component: React.FC<Props> = (props: Props) => {
         (await getAllAddress(start, end)).forEach(({ address }, index) => {
           rs[start + index] = {
             accountIndex: start + index,
-            name: `Ledger ${accountName} ${start + index + 1}`,
+            name: `Ledger ${accountMigrateNetworkName} ${accountMigrateNetworkName ? `(${accountName})` : accountName} ${start + index + 1}`,
             address: address
           };
         });
@@ -132,7 +172,7 @@ const Component: React.FC<Props> = (props: Props) => {
     });
 
     loadingFlag.current = false;
-  }, [page, getAllAddress, accountName, refresh]);
+  }, [page, getAllAddress, accountName, accountMigrateNetworkName, refresh]);
 
   const onNextStep = useCallback(() => {
     setFirstStep(false);
@@ -173,7 +213,8 @@ const Component: React.FC<Props> = (props: Props) => {
       const selected = !!selectedAccounts.find((it) => it.address === item.address);
       const originAddress = reformatAddress(item.address, 42);
 
-      const disabled = !!accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
+      const existedAccount = accounts.find((acc) => acc.address === originAddress && acc.genesisHash === selectedChain?.genesisHash);
+      const disabled = !!existedAccount;
 
       return (
         <AccountItemWithName
@@ -205,6 +246,7 @@ const Component: React.FC<Props> = (props: Props) => {
           address: item.address,
           addressOffset: 0, // don't change
           genesisHash: selectedChain.genesisHash,
+          originGenesisHash: selectedChainMigrateMode?.genesisHash || selectedChain.genesisHash,
           hardwareType: 'ledger',
           name: item.name,
           isEthereum: selectedChain.isEthereum,
@@ -221,13 +263,13 @@ const Component: React.FC<Props> = (props: Props) => {
           setIsSubmitting(false);
         });
     }, 300);
-  }, [selectedAccounts, selectedChain, onComplete]);
+  }, [selectedAccounts, selectedChain, selectedChainMigrateMode?.genesisHash, onComplete]);
 
   useEffect(() => {
     setSelectedAccounts([]);
     setLedgerAccounts([]);
     setPage(0);
-  }, [chain]);
+  }, [chain, chainMigrateMode]);
 
   const isConnected = !isLocked && !isLoading && !!ledger;
 
@@ -244,15 +286,21 @@ const Component: React.FC<Props> = (props: Props) => {
         }}
         subHeaderIcons={[
           {
-            icon: <CloseIcon />,
-            onClick: goHome
+            icon: <InfoIcon />,
+            onClick: goUserGuide
           }
         ]}
         title={t('Connect Ledger device')}
       >
         <div className={CN('container')}>
           <div className='sub-title'>
-            {t('Connect and unlock your Ledger, then open the selected network on your Ledger')}
+            {t('Unlock your Ledger and open the selected app. For more information regarding Polkadot and Polkadot Migration app, click ')}
+            <a
+              href={CONNECT_LEDGER_USER_GUIDE_URL}
+              target='__blank'
+            >
+              {t('here')}
+            </a>
           </div>
           {
             firstStep && (
@@ -261,29 +309,44 @@ const Component: React.FC<Props> = (props: Props) => {
                   <DualLogo
                     leftLogo={(
                       <Image
-                        height={56}
+                        height={52}
                         shape='squircle'
                         src={DefaultLogosMap.subwallet}
-                        width={56}
+                        width={52}
                       />
                     )}
                     rightLogo={(
                       <Image
-                        height={56}
+                        height={52}
                         shape='squircle'
                         src={DefaultLogosMap.ledger}
-                        width={56}
+                        width={52}
                       />
                     )}
+                    innerSize={52}
+                    sizeLinkIcon={36}
+                    sizeSquircleBorder={108}
                   />
                 </div>
                 <ChainSelector
                   items={networks}
-                  label={t('Select network')}
+                  label={t('Select Ledger app')}
                   onChange={onChainChange}
-                  placeholder={t('Select network')}
+                  placeholder={t('Select Ledger app')}
                   value={chain}
                 />
+                {
+                  !!chainMigrateMode && <ChainSelector
+                    className={'ledger-chain-migrate-select'}
+                    id={'migrate-chain-select-modal-id'}
+                    items={networkMigrates}
+                    label={t('Select network')}
+                    messageTooltip={'To use this network, choose Polkadot Ledger app'}
+                    onChange={onMigrateChainChange}
+                    placeholder={t('Select network')}
+                    value={chainMigrateMode}
+                  />
+                }
                 <Button
                   block={true}
                   className={CN('ledger-button', { connected: isConnected, loading: isLoading })}
@@ -355,7 +418,7 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
 
     '.container': {
       padding: `${token.padding}px ${token.padding}px 0`,
-      overflow: 'hidden',
+      overflow: 'auto',
       height: '100%',
       display: 'flex',
       flexDirection: 'column'
@@ -395,7 +458,7 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
     },
 
     '.ledger-button': {
-      marginTop: token.margin - 2,
+      marginTop: token.marginXS,
       padding: `0 ${token.paddingSM}px`,
       '--icon-bg-color': token['gray-4'],
 
@@ -438,6 +501,10 @@ const ConnectLedger = styled(Component)<Props>(({ theme: { token } }: Props) => 
       '.anticon': {
         animation: 'spinner-loading 1s infinite linear'
       }
+    },
+
+    '.ledger-chain-migrate-select': {
+      marginTop: token.marginXS
     }
   };
 });

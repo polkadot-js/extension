@@ -106,7 +106,7 @@ const usePreCheckAction = (address?: string, blockAllAccount = true, message?: s
             accountTitle = t('Ledger - Substrate account');
             block = !account.isGeneric;
           } else {
-            const ledgerNetwork = PredefinedLedgerNetwork.find((network) => network.genesisHash === account.originGenesisHash);
+            const ledgerNetwork = PredefinedLedgerNetwork.find((network) => network.genesisHash === account.genesisHash);
             const networkName = ledgerNetwork?.accountName || 'Unknown';
             const slug = ledgerNetwork?.slug || '';
 

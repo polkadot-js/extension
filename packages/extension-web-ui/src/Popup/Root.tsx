@@ -43,6 +43,7 @@ const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
+const settingImportNetwork = '/settings/chains/import';
 
 // Campaign
 const earningOptionsPreviewUrl = '/earning-preview';
@@ -92,6 +93,10 @@ function removeLoadingPlaceholder (animation: boolean): void {
 interface RedirectProps {
   redirect: string|null;
   modal: string|null;
+}
+
+interface RootLocationState {
+  useOpenModal?: string
 }
 
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
@@ -205,10 +210,17 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (!allowPreventWelcomeUrls.includes(pathName) && !redirectHandlePage) {
         redirectObj.redirect = welcomeUrl;
       }
+    } else if (hasConfirmations && pathName === settingImportNetwork) {
+      redirectObj.modal = `close:${CONFIRMATION_MODAL}`;
     } else if (hasConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       redirectObj.redirect = tokenUrl;
+      const state = location.state as RootLocationState;
+
+      if (state?.useOpenModal) {
+        redirectObj.modal = `open:${state.useOpenModal}`;
+      }
     } else if (pathName === loginUrl && !needUnlock) {
       redirectObj.redirect = DEFAULT_ROUTER_PATH;
     } else if (pathName === welcomeUrl && !isNoAccount) {
@@ -238,7 +250,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     redirectObj.redirect = redirectObj.redirect !== pathName ? redirectObj.redirect : null;
 
     return redirectObj;
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, isNoAccount, hasConfirmations, hasInternalConfirmations]);
+  }, [location.state, location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, isNoAccount, hasConfirmations, hasInternalConfirmations]);
 
   // Active or inactive confirmation modal
   useEffect(() => {

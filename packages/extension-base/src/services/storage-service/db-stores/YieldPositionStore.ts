@@ -70,10 +70,10 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
   }
 
   async checkPositionByPoolSlug (slug: string, filterFunc: (i: YieldPositionInfo) => boolean) {
-    return this.table.where('slug').anyOfIgnoreCase(slug).filter(filterFunc).count();
+    return this.table.where('slug').anyOfIgnoreCase(slug).filter(filterFunc).limit(1).count();
   }
 
   async checkPositionExist (filterFunc: (i: YieldPositionInfo) => boolean) {
-    return this.table.filter(filterFunc).count();
+    return this.table.filter(filterFunc).limit(1).count();
   }
 }

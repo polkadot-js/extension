@@ -209,7 +209,7 @@ export class KoniCron {
   };
 
   fetchMktCampaignData = () => {
-    this.state.mktCampaignService.fetchMktCampaignData1();
+    this.state.mktCampaignService.fetchMktCampaignData();
   };
 
   stopPoolInfo = () => {

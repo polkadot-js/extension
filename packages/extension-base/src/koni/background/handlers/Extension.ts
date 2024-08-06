@@ -4320,7 +4320,7 @@ export default class KoniExtension {
     return null;
   }
 
-  private async subscribeAppPopupData (id: string, port: chrome.runtime.Port): Promise<AppPopupData[]> {
+  private subscribeAppPopupData (id: string, port: chrome.runtime.Port): AppPopupData[] {
     const cb = createSubscription<'pri(campaign.popups.subscribe)'>(id, port);
     let ready = false;
 
@@ -4337,14 +4337,12 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
-
-    await this.#koniState.eventService.waitCampaignPopupsReady;
     ready = true;
 
     return this.#koniState.mktCampaignService.getAppPopupsData();
   }
 
-  private async subscribeAppBannerData (id: string, port: chrome.runtime.Port): Promise<AppBannerData[]> {
+  private subscribeAppBannerData (id: string, port: chrome.runtime.Port): AppBannerData[] {
     const cb = createSubscription<'pri(campaign.banners.subscribe)'>(id, port);
     let ready = false;
 
@@ -4361,14 +4359,12 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
-
-    await this.#koniState.eventService.waitCampaignBannersReady;
     ready = true;
 
     return this.#koniState.mktCampaignService.getAppBannersData();
   }
 
-  private async subscribeAppConfirmationData (id: string, port: chrome.runtime.Port): Promise<AppConfirmationData[]> {
+  private subscribeAppConfirmationData (id: string, port: chrome.runtime.Port): AppConfirmationData[] {
     const cb = createSubscription<'pri(campaign.confirmations.subscribe)'>(id, port);
     let ready = false;
 
@@ -4385,8 +4381,6 @@ export default class KoniExtension {
     port.onDisconnect.addListener((): void => {
       this.cancelSubscription(id);
     });
-
-    await this.#koniState.eventService.waitCampaignConfirmationsReady;
     ready = true;
 
     return this.#koniState.mktCampaignService.getAppConfirmationsData();

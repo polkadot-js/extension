@@ -64,7 +64,7 @@ export enum MktCampaignConditionTypeValue {
   HAS_MONEY = 'condition-has-money'
 }
 
-export interface AppPopupCondition {
+export interface MktCampaignCondition {
   [MktCampaignConditionTypeValue.BALANCE]: ConditionBalanceType[];
   [MktCampaignConditionTypeValue.EARNING]: ConditionEarningType[];
   [MktCampaignConditionTypeValue.NFT]: ConditionNftType[];
@@ -81,7 +81,7 @@ export interface AppCommonData {
   id: number;
   position: string;
   position_params: PositionParam[];
-  conditions: AppPopupCondition;
+  conditions: MktCampaignCondition;
   info?: AppBasicInfoData;
 }
 

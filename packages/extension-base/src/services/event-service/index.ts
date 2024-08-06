@@ -31,9 +31,6 @@ export class EventService extends EventEmitter<EventRegistry> {
 
   public readonly waitMigrateReady: Promise<boolean>;
   public readonly waitCampaignReady: Promise<boolean>;
-  public readonly waitCampaignPopupsReady: Promise<boolean>;
-  public readonly waitCampaignBannersReady: Promise<boolean>;
-  public readonly waitCampaignConfirmationsReady: Promise<boolean>;
   public readonly waitBuyTokenReady: Promise<boolean>;
   public readonly waitBuyServiceReady: Promise<boolean>;
   public readonly waitEarningReady: Promise<boolean>;
@@ -54,9 +51,6 @@ export class EventService extends EventEmitter<EventRegistry> {
 
     this.waitMigrateReady = this.generateWaitPromise('migration.done');
     this.waitCampaignReady = this.generateWaitPromise('campaign.ready');
-    this.waitCampaignPopupsReady = this.generateWaitPromise('campaign.popups.ready');
-    this.waitCampaignBannersReady = this.generateWaitPromise('campaign.banners.ready');
-    this.waitCampaignConfirmationsReady = this.generateWaitPromise('campaign.confirmations.ready');
     this.waitBuyTokenReady = this.generateWaitPromise('buy.tokens.ready');
     this.waitBuyServiceReady = this.generateWaitPromise('buy.services.ready');
     this.waitEarningReady = this.generateWaitPromise('earning.ready');

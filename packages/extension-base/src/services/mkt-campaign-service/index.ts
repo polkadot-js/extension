@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
-import { _getAssetDecimals } from '@subwallet/extension-base/services/chain-service/utils';
-import { AppBannerData, AppBasicInfoData, AppCommonData, AppConfirmationData, AppPopupData, ConditionBalanceType, ConditionCrowdloanType, ConditionEarningType, ConditionHasMoneyType, ConditionNftType, ConditionType, MktCampaignConditionTypeValue } from '@subwallet/extension-base/services/mkt-campaign-service/types';
-import { fetchStaticData, wait } from '@subwallet/extension-base/utils';
+import { _getAssetDecimals, _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
+import { AppBannerData, AppBasicInfoData, AppCommonData, AppConfirmationData, AppPopupData, ConditionBalanceType, ConditionCrowdloanType, ConditionEarningType, ConditionHasMoneyType, ConditionNftType, ConditionType, MktCampaignCondition, MktCampaignConditionTypeValue } from '@subwallet/extension-base/services/mkt-campaign-service/types';
+import { fetchStaticData, TARGET_ENV, wait } from '@subwallet/extension-base/utils';
 import { keyring } from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import { BehaviorSubject } from 'rxjs';
@@ -24,21 +24,18 @@ export default class MktCampaignService {
 
     this.fetchPopupData().catch((e) => {
       console.error('Error on fetch popup', e);
-      this.#state.eventService.emit('campaign.popups.ready', true);
     });
 
     this.fetchBannerData().catch((e) => {
       console.error('Error on fetch banner', e);
-      this.#state.eventService.emit('campaign.banners.ready', true);
     });
 
-    this.fetchPopupData().catch((e) => {
+    this.fetchConfirmationData().catch((e) => {
       console.error('Error on fetch confirmation', e);
-      this.#state.eventService.emit('campaign.confirmations.ready', true);
     });
   }
 
-  fetchMktCampaignData1 (timeout = 10000) {
+  fetchMktCampaignData (timeout = 10000) {
     wait(timeout)
       .finally(() => {
         this.fetchPopupData().catch(console.error);
@@ -48,34 +45,30 @@ export default class MktCampaignService {
   }
 
   public init () {
-    this.fetchMktCampaignData1();
+    this.fetchMktCampaignData();
     console.log('Mkt campaign service ready');
   }
 
   public async fetchPopupData () {
-    console.log('run to service');
     const respAppPopupData = await fetchStaticData<AppPopupData[]>('app-popups');
-    const result = await this.fetchMktCampaignData<AppPopupData>(respAppPopupData);
+    const result = await this.handleMktCampaignData<AppPopupData>(respAppPopupData);
 
     this.appPopupSubject.next(result);
-    this.#state.eventService.emit('campaign.popups.ready', true);
   }
 
   public async fetchBannerData () {
     const respAppBannerData = await fetchStaticData<AppBannerData[]>('app-banners');
-    const result = await this.fetchMktCampaignData<AppBannerData>(respAppBannerData);
+    const result = await this.handleMktCampaignData<AppBannerData>(respAppBannerData);
 
     this.appBannerSubject.next(result);
-    this.#state.eventService.emit('campaign.banners.ready', true);
   }
 
   public async fetchConfirmationData () {
     const respAppConfirmationData = await fetchStaticData<AppConfirmationData[]>('app-confirmations');
 
-    const result = await this.fetchMktCampaignData<AppConfirmationData>(respAppConfirmationData);
+    const result = await this.handleMktCampaignData<AppConfirmationData>(respAppConfirmationData);
 
     this.appConfirmationSubject.next(result);
-    this.#state.eventService.emit('campaign.confirmations.ready', true);
   }
 
   public subscribePopupsData (callback: (data: AppPopupData[]) => void) {
@@ -108,7 +101,7 @@ export default class MktCampaignService {
     return this.appConfirmationSubject.getValue();
   }
 
-  public async fetchMktCampaignData<T extends AppCommonData> (data: T[]): Promise<T[]> {
+  public async handleMktCampaignData<T extends AppCommonData> (data: T[]): Promise<T[]> {
     const addresses = keyring.getPairs().map((pair) => pair.address);
     const allConditions: Record<string, string[]> = this.getAllConditions(data);
     const conditionBalanceMap = await this.checkBalanceCondition(allConditions, addresses);
@@ -127,24 +120,20 @@ export default class MktCampaignService {
   private checkActiveAndPlatformCondition<T extends AppCommonData> (data: T[]) {
     return data.filter((item) => {
       if (item.info) {
-        return this.checkCampaignExistTime(item.info) && item.info.platforms.includes('extension');
+        return this.checkCampaignExistTime(item.info) && item.info.platforms.includes(TARGET_ENV);
       } else {
         return true;
       }
     });
   }
 
-  private checkCampaignExistTime (info?: AppBasicInfoData) {
-    if (info?.start_time && info?.stop_time) {
+  private checkCampaignExistTime (info: AppBasicInfoData) {
+    if (info.start_time && info.stop_time) {
       const now = new Date();
       const startTime = new Date(info.start_time);
       const endTime = new Date(info.stop_time);
 
-      if (now >= startTime && now <= endTime) {
-        return true;
-      } else {
-        return false;
-      }
+      return now >= startTime && now <= endTime;
     } else {
       return false;
     }
@@ -192,8 +181,8 @@ export default class MktCampaignService {
 
       const chain = earningCondition.pool_slug.split('___')[2];
       const chainInfo = this.#state.getChainInfo(chain);
-      const decimals = chainInfo?.substrateInfo?.decimals || chainInfo?.evmInfo?.decimals;
-      const convertedValue = new BigN(earningCondition.value).shiftedBy(decimals || 0);
+      const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
+      const convertedValue = new BigN(earningCondition.value).shiftedBy(decimals);
 
       allEarningConditionPromises.push(
         this.#state.dbService.checkEarningByTokens(earningCondition.pool_slug, earningCondition.comparison, addresses, convertedValue.toString())
@@ -257,7 +246,8 @@ export default class MktCampaignService {
   }
 
   private async checkHasMoneyCondition (allConditions: Record<string, string[]>, addresses: string[]): Promise<Record<string, boolean>> {
-    const allHasMoneyConditions = allConditions[MktCampaignConditionTypeValue.HAS_MONEY]?.map((condition) => {
+    const hasMoneyCondition = allConditions[MktCampaignConditionTypeValue.HAS_MONEY];
+    const allHasMoneyConditions = hasMoneyCondition?.map((condition) => {
       return JSON.parse(condition) as ConditionHasMoneyType;
     });
 
@@ -273,7 +263,7 @@ export default class MktCampaignService {
     const conditionHasMoneyMap: Record<string, boolean> = {};
 
     promiseHasMoneyResult.forEach((rs, i) => {
-      conditionHasMoneyMap[allConditions[MktCampaignConditionTypeValue.HAS_MONEY][i]] = rs > 0;
+      conditionHasMoneyMap[hasMoneyCondition[i]] = rs > 0;
     });
 
     return conditionHasMoneyMap;
@@ -288,17 +278,23 @@ export default class MktCampaignService {
       [MktCampaignConditionTypeValue.HAS_MONEY]: []
     };
 
-    const getConditionByType = (data: AppCommonData, type: ConditionType) => {
-      data.conditions?.[type]?.forEach((condition) => {
-        if (!result[type].includes(JSON.stringify(condition))) {
-          result[type].push(JSON.stringify(condition));
+    const getConditionByType = (campaignCondition: MktCampaignCondition, type: ConditionType) => {
+      const campaignConditionByType = campaignCondition[type];
+
+      campaignConditionByType?.forEach((condition) => {
+        const conditionStringify = JSON.stringify(condition);
+
+        if (!result[type].includes(conditionStringify)) {
+          result[type].push(conditionStringify);
         }
       });
     };
 
     respAppPopupData.forEach((popup) => {
-      if (Object.keys(popup.conditions) && Object.keys(popup.conditions).length) {
-        Object.keys(popup.conditions).forEach((con) => getConditionByType(popup, con as MktCampaignConditionTypeValue));
+      const conditionKeys = Object.keys(popup.conditions);
+
+      if (conditionKeys && conditionKeys.length) {
+        conditionKeys.forEach((con) => getConditionByType(popup.conditions, con as MktCampaignConditionTypeValue));
       }
     });
 

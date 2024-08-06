@@ -91,7 +91,7 @@ export default class DatabaseService {
     return this.stores.balance.table.filter((obj) => addresses.includes(obj.address)).toArray();
   }
 
-  async checkBalanceByTokens (tokens: string[], comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount?: string) {
+  async checkBalanceByTokens (tokens: string[], comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount: string) {
     const filterFunc = (item: IBalance): boolean => {
       const freeBalance = item?.free;
       const lockedBalance = item?.locked;
@@ -118,7 +118,7 @@ export default class DatabaseService {
     return this.stores.balance.checkBalanceByTokens(tokens, filterFunc);
   }
 
-  async checkEarningByTokens (slug: string, comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount?: string) {
+  async checkEarningByTokens (slug: string, comparison: 'eq' | 'gt' | 'gte' | 'lt' | 'lte', addresses: string[], amount: string) {
     const filterFunc = (item: YieldPositionInfo): boolean => {
       if (!addresses.includes(item.address)) {
         return false;

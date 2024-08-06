@@ -30,6 +30,9 @@ export async function wakeUpServiceWorker (): Promise<{ status: string }> {
   });
 }
 
+// This object is required to allow jest.spyOn to be used to create a mock Implementation for testing
+export const wakeUpServiceWorkerWrapper = { wakeUpServiceWorker };
+
 export async function ensurePortConnection (
   portRef: chrome.runtime.Port | undefined,
   portConfig: {
@@ -43,7 +46,7 @@ export async function ensurePortConnection (
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      const response = await wakeUpServiceWorker();
+      const response = await wakeUpServiceWorkerWrapper.wakeUpServiceWorker();
 
       if (response?.status === 'awake') {
         if (!portRef) {

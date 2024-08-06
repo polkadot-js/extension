@@ -209,7 +209,6 @@ export class KoniCron {
   };
 
   fetchMktCampaignData = () => {
-    console.log('run to cron');
     this.state.mktCampaignService.fetchMktCampaignData1();
   };
 

@@ -4,8 +4,8 @@
 import { AppConfirmationData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateConfirmationHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
-import { useCallback, useEffect, useMemo } from 'react';
+import { MktCampaignHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 export interface AppConfirmationHookType {
@@ -16,10 +16,15 @@ export interface AppConfirmationHookType {
 export const useHandleAppConfirmationMap = (): AppConfirmationHookType => {
   const dispatch = useDispatch();
   const { appConfirmationData, confirmationHistoryMap } = useSelector((state: RootState) => state.staticContent);
+  const bannerHistoryMapRef = useRef<Record<string, MktCampaignHistoryData>>(confirmationHistoryMap);
 
-  const initConfirmationHistoryMap = useCallback((data: AppConfirmationData[]) => {
-    const newData: Record<string, PopupHistoryData> = data && data.length
-      ? data.reduce(
+  useEffect(() => {
+    bannerHistoryMapRef.current = confirmationHistoryMap;
+  }, [confirmationHistoryMap]);
+
+  useEffect(() => {
+    const newData: Record<string, MktCampaignHistoryData> = appConfirmationData && appConfirmationData.length
+      ? appConfirmationData.reduce(
         (o, key) =>
           Object.assign(o, {
             [`${key.position}-${key.id}`]: {
@@ -30,24 +35,18 @@ export const useHandleAppConfirmationMap = (): AppConfirmationHookType => {
         {}
       )
       : {};
-    const result: Record<string, PopupHistoryData> = {};
+    const result: Record<string, MktCampaignHistoryData> = {};
 
     Object.keys(newData).forEach((key) => {
-      if (!confirmationHistoryMap[key]) {
+      if (!bannerHistoryMapRef.current[key]) {
         result[key] = newData[key];
       } else {
-        result[key] = confirmationHistoryMap[key];
+        result[key] = bannerHistoryMapRef.current[key];
       }
     });
 
     dispatch(updateConfirmationHistoryData(result));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    initConfirmationHistoryMap(appConfirmationData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appConfirmationData]);
+  }, [appConfirmationData, dispatch]);
 
   const updateConfirmationHistoryMap = useCallback(
     (id: string) => {

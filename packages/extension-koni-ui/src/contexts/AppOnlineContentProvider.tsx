@@ -9,7 +9,7 @@ import { useHandleAppConfirmationMap } from '@subwallet/extension-koni-ui/hooks/
 import { useHandleAppPopupMap } from '@subwallet/extension-koni-ui/hooks/static-content/useHandleAppPopupMap';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EarningPoolsParam, EarningPositionDetailParam } from '@subwallet/extension-koni-ui/types';
-import { OnlineContentDataType, PopupFrequency, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { MktCampaignHistoryData, OnlineContentDataType, PopupFrequency } from '@subwallet/extension-koni-ui/types/staticContent';
 import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useContext, useEffect } from 'react';
 import { useSelector } from 'react-redux';
@@ -24,9 +24,9 @@ interface AppOnlineContentContextType {
   appPopupMap: Record<string, AppPopupData[]>;
   appBannerMap: Record<string, AppBannerData[]>;
   appConfirmationMap: Record<string, AppConfirmationData[]>;
-  popupHistoryMap: Record<string, PopupHistoryData>;
-  bannerHistoryMap: Record<string, PopupHistoryData>;
-  confirmationHistoryMap: Record<string, PopupHistoryData>;
+  popupHistoryMap: Record<string, MktCampaignHistoryData>;
+  bannerHistoryMap: Record<string, MktCampaignHistoryData>;
+  confirmationHistoryMap: Record<string, MktCampaignHistoryData>;
   updatePopupHistoryMap: (id: string) => void;
   updateBannerHistoryMap: (ids: string[]) => void;
   updateConfirmationHistoryMap: (id: string) => void;

@@ -16,7 +16,7 @@ import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
 
-import { PopupHistoryData } from '../types/staticContent';
+import { MktCampaignHistoryData } from '../types/staticContent';
 
 // todo: move this file to extension-koni-ui/src/types/
 
@@ -139,9 +139,9 @@ export interface AppOnlineContent {
   appPopupData: AppPopupData[];
   appBannerData: AppBannerData[];
   appConfirmationData: AppConfirmationData[];
-  popupHistoryMap: Record<string, PopupHistoryData>;
-  bannerHistoryMap: Record<string, PopupHistoryData>;
-  confirmationHistoryMap: Record<string, PopupHistoryData>;
+  popupHistoryMap: Record<string, MktCampaignHistoryData>;
+  bannerHistoryMap: Record<string, MktCampaignHistoryData>;
+  confirmationHistoryMap: Record<string, MktCampaignHistoryData>;
 }
 
 export interface BuyServiceStore extends BaseReduxStore {

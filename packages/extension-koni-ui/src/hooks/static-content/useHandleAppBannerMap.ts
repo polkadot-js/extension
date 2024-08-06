@@ -4,8 +4,8 @@
 import { AppBannerData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updateBannerHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
-import { useCallback, useEffect, useMemo } from 'react';
+import { MktCampaignHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 export interface AppBannerHookType {
@@ -16,10 +16,15 @@ export interface AppBannerHookType {
 export const useHandleAppBannerMap = (): AppBannerHookType => {
   const dispatch = useDispatch();
   const { appBannerData, bannerHistoryMap } = useSelector((state: RootState) => state.staticContent);
+  const bannerHistoryMapRef = useRef<Record<string, MktCampaignHistoryData>>(bannerHistoryMap);
 
-  const initBannerHistoryMap = useCallback((data: AppBannerData[]) => {
-    const newData: Record<string, PopupHistoryData> = data && data.length
-      ? data.reduce(
+  useEffect(() => {
+    bannerHistoryMapRef.current = bannerHistoryMap;
+  }, [bannerHistoryMap]);
+
+  useEffect(() => {
+    const newData: Record<string, MktCampaignHistoryData> = appBannerData && appBannerData.length
+      ? appBannerData.reduce(
         (o, key) =>
           Object.assign(o, {
             [`${key.position}-${key.id}`]: {
@@ -30,27 +35,22 @@ export const useHandleAppBannerMap = (): AppBannerHookType => {
         {}
       )
       : {};
-    const result: Record<string, PopupHistoryData> = {};
+    const result: Record<string, MktCampaignHistoryData> = {};
 
     Object.keys(newData).forEach((key) => {
-      if (!bannerHistoryMap[key]) {
+      if (!bannerHistoryMapRef.current[key]) {
         result[key] = newData[key];
       } else {
-        result[key] = bannerHistoryMap[key];
+        result[key] = bannerHistoryMapRef.current[key];
       }
     });
 
     dispatch(updateBannerHistoryData(result));
-  }, [bannerHistoryMap, dispatch]);
-
-  useEffect(() => {
-    initBannerHistoryMap(appBannerData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appBannerData]);
+  }, [appBannerData, dispatch]);
 
   const updateBannerHistoryMap = useCallback(
     (ids: string[]) => {
-      const result: Record<string, PopupHistoryData> = {};
+      const result: Record<string, MktCampaignHistoryData> = {};
 
       for (const key of ids) {
         result[key] = { lastShowTime: Date.now(), showTimes: bannerHistoryMap[key].showTimes + 1 };

@@ -4,8 +4,8 @@
 import { AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { updatePopupHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
-import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
-import { useCallback, useEffect, useMemo } from 'react';
+import { MktCampaignHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 export interface AppPopupHookType {
@@ -15,11 +15,16 @@ export interface AppPopupHookType {
 
 export const useHandleAppPopupMap = (): AppPopupHookType => {
   const { appPopupData, popupHistoryMap } = useSelector((state: RootState) => state.staticContent);
+  const popupHistoryMapRef = useRef<Record<string, MktCampaignHistoryData>>(popupHistoryMap);
   const dispatch = useDispatch();
 
-  const initPopupHistoryMap = useCallback((data: AppPopupData[]) => {
-    const newData: Record<string, PopupHistoryData> = data && data.length
-      ? data.reduce(
+  useEffect(() => {
+    popupHistoryMapRef.current = popupHistoryMap;
+  }, [popupHistoryMap]);
+
+  useEffect(() => {
+    const newData: Record<string, MktCampaignHistoryData> = appPopupData && appPopupData.length
+      ? appPopupData.reduce(
         (o, key) =>
           Object.assign(o, {
             [`${key.position}-${key.id}`]: {
@@ -30,23 +35,18 @@ export const useHandleAppPopupMap = (): AppPopupHookType => {
         {}
       )
       : {};
-    const result: Record<string, PopupHistoryData> = {};
+    const result: Record<string, MktCampaignHistoryData> = {};
 
     Object.keys(newData).forEach((key) => {
-      if (!popupHistoryMap[key]) {
+      if (!popupHistoryMapRef.current[key]) {
         result[key] = newData[key];
       } else {
-        result[key] = popupHistoryMap[key];
+        result[key] = popupHistoryMapRef.current[key];
       }
     });
 
     dispatch(updatePopupHistoryData(result));
-  }, [dispatch, popupHistoryMap]);
-
-  useEffect(() => {
-    initPopupHistoryMap(appPopupData);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [appPopupData]);
+  }, [appPopupData, dispatch]);
 
   const updatePopupHistoryMap = useCallback(
     (id: string) => {

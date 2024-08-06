@@ -15,19 +15,9 @@ export interface AppInstructionInfo {
   icon: PhosphorIcon;
 }
 
-export interface PopupHistoryData {
+export interface MktCampaignHistoryData {
   lastShowTime: number;
   showTimes: number;
-}
-
-export interface AppBasicInfoData {
-  id: number;
-  name: string;
-  description: string | null;
-  start_time: string;
-  stop_time: string;
-  platforms: string[];
-  os: 'android' | 'ios';
 }
 
 export interface AppContentButtonInstruction {

@@ -15,7 +15,7 @@ import { HistoryQuery } from '@subwallet/extension-base/services/storage-service
 import YieldPoolStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPoolStore';
 import YieldPositionStore from '@subwallet/extension-base/services/storage-service/db-stores/YieldPositionStore';
 import { BalanceItem, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
-import { reformatAddress } from '@subwallet/extension-base/utils';
+import { BN_ZERO, reformatAddress } from '@subwallet/extension-base/utils';
 import keyring from '@subwallet/ui-keyring';
 import BigN from 'bignumber.js';
 import { Subscription } from 'dexie';
@@ -143,12 +143,96 @@ export default class DatabaseService {
     return this.stores.yieldPosition.checkPositionByPoolSlug(slug, filterFunc);
   }
 
-  async checkNftByTokens (chain: string, collectionId: string) {
-    return this.stores.nftCollection.checkNftByChainOrCollectionId(chain, collectionId);
+  async checkNftByTokens (chain: string, addresses: string[], collectionId?: string) {
+    const filterFunc = (item: INft) => {
+      if (!addresses.includes(item.address)) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    return this.stores.nft.checkNftsByChainAndCollection(chain, filterFunc, collectionId);
   }
 
-  async checkCrowdloanByChain (chain: string) {
-    return this.stores.crowdloan.checkCrowdloanByChain(chain);
+  async checkCrowdloanByChain (chain: string, addresses: string[]) {
+    const filterFunc = (item: ICrowdloanItem) => {
+      if (!addresses.includes(item.address)) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+
+    return this.stores.crowdloan.checkCrowdloanExist(filterFunc);
+  }
+
+  async checkHasMoneyByTokens (types: string[], addresses: string[]) {
+    const allHasMoneysConditionValid: string[] = [];
+
+    if (types.includes('balance')) {
+      const filterFunc = (item: IBalance): boolean => {
+        if (!addresses.includes(item.address)) {
+          return false;
+        }
+
+        const freeBalance = item?.free;
+        const lockedBalance = item?.locked;
+        const value = new BigN(freeBalance).plus(lockedBalance);
+
+        return value.gt(BN_ZERO);
+      };
+
+      const balanceResult = await this.stores.balance.checkBalanceExist(filterFunc);
+
+      balanceResult > 0 && allHasMoneysConditionValid.push('balance');
+    }
+
+    if (types.includes('earning')) {
+      const filterFunc = (item: YieldPositionInfo): boolean => {
+        if (!addresses.includes(item.address)) {
+          return false;
+        }
+
+        const value = new BigN(item.activeStake);
+
+        return value.gt(BN_ZERO);
+      };
+
+      const earningResult = await this.stores.yieldPosition.checkPositionExist(filterFunc);
+
+      earningResult > 0 && allHasMoneysConditionValid.push('earning');
+    }
+
+    if (types.includes('nft')) {
+      const filterFunc = (item: INft) => {
+        if (!addresses.includes(item.address)) {
+          return false;
+        } else {
+          return true;
+        }
+      };
+
+      const nftResult = await this.stores.nft.checkNftExist(filterFunc);
+
+      nftResult > 0 && allHasMoneysConditionValid.push('nft');
+    }
+
+    if (types.includes('crowdloan')) {
+      const filterFunc = (item: ICrowdloanItem) => {
+        if (!addresses.includes(item.address)) {
+          return false;
+        } else {
+          return true;
+        }
+      };
+
+      const crowdloanResult = await this.stores.crowdloan.checkCrowdloanExist(filterFunc);
+
+      crowdloanResult > 0 && allHasMoneysConditionValid.push('crowdloan');
+    }
+
+    return allHasMoneysConditionValid.length;
   }
 
   async updateBalanceStore (item: BalanceItem) {

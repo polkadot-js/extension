@@ -2399,6 +2399,9 @@ export interface KoniRequestSignatures {
   'pri(campaign.popup.getData)': [null, AppPopupData[]];
   'pri(campaign.banner.getData)': [null, AppBannerData[]];
   'pri(campaign.confirmation.getData)': [null, AppConfirmationData[]];
+  'pri(campaign.popups.subscribe)': [null, AppPopupData[], AppPopupData[]];
+  'pri(campaign.banners.subscribe)': [null, AppBannerData[], AppBannerData[]];
+  'pri(campaign.confirmations.subscribe)': [null, AppConfirmationData[], AppConfirmationData[]];
   'pri(campaign.banner.complete)': [RequestCampaignBannerComplete, boolean];
   /* Campaign */
 

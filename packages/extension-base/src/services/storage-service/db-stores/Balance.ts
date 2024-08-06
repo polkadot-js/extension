@@ -22,4 +22,8 @@ export default class BalanceStore extends BaseStoreWithAddress<IBalance> {
   async checkBalanceByTokens (tokens: string[], filterFunc: (i: IBalance) => boolean) {
     return this.table.where('tokenSlug').anyOfIgnoreCase(tokens).filter(filterFunc).count();
   }
+
+  async checkBalanceExist (filterFunc: (x: IBalance) => boolean) {
+    return this.table.filter((item) => filterFunc(item)).count();
+  }
 }

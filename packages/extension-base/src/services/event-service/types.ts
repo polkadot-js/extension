@@ -51,6 +51,11 @@ export interface EventRegistry {
   'buy.tokens.ready': [boolean];
   'buy.services.ready': [boolean];
 
+  // Campaign
+  'campaign.popups.ready': [boolean];
+  'campaign.banners.ready': [boolean];
+  'campaign.confirmations.ready': [boolean];
+
   // Earning
   'earning.ready': [boolean];
 

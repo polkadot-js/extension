@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { _isCustomAsset, _isSmartContractToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-web-ui/components/NoContent';
@@ -16,7 +16,7 @@ import useDefaultNavigate from '@subwallet/extension-web-ui/hooks/router/useDefa
 import useGetChainAssetInfo from '@subwallet/extension-web-ui/hooks/screen/common/useGetChainAssetInfo';
 import { deleteCustomAssets } from '@subwallet/extension-web-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-web-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail, INftItemDetail } from '@subwallet/extension-web-ui/Popup/Home/Nfts/utils';
+import { getNftsByCollection, INftCollectionDetail, INftItemDetail } from '@subwallet/extension-web-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Button, ButtonProps, Icon, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -27,7 +27,8 @@ import styled from 'styled-components';
 
 type WrapperProps = ThemeProps;
 type Props = ThemeProps & {
-  collectionDetail: INftCollectionDetail
+  collectionInfo: NftCollection
+  nftList: NftItem[]
 };
 
 const subHeaderRightButton = (
@@ -39,14 +40,13 @@ const subHeaderRightButton = (
   />
 );
 
-function Component ({ className = '', collectionDetail }: Props): React.ReactElement<Props> {
-  const { collectionInfo, nftList } = collectionDetail;
+function Component ({ className = '', collectionInfo, nftList }: Props): React.ReactElement<Props> {
   const outletContext: {
     searchInput: string,
     setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>
     setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
-  } = useOutletContext();
+  } | undefined = useOutletContext();
   const { isWebUI } = useContext(ScreenContext);
 
   const { t } = useTranslation();
@@ -84,7 +84,7 @@ function Component ({ className = '', collectionDetail }: Props): React.ReactEle
   }, [navigate]);
 
   const renderNft = useCallback((nftItem: NftItem) => {
-    const routingParams = { collectionInfo, nftItem } as INftItemDetail;
+    const routingParams = { collectionId: collectionInfo.collectionId, nftId: nftItem.id } as INftItemDetail;
 
     return (
       <NftGalleryWrapper
@@ -166,9 +166,9 @@ function Component ({ className = '', collectionDetail }: Props): React.ReactEle
 
   useEffect(() => {
     if (outletContext) {
-      outletContext.setDetailTitle(title);
-      outletContext.setSearchPlaceholder('NFTid');
-      outletContext.setShowSearchInput(true);
+      outletContext.setDetailTitle?.(title);
+      outletContext.setSearchPlaceholder?.('NFTid');
+      outletContext.setShowSearchInput?.(true);
     }
   }, [outletContext, title]);
 
@@ -206,7 +206,7 @@ function Component ({ className = '', collectionDetail }: Props): React.ReactEle
                     renderWhenEmpty={emptyNft}
                     searchBy={searchNft}
                     searchMinCharactersCount={2}
-                    searchTerm={outletContext.searchInput}
+                    searchTerm={outletContext?.searchInput}
                   />
                 </div>
               )}
@@ -255,22 +255,47 @@ function Component ({ className = '', collectionDetail }: Props): React.ReactEle
 function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
   const navigate = useNavigate();
   const location = useLocation();
-  const [collectionDetail] = useState((location.state as INftCollectionDetail));
+  const outletContext: {
+    nftCollections: NftCollection[],
+    nftItems: NftItem[]
+  } | undefined = useOutletContext();
+
+  const [collectionDetail] = useState((location.state as INftCollectionDetail | undefined));
+
+  const collectionInfo = useMemo(() => {
+    if (!collectionDetail?.collectionId) {
+      return;
+    }
+
+    return outletContext?.nftCollections?.find((c) => c.collectionId === collectionDetail.collectionId);
+  }, [collectionDetail?.collectionId, outletContext?.nftCollections]);
+
+  const nftList = useMemo(() => {
+    if (!outletContext?.nftItems || !collectionInfo) {
+      return [] as NftItem[];
+    }
+
+    return getNftsByCollection(collectionInfo, outletContext?.nftItems);
+  }, [collectionInfo, outletContext?.nftItems]);
+
+  const isReady = !!collectionInfo && !!nftList.length;
 
   useEffect(() => {
-    if (!collectionDetail) {
+    if (!isReady) {
       navigate('/home/nfts/collections');
     }
-  }, [collectionDetail, navigate]);
+  }, [collectionInfo, isReady, navigate, nftList.length]);
 
-  if (!collectionDetail) {
+  if (!isReady) {
     return <></>;
   }
 
   return (
     <Component
       {...props}
-      collectionDetail={collectionDetail}
+      // @ts-ignore
+      collectionInfo={collectionInfo}
+      nftList={nftList}
     />
   );
 }

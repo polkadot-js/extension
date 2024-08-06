@@ -12,6 +12,8 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
     handleButtonClick,
     updateBannerHistoryMap } = useContext(AppOnlineContentContext);
 
+  console.log('appBannerMap', appBannerMap)
+
   const dismissBanner = useCallback(
     (ids: string[]) => {
       updateBannerHistoryMap(ids);
@@ -29,7 +31,6 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
   );
 
   const banners = useMemo(() => {
-    console.log('appBannerMap Ui', appBannerMap);
     const displayedBanner = appBannerMap[screen];
 
     if (displayedBanner && displayedBanner.length) {

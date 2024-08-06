@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AppBannerData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
-import { getAppBannerData } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { updateAppBannerData, updateBannerHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
+import { updateBannerHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
 import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,19 +30,22 @@ export const useHandleAppBannerMap = (): AppBannerHookType => {
         {}
       )
       : {};
-    const result = { ...newData, ...bannerHistoryMap };
+    const result: Record<string, PopupHistoryData> = {};
+
+    Object.keys(newData).forEach((key) => {
+      if (!bannerHistoryMap[key]) {
+        result[key] = newData[key];
+      } else {
+        result[key] = bannerHistoryMap[key];
+      }
+    });
 
     dispatch(updateBannerHistoryData(result));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [bannerHistoryMap, dispatch]);
 
   useEffect(() => {
-    getAppBannerData().then((rs) => {
-      dispatch(updateAppBannerData(rs));
-      initBannerHistoryMap(rs);
-      console.log('init data success');
-    }).catch((e) => console.log('error when get app banner data', e));
-  }, [dispatch, initBannerHistoryMap]);
+    initBannerHistoryMap(appBannerData);
+  }, [appBannerData]);
 
   const updateBannerHistoryMap = useCallback(
     (ids: string[]) => {
@@ -81,8 +83,6 @@ export const useHandleAppBannerMap = (): AppBannerHookType => {
       return {};
     }
   }, [appBannerData]);
-
-  console.log('appBannerMap', appBannerMap);
 
   return {
     updateBannerHistoryMap,

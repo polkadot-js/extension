@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AppConfirmationData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
-import { getAppConfirmationData } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { updateAppConfirmationData, updateConfirmationHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
+import { updateConfirmationHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
 import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,18 +30,23 @@ export const useHandleAppConfirmationMap = (): AppConfirmationHookType => {
         {}
       )
       : {};
-    const result = { ...newData, ...confirmationHistoryMap };
+    const result: Record<string, PopupHistoryData> = {};
+
+    Object.keys(newData).forEach((key) => {
+      if (!confirmationHistoryMap[key]) {
+        result[key] = newData[key];
+      } else {
+        result[key] = confirmationHistoryMap[key];
+      }
+    });
 
     dispatch(updateConfirmationHistoryData(result));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    getAppConfirmationData().then((rs) => {
-      dispatch(updateAppConfirmationData(rs));
-      initConfirmationHistoryMap(rs);
-    }).catch((e) => console.log('error when get app confirmation data', e));
-  }, [dispatch, initConfirmationHistoryMap]);
+    initConfirmationHistoryMap(appConfirmationData);
+  }, [appConfirmationData]);
 
   const updateConfirmationHistoryMap = useCallback(
     (id: string) => {

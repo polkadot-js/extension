@@ -2,9 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
-import { getAppPopupData } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { updateAppPopupData, updatePopupHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
+import { updatePopupHistoryData } from '@subwallet/extension-koni-ui/stores/base/StaticContent';
 import { PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,19 +30,22 @@ export const useHandleAppPopupMap = (): AppPopupHookType => {
         {}
       )
       : {};
-    const result = { ...newData, ...popupHistoryMap };
+    const result: Record<string, PopupHistoryData> = {};
+
+    Object.keys(newData).forEach((key) => {
+      if (!popupHistoryMap[key]) {
+        result[key] = newData[key];
+      } else {
+        result[key] = popupHistoryMap[key];
+      }
+    });
 
     dispatch(updatePopupHistoryData(result));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, popupHistoryMap]);
 
   useEffect(() => {
-    getAppPopupData().then((rs) => {
-      dispatch(updateAppPopupData(rs));
-      initPopupHistoryMap(rs);
-      console.log('init data success');
-    }).catch((e) => console.log('error when get app popup data', e));
-  }, [dispatch, initPopupHistoryMap]);
+    initPopupHistoryMap(appPopupData);
+  }, [appPopupData]);
 
   const updatePopupHistoryMap = useCallback(
     (id: string) => {

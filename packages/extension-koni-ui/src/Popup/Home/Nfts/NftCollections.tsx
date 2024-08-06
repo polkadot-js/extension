@@ -15,6 +15,7 @@ import { ArrowClockwise, Image, Plus, PlusCircle } from 'phosphor-react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import useGetBannerByScreen from "../../../hooks/campaign/useGetBannerByScreen";
 
 type Props = ThemeProps
 
@@ -31,6 +32,8 @@ const rightIcon = <Icon
 />;
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
+  const { banners } = useGetBannerByScreen('nft');
+  console.log('banners', banners);
   useSetCurrentPage('/home/nfts/collections');
   const { t } = useTranslation();
   const navigate = useNavigate();

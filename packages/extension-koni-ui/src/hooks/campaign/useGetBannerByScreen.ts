@@ -12,8 +12,6 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
     handleButtonClick,
     updateBannerHistoryMap } = useContext(AppOnlineContentContext);
 
-  console.log('appBannerMap', appBannerMap)
-
   const dismissBanner = useCallback(
     (ids: string[]) => {
       updateBannerHistoryMap(ids);

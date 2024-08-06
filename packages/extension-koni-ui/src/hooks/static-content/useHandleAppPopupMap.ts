@@ -45,6 +45,7 @@ export const useHandleAppPopupMap = (): AppPopupHookType => {
 
   useEffect(() => {
     initPopupHistoryMap(appPopupData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appPopupData]);
 
   const updatePopupHistoryMap = useCallback(

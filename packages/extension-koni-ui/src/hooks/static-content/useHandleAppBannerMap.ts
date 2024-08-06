@@ -45,6 +45,7 @@ export const useHandleAppBannerMap = (): AppBannerHookType => {
 
   useEffect(() => {
     initBannerHistoryMap(appBannerData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appBannerData]);
 
   const updateBannerHistoryMap = useCallback(

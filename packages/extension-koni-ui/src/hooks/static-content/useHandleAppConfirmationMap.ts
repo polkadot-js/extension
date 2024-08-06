@@ -46,6 +46,7 @@ export const useHandleAppConfirmationMap = (): AppConfirmationHookType => {
 
   useEffect(() => {
     initConfirmationHistoryMap(appConfirmationData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appConfirmationData]);
 
   const updateConfirmationHistoryMap = useCallback(

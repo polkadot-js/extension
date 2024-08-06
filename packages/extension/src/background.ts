@@ -29,15 +29,26 @@ chrome.runtime.onConnect.addListener((port): void => {
   port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
 });
 
+function isValidUrl (url: string) {
+  try {
+    const urlObj = new URL(url);
+
+    return urlObj.protocol === 'http:' || urlObj.protocol === 'https:';
+  } catch (_e) {
+    return false;
+  }
+}
+
 function getActiveTabs () {
   // queriing the current active tab in the current window should only ever return 1 tab
   // although an array is specified here
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    // get the urls of the active tabs. In the case of new tab the url may be empty or undefined
+    // get the urls of the active tabs. Only http or https urls are supported. Other urls will be filtered out.
+    // e.g. browser tabs like chrome://newtab/, chrome://extensions/, about:addons etc will be filtered out
     // we filter these out
     const urls: string[] = tabs
       .map(({ url }) => url)
-      .filter((url) => !!url) as string[];
+      .filter((url) => !!url && isValidUrl(url)) as string[];
 
     const request: TransportRequestMessage<'pri(activeTabsUrl.update)'> = {
       id: 'background',

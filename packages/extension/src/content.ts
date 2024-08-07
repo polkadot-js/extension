@@ -30,6 +30,12 @@ window.addEventListener('message', ({ data, source }: Message): void => {
     return;
   }
 
+  // in the event of a service worker crash, the port's name will be
+  // renamed to something bogus. so we need to unset the port variable.
+  if (!(port?.name === PORT_CONTENT)) {
+    port = undefined;
+  }
+
   ensurePortConnection(port, portConfig).then((connectedPort) => {
     connectedPort.postMessage(data);
     port = connectedPort;

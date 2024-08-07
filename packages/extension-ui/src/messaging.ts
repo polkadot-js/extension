@@ -77,6 +77,12 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     handlers[id] = { reject, resolve, subscriber };
 
+    // in the event of a service worker crash, the port's name will be
+    // renamed to something bogus. so we need to unset the port variable.
+    if (!(port?.name === PORT_EXTENSION)) {
+      port = undefined;
+    }
+
     ensurePortConnection(port, portConfig).then((connectedPort) => {
       connectedPort.postMessage({ id, message, request: request || {} });
       port = connectedPort;

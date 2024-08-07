@@ -79,7 +79,7 @@ function sendMessage<TMessageType extends MessageTypes> (message: TMessageType, 
 
     // in the event of a service worker crash, the port's name will be
     // renamed to something bogus. so we need to unset the port variable.
-    if (!(port?.name === PORT_EXTENSION)) {
+    if (port && !(port.name === PORT_EXTENSION)) {
       port = undefined;
     }
 

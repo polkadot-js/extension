@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.51.1 Aug 7, 2024
+
+Contributed:
+
+- Update XCM Analyser to v1.3.1 (Thanks to https://github.com/dudo50)
+- Fix: ensure the service worker is awake before every port message (Thanks to https://github.com/F-OBrien)
+
+Changes:
+
+- Bump yarn to 4.3.1
+- Add CI script to check for diffs in src vs build for store release
+- Change Connected to Connect Accounts
+- Upgrade Polkadot-js deps
+    - polkadot/api 12.3.1
+    - polkadot/phishing 0.23.3
+    - polkadot/ui 3.8.3
+
+
 ## 0.50.1 July 30, 2024
 
 Contributed:

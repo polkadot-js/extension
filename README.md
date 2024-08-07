@@ -24,21 +24,6 @@ Find out more about how to use the extension as a Dapp developper, cookbook, as 
   
 NOTE: If you would like to regenerate the compressed `master-ff-build.zip`, and `master-ff-src.zip` files run: `yarn build:zip:ff`
 
-## Ensuring `master-<TARGET-BROWSER>-build` and `master-<TARGET_BROWSER>-src` dont have any diffs (For maintainers)
-
-Summary: These are the steps to ensure the following builds don't have any diffs so that the firefox review goes smoothly.
-
-1. Run `yarn build:ff` or `yarn build:chrome`, depending on your target browser.
-2. Run `yarn build:zip:ff` or `yarn build:zip:chrome` - This will generate a `master-<TARGET_BROWSER>-build.zip`, and `master-<TARGET_BROWSER>-src.zip`.
-3. Move `master-<TARGET_BROWSER>-src.zip`, and `master-<TARGET_BROWSER>-build.zip` to its own enviornment/folder.
-4. Uncompress `master-<TARGET_BROWSER>-src.zip` to `master-src` and inside of `master-src` run `yarn && yarn build:<ff|chrome>`, depending on your target browser.
-5. Uncompress `master-<TARGET_BROWSER>-build.zip` to `master-build`.
-6. Now we can compare the two builds using `diff`, and `comm`
-  - Run `diff -qr <path-to-master-build>/master-build <path-to-master-src>/packages/extension/build | sort`
-7. To sanity check important files (`background.js`, and `extension.js`) you can also run: 
-  - `comm -23 <(sort <path-to-master-build>/background.js) <(sort <path-to-master-src>/packages/extension/build/background.js) > diff`
-  - `comm -23 <(sort <path-to-master-build>/extension.js) <(sort <path-to-master-src>/packages/extension/build/extension.js) > diff`
-
 ## Development version
 
 Steps to build the extension and view your changes in a browser:

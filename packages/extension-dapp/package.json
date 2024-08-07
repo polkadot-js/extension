@@ -18,10 +18,10 @@
     "./packageDetect.cjs"
   ],
   "type": "module",
-  "version": "0.50.2-6-x",
+  "version": "0.50.2-7-x",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/extension-inject": "0.50.2-6-x",
+    "@polkadot/extension-inject": "0.50.2-7-x",
     "@polkadot/util": "^13.0.2",
     "@polkadot/util-crypto": "^13.0.2",
     "tslib": "^2.6.2"

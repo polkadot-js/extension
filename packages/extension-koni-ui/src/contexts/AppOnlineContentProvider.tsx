@@ -199,7 +199,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
   const showAppPopup = useCallback(
     (currentRoute: string | undefined) => {
       const currentTransformRoute = getPositionByRouteName(currentRoute) || '';
-      const currentPopupList = appPopupMap[currentTransformRoute];
+      const currentPopupList = appPopupMap[currentTransformRoute].sort((a, b) => a.priority - b.priority);
 
       if (currentPopupList && currentPopupList.length) {
         const filteredPopupList = currentPopupList.filter((item) => {

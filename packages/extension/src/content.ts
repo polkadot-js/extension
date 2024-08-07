@@ -32,7 +32,7 @@ window.addEventListener('message', ({ data, source }: Message): void => {
 
   // in the event of a service worker crash, the port's name will be
   // renamed to something bogus. so we need to unset the port variable.
-  if (port && !(port.name === PORT_CONTENT)) {
+  if (port && port.name !== PORT_CONTENT) {
     port = undefined;
   }
 

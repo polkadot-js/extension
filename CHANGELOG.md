@@ -6,6 +6,10 @@ Contributed:
 
 - Update XCM Analyser to v1.3.1 (Thanks to https://github.com/dudo50) ([#1419](https://github.com/polkadot-js/extension/pull/1419))
 - Fix: ensure the service worker is awake before every port message (Thanks to https://github.com/F-OBrien) ([#1433](https://github.com/polkadot-js/extension/pull/1433))
+    - NOTE: The extension-base now exposes a set of functions for port connection stability.
+    - `setupPort`
+    - `wakeUpServiceWorker`
+    - `ensurePortConnection`
 
 Changes:
 

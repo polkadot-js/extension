@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## 0.51.1 Aug 7, 2024
+
+Contributed:
+
+- Update XCM Analyser to v1.3.1 (Thanks to https://github.com/dudo50) ([#1419](https://github.com/polkadot-js/extension/pull/1419))
+- Fix: ensure the service worker is awake before every port message (Thanks to https://github.com/F-OBrien) ([#1433](https://github.com/polkadot-js/extension/pull/1433))
+    - NOTE: The extension-base now exposes a set of functions for port connection stability.
+    - `setupPort`
+    - `wakeUpServiceWorker`
+    - `ensurePortConnection`
+
+Changes:
+
+- Bump yarn to 4.3.1 ([#1426](https://github.com/polkadot-js/extension/pull/1426))
+- Add CI script to check for diffs in src vs build for store release ([#1429](https://github.com/polkadot-js/extension/pull/1429)) ([#1436](https://github.com/polkadot-js/extension/pull/1436))
+- Change Connected to Connect Accounts ([#1430](https://github.com/polkadot-js/extension/pull/1430))
+- Upgrade Polkadot-js deps ([#1434](https://github.com/polkadot-js/extension/pull/1434)) ([#1435](https://github.com/polkadot-js/extension/pull/1435))
+    - polkadot/api 12.3.1
+    - polkadot/phishing 0.23.3
+    - polkadot/ui 3.8.3
+
+
 ## 0.50.1 July 30, 2024
 
 Contributed:

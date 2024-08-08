@@ -66,6 +66,16 @@ export default class NftStore extends BaseStoreWithAddressAndChain<INft> {
     return this.table.where('address').anyOfIgnoreCase(addresses).delete();
   }
 
+  checkNftsByChainAndCollection (chain: string, filterFunc: (x: INft) => boolean, collectionId?: string) {
+    const data = collectionId ? this.table.where({ chain, collectionId }) : this.table.where({ chain });
+
+    return data.filter((item) => filterFunc(item)).count();
+  }
+
+  checkNftExist (filterFunc: (x: INft) => boolean) {
+    return this.table.filter(filterFunc).count();
+  }
+
   // reformatCollectionIds (items: INft[]) {
   //   return items.map((item) => {
   //     item.collectionId = item.collectionId?.toLowerCase();

@@ -23,6 +23,7 @@ export async function loadWasm () {
 }
 
 export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
+  protected ss58_addr_type = 42;
   getVersion (): Promise<LedgerVersion> {
     return this.withApp(async (app): Promise<LedgerVersion> => {
       const { deviceLocked: locked, major, minor, patch, testMode } = await app.getVersion();
@@ -46,8 +47,7 @@ export class SubstrateGenericLedger extends BaseLedger<PolkadotGenericApp> {
   getAddress (confirm?: boolean, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerAddress> {
     return this.withApp(async (app): Promise<LedgerAddress> => {
       const path = this.serializePath(accountOffset, addressOffset, accountOptions);
-
-      const { address, pubKey } = await this.wrapError(app.getAddress(path, 42, confirm));
+      const { address, pubKey } = await this.wrapError(app.getAddress(path, this.ss58_addr_type, confirm));
 
       return {
         address,

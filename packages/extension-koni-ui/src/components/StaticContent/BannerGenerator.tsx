@@ -1,11 +1,11 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { AppBannerData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { StaticDataProps } from '@subwallet/extension-koni-ui/components/Modal/Campaign/AppPopupModal';
 import Banner from '@subwallet/extension-koni-ui/components/StaticContent/Banner';
 import { APP_INSTRUCTION_DATA } from '@subwallet/extension-koni-ui/constants';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { AppBannerData } from '@subwallet/extension-koni-ui/types/staticContent';
 import React, { useMemo } from 'react';
 import Slider, { Settings } from 'react-slick';
 import styled from 'styled-components';

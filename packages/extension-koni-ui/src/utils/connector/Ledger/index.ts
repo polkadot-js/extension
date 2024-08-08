@@ -4,7 +4,7 @@
 import { ConvertLedgerError } from '@subwallet/extension-koni-ui/types';
 import { TFunction } from 'i18next';
 
-export const convertLedgerError = (err: Error, t: TFunction, network: string, isSigning = false, expandError = true): ConvertLedgerError => {
+export const convertLedgerError = (err: Error, t: TFunction, network: string, isSigning = false, expandError = true, isGetAddress = false): ConvertLedgerError => {
   const error = err;
   const message = error.message;
   const name = error.name;
@@ -42,6 +42,15 @@ export const convertLedgerError = (err: Error, t: TFunction, network: string, is
       return {
         status: 'error',
         message: t('Open "{{network}}" on Ledger to connect', { replace: { network: network } })
+      };
+    }
+  }
+
+  if (message.includes('Data is invalid')) {
+    if (isGetAddress) {
+      return {
+        status: 'error',
+        message: t('Unable to sign. Open “{{network}}” on Ledger, refresh and approve again', { replace: { network: network } })
       };
     }
   }

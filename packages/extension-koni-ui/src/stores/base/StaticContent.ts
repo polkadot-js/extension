@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit/dist';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { AppOnlineContent, ReduxStatus } from '@subwallet/extension-koni-ui/stores/types';
-import { AppBannerData, AppConfirmationData, AppPopupData, PopupHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
+import { MktCampaignHistoryData } from '@subwallet/extension-koni-ui/types/staticContent';
 
 const initialState = {
   appPopupData: [],
@@ -46,7 +47,7 @@ const staticContentSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updatePopupHistoryData (state, action: PayloadAction<Record<string, PopupHistoryData>>) {
+    updatePopupHistoryData (state, action: PayloadAction<Record<string, MktCampaignHistoryData>>) {
       const payload = action.payload;
 
       return {
@@ -55,7 +56,7 @@ const staticContentSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateBannerHistoryData (state, action: PayloadAction<Record<string, PopupHistoryData>>) {
+    updateBannerHistoryData (state, action: PayloadAction<Record<string, MktCampaignHistoryData>>) {
       const payload = action.payload;
 
       return {
@@ -64,7 +65,7 @@ const staticContentSlice = createSlice({
         reduxStatus: ReduxStatus.READY
       };
     },
-    updateConfirmationHistoryData (state, action: PayloadAction<Record<string, PopupHistoryData>>) {
+    updateConfirmationHistoryData (state, action: PayloadAction<Record<string, MktCampaignHistoryData>>) {
       const payload = action.payload;
 
       return {

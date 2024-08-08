@@ -35,7 +35,7 @@ function Component ({ className, request }: Props) {
     const _payload = request.request.payload;
 
     return isRawPayload(_payload)
-      ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
+      ? (account.genesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
       : _payload.genesisHash;
   }, [account, chainInfoMap, request]);
 

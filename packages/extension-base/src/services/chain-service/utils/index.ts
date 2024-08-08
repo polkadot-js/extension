@@ -490,6 +490,10 @@ export function _getChainExistentialDeposit (chainInfo: _ChainInfo): string {
   return chainInfo?.substrateInfo?.existentialDeposit || '0';
 }
 
+export function _getAssetExistentialDeposit (chainAsset: _ChainAsset): string {
+  return chainAsset?.minAmount || '0';
+}
+
 export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {
   if (Object.keys(providers).length === 0) {
     return {

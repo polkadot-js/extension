@@ -1,25 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
-import BigN from 'bignumber.js';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 
-export type PalletNominationPoolsPoolMember = {
-  poolId: number,
-  points: number,
-  lastRecordedRewardCounter: number,
-  unbondingEras: Record<string, number>
+export function _getActiveStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): bigint {
+  return BigInt(memberInfo.points);
 }
 
-export function _getActiveStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {
-  return new BigN(memberInfo.points.toString());
+export function _getUnbondingStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): bigint {
+  const unbondingValues = Object.values(memberInfo.unbondingEras).map((unbonding) => BigInt(unbonding));
+
+  return unbondingValues.reduce((a, b) => a + b, BigInt(0));
 }
 
-export function _getUnbondingStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {
-  const unbondingValues: BigN[] = Object.values(memberInfo.unbondingEras).map((unbonding) => new BigN(unbonding));
-
-  return new BigN(Object.values(unbondingValues).reduce((a, b) => a.plus(b), new BigN(0)));
-}
-
-export function _getTotalStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): BigN {
-  return _getActiveStakeInNominationPool(memberInfo).plus(_getUnbondingStakeInNominationPool(memberInfo));
+export function _getTotalStakeInNominationPool (memberInfo: PalletNominationPoolsPoolMember): bigint {
+  return _getActiveStakeInNominationPool(memberInfo) + _getUnbondingStakeInNominationPool(memberInfo);
 }

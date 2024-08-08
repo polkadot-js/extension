@@ -3,7 +3,7 @@
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, NominatorMetadata, StakingItem, StakingRewardItem, StakingType } from '@subwallet/extension-base/background/KoniTypes';
-import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
+import { PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 import { PalletStakingStakingLedger, subscribeRelayChainNominatorMetadata, subscribeRelayChainPoolMemberMetadata } from '@subwallet/extension-base/koni/api/staking/bonding/relayChain';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';

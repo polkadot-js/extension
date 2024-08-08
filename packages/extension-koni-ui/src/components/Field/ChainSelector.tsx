@@ -5,7 +5,8 @@ import { BasicInputWrapper } from '@subwallet/extension-koni-ui/components/Field
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
 import { useSelectModalInputHelper } from '@subwallet/extension-koni-ui/hooks/form/useSelectModalInputHelper';
 import { ChainItemType, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Icon, InputRef, Logo, NetworkItem, SelectModal } from '@subwallet/react-ui';
+import { Icon, InputRef, Logo, NetworkItem, SelectModal, Tooltip } from '@subwallet/react-ui';
+import CN from 'classnames';
 import { CheckCircle } from 'phosphor-react';
 import React, { ForwardedRef, forwardRef, useCallback, useMemo } from 'react';
 import styled, { useTheme } from 'styled-components';
@@ -14,13 +15,14 @@ import { GeneralEmptyList } from '../EmptyList';
 
 interface Props extends ThemeProps, BasicInputWrapper {
   items: ChainItemType[];
-  loading?: boolean
+  loading?: boolean;
+  messageTooltip?: string;
 }
 
 const renderEmpty = () => <GeneralEmptyList />;
 
 function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactElement<Props> {
-  const { className = '', disabled, id = 'address-input', items, label, loading, placeholder, statusHelp, title, tooltip, value } = props;
+  const { className = '', disabled, id = 'address-input', items, label, loading, messageTooltip, placeholder, statusHelp, title, tooltip, value } = props;
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
   const { onSelect } = useSelectModalInputHelper(props, ref);
@@ -51,14 +53,43 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         className='chain-logo'
         network={value}
         shape='circle'
-        size={token.controlHeightSM}
+        size={token.sizeMD}
       />
     );
-  }, [value, token.controlHeightSM]);
+  }, [value, token.sizeMD]);
 
   const renderItem = useCallback((item: ChainItemType, selected: boolean) => {
+    if (item.disabled && !!messageTooltip) {
+      return (
+        <Tooltip
+          placement='topRight'
+          title={t(messageTooltip)}
+        >
+          <div>
+            <NetworkItem
+              className={CN({ disabled: item.disabled })}
+              name={item.name}
+              networkKey={item.slug}
+              networkMainLogoShape='squircle'
+              networkMainLogoSize={28}
+              rightItem={selected && (<div className={'__check-icon'}>
+                <Icon
+                  customSize={'20px'}
+                  iconColor={token.colorSuccess}
+                  phosphorIcon={CheckCircle}
+                  type='phosphor'
+                  weight='fill'
+                />
+              </div>)}
+            />
+          </div>
+        </Tooltip>
+      );
+    }
+
     return (
       <NetworkItem
+        className={CN({ disabled: item.disabled })}
         name={item.name}
         networkKey={item.slug}
         networkMainLogoShape='squircle'
@@ -74,11 +105,11 @@ function Component (props: Props, ref: ForwardedRef<InputRef>): React.ReactEleme
         </div>)}
       />
     );
-  }, [token]);
+  }, [messageTooltip, t, token.colorSuccess]);
 
   return (
     <SelectModal
-      className={`${className} chain-selector-modal`}
+      className={`${className} chain-selector-modal selector-${id}-modal`}
       disabled={disabled}
       id={id}
       inputClassName={`${className} chain-selector-input`}
@@ -111,14 +142,21 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
     },
 
     '&.chain-selector-input': {
+      paddingTop: token.paddingXXS,
       '.__selected-item, .__loading-text': {
         whiteSpace: 'nowrap',
         overflow: 'hidden',
         textOverflow: 'ellipsis'
       },
 
+      '.ant-select-modal-input-label': {
+        lineHeight: token.lineHeightSuper2
+      },
+
       '.__selected-item': {
-        color: token.colorText
+        color: token.colorText,
+        fontWeight: 500,
+        lineHeight: token.lineHeightHeading6
       },
 
       '.__loading-text': {
@@ -134,6 +172,17 @@ export const ChainSelector = styled(forwardRef(Component))<Props>(({ theme: { to
       display: 'flex',
       width: 40,
       justifyContent: 'center'
+    },
+
+    '.ant-network-item.disabled': {
+      opacity: token.opacityDisable,
+      '.ant-network-item-content': {
+        cursor: 'not-allowed',
+
+        '&:hover': {
+          backgroundColor: token.colorBgSecondary
+        }
+      }
     }
   });
 });

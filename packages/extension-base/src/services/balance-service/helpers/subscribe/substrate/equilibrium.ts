@@ -25,7 +25,7 @@ export const subscribeEquilibriumTokenBalance = async ({ addresses, assetMap, ca
   const tokenMap = filterAssetsByChainAndType(assetMap, chain, tokenTypes);
 
   try {
-    const unsub = await substrateApi.query.system.account.multi(addresses, (balances: Record<string, any>[]) => { // Equilibrium customizes the SystemAccount pallet
+    const unsub = await substrateApi.api.query.system.account.multi(addresses, (balances: Record<string, any>[]) => { // Equilibrium customizes the SystemAccount pallet
       Object.values(tokenMap).forEach((tokenInfo) => {
         const assetId = _getTokenOnChainAssetId(tokenInfo);
 
@@ -84,7 +84,7 @@ export const subscribeEqBalanceAccountPallet = async ({ addresses, assetMap, cal
   const unsubList = Object.values(tokenMap).map(async (tokenInfo) => {
     try {
       const assetId = _getTokenOnChainAssetId(tokenInfo);
-      const unsub = await substrateApi.query.eqBalances.account.multi(addresses.map((address) => [address, [assetId]]), (balances: SignedBalance[]) => {
+      const unsub = await substrateApi.api.query.eqBalances.account.multi(addresses.map((address) => [address, [assetId]]), (balances: SignedBalance[]) => {
         const items: BalanceItem[] = balances.map((balance, index) => {
           return {
             address: addresses[index],

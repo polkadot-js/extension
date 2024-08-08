@@ -967,6 +967,7 @@ export interface RequestAccountCreateHardwareV2 {
   address: string;
   addressOffset: number;
   genesisHash: string;
+  originGenesisHash: string;
   hardwareType: string;
   name: string;
   isAllowed?: boolean;
@@ -977,6 +978,7 @@ export interface CreateHardwareAccountItem {
   address: string;
   addressOffset: number;
   genesisHash: string;
+  originGenesisHash: string;
   hardwareType: string;
   name: string;
   isEthereum: boolean;
@@ -1424,8 +1426,14 @@ export interface LedgerNetwork {
   isGeneric: boolean;
   /** Use for evm account */
   isEthereum: boolean;
+  /** Hide networks that are supported by the dot migration app */
+  isHide?: boolean;
   /** Slip44 in the derivation path */
   slip44: number;
+}
+
+export interface MigrationLedgerNetwork extends Omit<LedgerNetwork, 'isGeneric' | 'isEthereum' | 'isDevMode' | 'icon' > {
+  ss58_addr_type: number
 }
 
 /// Qr Sign

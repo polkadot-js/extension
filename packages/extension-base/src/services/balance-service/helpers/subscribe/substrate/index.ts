@@ -11,6 +11,7 @@ import { _getOrmlTokensPalletLockedBalance, _getOrmlTokensPalletTransferable } f
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { _getTokensPalletLocked, _getTokensPalletTransferable } from '@subwallet/extension-base/core/substrate/tokens-pallet';
 import { FrameSystemAccountInfo, OrmlTokensAccountData, PalletAssetsAssetAccount, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
+import { _adaptX1Interior } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _BALANCE_CHAIN_GROUP, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
@@ -178,7 +179,7 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
             section: 'query',
             module: foreignAssetsAccountKey.split('_')[1],
             method: foreignAssetsAccountKey.split('_')[2],
-            args: addresses.map((address) => [_getTokenOnChainInfo(tokenInfo) || _getXcmAssetMultilocation(tokenInfo), address])
+            args: addresses.map((address) => [_getTokenOnChainInfo(tokenInfo) || _adaptX1Interior(_getXcmAssetMultilocation(tokenInfo), 3), address])
           }
         ];
 

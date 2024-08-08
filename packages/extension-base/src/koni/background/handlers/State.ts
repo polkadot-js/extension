@@ -24,6 +24,7 @@ import { HistoryService } from '@subwallet/extension-base/services/history-servi
 import { KeyringService } from '@subwallet/extension-base/services/keyring-service';
 import MigrationService from '@subwallet/extension-base/services/migration-service';
 import MintCampaignService from '@subwallet/extension-base/services/mint-campaign-service';
+import MktCampaignService from '@subwallet/extension-base/services/mkt-campaign-service';
 import NotificationService from '@subwallet/extension-base/services/notification-service/NotificationService';
 import { PriceService } from '@subwallet/extension-base/services/price-service';
 import RequestService from '@subwallet/extension-base/services/request-service';
@@ -136,6 +137,7 @@ export default class KoniState {
   readonly walletConnectService: WalletConnectService;
   readonly mintCampaignService: MintCampaignService;
   readonly campaignService: CampaignService;
+  readonly mktCampaignService: MktCampaignService;
   readonly buyService: BuyService;
   readonly earningService: EarningService;
   readonly feeService: FeeService;
@@ -166,6 +168,7 @@ export default class KoniState {
     this.migrationService = new MigrationService(this, this.eventService);
 
     this.campaignService = new CampaignService(this);
+    this.mktCampaignService = new MktCampaignService(this);
     this.buyService = new BuyService(this);
     this.transactionService = new TransactionService(this);
     this.earningService = new EarningService(this);
@@ -321,6 +324,7 @@ export default class KoniState {
     this.afterChainServiceInit();
     await this.migrationService.run();
     this.campaignService.init();
+    this.mktCampaignService.init();
     this.eventService.emit('chain.ready', true);
 
     await this.balanceService.init();

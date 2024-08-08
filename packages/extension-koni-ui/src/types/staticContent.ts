@@ -15,19 +15,9 @@ export interface AppInstructionInfo {
   icon: PhosphorIcon;
 }
 
-export interface PopupHistoryData {
+export interface MktCampaignHistoryData {
   lastShowTime: number;
   showTimes: number;
-}
-
-export interface AppBasicInfoData {
-  id: number;
-  name: string;
-  description: string | null;
-  start_time: string;
-  stop_time: string;
-  platforms: string[];
-  os: 'android' | 'ios';
 }
 
 export interface AppContentButtonInstruction {
@@ -53,51 +43,4 @@ export interface AppContentButton {
   color: 'primary' | 'secondary' | 'warning' | 'danger' | 'ghost';
   instruction: AppContentButtonInstruction | null;
   action: AppContentButtonAction | null;
-}
-
-export type ConditionBalanceType = { comparison: string; value: number; chain_asset: string };
-export type ConditionEarningType = { comparison: string; value: number; pool_slug: string };
-
-export interface AppPopupCondition {
-  'condition-balance': ConditionBalanceType[];
-  'condition-earning': ConditionEarningType[];
-}
-
-export interface PositionParam {
-  property: string;
-  value: string;
-}
-
-export interface AppCommonData {
-  id: number;
-  position: string;
-  position_params: PositionParam[];
-  conditions: AppPopupCondition;
-}
-
-export interface AppPopupData extends AppCommonData {
-  priority: number;
-  repeat: PopupFrequency;
-  content: string;
-  media: string;
-  info: AppBasicInfoData;
-  buttons: AppContentButton[];
-  repeat_every_x_days: number | null;
-}
-
-export interface AppBannerData extends AppCommonData {
-  priority: number;
-  media: string;
-  info: AppBasicInfoData;
-  action: AppContentButtonAction;
-  instruction: AppContentButtonInstruction | null;
-}
-
-export interface AppConfirmationData extends AppCommonData {
-  name: string;
-  repeat: PopupFrequency;
-  confirm_label: string;
-  cancel_label: string;
-  content: string;
-  repeat_every_x_days: number | null;
 }

@@ -25,4 +25,12 @@ export default class NftCollectionStore extends BaseStoreWithChain<NftCollection
       collectionId
     }).delete();
   }
+
+  async checkNftByChainOrCollectionId (chain: string, collectionId?: string) {
+    if (collectionId) {
+      return this.table.where({ chain, collectionId }).count();
+    }
+
+    return this.table.where({ chain }).count();
+  }
 }

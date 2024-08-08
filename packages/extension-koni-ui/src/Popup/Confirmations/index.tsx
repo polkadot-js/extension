@@ -34,7 +34,7 @@ const titleMap: Record<ConfirmationType, string> = {
   switchNetworkRequest: detectTranslate('Add network request'),
   connectWCRequest: detectTranslate('WalletConnect'),
   notSupportWCRequest: detectTranslate('WalletConnect'),
-  errorConnectNetwork: detectTranslate('Request Error')
+  errorConnectNetwork: detectTranslate('Transaction request')
 } as Record<ConfirmationType, string>;
 
 const alertModalId = 'confirmation-alert-modal';

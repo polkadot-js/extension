@@ -111,11 +111,11 @@ const defaultErrorMap = {
 export class TransactionError extends SWError {
   override errorType: TransactionErrorType;
 
-  constructor (errorType: TransactionErrorType, errMessage?: string, data?: unknown) {
+  constructor (errorType: TransactionErrorType, errMessage?: string, data?: unknown, name?: string) {
     const defaultErr = defaultErrorMap[errorType];
     const message = errMessage || t(defaultErr?.message || '') || errorType;
 
-    super(errorType, message, defaultErr?.code, data);
+    super(errorType, message, defaultErr?.code, data, name);
     this.errorType = errorType;
   }
 }

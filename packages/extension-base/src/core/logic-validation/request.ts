@@ -8,7 +8,7 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { AuthUrlInfo } from '@subwallet/extension-base/services/request-service/types';
-import { createPromiseHandler, isSameAddress, stripUrl, wait } from '@subwallet/extension-base/utils';
+import { BN_ZERO, createPromiseHandler, isSameAddress, stripUrl, wait } from '@subwallet/extension-base/utils';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { KeyringPair } from '@subwallet/keyring/types';
 import { keyring } from '@subwallet/ui-keyring';
@@ -56,24 +56,37 @@ export async function validationAuthMiddleware (koni: KoniState, url: string, pa
 
   if (!address || !isString(address)) {
     payload.errorPosition = 'dApp';
-    errors.push(new Error('Not found address to sign'));
+    const [message] = convertErrorMessage('Not found address to sign');
+
+    errors.push(new Error(message));
   } else {
-    payload.pair = keyring.getPair(address);
+    try {
+      payload.pair = keyring.getPair(address);
 
-    if (!payload.pair) {
-      payload.errorPosition = 'dApp';
-      errors.push(new Error('Unable to find account'));
-    } else {
-      const authList = await koni.getAuthList();
-
-      const authInfo = authList[stripUrl(url)];
-
-      if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[payload.pair.address]) {
+      if (!payload.pair) {
         payload.errorPosition = 'dApp';
-        errors.push(new Error('Account {{address}} not in allowed list'.replace('{{address}}', address)));
-      }
+        const [message] = convertErrorMessage('Unable to find account');
 
-      payload.authInfo = authInfo;
+        errors.push(new Error(message));
+      } else {
+        const authList = await koni.getAuthList();
+
+        const authInfo = authList[stripUrl(url)];
+
+        if (!authInfo || !authInfo.isAllowed || !authInfo.isAllowedMap[payload.pair.address]) {
+          payload.errorPosition = 'dApp';
+          const [message] = convertErrorMessage('Account not in allowed list', '');
+
+          errors.push(new Error(message));
+        }
+
+        payload.authInfo = authInfo;
+      }
+    } catch (e) {
+      const [message] = convertErrorMessage((e as Error).message);
+
+      payload.errorPosition = 'dApp';
+      errors.push(new Error(message));
     }
   }
 
@@ -85,10 +98,14 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
   let autoActiveChain = false;
   let { address, authInfo, errors, networkKey } = { ...payload };
 
-  const handleError = (message: string) => {
+  const handleError = (message_: string) => {
     payload.errorPosition = 'ui';
     payload.confirmationType = 'errorConnectNetwork';
-    errors.push(new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message));
+    const [message, name] = convertErrorMessage(message_);
+    const error = new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message, undefined, name);
+
+    console.error(error);
+    errors.push(error);
   };
 
   if (authInfo?.currentEvmNetworkKey) {
@@ -116,7 +133,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
       try {
         await koni.chainService.enableChain(networkKey);
       } catch (e) {
-        handleError(' Can not active chain: ' + chainInfo.name);
+        handleError('Can not active chain: ' + chainInfo.name);
       }
     }
 
@@ -128,7 +145,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
       try {
         currentProviderConnected = !!await web3.eth.getBalance(address);
       } catch (e) {
-        handleError(convertErrorMessage(e as Error));
+        handleError((e as Error).message);
       }
     };
 
@@ -144,7 +161,7 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
         })
       ]);
     } catch (e) {
-      handleError(convertErrorMessage(e as Error));
+      handleError((e as Error).message);
     }
   } else {
     handleError('This network is currently not supported');
@@ -175,14 +192,18 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     return val;
   };
 
-  const handleError = (e: TransactionError) => {
+  const handleError = (message_: string) => {
     payload.errorPosition = 'ui';
     payload.confirmationType = 'evmWatchTransactionRequest';
-    errors.push(e);
+    const [message, name] = convertErrorMessage(message_);
+    const error = new TransactionError(BasicTxErrorType.INVALID_PARAMS, message, undefined, name);
+
+    console.error(error);
+    errors.push(error);
   };
 
   if (!web3) {
-    handleError(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED));
+    handleError('connection error');
   }
 
   const transaction: TransactionConfig = {
@@ -196,18 +217,35 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     data: transactionParams.data
   };
 
-  if (transaction.from === transaction.to) {
-    handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('Receiving address must be different from sending address')));
+  // Address is validated in before step
+  if (!fromAddress || !isEthereumAddress(fromAddress)) {
+    handleError('the sender address must be the ethereum address type');
   }
 
   if (transaction.to && !isEthereumAddress(transaction.to)) {
-    handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('The receiving address is not a valid Ethereum address')));
+    handleError('invalid recipient address');
   }
 
-  // Address is validated in before step
+  if (fromAddress === transaction.to) {
+    handleError('receiving address must be different from sending address');
+  }
 
-  if (!fromAddress) {
-    handleError(new TransactionError(BasicTxErrorType.INVALID_PARAMS, t('You have rescinded allowance for koni account in wallet')));
+  if (!transaction.to) {
+    if (transaction.data) {
+      if (transaction.value) {
+        try {
+          const valueBn = new BigN(transaction.value.toString());
+
+          if (!valueBn.eq(BN_ZERO)) {
+            handleError('Recipient address not found');
+          }
+        } catch (e) {
+          handleError('invalid number');
+        }
+      }
+    } else {
+      handleError('Recipient address not found');
+    }
   }
 
   if (!transaction.gas) {
@@ -215,8 +253,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
       try {
         transaction.gas = await web3.eth.estimateGas({ ...transaction });
       } catch (e) {
-        console.error(e);
-        handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+        handleError((e as Error).message);
       }
     };
 
@@ -232,13 +269,12 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         })
       ]);
     } catch (e) {
-      console.error(e);
-      handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+      handleError((e as Error).message);
     }
   }
 
   if (!transaction.gas) {
-    handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR));
+    handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR).message);
   } else {
     if (transactionParams.maxPriorityFeePerGas && transactionParams.maxFeePerGas) {
       const maxFee = new BigN(transactionParams.maxFeePerGas);
@@ -262,8 +298,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
           estimateGas = new BigN(priority.gasPrice).multipliedBy(transaction.gas).toFixed(0);
         }
       } catch (e) {
-        console.error(e);
-        handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+        handleError((e as Error).message);
       }
     }
 
@@ -272,13 +307,12 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
       const balance = new BN(await web3.eth.getBalance(fromAddress) || 0);
 
       if (!estimateGas) {
-        handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Can\'t calculate estimate gas fee')));
+        handleError('Can\'t calculate estimate gas fee');
       } else if (balance.lt(new BN(estimateGas).add(new BN(autoFormatNumber(transactionParams.value) || '0')))) {
-        handleError(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE, t('Insufficient balance')));
+        handleError('Insufficient balance');
       }
     } catch (e) {
-      console.error(e);
-      handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+      handleError((e as Error).message);
     }
   }
 
@@ -288,17 +322,17 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
   try {
     transaction.nonce = await web3.eth.getTransactionCount(fromAddress);
   } catch (e) {
-    console.error(e);
-    handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+    handleError((e as Error).message);
   }
 
   const hasError = (errors && errors.length > 0) || !networkKey;
-  const hashPayload = hasError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
   const evmNetwork = koni.getChainInfo(networkKey || '');
   let isToContract = false;
+  let hashPayload = '';
   let parseData: EvmTransactionData = '';
 
   try {
+    hashPayload = hasError ? '' : koni.transactionService.generateHashPayload(networkKey, transaction);
     isToContract = await isContractAddress(transaction.to || '', evmApi);
     parseData = isToContract
       ? transaction.data && !hasError
@@ -306,8 +340,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
         : ''
       : transaction.data || '';
   } catch (e) {
-    console.error(e);
-    handleError(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, (e as Error).message));
+    handleError((e as Error).message);
   }
 
   return {
@@ -332,14 +365,18 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
   let hashPayload = '';
   let canSign = false;
 
-  const handleError = (e: EvmProviderError) => {
+  const handleError = (message_: string) => {
     payload_.errorPosition = 'ui';
     payload_.confirmationType = 'evmSignatureRequest';
-    errors.push(e);
+    const [message, name] = convertErrorMessage(message_);
+    const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name);
+
+    console.error(error);
+    errors.push(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name));
   };
 
   if (address === '' || !payload) {
-    handleError(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Not found address or payload to sign'));
+    handleError('Not found address or payload to sign');
   }
 
   const pair = pair_ || keyring.getPair(address);
@@ -348,7 +385,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
 
   if (method) {
     if (['eth_sign', 'personal_sign', 'eth_signTypedData', 'eth_signTypedData_v1', 'eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) < 0) {
-      handleError(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unsupported action'));
+      handleError('Unsupported action');
     }
 
     if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
@@ -372,10 +409,10 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
 
         break;
       default:
-        handleError(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unsupported action'));
+        handleError('Unsupported action');
     }
   } else {
-    handleError(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'Unsupported method'));
+    handleError('Unsupported method');
   }
 
   const payloadAfterValidated: EvmSignatureRequest = {
@@ -418,20 +455,33 @@ export function validationAuthWCMiddleware (koni: KoniState, url: string, payloa
 
     if (!address || !isString(address)) {
       payload.errorPosition = 'dApp';
-      errors.push(new Error(getSdkError('UNSUPPORTED_ACCOUNTS').message + ' ' + address));
+      const [message] = convertErrorMessage('Unable to find account');
+
+      errors.push(new Error(message));
     } else {
-      payload.pair = keyring.getPair(address);
+      try {
+        payload.pair = keyring.getPair(address);
 
-      if (!payload.pair) {
+        if (!payload.pair) {
+          payload.errorPosition = 'dApp';
+          const [message] = convertErrorMessage('Unable to find account');
+
+          errors.push(new Error(message));
+        }
+
+        const isExitsAccount = sessionAccounts.find((account) => isSameAddress(account, address));
+
+        if (!isExitsAccount) {
+          payload.errorPosition = 'dApp';
+          const [message] = convertErrorMessage('Account not in allowed list');
+
+          errors.push(new Error(message));
+        }
+      } catch (e) {
+        const [message] = convertErrorMessage((e as Error).message);
+
         payload.errorPosition = 'dApp';
-        errors.push(new Error('Unable to find account'));
-      }
-
-      const isExitsAccount = sessionAccounts.find((account) => isSameAddress(account, address));
-
-      if (!isExitsAccount) {
-        payload.errorPosition = 'dApp';
-        errors.push(new Error(getSdkError('UNSUPPORTED_ACCOUNTS').message + ' ' + address));
+        errors.push(new Error(message));
       }
     }
   }
@@ -441,16 +491,72 @@ export function validationAuthWCMiddleware (koni: KoniState, url: string, payloa
   return promise;
 }
 
-export function convertErrorMessage (err: Error): string {
-  const message = err.message.toLowerCase();
+export function convertErrorMessage (message_: string, name?: string): string[] {
+  const message = message_.toLowerCase();
 
+  // Network error
   if (
     message.includes('connection error') ||
     message.includes('connection not open') ||
-    message.includes('connection timeout')
+    message.includes('connection timeout') ||
+    message.includes('can not active chain') ||
+    message.includes('invalid json rpc')
   ) {
-    return 'Unable to process this request. Please re-enable the network';
+    return [t('Re-enable the network or change RPC on the extension and try again'), t('Unstable network connection')];
   }
 
-  return err.message;
+  if (message.includes('network is currently not supported')) {
+    return [t('This network is not yet supported on SubWallet. |Import the network|https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks| on SubWallet and try again'), t('Network not supported')];
+  }
+
+  // Authentication
+  if (message.includes('not found address to sign') ||
+    message.includes('unable to find account') || message.includes('unable to retrieve keypair')) {
+    return ['Address not found on SubWallet. Re-check the address information in the extension then try again'];
+  }
+
+  if (message.includes('account not in allowed list')) {
+    return ['Account disconnected from the dApp. Open the extension to re-connect the account and try again'];
+  }
+
+  // Transaction
+
+  if (message.includes('recipient address not found')) {
+    return [t('Enter recipient address and try again'), t('Recipient address not found')];
+  }
+
+  if (message.includes('is not a number') || message.includes('invalid number value') || message.includes('invalid bignumberish')) {
+    return [t('Amount must be an integer. Enter an integer and try again'), t('Invalid amount')];
+  }
+
+  if (message.includes('calculate estimate gas fee') || message.includes('invalidcode')) {
+    return [t('Unable to calculate estimated gas for this transaction. Try again or contact support at agent@subwallet.app'), t('Gas calculation error')];
+  }
+
+  if (message.includes('invalid recipient address')) {
+    return [t('Make sure the recipient address is valid and in the same type as the sender address, then try again'), t('Invalid recipient address')];
+  }
+
+  if (message.includes('must be different from sending address')) {
+    return [t('The recipient address must be different from the sender address'), t('Invalid recipient address')];
+  }
+
+  if (message.includes('the sender address must be the ethereum address type')) {
+    return [t('The sender address must be the ethereum address type'), t('Invalid address type')];
+  }
+
+  if (message.includes('insufficient balance') || message.includes('insufficient funds')) {
+    return [t('Insufficient balance on the sender address. Top up your balance and try again'), t('Unable to sign transaction')];
+  }
+
+  // Sign Message
+  if (message.includes('not found address or payload to sign')) {
+    return [t('An error occurred when signing this request. Try again or contact support at agent@subwallet.app'), t('Unable to sign message')];
+  }
+
+  if (message.includes('unsupported method') || message.includes('unsupported action')) {
+    return [t('This sign method is not supported by SubWallet. Try again or contact support at agent@subwallet.app'), t('Method not supported')];
+  }
+
+  return [message, name || ''];
 }

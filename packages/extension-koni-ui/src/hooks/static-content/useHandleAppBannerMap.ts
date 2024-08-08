@@ -35,15 +35,7 @@ export const useHandleAppBannerMap = (): AppBannerHookType => {
         {}
       )
       : {};
-    const result: Record<string, MktCampaignHistoryData> = {};
-
-    Object.keys(newData).forEach((key) => {
-      if (!bannerHistoryMapRef.current[key]) {
-        result[key] = newData[key];
-      } else {
-        result[key] = bannerHistoryMapRef.current[key];
-      }
-    });
+    const result: Record<string, MktCampaignHistoryData> = { ...newData, ...bannerHistoryMapRef.current };
 
     dispatch(updateBannerHistoryData(result));
   }, [appBannerData, dispatch]);

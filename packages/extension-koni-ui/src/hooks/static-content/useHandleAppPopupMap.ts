@@ -35,15 +35,7 @@ export const useHandleAppPopupMap = (): AppPopupHookType => {
         {}
       )
       : {};
-    const result: Record<string, MktCampaignHistoryData> = {};
-
-    Object.keys(newData).forEach((key) => {
-      if (!popupHistoryMapRef.current[key]) {
-        result[key] = newData[key];
-      } else {
-        result[key] = popupHistoryMapRef.current[key];
-      }
-    });
+    const result: Record<string, MktCampaignHistoryData> = { ...newData, ...popupHistoryMapRef.current };
 
     dispatch(updatePopupHistoryData(result));
   }, [appPopupData, dispatch]);

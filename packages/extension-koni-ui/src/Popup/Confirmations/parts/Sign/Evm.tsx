@@ -280,25 +280,35 @@ const Component: React.FC<Props> = (props: Props) => {
           <AlertBox
             className={CN(className, 'alert-box')}
             description={errors[0].message}
-            title={'Error'}
+            title={errors[0].name}
             type={'error'}
           />
         )
       }
+      {
+        isErrorTransaction
+          ? <Button
+            disabled={loading}
+            onClick={onCancel}
+            schema={'primary'}
+          >
+            {t('Back to home')}
+          </Button>
+          : <Button
+            disabled={loading}
+            icon={(
+              <Icon
+                phosphorIcon={XCircle}
+                weight='fill'
+              />
+            )}
+            onClick={onCancel}
+            schema={isErrorTransaction ? 'primary' : 'secondary'}
+          >
+            {t('Cancel')}
+          </Button>
+      }
 
-      <Button
-        disabled={loading}
-        icon={(
-          <Icon
-            phosphorIcon={XCircle}
-            weight='fill'
-          />
-        )}
-        onClick={onCancel}
-        schema={isErrorTransaction ? 'primary' : 'secondary'}
-      >
-        {t('Cancel')}
-      </Button>
       {!isErrorTransaction && <Button
         disabled={showQuoteExpired || !canSign}
         icon={(

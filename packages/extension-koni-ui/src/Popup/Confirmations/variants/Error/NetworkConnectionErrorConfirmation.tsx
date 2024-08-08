@@ -2,15 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { ConfirmationResult, ConfirmationsQueueItem, ErrorNetworkConnection } from '@subwallet/extension-base/background/KoniTypes';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertBox, ConfirmationGeneralInfo, MetaInfo } from '@subwallet/extension-koni-ui/components';
 import { useGetAccountByAddress } from '@subwallet/extension-koni-ui/hooks';
 import { completeConfirmation } from '@subwallet/extension-koni-ui/messaging';
 import { EvmErrorSupportType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { Button, Icon } from '@subwallet/react-ui';
+import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
-import { XCircle } from 'phosphor-react';
-import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -40,12 +40,20 @@ function Component ({ className, request, type }: Props) {
     });
   }, [id, type]);
 
+  const errorMessage = useMemo(() => {
+    if (errors && errors.length > 0) {
+      return errors[0].message.split('|');
+    }
+
+    return [];
+  }, [errors]);
+
   return (
     <>
       <div className={CN('confirmation-content', className)}>
         <ConfirmationGeneralInfo request={request} />
         <div className='title'>
-          {t('Network Connection Error')}
+          {t('Transaction request')}
         </div>
         {/* <div className='description'> */}
         {/*  {t('You are approving a request with the following account')} */}
@@ -71,8 +79,21 @@ function Component ({ className, request, type }: Props) {
           errors && errors.length > 0 && (
             <AlertBox
               className={CN(className, 'alert-box')}
-              description={errors[0].message}
-              title={'Error'}
+              description={errorMessage.length > 1
+                ? <Trans
+                  components={{
+                    highlight: (
+                      <a
+                        className='link'
+                        href={errorMessage[2]}
+                        target='__blank'
+                      />
+                    )
+                  }}
+                  i18nKey={detectTranslate(`${errorMessage[0]}<highlight>${errorMessage[1]}</highlight>${errorMessage[3]}`)}
+                />
+                : errors[0].message}
+              title={errors[0].name}
               type={'error'}
             />
           )
@@ -80,16 +101,10 @@ function Component ({ className, request, type }: Props) {
 
         <Button
           disabled={loading}
-          icon={(
-            <Icon
-              phosphorIcon={XCircle}
-              weight='fill'
-            />
-          )}
           onClick={onCancel}
           schema={'primary'}
         >
-          {t('Cancel')}
+          {t('Back to home')}
         </Button>
       </div>
     </>
@@ -107,6 +122,10 @@ const NetworkConnectionErrorConfirmation = styled(Component)<Props>(({ theme: { 
 
   '.__label': {
     textAlign: 'left'
+  },
+
+  '.alert-box': {
+    width: '100%'
   }
 }));
 

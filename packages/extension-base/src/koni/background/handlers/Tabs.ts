@@ -847,9 +847,21 @@ export default class KoniTabs {
         params: params as any[],
         id
       }, (error, result) => {
-        const err = result?.error || error;
+        let err = result?.error || error;
 
         if (err) {
+          let message = err.message.toLowerCase();
+
+          if (message.includes('method not found') || message.includes('not supported') || message.includes('is not available')) {
+            message = 'This method is not supported by SubWallet. Try again or contact support at agent@subwallet.app';
+          }
+
+          if (message.includes('network is disconnected')) {
+            message = 'Re-enable the network or change RPC on the extension and try again';
+          }
+
+          err = { ...err, message };
+
           reject(err);
         } else {
           const rs = result?.result as unknown;

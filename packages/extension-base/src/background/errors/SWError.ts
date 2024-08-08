@@ -8,11 +8,15 @@ export class SWError extends Error implements SWErrorType {
   code: number | undefined;
   data: unknown | undefined;
 
-  constructor (errorType: string, message: string, code?: number, data?: unknown) {
+  constructor (errorType: string, message: string, code?: number, data?: unknown, name?: string) {
     super(message);
     this.errorType = errorType;
     this.code = code;
     this.data = data;
+
+    if (name) {
+      this.name = name;
+    }
   }
 
   public toJSON () {

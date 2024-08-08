@@ -1,10 +1,10 @@
-    2779	AnhMTV                        	
-    2496	Nam Phạm                      	[Issue 3378] feat: update chainlist
-    2174	S2kael                        	[Issue-3403] Update stable version for chain-list
+    2783	AnhMTV                        	
+    2519	Nam Phạm                      	[Issue 3389] fix: resolve conflict
+    2175	S2kael                        	[Issue-3425] Update stable version for chain-list
      832	lw-cdm                        	[Issue-3148] Refactor the navigation code in the Root component
      537	nguyentiendung                	[Issue-3272] Improve usage of debounce for the swapFromField input
      465	Jaco                          	0.42.5 (#969)
-     237	bluezdot                      	[Issue-3403] Re-update stable version for chain-list
+     255	bluezdot                      	[Issue-3425] Update chainlist
      186	Thiendekaco                   	[Issue 3307] [update]  Extension - Add validate in case sign multi chains
      185	quangdo                       	
      145	dominhquang                   	[Issue-3414] Fix bug re-open popup
@@ -14,7 +14,7 @@
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
-      63	bluedot                       	[Issue-2965] fix: Handle earning status for request redeem
+      66	bluedot                       	[Issue-2965] fix: Handle earning status for request redeem
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
       24	S2kael                        	

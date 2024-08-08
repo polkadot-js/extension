@@ -78,10 +78,11 @@ export const createXcmExtrinsic = async ({ chainInfoMap,
   return extrinsic;
 };
 
-export const getXcmMockTxFee = async (substrateApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, address: string, originTokenInfo: _ChainAsset, destinationTokenInfo: _ChainAsset): Promise<BigN> => {
+export const getXcmMockTxFee = async (substrateApi: _SubstrateApi, chainInfoMap: Record<string, _ChainInfo>, originTokenInfo: _ChainAsset, destinationTokenInfo: _ChainAsset): Promise<BigN> => {
   try {
     const destChainInfo = chainInfoMap[destinationTokenInfo.originChain];
     const originChainInfo = chainInfoMap[originTokenInfo.originChain];
+    const address = '5DRewsYzhJqZXU3SRaWy1FSt5iDr875ao91aw5fjrJmDG4Ap';
 
     // mock receiving account from sender
     const recipient = !isEthereumAddress(address) && _isChainEvmCompatible(destChainInfo) && !_isChainEvmCompatible(originChainInfo)

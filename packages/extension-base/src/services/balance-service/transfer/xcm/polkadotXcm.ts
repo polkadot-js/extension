@@ -17,7 +17,7 @@ export function getExtrinsicByPolkadotXcmPallet (tokenInfo: _ChainAsset, originC
     method = 'transferAssets';
   }
 
-  if (isUseTeleportProtocol(originChainInfo, destinationChainInfo)) {
+  if (isUseTeleportProtocol(originChainInfo, destinationChainInfo, tokenInfo.slug)) {
     method = 'limitedTeleportAssets';
   }
 

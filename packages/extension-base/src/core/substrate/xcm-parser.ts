@@ -209,15 +209,31 @@ function _getRecipientLocation (destChainInfo: _ChainInfo, recipient: _Address, 
 }
 
 function _getAssetIdentifier (tokenInfo: _ChainAsset, version: number) {
-  const assetIdentifier = _getXcmAssetMultilocation(tokenInfo);
+  const _assetIdentifier = _getXcmAssetMultilocation(tokenInfo);
 
-  if (!assetIdentifier) {
+  if (!_assetIdentifier) {
     throw new Error('Asset must have multilocation');
   }
+
+  const assetIdentifier = _adaptX1Interior(structuredClone(_assetIdentifier), version);
 
   return version >= 4 // from V4, Concrete is removed
     ? assetIdentifier
     : { Concrete: assetIdentifier };
+}
+
+export function _adaptX1Interior (assetIdentifier: Record<string, any>, version: number): Record<string, any> {
+  const interior = assetIdentifier.interior as Record<string, any>;
+  const isInteriorObj = typeof interior === 'object' && interior !== null;
+  const isX1 = isInteriorObj && 'X1' in interior;
+  const needModifyX1 = version <= 4 && Array.isArray(interior.X1);
+
+  if (isInteriorObj && isX1 && needModifyX1) { // X1 is an object for version < 4. From V4, it's an array
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment,@typescript-eslint/no-unsafe-member-access
+    interior.X1 = interior.X1[0];
+  }
+
+  return assetIdentifier;
 }
 
 function _getNetworkByVersion (version: number) {

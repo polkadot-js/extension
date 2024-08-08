@@ -6,7 +6,8 @@ import { TransactionError } from '@subwallet/extension-base/background/errors/Tr
 import { _Address, AmountData, BasicTxErrorType, BasicTxWarningCode, ExtrinsicType, FeeData, TransferTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { XCM_MIN_AMOUNT_RATIO } from '@subwallet/extension-base/constants';
-import { _canAccountBeReaped, FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/system-pallet';
+import { _canAccountBeReaped } from '@subwallet/extension-base/core/substrate/system-pallet';
+import { FrameSystemAccountInfo } from '@subwallet/extension-base/core/substrate/types';
 import { _TRANSFER_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainExistentialDeposit, _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getTokenMinAmount, _isNativeToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';

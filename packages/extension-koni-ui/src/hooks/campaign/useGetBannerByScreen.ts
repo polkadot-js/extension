@@ -29,7 +29,7 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
   );
 
   const banners = useMemo(() => {
-    const displayedBanner = appBannerMap[screen].sort((a, b) => a.priority - b.priority);
+    const displayedBanner = appBannerMap[screen];
 
     if (displayedBanner && displayedBanner.length) {
       return displayedBanner.filter((banner) => {
@@ -41,7 +41,7 @@ const useGetBannerByScreen = (screen: string, compareValue?: string) => {
         } else {
           return isBannerVisible;
         }
-      });
+      }).sort((a, b) => a.priority - b.priority);
     } else {
       return [];
     }

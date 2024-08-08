@@ -199,7 +199,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
   const showAppPopup = useCallback(
     (currentRoute: string | undefined) => {
       const currentTransformRoute = getPositionByRouteName(currentRoute) || '';
-      const currentPopupList = appPopupMap[currentTransformRoute].sort((a, b) => a.priority - b.priority);
+      const currentPopupList = appPopupMap[currentTransformRoute];
 
       if (currentPopupList && currentPopupList.length) {
         const filteredPopupList = currentPopupList.filter((item) => {
@@ -215,7 +215,7 @@ export const AppOnlineContentContextProvider = ({ children }: AppOnlineContentCo
           } else {
             return false;
           }
-        });
+        }).sort((a, b) => a.priority - b.priority);
 
         if (filteredPopupList && filteredPopupList.length) {
           const result: AppPopupModalInfo[] = filteredPopupList.map((item) => ({

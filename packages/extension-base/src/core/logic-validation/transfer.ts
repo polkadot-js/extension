@@ -66,7 +66,7 @@ export function additionalValidateTransfer (tokenInfo: _ChainAsset, nativeTokenI
   // Check ed for receiver before sending
   if (extrinsicType === ExtrinsicType.TRANSFER_TOKEN && receiverNativeTransferable) {
     if (new BigN(receiverNativeTransferable).lt(nativeMinAmount)) {
-      const error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('You could not transfer to inactive account (Account has native balance < Existential Deposit) to avoid losing your assets'));
+      const error = new TransactionError(TransferTxErrorType.RECEIVER_NOT_ENOUGH_EXISTENTIAL_DEPOSIT, t('The recipient account has {{amount}} {{nativeSymbol}} which can lead to your {{localSymbol}} being lost. Change recipient account and try again', { replace: { amount: receiverNativeTransferable, nativeSymbol: nativeTokenInfo.symbol, localSymbol: tokenInfo.symbol } }));
 
       errors.push(error);
     }

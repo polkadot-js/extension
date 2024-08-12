@@ -32,7 +32,7 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   const { t } = useTranslation();
 
   useEffect(() => {
-    const lockSigner = async () => {
+    const setSignerLockStatus = async () => {
       setIsLocked(null);
 
       try {
@@ -40,13 +40,15 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
 
         setIsLocked(isLocked);
 
-        await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
+        if (remainingTime > 0) {
+          await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
+        }
 
         if (!isLocked) {
           setSavePass(true);
         }
       } catch (error) {
-        console.error('Error locking signer:', error);
+        console.error('Error setting signer lock status:', error);
       }
     };
 
@@ -62,16 +64,20 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
       });
     };
 
-    const executeLockSigner = async () => {
-      if (!isExternal) {
-        await lockSigner();
-        await resetAlarm();
+    const onAlarmTriggered = (alarm: chrome.alarms.Alarm) => {
+      if (alarm.name === 'SIGNER_TIMEOUT') {
+        setSignerLockStatus().catch((error) => console.error('Error handling alarm:', error));
       }
     };
 
-    executeLockSigner().then(async () => {
-      return await executeLockSigner();
-    }).catch((error) => console.error('Error clearing the alarm: ', error));
+    !isExternal && setSignerLockStatus().catch((error) => console.error('Error clearing the alarm: ', error));
+
+    chrome.alarms.onAlarm.addListener(onAlarmTriggered);
+
+    return () => {
+      chrome.alarms.onAlarm.removeListener(onAlarmTriggered);
+      resetAlarm().catch((error) => console.error('Error clearing the alarm on cleanup:', error));
+    };
   }, [isExternal, signId]);
 
   const _onSign = useCallback(

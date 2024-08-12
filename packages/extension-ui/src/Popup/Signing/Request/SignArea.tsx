@@ -1,8 +1,6 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/* global chrome */
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
@@ -32,51 +30,22 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   const { t } = useTranslation();
 
   useEffect(() => {
-    const setSignerLockStatus = async () => {
-      setIsLocked(null);
+    setIsLocked(null);
+    let timeout: ReturnType<typeof setTimeout>;
 
-      try {
-        const { isLocked, remainingTime } = await isSignLocked(signId);
-
+    !isExternal && isSignLocked(signId)
+      .then(({ isLocked, remainingTime }) => {
         setIsLocked(isLocked);
+        timeout = setTimeout(() => {
+          setIsLocked(true);
+        }, remainingTime);
 
-        if (remainingTime > 0) {
-          await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
-        }
-
-        if (!isLocked) {
-          setSavePass(true);
-        }
-      } catch (error) {
-        console.error('Error setting signer lock status:', error);
-      }
-    };
-
-    const resetAlarm = async () => {
-      return new Promise((resolve, reject) => {
-        chrome.alarms.clear('SIGNER_TIMEOUT', (cleared) => {
-          if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
-          } else {
-            resolve(cleared);
-          }
-        });
-      });
-    };
-
-    const onAlarmTriggered = (alarm: chrome.alarms.Alarm) => {
-      if (alarm.name === 'SIGNER_TIMEOUT') {
-        setSignerLockStatus().catch((error) => console.error('Error handling alarm:', error));
-      }
-    };
-
-    !isExternal && setSignerLockStatus().catch((error) => console.error('Error clearing the alarm: ', error));
-
-    chrome.alarms.onAlarm.addListener(onAlarmTriggered);
+        !isLocked && setSavePass(true);
+      })
+      .catch((error: Error) => console.error(error));
 
     return () => {
-      chrome.alarms.onAlarm.removeListener(onAlarmTriggered);
-      resetAlarm().catch((error) => console.error('Error clearing the alarm on cleanup:', error));
+      !!timeout && clearTimeout(timeout);
     };
   }, [isExternal, signId]);
 

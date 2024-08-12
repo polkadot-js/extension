@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## 1.2.23
+Build date: Aug 03, 2024.
+
+Features & Update:
+- Update chain-list (#3403)
+  - Add support for ROUTE token
+  - Add support for Aleph Zero EVM (mainnet)
+  - Update price-id for AZERO EVM
+
+
+## 1.2.22
+Build date: Jul 31, 2024.
+
+Features & Update:
+- Update chain-list (#3385)
+- Integrate Avail Ledger app (#2982)
+
+Bugs fixed:
+- Fix bug Show incorrect withdrawal information of the Bifrost liquid staking when all accounts mode (#3327)
+- Fix bug do not show root screen after remove account (#3148)
+- Fix bug Show blank screen when attach account (#3054)
+
+
 ## 1.2.21
 Build date: Jul 24, 2024.
 

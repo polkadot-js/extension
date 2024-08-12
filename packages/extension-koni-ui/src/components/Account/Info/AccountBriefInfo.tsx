@@ -19,7 +19,7 @@ interface Props extends ThemeProps {
 const Component: React.FC<Props> = ({ account, className }: Props) => {
   const { t } = useTranslation();
   const isAll = useMemo((): boolean => isAccountAll(account.address), [account.address]);
-  const networkInfo = useChainInfo(undefined, account?.originGenesisHash ?? account?.genesisHash);
+  const networkInfo = useChainInfo(undefined, account?.genesisHash);
   const address = useMemo((): string => formatAccountAddress(account, networkInfo), [account, networkInfo]);
 
   return (

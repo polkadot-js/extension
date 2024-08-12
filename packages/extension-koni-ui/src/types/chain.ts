@@ -11,6 +11,7 @@ export type ChainInfo = {
 export interface ChainItemType {
   name: string;
   slug: string;
+  disabled?: boolean;
 }
 
 export interface TokenTypeItem {

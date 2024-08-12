@@ -6,6 +6,7 @@ import { AuthUrls } from '@subwallet/extension-base/background/handlers/State';
 import { AccountsWithCurrentAddress, AddressBookInfo, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationsQueue, CrowdloanJson, KeyringState, MantaPayConfig, MantaPaySyncState, NftCollection, NftJson, NominatorMetadata, PriceJson, ShowCampaignPopupRequest, StakingJson, StakingRewardJson, TransactionHistoryItem, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, ConfirmationRequestBase, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceJson, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardJson, YieldPoolInfo, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -356,9 +357,27 @@ export const updateCampaignPopupVisibility = (data: ShowCampaignPopupRequest) =>
   store.dispatch({ type: 'campaign/updatePopupVisibility', payload: data.value });
 };
 
+export const updateCampaignPopupData = (data: AppPopupData[]) => {
+  store.dispatch({ type: 'staticContent/updateAppPopupData', payload: data });
+};
+
+export const updateCampaignBannerData = (data: AppBannerData[]) => {
+  store.dispatch({ type: 'staticContent/updateAppBannerData', payload: data });
+};
+
+export const updateCampaignConfirmationData = (data: AppConfirmationData[]) => {
+  store.dispatch({ type: 'staticContent/updateAppConfirmationData', payload: data });
+};
+
 export const subscribeProcessingCampaign = lazySubscribeMessage('pri(campaign.banner.subscribe)', null, updateBanner, updateBanner);
 
 export const subscribeCampaignPopupVisibility = lazySubscribeMessage('pri(campaign.popup.subscribeVisibility)', null, updateCampaignPopupVisibility, updateCampaignPopupVisibility);
+
+export const subscribeCampaignPopupData = lazySubscribeMessage('pri(campaign.popups.subscribe)', null, updateCampaignPopupData, updateCampaignPopupData);
+
+export const subscribeCampaignBannerData = lazySubscribeMessage('pri(campaign.banners.subscribe)', null, updateCampaignBannerData, updateCampaignBannerData);
+
+export const subscribeCampaignConfirmationData = lazySubscribeMessage('pri(campaign.confirmations.subscribe)', null, updateCampaignConfirmationData, updateCampaignConfirmationData);
 /* Campaign */
 
 /* Buy service */

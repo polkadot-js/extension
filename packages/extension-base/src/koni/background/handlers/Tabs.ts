@@ -297,7 +297,6 @@ export default class KoniTabs {
     const cb = createSubscription<'pub(accounts.subscribeV2)'>(id, port);
     const authInfoSubject = this.#koniState.requestService.subscribeAuthorizeUrlSubject;
 
-    // Update unsubscribe from @polkadot/extension-base
     this.#accountSubs[id] = {
       subscription: authInfoSubject.subscribe((infos: AuthUrls) => {
         this.getAuthInfo(url, infos)
@@ -312,9 +311,17 @@ export default class KoniTabs {
       url
     };
 
-    port.onDisconnect.addListener((): void => {
-      this.accountsUnsubscribe(url, { id });
-    });
+    this.#koniState.ensureUrlAuthorizedV2(url)
+      .then(() => {
+        // Update unsubscribe from @polkadot/extension-base
+
+        port.onDisconnect.addListener((): void => {
+          this.accountsUnsubscribe(url, { id });
+        });
+      })
+      .catch(() => {
+        this.accountsUnsubscribe(url, { id });
+      });
 
     return id;
   }
@@ -362,7 +369,6 @@ export default class KoniTabs {
             const result = accountList.filter((adr) => adr !== address);
 
             result.unshift(address);
-            accounts = result;
           } else {
             accounts = accountList;
           }
@@ -842,9 +848,11 @@ export default class KoniTabs {
       clearInterval(networkCheckInterval);
     });
 
-    port.onDisconnect.addListener((): void => {
-      this.cancelSubscription(id);
-    });
+    await this.#koniState.ensureUrlAuthorizedV2(url).then(() => {
+      port.onDisconnect.addListener((): void => {
+        this.cancelSubscription(id);
+      });
+    }).catch(() => this.cancelSubscription(id));
 
     return true;
   }
@@ -1016,11 +1024,12 @@ export default class KoniTabs {
   }
 
   public isEvmPublicRequest (type: string, request: RequestArguments) {
-    return type === 'evm(request)' &&
+    return (type === 'evm(request)' &&
       [
         'eth_chainId',
-        'net_version'
-      ].includes(request?.method);
+        'net_version',
+        'eth_accounts'
+      ].includes(request?.method)) || type === 'evm(events.subscribe)';
   }
 
   public async addPspToken (id: string, url: string, { genesisHash, tokenInfo: input }: RequestAddPspToken) {
@@ -1102,7 +1111,7 @@ export default class KoniTabs {
     // Wait for account ready and chain ready
     await Promise.all([this.#koniState.eventService.waitAccountReady, this.#koniState.eventService.waitChainReady]);
 
-    if (type !== 'pub(authorize.tabV2)' && !this.isEvmPublicRequest(type, request as RequestArguments)) {
+    if (!['pub(authorize.tabV2)', 'pub(accounts.subscribeV2)'].includes(type) && !this.isEvmPublicRequest(type, request as RequestArguments)) {
       await this.#koniState.ensureUrlAuthorizedV2(url)
         .catch((e: Error) => {
           if (type.startsWith('evm')) {

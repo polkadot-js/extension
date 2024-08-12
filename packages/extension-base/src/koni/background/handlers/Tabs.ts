@@ -847,12 +847,12 @@ export default class KoniTabs {
         params: params as any[],
         id
       }, (error, result) => {
-        let err = result?.error || error;
+        const err = result?.error || error;
 
         if (err) {
           let message = err.message.toLowerCase();
 
-          if (message.includes('method not found')) {
+          if (message.includes('method not found') || message.includes('not supported') || message.includes('is not available')) {
             message = 'This method is not supported by SubWallet. Try again or contact support at agent@subwallet.app';
           }
 

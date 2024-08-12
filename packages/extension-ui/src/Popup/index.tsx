@@ -14,7 +14,7 @@ import { settings } from '@polkadot/ui-settings';
 import { AccountContext, ActionContext, AuthorizeReqContext, MediaContext, MetadataReqContext, SettingsContext, SigningReqContext } from '../components/contexts.js';
 import { ErrorBoundary, Loading } from '../components/index.js';
 import ToastProvider from '../components/Toast/ToastProvider.js';
-import { subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging.js';
+import { ping, subscribeAccounts, subscribeAuthorizeRequests, subscribeMetadataRequests, subscribeSigningRequests } from '../messaging.js';
 import { buildHierarchy } from '../util/buildHierarchy.js';
 import Accounts from './Accounts/index.js';
 import AccountManagement from './AuthManagement/AccountManagement.js';
@@ -98,12 +98,14 @@ export default function Popup (): React.ReactElement {
   );
 
   useEffect((): void => {
-    Promise.all([
+    // initially send a ping message to create a port that will be reused for subsequent
+    // messages. This ensure onConnect event is fired only once
+    ping().then(() => Promise.all([
       subscribeAccounts(setAccounts),
       subscribeAuthorizeRequests(setAuthRequests),
       subscribeMetadataRequests(setMetaRequests),
       subscribeSigningRequests(setSignRequests)
-    ]).catch(console.error);
+    ])).catch(console.error);
 
     settings.on('change', (settings): void => {
       setSettingsCtx(settings);

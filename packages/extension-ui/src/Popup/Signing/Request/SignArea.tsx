@@ -1,8 +1,6 @@
 // Copyright 2019-2024 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-/* global chrome */
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
 import { PASSWORD_EXPIRY_MIN } from '@polkadot/extension-base/defaults';
@@ -32,46 +30,23 @@ function SignArea ({ buttonText, className, error, isExternal, isFirst, setError
   const { t } = useTranslation();
 
   useEffect(() => {
-    const lockSigner = async () => {
-      setIsLocked(null);
+    setIsLocked(null);
+    let timeout: ReturnType<typeof setTimeout>;
 
-      try {
-        const { isLocked, remainingTime } = await isSignLocked(signId);
-
+    !isExternal && isSignLocked(signId)
+      .then(({ isLocked, remainingTime }) => {
         setIsLocked(isLocked);
+        timeout = setTimeout(() => {
+          setIsLocked(true);
+        }, remainingTime);
 
-        await chrome.alarms.create('SIGNER_TIMEOUT', { delayInMinutes: remainingTime / 60000 });
+        !isLocked && setSavePass(true);
+      })
+      .catch((error: Error) => console.error(error));
 
-        if (!isLocked) {
-          setSavePass(true);
-        }
-      } catch (error) {
-        console.error('Error locking signer:', error);
-      }
+    return () => {
+      !!timeout && clearTimeout(timeout);
     };
-
-    const resetAlarm = async () => {
-      return new Promise((resolve, reject) => {
-        chrome.alarms.clear('SIGNER_TIMEOUT', (cleared) => {
-          if (chrome.runtime.lastError) {
-            reject(chrome.runtime.lastError);
-          } else {
-            resolve(cleared);
-          }
-        });
-      });
-    };
-
-    const executeLockSigner = async () => {
-      if (!isExternal) {
-        await lockSigner();
-        await resetAlarm();
-      }
-    };
-
-    executeLockSigner().then(async () => {
-      return await executeLockSigner();
-    }).catch((error) => console.error('Error clearing the alarm: ', error));
   }, [isExternal, signId]);
 
   const _onSign = useCallback(

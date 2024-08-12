@@ -3,7 +3,7 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ConfirmationType, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ConfirmationType, ErrorValidation, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
@@ -32,7 +32,7 @@ export interface PayloadValidated {
   payloadAfterValidated: any,
   errorPosition?: 'dApp' | 'ui',
   confirmationType?: ConfirmationType,
-  errors: Error[]
+  errors: ErrorValidation[]
 }
 
 export async function generateValidationProcess (koni: KoniState, url: string, payloadValidate: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
@@ -102,10 +102,10 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
     payload.errorPosition = 'ui';
     payload.confirmationType = 'errorConnectNetwork';
     const [message, name] = convertErrorMessage(message_);
-    const error = new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message, undefined, name);
+    const error = new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message);
 
     console.error(error);
-    errors.push(error);
+    errors.push({ message, name });
   };
 
   if (authInfo?.currentEvmNetworkKey) {
@@ -196,10 +196,10 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     payload.errorPosition = 'ui';
     payload.confirmationType = 'evmWatchTransactionRequest';
     const [message, name] = convertErrorMessage(message_);
-    const error = new TransactionError(BasicTxErrorType.INVALID_PARAMS, message, undefined, name);
+    const error = new TransactionError(BasicTxErrorType.INVALID_PARAMS, message);
 
     console.error(error);
-    errors.push(error);
+    errors.push({ name, message });
   };
 
   if (!web3) {
@@ -369,10 +369,10 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
     payload_.errorPosition = 'ui';
     payload_.confirmationType = 'evmSignatureRequest';
     const [message, name] = convertErrorMessage(message_);
-    const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name);
+    const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message);
 
     console.error(error);
-    errors.push(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name));
+    errors.push({ name, message });
   };
 
   if (address === '' || !payload) {
@@ -506,7 +506,7 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
   }
 
   if (message.includes('network is currently not supported')) {
-    return [t('This network is not yet supported on SubWallet. |Import the network|https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks| on SubWallet and try again'), t('Network not supported')];
+    return [t('This network is not yet supported on SubWallet. (Import the network)[https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks] on SubWallet and try again'), t('Network not supported')];
   }
 
   // Authentication
@@ -558,5 +558,5 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
     return [t('This sign method is not supported by SubWallet. Try again or contact support at agent@subwallet.app'), t('Method not supported')];
   }
 
-  return [message, name || ''];
+  return [message, name || 'Error'];
 }

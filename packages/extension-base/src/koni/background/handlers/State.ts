@@ -1435,6 +1435,8 @@ export default class KoniState {
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const { confirmationType, errors, networkKey: networkKey_ } = result;
 
+    console.log(errors, 'errors');
+
     if (errors && errors.length > 0 && confirmationType) {
       if (ERROR_CONFIRMATION_TYPE.includes(confirmationType)) {
         return this.requestService.addConfirmation(id, url, confirmationType, result, {})
@@ -1449,7 +1451,7 @@ export default class KoniState {
 
     const requestPayload: EvmSendTransactionRequest = {
       ...transactionValidated,
-      errors: errors as TransactionError[]
+      errors: errors
     };
 
     const eType = transactionValidated.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;

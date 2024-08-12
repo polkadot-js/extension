@@ -847,7 +847,7 @@ export default class KoniTabs {
         params: params as any[],
         id
       }, (error, result) => {
-        const err = result?.error || error;
+        let err = result?.error || error;
 
         if (err) {
           let message = err.message.toLowerCase();

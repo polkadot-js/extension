@@ -40,11 +40,11 @@ const defaultErrorMap: Record<EvmProviderErrorType, { message: string, code?: nu
 export class EvmProviderError extends SWError {
   override errorType: EvmProviderErrorType;
 
-  constructor (errorType: EvmProviderErrorType, errMessage?: string, data?: unknown, name?: string) {
+  constructor (errorType: EvmProviderErrorType, errMessage?: string, data?: unknown) {
     const { code, message } = defaultErrorMap[errorType];
     const finalMessage = errMessage || t(message || '') || errorType;
 
-    super(errorType, finalMessage, code, data, name);
+    super(errorType, finalMessage, code, data);
     this.errorType = errorType;
   }
 }

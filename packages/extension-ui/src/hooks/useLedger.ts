@@ -10,7 +10,7 @@ import type { HexString } from '@polkadot/util/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { LedgerGeneric } from '@polkadot/hw-ledger';
+import { Ledger, LedgerGeneric } from '@polkadot/hw-ledger';
 import { knownLedger } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
@@ -29,7 +29,7 @@ interface State extends StateBase {
   error: string | null;
   isLoading: boolean;
   isLocked: boolean;
-  ledger: LedgerGeneric | null;
+  ledger: LedgerGeneric | Ledger | null;
   refresh: () => void;
   warning: string | null;
 }
@@ -47,8 +47,8 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): LedgerGeneric {
-  let ledger: LedgerGeneric | null = null;
+function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
+  let ledger: LedgerGeneric | Ledger | null = null;
 
   const currApp = settings.get().ledgerApp;
 
@@ -72,6 +72,8 @@ function retrieveLedger (genesis: string): LedgerGeneric {
     ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
   } else if (currApp === 'migration') {
     ledger = new LedgerGeneric('webusb', def.network, knownLedger[def.network]);
+  } else if (currApp === 'chainSpecific') {
+    ledger = new Ledger('webusb', def.network);
   } else {
     // This will never get touched since it will always hit the above two. This satisfies the compiler.
     ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
@@ -88,6 +90,28 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const { t } = useTranslation();
+
+  const handleGetAddressError = (e: Error, genesis: string) => {
+    setIsLoading(false);
+    const { network } = getNetwork(genesis) || { network: 'unknown network' };
+
+    const warningMessage = e.message.includes('Code: 26628')
+      ? t('Is your ledger locked?')
+      : null;
+
+    const errorMessage = e.message.includes('App does not seem to be open')
+      ? t('App "{{network}}" does not seem to be open', { replace: { network } })
+      : e.message;
+
+    setIsLocked(true);
+    setWarning(warningMessage);
+    setError(t(
+      'Ledger error: {{errorMessage}}',
+      { replace: { errorMessage } }
+    ));
+    console.error(e);
+    setAddress(null);
+  };
 
   const ledger = useMemo(() => {
     setError(null);
@@ -131,31 +155,25 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     // Just in case, but this shouldn't be triggered
     assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
 
-    ledger.getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
-      .then((res) => {
-        setIsLoading(false);
-        setAddress(res.address);
-      }).catch((e: Error) => {
-        setIsLoading(false);
-        const { network } = getNetwork(genesis) || { network: 'unknown network' };
+    const currApp = settings.get().ledgerApp;
 
-        const warningMessage = e.message.includes('Code: 26628')
-          ? t('Is your ledger locked?')
-          : null;
-
-        const errorMessage = e.message.includes('App does not seem to be open')
-          ? t('App "{{network}}" does not seem to be open', { replace: { network } })
-          : e.message;
-
-        setIsLocked(true);
-        setWarning(warningMessage);
-        setError(t(
-          'Ledger error: {{errorMessage}}',
-          { replace: { errorMessage } }
-        ));
-        console.error(e);
-        setAddress(null);
-      });
+    if (currApp === 'generic' || currApp === 'migration') {
+      (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
+        .then((res) => {
+          setIsLoading(false);
+          setAddress(res.address);
+        }).catch((e: Error) => {
+          handleGetAddressError(e, genesis);
+        });
+    } else if (currApp === 'chainSpecific') {
+      (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
+        .then((res) => {
+          setIsLoading(false);
+          setAddress(res.address);
+        }).catch((e: Error) => {
+          handleGetAddressError(e, genesis);
+        });
+    }
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps

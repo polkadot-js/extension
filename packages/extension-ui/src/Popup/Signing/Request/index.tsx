@@ -117,7 +117,8 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             error={error}
             genesisHash={json.genesisHash}
             onSignature={_onSignature}
-            payload={json}
+            payloadExt={payload}
+            payloadJson={json}
             setError={setError}
           />
         )}

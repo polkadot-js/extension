@@ -75,6 +75,10 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   const _onSignLedger = useCallback(
     (): void => {
       if (!ledger || !payloadJson || !onSignature || !chain || !payloadExt) {
+        if (!chain) {
+          setError('No chain information found. You may need to update/upload the metadata.');
+        }
+
         return;
       }
 

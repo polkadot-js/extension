@@ -78,20 +78,20 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         return;
       }
 
-      if (!chain?.definition.rawMetadata) {
-        setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
-      }
-
-      const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
-
-      const metaBuff = Buffer.from(txMetadata);
-
       setError(null);
       setIsBusy(true);
 
       const currApp = settings.get().ledgerApp;
 
       if (currApp === 'generic' || currApp === 'migration') {
+        if (!chain?.definition.rawMetadata) {
+          setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
+        }
+
+        const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
+
+        const metaBuff = Buffer.from(txMetadata);
+
         (ledger as LedgerGeneric).signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
           .then((signature) => {
             const extrinsic = chain.registry.createType(

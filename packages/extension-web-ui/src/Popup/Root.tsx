@@ -43,6 +43,7 @@ const createPasswordUrl = '/keyring/create-password';
 const migratePasswordUrl = '/keyring/migrate-password';
 const securityUrl = '/settings/security';
 const createDoneUrl = '/create-done';
+const settingImportNetwork = '/settings/chains/import';
 
 // Campaign
 const earningOptionsPreviewUrl = '/earning-preview';
@@ -94,6 +95,10 @@ interface RedirectProps {
   modal: string|null;
 }
 
+interface RootLocationState {
+  useOpenModal?: string
+}
+
 function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactElement {
   const dataContext = useContext(DataContext);
   const screenContext = useContext(ScreenContext);
@@ -117,7 +122,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
 
   const needMigrate = useMemo(
     () => !!accounts
-      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected)
+      .filter((acc) => acc.address !== ALL_ACCOUNT_KEY && !acc.isExternal && !acc.isInjected && !acc.pendingMigrate)
       .filter((acc) => !acc.isMasterPassword)
       .length
     , [accounts]
@@ -205,10 +210,17 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
       if (!allowPreventWelcomeUrls.includes(pathName) && !redirectHandlePage) {
         redirectObj.redirect = welcomeUrl;
       }
+    } else if (hasConfirmations && pathName === settingImportNetwork) {
+      redirectObj.modal = `close:${CONFIRMATION_MODAL}`;
     } else if (hasConfirmations) {
       redirectObj.modal = `open:${CONFIRMATION_MODAL}`;
     } else if (pathName === DEFAULT_ROUTER_PATH) {
       redirectObj.redirect = tokenUrl;
+      const state = location.state as RootLocationState;
+
+      if (state?.useOpenModal) {
+        redirectObj.modal = `open:${state.useOpenModal}`;
+      }
     } else if (pathName === loginUrl && !needUnlock) {
       redirectObj.redirect = DEFAULT_ROUTER_PATH;
     } else if (pathName === welcomeUrl && !isNoAccount) {
@@ -238,7 +250,7 @@ function DefaultRoute ({ children }: {children: React.ReactNode}): React.ReactEl
     redirectObj.redirect = redirectObj.redirect !== pathName ? redirectObj.redirect : null;
 
     return redirectObj;
-  }, [location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, isNoAccount, hasConfirmations, hasInternalConfirmations]);
+  }, [location.state, location.pathname, dataLoaded, needMigrate, hasMasterPassword, needUnlock, isNoAccount, hasConfirmations, hasInternalConfirmations]);
 
   // Active or inactive confirmation modal
   useEffect(() => {

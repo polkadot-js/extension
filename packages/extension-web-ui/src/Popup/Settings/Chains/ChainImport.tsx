@@ -7,17 +7,20 @@ import { _generateCustomProviderKey } from '@subwallet/extension-base/services/c
 import { isUrl } from '@subwallet/extension-base/utils';
 import { Layout, PageWrapper } from '@subwallet/extension-web-ui/components';
 import InfoIcon from '@subwallet/extension-web-ui/components/Icon/InfoIcon';
+import { DEFAULT_ROUTER_PATH, WALLET_CONNECT_CREATE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import useNotification from '@subwallet/extension-web-ui/hooks/common/useNotification';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import useFocusFormItem from '@subwallet/extension-web-ui/hooks/form/useFocusFormItem';
-import { upsertChain, validateCustomChain } from '@subwallet/extension-web-ui/messaging';
+import { rejectWalletConnectSession, upsertChain, validateCustomChain } from '@subwallet/extension-web-ui/messaging';
 import { Theme, ThemeProps, ValidateStatus } from '@subwallet/extension-web-ui/types';
+import { noop } from '@subwallet/extension-web-ui/utils';
+import { fetchChainInfo } from '@subwallet/extension-web-ui/utils/chain/fetchNetworkByChainId';
 import { ActivityIndicator, Col, Form, Icon, Input, Row } from '@subwallet/react-ui';
 import { FloppyDiskBack, Globe, ShareNetwork, WifiHigh, WifiSlash } from 'phosphor-react';
 import { RuleObject } from 'rc-field-form/lib/interface';
-import React, { useCallback, useContext, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled, { useTheme } from 'styled-components';
 
 type Props = ThemeProps
@@ -41,6 +44,18 @@ interface ValidationInfo {
   message?: string
 }
 
+interface LocationState {
+  useGoHome?: boolean;
+  chainId?: string[];
+  id?: string;
+}
+
+async function handleWCCancel (id: string) {
+  return await rejectWalletConnectSession({
+    id
+  });
+}
+
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { isWebUI } = useContext(ScreenContext);
@@ -48,12 +63,14 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const { token } = useTheme() as Theme;
   const showNotification = useNotification();
   const [form] = Form.useForm<ChainImportForm>();
+  const locationState = useLocation().state as LocationState;
+
+  const [location] = useState<LocationState>(locationState);
   const [loading, setLoading] = useState(false);
   const [isPureEvmChain, setIsPureEvmChain] = useState(false);
   const [isShowConnectionStatus, setIsShowConnectionStatus] = useState(false);
   const [providerValidation, setProviderValidation] = useState<ValidationInfo>({ status: '' });
   const [isValidating, setIsValidating] = useState(false);
-
   const [genesisHash, setGenesisHash] = useState('');
   const [existentialDeposit, setExistentialDeposit] = useState('0');
 
@@ -62,8 +79,16 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, []);
 
   const onBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
+    if (location?.useGoHome) {
+      location?.id
+        ? handleWCCancel(location.id).finally(() => {
+          navigate(DEFAULT_ROUTER_PATH, { state: { useOpenModal: WALLET_CONNECT_CREATE_MODAL } });
+        })
+        : navigate(DEFAULT_ROUTER_PATH);
+    } else {
+      navigate(-1);
+    }
+  }, [location, navigate]);
 
   const isSubmitDisabled = useCallback(() => {
     return providerValidation.status !== 'success';
@@ -117,7 +142,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           showNotification({
             message: t('Imported chain successfully')
           });
-          navigate(-1);
+          setTimeout(() => {
+            navigate(-1);
+          }, 100);
         } else {
           showNotification({
             message: t('An error occurred, please try again')
@@ -272,6 +299,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [isShowConnectionStatus, isValidating, providerValidation.status, token]);
 
   useFocusFormItem(form, 'provider');
+
+  useEffect(() => {
+    if (location?.useGoHome && location?.chainId) {
+      fetchChainInfo(location.chainId)
+        .then((chainInfo) => {
+          if (chainInfo.length > 0) {
+            const { rpcUrls } = chainInfo[0];
+
+            if (rpcUrls.length > 0) {
+              form.setFieldValue('provider', rpcUrls[0]);
+              setTimeout(() => {
+                form.validateFields(['provider']).catch(noop);
+              }, 300);
+            }
+          }
+        }).catch(console.error);
+    }
+  }, [form, location]);
 
   return (
     <PageWrapper className={`chain_import ${className}`}>

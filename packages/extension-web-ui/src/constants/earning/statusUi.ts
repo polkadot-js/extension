@@ -5,7 +5,7 @@ import { EarningStatus } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts/types';
 import { EarningStatusUiProps, NominationPoolState } from '@subwallet/extension-web-ui/types';
-import { CheckCircle, ListChecks, XCircle } from 'phosphor-react';
+import {CheckCircle, ListChecks, LockSimple, XCircle} from 'phosphor-react';
 
 export const EarningStatusUi: Record<EarningStatus, EarningStatusUiProps> = {
   [EarningStatus.EARNING_REWARD]: {
@@ -42,8 +42,8 @@ export const NominationPoolsEarningStatusUi: Record<NominationPoolState['state']
     name: detectTranslate('Open')
   },
   Locked: {
-    schema: 'danger' as InfoItemBase['valueColorSchema'],
-    icon: XCircle,
+    schema: 'gray' as InfoItemBase['valueColorSchema'],
+    icon: LockSimple,
     name: detectTranslate('Locked')
   },
   Destroying: {

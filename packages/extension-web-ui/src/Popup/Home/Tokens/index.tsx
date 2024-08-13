@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { EmptyList, PageWrapper, TokenBalance, TokenItem, TokenPrice } from '@subwallet/extension-web-ui/components';
-import NetworkGroup from '@subwallet/extension-web-ui/components/MetaInfo/parts/NetworkGroup';
+import AnimatedNetworkGroup from '@subwallet/extension-web-ui/components/MetaInfo/parts/AnimatedNetworkGroup';
 import { AccountSelectorModal } from '@subwallet/extension-web-ui/components/Modal/AccountSelectorModal';
 import ReceiveQrModal from '@subwallet/extension-web-ui/components/Modal/ReceiveModal/ReceiveQrModal';
 import { TokensSelectorModal } from '@subwallet/extension-web-ui/components/Modal/ReceiveModal/TokensSelectorModal';
@@ -259,7 +259,7 @@ const Component = (): React.ReactElement => {
             {`${relatedChains.length} ${t('networks')}`}
           </Typography.Text>
 
-          <NetworkGroup chains={relatedChains} />
+          <AnimatedNetworkGroup chains={relatedChains} />
         </div>
       );
     }

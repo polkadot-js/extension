@@ -77,6 +77,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
       if (!ledger || !payloadJson || !onSignature || !chain || !payloadExt) {
         if (!chain) {
           setError('No chain information found. You may need to update/upload the metadata.');
+          setIsBusy(false);
         }
 
         return;

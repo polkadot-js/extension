@@ -185,7 +185,7 @@ export default class WalletConnectService {
 
     try {
       const requestSession = this.getSession(topic);
-      const sessionAccounts = requestSession.namespaces.eip155.accounts.map((account) => account.split(':')[2]);
+      const sessionAccounts = requestSession.namespaces.eip155.accounts.concat(requestSession.namespaces.polkadot.accounts);
 
       if (sessionAccounts.length > 0 && this.#client) {
         await this.#client.ping({ topic });

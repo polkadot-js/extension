@@ -718,43 +718,6 @@ export default class KoniState {
     }
   }
 
-  public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
-    const chainInfo = this.chainService.getChainInfoByKey(networkKey);
-    const chainState = this.chainService.getChainStateByKey(networkKey);
-    const { address, currentGenesisHash } = this.keyringService.currentAccount;
-
-    return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', {
-      networkKey,
-      address: changeAddress
-    }, { address: changeAddress })
-      .then(({ isApproved }) => {
-        if (isApproved) {
-          const useAddress = changeAddress || address;
-
-          if (chainInfo && !_isChainEnabled(chainState)) {
-            this.enableChain(networkKey).catch(console.error);
-          }
-
-          if (useAddress !== ALL_ACCOUNT_KEY) {
-            const pair = keyring.getPair(useAddress);
-
-            assert(pair, t('Unable to find account'));
-
-            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: _getSubstrateGenesisHash(chainInfo) });
-          }
-
-          if (address !== changeAddress || _getSubstrateGenesisHash(chainInfo) !== currentGenesisHash || isApproved) {
-            this.setCurrentAccount({
-              address: useAddress,
-              currentGenesisHash: _getSubstrateGenesisHash(chainInfo)
-            });
-          }
-        }
-
-        return isApproved;
-      });
-  }
-
   public async addNetworkConfirm (id: string, url: string, networkData: _NetworkUpsertParams) {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(async ({ isApproved }) => {

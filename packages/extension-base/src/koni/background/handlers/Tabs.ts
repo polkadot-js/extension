@@ -35,6 +35,7 @@ import { checkIfDenied } from '@polkadot/phishing';
 import { JsonRpcResponse } from '@polkadot/rpc-provider/types';
 import { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import { assert, isArray, isNumber } from '@polkadot/util';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 interface AccountSub {
   subscription: Subscription;
@@ -311,17 +312,10 @@ export default class KoniTabs {
       url
     };
 
-    this.#koniState.ensureUrlAuthorizedV2(url)
-      .then(() => {
-        // Update unsubscribe from @polkadot/extension-base
-
-        port.onDisconnect.addListener((): void => {
-          this.accountsUnsubscribe(url, { id });
-        });
-      })
-      .catch(() => {
-        this.accountsUnsubscribe(url, { id });
-      });
+    // Update unsubscribe from @polkadot/extension-base
+    port.onDisconnect.addListener((): void => {
+      this.accountsUnsubscribe(url, { id });
+    });
 
     return id;
   }
@@ -458,11 +452,23 @@ export default class KoniTabs {
   }
 
   private async revokePermissions (url: string, id: string, { params }: RequestArguments) {
+    const revokePermissions: Record<string, boolean> = {
+      eth_accounts: true
+    };
+
     if (!params || !isArray(params) || params.length === 0) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'No list of permissions found to revoke in the parameters.');
     }
 
-    const permissions = Object.keys(params[0] as Record<string, any>);
+    const permissions = Object.keys(params[0] as Record<string, any>).filter((permission) => {
+      if (!revokePermissions[permission]) {
+        return false;
+      } else {
+        revokePermissions[permission] = false;
+
+        return true;
+      }
+    });
 
     const permissionPromise = async (permission: string): Promise<void> => {
       if (permission === 'eth_accounts') {
@@ -471,7 +477,36 @@ export default class KoniTabs {
             const urlStripped = stripUrl(url);
 
             if (value && value[urlStripped]) {
-              delete value[urlStripped];
+              const { accountAuthType, isAllowedMap } = { ...value[urlStripped] };
+
+              if (!accountAuthType) {
+                resolve();
+              }
+
+              switch (accountAuthType) {
+                case 'substrate':
+                  resolve();
+                  break;
+
+                case 'evm':
+                  delete value[urlStripped];
+
+                  break;
+
+                case 'both': {
+                  value[urlStripped].isAllowedMap = Object.entries(isAllowedMap).reduce<Record<string, boolean>>((allowedMap, [address, value]) => {
+                    if (isEthereumAddress(address)) {
+                      allowedMap[address] = false;
+                    } else {
+                      allowedMap[address] = value;
+                    }
+
+                    return allowedMap;
+                  }, {});
+
+                  break;
+                }
+              }
 
               this.#koniState.setAuthorize(value, () => {
                 resolve();
@@ -848,11 +883,9 @@ export default class KoniTabs {
       clearInterval(networkCheckInterval);
     });
 
-    await this.#koniState.ensureUrlAuthorizedV2(url).then(() => {
-      port.onDisconnect.addListener((): void => {
-        this.cancelSubscription(id);
-      });
-    }).catch(() => this.cancelSubscription(id));
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
 
     return true;
   }

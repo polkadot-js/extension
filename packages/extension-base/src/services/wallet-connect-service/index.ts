@@ -177,15 +177,13 @@ export default class WalletConnectService {
   }
 
   async #onPingReply ({ topic }: SignClientTypes.EventArguments['session_ping']) {
-    if (!(await this.haveData())) {
-      await this.initClient(true);
-    }
+    // Doc: https://specs.walletconnect.com/2.0/specs/clients/sign/session-events#session_ping
 
     this.#checkClient();
 
     try {
       const requestSession = this.getSession(topic);
-      const sessionAccounts = requestSession.namespaces.eip155.accounts.concat(requestSession.namespaces.polkadot.accounts);
+      const sessionAccounts = (requestSession.namespaces.eip155?.accounts || []).concat(requestSession.namespaces.polkadot?.accounts || []);
 
       if (sessionAccounts.length > 0 && this.#client) {
         await this.#client.ping({ topic });

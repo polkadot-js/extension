@@ -12,7 +12,7 @@ import { AddNetworkRequestExternal, AddTokenRequestExternal, EvmAppState, EvmEve
 import RequestBytesSign from '@subwallet/extension-base/background/RequestBytesSign';
 import RequestExtrinsicSign from '@subwallet/extension-base/background/RequestExtrinsicSign';
 import { AccountAuthType, MessageTypes, RequestAccountList, RequestAccountSubscribe, RequestAccountUnsubscribe, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestTypes, ResponseRpcListProviders, ResponseSigning, ResponseTypes, SubscriptionMessageTypes } from '@subwallet/extension-base/background/types';
-import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS } from '@subwallet/extension-base/constants';
+import { ALL_ACCOUNT_KEY, CRON_GET_API_MAP_STATUS, PERMISSIONS_TO_REVOKE } from '@subwallet/extension-base/constants';
 import { PHISHING_PAGE_REDIRECT } from '@subwallet/extension-base/defaults';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
@@ -363,6 +363,7 @@ export default class KoniTabs {
             const result = accountList.filter((adr) => adr !== address);
 
             result.unshift(address);
+            accounts = result;
           } else {
             accounts = accountList;
           }
@@ -440,6 +441,7 @@ export default class KoniTabs {
   }
 
   private async getEvmPermission (url: string, id: string) {
+    // Docs: https://docs.metamask.io/wallet/reference/wallet_getpermissions/
     const accounts = await this.getEvmCurrentAccount(url);
 
     return [{
@@ -452,23 +454,22 @@ export default class KoniTabs {
   }
 
   private async revokePermissions (url: string, id: string, { params }: RequestArguments) {
-    const revokePermissions: Record<string, boolean> = {
-      eth_accounts: true
-    };
-
     if (!params || !isArray(params) || params.length === 0) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, 'No list of permissions found to revoke in the parameters.');
     }
 
-    const permissions = Object.keys(params[0] as Record<string, any>).filter((permission) => {
-      if (!revokePermissions[permission]) {
-        return false;
-      } else {
-        revokePermissions[permission] = false;
+    // Example of a request in MetaMask wallet
+    // await window.ethereum.request({
+    //   "method": "wallet_revokePermissions",
+    //   "params": [
+    //     {
+    //       "eth_accounts": {}
+    //     }
+    //   ]
+    // });
+    // Doc: https://docs.metamask.io/wallet/reference/wallet_revokepermissions/
 
-        return true;
-      }
-    });
+    const permissions = new Set(Object.keys(params[0] as Record<string, any>).filter((permission) => PERMISSIONS_TO_REVOKE.includes(permission)));
 
     const permissionPromise = async (permission: string): Promise<void> => {
       if (permission === 'eth_accounts') {
@@ -504,6 +505,7 @@ export default class KoniTabs {
                     return allowedMap;
                   }, {});
 
+                  value[urlStripped].accountAuthType = 'substrate';
                   break;
                 }
               }
@@ -519,7 +521,7 @@ export default class KoniTabs {
       }
     };
 
-    await Promise.all(permissions.map(permissionPromise));
+    await Promise.all(Array.from(permissions).map(permissionPromise));
 
     return null;
   }
@@ -1061,7 +1063,8 @@ export default class KoniTabs {
       [
         'eth_chainId',
         'net_version',
-        'eth_accounts'
+        'wallet_requestPermissions',
+        'wallet_getPermissions'
       ].includes(request?.method)) || type === 'evm(events.subscribe)';
   }
 

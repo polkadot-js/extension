@@ -10,7 +10,7 @@ import { InjectContext } from '@subwallet/extension-web-ui/contexts/InjectContex
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-web-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest, shortenMetadata } from '@subwallet/extension-web-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { convertErrorMessage, getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils'
+import { convertErrorMessage, getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';

@@ -144,7 +144,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         showUnSelectedIcon
       />
     );
-  }, [changeAccounts, className, items, onAccountSelect, onClickItem]);
+  }, [changeAccounts, className, onAccountSelect, onClickItem]);
 
   const onClickFilterButton = useCallback(
     (e?: SyntheticEvent) => {

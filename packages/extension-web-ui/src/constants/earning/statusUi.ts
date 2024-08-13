@@ -5,7 +5,7 @@ import { EarningStatus } from '@subwallet/extension-base/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { InfoItemBase } from '@subwallet/extension-web-ui/components/MetaInfo/parts/types';
 import { EarningStatusUiProps, NominationPoolState } from '@subwallet/extension-web-ui/types';
-import {CheckCircle, ListChecks, LockSimple, XCircle} from 'phosphor-react';
+import { CheckCircle, ListChecks, LockSimple, XCircle } from 'phosphor-react';
 
 export const EarningStatusUi: Record<EarningStatus, EarningStatusUiProps> = {
   [EarningStatus.EARNING_REWARD]: {

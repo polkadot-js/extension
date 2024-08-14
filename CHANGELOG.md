@@ -1,5 +1,20 @@
 # CHANGELOG
 
+## 0.52.1 Aug 14, 2024
+
+Contributed:
+
+- Send ping before subscriptions (Thanks to https://github.com/F-OBrien) ([#1441](https://github.com/polkadot-js/extension/pull/1441))
+- Fix SignArea and ToastProvider timeout (Thanks to https://github.com/F-OBrien) ([#1444](https://github.com/polkadot-js/extension/pull/1444))
+
+Changes:
+
+- Bump yarn to 4.4.0 ([#1442](https://github.com/polkadot-js/extension/pull/1442))
+- Enable "Chain Specific App" setting ([#1445](https://github.com/polkadot-js/extension/pull/1445))
+    - This allows for ledger apps that are not included in the Polkadot Generic App to work with their specific Ledger App
+- Fix setting rawMetadata as registry metadata ([#1446](https://github.com/polkadot-js/extension/pull/1446))
+
+
 ## 0.51.1 Aug 7, 2024
 
 Contributed:

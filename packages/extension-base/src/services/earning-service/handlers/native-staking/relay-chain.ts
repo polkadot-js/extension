@@ -177,7 +177,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const activeStake = ledger.active.toString();
     const totalStake = ledger.total.toString();
-    const unstakingBalance = (ledger.total - ledger.active).toString();
+    const unstakingBalance = new BigN(ledger.total).minus(ledger.active).toString();
     const unstakingList: UnstakingInfo[] = [];
     const nominationList = await this.handleNominationsList(substrateApi, chain, nominations, currentEra, addressFormatted, maxNominatorRewardedPerValidator) || [];
 

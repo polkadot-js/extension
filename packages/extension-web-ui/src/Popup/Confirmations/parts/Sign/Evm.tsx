@@ -10,7 +10,7 @@ import { completeConfirmation } from '@subwallet/extension-web-ui/messaging';
 import { PhosphorIcon, SigData, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { AccountSignMode } from '@subwallet/extension-web-ui/types/account';
 import { EvmSignatureSupportType } from '@subwallet/extension-web-ui/types/confirmation';
-import { getSignMode, isEvmMessage, removeTransactionPersist } from '@subwallet/extension-web-ui/utils';
+import { convertErrorMessage, getSignMode, isEvmMessage, removeTransactionPersist } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
@@ -188,7 +188,16 @@ const Component: React.FC<Props> = (props: Props) => {
             .then((value) => {
               resolve(value);
             })
-            .catch(reject);
+            .catch((e: Error) => {
+              console.error(e);
+              notify({
+                message: convertErrorMessage(e),
+                type: 'error',
+                duration: 8
+              });
+              onCancel();
+              reject(e);
+            });
         });
       }
 
@@ -204,7 +213,7 @@ const Component: React.FC<Props> = (props: Props) => {
           setLoading(false);
         });
     }
-  }, [account.address, chainId, evmWallet, isMessage, onApproveSignature, payload.payload]);
+  }, [account.address, chainId, evmWallet, isMessage, notify, onApproveSignature, onCancel, payload.payload]);
 
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);
@@ -215,7 +224,8 @@ const Component: React.FC<Props> = (props: Props) => {
       if (currentTime >= txExpirationTime) {
         notify({
           message: t('Transaction expired'),
-          type: 'error'
+          type: 'error',
+          duration: 8
         });
         onCancel();
       }

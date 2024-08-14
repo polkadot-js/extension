@@ -4,14 +4,25 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 
 export interface INftCollectionDetail {
-  collectionInfo: NftCollection,
-  nftList: NftItem[]
+  collectionId: string
 }
 
 export interface INftItemDetail {
-  collectionInfo: NftCollection,
-  nftItem: NftItem
+  collectionId: string,
+  nftId: string
 }
 
 // might set perPage based on screen height
 export const NFT_PER_PAGE = 4;
+
+export const getNftsByCollection = (nftCollection: NftCollection, nftItems: NftItem[]) => {
+  const nftList: NftItem[] = [];
+
+  nftItems.forEach((nftItem) => {
+    if (nftItem.collectionId === nftCollection.collectionId && nftItem.chain === nftCollection.chain) {
+      nftList.push(nftItem);
+    }
+  });
+
+  return nftList;
+};

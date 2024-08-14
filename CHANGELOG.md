@@ -9,10 +9,10 @@ Contributed:
 
 Changes:
 
-- Bump yarn to 4.4.0
-- Enable "Chain Specific App" setting
+- Bump yarn to 4.4.0 ([#1442](https://github.com/polkadot-js/extension/pull/1442))
+- Enable "Chain Specific App" setting ([#1445](https://github.com/polkadot-js/extension/pull/1445))
     - This allows for ledger apps that are not included in the Polkadot Generic App to work with their specific Ledger App
-- Fix setting rawMetadata as registry metadata
+- Fix setting rawMetadata as registry metadata ([#1446](https://github.com/polkadot-js/extension/pull/1446))
 
 
 ## 0.51.1 Aug 7, 2024

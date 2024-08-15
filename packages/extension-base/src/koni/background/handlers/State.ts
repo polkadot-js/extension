@@ -8,6 +8,7 @@ import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/ba
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
+import { SignTypedDataMessageV3V4, validateSignMessageData, validateTypedSignMessageDataV1, validateTypedSignMessageDataV3V4 } from '@subwallet/extension-base/core/logic-validation/request';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -1320,11 +1321,6 @@ export default class KoniState {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('Unsupported action'));
     }
 
-    if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-      payload = JSON.parse(payload);
-    }
-
     // Check sign abiblity
     if (!allowedAccounts.find((acc) => (acc.toLowerCase() === address.toLowerCase()))) {
       throw new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, t('You have rescinded allowance for this account in wallet'));
@@ -1343,14 +1339,30 @@ export default class KoniState {
 
     switch (method) {
       case 'personal_sign':
+        payload = validateSignMessageData({ data: payload as string, from: address });
         canSign = true;
         hashPayload = payload as string;
         break;
       case 'eth_sign':
+        if (!account.isExternal) {
+          canSign = true;
+        }
+
+        break;
       case 'eth_signTypedData':
       case 'eth_signTypedData_v1':
+        payload = validateTypedSignMessageDataV1({ data: payload as Record<string, unknown>[], from: address });
+
+        if (!account.isExternal) {
+          canSign = true;
+        }
+
+        break;
+
       case 'eth_signTypedData_v3':
       case 'eth_signTypedData_v4':
+        payload = validateTypedSignMessageDataV3V4({ data: payload as SignTypedDataMessageV3V4, from: address });
+
         if (!account.isExternal) {
           canSign = true;
         }

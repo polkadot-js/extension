@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.52.2 Aug 16, 2024
+
+NOTE: This is strictly a patch release for the store.
+
+Changes:
+
+- Remove Alarm permissions ([#1449](https://github.com/polkadot-js/extension/pull/1449))
+
+
 ## 0.52.1 Aug 14, 2024
 
 Contributed:

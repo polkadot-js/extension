@@ -32,7 +32,7 @@ export interface PayloadValidated {
   payloadAfterValidated: any,
   errorPosition?: 'dApp' | 'ui',
   confirmationType?: ConfirmationType,
-  errors: ErrorValidation[]
+  errors: Error[]
 }
 
 export async function generateValidationProcess (koni: KoniState, url: string, payloadValidate: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
@@ -102,10 +102,10 @@ export async function validationConnectMiddleware (koni: KoniState, url: string,
     payload.errorPosition = 'ui';
     payload.confirmationType = 'errorConnectNetwork';
     const [message, name] = convertErrorMessage(message_);
-    const error = new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message);
+    const error = new EvmProviderError(EvmProviderErrorType.CHAIN_DISCONNECTED, message, undefined, name);
 
     console.error(error);
-    errors.push({ message, name });
+    errors.push(error);
   };
 
   if (authInfo?.currentEvmNetworkKey) {
@@ -196,10 +196,10 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
     payload.errorPosition = 'ui';
     payload.confirmationType = 'evmWatchTransactionRequest';
     const [message, name] = convertErrorMessage(message_);
-    const error = new TransactionError(BasicTxErrorType.INVALID_PARAMS, message);
+    const error = new TransactionError(BasicTxErrorType.INVALID_PARAMS, message, undefined, name);
 
     console.error(error);
-    errors.push({ name, message });
+    errors.push(error);
   };
 
   if (!web3) {
@@ -369,10 +369,10 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
     payload_.errorPosition = 'ui';
     payload_.confirmationType = 'evmSignatureRequest';
     const [message, name] = convertErrorMessage(message_);
-    const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message);
+    const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name);
 
     console.error(error);
-    errors.push({ name, message });
+    errors.push(error);
   };
 
   if (address === '' || !payload) {
@@ -559,4 +559,12 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
   }
 
   return [message, name || 'Error'];
+}
+
+export function convertErrorFormat (errors: Error[]): ErrorValidation[] {
+  if (errors.length > 0) {
+    return [{ name: errors[0].name, message: errors[0].message }];
+  }
+
+  return [];
 }

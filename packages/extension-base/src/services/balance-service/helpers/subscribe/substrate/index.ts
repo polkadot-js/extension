@@ -122,8 +122,6 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
   const isNominationPoolMigrated = !!substrateApi.api.tx?.nominationPools?.migrateDelegation;
 
-  console.log(chainInfo.slug, 'updated: ', isNominationPoolMigrated);
-
   const params: _SubstrateAdapterSubscriptionArgs[] = [
     {
       section: 'query',

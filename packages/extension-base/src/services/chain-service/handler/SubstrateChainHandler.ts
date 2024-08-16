@@ -13,6 +13,7 @@ import { cacheMetadata, GEAR_DEFAULT_ADDRESS, getGRC20ContractPromise, getVFTCon
 
 import { ApiPromise } from '@polkadot/api';
 import { ContractPromise } from '@polkadot/api-contract';
+import { Registry } from '@polkadot/types/types';
 import { BN } from '@polkadot/util';
 import { logger as createLogger } from '@polkadot/util/logger';
 import { Logger } from '@polkadot/util/types';
@@ -22,7 +23,7 @@ import { _PSP22_ABI, _PSP34_ABI } from '../../../koni/api/contract-handler/utils
 export const DEFAULT_AUX = ['Aux1', 'Aux2', 'Aux3', 'Aux4', 'Aux5', 'Aux6', 'Aux7', 'Aux8', 'Aux9'];
 
 export class SubstrateChainHandler extends AbstractChainHandler {
-  private substrateApiMap: Record<string, SubstrateApi> = {};
+  private substrateApiMap: Record<string, _SubstrateApi> = {};
 
   private logger: Logger;
 
@@ -90,24 +91,22 @@ export class SubstrateChainHandler extends AbstractChainHandler {
       addressPrefix: -1,
       decimals: 0,
       existentialDeposit: '',
-      genesisHash: substrateApi.api.genesisHash?.toHex(),
+      genesisHash: await substrateApi.makeRpcQuery<`0x${string}`>({ section: 'genesisHash' }),
       name: '',
       symbol: '',
       paraId: null
     };
 
-    const { chainDecimals, chainTokens } = substrateApi.api.registry;
+    const { chainDecimals, chainTokens } = await substrateApi.makeRpcQuery<Registry>({ section: 'registry' });
 
-    if (substrateApi.api.query.parachainInfo) {
-      result.paraId = (await substrateApi.api.query.parachainInfo.parachainId()).toPrimitive() as number;
-    }
+    result.paraId = await substrateApi.makeRpcQuery<number | null>({ section: 'query', module: 'parachainInfo', method: 'parachainId' });
 
     // get first token by default, might change
-    result.name = (await substrateApi.api.rpc.system.chain()).toPrimitive();
+    result.name = await substrateApi.makeRpcQuery<string>({ section: 'rpc', module: 'system', method: 'chain' });
     result.symbol = chainTokens[0];
     result.decimals = chainDecimals[0];
-    result.addressPrefix = substrateApi.api?.consts?.system?.ss58Prefix?.toPrimitive() as number;
-    result.existentialDeposit = substrateApi.api.consts.balances.existentialDeposit.toString();
+    result.addressPrefix = await substrateApi.makeRpcQuery<number>({ section: 'consts', module: 'system', method: 'ss58Prefix' });
+    result.existentialDeposit = await substrateApi.makeRpcQuery<string>({ section: 'consts', module: 'balances', method: 'existentialDeposit' });
 
     return result;
   }
@@ -255,7 +254,7 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     }
   }
 
-  public setSubstrateApi (chainSlug: string, substrateApi: SubstrateApi) {
+  public setSubstrateApi (chainSlug: string, substrateApi: _SubstrateApi) {
     this.substrateApiMap[chainSlug] = substrateApi;
   }
 
@@ -265,10 +264,10 @@ export class SubstrateChainHandler extends AbstractChainHandler {
     substrateAPI?.destroy().catch(console.error);
   }
 
-  public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<SubstrateApi> {
+  public async initApi (chainSlug: string, apiUrl: string, { externalApiPromise, onUpdateStatus, providerName }: Omit<_ApiOptions, 'metadata'> = {}): Promise<_SubstrateApi> {
     const existed = this.substrateApiMap[chainSlug];
 
-    const updateMetadata = (substrateApi: SubstrateApi) => {
+    const updateMetadata = (substrateApi: _SubstrateApi) => {
       // Update metadata to database with async methods
       cacheMetadata(chainSlug, substrateApi, this.parent);
     };

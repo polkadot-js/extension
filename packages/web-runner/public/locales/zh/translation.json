@@ -1272,5 +1272,8 @@
   "Wrong device. Connect your previously used Ledger and try again": "",
   "Add network to connect": "",
   " The network you're connecting to is not yet supported on SubWallet. Add the network first, then connect with WalletConnect again.": "",
-  "{{number}} networks supported": ""
+  "{{number}} networks supported": "",
+  "Unlock your Ledger and open the selected app. For more information regarding Polkadot and Polkadot Migration app, click ": "",
+  "here": "",
+  "Select Ledger app": ""
 }

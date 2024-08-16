@@ -32,6 +32,7 @@ import { createSnowBridgeExtrinsic, createXcmExtrinsic, getXcmMockTxFee } from '
 import { _API_OPTIONS_CHAIN_GROUP, _DEFAULT_MANTA_ZK_CHAIN, _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _ChainApiStatus, _ChainConnectionStatus, _ChainState, _NetworkUpsertParams, _ValidateCustomAssetRequest, _ValidateCustomAssetResponse, EnableChainParams, EnableMultiChainParams } from '@subwallet/extension-base/services/chain-service/types';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getContractAddressOfToken, _getEvmChainId, _getSubstrateGenesisHash, _isAssetSmartContractNft, _isChainEvmCompatible, _isCustomAsset, _isLocalToken, _isMantaZkAsset, _isNativeToken, _isPureEvmChain, _isTokenEvmSmartContract, _isTokenTransferredByEvm } from '@subwallet/extension-base/services/chain-service/utils';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { AuthUrls } from '@subwallet/extension-base/services/request-service/types';
 import { DEFAULT_AUTO_LOCK_TIME } from '@subwallet/extension-base/services/setting-service/constants';
@@ -1801,20 +1802,25 @@ export default class KoniExtension {
 
     const additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
       let senderTransferTokenTransferable: string | undefined;
+      let receiverNativeTransferable: string | undefined;
 
       // Check ed for sender
       if (!isTransferNativeToken) {
-        const { value } = await this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug, extrinsicType });
+        const [_senderTransferTokenTransferable, _receiverNativeTransferable] = await Promise.all([
+          this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug, extrinsicType }),
+          this.getAddressTransferableBalance({ address: to, networkKey, token: nativeTokenSlug, extrinsicType: ExtrinsicType.TRANSFER_BALANCE })
+        ]);
 
-        senderTransferTokenTransferable = value;
+        senderTransferTokenTransferable = _senderTransferTokenTransferable.value;
+        receiverNativeTransferable = _receiverNativeTransferable.value;
       }
 
       const { value: receiverTransferTokenTransferable } = await this.getAddressTransferableBalance({ address: to, networkKey, token: tokenSlug, extrinsicType }); // todo: shouldn't be just transferable, locked also counts
 
-      const [warning, error] = additionalValidateTransfer(transferTokenInfo, extrinsicType, receiverTransferTokenTransferable, transferAmount.value, senderTransferTokenTransferable);
+      const [warnings, errors] = additionalValidateTransfer(transferTokenInfo, nativeTokenInfo, extrinsicType, receiverTransferTokenTransferable, transferAmount.value, senderTransferTokenTransferable, receiverNativeTransferable);
 
-      warning && inputTransaction.warnings.push(warning);
-      error && inputTransaction.errors.push(error);
+      warnings.length && inputTransaction.warnings.push(...warnings);
+      errors.length && inputTransaction.errors.push(...errors);
     };
 
     return this.#koniState.transactionService.handleTransaction({
@@ -2087,7 +2093,7 @@ export default class KoniExtension {
 
     if (destinationTokenInfo) {
       const [bnMockFee, { value }] = await Promise.all([
-        getXcmMockTxFee(substrateApi, chainInfoMap, address, originTokenInfo, destinationTokenInfo),
+        getXcmMockTxFee(substrateApi, chainInfoMap, originTokenInfo, destinationTokenInfo),
         this.getAddressTransferableBalance({ extrinsicType: ExtrinsicType.TRANSFER_XCM, address, networkKey: originTokenInfo.originChain, token: originTokenInfo.slug })
       ]);
 
@@ -4320,6 +4326,72 @@ export default class KoniExtension {
     return null;
   }
 
+  private subscribeAppPopupData (id: string, port: chrome.runtime.Port): AppPopupData[] {
+    const cb = createSubscription<'pri(campaign.popups.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: AppPopupData[]) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.mktCampaignService.subscribePopupsData(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+    ready = true;
+
+    return this.#koniState.mktCampaignService.getAppPopupsData();
+  }
+
+  private subscribeAppBannerData (id: string, port: chrome.runtime.Port): AppBannerData[] {
+    const cb = createSubscription<'pri(campaign.banners.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: AppBannerData[]) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.mktCampaignService.subscribeBannersData(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+    ready = true;
+
+    return this.#koniState.mktCampaignService.getAppBannersData();
+  }
+
+  private subscribeAppConfirmationData (id: string, port: chrome.runtime.Port): AppConfirmationData[] {
+    const cb = createSubscription<'pri(campaign.confirmations.subscribe)'>(id, port);
+    let ready = false;
+
+    const callback = (rs: AppConfirmationData[]) => {
+      if (ready) {
+        cb(rs);
+      }
+    };
+
+    const subscription = this.#koniState.mktCampaignService.subscribeConfirmationsData(callback);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+    ready = true;
+
+    return this.#koniState.mktCampaignService.getAppConfirmationsData();
+  }
+
   /* Campaign */
 
   /* Buy service */
@@ -4989,6 +5061,12 @@ export default class KoniExtension {
         return this.subscribeCampaignPopupVisibility(id, port);
       case 'pri(campaign.popup.toggle)':
         return this.toggleCampaignPopup(request as ShowCampaignPopupRequest);
+      case 'pri(campaign.popups.subscribe)':
+        return this.subscribeAppPopupData(id, port);
+      case 'pri(campaign.banners.subscribe)':
+        return this.subscribeAppBannerData(id, port);
+      case 'pri(campaign.confirmations.subscribe)':
+        return this.subscribeAppConfirmationData(id, port);
 
         /* Campaign */
 

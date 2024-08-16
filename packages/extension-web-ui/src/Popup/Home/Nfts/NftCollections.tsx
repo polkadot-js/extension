@@ -6,12 +6,11 @@ import { EmptyList, Layout, PageWrapper } from '@subwallet/extension-web-ui/comp
 import { BaseModal } from '@subwallet/extension-web-ui/components/Modal/BaseModal';
 import NoContent, { PAGE_TYPE } from '@subwallet/extension-web-ui/components/NoContent';
 import { IMPORT_NFT_MODAL } from '@subwallet/extension-web-ui/constants';
-import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
-import { useGetNftByAccount, useNotification, useSetCurrentPage, useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useNotification, useSetCurrentPage, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
 import { NftGalleryWrapper } from '@subwallet/extension-web-ui/Popup/Home/Nfts/component/NftGalleryWrapper';
-import { INftCollectionDetail } from '@subwallet/extension-web-ui/Popup/Home/Nfts/utils';
+import { getNftsByCollection, INftCollectionDetail } from '@subwallet/extension-web-ui/Popup/Home/Nfts/utils';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { ActivityIndicator, Button, ButtonProps, Icon, ModalContext, SwList, useExcludeModal } from '@subwallet/react-ui';
 import CN from 'classnames';
@@ -49,18 +48,24 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   const outletContext: {
     searchInput: string,
     setSearchPlaceholder: React.Dispatch<React.SetStateAction<React.ReactNode>>,
-    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>
+    setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>,
+    nftCollections: NftCollection[],
+    nftItems: NftItem[]
   } = useOutletContext();
 
   const setSearchPlaceholder = outletContext?.setSearchPlaceholder;
   const setShowSearchInput = outletContext?.setShowSearchInput;
+  const nftCollections = useMemo(() => {
+    return outletContext?.nftCollections || [];
+  }, [outletContext?.nftCollections]);
+  const nftItems = useMemo(() => {
+    return outletContext?.nftItems || [];
+  }, [outletContext?.nftItems]);
 
-  const dataContext = useContext(DataContext);
   const { isWebUI } = useContext(ScreenContext);
 
   useExcludeModal(modalId);
 
-  const { nftCollections, nftItems } = useGetNftByAccount();
   const [loading, setLoading] = React.useState<boolean>(false);
   const notify = useNotification();
 
@@ -112,24 +117,12 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     );
   }, []);
 
-  const getNftsByCollection = useCallback((nftCollection: NftCollection) => {
-    const nftList: NftItem[] = [];
-
-    nftItems.forEach((nftItem) => {
-      if (nftItem.collectionId === nftCollection.collectionId && nftItem.chain === nftCollection.chain) {
-        nftList.push(nftItem);
-      }
-    });
-
-    return nftList;
-  }, [nftItems]);
-
   const handleOnClickCollection = useCallback((state: INftCollectionDetail) => {
     navigate('/home/nfts/collection-detail', { state });
   }, [navigate]);
 
   const renderNftCollection = useCallback((nftCollection: NftCollection) => {
-    const nftList = getNftsByCollection(nftCollection);
+    const nftList = getNftsByCollection(nftCollection, nftItems);
 
     let fallbackImage: string | undefined;
 
@@ -140,7 +133,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       }
     }
 
-    const state: INftCollectionDetail = { collectionInfo: nftCollection, nftList };
+    const state: INftCollectionDetail = { collectionId: nftCollection.collectionId };
 
     return (
       <NftGalleryWrapper
@@ -153,7 +146,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
         title={nftCollection.collectionName || nftCollection.collectionId}
       />
     );
-  }, [getNftsByCollection, handleOnClickCollection]);
+  }, [handleOnClickCollection, nftItems]);
 
   const emptyButtonProps = useMemo((): ButtonProps => {
     return {
@@ -252,7 +245,6 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   return (
     <PageWrapper
       className={`nft_container ${className}`}
-      resolve={dataContext.awaitStores(['nft'])}
     >
       <Layout.Base
         {...!isWebUI && {

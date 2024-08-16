@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ResponseAccountExportPrivateKey } from '@subwallet/extension-base/background/KoniTypes';
+import { RequestAccountBatchExportV2, ResponseAccountExportPrivateKey } from '@subwallet/extension-base/background/KoniTypes';
 import { sendMessage } from '@subwallet/extension-web-ui/messaging';
 import { KeyringPair$Json } from '@subwallet/keyring/types';
 import { KeyringPairs$Json } from '@subwallet/ui-keyring/types';
@@ -17,4 +17,8 @@ export async function exportAccountPrivateKey (address: string, password: string
 
 export async function exportAccounts (addresses: string[], password: string): Promise<{ exportedJson: KeyringPairs$Json }> {
   return sendMessage('pri(accounts.batchExport)', { addresses, password });
+}
+
+export async function exportAccountsV2 (request: RequestAccountBatchExportV2): Promise<{ exportedJson: KeyringPairs$Json }> {
+  return sendMessage('pri(accounts.batchExportV2)', request);
 }

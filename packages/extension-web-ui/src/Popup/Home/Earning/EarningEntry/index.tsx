@@ -104,7 +104,7 @@ const Wrapper = ({ className }: Props) => {
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={dataContext.awaitStores(['earning', 'price', 'balance'])}
+      resolve={dataContext.awaitStores(['earning', 'price', 'balance', 'chainStore', 'assetRegistry'])}
     >
       <Component />
     </PageWrapper>

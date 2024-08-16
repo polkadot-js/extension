@@ -30,4 +30,12 @@ export default class CrowdloanStore extends BaseStoreWithAddressAndChain<ICrowdl
   deleteByChainAndAddress (chain: string, address: string) {
     return this.table.where({ chain, address }).delete();
   }
+
+  checkCrowdloanByChain (chain: string, filterFunc: (i: ICrowdloanItem) => boolean) {
+    return this.table.where({ chain }).filter(filterFunc).count();
+  }
+
+  checkCrowdloanExist (filterFunc: (i: ICrowdloanItem) => boolean) {
+    return this.table.filter(filterFunc).count();
+  }
 }

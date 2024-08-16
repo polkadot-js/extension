@@ -215,7 +215,8 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
   vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
   vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
-  avail_mainnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, maxInflation: 0.05, minInflation: 0.01 }
+  avail_mainnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, maxInflation: 0.05, minInflation: 0.01 },
+  dentnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.5 }
 };
 
 // Send fund------------------------------------------------------------------------------------------------------------

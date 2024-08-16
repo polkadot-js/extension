@@ -1802,20 +1802,25 @@ export default class KoniExtension {
 
     const additionalValidator = async (inputTransaction: SWTransactionResponse): Promise<void> => {
       let senderTransferTokenTransferable: string | undefined;
+      let receiverNativeTransferable: string | undefined;
 
       // Check ed for sender
       if (!isTransferNativeToken) {
-        const { value } = await this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug, extrinsicType });
+        const [_senderTransferTokenTransferable, _receiverNativeTransferable] = await Promise.all([
+          this.getAddressTransferableBalance({ address: from, networkKey, token: tokenSlug, extrinsicType }),
+          this.getAddressTransferableBalance({ address: to, networkKey, token: nativeTokenSlug, extrinsicType: ExtrinsicType.TRANSFER_BALANCE })
+        ]);
 
-        senderTransferTokenTransferable = value;
+        senderTransferTokenTransferable = _senderTransferTokenTransferable.value;
+        receiverNativeTransferable = _receiverNativeTransferable.value;
       }
 
       const { value: receiverTransferTokenTransferable } = await this.getAddressTransferableBalance({ address: to, networkKey, token: tokenSlug, extrinsicType }); // todo: shouldn't be just transferable, locked also counts
 
-      const [warning, error] = additionalValidateTransfer(transferTokenInfo, extrinsicType, receiverTransferTokenTransferable, transferAmount.value, senderTransferTokenTransferable);
+      const [warnings, errors] = additionalValidateTransfer(transferTokenInfo, nativeTokenInfo, extrinsicType, receiverTransferTokenTransferable, transferAmount.value, senderTransferTokenTransferable, receiverNativeTransferable);
 
-      warning && inputTransaction.warnings.push(warning);
-      error && inputTransaction.errors.push(error);
+      warnings.length && inputTransaction.warnings.push(...warnings);
+      errors.length && inputTransaction.errors.push(...errors);
     };
 
     return this.#koniState.transactionService.handleTransaction({

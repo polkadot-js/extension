@@ -224,6 +224,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
+    '.ant-input': {
+      minWidth: 0 // fix issue related to input overflow width
+    },
+
     '.ant-input-affix-wrapper': {
       overflow: 'hidden',
 

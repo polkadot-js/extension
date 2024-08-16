@@ -6,31 +6,50 @@ import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
 import { EarningRewardItem, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, BaseModal, EarningInstructionModal, EarningPositionDesktopItem, EarningPositionItem, EmptyList, FilterModal, Layout } from '@subwallet/extension-web-ui/components';
+import { FilterTabsNode } from '@subwallet/extension-web-ui/components/FilterTabsNode';
 import { ASTAR_PORTAL_URL, BN_TEN, CANCEL_UN_STAKE_TRANSACTION, CLAIM_REWARD_TRANSACTION, DEFAULT_CANCEL_UN_STAKE_PARAMS, DEFAULT_CLAIM_REWARD_PARAMS, DEFAULT_EARN_PARAMS, DEFAULT_UN_STAKE_PARAMS, DEFAULT_WITHDRAW_PARAMS, EARN_TRANSACTION, EARNING_INSTRUCTION_MODAL, TRANSACTION_YIELD_CANCEL_UNSTAKE_MODAL, TRANSACTION_YIELD_CLAIM_MODAL, TRANSACTION_YIELD_UNSTAKE_MODAL, TRANSACTION_YIELD_WITHDRAW_MODAL, UN_STAKE_TRANSACTION, WITHDRAW_TRANSACTION } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { reloadCron } from '@subwallet/extension-web-ui/messaging';
+import EarningPositionBalance from '@subwallet/extension-web-ui/Popup/Home/Earning/EarningEntry/EarningPositions/EarningPositionsBalance';
 import { Toolbar } from '@subwallet/extension-web-ui/Popup/Home/Earning/shared/desktop/Toolbar';
 import Transaction from '@subwallet/extension-web-ui/Popup/Transaction/Transaction';
 import CancelUnstake from '@subwallet/extension-web-ui/Popup/Transaction/variants/CancelUnstake';
 import ClaimReward from '@subwallet/extension-web-ui/Popup/Transaction/variants/ClaimReward';
 import Unbond from '@subwallet/extension-web-ui/Popup/Transaction/variants/Unbond';
 import Withdraw from '@subwallet/extension-web-ui/Popup/Transaction/variants/Withdraw';
-import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
 import { isAccountAll, isRelatedToAstar, openInNewTab } from '@subwallet/extension-web-ui/utils';
-import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
+import { Button, ButtonProps, Icon, ModalContext, SwIconProps, SwList } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phosphor-react';
+import { ArrowsClockwise, Database, FadersHorizontal, HandsClapping, Leaf, Plus, PlusCircle, SquaresFour, Users, Vault } from 'phosphor-react';
+import { IconWeight } from 'phosphor-react/src/lib';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
   setEntryView: React.Dispatch<React.SetStateAction<EarningEntryView>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+type FilterTabItemType = {
+  label: string,
+  value: string,
+  icon: SwIconProps['phosphorIcon'],
+  iconColor: string,
+  weight?: IconWeight,
+}
+
+enum FilterValue {
+  ALL = 'ALL',
+  NOMINATION_POOL = 'NOMINATION_POOL',
+  DIRECT_NOMINATION = 'NATIVE_STAKING',
+  LIQUID_STAKING = 'LIQUID_STAKING',
+  LENDING = 'LENDING'
 }
 
 let cacheData: Record<string, boolean> = {};
@@ -64,8 +83,55 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
   const { inactiveModal } = useContext(ModalContext);
 
+  const { token } = useTheme() as Theme;
+
   const [searchInput, setSearchInput] = useState<string>('');
+  const [selectedFilterTab, setSelectedFilterTab] = useState<string>(FilterValue.ALL);
   const [selectedPositionInfo, setSelectedPositionInfo] = useState<ExtraYieldPositionInfo | undefined>(undefined);
+
+  const filterTabItems = useMemo<FilterTabItemType[]>(() => {
+    return [
+      {
+        label: t('All'),
+        value: FilterValue.ALL,
+        icon: SquaresFour,
+        iconColor: token.geekblue,
+        weight: 'fill'
+      },
+      {
+        label: t('Nomination pool'),
+        value: FilterValue.NOMINATION_POOL,
+        icon: Users,
+        iconColor: token['colorSuccess-6']
+
+      },
+      {
+        label: t('Direct nomination'),
+        value: FilterValue.DIRECT_NOMINATION,
+        icon: Database,
+        iconColor: token['gold-6'],
+        weight: 'fill'
+      },
+      {
+        label: t('Liquid staking'),
+        value: FilterValue.LIQUID_STAKING,
+        icon: Leaf,
+        iconColor: token['magenta-6'],
+        weight: 'fill'
+      },
+      {
+        label: t('Lending'),
+        value: FilterValue.LENDING,
+        icon: HandsClapping,
+        iconColor: token['green-6']
+      }
+    ];
+  }, [t, token]);
+
+  const onSelectFilterTab = useCallback((value: string) => {
+    setSelectedFilterTab(value);
+  }, []);
+
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
       return [];
@@ -437,10 +503,26 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     setEntryView(EarningEntryView.OPTIONS);
   }, [setEntryView]);
 
+  const filteredItems = useMemo(() => {
+    const filterTabFunction = (item: ExtraYieldPositionInfo) => {
+      if (selectedFilterTab === FilterValue.ALL) {
+        return true;
+      }
+
+      return item.type === selectedFilterTab;
+    };
+
+    const _filterFunction = (_item: ExtraYieldPositionInfo) => {
+      return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
+    };
+
+    return items.filter(_filterFunction);
+  }, [items, filterFunction, searchFunction, searchInput, selectedFilterTab]);
+
   return (
     <>
       <Layout.Base
-        className={CN(className)}
+        className={CN(className, { '-mobile-mode': !isWebUI })}
         showSubHeader={true}
         subHeaderBackground={'transparent'}
         subHeaderCenter={false}
@@ -452,27 +534,49 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
           isWebUI
             ? (
               <>
-                <Toolbar
-                  className={'__desktop-toolbar'}
-                  extraActionNode={
-                    subHeaderButtons.map((b, index) => (
-                      <Button
-                        {...b}
-                        key={index}
-                        size={'xs'}
-                        type={'ghost'}
+                <EarningPositionBalance items={items} />
+                <div className={'action-wrapper'}>
+                  <FilterTabsNode
+                    className={'filter-tabs-container'}
+                    items={filterTabItems}
+                    onSelect={onSelectFilterTab}
+                    selectedItem={selectedFilterTab}
+                  />
+                  <Toolbar
+                    className={'__desktop-toolbar'}
+                    extraActionNode={
+                      subHeaderButtons.map((b, index) => (
+                        <Button
+                          {...b}
+                          key={index}
+                          size={'xs'}
+                          type={'ghost'}
+                        />
+                      ))
+                    }
+                    inputPlaceholder={t<string>('Search token')}
+                    onClickFilter={onClickFilterButton}
+                    onSearch={setSearchInput}
+                    searchValue={searchInput}
+                  />
+                  <Button
+                    className={'__filter-button'}
+                    icon={(
+                      <Icon
+                        phosphorIcon={FadersHorizontal}
+                        size='sm'
                       />
-                    ))
-                  }
-                  inputPlaceholder={t<string>('Search token')}
-                  onClickFilter={onClickFilterButton}
-                  onSearch={setSearchInput}
-                  searchValue={searchInput}
-                />
+                    )}
+                    onClick={onClickFilterButton}
+                    size={'xs'}
+                    type={'ghost'}
+                  >
+                  </Button>
+                </div>
                 <SwList
                   className={'__desktop-list-container'}
                   filterBy={filterFunction}
-                  list={items}
+                  list={filteredItems}
                   renderItem={renderItem}
                   renderWhenEmpty={emptyList}
                   searchBy={searchFunction}
@@ -482,20 +586,23 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               </>
             )
             : (
-              <SwList.Section
-                actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
-                className={'__section-list-container'}
-                enableSearchInput
-                filterBy={filterFunction}
-                list={items}
-                onClickActionBtn={onClickFilterButton}
-                renderItem={renderItem}
-                renderWhenEmpty={emptyList}
-                searchFunction={searchFunction}
-                searchMinCharactersCount={1}
-                searchPlaceholder={t<string>('Search token')}
-                showActionBtn
-              />
+              <>
+                <EarningPositionBalance items={items} />
+                <SwList.Section
+                  actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
+                  className={'__section-list-container'}
+                  enableSearchInput
+                  filterBy={filterFunction}
+                  list={items}
+                  onClickActionBtn={onClickFilterButton}
+                  renderItem={renderItem}
+                  renderWhenEmpty={emptyList}
+                  searchFunction={searchFunction}
+                  searchMinCharactersCount={1}
+                  searchPlaceholder={t<string>('Search token')}
+                  showActionBtn
+                />
+              </>
             )
         }
         <div className={'footer-separator'}></div>
@@ -634,6 +741,10 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     marginBottom: token.marginXS
   },
 
+  '.__filter-button': {
+    display: 'none'
+  },
+
   '.__section-list-container': {
     paddingLeft: 0,
     paddingRight: 0,
@@ -702,10 +813,51 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
     }
   },
 
+  '.action-wrapper': {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    '.filter-tabs-container': {
+      flex: 1,
+      overflowX: 'auto'
+    },
+
+    '.__desktop-toolbar': {
+      minWidth: 360
+    }
+  },
+
+  '&.-mobile-mode': {
+    '.ant-sw-sub-header-container': {
+      marginBottom: 0
+    }
+  },
+
   '@media (min-width: 992px)': {
     '.__empty-list-earning-positions': {
       paddingTop: 32,
       paddingBottom: 62
+    }
+  },
+  '@media screen and (max-width: 1305px)': {
+    '.__filter-button': {
+      display: 'flex',
+      marginBottom: 20
+    },
+    '.__desktop-toolbar.__desktop-toolbar': {
+      minWidth: 'fit-content'
+    },
+    '.__desktop-toolbar': {
+      '.ant-btn-content-wrapper': {
+        display: 'none'
+      },
+      '.ant-input-container': {
+        display: 'none'
+      },
+      '.ant-btn:first-child': {
+        padding: 0,
+        minWidth: 40
+      }
     }
   },
   '@media (max-width: 991px)': {

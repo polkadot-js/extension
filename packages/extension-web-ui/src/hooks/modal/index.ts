@@ -7,3 +7,4 @@ export { default as useSwitchModal } from './useSwitchModal';
 
 export * from './useFilterModal';
 export * from './useSelectValidators';
+export * from './useSelectAccount';

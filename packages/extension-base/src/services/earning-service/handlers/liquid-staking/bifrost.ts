@@ -47,7 +47,7 @@ interface BifrostUnlockInfo {
   era: number
 }
 
-const STATS_URL = 'https://api.bifrost.app/api/site';
+const STATS_URL = 'https://dapi.bifrost.io/api/site';
 const BIFROST_GRAPHQL_ENDPOINT = 'https://bifrost-subsql.liebi.com/v1/graphql';
 const BIFROST_EXCHANGE_RATE_REQUEST = 'query MyQuery{slp_polkadot_ratio(limit:1 where:{key:{_eq:"0"}} order_by:{timestamp:desc_nulls_first}){ratio key timestamp total_issuance token_pool}}';
 

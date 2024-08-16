@@ -108,7 +108,6 @@ const Component = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [handleRequestLoading, setHandleRequestLoading] = useState(true);
   const [requestUserInteractToContinue, setRequestUserInteractToContinue] = useState<boolean>(false);
-  const [isButtonClicked, setIsButtonClicked] = useState(false);
   const continueRefreshQuoteRef = useRef<boolean>(false);
   const { token } = useTheme() as Theme;
 
@@ -310,8 +309,6 @@ const Component = () => {
   }, [form]);
 
   const onSwitchSide = useCallback(() => {
-    setIsButtonClicked(true);
-
     if (fromTokenSlugValue && toTokenSlugValue) {
       form.setFieldsValue({
         fromTokenSlug: toTokenSlugValue,
@@ -1114,12 +1111,6 @@ const Component = () => {
     }
   }, [checkChainConnected, altChain, turnOnChain]);
 
-  useEffect(() => {
-    if (isButtonClicked) {
-      setIsButtonClicked(false);
-    }
-  }, [isButtonClicked]);
-
   const isNotConnectedAltChain = useMemo(() => {
     if (altChain && !checkChainConnected(altChain)) {
       return true;
@@ -1178,7 +1169,6 @@ const Component = () => {
                   <SwapFromField
                     amountValue={fromAmountValue}
                     fromAsset={fromAssetInfo}
-                    isButtonClicked={isButtonClicked}
                     label={t('From')}
                     onChangeAmount={onChangeAmount}
                     onSelectToken={onSelectFromToken}

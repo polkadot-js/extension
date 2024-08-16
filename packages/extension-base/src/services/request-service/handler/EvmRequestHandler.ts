@@ -28,7 +28,8 @@ export default class EvmRequestHandler {
     addTokenRequest: {},
     evmSignatureRequest: {},
     evmSendTransactionRequest: {},
-    evmWatchTransactionRequest: {}
+    evmWatchTransactionRequest: {},
+    errorConnectNetwork: {}
   });
 
   private readonly confirmationsPromiseMap: Record<string, { resolver: Resolver<any>, validator?: (rs: any) => Error | undefined }> = {};

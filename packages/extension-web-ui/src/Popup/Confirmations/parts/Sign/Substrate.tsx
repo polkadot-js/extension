@@ -10,7 +10,7 @@ import { InjectContext } from '@subwallet/extension-web-ui/contexts/InjectContex
 import { useGetChainInfoByGenesisHash, useLedger, useMetadata, useNotification, useParseSubstrateRequestPayload, useSelector, useUnlockChecker } from '@subwallet/extension-web-ui/hooks';
 import { approveSignPasswordV2, approveSignSignature, cancelSignRequest, shortenMetadata } from '@subwallet/extension-web-ui/messaging';
 import { AccountSignMode, PhosphorIcon, SubstrateSigData, ThemeProps } from '@subwallet/extension-web-ui/types';
-import { getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils';
+import { convertErrorMessage, getSignMode, isRawPayload, isSubstrateMessage, removeTransactionPersist, toShort } from '@subwallet/extension-web-ui/utils';
 import { Button, Icon, ModalContext } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { CheckCircle, QrCode, Swatches, Wallet, XCircle } from 'phosphor-react';
@@ -230,6 +230,7 @@ const Component: React.FC<Props> = (props: Props) => {
   }, [signMode, isRuntimeUpdated, isMessage, loadingChain, chain, isMetadataOutdated, t, networkName, isMissingData, addExtraData]);
 
   const activeLedger = useMemo(() => isLedger && !loadingChain && alertData?.type !== 'error', [isLedger, loadingChain, alertData?.type]);
+  const forceUseMigrationApp = useMemo(() => isRuntimeUpdated || (isMessage && chainSlug !== 'avail_mainnet'), [isRuntimeUpdated, isMessage, chainSlug]);
 
   const { error: ledgerError,
     isLoading: isLedgerLoading,
@@ -238,7 +239,7 @@ const Component: React.FC<Props> = (props: Props) => {
     refresh: refreshLedger,
     signMessage: ledgerSignMessage,
     signTransaction: ledgerSignTransaction,
-    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, isRuntimeUpdated || isMessage);
+    warning: ledgerWarning } = useLedger(chainSlug, activeLedger, true, forceUseMigrationApp);
 
   const isLedgerConnected = useMemo(() => !isLocked && !isLedgerLoading && !!ledger, [isLedgerLoading, isLocked, ledger]);
 
@@ -388,14 +389,20 @@ const Component: React.FC<Props> = (props: Props) => {
 
           onApproveSignature({ signature, signedTransaction });
         })
-        .catch((e) => {
+        .catch((e: Error) => {
           console.error(e);
+          notify({
+            message: convertErrorMessage(e),
+            type: 'error',
+            duration: 8
+          });
+          onCancel();
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [account.address, isMessage, onApproveSignature, payload, request.payload, substrateWallet]);
+  }, [account.address, isMessage, notify, onApproveSignature, onCancel, payload, request.payload, substrateWallet]);
 
   const onConfirm = useCallback(() => {
     removeTransactionPersist(extrinsicType);

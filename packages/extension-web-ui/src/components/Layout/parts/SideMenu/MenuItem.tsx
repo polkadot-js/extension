@@ -10,13 +10,13 @@ import styled from 'styled-components';
 export type MenuItemType = {
   label: string;
   value: string;
-  icon: SwIconProps['phosphorIcon'];
-
+  icon: SwIconProps;
 };
 
 type Props = MenuItemType & ThemeProps & {
   showToolTip: boolean;
   isActivated: boolean;
+  latestLiveMissionLength?: number
   onClick: (key: string) => void;
 };
 
@@ -33,11 +33,14 @@ function Component ({ className = '', icon, isActivated, label, onClick, showToo
       onClick={_onClick}
       tabIndex={-1}
     >
+
       <Icon
         className={'__icon'}
-        phosphorIcon={icon}
-        weight='fill'
+        size={'md'}
+        weight={'fill'}
+        {...icon}
       />
+
       <div className={'__label'}>
         {label}
       </div>
@@ -96,6 +99,21 @@ export const MenuItem = styled(Component)<Props>(({ theme: { token } }: Props) =
       marginLeft: token.marginXS,
       color: token.colorTextLight3,
       'white-space': 'nowrap'
+    },
+
+    '.__active-count': {
+      borderRadius: '50%',
+      color: token.colorWhite,
+      fontSize: token.sizeXS,
+      fontWeight: token.bodyFontWeight,
+      lineHeight: token.lineHeightLG,
+      paddingTop: 0,
+      paddingBottom: 0,
+      backgroundColor: token.colorError,
+      position: 'absolute',
+      right: 194,
+      top: 14,
+      minWidth: '12px'
     },
 
     '&:hover': {

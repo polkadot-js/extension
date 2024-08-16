@@ -21,7 +21,7 @@ interface Props extends ThemeProps {
 function Component ({ className, request, type }: Props) {
   const { id, payload } = request;
   const { t } = useTranslation();
-  const { account } = payload;
+  const { account, errors } = payload;
 
   const onClickDetail = useOpenDetailModal();
 
@@ -42,7 +42,7 @@ function Component ({ className, request, type }: Props) {
           className='account-item'
           isSelected={true}
         />
-        <div>
+        {(!errors || errors.length === 0) && <div>
           <Button
             icon={<ViewDetailIcon />}
             onClick={onClickDetail}
@@ -52,17 +52,18 @@ function Component ({ className, request, type }: Props) {
             {t('View details')}
           </Button>
         </div>
+        }
       </div>
       <EvmSignArea
         id={id}
         payload={request}
         type={type}
       />
-      <BaseDetailModal
+      {(!errors || errors.length === 0) && <BaseDetailModal
         title={t('Message details')}
       >
         <EvmMessageDetail payload={request.payload} />
-      </BaseDetailModal>
+      </BaseDetailModal>}
     </>
   );
 }

@@ -3,7 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceAccountType, OrmlTokensAccountData } from '@subwallet/extension-base/core/substrate/types';
-import { _getAppliedExistentialDeposit, getMaxBigint, getStrictMode } from '@subwallet/extension-base/core/utils';
+import { _getAppliedExistentialDeposit, getMaxBigInt, getStrictMode } from '@subwallet/extension-base/core/utils';
 
 export function _getOrmlTokensPalletTransferable (accountInfo: OrmlTokensAccountData, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
   const strictMode = getStrictMode(BalanceAccountType.OrmlTokensAccountData, extrinsicType);
@@ -12,7 +12,7 @@ export function _getOrmlTokensPalletTransferable (accountInfo: OrmlTokensAccount
   const bnFrozen = BigInt(accountInfo.frozen);
   const bnFree = BigInt(accountInfo.free);
 
-  return bnFree - getMaxBigint(bnFrozen, bnAppliedExistentialDeposit);
+  return bnFree - getMaxBigInt(bnFrozen, bnAppliedExistentialDeposit);
 }
 
 export function _getOrmlTokensPalletLockedBalance (accountInfo: OrmlTokensAccountData): bigint {

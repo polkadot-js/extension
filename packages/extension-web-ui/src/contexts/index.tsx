@@ -24,7 +24,8 @@ const ConfirmationsQueueContext = React.createContext<ConfirmationsQueue>({
   addTokenRequest: {},
   evmSignatureRequest: {},
   evmSendTransactionRequest: {},
-  evmWatchTransactionRequest: {}
+  evmWatchTransactionRequest: {},
+  errorConnectNetwork: {}
 });
 
 const SettingsContext = React.createContext<SettingsStruct>(settings.get());

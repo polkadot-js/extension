@@ -22,11 +22,11 @@ const Component: React.FC<Props> = (props: Props) => {
   return (
     <WCNetworkBase
       className={className}
-      content={t('{{number}} networks support', { replace: { number: networkNumber } })}
+      content={t('{{number}} {{network}} support', { replace: { number: networkNumber, network: networkNumber > 1 ? 'networks' : 'network' } })}
       contentNetworks={networks}
       id={id}
       networks={networks}
-      subTitle={t('{{number}} networks support', { replace: { number: networkNumber } })}
+      subTitle={t('{{number}} {{network}} support', { replace: { number: networkNumber, network: networkNumber > 1 ? 'networks' : 'network' } })}
       title={t('Supported networks')}
     />
   );

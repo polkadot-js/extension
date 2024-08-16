@@ -24,6 +24,7 @@ const initialState: RequestState = {
   evmSignatureRequest: {},
   evmSendTransactionRequest: {},
   evmWatchTransactionRequest: {},
+  errorConnectNetwork: {},
 
   // Summary Info
   reduxStatus: ReduxStatus.INIT,

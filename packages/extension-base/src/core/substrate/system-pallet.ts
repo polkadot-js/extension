@@ -3,7 +3,7 @@
 
 import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceAccountType, FrameSystemAccountInfo, FrameSystemAccountInfoV1, FrameSystemAccountInfoV2 } from '@subwallet/extension-base/core/substrate/types';
-import { getMaxBigint, getStrictMode } from '@subwallet/extension-base/core/utils';
+import { getMaxBigInt, getStrictMode } from '@subwallet/extension-base/core/utils';
 
 function isV1 (accountInfo: FrameSystemAccountInfo): accountInfo is FrameSystemAccountInfoV1 {
   return (accountInfo as FrameSystemAccountInfoV1).data.miscFrozen !== undefined && (accountInfo as FrameSystemAccountInfoV1).data.feeFrozen !== undefined;
@@ -57,8 +57,9 @@ function _getAppliedExistentialDeposit (accountInfo: FrameSystemAccountInfo, exi
 function _getSystemPalletTransferableV2 (accountInfo: FrameSystemAccountInfoV2, existentialDeposit: string, strictMode?: boolean): bigint {
   const bnLocked = BigInt(accountInfo.data.frozen) - BigInt(accountInfo.data.reserved); // locked can go below 0 but this shouldn't matter
   const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(accountInfo, existentialDeposit, strictMode);
+  const bnTransferable = BigInt(accountInfo.data.free) - (getMaxBigInt(bnLocked, bnAppliedExistentialDeposit));
 
-  return BigInt(accountInfo.data.free) - (getMaxBigint(bnLocked, bnAppliedExistentialDeposit));
+  return getMaxBigInt(bnTransferable, BigInt(0));
 }
 
 function _getSystemPalletTotalBalanceV2 (accountInfo: FrameSystemAccountInfoV2): bigint {
@@ -67,9 +68,10 @@ function _getSystemPalletTotalBalanceV2 (accountInfo: FrameSystemAccountInfoV2):
 
 function _getSystemPalletTransferableV1 (accountInfo: FrameSystemAccountInfoV1, existentialDeposit: string, strictMode?: boolean): bigint {
   const bnAppliedExistentialDeposit = BigInt(_getAppliedExistentialDeposit(accountInfo, existentialDeposit, strictMode));
-  const bnAppliedFrozen = getMaxBigint(BigInt(accountInfo.data.feeFrozen), BigInt(accountInfo.data.miscFrozen));
+  const bnAppliedFrozen = getMaxBigInt(BigInt(accountInfo.data.feeFrozen), BigInt(accountInfo.data.miscFrozen));
+  const bnTransferable = BigInt(accountInfo.data.free) - (getMaxBigInt(bnAppliedFrozen, bnAppliedExistentialDeposit));
 
-  return BigInt(accountInfo.data.free) - (getMaxBigint(bnAppliedFrozen, bnAppliedExistentialDeposit));
+  return getMaxBigInt(bnTransferable, BigInt(0));
 }
 
 function _getSystemPalletTotalBalanceV1 (accountInfo: FrameSystemAccountInfoV1): bigint {

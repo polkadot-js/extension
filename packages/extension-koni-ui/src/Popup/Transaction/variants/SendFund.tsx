@@ -17,7 +17,7 @@ import { approveSpending, getMaxTransfer, getOptimalTransferProcess, makeCrossCh
 import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-koni-ui/reducer';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ChainItemType, FormCallbacks, Theme, ThemeProps, TransferParams } from '@subwallet/extension-koni-ui/types';
-import { findAccountByAddress, findNetworkJsonByGenesisHash, formatBalance, isAccountAll, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, findNetworkJsonByGenesisHash, formatBalance, isAccountAll, ledgerMustCheckNetwork, noop, reformatAddress } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon } from '@subwallet/react-ui';
 import { Rule } from '@subwallet/react-ui/es/form';
 import BigN from 'bignumber.js';
@@ -376,8 +376,12 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
 
       if (!account.isGeneric && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
         return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
-      } else if (account.isGeneric && !isEthereumAddress(_recipientAddress) && !ledgerGenericAllowNetworks.includes(destChainInfo.slug)) {
-        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+      }
+
+      const ledgerCheck = ledgerMustCheckNetwork(account);
+
+      if (ledgerCheck !== 'unnecessary' && !ledgerGenericAllowNetworks.includes(destChainInfo.slug)) {
+        return Promise.reject(t('Ledger {{ledgerApp}} address is not supported for this transfer', { replace: { ledgerApp: ledgerCheck === 'polkadot' ? 'Polkadot' : 'Migration' } }));
       }
     }
 

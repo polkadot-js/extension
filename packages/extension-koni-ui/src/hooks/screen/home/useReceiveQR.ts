@@ -7,10 +7,11 @@ import { AccountJson } from '@subwallet/extension-base/background/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
 import { _getMultiChainAsset, _isAssetFungibleToken, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { AccountSelectorModalId } from '@subwallet/extension-koni-ui/components/Modal/AccountSelectorModal';
-import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL, WARNING_LEDGER_RECEIVE_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
+import { useConfirmModal, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { useChainAssets } from '@subwallet/extension-koni-ui/hooks/assets';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
-import { findAccountByAddress, isAccountAll as checkIsAccountAll } from '@subwallet/extension-koni-ui/utils';
+import { findAccountByAddress, isAccountAll as checkIsAccountAll, needCheckLedgerSupport } from '@subwallet/extension-koni-ui/utils';
 import { findNetworkJsonByGenesisHash } from '@subwallet/extension-koni-ui/utils/chain/getNetworkJsonByGenesisHash';
 import { ModalContext } from '@subwallet/react-ui';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -63,15 +64,30 @@ function isMantaPayEnabled (account: AccountJson | null, configs: MantaPayConfig
 }
 
 export default function useReceiveQR (tokenGroupSlug?: string) {
+  const { t } = useTranslation();
+
   const { activeModal, inactiveModal } = useContext(ModalContext);
+
   const { accounts, currentAccount, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const assetRegistryMap = useChainAssets().chainAssetRegistry;
-  const { chainInfoMap } = useSelector((state: RootState) => state.chainStore);
+  const { chainInfoMap, ledgerGenericAllowNetworks } = useSelector((state: RootState) => state.chainStore);
+  const mantaPayConfigs = useSelector((state: RootState) => state.mantaPay.configs);
+
   const [tokenSelectorItems, setTokenSelectorItems] = useState<_ChainAsset[]>([]);
   const [{ selectedAccount, selectedNetwork }, setReceiveSelectedResult] = useState<ReceiveSelectedResult>(
     { selectedAccount: isAllAccount ? undefined : currentAccount?.address }
   );
-  const mantaPayConfigs = useSelector((state: RootState) => state.mantaPay.configs);
+
+  const { handleSimpleConfirmModal } = useConfirmModal({
+    id: WARNING_LEDGER_RECEIVE_MODAL,
+    title: t<string>('Delete token'),
+    maskClosable: true,
+    closable: true,
+    type: 'error',
+    subTitle: t<string>('You are about to delete this token'),
+    content: t<string>('Confirm delete this token'),
+    okText: t<string>('Remove')
+  });
 
   const accountSelectorItems = useMemo<AccountJson[]>(() => {
     if (!isAllAccount) {
@@ -186,7 +202,20 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
       setTokenSelectorItems(_tokenSelectorItems);
 
       if (tokenGroupSlug) {
+        const firstToken = _tokenSelectorItems[0];
+
         if (_tokenSelectorItems.length === 1) {
+          if (needCheckLedgerSupport(currentAccount) && !ledgerGenericAllowNetworks.includes(firstToken.originChain)) {
+            handleSimpleConfirmModal()
+              .then(() => {
+                setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: _tokenSelectorItems[0].originChain }));
+                activeModal(RECEIVE_QR_MODAL);
+              })
+              .catch(console.error);
+
+            return;
+          }
+
           setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: _tokenSelectorItems[0].originChain }));
           activeModal(RECEIVE_QR_MODAL);
 
@@ -196,7 +225,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
       activeModal(RECEIVE_TOKEN_SELECTOR_MODAL);
     }
-  }, [activeModal, chainInfoMap, currentAccount, getTokenSelectorItems, tokenGroupSlug]);
+  }, [activeModal, chainInfoMap, currentAccount, getTokenSelectorItems, tokenGroupSlug, ledgerGenericAllowNetworks, handleSimpleConfirmModal]);
 
   const openSelectAccount = useCallback((account: AccountJson) => {
     setReceiveSelectedResult({ selectedAccount: account.address });
@@ -206,6 +235,20 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
     if (tokenGroupSlug) {
       if (_tokenSelectorItems.length === 1) {
+        const first = _tokenSelectorItems[0];
+
+        if (needCheckLedgerSupport(account) && !ledgerGenericAllowNetworks.includes(first.originChain)) {
+          handleSimpleConfirmModal()
+            .then(() => {
+              setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: _tokenSelectorItems[0].originChain }));
+              activeModal(RECEIVE_QR_MODAL);
+              inactiveModal(AccountSelectorModalId);
+            })
+            .catch(console.error);
+
+          return;
+        }
+
         setReceiveSelectedResult((prev) => ({ ...prev, selectedNetwork: _tokenSelectorItems[0].originChain }));
         activeModal(RECEIVE_QR_MODAL);
         inactiveModal(AccountSelectorModalId);
@@ -216,7 +259,7 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
 
     activeModal(RECEIVE_TOKEN_SELECTOR_MODAL);
     inactiveModal(AccountSelectorModalId);
-  }, [activeModal, getTokenSelectorItems, inactiveModal, tokenGroupSlug]);
+  }, [activeModal, getTokenSelectorItems, handleSimpleConfirmModal, inactiveModal, ledgerGenericAllowNetworks, tokenGroupSlug]);
 
   const openSelectToken = useCallback((item: _ChainAsset) => {
     setReceiveSelectedResult((prevState) => ({ ...prevState, selectedNetwork: item.originChain }));

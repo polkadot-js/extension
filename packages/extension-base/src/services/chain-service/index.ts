@@ -104,6 +104,7 @@ export class ChainService {
   private swapRefMapSubject = new Subject<Record<string, _AssetRef>>();
   private assetLogoMapSubject = new BehaviorSubject<Record<string, string>>(AssetLogoMap);
   private chainLogoMapSubject = new BehaviorSubject<Record<string, string>>(ChainLogoMap);
+  private ledgerGenericAllowChainsSubject = new BehaviorSubject<string[]>([]);
   private assetMapPatch: string = JSON.stringify({});
   private assetLogoPatch: string = JSON.stringify({});
 
@@ -132,6 +133,26 @@ export class ChainService {
     this.evmChainHandler = new EvmChainHandler(this);
 
     this.logger = createLogger('chain-service');
+  }
+
+  public get value () {
+    const ledgerGenericAllowChains = this.ledgerGenericAllowChainsSubject;
+
+    return {
+      get ledgerGenericAllowChains () {
+        return ledgerGenericAllowChains.value;
+      }
+    };
+  }
+
+  public get observable () {
+    const ledgerGenericAllowChains = this.ledgerGenericAllowChainsSubject;
+
+    return {
+      get ledgerGenericAllowChains () {
+        return ledgerGenericAllowChains.asObservable();
+      }
+    };
   }
 
   public subscribeSwapRefMap () {
@@ -784,6 +805,12 @@ export class ChainService {
     }
   }
 
+  handleLatestLedgerGenericAllowChains (latestledgerGenericAllowChains: string[]) {
+    this.ledgerGenericAllowChainsSubject.next(latestledgerGenericAllowChains);
+    this.eventService.emit('ledger.ready', true);
+    this.logger.log('Finished updating latest ledger generic allow chains');
+  }
+
   handleLatestData () {
     this.fetchLatestAssetData().then(([latestAssetInfo, latestAssetLogoMap]) => {
       this.eventService.waitAssetReady
@@ -804,6 +831,12 @@ export class ChainService {
     this.fetchLatestPriceIdsData().then((latestPriceIds) => {
       this.handleLatestPriceId(latestPriceIds);
     }).catch(console.error);
+
+    this.fetchLatestLedgerGenericAllowChains()
+      .then((latestledgerGenericAllowChains) => {
+        this.handleLatestLedgerGenericAllowChains(latestledgerGenericAllowChains);
+      })
+      .catch(console.error);
   }
 
   private async initApis () {
@@ -1098,6 +1131,10 @@ export class ChainService {
 
   private async fetchLatestAssetRef () {
     return await Promise.all([fetchStaticData<string[]>('chain-assets/disabled-xcm-channels'), fetchPatchData<Record<string, _AssetRef>>('AssetRef.json')]);
+  }
+
+  private async fetchLatestLedgerGenericAllowChains () {
+    return await fetchStaticData<string[]>('chains/ledger-generic-allow-chains') || [];
   }
 
   private async initChains () {

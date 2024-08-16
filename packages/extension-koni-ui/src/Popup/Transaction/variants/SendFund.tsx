@@ -237,7 +237,7 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
   const assetInfo = useFetchChainAssetInfo(asset);
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
 
-  const { chainInfoMap, chainStatusMap } = useSelector((root) => root.chainStore);
+  const { chainInfoMap, chainStatusMap, ledgerGenericAllowNetworks } = useSelector((root) => root.chainStore);
   const { assetRegistry, assetSettingMap, multiChainAssetMap, xcmRefMap } = useSelector((root) => root.assetRegistry);
   const { accounts, isAllAccount } = useSelector((state: RootState) => state.accountState);
   const [maxTransfer, setMaxTransfer] = useState<string>('0');
@@ -372,16 +372,17 @@ const _SendFund = ({ className = '' }: Props): React.ReactElement<Props> => {
     if (account?.isHardware) {
       const destChainInfo = chainInfoMap[destChain];
       const availableGen: string[] = account.availableGenesisHashes || [];
+      const destChainName = destChainInfo?.name || 'Unknown';
 
       if (!account.isGeneric && !availableGen.includes(destChainInfo?.substrateInfo?.genesisHash || '')) {
-        const destChainName = destChainInfo?.name || 'Unknown';
-
+        return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
+      } else if (account.isGeneric && !isEthereumAddress(_recipientAddress) && !ledgerGenericAllowNetworks.includes(destChainInfo.slug)) {
         return Promise.reject(t('Wrong network. Your Ledger account is not supported by {{network}}. Please choose another receiving account and try again.', { replace: { network: destChainName } }));
       }
     }
 
     return Promise.resolve();
-  }, [accounts, chainInfoMap, form, t]);
+  }, [accounts, chainInfoMap, form, t, ledgerGenericAllowNetworks]);
 
   const validateAmount = useCallback((rule: Rule, amount: string): Promise<void> => {
     if (!amount) {

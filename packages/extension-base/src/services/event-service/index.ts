@@ -34,6 +34,7 @@ export class EventService extends EventEmitter<EventRegistry> {
   public readonly waitBuyTokenReady: Promise<boolean>;
   public readonly waitBuyServiceReady: Promise<boolean>;
   public readonly waitEarningReady: Promise<boolean>;
+  public readonly waitLedgerReady: Promise<boolean>;
 
   constructor () {
     super();
@@ -54,6 +55,7 @@ export class EventService extends EventEmitter<EventRegistry> {
     this.waitBuyTokenReady = this.generateWaitPromise('buy.tokens.ready');
     this.waitBuyServiceReady = this.generateWaitPromise('buy.services.ready');
     this.waitEarningReady = this.generateWaitPromise('earning.ready');
+    this.waitLedgerReady = this.generateWaitPromise('ledger.ready');
   }
 
   private generateWaitPromise<T extends EventType> (eventType: T): Promise<boolean> {

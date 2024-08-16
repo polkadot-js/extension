@@ -175,3 +175,7 @@ export const convertKeyTypes = (authTypes: AccountAuthType[]): KeypairType[] => 
 
   return _rs.length ? _rs : DEFAULT_ACCOUNT_TYPES;
 };
+
+export const needCheckLedgerSupport = (account: AccountJson | null): boolean => {
+  return !!(account && account.isHardware && account.isGeneric && !isEthereumAddress(account.address));
+};

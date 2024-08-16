@@ -202,9 +202,9 @@ export default function useReceiveQR (tokenGroupSlug?: string) {
       setTokenSelectorItems(_tokenSelectorItems);
 
       if (tokenGroupSlug) {
-        const firstToken = _tokenSelectorItems[0];
-
         if (_tokenSelectorItems.length === 1) {
+          const firstToken = _tokenSelectorItems[0];
+
           if (needCheckLedgerSupport(currentAccount) && !ledgerGenericAllowNetworks.includes(firstToken.originChain)) {
             handleSimpleConfirmModal()
               .then(() => {

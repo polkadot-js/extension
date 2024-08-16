@@ -42,7 +42,7 @@ const Component = (props: Props) => {
     return reformatAddress(address || '', networkPrefix, isEvmChain);
   }, [address, chainInfo, symbol]);
 
-  const _onCLickCopyBtnAsync = useCallback((e: React.SyntheticEvent) => {
+  const _onClickCopyBtnAsync = useCallback((e: React.SyntheticEvent) => {
     e.stopPropagation();
     onPreCopy?.()
       .then(() => {
@@ -105,7 +105,7 @@ const Component = (props: Props) => {
                           size='sm'
                         />
                       }
-                      onClick={_onCLickCopyBtnAsync}
+                      onClick={_onClickCopyBtnAsync}
                       size='xs'
                       tooltip={t('Copy address')}
                       type='ghost'

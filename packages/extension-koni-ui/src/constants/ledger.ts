@@ -507,8 +507,6 @@ export const StandardDerivationPathGens: string[] = Object.values(PredefinedLedg
 
 export const NotNeedMigrationGens: string[] = [...PolkadotDerivationPathGens, ...StandardDerivationPathGens];
 
-export const AllowLedgerGenericNetworks: string[] = ['polkadot'];
-
 /*
   BLOCK
   *: All network,

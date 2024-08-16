@@ -130,7 +130,8 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   manta_network: 12,
   enjin_relaychain: 6,
   availTuringTest: 20,
-  avail_mainnet: 20
+  avail_mainnet: 20,
+  dentnet: 3
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {

@@ -416,9 +416,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     if (_waitingValidatorLedger) {
       waitingValidatorList.forEach((validator, i) => {
-        const validatorLedger = _waitingValidatorLedger[i].toPrimitive() as unknown as PalletStakingStakingLedger;
+        const validatorLedger = _waitingValidatorLedger[i]?.toPrimitive() as unknown as PalletStakingStakingLedger;
 
-        waitingValidatorLedger[validator] = new BigN(validatorLedger.total).toFixed();
+        waitingValidatorLedger[validator] = new BigN(validatorLedger?.total || 0).toFixed();
       });
     }
 

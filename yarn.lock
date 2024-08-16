@@ -6262,6 +6262,7 @@ __metadata:
     "@galacticcouncil/sdk": ^2.1.0
     "@gear-js/api": ^0.38.1
     "@json-rpc-tools/utils": ^1.7.6
+    "@metamask/eth-sig-util": ^7.0.3
     "@metamask/safe-event-emitter": ^2.0.0
     "@metaverse-network-sdk/type-definitions": ^0.0.1-13
     "@oak-foundation/types": ^0.0.23

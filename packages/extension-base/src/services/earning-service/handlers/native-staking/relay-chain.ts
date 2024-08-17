@@ -386,7 +386,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     let _eraStakersPromise;
 
-    if (_UPDATED_RUNTIME_STAKING_GROUP.includes(this.chain)) { // todo: review all relaychains later
+    if (chainApi.api.query.staking.erasStakersOverview) { // todo: review all relaychains later
       _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
     } else {
       _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
@@ -416,9 +416,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     if (_waitingValidatorLedger) {
       waitingValidatorList.forEach((validator, i) => {
-        const validatorLedger = _waitingValidatorLedger[i].toPrimitive() as unknown as PalletStakingStakingLedger;
+        const validatorLedger = _waitingValidatorLedger[i]?.toPrimitive() as unknown as PalletStakingStakingLedger;
 
-        waitingValidatorLedger[validator] = new BigN(validatorLedger.total).toFixed();
+        waitingValidatorLedger[validator] = new BigN(validatorLedger?.total || 0).toFixed();
       });
     }
 

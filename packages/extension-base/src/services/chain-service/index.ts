@@ -45,7 +45,9 @@ const ignoredList = [
   'boolBeta_testnet',
   'core',
   'satoshivm',
-  'satoshivm_testnet'
+  'satoshivm_testnet',
+  'ton',
+  'ton_testnet'
 ];
 
 const filterAssetInfoMap = (chainInfo: Record<string, _ChainInfo>, assets: Record<string, _ChainAsset>): Record<string, _ChainAsset> => {
@@ -1228,6 +1230,7 @@ export class ChainService {
               evmInfo: storedChainInfo.evmInfo,
               substrateInfo: storedChainInfo.substrateInfo,
               bitcoinInfo: storedChainInfo.bitcoinInfo ?? null,
+              tonInfo: storedChainInfo.tonInfo ?? null,
               isTestnet: storedChainInfo.isTestnet,
               chainStatus: storedChainInfo.chainStatus,
               icon: storedChainInfo.icon,
@@ -1473,6 +1476,7 @@ export class ChainService {
       substrateInfo,
       evmInfo,
       bitcoinInfo: null,
+      tonInfo: null,
       isTestnet: false,
       chainStatus: _ChainStatus.ACTIVE,
       icon: '', // Todo: Allow update with custom chain,

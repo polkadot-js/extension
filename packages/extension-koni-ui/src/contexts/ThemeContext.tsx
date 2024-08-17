@@ -224,6 +224,10 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
       }
     },
 
+    '.ant-input': {
+      minWidth: 0 // fix issue related to input overflow width
+    },
+
     '.ant-input-affix-wrapper': {
       overflow: 'hidden',
 
@@ -248,6 +252,20 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         overflow: 'hidden',
         display: 'block',
         'white-space': 'nowrap'
+      }
+    },
+
+    '.ledger-warning-modal': {
+      '.ant-sw-modal-confirm-btns': {
+        flexDirection: 'row',
+
+        button: {
+          flex: 1,
+
+          '.anticon': {
+            display: 'none'
+          }
+        }
       }
     }
   });

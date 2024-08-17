@@ -3,12 +3,13 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { _MANTA_ZK_CHAIN_GROUP, _ZK_ASSET_PREFIX } from '@subwallet/extension-base/services/chain-service/constants';
-import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL } from '@subwallet/extension-koni-ui/constants';
-import { useGetZkAddress, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { RECEIVE_QR_MODAL, RECEIVE_TOKEN_SELECTOR_MODAL, WARNING_LEDGER_RECEIVE_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { useConfirmModal, useGetAccountByAddress, useGetZkAddress, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ModalContext, SwList, SwModal } from '@subwallet/react-ui';
+import { ledgerMustCheckNetwork } from '@subwallet/extension-koni-ui/utils';
+import { ModalContext, SwList, SwModal, SwModalFuncProps } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
-import React, { useCallback, useContext, useEffect, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
 import { TokenEmptyList } from '../../EmptyList';
@@ -28,9 +29,30 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
   const { t } = useTranslation();
   const { activeModal, checkActive, inactiveModal } = useContext(ModalContext);
 
-  const zkAddress = useGetZkAddress(address);
+  const { chainInfoMap, ledgerGenericAllowNetworks } = useSelector((state) => state.chainStore);
 
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const zkAddress = useGetZkAddress(address);
+  const account = useGetAccountByAddress(address);
+
+  const ledgerCheck = useMemo(() => ledgerMustCheckNetwork(account), [account]);
+
+  const confirmModalProps = useMemo((): SwModalFuncProps => ({
+    id: WARNING_LEDGER_RECEIVE_MODAL,
+    title: t<string>('Unsupported network'),
+    maskClosable: true,
+    closable: true,
+    subTitle: t<string>('Do you still want to get the address?'),
+    okText: t<string>('Get address'),
+    okCancel: true,
+    type: 'warn',
+    cancelButtonProps: {
+      children: t<string>('Cancel'),
+      schema: 'secondary'
+    },
+    className: 'ledger-warning-modal'
+  }), [t]);
+
+  const { handleSimpleConfirmModal } = useConfirmModal(confirmModalProps);
 
   const isActive = checkActive(modalId);
 
@@ -53,23 +75,55 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
 
   const onClickQrBtn = useCallback((item: _ChainAsset) => {
     return () => {
+      if (ledgerCheck !== 'unnecessary' && !ledgerGenericAllowNetworks.includes(item.originChain)) {
+        handleSimpleConfirmModal({
+          content: t<string>(
+            'Ledger {{ledgerApp}} accounts are NOT compatible with {{networkName}} network. Tokens will get stuck (i.e., can’t be transferred out or staked) when sent to this account type.',
+            {
+              replace: {
+                ledgerApp: ledgerCheck === 'polkadot' ? 'Polkadot' : 'Migration',
+                networkName: chainInfoMap[item.originChain]?.name
+              }
+            }
+          )
+        })
+          .then(() => {
+            onSelectItem && onSelectItem(item);
+            // checkAsset(item.slug);
+            inactiveModal(modalId);
+            activeModal(RECEIVE_QR_MODAL);
+          })
+          .catch(console.error);
+
+        return;
+      }
+
       onSelectItem && onSelectItem(item);
       // checkAsset(item.slug);
       inactiveModal(modalId);
       activeModal(RECEIVE_QR_MODAL);
     };
-  }, [activeModal, inactiveModal, onSelectItem]);
+  }, [ledgerCheck, ledgerGenericAllowNetworks, onSelectItem, inactiveModal, activeModal, handleSimpleConfirmModal, t, chainInfoMap]);
 
-  useEffect(() => {
-    if (!isActive) {
-      setTimeout(() => {
-        sectionRef.current?.setSearchValue('');
-      }, 100);
-    }
-  }, [isActive]);
+  const onPreCopy = useCallback((item: _ChainAsset, ledgerCheck: string) => {
+    return () => {
+      return handleSimpleConfirmModal({
+        content: t<string>(
+          'Ledger {{ledgerApp}} accounts are NOT compatible with {{networkName}} network. Tokens will get stuck (i.e., can’t be transferred out or staked) when sent to this account type.',
+          {
+            replace: {
+              ledgerApp: ledgerCheck === 'polkadot' ? 'Polkadot' : 'Migration',
+              networkName: chainInfoMap[item.originChain]?.name
+            }
+          }
+        )
+      });
+    };
+  }, [chainInfoMap, handleSimpleConfirmModal, t]);
 
   const renderItem = useCallback((item: _ChainAsset) => {
     const isMantaZkAsset = _MANTA_ZK_CHAIN_GROUP.includes(item.originChain) && item.symbol.startsWith(_ZK_ASSET_PREFIX);
+    const needConfirm = ledgerCheck !== 'unnecessary' && !ledgerGenericAllowNetworks.includes(item.originChain);
 
     return (
       <TokenSelectionItem
@@ -78,10 +132,19 @@ function Component ({ address, className = '', items, onSelectItem }: Props): Re
         item={item}
         key={item.slug}
         onClickQrBtn={onClickQrBtn(item)}
+        onPreCopy={needConfirm ? onPreCopy(item, ledgerCheck) : undefined}
         onPressItem={onClickQrBtn(item)}
       />
     );
-  }, [address, onClickQrBtn, zkAddress]);
+  }, [address, ledgerGenericAllowNetworks, ledgerCheck, onClickQrBtn, onPreCopy, zkAddress]);
+
+  useEffect(() => {
+    if (!isActive) {
+      setTimeout(() => {
+        sectionRef.current?.setSearchValue('');
+      }, 100);
+    }
+  }, [isActive]);
 
   return (
     <SwModal

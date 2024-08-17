@@ -10,9 +10,10 @@ export default function useConfirmModal (props: Partial<SwModalFuncProps>) {
   const { addConfirmModal, inactiveModal } = useContext(ModalContext);
   const confirmationModalId = props.id || CONFIRMATION_MODAL_ID;
 
-  const handleSimpleConfirmModal = useCallback(() => new Promise<void>((resolve, reject) => {
+  const handleSimpleConfirmModal = useCallback((_props?: Partial<SwModalFuncProps>) => new Promise<void>((resolve, reject) => {
     addConfirmModal({
       ...props,
+      ..._props,
       id: confirmationModalId,
       onCancel: () => {
         // eslint-disable-next-line prefer-promise-reject-errors

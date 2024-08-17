@@ -1,6 +1,22 @@
 # CHANGELOG
 
 ## 1.2.24
+Build date: Aug 17, 2024.
+
+Features & Update:
+- Update balance calculation for nomination pool runtime update (#3443)
+- Do not allow send to empty account (Native token balance = 0) (#2783)
+- Add validate for Solochain when receive, transfer with Generic ledger account (#3464)
+- Update chainlist (#3451)
+  - Add support for Blast Mainnet
+  - Add in-app staking support for DENTX
+
+Bugs fixed:
+- Fix Input overflow width issue (#3441)
+- Fix bug Do not show Signature popup in case not enough balance to cover gas fee (#2501)
+
+
+## 1.2.24
 Build date: Aug 09, 2024.
 
 Features & Update:

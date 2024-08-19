@@ -1,6 +1,12 @@
 # CHANGELOG
 
-## 1.2.24
+## 1.2.26
+Build date: Aug 19, 2024.
+
+Bugs fixed:
+- Update earning feature with cache from middleware service
+
+## 1.2.25
 Build date: Aug 17, 2024.
 
 Features & Update:

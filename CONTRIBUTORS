@@ -1,6 +1,6 @@
      634	Jaco                          	2024 (#1302)
       92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
-      54	Tarik Gul                     	0.52.2 (#1450)
+      55	Tarik Gul                     	Update polkadot-js/api to 12.4.1 (#1451)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)
        5	Francis O'Brien               	Fix SignArea and ToastProvider timeout (#1444)

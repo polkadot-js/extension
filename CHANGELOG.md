@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.52.3 Aug 19, 2024
+
+Changes:
+
+- Upgrade polkadot-js/api to 12.4.1
+- Upgrade polkadot-js/phishing to 0.23.4
+
+
 ## 0.52.2 Aug 16, 2024
 
 NOTE: This is strictly a patch release for the store.

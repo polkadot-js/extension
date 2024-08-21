@@ -292,7 +292,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onCancel}
             schema={'primary'}
           >
-            {t('Back to home')}
+            {t('I understand')}
           </Button>
           : <Button
             disabled={loading}
@@ -303,7 +303,7 @@ const Component: React.FC<Props> = (props: Props) => {
               />
             )}
             onClick={onCancel}
-            schema={isErrorTransaction ? 'primary' : 'secondary'}
+            schema={'secondary'}
           >
             {t('Cancel')}
           </Button>

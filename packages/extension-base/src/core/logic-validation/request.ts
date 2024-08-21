@@ -112,7 +112,7 @@ export function validateTypedSignMessageDataV1 (messageData: TypedMessageParams)
 
     return messageData.data;
   } catch (e) {
-    throw new Error('Expected EIP712 typed data.');
+    throw new Error('Invalid message "data": Expected EIP712 typed data.');
   }
 }
 
@@ -140,7 +140,7 @@ export function validateTypedSignMessageDataV3V4 (
     try {
       data = JSON.parse(messageData.data) as SignTypedDataMessageV3V4;
     } catch (e) {
-      throw new Error('Data must be passed as a valid JSON string.');
+      throw new Error('Invalid message "data" must be passed as a valid JSON string.');
     }
   }
 
@@ -148,7 +148,7 @@ export function validateTypedSignMessageDataV3V4 (
 
   if (validation.error) {
     throw new Error(
-      'Data must conform to EIP-712 schema. See https://git.io/fNtcx.'
+      'Invalid message "data" must conform to EIP-712 schema. See https://git.io/fNtcx.'
     );
   }
 
@@ -540,8 +540,8 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
     try {
       switch (method) {
         case 'personal_sign':
-          payload = validateSignMessageData({ data: payload as string, from: address });
           canSign = true;
+          payload = validateSignMessageData({ data: payload as string, from: address });
           hashPayload = payload;
           break;
         case 'eth_sign':
@@ -720,6 +720,10 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
 
   if (message.includes('unsupported method') || message.includes('unsupported action')) {
     return [t('This sign method is not supported by SubWallet. Try again or contact support at agent@subwallet.app'), t('Method not supported')];
+  }
+
+  if (message.includes('eip712 typed data') || message.includes('invalid message')) {
+    return [t('An error occurred when signing this request. Contact support at agent@subwallet.app'), t('Unable to sign message')];
   }
 
   return [message, name || ''];

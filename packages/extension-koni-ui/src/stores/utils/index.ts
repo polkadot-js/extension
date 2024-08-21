@@ -486,3 +486,11 @@ export const updateSwapPairs = (data: SwapPair[]) => {
 
 export const subscribeSwapPairs = lazySubscribeMessage('pri(swapService.subscribePairs)', null, updateSwapPairs, updateSwapPairs);
 /* Swap */
+
+/* Ledger */
+export const updateLedgerGenericAllowNetworks = (data: string[]) => {
+  store.dispatch({ type: 'chainStore/updateLedgerGenericAllowNetworks', payload: data });
+};
+
+export const subscribeLedgerGenericAllowNetworks = lazySubscribeMessage('pri(ledger.generic.allow)', null, updateLedgerGenericAllowNetworks, updateLedgerGenericAllowNetworks);
+/* Ledger */

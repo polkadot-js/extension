@@ -12,3 +12,4 @@ export { default as NotSupportConfirmation } from './NotSupportConfirmation';
 export { default as SignConfirmation } from './SignConfirmation';
 export { default as TransactionConfirmation } from './Transaction';
 export { default as NotSupportWCConfirmation } from './NotSupportWCConfirmation';
+export * from './Error';

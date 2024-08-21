@@ -120,20 +120,27 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
   const systemAccountKey = 'query_system_account';
   const poolMembersKey = 'query_nominationPools_poolMembers';
 
+  const isNominationPoolMigrated = !!substrateApi.api.tx?.nominationPools?.migrateDelegation;
+
   const params: _SubstrateAdapterSubscriptionArgs[] = [
     {
       section: 'query',
       module: systemAccountKey.split('_')[1],
       method: systemAccountKey.split('_')[2],
       args: addresses
-    },
-    {
-      section: 'query',
-      module: poolMembersKey.split('_')[1],
-      method: poolMembersKey.split('_')[2],
-      args: addresses
     }
   ];
+
+  if (!isNominationPoolMigrated) {
+    params.push(
+      {
+        section: 'query',
+        module: poolMembersKey.split('_')[1],
+        method: poolMembersKey.split('_')[2],
+        args: addresses
+      }
+    );
+  }
 
   const subscription = substrateApi.subscribeDataWithMulti(params, (rs) => {
     const balances = rs[systemAccountKey];
@@ -141,13 +148,18 @@ const subscribeWithSystemAccountPallet = async ({ addresses, callback, chainInfo
 
     const items: BalanceItem[] = balances.map((_balance, index) => {
       const balanceInfo = _balance as unknown as FrameSystemAccountInfo;
-      const poolMemberInfo = poolMemberInfos[index] as unknown as PalletNominationPoolsPoolMember;
-
-      const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : BigInt(0);
 
       const transferableBalance = _getSystemPalletTransferable(balanceInfo, _getChainExistentialDeposit(chainInfo), extrinsicType);
       const totalBalance = _getSystemPalletTotalBalance(balanceInfo);
-      const totalLockedFromTransfer = totalBalance - transferableBalance + nominationPoolBalance;
+      let totalLockedFromTransfer = totalBalance - transferableBalance;
+
+      if (!isNominationPoolMigrated) {
+        const poolMemberInfo = poolMemberInfos[index] as unknown as PalletNominationPoolsPoolMember;
+
+        const nominationPoolBalance = poolMemberInfo ? _getTotalStakeInNominationPool(poolMemberInfo) : BigInt(0);
+
+        totalLockedFromTransfer += nominationPoolBalance;
+      }
 
       return ({
         address: addresses[index],

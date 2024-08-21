@@ -56,6 +56,9 @@ export interface EventRegistry {
 
   // Swap
   'swap.ready': [boolean];
+
+  // Ledger
+  'ledger.ready': [boolean];
 }
 
 export type EventType = keyof EventRegistry;

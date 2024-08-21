@@ -61,3 +61,7 @@ export const SWAP_IDLE_WARNING_MODAL = 'swap-idle-warning-modal';
 export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
 export const EARNING_MIGRATION_MODAL = 'earning-migration-modal';
 /* Announcement */
+
+/* Ledger */
+export const WARNING_LEDGER_RECEIVE_MODAL = 'warning-ledger-receive-modal';
+/* Ledger */

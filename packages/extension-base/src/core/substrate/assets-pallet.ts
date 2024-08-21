@@ -5,11 +5,11 @@ import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { BalanceAccountType, PalletAssetsAssetAccount, PalletAssetsAssetAccountWithoutStatus, PalletAssetsAssetAccountWithStatus } from '@subwallet/extension-base/core/substrate/types';
 import { _getAppliedExistentialDeposit, getStrictMode } from '@subwallet/extension-base/core/utils';
 
-function isWithStatus (accountInfo: PalletAssetsAssetAccount | undefined): accountInfo is PalletAssetsAssetAccountWithStatus {
+function isWithStatus (accountInfo: PalletAssetsAssetAccount): accountInfo is PalletAssetsAssetAccountWithStatus {
   return (accountInfo as PalletAssetsAssetAccountWithStatus).status !== undefined && (accountInfo as PalletAssetsAssetAccountWithoutStatus).isFrozen === undefined;
 }
 
-export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount | undefined, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
+export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAccount, existentialDeposit: string, extrinsicType?: ExtrinsicType): bigint {
   const strictMode = getStrictMode(BalanceAccountType.PalletAssetsAssetAccount, extrinsicType);
 
   if (isWithStatus(accountInfo)) {
@@ -19,7 +19,7 @@ export function _getAssetsPalletTransferable (accountInfo: PalletAssetsAssetAcco
   }
 }
 
-export function _getAssetsPalletLocked (accountInfo: PalletAssetsAssetAccount | undefined): bigint {
+export function _getAssetsPalletLocked (accountInfo: PalletAssetsAssetAccount): bigint {
   if (isWithStatus(accountInfo)) {
     return _getAssetsPalletLockedWithStatus(accountInfo);
   } else {
@@ -29,62 +29,22 @@ export function _getAssetsPalletLocked (accountInfo: PalletAssetsAssetAccount | 
 
 // ----------------------------------------------------------------------
 
-export function _getAssetsPalletTransferableWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus | undefined, existentialDeposit: string, strictMode?: boolean) {
+export function _getAssetsPalletTransferableWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus, existentialDeposit: string, strictMode?: boolean) {
   const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
 
-  let bnTransferable = BigInt(0);
-
-  if (!accountInfo) {
-    return BigInt(0);
-  }
-
-  if (['Liquid'].includes(accountInfo.status as string)) {
-    bnTransferable = BigInt(accountInfo.balance) - bnAppliedExistentialDeposit;
-  }
-
-  return bnTransferable;
+  return ['Liquid'].includes(accountInfo.status as string) ? BigInt(accountInfo.balance) - bnAppliedExistentialDeposit : BigInt(0);
 }
 
-export function _getAssetsPalletTransferableWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus | undefined, existentialDeposit: string, strictMode?: boolean) {
+export function _getAssetsPalletTransferableWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus, existentialDeposit: string, strictMode?: boolean) {
   const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
 
-  let bnTransferable = BigInt(0);
-
-  if (!accountInfo) {
-    return BigInt(0);
-  }
-
-  if (!accountInfo.isFrozen) {
-    bnTransferable = BigInt(accountInfo.balance) - bnAppliedExistentialDeposit;
-  }
-
-  return bnTransferable;
+  return !accountInfo.isFrozen ? BigInt(accountInfo.balance) - bnAppliedExistentialDeposit : BigInt(0);
 }
 
-export function _getAssetsPalletLockedWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus | undefined) {
-  let bnLocked = BigInt(0);
-
-  if (!accountInfo) {
-    return bnLocked;
-  }
-
-  if (!['Liquid'].includes(accountInfo.status as string)) {
-    bnLocked = BigInt(accountInfo.balance);
-  }
-
-  return bnLocked;
+export function _getAssetsPalletLockedWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus) {
+  return !['Liquid'].includes(accountInfo.status as string) ? BigInt(accountInfo.balance) : BigInt(0);
 }
 
-export function _getAssetsPalletLockedWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus | undefined) {
-  let bnLocked = BigInt(0);
-
-  if (!accountInfo) {
-    return bnLocked;
-  }
-
-  if (accountInfo.isFrozen) {
-    bnLocked = BigInt(accountInfo.balance);
-  }
-
-  return bnLocked;
+export function _getAssetsPalletLockedWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus) {
+  return accountInfo.isFrozen ? BigInt(accountInfo.balance) : BigInt(0);
 }

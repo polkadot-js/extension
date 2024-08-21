@@ -378,6 +378,17 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
         const balances = rs[assetsAccountKey];
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
+
+          if (balanceInfo === undefined) { // no balance info response
+            return {
+              address: addresses[index],
+              tokenSlug: tokenInfo.slug,
+              free: '0',
+              locked: '0',
+              state: APIItemState.READY
+            };
+          }
+
           const transferableBalance = _getAssetsPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
           const totalLockedFromTransfer = _getAssetsPalletLocked(balanceInfo);
 

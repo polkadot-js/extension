@@ -10,10 +10,11 @@ import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext'
 import { useFilterModal, useSelector } from '@subwallet/extension-web-ui/hooks';
 import { MissionDetailModal, PoolDetailModalId } from '@subwallet/extension-web-ui/Popup/MissionPool/MissionDetailModal';
 import MissionItem from '@subwallet/extension-web-ui/Popup/MissionPool/MissionItem';
-import { missionCategories, MissionCategoryType } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
+import { missionCategories, MissionCategoryType, MissionTab } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
+import { computeStatus } from '@subwallet/extension-web-ui/utils';
 import { Icon, ModalContext, SwSubHeader } from '@subwallet/react-ui';
 import { FadersHorizontal } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -24,36 +25,6 @@ import styled from 'styled-components';
 type Props = ThemeProps;
 
 const FILTER_MODAL_ID = 'mission-filter-modal';
-
-function computeStatus (item: MissionInfo): MissionCategoryType {
-  const now = Date.now();
-
-  try {
-    if (item.start_time) {
-      const startTime = new Date(item.start_time).getTime();
-
-      if (now < startTime) {
-        return MissionCategoryType.UPCOMING;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  try {
-    if (item.end_time) {
-      const endTime = new Date(item.end_time).getTime();
-
-      if (now > endTime) {
-        return MissionCategoryType.ARCHIVED;
-      }
-    }
-  } catch (error) {
-    console.error(error);
-  }
-
-  return MissionCategoryType.LIVE;
-}
 
 const Component: React.FC<Props> = ({ className }: Props) => {
   const { t } = useTranslation();
@@ -96,9 +67,20 @@ const Component: React.FC<Props> = ({ className }: Props) => {
         label: t('All'),
         value: MissionCategoryType.ALL
       },
-      ...filterOptions
+      {
+        label: t('Defi'),
+        value: MissionTab.DEFI
+      },
+      {
+        label: t('Meme'),
+        value: MissionTab.MEME
+      },
+      {
+        label: t('Gaming'),
+        value: MissionTab.GAMING
+      }
     ];
-  }, [filterOptions, t]);
+  }, [t]);
 
   const filterFunction = useMemo<(item: MissionInfo) => boolean>(() => {
     return (item) => {
@@ -128,20 +110,45 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     );
   }, []);
 
+  const sortFunction = (itemA: MissionInfo, itemB: MissionInfo) => {
+    const statusOrder: Record<string, number> = {
+      live: 0,
+      upcoming: 1,
+      archived: 2
+    };
+
+    const getStatusOrderValue = (status: string | undefined | null): number => {
+      if (status && status in statusOrder) {
+        return statusOrder[status];
+      } else {
+        return statusOrder.archived;
+      }
+    };
+
+    const statusA = getStatusOrderValue(itemA.status);
+    const statusB = getStatusOrderValue(itemB.status);
+
+    if (statusA !== statusB) {
+      return statusA - statusB;
+    }
+
+    return (itemA.ordinal || 0) - (itemB.ordinal || 0);
+  };
+
   const filteredItems = useMemo(() => {
     const filterTabFunction = (item: MissionInfo) => {
-      if (selectedFilterTab === MissionCategoryType.ALL) {
+      if (selectedFilterTab === MissionTab.ALL) {
         return true;
       }
 
-      return item.status === selectedFilterTab;
+      return item.categories?.some((category) => category.slug === selectedFilterTab) ?? false;
     };
 
     const _filterFunction = (_item: MissionInfo) => {
       return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
     };
 
-    return computedMission.filter(_filterFunction);
+    return computedMission.filter(_filterFunction).sort(sortFunction);
   }, [computedMission, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
   const onSelectFilterTab = useCallback((value: string) => {

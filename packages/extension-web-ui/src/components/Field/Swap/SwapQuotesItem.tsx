@@ -4,11 +4,9 @@
 import { _getAssetDecimals, _getAssetSymbol } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapQuote } from '@subwallet/extension-base/types/swap';
 import { swapCustomFormatter } from '@subwallet/extension-base/utils';
-import { BN_TEN } from '@subwallet/extension-web-ui/constants';
 import { useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { Icon, Number } from '@subwallet/react-ui';
-import BigN from 'bignumber.js';
 import CN from 'classnames';
 import { CheckCircle, CircleWavyCheck } from 'phosphor-react';
 import React, { useCallback, useMemo } from 'react';
@@ -29,21 +27,9 @@ const Component: React.FC<Props> = (props: Props) => {
     onSelect?.(quote);
   }, [onSelect, quote]);
 
-  const fromAssetInfo = useMemo(() => {
-    return assetRegistryMap[quote.pair.from] || undefined;
-  }, [assetRegistryMap, quote.pair.from]);
-
   const toAssetInfo = useMemo(() => {
     return assetRegistryMap[quote.pair.to] || undefined;
   }, [assetRegistryMap, quote.pair.to]);
-
-  const destinationSwapValue = useMemo(() => {
-    const decimals = _getAssetDecimals(fromAssetInfo);
-
-    return new BigN(quote.fromAmount)
-      .div(BN_TEN.pow(decimals))
-      .multipliedBy(quote.rate);
-  }, [quote, fromAssetInfo]);
 
   return (
     <>
@@ -69,11 +55,11 @@ const Component: React.FC<Props> = (props: Props) => {
             <Number
               className={'__est-receive-value'}
               customFormatter={swapCustomFormatter}
-              decimal={0}
+              decimal={_getAssetDecimals(toAssetInfo)}
               formatType={'custom'}
               metadata={numberMetadata}
               suffix={_getAssetSymbol(toAssetInfo)}
-              value={destinationSwapValue}
+              value={quote.toAmount || '0'}
             />
           </div>
         </div>

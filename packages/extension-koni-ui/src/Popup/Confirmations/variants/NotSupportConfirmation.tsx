@@ -3,6 +3,7 @@
 
 import { ConfirmationResult } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, ConfirmationRequestBase } from '@subwallet/extension-base/background/types';
+import { detectTranslate } from '@subwallet/extension-base/utils';
 import { AccountItemWithName, ConfirmationGeneralInfo } from '@subwallet/extension-koni-ui/components';
 import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useGetAccountTitleByAddress } from '@subwallet/extension-koni-ui/hooks';
@@ -11,7 +12,7 @@ import { EvmSignatureSupportType, ThemeProps } from '@subwallet/extension-koni-u
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
 import React, { useCallback, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
@@ -73,9 +74,15 @@ const Component: React.FC<Props> = (props: Props) => {
           { isMessage ? t('Signature required') : t('Transaction request')}
         </div>
         <div className='description'>
-          <span>{t('This feature is not available for')}</span>
-          <span className='highlight'>&nbsp;{accountTitle}</span>
-          <span>.&nbsp;{t('Please change to another account type.')}</span>
+          <Trans
+            components={{
+              highlight: (
+                <span className='highlight' />
+              )
+            }}
+            i18nKey={detectTranslate('Feature not available for <highlight>{{accountTitle}}</highlight>. Change to another account type and try again.')}
+            values={{ accountTitle }}
+          />
         </div>
         <AccountItemWithName
           accountName={account?.name}

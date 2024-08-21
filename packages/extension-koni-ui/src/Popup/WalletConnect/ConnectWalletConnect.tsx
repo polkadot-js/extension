@@ -5,8 +5,7 @@ import { CloseIcon, Layout, QrScannerErrorNotice, WalletConnect } from '@subwall
 import { TIME_OUT_RECORD } from '@subwallet/extension-koni-ui/constants';
 import { useDefaultNavigate, useOpenQrScanner } from '@subwallet/extension-koni-ui/hooks';
 import { addConnection } from '@subwallet/extension-koni-ui/messaging';
-import { FormCallbacks, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { ScannerResult } from '@subwallet/extension-koni-ui/types/scanner';
+import { FormCallbacks, ScannerResult, Theme, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { noop, validWalletConnectUri } from '@subwallet/extension-koni-ui/utils';
 import { Button, Form, Icon, Input, ModalContext, PageIcon, SwModal, SwQrScanner } from '@subwallet/react-ui';
 import CN from 'classnames';

@@ -1,18 +1,18 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { FilterModal, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import { FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import EmptyList from '@subwallet/extension-koni-ui/components/EmptyList/EmptyList';
 import { FilterTabItemType, FilterTabs } from '@subwallet/extension-koni-ui/components/FilterTabs';
 import Search from '@subwallet/extension-koni-ui/components/Search';
-import { useDefaultNavigate, useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { MissionDetailModal, PoolDetailModalId } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/MissionDetailModal';
 import MissionItem from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/MissionPoolItem';
-import { missionCategories, MissionCategoryType } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
+import { missionCategories, MissionCategoryType, MissionTab } from '@subwallet/extension-koni-ui/Popup/Settings/MissionPool/predefined';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { MissionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { computeStatus } from '@subwallet/extension-koni-ui/utils';
-import { Icon, ModalContext, SwList, SwSubHeader } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, GlobeHemisphereWest } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo, useState } from 'react';
@@ -31,7 +31,6 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   const { activeModal } = useContext(ModalContext);
   const [currentSelectItem, setCurrentSelectItem] = useState<MissionInfo | null>(null);
   const { missions } = useSelector((state: RootState) => state.missionPool);
-  const goBack = useDefaultNavigate().goBack;
 
   const computedMission = useMemo(() => {
     return missions.map((item) => {
@@ -53,11 +52,22 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     return [
       {
         label: t('All'),
-        value: MissionCategoryType.ALL
+        value: MissionTab.ALL
       },
-      ...filterOptions
+      {
+        label: t('Defi'),
+        value: MissionTab.DEFI
+      },
+      {
+        label: t('Meme'),
+        value: MissionTab.MEME
+      },
+      {
+        label: t('Gaming'),
+        value: MissionTab.GAMING
+      }
     ];
-  }, [filterOptions, t]);
+  }, [t]);
 
   const filterFunction = useMemo<(item: MissionInfo) => boolean>(() => {
     return (item) => {
@@ -89,18 +99,43 @@ const Component: React.FC<Props> = ({ className }: Props) => {
 
   const filteredItems = useMemo(() => {
     const filterTabFunction = (item: MissionInfo) => {
-      if (selectedFilterTab === MissionCategoryType.ALL) {
+      if (selectedFilterTab === MissionTab.ALL) {
         return true;
       }
 
-      return item.status === selectedFilterTab;
+      return item.categories?.some((category) => category.slug === selectedFilterTab) ?? false;
+    };
+
+    const sortFunction = (itemA: MissionInfo, itemB: MissionInfo) => {
+      const statusOrder: Record<string, number> = {
+        live: 0,
+        upcoming: 1,
+        archived: 2
+      };
+
+      const getStatusOrderValue = (status: string | undefined | null): number => {
+        if (status && status in statusOrder) {
+          return statusOrder[status];
+        } else {
+          return statusOrder.archived;
+        }
+      };
+
+      const statusA = getStatusOrderValue(itemA.status);
+      const statusB = getStatusOrderValue(itemB.status);
+
+      if (statusA !== statusB) {
+        return statusA - statusB;
+      }
+
+      return (itemA.ordinal || 0) - (itemB.ordinal || 0);
     };
 
     const _filterFunction = (_item: MissionInfo) => {
       return filterTabFunction(_item) && filterFunction(_item) && searchFunction(_item, searchInput);
     };
 
-    return computedMission.filter(_filterFunction);
+    return computedMission.filter(_filterFunction).sort(sortFunction);
   }, [computedMission, filterFunction, searchFunction, searchInput, selectedFilterTab]);
 
   const onSelectFilterTab = useCallback((value: string) => {
@@ -147,16 +182,14 @@ const Component: React.FC<Props> = ({ className }: Props) => {
   }, [t]);
 
   return (
-    <PageWrapper className={CN(className, 'mission-pools')}>
-      <SwSubHeader
-        background={'transparent'}
-        center
-        className={'__header-area'}
-        onBack={goBack}
-        paddingVertical
-        showBackButton
-        title={t('Mission Pools')}
-      />
+    <Layout.Base
+      className={CN(className)}
+      showSubHeader={true}
+      subHeaderBackground={'transparent'}
+      subHeaderCenter={false}
+      subHeaderPaddingVertical={true}
+      title={t<string>('Mission Pools')}
+    >
       <div className={'__tool-area'}>
         <Search
           actionBtnIcon={(
@@ -207,12 +240,7 @@ const Component: React.FC<Props> = ({ className }: Props) => {
       <MissionDetailModal
         data={currentSelectItem}
       />
-
-      <div
-        className={'__scroll-container'}
-      >
-      </div>
-    </PageWrapper>
+    </Layout.Base>
   );
 };
 
@@ -221,6 +249,10 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
+    '.__tab-item-label': {
+      fontSize: token.fontSize,
+      lineHeight: token.lineHeight
+    },
     '.__section-list-container': {
       paddingLeft: token.padding,
       paddingRight: token.padding,
@@ -228,6 +260,10 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS
+    },
+    '.ant-sw-screen-layout-body': {
+      display: 'flex',
+      flexDirection: 'column'
     },
     '.filter-tabs-container': {
       paddingLeft: token.padding,
@@ -237,16 +273,15 @@ const MissionPool = styled(Component)<Props>(({ theme: { token } }: Props) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      paddingTop: token.padding
+      paddingTop: token.paddingXS
     },
     '.__tool-area': {
       display: 'flex',
       flexDirection: 'column',
       gap: token.sizeXS,
-      marginBottom: token.marginMD
+      marginBottom: token.marginXS
     },
     '.__content-wrapper': {
-      marginBottom: token.margin,
       overflowX: 'auto'
     },
     '.ant-sw-header-container-padding-vertical': {

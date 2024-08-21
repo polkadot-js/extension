@@ -3,21 +3,22 @@
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
-import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { ExtrinsicType, NotificationType } from '@subwallet/extension-base/background/KoniTypes';
 import { _getAssetDecimals, _getAssetOriginChain, _getAssetSymbol, _getChainNativeTokenSlug, _getOriginChainOfAsset, _isChainEvmCompatible, _parseAssetRefKey } from '@subwallet/extension-base/services/chain-service/utils';
 import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
 import { SWTransactionResponse } from '@subwallet/extension-base/services/transaction-service/types';
-import { OptimalSwapPath, SlippageType, SwapFeeComponent, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapStepType } from '@subwallet/extension-base/types/swap';
+import { CommonFeeComponent, CommonOptimalPath, CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { SlippageType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest } from '@subwallet/extension-base/types/swap';
 import { formatNumberString, isAccountAll, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { AccountSelector, AddMoreBalanceModal, AddressInput, AlertBox, ChooseFeeTokenModal, HiddenInput, MetaInfo, PageWrapper, QuoteResetTime, SlippageModal, SwapFromField, SwapIdleWarningModal, SwapQuotesSelectorModal, SwapRoute, SwapTermsOfServiceModal, SwapToField } from '@subwallet/extension-web-ui/components';
 import { BN_TEN, BN_ZERO, CONFIRM_SWAP_TERM, DEFAULT_SWAP_PARAMS, SWAP_ALL_QUOTES_MODAL, SWAP_CHOOSE_FEE_TOKEN_MODAL, SWAP_IDLE_WARNING_MODAL, SWAP_MORE_BALANCE_MODAL, SWAP_SLIPPAGE_MODAL, SWAP_TERMS_OF_SERVICE_MODAL } from '@subwallet/extension-web-ui/constants';
 import { DataContext } from '@subwallet/extension-web-ui/contexts/DataContext';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
-import { useChainConnection, useNotification, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
+import { useChainConnection, useNotification, usePreCheckAction, useSelector, useTransactionContext, useWatchTransaction } from '@subwallet/extension-web-ui/hooks';
 import { getLatestSwapQuote, handleSwapRequest, handleSwapStep, validateSwapProcess } from '@subwallet/extension-web-ui/messaging/transaction/swap';
 import { FreeBalance, FreeBalanceToEarn, TransactionContent, TransactionFooter } from '@subwallet/extension-web-ui/Popup/Transaction/parts';
-import { DEFAULT_SWAP_PROCESS, SwapActionType, swapReducer } from '@subwallet/extension-web-ui/reducer';
+import { CommonActionType, commonProcessReducer, DEFAULT_COMMON_PROCESS } from '@subwallet/extension-web-ui/reducer';
 import { RootState } from '@subwallet/extension-web-ui/stores';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { FormCallbacks, FormFieldData, SwapParams, ThemeProps, TokenSelectorItemType } from '@subwallet/extension-web-ui/types';
@@ -97,7 +98,7 @@ const Component = () => {
   const [currentSlippage, setCurrentSlippage] = useState<SlippageType>({ slippage: new BigN(0.01), isCustomType: true });
   const [swapError, setSwapError] = useState<SwapError|undefined>(undefined);
   const [isFormInvalid, setIsFormInvalid] = useState<boolean>(false);
-  const [currentOptimalSwapPath, setOptimalSwapPath] = useState<OptimalSwapPath | undefined>(undefined);
+  const [currentOptimalSwapPath, setOptimalSwapPath] = useState<CommonOptimalPath | undefined>(undefined);
   // @ts-ignore
   const [confirmedTerm, setConfirmedTerm] = useLocalStorage(CONFIRM_SWAP_TERM, '');
   const [showQuoteArea, setShowQuoteArea] = useState<boolean>(false);
@@ -141,8 +142,9 @@ const Component = () => {
   const chainValue = useWatchTransaction('chain', form, defaultData);
   const recipientValue = useWatchTransaction('recipient', form, defaultData);
   const { checkChainConnected, turnOnChain } = useChainConnection();
+  const onPreCheck = usePreCheckAction(fromValue);
 
-  const [processState, dispatchProcessState] = useReducer(swapReducer, DEFAULT_SWAP_PROCESS);
+  const [processState, dispatchProcessState] = useReducer(commonProcessReducer, DEFAULT_COMMON_PROCESS);
 
   const fromAndToTokenMap = useMemo<Record<string, string[]>>(() => {
     const result: Record<string, string[]> = {};
@@ -344,7 +346,7 @@ const Component = () => {
     return totalBalance;
   }, [assetRegistryMap, currentQuote?.feeInfo.feeComponent, priceMap]);
 
-  const getConvertedBalance = useCallback((feeItem: SwapFeeComponent) => {
+  const getConvertedBalance = useCallback((feeItem: CommonFeeComponent) => {
     const asset = assetRegistryMap[feeItem.tokenSlug];
 
     if (asset) {
@@ -472,9 +474,8 @@ const Component = () => {
         type: 'error',
         duration: 8
       });
-
       dispatchProcessState({
-        type: SwapActionType.STEP_ERROR_ROLLBACK,
+        type: CommonActionType.STEP_ERROR_ROLLBACK,
         payload: error
       });
     },
@@ -508,7 +509,7 @@ const Component = () => {
             return false;
           } else {
             dispatchProcessState({
-              type: needRollback ? SwapActionType.STEP_ERROR_ROLLBACK : SwapActionType.STEP_ERROR,
+              type: needRollback ? CommonActionType.STEP_ERROR_ROLLBACK : CommonActionType.STEP_ERROR,
               payload: _errors[0]
             });
 
@@ -516,7 +517,7 @@ const Component = () => {
           }
         } else if (id) {
           dispatchProcessState({
-            type: SwapActionType.STEP_COMPLETE,
+            type: CommonActionType.STEP_COMPLETE,
             payload: rs
           });
 
@@ -574,7 +575,7 @@ const Component = () => {
 
       const submitData = async (step: number): Promise<boolean> => {
         dispatchProcessState({
-          type: SwapActionType.STEP_SUBMIT,
+          type: CommonActionType.STEP_SUBMIT,
           payload: null
         });
 
@@ -599,11 +600,11 @@ const Component = () => {
               return false;
             } else {
               dispatchProcessState({
-                type: SwapActionType.STEP_COMPLETE,
+                type: CommonActionType.STEP_COMPLETE,
                 payload: true
               });
               dispatchProcessState({
-                type: SwapActionType.STEP_SUBMIT,
+                type: CommonActionType.STEP_SUBMIT,
                 payload: null
               });
 
@@ -683,31 +684,19 @@ const Component = () => {
     }
   }, [accounts, chainValue, checkChainConnected, closeAlert, currentOptimalSwapPath, currentQuote, currentQuoteRequest, currentSlippage.slippage, notify, onError, onSuccess, openAlert, processState.currentStep, processState.steps.length, t]);
 
-  const destinationSwapValue = useMemo(() => {
-    if (currentQuote) {
-      const decimals = _getAssetDecimals(fromAssetInfo);
-
-      return new BigN(fromAmountValue || 0)
-        .div(BN_TEN.pow(decimals))
-        .multipliedBy(currentQuote.rate);
-    }
-
-    return BN_ZERO;
-  }, [currentQuote, fromAmountValue, fromAssetInfo]);
-
   const minimumReceived = useMemo(() => {
-    const calcMinimumReceived = (value: BigN) => {
+    const calcMinimumReceived = (value: string) => {
       const adjustedValue = supportSlippageSelection
         ? value
-        : value.multipliedBy(new BigN(1).minus(currentSlippage.slippage));
+        : new BigN(value).multipliedBy(new BigN(1).minus(currentSlippage.slippage)).integerValue(BigN.ROUND_DOWN);
 
       return adjustedValue.toString().includes('e')
         ? formatNumberString(adjustedValue.toString())
         : adjustedValue.toString();
     };
 
-    return calcMinimumReceived(destinationSwapValue);
-  }, [supportSlippageSelection, destinationSwapValue, currentSlippage.slippage]);
+    return calcMinimumReceived(currentQuote?.toAmount || '0');
+  }, [currentQuote?.toAmount, currentSlippage.slippage, supportSlippageSelection]);
 
   const onAfterConfirmTermModal = useCallback(() => {
     return setConfirmedTerm('swap-term-confirmed');
@@ -799,8 +788,14 @@ const Component = () => {
   };
 
   const isSwapXCM = useMemo(() => {
-    return processState.steps.some((item) => item.type === SwapStepType.XCM);
+    return processState.steps.some((item) => item.type === CommonStepType.XCM);
   }, [processState.steps]);
+
+  const isSwapAssetHub = useMemo(() => {
+    const providerId = currentQuote?.provider?.id;
+
+    return providerId ? [SwapProviderId.KUSAMA_ASSET_HUB, SwapProviderId.POLKADOT_ASSET_HUB, SwapProviderId.ROCOCO_ASSET_HUB].includes(providerId) : false;
+  }, [currentQuote?.provider?.id]);
 
   const renderAlertBox = () => {
     const multichainAsset = fromAssetInfo?.multiChainAsset;
@@ -809,7 +804,15 @@ const Component = () => {
 
     return (
       <>
-        {isSwapXCM && fromAssetName && toAssetName && (
+        {isSwapAssetHub && !isFormInvalid && (
+          <AlertBox
+            className={'__assethub-notification'}
+            description={'Swapping on Asset Hub is in beta with a limited number of pairs and low liquidity. Continue at your own risk'}
+            title={'Pay attention!'}
+            type='warning'
+          />
+        )}
+        {isSwapXCM && fromAssetName && toAssetName && !isFormInvalid && (
           <AlertBox
             className={'__xcm-notification'}
             description={`The amount you entered is higher than your available balance on ${toAssetName} network. You need to first transfer cross-chain from ${fromAssetName} network to ${toAssetName} network to continue swapping`}
@@ -946,7 +949,7 @@ const Component = () => {
                   steps: result.process.steps,
                   feeStructure: result.process.totalFee
                 },
-                type: SwapActionType.STEP_CREATE
+                type: CommonActionType.STEP_CREATE
               });
 
               setQuoteOptions(result.quote.quotes);
@@ -1193,9 +1196,10 @@ const Component = () => {
                   </div>
 
                   <SwapToField
+                    decimals={_getAssetDecimals(toAssetInfo)}
                     loading={handleRequestLoading && showQuoteArea}
                     onSelectToken={onSelectToToken}
-                    swapValue={destinationSwapValue}
+                    swapValue={currentQuote?.toAmount || 0}
                     toAsset={toAssetInfo}
                     tokenSelectorItems={toTokenItems}
                     tokenSelectorValue={toTokenSlugValue}
@@ -1321,7 +1325,7 @@ const Component = () => {
               className={'__swap-submit-button'}
               disabled={submitLoading || handleRequestLoading || isNotConnectedAltChain}
               loading={submitLoading}
-              onClick={form.submit}
+              onClick={onPreCheck(form.submit, ExtrinsicType.SWAP)}
             >
               {t('Swap')}
             </Button>
@@ -1391,8 +1395,7 @@ const Component = () => {
                       shape='squircle'
                       size={24}
                     />
-
-                    {currentQuote.provider.name}
+                    <span className={'__provider-name'}>{currentQuote.provider.name}</span>
                   </MetaInfo.Default>
 
                   <MetaInfo.Default
@@ -1404,7 +1407,7 @@ const Component = () => {
                   <div className={'__minimum-received'}>
                     <MetaInfo.Number
                       customFormatter={swapCustomFormatter}
-                      decimals={0}
+                      decimals={_getAssetDecimals(toAssetInfo)}
                       formatType={'custom'}
                       label={
                         <Tooltip
@@ -1586,8 +1589,13 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
       alignItems: 'center',
       cursor: 'pointer'
     },
-    '.__xcm-notification': {
+    '.__xcm-notification, .__assethub-notification': {
       marginBottom: token.marginSM
+    },
+    '.__provider-name': {
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden'
     },
     '.__fee-paid-token': {
       display: 'flex',
@@ -1605,7 +1613,14 @@ const Swap = styled(Wrapper)<Props>(({ theme: { token } }: Props) => {
     },
     '.__swap-provider .__value ': {
       display: 'flex',
-      gap: 8
+      gap: 8,
+      overflow: 'hidden'
+    },
+    '.__swap-provider .__col': {
+      alignItems: 'unset',
+      flexDirection: 'row',
+      justifyContent: 'flex-end'
+
     },
     '.ant-background-icon': {
       width: 24,

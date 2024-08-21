@@ -33,6 +33,12 @@ export interface InjectedAccounts {
   subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 
+export type AuthAccountSubstrateType = 'substrate' | 'both';
+
+export interface AuthRequestOption {
+  accountAuthType: AuthAccountSubstrateType
+}
+
 export interface InjectedExtensionInfo {
   name: string;
   version: string;
@@ -106,7 +112,7 @@ export interface EvmProvider {
 }
 
 export interface InjectedWindowProvider {
-  enable: (origin: string) => Promise<Injected>;
+  enable: (origin: string, opt?: AuthRequestOption) => Promise<Injected>;
   version: string;
 }
 

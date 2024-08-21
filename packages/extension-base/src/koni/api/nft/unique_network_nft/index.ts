@@ -4,28 +4,25 @@
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
 import { OPAL_SCAN_ENDPOINT, QUARTZ_SCAN_ENDPOINT, UNIQUE_IPFS_GATEWAY, UNIQUE_SCAN_ENDPOINT } from '@subwallet/extension-base/koni/api/nft/config';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
+import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { baseParseIPFSUrl } from '@subwallet/extension-base/utils';
 
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
-interface NftAttributeData {
-  _: string
-}
-
 interface NftAttribute {
-  name: NftAttributeData;
-  value: NftAttributeData | Array<NftAttributeData>
+  trait_type: string;
+  value: any;
 }
 
 interface NftData {
-  collection_id: string;
+  collection_id: number;
   collection_name: string;
   collection_description: string;
   collection_cover: string;
-  token_id: string;
+  token_id: number;
   token_name: string;
-  image: Record<string, string>;
-  attributes: Record<string, NftAttribute>;
+  image: string;
+  attributes: NftAttribute[];
 }
 
 export class UniqueNftApi extends BaseNftApi {
@@ -41,26 +38,14 @@ export class UniqueNftApi extends BaseNftApi {
     const propertiesMap: Record<string, any> = {};
     const attRecord = nft.attributes;
 
-    if (attRecord) {
-      for (const item in attRecord) {
-        const attName = attRecord[item].name._;
-        const attInfo = attRecord[item].value;
+    if (attRecord.length) {
+      for (const item of attRecord) {
+        const attName = item.trait_type;
+        const attInfo = item.value as string;
 
-        if (Array.isArray(attInfo)) {
-          const attList: string[] = [];
-
-          for (const trait of attInfo) {
-            attList.push(trait._);
-          }
-
-          propertiesMap[attName] = {
-            value: attList
-          };
-        } else {
-          propertiesMap[attName] = {
-            value: attInfo._
-          };
-        }
+        propertiesMap[attName] = {
+          value: attInfo
+        };
       }
     }
 
@@ -109,6 +94,9 @@ export class UniqueNftApi extends BaseNftApi {
       endpoint = OPAL_SCAN_ENDPOINT;
       uniqueAddress = address;
       // Opal address: Normal address
+    } else if (_NFT_CHAIN_GROUP.unique_evm.includes(this.chain)) {
+      endpoint = UNIQUE_SCAN_ENDPOINT;
+      uniqueAddress = address.toLowerCase();
     }
 
     const resp = await fetch(endpoint, {
@@ -148,7 +136,7 @@ export class UniqueNftApi extends BaseNftApi {
               chain: this.chain,
               owner: address,
               name: nft.token_name,
-              image: this.parseUrl(nft.image?.fullUrl),
+              image: this.parseUrl(nft.image),
               description: nft.collection_description,
               collectionId: nft.collection_id.toString(),
               properties: propertiesMap as Record<any, any>

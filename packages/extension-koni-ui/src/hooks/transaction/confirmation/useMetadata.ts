@@ -3,40 +3,82 @@
 
 import type { Chain } from '@subwallet/extension-chains/types';
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { getMetadata, getMetadataRaw } from '@subwallet/extension-koni-ui/messaging';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { useSelector } from '../../common';
+import { useGetChainInfoByGenesisHash } from '../../chain';
 
-export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Chain | null {
+interface Result {
+  chain: Chain | null;
+  loadingChain: boolean;
+}
+
+export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Result {
   const [chain, setChain] = useState<Chain | null>(null);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const [loadingChain, setLoadingChain] = useState(true);
+  const _chainInfo = useGetChainInfoByGenesisHash(genesisHash || '');
+  const [chainInfo, setChainInfo] = useState<_ChainInfo | null>(_chainInfo);
+  const chainString = useMemo(() => JSON.stringify(chainInfo), [chainInfo]);
+
+  useEffect(() => {
+    const updated = JSON.stringify(_chainInfo);
+
+    if (updated !== chainString) {
+      setChainInfo(_chainInfo);
+    }
+  }, [_chainInfo, chainString]);
 
   useEffect((): void => {
+    setLoadingChain(true);
+
     if (genesisHash) {
-      const getChainByMetaStore = () => {
-        getMetadata(genesisHash, isPartial)
-          .then(setChain)
-          .catch((error): void => {
-            console.error(error);
-            setChain(null);
-          });
+      const getChainByMetaStore = async () => {
+        try {
+          const chain = await getMetadata(genesisHash, isPartial);
+
+          return chain;
+        } catch (error) {
+          console.error(error);
+
+          return null;
+        }
       };
 
-      getMetadataRaw(chainInfoMap, genesisHash).then((chain) => {
-        if (chain) {
-          setChain(chain);
-        } else {
-          getChainByMetaStore();
+      const fetchData = async () => {
+        try {
+          const chainFromRaw = await getMetadataRaw(chainInfo, genesisHash);
+          const chainFromMetaStore = await getChainByMetaStore();
+
+          if (chainFromRaw && chainFromMetaStore) {
+            if (chainFromRaw.specVersion >= chainFromMetaStore.specVersion) {
+              setChain(chainFromRaw);
+            } else {
+              setChain(chainFromMetaStore);
+            }
+
+            setLoadingChain(false);
+          } else {
+            setChain(chainFromRaw || chainFromMetaStore || null);
+            setLoadingChain(false);
+          }
+        } catch (error) {
+          console.error(error);
+          setChain(null);
+          setLoadingChain(false);
         }
-      }).catch((e) => {
-        console.error(e);
-        getChainByMetaStore();
+      };
+
+      fetchData().catch((error) => {
+        console.error(error);
+        setChain(null);
+        setLoadingChain(false);
       });
     } else {
+      setLoadingChain(false);
       setChain(null);
     }
-  }, [chainInfoMap, genesisHash, isPartial]);
+  }, [chainInfo, genesisHash, isPartial]);
 
-  return chain;
+  return useMemo(() => ({ chain, loadingChain }), [chain, loadingChain]);
 }

@@ -431,6 +431,7 @@ export * from './fetchEvmChainInfo';
 export * from './fetchStaticData';
 export * from './gear';
 export * from './lazy';
+export * from './metadata';
 export * from './number';
 export * from './object';
 export * from './promise';

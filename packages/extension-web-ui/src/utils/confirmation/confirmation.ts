@@ -11,3 +11,17 @@ export const isSubstrateMessage = (payload: string | ExtrinsicPayload): payload 
 export const isEvmMessage = (request: ConfirmationDefinitions[EvmSignatureSupportType][0]): request is ConfirmationDefinitions['evmSignatureRequest'][0] => {
   return !!(request as ConfirmationDefinitions['evmSignatureRequest'][0]).payload.type;
 };
+
+export function convertErrorMessage (err: Error): string {
+  const message = err.message.toLowerCase();
+
+  if (
+    message.includes('connection error') ||
+    message.includes('connection not open') ||
+    message.includes('connection timeout')
+  ) {
+    return 'Unstable network connection. Re-enable the network or change RPC and try again';
+  }
+
+  return err.message;
+}

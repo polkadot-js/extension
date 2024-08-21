@@ -1,20 +1,23 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { _ChainAsset } from '@subwallet/chain-list/types';
 import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
+import { getExplorerLink } from '@subwallet/extension-base/services/transaction-service/utils';
 import { BalanceItem } from '@subwallet/extension-base/types';
 import { isSameAddress } from '@subwallet/extension-base/utils';
 import { AccountTokenBalanceItem, EmptyList, RadioGroup } from '@subwallet/extension-koni-ui/components';
-import { useSelector } from '@subwallet/extension-koni-ui/hooks';
+import { useGetChainPrefixBySlug, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import useTranslation from '@subwallet/extension-koni-ui/hooks/common/useTranslation';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { TokenBalanceItemType } from '@subwallet/extension-koni-ui/types/balance';
-import { isAccountAll } from '@subwallet/extension-koni-ui/utils';
-import { Form, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
+import { isAccountAll, reformatAddress } from '@subwallet/extension-koni-ui/utils';
+import { Button, Form, Icon, ModalContext, Number, SwModal } from '@subwallet/react-ui';
 import BigN from 'bignumber.js';
 import CN from 'classnames';
-import { ArrowCircleLeft, Coins } from 'phosphor-react';
-import React, { useContext, useEffect, useMemo } from 'react';
+import { ArrowCircleLeft, ArrowSquareOut, Coins } from 'phosphor-react';
+import React, { useCallback, useContext, useEffect, useMemo } from 'react';
 import styled from 'styled-components';
 
 type Props = ThemeProps & {
@@ -56,11 +59,34 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
   const isActive = checkActive(id);
 
   const { currentAccount, isAllAccount } = useSelector((state) => state.accountState);
+  const { assetRegistry } = useSelector((state) => state.assetRegistry);
   const { balanceMap } = useSelector((state) => state.balance);
+  const chainInfoMap = useSelector((state: RootState) => state.chainStore.chainInfoMap);
 
   const [form] = Form.useForm<FormState>();
 
   const view = Form.useWatch('view', form);
+
+  const tokenInfo = useMemo((): _ChainAsset|undefined => currentTokenInfo && assetRegistry[currentTokenInfo?.slug], [assetRegistry, currentTokenInfo]);
+  const addressPrefix = useGetChainPrefixBySlug(tokenInfo?.originChain);
+  const reformatedAddress = useMemo(() => currentAccount?.address && reformatAddress(currentAccount?.address, addressPrefix), [currentAccount?.address, addressPrefix]);
+
+  const chainInfo = useMemo(() => {
+    if (tokenInfo?.originChain === undefined) {
+      return undefined;
+    }
+
+    return chainInfoMap[tokenInfo.originChain];
+  }, [chainInfoMap, tokenInfo?.originChain]);
+
+  const openBlockExplorer = useCallback(
+    (link: string) => {
+      return () => {
+        window.open(link, '_blank');
+      };
+    },
+    []
+  );
 
   const defaultValues = useMemo((): FormState => ({
     view: ViewValue.OVERVIEW
@@ -143,6 +169,8 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
     });
   }, [accountItems]);
 
+  const link = (chainInfo !== undefined && reformatedAddress) && getExplorerLink(chainInfo, reformatedAddress, 'account');
+
   useEffect(() => {
     if (!isActive) {
       form?.resetFields();
@@ -174,27 +202,45 @@ function Component ({ className = '', currentTokenInfo, id, onCancel, tokenBalan
       <div className='content-container'>
         {
           view === ViewValue.OVERVIEW && (
-            <div className={'__container'}>
-              {items.map((item) => (
-                <div
-                  className={'__row'}
-                  key={item.key}
-                >
-                  <div className={'__label'}>{item.label}</div>
+            <>
+              <div className={'__container'}>
+                {items.map((item) => (
+                  <div
+                    className={'__row'}
+                    key={item.key}
+                  >
+                    <div className={'__label'}>{item.label}</div>
 
-                  <Number
-                    className={'__value'}
-                    decimal={0}
-                    decimalOpacity={0.45}
-                    intOpacity={0.85}
-                    size={14}
-                    suffix={item.symbol}
-                    unitOpacity={0.85}
-                    value={item.value}
-                  />
-                </div>
-              ))}
-            </div>
+                    <Number
+                      className={'__value'}
+                      decimal={0}
+                      decimalOpacity={0.45}
+                      intOpacity={0.85}
+                      size={14}
+                      suffix={item.symbol}
+                      unitOpacity={0.85}
+                      value={item.value}
+                    />
+                  </div>
+                ))}
+              </div>
+              {!isAllAccount && <div className={'__explorer-link'}>
+                {!!link && (
+                  <Button
+                    block
+                    disabled={!link}
+                    icon={
+                      <Icon
+                        phosphorIcon={ArrowSquareOut}
+                      />
+                    }
+                    onClick={openBlockExplorer(link)}
+                  >
+                    {t('View on explorer')}
+                  </Button>
+                )}
+              </div>}
+            </>
           )
         }
         {
@@ -263,6 +309,10 @@ export const DetailModal = styled(Component)<Props>(({ theme: { token } }: Props
       borderRadius: token.borderRadiusLG,
       backgroundColor: token.colorBgSecondary,
       padding: '12px 12px 4px'
+    },
+
+    '.__explorer-link': {
+      marginTop: token.margin
     },
 
     '.__row': {

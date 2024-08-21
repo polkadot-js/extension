@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
+import { BN_TEN, formatNumberString, swapCustomFormatter } from '@subwallet/extension-base/utils';
 import { SwapTokenSelector } from '@subwallet/extension-koni-ui/components/Field/Swap/parts';
 import { BN_ZERO } from '@subwallet/extension-koni-ui/constants';
 import { useSelector } from '@subwallet/extension-koni-ui/hooks';
@@ -21,13 +21,14 @@ type Props = ThemeProps & {
   tokenSelectorValue?: string;
   toAsset?: _ChainAsset;
   tokenSelectorItems: TokenSelectorItemType[];
-  swapValue: BigN;
+  swapValue: BigN | string | number;
+  decimals: number;
   loading?: boolean;
 }
 const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
-  const { className, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
+  const { className, decimals, label, loading, onSelectToken, swapValue, toAsset, tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
   const { currencyData, priceMap } = useSelector((state) => state.price);
 
@@ -36,19 +37,21 @@ const Component = (props: Props) => {
       const { priceId } = toAsset;
       const price = priceMap[priceId || ''] || 0;
 
-      return swapValue.multipliedBy(price);
+      return new BigN(swapValue).multipliedBy(price);
     }
 
     return BN_ZERO;
   }, [priceMap, swapValue, toAsset]);
 
   const convertedDestinationSwapValue = useMemo(() => {
-    if (swapValue.toString().includes('e')) {
-      return formatNumberString(swapValue.toString());
+    const convertValue = new BigN(swapValue).div(BN_TEN.pow(decimals));
+
+    if (convertValue.toString().includes('e')) {
+      return formatNumberString(convertValue.toString());
     } else {
-      return swapValue.toString();
+      return convertValue.toString();
     }
-  }, [swapValue]);
+  }, [decimals, swapValue]);
 
   return (
     <div className={CN(className, 'swap-to-field')}>
@@ -78,7 +81,7 @@ const Component = (props: Props) => {
                 <Number
                   className={'__amount-convert'}
                   customFormatter={swapCustomFormatter}
-                  decimal={0}
+                  decimal={decimals}
                   formatType={'custom'}
                   metadata={numberMetadata}
                   prefix={(currencyData.isPrefix && currencyData.symbol) || ''}

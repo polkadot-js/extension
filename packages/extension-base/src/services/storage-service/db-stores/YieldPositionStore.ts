@@ -68,4 +68,12 @@ export default class YieldPositionStore extends BaseStore<YieldPositionInfo> {
       () => this.getByAddress(addresses)
     );
   }
+
+  async checkPositionByPoolSlug (slug: string, filterFunc: (i: YieldPositionInfo) => boolean) {
+    return this.table.where('slug').anyOfIgnoreCase(slug).filter(filterFunc).limit(1).count();
+  }
+
+  async checkPositionExist (filterFunc: (i: YieldPositionInfo) => boolean) {
+    return this.table.filter(filterFunc).limit(1).count();
+  }
 }

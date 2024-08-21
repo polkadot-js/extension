@@ -112,6 +112,7 @@ function Component ({ className }: Props) {
   }, [homePath, navigate]);
 
   const [subHeaderRightButtons, setSubHeaderRightButtons] = useState<ButtonProps[] | undefined>();
+  const [isDisableHeader, setIsDisableHeader] = useState<boolean>();
   const [{ disabled: disableBack, onClick: onClickBack }, setBackProps] = useState<{
     disabled: boolean,
     onClick: null | VoidFunction
@@ -150,6 +151,7 @@ function Component ({ className }: Props) {
   return (
     <>
       <Layout.Home
+        isDisableHeader={isDisableHeader}
         showFilterIcon
         showTabBar={false}
       >
@@ -159,6 +161,7 @@ function Component ({ className }: Props) {
           persistData: setStorage,
           onDone,
           setSubHeaderRightButtons,
+          setIsDisableHeader,
           setCustomScreenTitle,
           goBack,
           setBackProps,

@@ -3,11 +3,11 @@
 
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { NftCollection, NftItem } from '@subwallet/extension-base/background/KoniTypes';
+import { getPSP34ContractPromise, getTokenUriMethod, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { AZERO_DOMAIN_CONTRACTS } from '@subwallet/extension-base/koni/api/dotsama/domain';
 import { BaseNftApi, HandleNftParams } from '@subwallet/extension-base/koni/api/nft/nft';
 import { collectionApiFromArtZero, collectionDetailApiFromArtZero, externalUrlOnArtZero, ipfsApiFromArtZero, itemImageApiFromArtZero } from '@subwallet/extension-base/koni/api/nft/wasm_nft/utils';
-import { getPSP34ContractPromise, getTokenUriMethod, isAzeroDomainNft, isPinkRoboNft } from '@subwallet/extension-base/koni/api/tokens/wasm';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
 import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { isUrl } from '@subwallet/extension-base/utils';

@@ -133,10 +133,6 @@ const StakingValidatorItem = styled(Component)<Props>(({ theme: { token } }: Pro
       borderRadius: token.borderRadiusLG
     },
 
-    '.ant-web3-block-middle-item': {
-      paddingRight: token.padding
-    },
-
     '.middle-item__name-wrapper': {
       display: 'flex',
       alignItems: 'center'

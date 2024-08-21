@@ -26,6 +26,7 @@
 	<meta property="og:image:secure_url" content="https://file-library.subwallet.app/preview-images/webapp.png"/>
 	<meta property="og:image:width" content="1200"/>
 	<meta property="og:image:height" content="600"/>
+  <meta name="app:version" content="<%= htmlWebpackPlugin.options.meta['app-version'] %>">
 	<meta name="copyright" content="SubWallet"/>
 
   <link rel="canonical" href="https://web.subwallet.app/"/>
@@ -72,6 +73,42 @@
     gtag('js', new Date());
 
     gtag('config', 'G-KZM1Q77YBJ');
+
+    function fetchPackageJson() {
+      return fetch('/package.json')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Failed to fetch package.json');
+          }
+          return response.json();
+        });
+    }
+
+    function checkForUpdates() {
+      fetchPackageJson()
+        .then(packageJson => {
+          const metaTag = document.querySelector('meta[name="app:version"]');
+
+          if(!metaTag){
+            return;
+          }
+
+          const currentBuildVersion = metaTag.getAttribute('content');
+
+           if (currentBuildVersion !== packageJson.buildNumber) {
+                window.location.reload();
+           } else {
+              console.log('No updates available');
+              // Load other necessary scripts or perform other actions
+            }
+        })
+        .catch(error => {
+          console.error('Error fetching package.json:', error);
+        });
+    }
+
+    checkForUpdates()
+
   </script>
 
   <!-- Import main JS logic -->

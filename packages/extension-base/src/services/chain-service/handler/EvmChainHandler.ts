@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _AssetType } from '@subwallet/chain-list/types';
+import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/koni/api/contract-handler/utils';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { AbstractChainHandler } from '@subwallet/extension-base/services/chain-service/handler/AbstractChainHandler';
 import { EvmApi } from '@subwallet/extension-base/services/chain-service/handler/EvmApi';
 import { _ApiOptions, _EvmChainSpec } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { _ERC20_ABI, _ERC721_ABI } from '@subwallet/extension-base/services/chain-service/helper';
 import { _EvmApi, _SmartContractTokenInfo } from '@subwallet/extension-base/services/chain-service/types';
 import BigN from 'bignumber.js';
 import { Contract } from 'web3-eth-contract';

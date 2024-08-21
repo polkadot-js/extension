@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @subwallet/extension-koni authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils';
+import { isFirefox, RuntimeInfo } from '@subwallet/extension-base/utils/environment'; // do not change to shorten path, avoid circle import
 
 export const SINGULAR_V1_ENDPOINT = 'https://singular.rmrk-api.xyz/api/account-rmrk1/';
 
@@ -38,6 +38,8 @@ export const PINATA_IPFS_GATEWAY = 'https://gateway.pinata.cloud/ipfs/';
 // export const QUARTZ_SCAN_ENDPOINT = 'https://hasura-quartz.unique.network/v1/graphql';
 
 export const VARA_SCAN_ENDPOINT = 'https://nft-explorer.vara-network.io/graphql';
+
+export const AVAIL_LIGHT_CLIENT_NFT = 'https://indexer.availspace.app/graphql'; // 'https://indexer-nft.availspace.app/graphql';
 
 export const UNIQUE_SCAN_ENDPOINT = 'https://api-unique.uniquescan.io/v1/graphql';
 
@@ -105,6 +107,8 @@ export const SUPPORTED_TRANSFER_EVM_CHAIN = [
   SUPPORTED_TRANSFER_EVM_CHAIN_NAME.shibuya as string
 ];
 
+export const UNSUPPORTED_TRANSFER_EVM_CHAIN_NAME = ['unique_evm'];
+
 export const TRANSFER_CHAIN_ID = {
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbase as string]: 1287,
   [SUPPORTED_TRANSFER_EVM_CHAIN_NAME.moonbeam as string]: 1284,
@@ -128,12 +132,7 @@ export enum SUPPORTED_TRANSFER_SUBSTRATE_CHAIN_NAME {
 }
 
 // This is for localhost or http only
-const RANDOM_IPFS_GATEWAY_SETTING = [
-  {
-    provider: CLOUDFLARE_PINATA_SERVER,
-    weight: 10
-  }
-];
+const RANDOM_IPFS_GATEWAY_SETTING: Array<{provider: string, weight: number}> = [];
 
 if (isFirefox) {
   RANDOM_IPFS_GATEWAY_SETTING.push({
@@ -145,30 +144,35 @@ if (isFirefox) {
 if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
   // This is for https
   if (RuntimeInfo.protocol.startsWith('https')) {
-    RANDOM_IPFS_GATEWAY_SETTING.push({
-      provider: IPFS_FLEEK,
-      weight: 4
-    },
-    {
-      provider: IPFS_GATEWAY_4EVERLAND,
-      weight: 2
-    },
-    {
-      provider: IPFS_W3S_LINK,
-      weight: 1
-    },
-    {
-      provider: CF_IPFS_GATEWAY,
-      weight: 4
-    },
-    {
-      provider: PINATA_IPFS_GATEWAY,
-      weight: 1 // Rate limit too low
-    },
-    {
-      provider: IPFS_IO,
-      weight: 5
-    }
+    RANDOM_IPFS_GATEWAY_SETTING.push(
+      // {
+      //   provider: IPFS_FLEEK,
+      //   weight: 4
+      // },
+      // {
+      //   provider: IPFS_GATEWAY_4EVERLAND,
+      //   weight: 2
+      // },
+      // {
+      //   provider: IPFS_W3S_LINK,
+      //   weight: 1
+      // },
+      // {
+      //   provider: CF_IPFS_GATEWAY,
+      //   weight: 4
+      // },
+      // {
+      //   provider: PINATA_IPFS_GATEWAY,
+      //   weight: 1 // Rate limit too low
+      // },
+      // {
+      //   provider: IPFS_IO,
+      //   weight: 5
+      // },
+      {
+        provider: SUBWALLET_IPFS,
+        weight: 10
+      }
     );
   }
 } else {
@@ -186,6 +190,13 @@ if (RuntimeInfo.protocol && RuntimeInfo.protocol.startsWith('http')) {
     weight: 5
   }
   );
+}
+
+if (RANDOM_IPFS_GATEWAY_SETTING.length === 0) {
+  RANDOM_IPFS_GATEWAY_SETTING.push({
+    provider: SUBWALLET_IPFS,
+    weight: 10
+  });
 }
 
 const RANDOM_IPFS_GATEWAY_TOTAL_WEIGHT = RANDOM_IPFS_GATEWAY_SETTING.reduce((value, item) => value + item.weight, 0);

@@ -3,16 +3,35 @@
 
 import type { Chain } from '@subwallet/extension-chains/types';
 
+import { _ChainInfo } from '@subwallet/chain-list/types';
 import { getMetadata, getMetadataRaw } from '@subwallet/extension-web-ui/messaging';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-import { useSelector } from '../../common';
+import { useGetChainInfoByGenesisHash } from '../../chain';
 
-export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Chain | null {
+interface Result {
+  chain: Chain | null;
+  loadingChain: boolean;
+}
+
+export default function useMetadata (genesisHash?: string | null, isPartial?: boolean): Result {
   const [chain, setChain] = useState<Chain | null>(null);
-  const { chainInfoMap } = useSelector((state) => state.chainStore);
+  const [loadingChain, setLoadingChain] = useState(true);
+  const _chainInfo = useGetChainInfoByGenesisHash(genesisHash || '');
+  const [chainInfo, setChainInfo] = useState<_ChainInfo | null>(_chainInfo);
+  const chainString = useMemo(() => JSON.stringify(chainInfo), [chainInfo]);
+
+  useEffect(() => {
+    const updated = JSON.stringify(_chainInfo);
+
+    if (updated !== chainString) {
+      setChainInfo(_chainInfo);
+    }
+  }, [_chainInfo, chainString]);
 
   useEffect((): void => {
+    setLoadingChain(true);
+
     if (genesisHash) {
       const getChainByMetaStore = () => {
         getMetadata(genesisHash, isPartial)
@@ -20,23 +39,30 @@ export default function useMetadata (genesisHash?: string | null, isPartial?: bo
           .catch((error): void => {
             console.error(error);
             setChain(null);
+          })
+          .finally(() => {
+            setLoadingChain(false);
           });
       };
 
-      getMetadataRaw(chainInfoMap, genesisHash).then((chain) => {
-        if (chain) {
-          setChain(chain);
-        } else {
+      getMetadataRaw(chainInfo, genesisHash)
+        .then((chain) => {
+          if (chain) {
+            setChain(chain);
+            setLoadingChain(false);
+          } else {
+            getChainByMetaStore();
+          }
+        })
+        .catch((e) => {
+          console.error(e);
           getChainByMetaStore();
-        }
-      }).catch((e) => {
-        console.error(e);
-        getChainByMetaStore();
-      });
+        });
     } else {
+      setLoadingChain(false);
       setChain(null);
     }
-  }, [chainInfoMap, genesisHash, isPartial]);
+  }, [chainInfo, genesisHash, isPartial]);
 
-  return chain;
+  return useMemo(() => ({ chain, loadingChain }), [chain, loadingChain]);
 }

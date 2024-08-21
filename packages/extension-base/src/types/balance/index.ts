@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
-import { APIItemState } from '@subwallet/extension-base/background/KoniTypes';
-import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
+import { _BalanceMetadata, APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
+import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 
-import { ApiPromise } from '@polkadot/api';
 import { BN } from '@polkadot/util';
 
 export interface TokenBalanceRaw {
@@ -14,21 +13,15 @@ export interface TokenBalanceRaw {
   free: BN
 }
 
-export interface SubstrateBalance {
-  reserved?: string,
-  miscFrozen?: string,
-  feeFrozen?: string
-}
-
 /**
  * Balance info of a token on an address
  * @property {string} address - Address
  * @property {string} tokenSlug - Slug of token
  * @property {APIItemState} state - State of information
  * @property {number} [timestamp] - Time to get information
- * @property {string} free - Free balance
- * @property {string} locked - Locked balance
- * @property {SubstrateBalance} [substrateInfo] - Substrate info of balance
+ * @property {string} free - Transferable balance
+ * @property {string} locked - Locked balance, cannot be transferred, locked here is only meaningful in the context of token transfer
+ * @property {metadata} [metadata] - Could be anything, supposed to be generic to handle various contexts
  */
 export interface BalanceItem {
   // metadata
@@ -37,12 +30,12 @@ export interface BalanceItem {
   state: APIItemState;
   timestamp?: number;
 
-  // must-have, total = free + locked
+  // must-have, total = transferable + locked
   free: string;
   locked: string;
 
   // substrate fields
-  substrateInfo?: SubstrateBalance;
+  metadata?: _BalanceMetadata;
 }
 
 /** Balance info of all tokens on an address */
@@ -60,10 +53,11 @@ export interface SubscribeBasePalletBalance {
   assetMap: Record<string, _ChainAsset>;
   chainInfo: _ChainInfo;
   callback: (rs: BalanceItem[]) => void;
+  extrinsicType?: ExtrinsicType;
 }
 
 export interface SubscribeSubstratePalletBalance extends SubscribeBasePalletBalance {
-  substrateApi: ApiPromise;
+  substrateApi: _SubstrateApi;
   includeNativeToken?: boolean;
 }
 

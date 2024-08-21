@@ -1,0 +1,51 @@
+## 1. Provider check
+## 2. Chain check
+- 2.1. Determine chain type
+  - Substrate
+  - Evm
+  - ...
+- 2.2. Check if provider match chain
+  - Substrate: check correct genesisHash.
+  - Evm: check correct chainId.
+- 2.3. Retrieve on-chain info
+  - Substrate:
+    - ss58Prefix
+    - paraChainId
+    - native token
+      - symbol
+      - decimals
+      - ED
+  - Evm:
+    - native token
+      - symbol
+      - decimals
+      - ED
+- 2.4. Validate chain info.
+  - Input: on-chain info, chain-list info.
+  - Output: true/false.
+- 2.5. Check chainlist constrains logic.
+  - If paraId: chainType = PARACHAIN else RELACHAIN.
+  - If chainType = PARACHAIN: check relaySlug else null.
+  - If chainInfo.isTesnet = True: assetInfo.hasValue = False else True.
+  - Check symbol, decimals, ED between chain and asset.
+## 3. Asset check
+- 3.4. Check chainlist asset constraints logic.
+  - Check slug:
+    - If [LOCAL, NATIVE, BRC20]: Check slug = originChain-assetType-symbol.
+    - If [RUNE]: Check slug = originChain-assetType-symbol-metadata.runeId.
+    - If [ERC20, ERC721, PSP22, PSP34, GRC20, GRC721]:
+      - Check slug = originChain-assetType-symbol-metadata.contractAddress.
+      - Check if has duplicate smartcontract.
+    - If [UNKNOWN]: ?
+  - Check group: same price => same asset group?
+  - Check asset-ref:
+    - Check slug = srcAsset___destAsset.
+    - If XCM: Check same symbol for src and dest.
+    - If SWAP: Check srcChain = destChain.
+      - If metadata.alternativeAsset: Check alternative asset symbol = src asset symbol
+  - Check multichain-asset:
+    - If has multichain-asset:
+      - Check symbol of MultichainAsset and ChainAsset match.
+      - Check price of MultichainAsset and ChainAsset match.
+  - Check metadata.assetType [moonbeam, moonbase, moonriver].
+  - Check multilocation.

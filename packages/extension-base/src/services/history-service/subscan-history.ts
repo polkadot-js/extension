@@ -103,7 +103,7 @@ export function parseSubscanTransferData (address: string, transferItem: Transfe
     amount: {
       value: transferItem.amount,
       decimals: 0,
-      symbol: transferItem.asset_symbol
+      symbol: transferItem.asset_type === 'nfts' ? 'NFT' : transferItem.asset_symbol
     },
     fee: {
       value: transferItem.fee,

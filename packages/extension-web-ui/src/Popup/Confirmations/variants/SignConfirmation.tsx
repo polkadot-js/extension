@@ -3,17 +3,22 @@
 
 import { SigningRequest } from '@subwallet/extension-base/background/types';
 import { AccountItemWithName, ConfirmationGeneralInfo, ViewDetailIcon } from '@subwallet/extension-web-ui/components';
-import { useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-web-ui/hooks';
+import { useMetadata, useOpenDetailModal, useParseSubstrateRequestPayload } from '@subwallet/extension-web-ui/hooks';
+import { enableChain } from '@subwallet/extension-web-ui/messaging';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isSubstrateMessage } from '@subwallet/extension-web-ui/utils';
+import { isRawPayload, isSubstrateMessage, noop } from '@subwallet/extension-web-ui/utils';
 import { Button } from '@subwallet/react-ui';
 import CN from 'classnames';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
+import { ExtrinsicPayload } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types';
 
+import useGetChainInfoByGenesisHash from '../../../hooks/chain/useGetChainInfoByGenesisHash';
 import { BaseDetailModal, SubstrateExtrinsic, SubstrateMessageDetail, SubstrateSignArea } from '../parts';
 
 interface Props extends ThemeProps {
@@ -22,13 +27,34 @@ interface Props extends ThemeProps {
 
 function Component ({ className, request }: Props) {
   const { account } = request;
-
   const { t } = useTranslation();
-  const payload = useParseSubstrateRequestPayload(request.request);
 
+  const { chainInfoMap, chainStateMap } = useSelector((root: RootState) => root.chainStore);
+
+  const genesisHash = useMemo(() => {
+    const _payload = request.request.payload;
+
+    return isRawPayload(_payload)
+      ? (account.originGenesisHash || chainInfoMap.polkadot.substrateInfo?.genesisHash || '')
+      : _payload.genesisHash;
+  }, [account, chainInfoMap, request]);
+
+  const { chain } = useMetadata(genesisHash);
+  const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
+  const { payload } = useParseSubstrateRequestPayload(chain, request.request);
   const onClickDetail = useOpenDetailModal();
 
-  const isMessage = isSubstrateMessage(payload);
+  const isMessage = useMemo(() => isSubstrateMessage(payload), [payload]);
+
+  useEffect(() => {
+    if (!isMessage && chainInfo) {
+      const chainState = chainStateMap[chainInfo.slug];
+
+      !chainState.active && enableChain(chainInfo.slug, false)
+        .then(noop)
+        .catch(console.error);
+    }
+  }, [chainStateMap, chainInfo, isMessage]);
 
   return (
     <>
@@ -68,12 +94,12 @@ function Component ({ className, request }: Props) {
       >
         {isMessage
           ? (
-            <SubstrateMessageDetail bytes={payload} />
+            <SubstrateMessageDetail bytes={payload as string} />
           )
           : (
             <SubstrateExtrinsic
               account={account}
-              payload={payload}
+              payload={payload as ExtrinsicPayload}
               request={request.request.payload as SignerPayloadJSON}
             />
           )

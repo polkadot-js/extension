@@ -114,20 +114,26 @@ export interface SigData {
   signature: `0x${string}`;
 }
 
+export interface SubstrateSigData extends SigData {
+  signedTransaction?: `0x${string}`;
+}
+
 export * from './account';
 export * from './balance';
 export * from './buy';
 export * from './chain';
 export * from './confirmation';
 export * from './crowdloan';
+export * from './earning';
 export * from './form';
 export * from './history';
 export * from './hook';
 export * from './ledger';
+export * from './localStorage';
+export * from './metadata';
+export * from './missionPool';
 export * from './navigation';
+export * from './scanner';
 export * from './staking';
 export * from './transaction';
 export * from './walletConnect';
-export * from './earning';
-export * from './missionPool';
-export * from './localStorage';

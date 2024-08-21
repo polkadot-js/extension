@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { CurrencyJson } from '@subwallet/extension-base/background/KoniTypes';
-import { SubstrateBalance } from '@subwallet/extension-base/types';
 import BigN from 'bignumber.js';
 
 export type BalanceValueInfo = {
@@ -13,7 +12,7 @@ export type BalanceValueInfo = {
 
 export type PriceChangeStatus = 'increase' | 'decrease';
 
-export interface TokenBalanceItemType extends SubstrateBalance {
+export interface TokenBalanceItemType {
   slug: string;
   logoKey: string;
   currency?: CurrencyJson;

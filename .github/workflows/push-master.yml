@@ -22,7 +22,7 @@ jobs:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         GH_PAT: ${{ secrets.GH_PAT }}
         GH_RELEASE_GITHUB_API_TOKEN: ${{ secrets.GH_PAT }}
-        GH_RELEASE_FILES: master-build.zip,master-src.zip
+        GH_RELEASE_FILES: master-build.zip,master-build-firefox.zip,master-src.zip
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         TRANSAK_API_KEY: ${{ secrets.TRANSAK_API_KEY }}

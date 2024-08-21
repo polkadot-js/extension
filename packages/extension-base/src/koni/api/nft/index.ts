@@ -6,6 +6,7 @@ import { NftCollection, NftItem } from '@subwallet/extension-base/background/Kon
 import { AcalaNftApi } from '@subwallet/extension-base/koni/api/nft/acala_nft';
 import AssetHubUniquesPalletApi from '@subwallet/extension-base/koni/api/nft/assethub_unique';
 import { BitCountryNftApi } from '@subwallet/extension-base/koni/api/nft/bit.country';
+import { BlobInscriptionApi } from '@subwallet/extension-base/koni/api/nft/blobinscription';
 import { EvmNftApi } from '@subwallet/extension-base/koni/api/nft/evm_nft';
 import { KaruraNftApi } from '@subwallet/extension-base/koni/api/nft/karura_nft';
 import { BaseNftApi } from '@subwallet/extension-base/koni/api/nft/nft';
@@ -23,7 +24,7 @@ import { categoryAddresses, targetIsWeb } from '@subwallet/extension-base/utils'
 import AssetHubNftsPalletApi from './assethub_nft';
 
 function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | null, addresses: string[]): BaseNftApi[] | null {
-  const [substrateAddresses] = categoryAddresses(addresses);
+  const [substrateAddresses, evmAddresses] = categoryAddresses(addresses);
 
   if (_NFT_CHAIN_GROUP.acala.includes(chain)) {
     return [new AcalaNftApi(substrateApi, substrateAddresses, chain)];
@@ -37,10 +38,14 @@ function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | nul
     return [new AssetHubUniquesPalletApi(substrateApi, substrateAddresses, chain), new AssetHubNftsPalletApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.unique_network.includes(chain)) {
     return [new UniqueNftApi(chain, substrateAddresses)];
+  } else if (_NFT_CHAIN_GROUP.unique_evm.includes(chain)) {
+    return [new UniqueNftApi(chain, evmAddresses)];
   } else if (_NFT_CHAIN_GROUP.bitcountry.includes(chain)) {
     return [new BitCountryNftApi(substrateApi, substrateAddresses, chain)];
   } else if (_NFT_CHAIN_GROUP.vara.includes(chain)) {
     return [new VaraNftApi(chain, substrateAddresses)];
+  } else if (_NFT_CHAIN_GROUP.avail.includes(chain)) {
+    return [new BlobInscriptionApi(chain, substrateAddresses)];
   }
 
   return null;
@@ -146,6 +151,14 @@ export class NftHandler {
               if (handler) {
                 this.handlers.push(handler);
               }
+            }
+          }
+
+          if (chain === 'unique_evm') {
+            const handlers = createSubstrateNftApi(chain, null, evmAddresses);
+
+            if (handlers && !!handlers.length) {
+              this.handlers.push(...handlers);
             }
           }
 

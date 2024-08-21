@@ -62,7 +62,7 @@ export default abstract class BaseNativeStakingPoolHandler extends BasePoolHandl
 
         try {
           const rs = await this.state.subscanService.getRewardHistoryList(this.chain, address);
-          const items = rs.list;
+          const items = rs?.list;
 
           if (items) {
             for (const item of items) {

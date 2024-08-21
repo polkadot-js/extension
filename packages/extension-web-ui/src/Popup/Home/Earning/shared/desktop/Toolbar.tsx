@@ -12,7 +12,7 @@ import React, { useCallback } from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps{
-  onClickFilter: VoidFunction;
+  onClickFilter?: VoidFunction;
   onSearch: (value: string) => void;
   inputPlaceholder: string;
   searchValue: string;
@@ -29,12 +29,14 @@ function Component ({ className, extraActionNode, inputPlaceholder, onClickFilte
   return (
     <div className={CN(className)}>
       <Search
-        actionBtnIcon={(
-          <Icon
-            phosphorIcon={FadersHorizontal}
-            size='sm'
-          />
-        )}
+        actionBtnIcon={onClickFilter
+          ? (
+            <Icon
+              phosphorIcon={FadersHorizontal}
+              size='sm'
+            />
+          )
+          : undefined}
         extraButton={
           (
             <>

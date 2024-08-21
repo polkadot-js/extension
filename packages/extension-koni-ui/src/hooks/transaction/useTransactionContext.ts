@@ -12,7 +12,8 @@ const useTransactionContext = <T extends TransactionFormBaseProps>() => {
     openRecheckChainConnectionModal,
     persistData,
     setBackProps,
-    setCustomScreenTitle, setSubHeaderRightButtons } = useContext(TransactionContext);
+    setCustomScreenTitle,
+    setIsDisableHeader, setSubHeaderRightButtons } = useContext(TransactionContext);
 
   return {
     defaultData: defaultData as T,
@@ -20,6 +21,7 @@ const useTransactionContext = <T extends TransactionFormBaseProps>() => {
     onDone,
     persistData,
     setSubHeaderRightButtons,
+    setIsDisableHeader,
     goBack,
     setBackProps,
     closeAlert,

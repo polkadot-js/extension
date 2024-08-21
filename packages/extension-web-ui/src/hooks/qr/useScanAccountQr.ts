@@ -1,12 +1,12 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import useOpenQrScanner from '@subwallet/extension-web-ui/hooks/qr/useOpenQrScanner';
-import { ValidateState } from '@subwallet/extension-web-ui/types';
-import { QrAccount, ScannerResult } from '@subwallet/extension-web-ui/types/scanner';
+import { isProductionMode } from '@subwallet/extension-web-ui/constants';
+import { QrAccount, ScannerResult, ValidateState } from '@subwallet/extension-web-ui/types';
 import { useCallback, useMemo } from 'react';
 
 import { useTranslation } from '../common';
+import useOpenQrScanner from './useOpenQrScanner';
 
 const useScanAccountQr = (
   modalId: string,
@@ -21,7 +21,16 @@ const useScanAccountQr = (
     const result = convertResult(val);
 
     if (result) {
-      return result;
+      if (isProductionMode && result.isEthereum) {
+        setValidateState({
+          message: t('Invalid QR code. EVM networks are not supported'),
+          status: 'error'
+        });
+
+        return null;
+      } else {
+        return result;
+      }
     } else {
       setValidateState({
         message: t('Invalid QR code'),

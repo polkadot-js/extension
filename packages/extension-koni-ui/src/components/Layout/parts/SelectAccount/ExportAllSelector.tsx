@@ -34,8 +34,12 @@ const filterOptions = [
     value: AccountSignMode.QR
   },
   {
-    label: 'Ledger account',
-    value: AccountSignMode.LEDGER
+    label: 'Ledger legacy account',
+    value: AccountSignMode.LEGACY_LEDGER
+  },
+  {
+    label: 'Ledger generic account',
+    value: AccountSignMode.GENERIC_LEDGER
   },
   {
     label: 'Watch-only account',
@@ -87,7 +91,9 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
           return true;
         }
 
-        if (filter === AccountSignMode.LEDGER && signMode === AccountSignMode.LEDGER) {
+        if (filter === AccountSignMode.LEGACY_LEDGER && signMode === AccountSignMode.LEGACY_LEDGER) {
+          return true;
+        } else if (filter === AccountSignMode.GENERIC_LEDGER && signMode === AccountSignMode.GENERIC_LEDGER) {
           return true;
         } else if (filter === AccountSignMode.QR && signMode === AccountSignMode.QR) {
           return true;

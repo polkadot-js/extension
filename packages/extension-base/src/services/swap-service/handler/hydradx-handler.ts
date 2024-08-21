@@ -7,15 +7,16 @@ import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType, ChainType, ExtrinsicType, RequestChangeFeeToken, RequestCrossChainTransfer } from '@subwallet/extension-base/background/KoniTypes';
-import { createXcmExtrinsic } from '@subwallet/extension-base/koni/api/xcm';
+import { _getEarlyHydradxValidationError } from '@subwallet/extension-base/core/logic-validation/swap';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
+import { createXcmExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/xcm';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getChainNativeTokenSlug, _getTokenOnChainAssetId, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
 import { SwapBaseHandler, SwapBaseInterface } from '@subwallet/extension-base/services/swap-service/handler/base-handler';
-import { calculateSwapRate, getEarlyHydradxValidationError, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
+import { calculateSwapRate, getSwapAlternativeAsset, SWAP_QUOTE_TIMEOUT_MAP } from '@subwallet/extension-base/services/swap-service/utils';
 import { RuntimeDispatchInfo } from '@subwallet/extension-base/types';
-import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeComponent, SwapFeeInfo, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { BaseStepDetail, CommonFeeComponent, CommonOptimalPath, CommonStepFeeInfo, CommonStepType } from '@subwallet/extension-base/types/service-base';
+import { HydradxPreValidationMetadata, HydradxSwapTxData, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapProviderId, SwapQuote, SwapRequest, SwapRoute, SwapStepType, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import BigNumber from 'bignumber.js';
 
 import { SubmittableExtrinsic } from '@polkadot/api/types';
@@ -33,14 +34,16 @@ export class HydradxHandler implements SwapBaseInterface {
   private tradeRouter: TradeRouter | undefined;
   private readonly isTestnet: boolean = true;
   public isReady = false;
+  providerSlug: SwapProviderId;
 
   constructor (chainService: ChainService, balanceService: BalanceService, isTestnet = true) {
     this.swapBaseHandler = new SwapBaseHandler({
       balanceService,
       chainService,
-      providerName: isTestnet ? 'HydraDX Testnet' : 'HydraDX',
+      providerName: isTestnet ? 'Hydration Testnet' : 'Hydration',
       providerSlug: isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET
     });
+    this.providerSlug = isTestnet ? SwapProviderId.HYDRADX_TESTNET : SwapProviderId.HYDRADX_MAINNET;
 
     this.isTestnet = isTestnet;
   }
@@ -90,11 +93,11 @@ export class HydradxHandler implements SwapBaseInterface {
     return this.swapBaseHandler.slug;
   }
 
-  async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getXcmStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined> {
     const bnAmount = new BigNumber(params.request.fromAmount);
     const fromAsset = this.chainService.getAssetBySlug(params.request.pair.from);
 
-    const fromAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
+    const fromAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, fromAsset.originChain, fromAsset.slug);
 
     const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
 
@@ -109,7 +112,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
 
     const alternativeAsset = this.chainService.getAssetBySlug(alternativeAssetSlug);
-    const alternativeAssetBalance = await this.balanceService.getTokenFreeBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
+    const alternativeAssetBalance = await this.balanceService.getTransferableBalance(params.request.address, alternativeAsset.originChain, alternativeAsset.slug);
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
 
     if (bnAlternativeAssetBalance.lte(0)) {
@@ -125,7 +128,7 @@ export class HydradxHandler implements SwapBaseInterface {
           destinationTokenInfo: fromAsset
         },
         name: `Transfer ${alternativeAsset.symbol} from ${alternativeChainInfo.name}`,
-        type: SwapStepType.XCM
+        type: CommonStepType.XCM
       };
 
       const xcmOriginSubstrateApi = await this.chainService.getSubstrateApi(alternativeAsset.originChain).isReady;
@@ -142,7 +145,7 @@ export class HydradxHandler implements SwapBaseInterface {
       const _xcmFeeInfo = await xcmTransfer.paymentInfo(params.request.address);
       const xcmFeeInfo = _xcmFeeInfo.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      const fee: SwapFeeInfo = {
+      const fee: CommonStepFeeInfo = {
         feeComponent: [{
           feeType: SwapFeeType.NETWORK_FEE,
           amount: Math.round(xcmFeeInfo.partialFee * 1.2).toString(),
@@ -158,7 +161,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
-  async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getFeeOptionStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined> {
     if (!params.selectedQuote) {
       return Promise.resolve(undefined);
     }
@@ -171,7 +174,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const feeStep: BaseStepDetail = {
       name: 'Set fee token',
-      type: SwapStepType.SET_FEE_TOKEN
+      type: CommonStepType.SET_FEE_TOKEN
     };
 
     try {
@@ -192,7 +195,7 @@ export class HydradxHandler implements SwapBaseInterface {
       const _txFee = await setFeeTx.paymentInfo(params.request.address);
       const txFee = _txFee.toPrimitive() as unknown as RuntimeDispatchInfo;
 
-      const fee: SwapFeeInfo = {
+      const fee: CommonStepFeeInfo = {
         feeComponent: [{
           feeType: SwapFeeType.NETWORK_FEE,
           amount: Math.round(txFee.partialFee).toString(),
@@ -212,7 +215,7 @@ export class HydradxHandler implements SwapBaseInterface {
     }
   }
 
-  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, SwapFeeInfo] | undefined> {
+  async getSubmitStep (params: OptimalSwapPathParams): Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined> {
     if (params.selectedQuote) {
       const submitStep = {
         name: 'Swap',
@@ -225,7 +228,7 @@ export class HydradxHandler implements SwapBaseInterface {
     return Promise.resolve(undefined);
   }
 
-  generateOptimalProcess (params: OptimalSwapPathParams): Promise<OptimalSwapPath> {
+  generateOptimalProcess (params: OptimalSwapPathParams): Promise<CommonOptimalPath> {
     return this.swapBaseHandler.generateOptimalProcess(params, [
       this.getXcmStep,
       // this.getFeeOptionStep.bind(this),
@@ -287,7 +290,7 @@ export class HydradxHandler implements SwapBaseInterface {
     if (earlyValidation.error) {
       const metadata = earlyValidation.metadata as HydradxPreValidationMetadata;
 
-      return getEarlyHydradxValidationError(earlyValidation.error, metadata);
+      return _getEarlyHydradxValidationError(earlyValidation.error, metadata);
     }
 
     try {
@@ -306,13 +309,13 @@ export class HydradxHandler implements SwapBaseInterface {
       const extrinsic = substrateApi.api.tx(txHex);
       const paymentInfo = await extrinsic.paymentInfo(request.address);
 
-      const networkFee: SwapFeeComponent = {
+      const networkFee: CommonFeeComponent = {
         tokenSlug: fromChainNativeTokenSlug,
         amount: paymentInfo.partialFee.toString(),
         feeType: SwapFeeType.NETWORK_FEE
       };
 
-      const tradeFee: SwapFeeComponent = {
+      const tradeFee: CommonFeeComponent = {
         tokenSlug: toAsset.slug, // fee is subtracted from receiving amount
         amount: quoteResponse.tradeFee.toString(),
         feeType: SwapFeeType.PLATFORM_FEE
@@ -381,7 +384,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
     const chainApi = await substrateApi.isReady;
 
-    const destinationAssetBalance = await this.balanceService.getTokenFreeBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
+    const destinationAssetBalance = await this.balanceService.getTransferableBalance(params.address, destinationAsset.originChain, destinationAsset.slug);
     const xcmFee = params.process.totalFee[params.currentStep];
 
     const bnAmount = new BigNumber(params.quote.fromAmount);
@@ -481,8 +484,8 @@ export class HydradxHandler implements SwapBaseInterface {
     const referral = _referral?.toString();
     const needSetReferral = !referral || referral === '';
 
-    const steps = params.process.steps.map((step) => step.type as SwapStepType);
-    const needSetFeeToken = steps.includes(SwapStepType.SET_FEE_TOKEN);
+    const steps = params.process.steps.map((step) => step.type);
+    const needSetFeeToken = steps.includes(CommonStepType.SET_FEE_TOKEN);
 
     if (!needSetReferral && !needSetFeeToken) {
       extrinsic = swapTx;
@@ -516,11 +519,11 @@ export class HydradxHandler implements SwapBaseInterface {
     const type = process.steps[currentStep].type;
 
     switch (type) {
-      case SwapStepType.DEFAULT:
+      case CommonStepType.DEFAULT:
         return Promise.reject(new TransactionError(BasicTxErrorType.UNSUPPORTED));
-      case SwapStepType.XCM:
+      case CommonStepType.XCM:
         return this.handleXcmStep(params);
-      case SwapStepType.SET_FEE_TOKEN:
+      case CommonStepType.SET_FEE_TOKEN:
         return this.handleSetFeeStep(params);
       case SwapStepType.SWAP:
         return this.handleSubmitStep(params);
@@ -542,11 +545,11 @@ export class HydradxHandler implements SwapBaseInterface {
     for (const [index, step] of params.process.steps.entries()) {
       const getErrors = async (): Promise<TransactionError[]> => {
         switch (step.type) {
-          case SwapStepType.DEFAULT:
+          case CommonStepType.DEFAULT:
             return Promise.resolve([]);
-          case SwapStepType.XCM:
+          case CommonStepType.XCM:
             return this.swapBaseHandler.validateXcmStep(params, index);
-          case SwapStepType.SET_FEE_TOKEN:
+          case CommonStepType.SET_FEE_TOKEN:
             return this.swapBaseHandler.validateSetFeeTokenStep(params, index);
           default:
             return this.swapBaseHandler.validateSwapStep(params, isXcmOk, index);
@@ -557,7 +560,7 @@ export class HydradxHandler implements SwapBaseInterface {
 
       if (errors.length) {
         return errors;
-      } else if (step.type === SwapStepType.XCM) {
+      } else if (step.type === CommonStepType.XCM) {
         isXcmOk = true;
       }
     }

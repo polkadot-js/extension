@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 interface Props extends ThemeProps {
-  type?: 'info' | 'warning';
+  type?: 'info' | 'warning' | 'error';
   title: string;
   description: React.ReactNode;
 }
@@ -85,6 +85,15 @@ const AlertBox = styled(Component)<Props>(({ theme: { token } }: Props) => {
 
       '.alert-title': {
         color: token.colorWarning
+      }
+    },
+
+    '&.type-error': {
+      '--bg-color': getAlphaColor(token.colorError, 0.1),
+      '--icon-color': token.colorError,
+
+      '.alert-title': {
+        color: token.colorError
       }
     }
   };

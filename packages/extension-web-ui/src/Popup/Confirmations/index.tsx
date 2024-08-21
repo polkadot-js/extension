@@ -6,16 +6,17 @@ import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertModal } from '@subwallet/extension-web-ui/components';
-import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-web-ui/constants';
+import { isProductionMode, NEED_SIGN_CONFIRMATION } from '@subwallet/extension-web-ui/constants';
 import { useAlert, useConfirmationsInfo, useSelector } from '@subwallet/extension-web-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-web-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { isRawPayload } from '@subwallet/extension-web-ui/utils';
+import { AccountSignMode, ThemeProps } from '@subwallet/extension-web-ui/types';
+import { getSignMode, isRawPayload } from '@subwallet/extension-web-ui/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { ConfirmationHeader } from './parts';
 import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
@@ -70,14 +71,20 @@ const Component = function ({ className }: Props) {
         const _isMessage = isRawPayload(request.request.payload);
 
         account = request.account;
+        const isEthereum = isEthereumAddress(account.address);
 
         if (account.isHardware) {
-          if (_isMessage) {
-            canSign = false;
+          if (account.isGeneric) {
+            canSign = !isEthereum;
           } else {
-            const payload = request.request.payload as SignerPayloadJSON;
+            if (_isMessage) {
+              canSign = true;
+            } else {
+              const payload = request.request.payload as SignerPayloadJSON;
 
-            canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+              // Valid even with evm ledger account (evm - availableGenesisHashes is empty)
+              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+            }
           }
         } else {
           canSign = true;
@@ -92,7 +99,15 @@ const Component = function ({ className }: Props) {
         isMessage = confirmation.type === 'evmSignatureRequest';
       }
 
-      if (account?.isReadOnly || !canSign) {
+      const signMode = getSignMode(account);
+      const isEvm = isEthereumAddress(account?.address);
+
+      const notSupport = signMode === AccountSignMode.READ_ONLY ||
+        signMode === AccountSignMode.UNKNOWN ||
+        (signMode === AccountSignMode.QR && isEvm && isProductionMode) ||
+        !canSign;
+
+      if (notSupport) {
         return (
           <NotSupportConfirmation
             account={account}
@@ -123,13 +138,6 @@ const Component = function ({ className }: Props) {
         return (
           <EvmSignatureConfirmation
             request={confirmation.item as ConfirmationDefinitions['evmSignatureRequest'][0]}
-            type={confirmation.type}
-          />
-        );
-      case 'evmWatchTransactionRequest':
-        return (
-          <EvmTransactionConfirmation
-            request={confirmation.item as ConfirmationDefinitions['evmWatchTransactionRequest'][0]}
             type={confirmation.type}
           />
         );
@@ -235,7 +243,7 @@ const Component = function ({ className }: Props) {
           return t('Stake compound confirm');
         case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
           return t('Cancel compound confirm');
-        case ExtrinsicType.TOKEN_APPROVE:
+        case ExtrinsicType.TOKEN_SPENDING_APPROVAL:
           return t('Token approve');
         case ExtrinsicType.SWAP:
           return t('Swap confirmation');

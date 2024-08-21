@@ -104,7 +104,7 @@ const mortalityAsString = (era: ExtrinsicEra, hexBlockNumber: string, t: TFuncti
 
 const Component: React.FC<Props> = ({ account, className, payload: { era, nonce, tip }, request: { blockNumber, genesisHash, method, specVersion: hexSpec } }: Props) => {
   const { t } = useTranslation();
-  const chain = useMetadata(genesisHash);
+  const { chain } = useMetadata(genesisHash);
   const chainInfo = useGetChainInfoByGenesisHash(genesisHash);
   const specVersion = useRef(bnToBn(hexSpec)).current;
   const decoded = useMemo(
@@ -113,6 +113,8 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
       : { args: null, method: null },
     [method, chain, specVersion]
   );
+
+  console.debug('tip', tip);
 
   return (
     <MetaInfo className={className}>
@@ -151,7 +153,7 @@ const Component: React.FC<Props> = ({ account, className, payload: { era, nonce,
           decimals={chainInfo?.substrateInfo?.decimals || 0}
           label={t<string>('Tip')}
           suffix={chainInfo?.substrateInfo?.symbol}
-          value={tip.toNumber()}
+          value={tip.toPrimitive() as string | number}
         />
       )}
       {renderMethod(method, decoded, t)}

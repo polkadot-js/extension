@@ -69,7 +69,11 @@ export const getSignMode = (account: AccountJson | null | undefined): AccountSig
 
       if (account.isExternal) {
         if (account.isHardware) {
-          return AccountSignMode.LEDGER;
+          if (account.isGeneric) {
+            return AccountSignMode.GENERIC_LEDGER;
+          } else {
+            return AccountSignMode.LEGACY_LEDGER;
+          }
         } else if (account.isReadOnly) {
           return AccountSignMode.READ_ONLY;
         } else {
@@ -170,4 +174,14 @@ export const convertKeyTypes = (authTypes: AccountAuthType[]): KeypairType[] => 
   const _rs = uniqueStringArray(result) as KeypairType[];
 
   return _rs.length ? _rs : DEFAULT_ACCOUNT_TYPES;
+};
+
+type LedgerMustCheckType = 'polkadot' | 'migration' | 'unnecessary'
+
+export const ledgerMustCheckNetwork = (account: AccountJson | null): LedgerMustCheckType => {
+  if (account && account.isHardware && account.isGeneric && !isEthereumAddress(account.address)) {
+    return account.originGenesisHash ? 'migration' : 'polkadot';
+  } else {
+    return 'unnecessary';
+  }
 };

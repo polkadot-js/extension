@@ -2,14 +2,17 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { BalanceError } from '@subwallet/extension-base/background/errors/BalanceError';
-import { AmountData, BalanceErrorType, DetectBalanceCache } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BalanceErrorType, DetectBalanceCache, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { _isXcmWithinSameConsensus } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
+import { getDefaultTransferProcess, getSnowbridgeTransferProcessFromEvm, RequestOptimalTransferProcess } from '@subwallet/extension-base/services/balance-service/helpers/process';
 import { ServiceStatus, StoppableServiceInterface } from '@subwallet/extension-base/services/base/types';
-import { _getChainNativeTokenSlug } from '@subwallet/extension-base/services/chain-service/utils';
+import { _getChainNativeTokenSlug, _isPureEvmChain } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
 import DetectAccountBalanceStore from '@subwallet/extension-base/stores/DetectAccountBalance';
 import { BalanceItem, BalanceJson } from '@subwallet/extension-base/types';
+import { CommonOptimalPath } from '@subwallet/extension-base/types/service-base';
 import { addLazy, createPromiseHandler, isAccountAll, PromiseHandler, waitTimeout } from '@subwallet/extension-base/utils';
 import keyring from '@subwallet/ui-keyring';
 import { t } from 'i18next';
@@ -183,8 +186,8 @@ export class BalanceService implements StoppableServiceInterface {
     });
   }
 
-  /** Subscribe token free balance of a address on chain */
-  public async subscribeTokenFreeBalance (address: string, chain: string, tokenSlug: string | undefined, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
+  /** Subscribe token free balance of an address on chain */
+  public async subscribeTransferableBalance (address: string, chain: string, tokenSlug: string | undefined, extrinsicType?: ExtrinsicType, callback?: (rs: AmountData) => void): Promise<[() => void, AmountData]> {
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
     const chainState = this.state.chainService.getChainStateByKey(chain);
 
@@ -214,10 +217,11 @@ export class BalanceService implements StoppableServiceInterface {
 
         if (rs.tokenSlug === tSlug) {
           hasError = false;
-          const balance = {
+          const balance: AmountData = {
             value: rs.free,
             decimals: tokenInfo.decimals || 0,
-            symbol: tokenInfo.symbol
+            symbol: tokenInfo.symbol,
+            metadata: rs.metadata
           };
 
           if (callback) {
@@ -229,7 +233,7 @@ export class BalanceService implements StoppableServiceInterface {
 
           resolve([unsub, balance]);
         }
-      });
+      }, extrinsicType);
 
       setTimeout(() => {
         if (hasError) {
@@ -243,15 +247,16 @@ export class BalanceService implements StoppableServiceInterface {
   /**
    * @public
    * @async
-   * @function getTokenFreeBalance
+   * @function getTransferableBalance
    * @desc Fetch free balance on chain
    * @param {string} address - Address
    * @param {string} chain - Slug of chain
    * @param {string} [tokenSlug] - Slug of token
+   * @param extrinsicType - Customize transferable based on context
    * @return {Promise<AmountData>} - Free token balance of address on chain
-  */
-  public async getTokenFreeBalance (address: string, chain: string, tokenSlug?: string): Promise<AmountData> {
-    const [, balance] = await this.subscribeTokenFreeBalance(address, chain, tokenSlug);
+   */
+  public async getTransferableBalance (address: string, chain: string, tokenSlug?: string, extrinsicType?: ExtrinsicType): Promise<AmountData> {
+    const [, balance] = await this.subscribeTransferableBalance(address, chain, tokenSlug, extrinsicType);
 
     return balance;
   }
@@ -366,7 +371,7 @@ export class BalanceService implements StoppableServiceInterface {
 
     const unsub = subscribeBalance(addresses, activeChainSlugs, assets, assetMap, chainInfoMap, substrateApiMap, evmApiMap, (result) => {
       !cancel && this.setBalanceItem(result);
-    });
+    }, ExtrinsicType.TRANSFER_BALANCE);
 
     const unsub2 = this.state.subscribeMantaPayBalance();
 
@@ -505,5 +510,26 @@ export class BalanceService implements StoppableServiceInterface {
     this._intervalScan = undefined;
     this._unsubscribeBalanceDetectCache = undefined;
     this.startBalanceDetectCache = undefined;
+  }
+
+  // process
+  public async getOptimalTransferProcess (params: RequestOptimalTransferProcess): Promise<CommonOptimalPath> {
+    const originChainInfo = this.state.chainService.getChainInfoByKey(params.originChain);
+
+    if (!params.destChain) { // normal transfers
+      return getDefaultTransferProcess();
+    }
+
+    const destChainInfo = this.state.chainService.getChainInfoByKey(params.destChain);
+
+    // xcm
+    if (!_isXcmWithinSameConsensus(originChainInfo, destChainInfo) && _isPureEvmChain(originChainInfo)) {
+      const evmApi = this.state.chainService.getEvmApi(originChainInfo.slug);
+      const tokenInfo = this.state.chainService.getAssetBySlug(params.tokenSlug);
+
+      return getSnowbridgeTransferProcessFromEvm(params.address, evmApi, tokenInfo, params.amount);
+    }
+
+    return getDefaultTransferProcess();
   }
 }

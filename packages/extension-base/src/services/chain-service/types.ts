@@ -3,15 +3,18 @@
 
 /* eslint @typescript-eslint/no-empty-interface: "off" */
 
+import type { ApiInterfaceRx } from '@polkadot/api/types';
+
 import { _AssetRef, _AssetType, _ChainAsset, _ChainInfo, _CrowdloanFund } from '@subwallet/chain-list/types';
 import { _CHAIN_VALIDATION_ERROR } from '@subwallet/extension-base/services/chain-service/handler/types';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import Web3 from 'web3';
 
 import { ApiPromise } from '@polkadot/api';
+import { Getters } from '@polkadot/api/base/Getters';
 import { SubmittableExtrinsicFunction } from '@polkadot/api/promise/types';
-import { ChainProperties, ChainType } from '@polkadot/types/interfaces';
-import { Registry } from '@polkadot/types/types';
+import { ChainProperties, ChainType, RuntimeVersion } from '@polkadot/types/interfaces';
+import { AnyJson, Registry } from '@polkadot/types/types';
 
 export interface _DataMap {
   chainInfoMap: Record<string, _ChainInfo>,
@@ -25,6 +28,12 @@ export enum _ChainConnectionStatus {
   DISCONNECTED = 'DISCONNECTED',
   UNSTABLE = 'UNSTABLE',
   CONNECTING = 'CONNECTING',
+}
+
+export interface ReportRpc {
+  runningRpc: Record<string, string>,
+  unstableRpc: Record<string, string>,
+  dieRpc: Record<string, string>
 }
 
 export interface _ChainState {
@@ -80,16 +89,36 @@ export interface _SubstrateApiState {
   defaultFormatBalance?: _SubstrateDefaultFormatBalance;
 }
 
-export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi {
+export interface _SubstrateApi extends _SubstrateApiState, _ChainBaseApi, _SubstrateApiAdapter {
   api: ApiPromise;
   isReady: Promise<_SubstrateApi>;
+  connect: (_callbackUpdateMetadata?: (substrateApi: _SubstrateApi) => void) => void;
 
   specName: string;
   specVersion: string;
   systemChain: string;
   systemName: string;
   systemVersion: string;
-  registry: Registry;
+  registry?: Registry;
+
+  useLightClient: boolean;
+}
+
+export interface _SubstrateAdapterQueryArgs {
+  section: keyof Getters<'promise'>,
+  module?: string,
+  method?: string,
+  args?: unknown[]
+}
+
+export interface _SubstrateAdapterSubscriptionArgs extends Omit<Required<_SubstrateAdapterQueryArgs>, 'section'> {
+  section: keyof Pick<ApiInterfaceRx, 'query'>,
+  isMultiQuery?: boolean
+}
+
+export interface _SubstrateApiAdapter {
+  makeRpcQuery<T extends AnyJson | `0x${string}` | Registry | RuntimeVersion>(params: _SubstrateAdapterQueryArgs): Promise<T>,
+  subscribeDataWithMulti(params: _SubstrateAdapterSubscriptionArgs[], callback: (rs: Record<string, AnyJson[]>) => void): Subscription
 }
 
 export interface _EvmApi extends _ChainBaseApi {
@@ -163,7 +192,8 @@ export interface _ValidateCustomAssetResponse extends _SmartContractTokenInfo {
 export const _FUNGIBLE_CONTRACT_STANDARDS = [
   _AssetType.ERC20,
   _AssetType.PSP22,
-  _AssetType.GRC20
+  _AssetType.GRC20,
+  _AssetType.VFT
 ];
 
 export const _NFT_CONTRACT_STANDARDS = [

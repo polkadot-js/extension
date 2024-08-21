@@ -1,6 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { useGetBalance } from '@subwallet/extension-web-ui/hooks';
 import useTranslation from '@subwallet/extension-web-ui/hooks/common/useTranslation';
 import { Theme, ThemeProps } from '@subwallet/extension-web-ui/types';
@@ -17,13 +18,14 @@ type Props = ThemeProps & {
   onBalanceReady?: (rs: boolean) => void;
   hidden?: boolean;
   isSubscribe?: boolean;
+  extrinsicType?: ExtrinsicType;
 }
 
-const Component = ({ address, chain, className, hidden, isSubscribe, label, onBalanceReady,
+const Component = ({ address, chain, className, extrinsicType, hidden, isSubscribe, label, onBalanceReady,
   tokenSlug }: Props) => {
   const { t } = useTranslation();
   const { token } = useTheme() as Theme;
-  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe);
+  const { error, isLoading, nativeTokenBalance, nativeTokenSlug, tokenBalance } = useGetBalance(chain, address, tokenSlug, isSubscribe, extrinsicType);
 
   useEffect(() => {
     onBalanceReady?.(!isLoading && !error);

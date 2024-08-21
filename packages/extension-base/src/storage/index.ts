@@ -151,7 +151,7 @@ export class SWStorage {
   async copy (): Promise<Record<string, string>> {
     !this.isReady && await this.waitReady;
 
-    return JSON.parse(JSON.stringify(this._storage)) as Record<string, string>;
+    return Promise.resolve(JSON.parse(JSON.stringify(this._storage)) as Record<string, string>);
   }
 
   async sync () {

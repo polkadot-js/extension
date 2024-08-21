@@ -16,7 +16,10 @@ describe('test chain provider', () => {
   });
 
   it('substrate provider', async () => {
-    const chainList = Object.values(ChainInfoMap).filter((info) => info.chainStatus === _ChainStatus.ACTIVE && !!info.substrateInfo);
+    const chainList = Object.values(ChainInfoMap).filter((info) =>
+      info.chainStatus === _ChainStatus.ACTIVE && !!info.substrateInfo
+      // && ['westend', 'edgeware', 'interlay', 'basilisk', 'zeitgeist', 'logion', 'phykenTest'].includes(info.slug)
+    );
 
     const errorProvider: Record<string, Array<[string, string, string]>> = {};
     const timeoutProvider: Record<string, Array<[string, string]>> = {};

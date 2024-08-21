@@ -117,7 +117,7 @@ export default class InterlayLendingPoolHandler extends BaseLendingPoolHandler {
       for (let i = 0; i < balances.length; i++) {
         const balanceItem = balances[i];
         const address = useAddresses[i];
-        const bnActiveBalance = balanceItem.free || BN_ZERO;
+        const bnActiveBalance = balanceItem.reserved || BN_ZERO;
         const bnTotalBalance = bnActiveBalance.mul(new BN(exchangeRate)).div(decimals);
 
         const result: LendingYieldPositionInfo = {

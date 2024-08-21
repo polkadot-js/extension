@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { YieldPoolType } from '@subwallet/extension-base/types';
 import { BN_TEN } from '@subwallet/extension-base/utils';
 import { NetworkTag } from '@subwallet/extension-koni-ui/components';
 import EarningTypeTag from '@subwallet/extension-koni-ui/components/Earning/EarningTypeTag';
@@ -34,10 +33,6 @@ const Component: React.FC<Props> = (props: Props) => {
   const { assetRegistry, multiChainAssetMap } = useSelector((state) => state.assetRegistry);
   const poolInfo = poolInfoMap[slug];
 
-  const showSubLogo = useMemo(() => {
-    return ![YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(type);
-  }, [type]);
-
   const poolName = useMemo(() => {
     return (multiChainAssetMap[group] || assetRegistry[group]).symbol;
   }, [assetRegistry, group, multiChainAssetMap]);
@@ -64,7 +59,7 @@ const Component: React.FC<Props> = (props: Props) => {
       <div className={'__item-left-part'}>
         <Logo
           className={'__item-logo'}
-          isShowSubLogo={showSubLogo}
+          isShowSubLogo={true}
           size={40}
           subNetwork={poolInfo.metadata.logo || poolInfo.chain}
           token={balanceToken.toLowerCase()}

@@ -10,7 +10,7 @@ export abstract class Ledger {
 
   abstract getVersion (): Promise<LedgerVersion>;
 
-  abstract signTransaction (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature>;
+  abstract signTransaction (message: Uint8Array, metadata: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature>;
   abstract signMessage (message: Uint8Array, accountOffset?: number, addressOffset?: number, accountOptions?: Partial<AccountOptions>): Promise<LedgerSignature>;
   abstract disconnect (): Promise<void>;
 }

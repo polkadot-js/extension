@@ -55,6 +55,12 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
     );
   }, []);
 
+  const handleValidatorLabel = useMemo(() => {
+    const label = getValidatorLabel(chain);
+
+    return label !== 'dApp' ? label.toLowerCase() : label;
+  }, [chain]);
+
   const renderSelected = useCallback(
     (item: NominationInfo) => {
       return (
@@ -105,7 +111,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         renderWhenEmpty={renderEmpty}
         searchFunction={searchFunction}
         searchMinCharactersCount={2}
-        searchPlaceholder={t<string>(`Search ${getValidatorLabel(chain)}`)}
+        searchPlaceholder={t<string>(`Search ${handleValidatorLabel}`)}
         selected={value || ''}
         statusHelp={statusHelp}
         title={label || placeholder || t('Select validator')}

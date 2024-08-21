@@ -8,6 +8,7 @@ import storage from 'redux-persist/lib/storage';
 import AccountStateReducer from './base/AccountState';
 import RequestStateReducer from './base/RequestState';
 import SettingsReducer from './base/Settings';
+import StaticContentReducer from './base/StaticContent';
 import UIViewStateReducer from './base/UIViewState';
 import BalanceReducer from './feature/Balance';
 import BondingReducer from './feature/Bonding';
@@ -35,7 +36,8 @@ const persistConfig = {
     'uiViewState',
     'staking',
     'campaign',
-    'buyService'
+    'buyService',
+    'staticContent'
   ]
 };
 
@@ -63,6 +65,7 @@ const rootReducers = combineReducers({
   settings: SettingsReducer,
   accountState: AccountStateReducer,
   uiViewState: UIViewStateReducer,
+  staticContent: StaticContentReducer,
 
   // wallet connect
   walletConnect: WalletConnectReducer,

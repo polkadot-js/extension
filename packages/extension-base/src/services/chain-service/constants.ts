@@ -37,7 +37,7 @@ export const _BALANCE_CHAIN_GROUP = {
   statemine: ['statemine', 'astar', 'shiden', 'statemint', 'moonbeam', 'moonbase', 'moonriver', 'crabParachain', 'darwinia2', 'parallel', 'calamari', 'manta_network', 'rococo_assethub', 'liberlandTest', 'liberland', 'dentnet', 'pangolin', 'crust', 'phala', 'shibuya', 'dbcchain'],
   kusama: ['kusama', 'kintsugi', 'kintsugi_test', 'interlay', 'acala', 'statemint', 'karura', 'bifrost'], // perhaps there are some runtime updates
   centrifuge: ['centrifuge'],
-  supportBridged: ['rococo_assethub']
+  supportBridged: ['rococo_assethub', 'statemint', 'statemine']
 };
 
 export const _BALANCE_TOKEN_GROUP = {
@@ -52,8 +52,10 @@ export const _NFT_CHAIN_GROUP = {
   statemine: ['statemine'],
   statemint: ['statemint'],
   unique_network: ['unique_network', 'quartz', 'opal'],
+  unique_evm: ['unique_evm'],
   bitcountry: ['bitcountry', 'pioneer', 'continuum_network'],
-  vara: ['vara_network']
+  vara: ['vara_network'],
+  avail: ['avail_mainnet']
 };
 
 // Staking--------------------------------------------------------------------------------------------------------------
@@ -128,7 +130,8 @@ export const _EXPECTED_BLOCK_TIME: Record<string, number> = { // in seconds
   manta_network: 12,
   enjin_relaychain: 6,
   availTuringTest: 20,
-  avail_mainnet: 20
+  avail_mainnet: 20,
+  dentnet: 3
 };
 
 export const _PARACHAIN_INFLATION_DISTRIBUTION: Record<string, Record<string, number>> = {
@@ -211,7 +214,9 @@ export const _KNOWN_CHAIN_INFLATION_PARAMS: Record<string, _SubstrateInflationPa
   nft_mart: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.04, stakeTarget: 0.60 },
   polkadot: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.75 },
   vara_network: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
-  vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 }
+  vara_testnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, stakeTarget: 0.8 },
+  avail_mainnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, maxInflation: 0.05, minInflation: 0.01 },
+  dentnet: { ..._SUBSTRATE_DEFAULT_INFLATION_PARAMS, falloff: 0.5 }
 };
 
 // Send fund------------------------------------------------------------------------------------------------------------
@@ -246,8 +251,8 @@ export const _DEFAULT_MANTA_ZK_CHAIN = 'calamari';
 // XCM------------------------------------------------------------------------------------------------------------------
 
 export const _XCM_CHAIN_GROUP = {
-  polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint', 'equilibrium_parachain'],
-  xcmPallet: ['polkadot', 'kusama']
+  polkadotXcm: ['astar', 'shiden', 'statemine', 'statemint', 'equilibrium_parachain', 'rococo_assethub', 'mythos'],
+  xcmPallet: ['polkadot', 'kusama', 'rococo']
   // default is xTokens pallet
 };
 
@@ -266,7 +271,8 @@ export const EVM_PASS_CONNECT_STATUS: Record<string, string[]> = {
   arbitrum_one: ['*'],
   okxTest: ['*'],
   astarZkEvm: ['*'],
-  xlayer: ['*']
+  xlayer: ['*'],
+  aleph_evm: ['*']
 };
 
 export const EVM_REFORMAT_DECIMALS = {

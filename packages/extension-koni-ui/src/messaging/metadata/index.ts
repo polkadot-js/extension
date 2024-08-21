@@ -8,9 +8,9 @@ import { metadataExpand } from '@subwallet/extension-chains';
 import { Chain } from '@subwallet/extension-chains/types';
 import { MetadataDef } from '@subwallet/extension-inject/types';
 import { sendMessage } from '@subwallet/extension-koni-ui/messaging/base';
-import { _getKnownHashes, _getKnownNetworks, findChainInfoByGenesisHash } from '@subwallet/extension-koni-ui/utils';
+import { _getKnownHashes, _getKnownNetworks } from '@subwallet/extension-koni-ui/utils';
 
-import { HexString } from '@polkadot/util/types';
+import { base64Encode } from '@polkadot/util-crypto';
 
 import { getSavedMeta, setSavedMeta } from './MetadataCache';
 
@@ -54,24 +54,24 @@ export async function getMetadata (genesisHash?: string | null, isPartial = fals
   return null;
 }
 
-export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, genesisHash?: string | null): Promise<Chain | null> {
+export async function getMetadataRaw (chainInfo: _ChainInfo | null, genesisHash?: string | null): Promise<Chain | null> {
   if (!genesisHash) {
     return null;
   }
 
-  const { rawMetadata, specVersion } = await sendMessage('pri(metadata.find)', { genesisHash });
+  const data = await sendMessage('pri(metadata.find)', { genesisHash });
+
+  const { rawMetadata, specVersion } = data;
 
   if (!rawMetadata) {
     return null;
   }
 
-  const chainInfo = findChainInfoByGenesisHash(chainInfoMap, genesisHash);
-
   if (!chainInfo) {
     return null;
   }
 
-  const registry = createRegistry(chainInfo, rawMetadata as HexString);
+  const registry = createRegistry(chainInfo, data);
 
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
 
@@ -80,7 +80,11 @@ export async function getMetadataRaw (chainInfoMap: Record<string, _ChainInfo>, 
     genesisHash,
     name: chainInfo.name,
     hasMetadata: true,
-    definition: {} as MetadataDef,
+    definition: {
+      types: data.types,
+      userExtensions: data.userExtensions,
+      metaCalls: base64Encode(data.rawMetadata)
+    } as MetadataDef,
     icon: chainInfo.icon,
     registry: registry,
     isUnknown: false,
@@ -125,3 +129,11 @@ export async function getChainMetadata (genesisHash?: string | null): Promise<Ch
 
   return null;
 }
+
+export const getMetadataHash = async (chain: string) => {
+  return sendMessage('pri(metadata.hash)', { chain });
+};
+
+export const shortenMetadata = async (chain: string, txBlob: string) => {
+  return sendMessage('pri(metadata.transaction.shorten)', { chain, txBlob });
+};

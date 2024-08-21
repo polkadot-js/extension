@@ -27,11 +27,18 @@ export const RESET_WALLET_MODAL = 'reset-wallet-modal';
 export const ADD_CONNECTION_MODAL = 'add-connection-modal';
 export const DISCONNECT_EXTENSION_MODAL = 'disconnect-extension-modal';
 export const REMIND_BACKUP_SEED_PHRASE_MODAL = 'remind-backup-seed-phrase-modal';
+export const REMIND_UPGRADE_FIREFOX_VERSION = 'remind-update-firefox-version';
 export const EXPORT_ACCOUNTS_PASSWORD_MODAL = 'export-accounts-password-modal';
+export const ADD_NETWORK_WALLET_CONNECT_MODAL = 'add-network-wallet-connect-modal';
 
 /* Campaign */
 export const HOME_CAMPAIGN_BANNER_MODAL = 'home-campaign-banner-modal';
 /* Campaign */
+
+/* AppPopup */
+export const APP_POPUP_MODAL = 'app-popup-modal';
+export const APP_INSTRUCTION_MODAL = 'app-instruction-modal';
+/* AppPopup */
 
 /* Terms and Conditions */
 export const GENERAL_TERM_AND_CONDITION_MODAL = 'general-term-and-condition-modal';
@@ -54,3 +61,7 @@ export const SWAP_IDLE_WARNING_MODAL = 'swap-idle-warning-modal';
 export const CLAIM_DAPP_STAKING_REWARDS_MODAL = 'claim-dapp-staking-rewards-modal';
 export const EARNING_MIGRATION_MODAL = 'earning-migration-modal';
 /* Announcement */
+
+/* Ledger */
+export const WARNING_LEDGER_RECEIVE_MODAL = 'warning-ledger-receive-modal';
+/* Ledger */

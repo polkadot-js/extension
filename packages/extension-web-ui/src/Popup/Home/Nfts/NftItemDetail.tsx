@@ -435,17 +435,33 @@ function Component ({ className = '', collectionInfo,
 function WrapperComponent (props: WrapperProps): React.ReactElement<WrapperProps> {
   const navigate = useNavigate();
   const location = useLocation();
-  const [itemDetail] = useState((location.state as INftItemDetail));
-
-  const collectionInfo = itemDetail?.collectionInfo;
-  const nftItem = itemDetail?.nftItem;
-  const originChainInfo = useGetChainInfo(nftItem?.chain || '');
-  const dataContext = useContext(DataContext);
+  const [itemDetail] = useState((location.state as INftItemDetail | undefined));
 
   const outletContext: {
     setShowSearchInput: React.Dispatch<React.SetStateAction<boolean>>,
-    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>
+    setDetailTitle: React.Dispatch<React.SetStateAction<React.ReactNode>>,
+    nftCollections: NftCollection[],
+    nftItems: NftItem[]
   } = useOutletContext();
+
+  const collectionInfo = useMemo(() => {
+    if (!itemDetail?.collectionId) {
+      return;
+    }
+
+    return outletContext?.nftCollections?.find((c) => c.collectionId === itemDetail.collectionId);
+  }, [itemDetail?.collectionId, outletContext?.nftCollections]);
+
+  const nftItem = useMemo(() => {
+    if (!outletContext?.nftItems?.length || !itemDetail?.nftId) {
+      return;
+    }
+
+    return outletContext?.nftItems?.find((c) => c.id === itemDetail?.nftId);
+  }, [itemDetail?.nftId, outletContext?.nftItems]);
+
+  const originChainInfo = useGetChainInfo(nftItem?.chain || '');
+  const dataContext = useContext(DataContext);
 
   const setDetailTitle = outletContext?.setDetailTitle;
   const setShowSearchInput = outletContext?.setShowSearchInput;

@@ -2,17 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _FundStatus } from '@subwallet/chain-list/types';
-import { CampaignBanner } from '@subwallet/extension-base/background/KoniTypes';
 import { CrowdloanItem, EmptyList, FilterModal, Layout, PageWrapper } from '@subwallet/extension-koni-ui/components';
+import BannerGenerator from '@subwallet/extension-koni-ui/components/StaticContent/BannerGenerator';
 import { DataContext } from '@subwallet/extension-koni-ui/contexts/DataContext';
-import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useSetCurrentPage, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { useFilterModal, useGetBannerByScreen, useGetCrowdloanList, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { _CrowdloanItemType, ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { openInNewTab } from '@subwallet/extension-koni-ui/utils';
-import { Icon, Image, ModalContext, SwList } from '@subwallet/react-ui';
+import { Icon, ModalContext, SwList } from '@subwallet/react-ui';
 import CN from 'classnames';
 import { FadersHorizontal, Rocket } from 'phosphor-react';
 import React, { SyntheticEvent, useCallback, useContext, useMemo } from 'react';
 import styled from 'styled-components';
+
+import useDefaultNavigate from '../../../hooks/router/useDefaultNavigate';
 
 type Props = ThemeProps;
 
@@ -24,20 +25,21 @@ enum FilterValue {
 }
 
 const FILTER_MODAL_ID = 'crowdloan-filter-modal';
+const SettingsListUrl = '/settings/list';
 
 function Component ({ className = '' }: Props): React.ReactElement<Props> {
-  useSetCurrentPage('/home/crowdloans');
   const { t } = useTranslation();
   const dataContext = useContext(DataContext);
   const items: _CrowdloanItemType[] = useGetCrowdloanList();
 
   const { activeModal } = useContext(ModalContext);
+  const goBack = useDefaultNavigate().goBack;
 
   const { isShowBalance } = useSelector((state) => state.settings);
 
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
-  const banners = useGetBannerByScreen('crowdloan');
+  const { banners, dismissBanner, onClickBanner } = useGetBannerByScreen('crowdloan');
 
   const filterOptions = useMemo(() => [
     { label: t('Polkadot parachain'), value: FilterValue.POLKADOT_PARACHAIN },
@@ -120,17 +122,9 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
     [t]
   );
 
-  const onClickBanner = useCallback((item: CampaignBanner) => {
-    return () => {
-      if (item.data.action === 'open_url') {
-        const url = item.data.metadata?.url as string | undefined;
-
-        if (url) {
-          openInNewTab(url)();
-        }
-      }
-    };
-  }, []);
+  const goBackToSettingList = useCallback(() => {
+    goBack(SettingsListUrl);
+  }, [goBack]);
 
   return (
     <PageWrapper
@@ -139,35 +133,20 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
       })}
       resolve={dataContext.awaitStores(['crowdloan', 'price', 'chainStore', 'balance'])}
     >
-      <Layout.Base
-        showSubHeader={true}
-        subHeaderBackground={'transparent'}
-        subHeaderCenter={false}
-        subHeaderPaddingVertical={true}
-        title={t<string>('Crowdloans')}
+      <Layout.WithSubHeaderOnly
+        onBack={goBackToSettingList}
+        title={t('Crowdloans')}
       >
         <div className='content-container'>
-          {
-            !!banners.length && (
-              <div className='banner-container'>
-                {banners.map((item) => {
-                  return (
-                    <div
-                      className='image-container'
-                      key={item.slug}
-                    >
-                      <Image
-                        className='banner-image'
-                        onClick={onClickBanner(item)}
-                        src={item.data.media}
-                        width='100%'
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            )
-          }
+          {!!banners.length && (
+            <div className={'banner-container'}>
+              <BannerGenerator
+                banners={banners}
+                dismissBanner={dismissBanner}
+                onClickBanner={onClickBanner}
+              />
+            </div>
+          )}
 
           <SwList.Section
             actionBtnIcon={<Icon phosphorIcon={FadersHorizontal} />}
@@ -193,7 +172,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
           options={filterOptions}
           title={t('Filter')}
         />
-      </Layout.Base>
+      </Layout.WithSubHeaderOnly>
     </PageWrapper>
   );
 }

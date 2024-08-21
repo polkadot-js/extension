@@ -21,7 +21,7 @@ cryptoWaitReady()
   .then((): void => {
     const koniState = SWHandler.instance.state;
 
-    setTimeout(() => koniState.onCheckToRemindUser(), 4000);
+    // setTimeout(() => koniState.onCheckToRemindUser(), 4000);
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519', password_store: new KeyringStore() });

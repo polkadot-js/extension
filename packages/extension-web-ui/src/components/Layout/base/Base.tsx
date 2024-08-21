@@ -1,14 +1,15 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SwScreenLayoutProps } from '@subwallet/react-ui';
-
 import { LanguageType } from '@subwallet/extension-base/background/KoniTypes';
+import { MISSIONS_POOL_LIVE_ID } from '@subwallet/extension-web-ui/constants';
 import { ScreenContext } from '@subwallet/extension-web-ui/contexts/ScreenContext';
 import { HeaderType, WebUIContext } from '@subwallet/extension-web-ui/contexts/WebUIContext';
 import { useDefaultNavigate, useSelector } from '@subwallet/extension-web-ui/hooks';
+import { RootState } from '@subwallet/extension-web-ui/stores';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
-import { SwScreenLayout } from '@subwallet/react-ui';
+import { computeStatus } from '@subwallet/extension-web-ui/utils';
+import { Icon, SwScreenLayout, SwScreenLayoutProps } from '@subwallet/react-ui';
 import { SwTabBarItem } from '@subwallet/react-ui/es/sw-tab-bar';
 import CN from 'classnames';
 import { Aperture, Clock, Globe, Parachute, Rocket, Vault, Wallet } from 'phosphor-react';
@@ -16,6 +17,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 import Footer from '../parts/Footer';
 import SelectAccount from '../parts/SelectAccount';
@@ -28,7 +30,7 @@ SwScreenLayoutProps,
   showFooter?: boolean;
   isSetTitleContext?: boolean;
 }
-
+type TabBarItem = Omit<SwTabBarItem, 'onClick'> & { url: string };
 const specialLanguages: Array<LanguageType> = ['ja', 'ru'];
 
 const Component = ({ children, className, footer, headerIcons, isSetTitleContext = true, onBack, showFooter, ...props }: LayoutBaseProps) => {
@@ -41,6 +43,19 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
   const { headerType, isSettingPage, setOnBack, setShowBackButtonOnHeader } = useContext(WebUIContext);
   const [customClassName, setCustomClassName] = useState('');
   const { language } = useSelector((state) => state.settings);
+  const { missions } = useSelector((state: RootState) => state.missionPool);
+
+  const [storedLiveMissionIds, setStoredLiveMissionIds] = useLocalStorage<number[]>(MISSIONS_POOL_LIVE_ID, []);
+
+  const liveMissionIds = useMemo(() => {
+    return missions
+      .filter((item) => computeStatus(item) === 'live')
+      .map((mission) => mission.id);
+  }, [missions]);
+
+  const latestLiveMissionIds = useMemo(() => {
+    return liveMissionIds.filter((id) => !storedLiveMissionIds.includes(id));
+  }, [liveMissionIds, storedLiveMissionIds]);
 
   const tabBarItems = useMemo((): Array<Omit<SwTabBarItem, 'onClick'> & { url: string }> => ([
     {
@@ -85,11 +100,19 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
     },
     {
       icon: {
-        type: 'phosphor',
-        phosphorIcon: Parachute,
-        weight: 'fill'
+        type: 'customIcon',
+        customIcon: (
+          <>
+            <Icon
+              phosphorIcon={Parachute}
+              type='phosphor'
+              weight='fill'
+            />
+            {(latestLiveMissionIds.length > 0) && <div className={CN('__active-count')}>{latestLiveMissionIds.length}</div>}
+          </>
+        )
       },
-      label: t('Mission Pools'),
+      label: t('Missions'),
       key: 'mission-pools',
       url: '/home/mission-pools'
     },
@@ -113,7 +136,7 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
       key: 'history',
       url: '/home/history'
     }
-  ]), [t]);
+  ]), [latestLiveMissionIds.length, t]);
 
   const selectedTab = useMemo((): string => {
     const isHomePath = pathname.includes('/home');
@@ -129,10 +152,14 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
   }, [pathname]);
 
   const onSelectTab = useCallback(
-    (url: string) => () => {
-      navigate(url);
+    (item: TabBarItem) => () => {
+      if (item.key === 'mission-pools' && latestLiveMissionIds.length > 0) {
+        setStoredLiveMissionIds(liveMissionIds);
+      }
+
+      navigate(item.url);
     },
-    [navigate]
+    [latestLiveMissionIds.length, navigate, setStoredLiveMissionIds, liveMissionIds]
   );
 
   const defaultOnBack = useCallback(() => {
@@ -177,7 +204,7 @@ const Component = ({ children, className, footer, headerIcons, isSetTitleContext
       showTabBar={!isWebUI && props.showTabBar}
       tabBarItems={tabBarItems.map((item) => ({
         ...item,
-        onClick: onSelectTab(item.url)
+        onClick: onSelectTab(item)
       }))}
     >
       {children}
@@ -201,6 +228,23 @@ const Base = styled(Component)<LayoutBaseProps>(({ theme: { token } }: LayoutBas
     '.ant-sw-tab-bar-item-label': {
       textAlign: 'center'
     }
+  },
+  '.ant-sw-tab-bar-item-icon': {
+    position: 'relative'
+  },
+  '.__active-count': {
+    borderRadius: '50%',
+    color: token.colorWhite,
+    fontSize: token.sizeXS,
+    fontWeight: token.bodyFontWeight,
+    lineHeight: token.lineHeightLG,
+    paddingTop: 0,
+    paddingBottom: 0,
+    backgroundColor: token.colorError,
+    position: 'absolute',
+    right: -2,
+    top: -1,
+    minWidth: '12px'
   },
 
   '&.special-language': {

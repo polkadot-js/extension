@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainAsset } from '@subwallet/chain-list/types';
-import { getERC20Contract } from '@subwallet/extension-base/koni/api/tokens/evm/web3';
-import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/tokens/wasm/utils';
-import { _PSP22_ABI } from '@subwallet/extension-base/services/chain-service/helper';
+import { getERC20Contract } from '@subwallet/extension-base/koni/api/contract-handler/evm/web3';
+import { _PSP22_ABI } from '@subwallet/extension-base/koni/api/contract-handler/utils';
+import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
 import { _EvmApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getContractAddressOfToken, _getTokenOnChainAssetId, _getTokenOnChainInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import BigN from 'bignumber.js';
@@ -64,14 +64,11 @@ interface AssetManagerWithChainInfoPalletMetadata {
   minimalBalance: number;
 }
 
-interface AssetRegistryWithAssetIdPalletMetadata {
-  symbol: string;
-  decimals: number;
-}
-
 interface AssetRegistryWithAssetIdPalletInfo {
   name: string;
   existentialDeposit: number;
+  decimals: number;
+  symbol: string;
 }
 
 interface AssetManagerWithAssetIdPalletMetadata {
@@ -221,18 +218,16 @@ const getByAssetManagerWithAssetIdPallet = async (asset: _ChainAsset, api: ApiPr
 };
 
 const getByAssetRegistryWithAssetIdPallet = async (asset: _ChainAsset, api: ApiPromise): Promise<AssetSpec> => {
-  const [_info, _metadata] = await api.queryMulti([
-    [api.query.assetRegistry.assets, _getTokenOnChainAssetId(asset)],
-    [api.query.assetRegistry.assetMetadataMap, _getTokenOnChainAssetId(asset)]
+  const [_info] = await api.queryMulti([
+    [api.query.assetRegistry.assets, _getTokenOnChainAssetId(asset)]
   ]);
 
   const info = _info.toPrimitive() as unknown as AssetRegistryWithAssetIdPalletInfo;
-  const metadata = _metadata.toPrimitive() as unknown as AssetRegistryWithAssetIdPalletMetadata;
 
   return {
-    decimals: metadata.decimals,
+    decimals: info.decimals,
     minAmount: info.existentialDeposit.toString(),
-    symbol: metadata.symbol
+    symbol: info.symbol
   };
 };
 
@@ -405,4 +400,25 @@ export const compareAsset = (
   if (decimals !== _decimals) {
     errors.push(`Wrong decimals: current - ${asset.decimals ?? 'null'}, onChain - ${decimals}`);
   }
+};
+
+export const validateAsset = (
+  onchainAsset: AssetSpec,
+  chainlistAsset: _ChainAsset
+) => {
+  const { decimals, minAmount, symbol } = onchainAsset;
+
+  const chainlistMinAmount = chainlistAsset.minAmount || '0';
+  const chainlistDecimals = chainlistAsset.decimals || 0;
+  const chainlistSymbol = chainlistAsset.symbol;
+
+  console.log(`[i] minAmount: current - ${chainlistMinAmount}, onchain - ${minAmount}`);
+  console.log(`[i] decimals: current - ${chainlistDecimals}, onchain - ${decimals}`);
+  console.log(`[i] symbol: current - ${chainlistSymbol}, onchain - ${symbol}`);
+
+  const isValidSymbol = symbol === chainlistSymbol ? true : 'zk' + symbol === chainlistSymbol;
+  const isValidMinAmount = minAmount === chainlistMinAmount;
+  const isValidDecimal = decimals === chainlistDecimals;
+
+  return (isValidSymbol && isValidMinAmount && isValidDecimal);
 };

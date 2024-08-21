@@ -1,8 +1,8 @@
 // Copyright 2019-2022 @subwallet/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { ETHEREUM_PREFIX, SCAN_TYPE, SECRET_PREFIX, SUBSTRATE_PREFIX } from '@subwallet/extension-web-ui/constants/qr';
-import { QrAccount } from '@subwallet/extension-web-ui/types/scanner';
+import { ETHEREUM_PREFIX, SCAN_TYPE, SECRET_PREFIX, SUBSTRATE_PREFIX } from '@subwallet/extension-web-ui/constants';
+import { QrAccount } from '@subwallet/extension-web-ui/types';
 
 import { isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress, isEthereumAddress } from '@polkadot/util-crypto';

@@ -3,8 +3,8 @@
 
 import { ChainAssetMap, ChainInfoMap } from '@subwallet/chain-list';
 import { _AssetType, _ChainAsset } from '@subwallet/chain-list/types';
-import { createTransferExtrinsic } from '@subwallet/extension-base/koni/api/dotsama/transfer';
-import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/koni/api/tokens/evm/transfer';
+import { createTransferExtrinsic } from '@subwallet/extension-base/services/balance-service/transfer/token';
+import { getERC20TransactionObject, getEVMTransactionObject } from '@subwallet/extension-base/services/balance-service/transfer/smart-contract';
 import { EvmChainHandler } from '@subwallet/extension-base/services/chain-service/handler/EvmChainHandler';
 import { SubstrateChainHandler } from '@subwallet/extension-base/services/chain-service/handler/SubstrateChainHandler';
 import { _getContractAddressOfToken, _isLocalToken, _isTokenEvmSmartContract } from '@subwallet/extension-base/services/chain-service/utils';

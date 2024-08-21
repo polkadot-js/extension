@@ -81,7 +81,7 @@ function Component ({ className = '' }: Props): React.ReactElement<Props> {
   }, [chainInfo]);
 
   const chainId = useMemo(() => {
-    return _getEvmChainId(chainInfo);
+    return _getEvmChainId(chainInfo) as number;
   }, [chainInfo]);
 
   const addressPrefix = useMemo(() => {

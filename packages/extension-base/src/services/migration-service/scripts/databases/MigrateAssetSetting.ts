@@ -8,7 +8,8 @@ export default class MigrateAssetSetting extends BaseMigrationJob {
   public override async run (): Promise<void> {
     try {
       const changeSlugsMap: Record<string, string> = {
-        'commune-NATIVE-C': 'commune-NATIVE-COMAI'
+        'bobMainnet-LOCAL-wBTC-0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3': 'bobMainnet-LOCAL-WBTC-0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3',
+        'hydradx_main-LOCAL-LRNA': 'hydradx_main-LOCAL-H2O'
       };
 
       const assetSetting = await this.state.chainService.getAssetSettings();

@@ -199,7 +199,7 @@ const Component: React.FC<ComponentProps> = (props) => {
         </MetaInfo.Default>
       </MetaInfo>
       <div className='total-account'>
-        {t('{{number}} account connected', { replace: { number: accountItems.length } })}
+        {t('{{number}} {{account}} connected', { replace: { number: accountItems.length, account: accountItems.length > 1 ? 'accounts' : 'account' } })}
       </div>
       <SwList.Section
         className='account-list'

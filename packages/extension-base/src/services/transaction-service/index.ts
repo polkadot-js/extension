@@ -3,15 +3,14 @@
 
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { AmountData, BasicTxErrorType, BasicTxWarningCode, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, FeeData, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
+import { AmountData, BasicTxErrorType, ChainType, EvmProviderErrorType, EvmSendTransactionRequest, ExtrinsicStatus, ExtrinsicType, NotificationType, TransactionAdditionalInfo, TransactionDirection, TransactionHistoryItem } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
-import { TransactionWarning } from '@subwallet/extension-base/background/warnings/TransactionWarning';
 import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
+import { checkBalanceWithTransactionFee, checkSigningAccountForTransaction, checkSupportForTransaction, estimateFeeForTransaction } from '@subwallet/extension-base/core/logic-validation/transfer';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
 import { _getAssetDecimals, _getAssetSymbol, _getChainNativeTokenBasicInfo, _getEvmChainId, _isChainEvmCompatible } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventService } from '@subwallet/extension-base/services/event-service';
-import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
 import { HistoryService } from '@subwallet/extension-base/services/history-service';
 import { EXTENSION_REQUEST_URL } from '@subwallet/extension-base/services/request-service/constants';
 import { TRANSACTION_TIMEOUT } from '@subwallet/extension-base/services/transaction-service/constants';
@@ -22,12 +21,11 @@ import { getExplorerLink, parseTransactionData } from '@subwallet/extension-base
 import { isWalletConnectRequest } from '@subwallet/extension-base/services/wallet-connect-service/helpers';
 import { Web3Transaction } from '@subwallet/extension-base/signers/types';
 import { LeavePoolAdditionalData, RequestStakePoolingBonding, RequestYieldStepSubmit, SpecialYieldPoolInfo, YieldPoolType } from '@subwallet/extension-base/types';
-import { anyNumberToBN, reformatAddress } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, anyNumberToBN, reformatAddress } from '@subwallet/extension-base/utils';
 import { mergeTransactionAndSignature } from '@subwallet/extension-base/utils/eth/mergeTransactionAndSignature';
 import { isContractAddress, parseContractInput } from '@subwallet/extension-base/utils/eth/parseTransaction';
 import { BN_ZERO } from '@subwallet/extension-base/utils/number';
 import keyring from '@subwallet/ui-keyring';
-import BigN from 'bignumber.js';
 import { addHexPrefix } from 'ethereumjs-util';
 import { ethers, TransactionLike } from 'ethers';
 import EventEmitter from 'eventemitter3';
@@ -36,13 +34,12 @@ import { BehaviorSubject, interval as rxjsInterval, Subscription } from 'rxjs';
 import { TransactionConfig, TransactionReceipt } from 'web3-core';
 
 import { SubmittableExtrinsic } from '@polkadot/api/promise/types';
-import { Signer, SignerResult } from '@polkadot/api/types';
+import { Signer, SignerOptions, SignerResult } from '@polkadot/api/types';
 import { EventRecord } from '@polkadot/types/interfaces';
 import { SignerPayloadJSON } from '@polkadot/types/types/extrinsic';
 import { isHex } from '@polkadot/util';
 import { HexString } from '@polkadot/util/types';
 
-import { _TRANSFER_CHAIN_GROUP } from '../chain-service/constants';
 import NotificationService from '../notification-service/NotificationService';
 
 export default class TransactionService {
@@ -91,145 +88,50 @@ export default class TransactionService {
     return [];
   }
 
-  public async generalValidate (validationInput: SWTransactionInput): Promise<SWTransactionResponse> {
-    const validation = {
-      ...validationInput,
-      errors: validationInput.errors || [],
-      warnings: validationInput.warnings || []
-    };
-    const { additionalValidator, address, chain, edAsWarning, extrinsicType, isTransferAll, transaction } = validation;
-
-    // Check duplicate transaction
-    validation.errors.push(...this.checkDuplicate(validationInput));
-
-    // Return unsupported error if not found transaction
-    if (!transaction) {
-      if (extrinsicType === ExtrinsicType.SEND_NFT) {
-        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED, t('This feature is not yet available for this NFT')));
-      } else {
-        validation.errors.push(new TransactionError(BasicTxErrorType.UNSUPPORTED));
-      }
-    }
-
+  public async validateTransaction (transactionInput: SWTransactionInput): Promise<SWTransactionResponse> {
     const validationResponse: SWTransactionResponse = {
+      ...transactionInput,
       status: undefined,
-      ...validation
+      errors: transactionInput.errors || [],
+      warnings: transactionInput.warnings || []
     };
 
-    // Estimate fee
-    const estimateFee: FeeData = {
-      symbol: '',
-      decimals: 0,
-      value: '',
-      tooHigh: false
-    };
+    const { additionalValidator, address, chain, extrinsicType } = validationResponse;
+
+    const transaction = transactionInput.transaction;
+
+    // Check duplicated transaction
+    validationResponse.errors.push(...this.checkDuplicate(transactionInput));
+
+    // Check support for transaction
+    checkSupportForTransaction(validationResponse, transaction);
 
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
 
     if (!chainInfo) {
       validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Cannot find network')));
-    } else {
-      const { decimals, symbol } = _getChainNativeTokenBasicInfo(chainInfo);
-
-      estimateFee.decimals = decimals;
-      estimateFee.symbol = symbol;
-
-      if (transaction) {
-        try {
-          if (isSubstrateTransaction(transaction)) {
-            estimateFee.value = (await transaction.paymentInfo(address)).partialFee.toString();
-          } else {
-            const web3 = this.state.chainService.getEvmApi(chain);
-
-            if (!web3) {
-              validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
-            } else {
-              const gasLimit = await web3.api.eth.estimateGas(transaction);
-
-              const priority = await calculateGasFeeParams(web3, chainInfo.slug);
-
-              if (priority.baseGasFee) {
-                const maxFee = priority.maxFeePerGas; // TODO: Need review
-
-                estimateFee.value = maxFee.multipliedBy(gasLimit).toFixed(0);
-              } else {
-                estimateFee.value = new BigN(priority.gasPrice).multipliedBy(gasLimit).toFixed(0);
-              }
-
-              estimateFee.tooHigh = priority.busyNetwork;
-            }
-          }
-        } catch (e) {
-          const error = e as Error;
-
-          if (error.message.includes('gas required exceeds allowance') && error.message.includes('insufficient funds')) {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-          }
-
-          estimateFee.value = '0';
-        }
-      }
     }
 
-    validationResponse.estimateFee = estimateFee;
+    const evmApi = this.state.chainService.getEvmApi(chainInfo.slug);
+    const isNeedEvmApi = transaction && !isSubstrateTransaction(transaction) && !evmApi;
 
-    // Read-only account
-    const pair = keyring.getPair(address);
-
-    if (!pair) {
-      validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('Unable to find account')));
-    } else {
-      if (pair.meta?.isReadOnly) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.INTERNAL_ERROR, t('This account is watch-only')));
-      }
+    if (isNeedEvmApi) {
+      validationResponse.errors.push(new TransactionError(BasicTxErrorType.CHAIN_DISCONNECTED, undefined));
     }
 
-    // Balance
-    const transferNative = validationResponse.transferNativeAmount || '0';
+    // Estimate fee for transaction
+    validationResponse.estimateFee = await estimateFeeForTransaction(validationResponse, transaction, chainInfo, evmApi);
+
+    // Check account signing transaction
+    checkSigningAccountForTransaction(validationResponse);
+
     const nativeTokenInfo = this.state.chainService.getNativeTokenInfo(chain);
+    const nativeTokenAvailable = await this.state.balanceService.getTransferableBalance(address, chain, nativeTokenInfo.slug, extrinsicType);
 
-    const balance = await this.state.balanceService.getTokenFreeBalance(address, chain, nativeTokenInfo.slug);
+    // Check available balance against transaction fee
+    checkBalanceWithTransactionFee(validationResponse, transactionInput, nativeTokenInfo, nativeTokenAvailable);
 
-    const existentialDeposit = nativeTokenInfo.minAmount || '0';
-
-    const feeNum = parseInt(estimateFee.value);
-    const balanceNum = parseInt(balance.value);
-    const edNum = parseInt(existentialDeposit);
-    const transferNativeNum = parseInt(transferNative);
-
-    if (!validationInput.skipFeeValidation) {
-      // TODO
-      if (!new BigN(balance.value).gt(0)) {
-        validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-      }
-
-      if (transferNativeNum + feeNum > balanceNum) {
-        if (!isTransferAll) {
-          validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-        } else {
-          if ([
-            ..._TRANSFER_CHAIN_GROUP.acala,
-            ..._TRANSFER_CHAIN_GROUP.genshiro,
-            ..._TRANSFER_CHAIN_GROUP.bitcountry,
-            ..._TRANSFER_CHAIN_GROUP.statemine
-          ].includes(chain)) { // Chain not have transfer all function
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE));
-          }
-        }
-      }
-
-      if (!isTransferAll) {
-        if (balanceNum - (transferNativeNum + feeNum) < edNum) {
-          if (edAsWarning) {
-            validationResponse.warnings.push(new TransactionWarning(BasicTxWarningCode.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-          } else {
-            validationResponse.errors.push(new TransactionError(BasicTxErrorType.NOT_ENOUGH_EXISTENTIAL_DEPOSIT));
-          }
-        }
-      }
-    }
-
-    // Validate transaction with additionalValidator method
+    // Check additional validations
     additionalValidator && await additionalValidator(validationResponse);
 
     return validationResponse;
@@ -285,7 +187,7 @@ export default class TransactionService {
   }
 
   public async handleTransaction (transaction: SWTransactionInput): Promise<SWTransactionResponse> {
-    const validatedTransaction = await this.generalValidate(transaction);
+    const validatedTransaction = await this.validateTransaction(transaction);
     const stopByErrors = validatedTransaction.errors.length > 0;
     const stopByWarnings = validatedTransaction.warnings.length > 0 && !validatedTransaction.ignoreWarnings;
 
@@ -336,7 +238,7 @@ export default class TransactionService {
 
   private async sendTransaction (transaction: SWTransaction): Promise<TransactionEmitter> {
     // Send Transaction
-    const emitter = transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : (await this.signAndSendEvmTransaction(transaction));
+    const emitter = await (transaction.chainType === 'substrate' ? this.signAndSendSubstrateTransaction(transaction) : this.signAndSendEvmTransaction(transaction));
 
     const { eventsHandler } = transaction;
 
@@ -677,9 +579,9 @@ export default class TransactionService {
         break;
       }
 
-      case ExtrinsicType.TOKEN_APPROVE: {
-        const data = parseTransactionData<ExtrinsicType.TOKEN_APPROVE>(transaction.data);
-        const inputAsset = this.state.chainService.getAssetBySlug(data.inputTokenSlug);
+      case ExtrinsicType.TOKEN_SPENDING_APPROVAL: {
+        const data = parseTransactionData<ExtrinsicType.TOKEN_SPENDING_APPROVAL>(transaction.data);
+        const inputAsset = this.state.chainService.getAssetBySlug(data.contractAddress);
 
         historyItem.amount = { value: '0', symbol: _getAssetSymbol(inputAsset), decimals: _getAssetDecimals(inputAsset) };
 
@@ -937,7 +839,7 @@ export default class TransactionService {
     const payload = (transaction as EvmSendTransactionRequest);
     const evmApi = this.state.chainService.getEvmApi(chain);
     const chainInfo = this.state.chainService.getChainInfoByKey(chain);
-
+    const hasError = !!(payload.errors && payload.errors.length > 0);
     const accountPair = keyring.getPair(address);
     const account: AccountJson = { address, ...accountPair.meta };
 
@@ -950,11 +852,11 @@ export default class TransactionService {
 
     // Fill contract info
     if (!payload.parseData) {
-      const isToContract = await isContractAddress(payload.to || '', evmApi);
-
-      payload.isToContract = isToContract;
-
       try {
+        const isToContract = await isContractAddress(payload.to || '', evmApi);
+
+        payload.isToContract = isToContract;
+
         payload.parseData = isToContract
           ? payload.data
             ? (await parseContractInput(payload.data || '', payload.to || '', chainInfo)).result
@@ -974,11 +876,13 @@ export default class TransactionService {
     if (!payload.nonce) {
       const evmApi = this.state.chainService.getEvmApi(chain);
 
-      payload.nonce = await evmApi.api.eth.getTransactionCount(address);
+      if (evmApi.isApiConnected) {
+        payload.nonce = await evmApi?.api.eth.getTransactionCount(address);
+      }
     }
 
     if (!payload.chainId) {
-      payload.chainId = chainInfo.evmInfo?.evmChainId ?? 1;
+      payload.chainId = chainInfo?.evmInfo?.evmChainId ?? 1;
     }
 
     // Autofill from
@@ -989,8 +893,10 @@ export default class TransactionService {
     const isExternal = !!account.isExternal;
     const isInjected = !!account.isInjected;
 
-    // generate hashPayload for EVM transaction
-    payload.hashPayload = this.generateHashPayload(chain, payload);
+    if (!hasError) {
+      // generate hashPayload for EVM transaction
+      payload.hashPayload = this.generateHashPayload(chain, payload);
+    }
 
     const emitter = new EventEmitter<TransactionEventMap>();
 
@@ -1158,7 +1064,7 @@ export default class TransactionService {
     return emitter;
   }
 
-  private signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): TransactionEmitter {
+  private async signAndSendSubstrateTransaction ({ address, chain, id, transaction, url }: SWTransaction): Promise<TransactionEmitter> {
     const emitter = new EventEmitter<TransactionEventMap>();
     const eventData: TransactionEventResponse = {
       id,
@@ -1167,18 +1073,35 @@ export default class TransactionService {
       extrinsicHash: id
     };
 
-    (transaction as SubmittableExtrinsic).signAsync(address, {
+    const extrinsic = transaction as SubmittableExtrinsic;
+    const registry = extrinsic.registry;
+    const signedExtensions = registry.signedExtensions;
+
+    const signerOption: Partial<SignerOptions> = {
       signer: {
         signPayload: async (payload: SignerPayloadJSON) => {
-          const signing = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
+          const { signature, signedTransaction } = await this.state.requestService.signInternalTransaction(id, address, url || EXTENSION_REQUEST_URL, payload);
 
           return {
             id: (new Date()).getTime(),
-            signature: signing.signature
+            signature,
+            signedTransaction
           } as SignerResult;
         }
-      } as Signer
-    }).then(async (rs) => {
+      } as Signer,
+      withSignedTransaction: true
+    };
+
+    if (_isRuntimeUpdated(signedExtensions)) {
+      const metadataHash = await this.state.chainService.calculateMetadataHash(chain);
+
+      if (metadataHash) {
+        signerOption.mode = 1;
+        signerOption.metadataHash = metadataHash;
+      }
+    }
+
+    extrinsic.signAsync(address, signerOption).then(async (rs) => {
       // Emit signed event
       emitter.emit('signed', eventData);
 

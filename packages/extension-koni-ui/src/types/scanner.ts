@@ -2,10 +2,12 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Transaction } from '@subwallet/extension-base/utils/eth';
+import { ScannerResult as _ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
 
 import { GenericExtrinsicPayload } from '@polkadot/types';
 
-export { ScannerResult } from '@subwallet/react-ui/es/sw-qr-scanner';
+export type ScannerResult = _ScannerResult;
+
 export interface Frames {
   completedFramesCount: number;
   isMultipart: boolean;

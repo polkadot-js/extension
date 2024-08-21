@@ -122,6 +122,22 @@ function Component ({ className, inputAsset, poolInfo, transactionChainValue, tr
         );
       } else {
         if (item.targetTimestampMs === undefined && item.waitingTime === undefined) {
+          if (item.chain === 'acala') {
+            return (
+              <>
+                <div className={'__withdraw-time-label'}>{t('Available for withdrawal')}</div>
+                {item.status === UnstakingStatus.CLAIMABLE && (
+                  <Icon
+                    iconColor={token.colorSecondary}
+                    phosphorIcon={CheckCircle}
+                    size='sm'
+                    weight='fill'
+                  />
+                )}
+              </>
+            );
+          }
+
           return (
             <>
               <div className={'__withdraw-time-label'}>{t('Waiting for withdrawal')}</div>

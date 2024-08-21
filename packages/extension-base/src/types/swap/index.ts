@@ -5,7 +5,7 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { AmountData, ChainType, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { TransactionData } from '@subwallet/extension-base/types';
-import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
+import { BaseStepDetail, CommonOptimalPath, CommonStepFeeInfo } from '@subwallet/extension-base/types/service-base';
 import BigN from 'bignumber.js';
 
 // core
@@ -33,7 +33,7 @@ export interface SwapQuote {
   isLowLiquidity?: boolean; // definition would be different for different providers
   metadata?: any;
 
-  feeInfo: SwapFeeInfo;
+  feeInfo: CommonStepFeeInfo;
 }
 
 export interface SwapRoute {
@@ -51,15 +51,12 @@ export enum SwapErrorType {
   SWAP_EXCEED_ALLOWANCE = 'SWAP_EXCEED_ALLOWANCE',
   SWAP_NOT_ENOUGH_BALANCE = 'SWAP_NOT_ENOUGH_BALANCE',
   NOT_ENOUGH_LIQUIDITY = 'NOT_ENOUGH_LIQUIDITY',
+  MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT = 'MAKE_POOL_NOT_ENOUGH_EXISTENTIAL_DEPOSIT',
   AMOUNT_CANNOT_BE_ZERO = 'AMOUNT_CANNOT_BE_ZERO',
 }
 
 export enum SwapStepType {
-  DEFAULT = 'DEFAULT',
-  TOKEN_APPROVAL = 'TOKEN_APPROVAL',
-  SET_FEE_TOKEN = 'SET_FEE_TOKEN',
-  SWAP = 'SWAP',
-  XCM = 'XCM'
+  SWAP = 'SWAP'
 }
 
 export enum SwapProviderId {
@@ -67,13 +64,19 @@ export enum SwapProviderId {
   CHAIN_FLIP_MAINNET = 'CHAIN_FLIP_MAINNET',
   HYDRADX_MAINNET = 'HYDRADX_MAINNET',
   HYDRADX_TESTNET = 'HYDRADX_TESTNET',
+  POLKADOT_ASSET_HUB = 'POLKADOT_ASSET_HUB',
+  KUSAMA_ASSET_HUB = 'KUSAMA_ASSET_HUB',
+  ROCOCO_ASSET_HUB = 'ROCOCO_ASSET_HUB',
 }
 
 export const _SUPPORTED_SWAP_PROVIDERS: SwapProviderId[] = [
   SwapProviderId.CHAIN_FLIP_TESTNET,
   SwapProviderId.CHAIN_FLIP_MAINNET,
   SwapProviderId.HYDRADX_MAINNET,
-  SwapProviderId.HYDRADX_TESTNET
+  SwapProviderId.HYDRADX_TESTNET,
+  SwapProviderId.POLKADOT_ASSET_HUB,
+  SwapProviderId.KUSAMA_ASSET_HUB,
+  SwapProviderId.ROCOCO_ASSET_HUB
 ];
 
 export interface SwapProvider {
@@ -90,28 +93,6 @@ export enum SwapFeeType {
   WALLET_FEE = 'WALLET_FEE'
 }
 
-export interface SwapFeeComponent {
-  feeType: SwapFeeType;
-  amount: string;
-  tokenSlug: string;
-}
-
-export interface SwapFeeInfo {
-  feeComponent: SwapFeeComponent[];
-  defaultFeeToken: string; // token to pay transaction fee with
-  feeOptions: string[]; // list of tokenSlug, always include defaultFeeToken
-  selectedFeeToken?: string;
-}
-
-export interface SwapStepDetail extends BaseStepDetail {
-  id: number;
-}
-
-export interface OptimalSwapPath { // path means the steps to complete the swap, not the quote itself
-  totalFee: SwapFeeInfo[]; // each item in the array is tx fee for a step
-  steps: SwapStepDetail[];
-}
-
 export type SwapTxData = ChainflipSwapTxData | HydradxSwapTxData; // todo: will be more
 
 export interface SwapBaseTxData {
@@ -120,7 +101,7 @@ export interface SwapBaseTxData {
   address: string;
   slippage: number;
   recipient?: string;
-  process: OptimalSwapPath;
+  process: CommonOptimalPath;
 }
 
 export interface ChainflipSwapTxData extends SwapBaseTxData {
@@ -134,7 +115,7 @@ export interface HydradxSwapTxData extends SwapBaseTxData {
 }
 
 // parameters & responses
-export type GenSwapStepFunc = (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
+export type GenSwapStepFunc = (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined>;
 
 export interface ChainflipPreValidationMetadata {
   minSwap: AmountData;
@@ -145,6 +126,13 @@ export interface ChainflipPreValidationMetadata {
 export interface HydradxPreValidationMetadata {
   maxSwap: AmountData;
   chain: _ChainInfo;
+}
+
+export interface AssetHubPreValidationMetadata {
+  chain: _ChainInfo;
+  toAmount: string;
+  quoteRate: string;
+  priceImpactPct?: string;
 }
 
 export interface QuoteAskResponse {
@@ -162,7 +150,7 @@ export interface SwapRequest {
 }
 
 export interface SwapRequestResult {
-  process: OptimalSwapPath;
+  process: CommonOptimalPath;
   quote: SwapQuoteResponse;
 }
 
@@ -174,7 +162,7 @@ export interface SwapQuoteResponse {
 }
 
 export interface SwapSubmitParams {
-  process: OptimalSwapPath;
+  process: CommonOptimalPath;
   currentStep: number;
   quote: SwapQuote;
   address: string;
@@ -198,12 +186,16 @@ export interface OptimalSwapPathParams {
 
 export interface SwapEarlyValidation {
   error?: SwapErrorType;
-  metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata;
+  metadata?: ChainflipPreValidationMetadata | HydradxPreValidationMetadata | AssetHubPreValidationMetadata;
+}
+
+export interface AssetHubSwapEarlyValidation extends SwapEarlyValidation {
+  metadata: AssetHubPreValidationMetadata;
 }
 
 export interface ValidateSwapProcessParams {
   address: string;
-  process: OptimalSwapPath;
+  process: CommonOptimalPath;
   selectedQuote: SwapQuote;
   recipient?: string;
 }

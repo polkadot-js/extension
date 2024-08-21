@@ -33,9 +33,9 @@ type Props = ThemeProps & {
 const numberMetadata = { maxNumberFormat: 2 };
 
 const Component = (props: Props) => {
-  const { amountValue, className, fromAsset, label,
-    onChangeAmount, onSelectToken, tokenSelectorItems,
-    tokenSelectorValue } = props;
+  const { amountValue, className, fromAsset,
+    label, onChangeAmount, onSelectToken,
+    tokenSelectorItems, tokenSelectorValue } = props;
   const { t } = useTranslation();
   const decimals = _getAssetDecimals(fromAsset);
   const priceId = _getAssetPriceId(fromAsset);

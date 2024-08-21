@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
 import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { RootState } from '@subwallet/extension-web-ui/stores';
@@ -23,8 +24,14 @@ const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
   const { currencyData } = useSelector((state: RootState) => state.price);
+  const { poolInfoMap } = useSelector((state) => state.earning);
+  const { balance, isTestnet, maxApy, poolSlugs, symbol, token, totalValueStaked } = poolGroup;
 
-  const { balance, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const isNotShowPrefix = poolSlugs.every((slug) => {
+    const poolInfo = poolInfoMap[slug];
+
+    return [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo?.type);
+  });
 
   return (
     <div
@@ -77,13 +84,16 @@ const Component: React.FC<Props> = (props: Props) => {
             !maxApy
               ? <div className={'__item-apy-not-available'}>TBD</div>
               : (
-                <Number
-                  className={'__item-apy-value'}
-                  decimal={0}
-                  size={30}
-                  suffix={'%'}
-                  value={maxApy}
-                />
+                <>
+                  {!isNotShowPrefix && <span className={'__item-apy-prefix'}>Up to</span>}
+                  <Number
+                    className={'__item-apy-value'}
+                    decimal={0}
+                    size={30}
+                    suffix={'%'}
+                    value={maxApy}
+                  />
+                </>
               )
           }
           <div className={'__item-apy-sub-text'}>{t('per year')}</div>
@@ -215,22 +225,28 @@ const EarningOptionDesktopItem = styled(Component)<Props>(({ theme: { token } }:
 
     '.__item-apy': {
       display: 'flex',
-      alignItems: 'baseline',
       gap: token.paddingXS,
       fontWeight: token.fontWeightStrong
     },
 
     '.__item-apy-not-available': {
       fontSize: token.fontSizeHeading2,
-      lineHeight: token.lineHeightHeading2,
-      paddingBottom: 6
+      lineHeight: token.lineHeightHeading2
     },
 
     '.__item-apy-sub-text': {
       fontSize: token.fontSizeLG,
       lineHeight: token.lineHeightLG,
       color: token.colorTextLight4,
-      paddingBottom: 6
+      display: 'flex',
+      alignItems: 'flex-end'
+    },
+
+    '.__item-apy-prefix': {
+      fontSize: token.fontSizeLG,
+      lineHeight: token.lineHeightLG,
+      color: token.colorTextLight4,
+      paddingTop: 3
     },
 
     '.__item-total-stake-wrapper': {

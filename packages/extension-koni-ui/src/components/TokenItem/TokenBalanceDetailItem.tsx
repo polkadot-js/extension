@@ -39,7 +39,7 @@ function Component (
         convertedBalanceValue={total.convertedValue}
         decimal={0}
         displayToken={symbol}
-        isShowSubLogo={!!chain && !slug.includes('NATIVE')}
+        isShowSubLogo={true}
         middleItem={
           (
             <>

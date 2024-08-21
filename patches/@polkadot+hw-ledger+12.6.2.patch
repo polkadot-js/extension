@@ -1,0 +1,12 @@
+diff --git a/node_modules/@polkadot/hw-ledger/defaults.js b/node_modules/@polkadot/hw-ledger/defaults.js
+index 9f06432..97efba8 100644
+--- a/node_modules/@polkadot/hw-ledger/defaults.js
++++ b/node_modules/@polkadot/hw-ledger/defaults.js
+@@ -37,5 +37,6 @@ export const ledgerApps = {
+     unique: 'Unique',
+     vtb: 'VTB',
+     xxnetwork: 'XXNetwork',
+-    zeitgeist: 'Zeitgeist'
++    zeitgeist: 'Zeitgeist',
++    avail: 'Avail'
+ };

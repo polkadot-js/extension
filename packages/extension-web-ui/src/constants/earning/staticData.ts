@@ -88,7 +88,7 @@ export const EARNING_DATA_RAW = {
       icon: 'Coins',
       title: 'Unstake and withdraw',
       description:
-        'Once staked, your funds will be locked. Unstake your funds anytime and withdraw immediately with a higher fee or wait {periodNumb} before withdrawing with a lower fee',
+        'Once staked, your funds will be locked. Unstake your funds anytime and withdraw immediately with a higher fee or wait up to {periodNumb} before withdrawing with a lower fee',
       iconColor: '#e6dc25'
     },
     {

@@ -6,7 +6,7 @@ import type { MessageTypes, MessageTypesWithNoSubscriptions, MessageTypesWithNul
 import { ProviderError } from '@subwallet/extension-base/background/errors/ProviderError';
 import { ProviderErrorType } from '@subwallet/extension-base/background/KoniTypes';
 import { SubWalletEvmProvider } from '@subwallet/extension-base/page/SubWalleEvmProvider';
-import { EvmProvider } from '@subwallet/extension-inject/types';
+import { AuthRequestOption, EvmProvider } from '@subwallet/extension-inject/types';
 
 import { MESSAGE_ORIGIN_PAGE } from '../defaults';
 import { getId } from '../utils/getId';
@@ -54,8 +54,9 @@ export function sendMessage<TMessageType extends MessageTypes> (message: TMessag
 }
 
 // the enable function, called by the dapp to allow access
-export async function enable (origin: string): Promise<Injected> {
-  await sendMessage('pub(authorize.tabV2)', { origin });
+
+export async function enable (origin: string, opt?: AuthRequestOption): Promise<Injected> {
+  await sendMessage('pub(authorize.tabV2)', { origin, accountAuthType: opt?.accountAuthType || 'substrate' });
 
   return new Injected(sendMessage);
 }
@@ -64,7 +65,7 @@ export function handleResponse<TMessageType extends MessageTypes> (data: Transpo
   const handler = handlers[data.id];
 
   if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
+    // console.error(`Unknown response: ${JSON.stringify(data)}`);
 
     return;
   }

@@ -4,21 +4,22 @@
 import { ConfirmationDefinitions, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
-import { detectTranslate } from '@subwallet/extension-base/utils';
+import { _isRuntimeUpdated, detectTranslate } from '@subwallet/extension-base/utils';
 import { AlertModal } from '@subwallet/extension-koni-ui/components';
-import { NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
+import { isProductionMode, NEED_SIGN_CONFIRMATION } from '@subwallet/extension-koni-ui/constants';
 import { useAlert, useConfirmationsInfo, useSelector } from '@subwallet/extension-koni-ui/hooks';
 import { ConfirmationType } from '@subwallet/extension-koni-ui/stores/base/RequestState';
-import { ThemeProps } from '@subwallet/extension-koni-ui/types';
-import { isRawPayload } from '@subwallet/extension-koni-ui/utils';
+import { AccountSignMode, ThemeProps } from '@subwallet/extension-koni-ui/types';
+import { getSignMode, isRawPayload } from '@subwallet/extension-koni-ui/utils';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
 
 import { SignerPayloadJSON } from '@polkadot/types/types';
+import { isEthereumAddress } from '@polkadot/util-crypto';
 
 import { ConfirmationHeader } from './parts';
-import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
+import { AddNetworkConfirmation, AddTokenConfirmation, AuthorizeConfirmation, ConnectWalletConnectConfirmation, EvmSignatureConfirmation, EvmTransactionConfirmation, MetadataConfirmation, NetworkConnectionErrorConfirmation, NotSupportConfirmation, NotSupportWCConfirmation, SignConfirmation, TransactionConfirmation } from './variants';
 
 type Props = ThemeProps
 
@@ -32,7 +33,8 @@ const titleMap: Record<ConfirmationType, string> = {
   signingRequest: detectTranslate('Signature request'),
   switchNetworkRequest: detectTranslate('Add network request'),
   connectWCRequest: detectTranslate('WalletConnect'),
-  notSupportWCRequest: detectTranslate('WalletConnect')
+  notSupportWCRequest: detectTranslate('WalletConnect'),
+  errorConnectNetwork: detectTranslate('Transaction request')
 } as Record<ConfirmationType, string>;
 
 const alertModalId = 'confirmation-alert-modal';
@@ -43,7 +45,6 @@ const Component = function ({ className }: Props) {
   const confirmation = confirmationQueue[index] || null;
   const { t } = useTranslation();
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-
   const { transactionRequest } = useSelector((state) => state.requestState);
 
   const nextConfirmation = useCallback(() => {
@@ -69,14 +70,20 @@ const Component = function ({ className }: Props) {
         const _isMessage = isRawPayload(request.request.payload);
 
         account = request.account;
+        const isEthereum = isEthereumAddress(account.address);
 
         if (account.isHardware) {
-          if (_isMessage) {
-            canSign = false;
+          if (account.isGeneric) {
+            canSign = !isEthereum;
           } else {
-            const payload = request.request.payload as SignerPayloadJSON;
+            if (_isMessage) {
+              canSign = true;
+            } else {
+              const payload = request.request.payload as SignerPayloadJSON;
 
-            canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash);
+              // Valid even with evm ledger account (evm - availableGenesisHashes is empty)
+              canSign = !!account.availableGenesisHashes?.includes(payload.genesisHash) || _isRuntimeUpdated(payload?.signedExtensions);
+            }
           }
         } else {
           canSign = true;
@@ -91,7 +98,15 @@ const Component = function ({ className }: Props) {
         isMessage = confirmation.type === 'evmSignatureRequest';
       }
 
-      if (account?.isReadOnly || !canSign) {
+      const signMode = getSignMode(account);
+      const isEvm = isEthereumAddress(account?.address);
+
+      const notSupport = signMode === AccountSignMode.READ_ONLY ||
+        signMode === AccountSignMode.UNKNOWN ||
+        (signMode === AccountSignMode.QR && isEvm && isProductionMode) ||
+        !canSign;
+
+      if (notSupport) {
         return (
           <NotSupportConfirmation
             account={account}
@@ -150,6 +165,12 @@ const Component = function ({ className }: Props) {
         );
       case 'notSupportWCRequest':
         return (<NotSupportWCConfirmation request={confirmation.item as WalletConnectNotSupportRequest} />);
+
+      case 'errorConnectNetwork':
+        return (<NetworkConnectionErrorConfirmation
+          request={confirmation.item as ConfirmationDefinitions['errorConnectNetwork'][0]}
+          type={confirmation.type}
+        />);
     }
 
     return null;
@@ -227,7 +248,7 @@ const Component = function ({ className }: Props) {
           return t('Stake compound confirm');
         case ExtrinsicType.STAKING_CANCEL_COMPOUNDING:
           return t('Cancel compound confirm');
-        case ExtrinsicType.TOKEN_APPROVE:
+        case ExtrinsicType.TOKEN_SPENDING_APPROVAL:
           return t('Token approve');
         case ExtrinsicType.SWAP:
           return t('Swap confirmation');

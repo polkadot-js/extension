@@ -39,7 +39,7 @@ export default class EarningService implements StoppableServiceInterface, Persis
 
   private dbService: DatabaseService;
   private eventService: EventService;
-  private useOnlineCacheOnly = false;
+  private useOnlineCacheOnly = true;
 
   constructor (state: KoniState) {
     this.state = state;
@@ -174,6 +174,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
         events.forEach((event) => {
           if (event.type === 'account.remove') {
             removedAddresses.push(event.data[0] as string);
+          }
+
+          if (event.type === 'account.add') {
+            delayReload = true;
           }
 
           if (event.type === 'chain.updateState') {

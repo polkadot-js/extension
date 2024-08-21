@@ -14,6 +14,7 @@ import { SortingModal } from '@subwallet/extension-koni-ui/components/Modal/Sort
 import { VALIDATOR_DETAIL_MODAL } from '@subwallet/extension-koni-ui/constants';
 import { useFilterModal, useGetPoolTargetList, useSelector, useSelectValidators, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { ThemeProps, ValidatorDataType } from '@subwallet/extension-koni-ui/types';
+import { autoSelectValidatorOptimally } from '@subwallet/extension-koni-ui/utils';
 import { getValidatorKey } from '@subwallet/extension-koni-ui/utils/transaction/stake';
 import { Badge, Button, Icon, InputRef, ModalContext, SwList, SwModal, useExcludeModal } from '@subwallet/react-ui';
 import { SwListSectionRef } from '@subwallet/react-ui/es/sw-list';
@@ -49,6 +50,8 @@ interface SortOption {
 
 const SORTING_MODAL_ID = 'nominated-sorting-modal';
 const FILTER_MODAL_ID = 'nominated-filter-modal';
+const AVAIL_CHAIN = 'avail_mainnet';
+const AVAIL_VALIDATOR = '5FjdibsxmNFas5HWcT2i1AXbpfgiNfWqezzo88H2tskxWdt2';
 
 const filterOptions = [
   {
@@ -150,6 +153,7 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
 
   const [viewDetailItem, setViewDetailItem] = useState<ValidatorDataType | undefined>(undefined);
   const [sortSelection, setSortSelection] = useState<SortKey>(SortKey.DEFAULT);
+  const [autoValidator, setAutoValidator] = useState('');
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, onResetFilter, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
 
   const fewValidators = changeValidators.length > 1;
@@ -309,14 +313,30 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
   }, [activeModal, id]);
 
   useEffect(() => {
-    const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || '';
+    if (chain === AVAIL_CHAIN) {
+      setAutoValidator((old) => {
+        if (old) {
+          return old;
+        } else {
+          const selectedValidator = autoSelectValidatorOptimally(items, 16, true, AVAIL_VALIDATOR);
+
+          return selectedValidator.map((item) => getValidatorKey(item.address, item.identity)).join(',');
+        }
+      });
+    } else {
+      setAutoValidator('');
+    }
+  }, [items, chain]);
+
+  useEffect(() => {
+    const _default = nominations?.map((item) => getValidatorKey(item.validatorAddress, item.validatorIdentity)).join(',') || autoValidator || '';
     const selected = defaultValue || (isSingleSelect ? '' : _default);
 
     onInitValidators(_default, selected);
     onChange && onChange({ target: { value: selected } });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nominations, onInitValidators, isSingleSelect]);
+  }, [nominations, onInitValidators, isSingleSelect, autoValidator]);
 
   useEffect(() => {
     if (!isActive) {

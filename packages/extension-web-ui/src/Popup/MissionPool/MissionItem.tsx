@@ -2,17 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import DefaultLogosMap from '@subwallet/extension-web-ui/assets/logo';
-import { MissionCategoryType } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
+import { MissionCategoryType, tagMap } from '@subwallet/extension-web-ui/Popup/MissionPool/predefined';
 import { Theme } from '@subwallet/extension-web-ui/themes';
 import { ThemeProps } from '@subwallet/extension-web-ui/types';
 import { MissionInfo } from '@subwallet/extension-web-ui/types/missionPool';
-import { customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
+import { convertHexColorToRGBA, customFormatDate, openInNewTab } from '@subwallet/extension-web-ui/utils';
 import { Button, ButtonProps, Icon, Image, Tag } from '@subwallet/react-ui';
 import capitalize from '@subwallet/react-ui/es/_util/capitalize';
-import { SwIconProps } from '@subwallet/react-ui/es/icon';
 import CN from 'classnames';
-import { CheckCircle, Coin, Cube, DiceSix, GlobeHemisphereWest, MagicWand, MegaphoneSimple, PlusCircle, SelectionBackground, User } from 'phosphor-react';
-import { IconWeight } from 'phosphor-react/src/lib';
+import { GlobeHemisphereWest, MagicWand, PlusCircle } from 'phosphor-react';
 import React, { Context, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import styled, { ThemeContext } from 'styled-components';
@@ -22,21 +20,6 @@ type Props = ThemeProps & {
   onClick: (data: MissionInfo) => void,
   compactMode?: boolean;
 };
-
-enum TagType {
-  FCFS='fcfs',
-  POINTS='points',
-  LUCKY_DRAW='lucky_draw',
-  MANUAL_SELECTION='manual_selection'
-}
-
-type TagInfo = {
-  theme: string,
-  name: string,
-  slug: string,
-  icon: SwIconProps['phosphorIcon'],
-  iconWeight?: IconWeight
-}
 
 function Component (props: Props): React.ReactElement<Props> {
   const { className, compactMode, data, onClick } = props;
@@ -73,64 +56,13 @@ function Component (props: Props): React.ReactElement<Props> {
     onClick(data);
   }, [data, onClick]);
 
-  const tagMap = useMemo<Record<string, TagInfo>>(() => {
-    return {
-      [TagType.FCFS]: {
-        theme: 'yellow',
-        name: t('FCFS'),
-        slug: TagType.FCFS,
-        icon: User
-      },
-      [TagType.POINTS]: {
-        theme: 'success',
-        name: t('Points'),
-        slug: TagType.POINTS,
-        icon: Coin,
-        iconWeight: 'fill'
-      },
-      [TagType.LUCKY_DRAW]: {
-        theme: 'gold',
-        name: t('Lucky draw'),
-        slug: TagType.LUCKY_DRAW,
-        icon: DiceSix,
-        iconWeight: 'fill'
-      },
-      [TagType.MANUAL_SELECTION]: {
-        theme: 'blue',
-        name: t('Manual selection'),
-        slug: TagType.MANUAL_SELECTION,
-        icon: SelectionBackground
-      },
-      [MissionCategoryType.UPCOMING]: {
-        theme: 'gray',
-        name: t('Upcoming'),
-        slug: MissionCategoryType.UPCOMING,
-        icon: MegaphoneSimple,
-        iconWeight: 'fill'
-      },
-      [MissionCategoryType.LIVE]: {
-        theme: 'success',
-        name: t('Live'),
-        slug: MissionCategoryType.LIVE,
-        icon: CheckCircle,
-        iconWeight: 'fill'
-      },
-      [MissionCategoryType.ARCHIVED]: {
-        theme: 'blue',
-        name: t('Archived'),
-        slug: MissionCategoryType.ARCHIVED,
-        icon: Cube,
-        iconWeight: 'fill'
-      }
-    };
-  }, [t]);
-
   const tagNode = useMemo(() => {
     if (!data.tags || !data.tags.length) {
       return null;
     }
 
     const tagSlug = data.tags[0];
+    const tagCategory = data?.categories?.[0];
     const theme = tagMap[tagSlug]?.theme || 'gray';
     const name = tagMap[tagSlug]?.name || t(capitalize(tagSlug.replace('_', ' ')));
     const iconWeight = tagMap[tagSlug]?.iconWeight;
@@ -157,10 +89,10 @@ function Component (props: Props): React.ReactElement<Props> {
             phosphorIcon={icon}
             weight={iconWeight}
           />
-          {name}
+          {t(`${name}`)}
         </Tag>
         {
-          missionStatus && (
+          !!missionStatus && !!missionName && (
             <Tag
               className='__item-tag'
               color={missionTheme}
@@ -171,13 +103,27 @@ function Component (props: Props): React.ReactElement<Props> {
                 phosphorIcon={missionIcon}
                 weight={missionIconWeight}
               />
-              {missionName}
+              {t(`${missionName}`)}
+            </Tag>
+          )
+        }
+        {
+          tagCategory && (
+            <Tag
+              className='__item-tag'
+              color={tagCategory.color}
+            >
+              <Icon
+                className={'__item-tag-icon'}
+                customSize={'12px'}
+              />
+              {tagCategory.name}
             </Tag>
           )
         }
       </>
     );
-  }, [data.tags, data.status, t, tagMap]);
+  }, [data.tags, data?.categories, data?.status, t]);
 
   if (compactMode) {
     return (
@@ -447,6 +393,9 @@ const MissionItem = styled(Component)<Props>(({ theme: { token } }: Props) => {
         height: 20,
         width: 20
       }
+    },
+    '.ant-tag-has-color': {
+      backgroundColor: convertHexColorToRGBA(token['gray-6'], 0.1)
     },
 
     '&.-compact-mode': {

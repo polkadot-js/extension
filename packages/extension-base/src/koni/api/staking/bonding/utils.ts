@@ -5,9 +5,10 @@ import { _ChainInfo } from '@subwallet/chain-list/types';
 import { NominationInfo, NominatorMetadata, StakingType, UnstakingInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { getAstarWithdrawable } from '@subwallet/extension-base/koni/api/staking/bonding/astar';
 import { _KNOWN_CHAIN_INFLATION_PARAMS, _SUBSTRATE_DEFAULT_INFLATION_PARAMS, _SubstrateInflationParams } from '@subwallet/extension-base/services/chain-service/constants';
+import { _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _getChainNativeTokenBasicInfo } from '@subwallet/extension-base/services/chain-service/utils';
 import { _STAKING_CHAIN_GROUP } from '@subwallet/extension-base/services/earning-service/constants';
-import { EarningStatus, PalletStakingEraRewardPoints, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
+import { EarningStatus, PalletStakingEraRewardPoints, PalletStakingValidatorPrefs, UnstakingStatus, YieldPoolInfo, YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { detectTranslate, parseRawNumber, reformatAddress } from '@subwallet/extension-base/utils';
 import { balanceFormatter, formatNumber } from '@subwallet/extension-base/utils/number';
 import BigNumber from 'bignumber.js';
@@ -189,18 +190,17 @@ export function calculateChainStakedReturn (inflation: number, totalEraStake: BN
   return stakedReturn;
 }
 
-export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, isCompound?: boolean) {
+export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuance: string, erasPerDay: number, lastTotalStaked: string, validatorEraReward: BigNumber, inflation: BigNumber, isCompound?: boolean) {
   const DAYS_PER_YEAR = 365;
-  // @ts-ignore
-  const DECIMAL = chainInfo.substrateInfo.decimals;
+  const { decimals } = _getChainNativeTokenBasicInfo(chainInfo);
 
-  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** DECIMAL));
-  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** DECIMAL));
+  const lastTotalStakedUnit = (new BigNumber(lastTotalStaked)).dividedBy(new BigNumber(10 ** decimals));
+  const totalIssuanceUnit = (new BigNumber(totalIssuance)).dividedBy(new BigNumber(10 ** decimals));
   const supplyStaked = lastTotalStakedUnit.dividedBy(totalIssuanceUnit);
 
   const dayRewardRate = validatorEraReward.multipliedBy(erasPerDay).dividedBy(totalIssuance).multipliedBy(100);
 
-  let inflationToStakers: BigNumber = new BigNumber(0);
+  let inflationToStakers: BigNumber;
 
   if (!isCompound) {
     inflationToStakers = dayRewardRate.multipliedBy(DAYS_PER_YEAR);
@@ -210,7 +210,7 @@ export function calculateChainStakedReturnV2 (chainInfo: _ChainInfo, totalIssuan
     inflationToStakers = new BigNumber(100).multipliedBy(multiplier).minus(100);
   }
 
-  const averageRewardRate = inflationToStakers.dividedBy(supplyStaked);
+  const averageRewardRate = (['avail_mainnet', 'dentnet'].includes(chainInfo.slug) ? inflation : inflationToStakers).dividedBy(supplyStaked);
 
   return averageRewardRate.toNumber();
 }
@@ -568,7 +568,7 @@ export function getAvgValidatorEraReward (supportedDays: number, eraRewardHistor
 }
 
 export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupportedEras: number, liveDay?: number) {
-  const maxSupportDay = maxSupportedEras / erasPerDay;
+  const maxSupportDay = Math.floor(maxSupportedEras / erasPerDay);
 
   if (liveDay && liveDay <= 30) {
     return Math.min(liveDay - 1, maxSupportDay);
@@ -581,16 +581,14 @@ export function getSupportedDaysByHistoryDepth (erasPerDay: number, maxSupported
   }
 }
 
-export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
+export function getRelayValidatorPointsMap (eraRewardMap: Record<string, PalletStakingEraRewardPoints>) {
   // mapping store validator and totalPoints
   const validatorTotalPointsMap: Record<string, BigNumber> = {};
 
   Object.values(eraRewardMap).forEach((info) => {
     const individual = info.individual;
 
-    Object.entries(individual).forEach(([validator, rawPoints]) => {
-      const points = rawPoints.replaceAll(',', '');
-
+    Object.entries(individual).forEach(([validator, points]) => {
       if (!validatorTotalPointsMap[validator]) {
         validatorTotalPointsMap[validator] = new BigNumber(points);
       } else {
@@ -602,7 +600,7 @@ export function getValidatorPointsMap (eraRewardMap: Record<string, PalletStakin
   return validatorTotalPointsMap;
 }
 
-export function getTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
+export function getRelayTopValidatorByPoints (validatorPointsList: Record<string, BigNumber>) {
   const sortValidatorPointsList = Object.fromEntries(
     Object.entries(validatorPointsList)
       .sort(
@@ -623,11 +621,69 @@ export function getTopValidatorByPoints (validatorPointsList: Record<string, Big
   return Object.keys(top50PercentRecord);
 }
 
+export function getRelayBlockedValidatorList (validators: any[]) {
+  const blockValidatorList: string[] = [];
+
+  for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (isBlocked) {
+      blockValidatorList.push(validatorAddress);
+    }
+  }
+
+  return blockValidatorList;
+}
+
+export function getRelayWaitingValidatorList (validators: any[]) {
+  const waitingValidators: string[] = [];
+
+  for (const validator of validators) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorAddress = validator[0].toHuman()[0] as string;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
+    const validatorPrefs = validator[1].toHuman() as unknown as PalletStakingValidatorPrefs;
+
+    const isBlocked = validatorPrefs.blocked;
+
+    if (!isBlocked) {
+      waitingValidators.push(validatorAddress);
+    }
+  }
+
+  return waitingValidators;
+}
+
+export function getRelayEraRewardMap (eraRewardPointArray: Codec[], startEraForPoints: number) {
+  const eraRewardMap: Record<string, PalletStakingEraRewardPoints> = {};
+
+  for (const item of eraRewardPointArray) {
+    eraRewardMap[startEraForPoints] = item.toPrimitive() as unknown as PalletStakingEraRewardPoints;
+    startEraForPoints++;
+  }
+
+  return eraRewardMap;
+}
+
+export async function getRelayMaxNominations (substrateApi: _SubstrateApi) {
+  await substrateApi.isReady;
+  const maxNominations = substrateApi.api.consts.staking?.maxNominations?.toString() || '16';
+  const _maxNominationsByNominationQuota = await substrateApi.api.call.stakingApi?.nominationsQuota(0); // todo: review param. Currently return constant for all param.
+  const maxNominationsByNominationQuota = _maxNominationsByNominationQuota?.toString();
+
+  return maxNominationsByNominationQuota || maxNominations;
+}
+
 export const getMinStakeErrorMessage = (chainInfo: _ChainInfo, bnMinStake: BN): string => {
   const tokenInfo = _getChainNativeTokenBasicInfo(chainInfo);
   const number = formatNumber(bnMinStake.toString(), tokenInfo.decimals || 0, balanceFormatter);
 
-  return t('Insufficient stake. Please stake at least {{number}} {{tokenSymbol}} to get rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
+  return t('Insufficient stake. You need to stake at least {{number}} {{tokenSymbol}} to earn rewards', { replace: { tokenSymbol: tokenInfo.symbol, number } });
 };
 
 export const getMaxValidatorErrorMessage = (chainInfo: _ChainInfo, max: number): string => {

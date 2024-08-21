@@ -2,8 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { _ChainInfo } from '@subwallet/chain-list/types';
+import { YieldPoolType } from '@subwallet/extension-base/types';
 import NetworkTag from '@subwallet/extension-web-ui/components/NetworkTag';
-import { useTranslation } from '@subwallet/extension-web-ui/hooks';
+import { useSelector, useTranslation } from '@subwallet/extension-web-ui/hooks';
 import { NetworkType, ThemeProps, YieldGroupInfo } from '@subwallet/extension-web-ui/types';
 import { isRelatedToAstar } from '@subwallet/extension-web-ui/utils';
 import { Icon, Logo, Number } from '@subwallet/react-ui';
@@ -23,10 +24,17 @@ type Props = ThemeProps & {
 const Component: React.FC<Props> = (props: Props) => {
   const { chain, className, displayBalanceInfo = true, isShowBalance, onClick, poolGroup } = props;
   const { t } = useTranslation();
+  const { poolInfoMap } = useSelector((state) => state.earning);
 
-  const { balance, group, isTestnet, maxApy, symbol, token, totalValueStaked } = poolGroup;
+  const { balance, group, isTestnet, maxApy, poolSlugs, symbol, token, totalValueStaked } = poolGroup;
 
   const _isRelatedToAstar = isRelatedToAstar(group);
+
+  const isNotShowPrefix = poolSlugs.every((slug) => {
+    const poolInfo = poolInfoMap[slug];
+
+    return [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo?.type);
+  });
 
   return (
     <div
@@ -66,9 +74,7 @@ const Component: React.FC<Props> = (props: Props) => {
             {
               !_isRelatedToAstar && !!maxApy && (
                 <div className='__item-upto'>
-                  <div className='__item-upto-label'>
-                    {t('Up to')}:
-                  </div>
+                  {!isNotShowPrefix && <span className={'__item-upto-label'}>Up to</span>}
                   <div className='__item-upto-value'>
                     <Number
                       decimal={0}

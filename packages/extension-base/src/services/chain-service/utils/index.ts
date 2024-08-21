@@ -61,11 +61,11 @@ export function _isEqualSmartContractAsset (asset1: _ChainAsset, asset2: _ChainA
 }
 
 export function _isPureEvmChain (chainInfo: _ChainInfo) {
-  return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
+  return (!!chainInfo.evmInfo && !chainInfo.substrateInfo);
 }
 
 export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
-  return (chainInfo.evmInfo === null && chainInfo.substrateInfo !== null);
+  return (!chainInfo.evmInfo && !!chainInfo.substrateInfo);
 }
 
 export function _getOriginChainOfAsset (assetSlug: string) {
@@ -155,7 +155,7 @@ export function _isSubstrateChain (chainInfo: _ChainInfo) {
 }
 
 export function _getEvmChainId (chainInfo: _ChainInfo) {
-  return chainInfo.evmInfo?.evmChainId || 1; // fallback to Ethereum
+  return chainInfo.evmInfo?.evmChainId; // fallback to Ethereum
 }
 
 export function _getSubstrateParaId (chainInfo: _ChainInfo) {
@@ -163,7 +163,7 @@ export function _getSubstrateParaId (chainInfo: _ChainInfo) {
 }
 
 export function _getSubstrateRelayParent (chainInfo: _ChainInfo) {
-  return chainInfo.substrateInfo?.relaySlug || '';
+  return chainInfo.substrateInfo?.relaySlug;
 }
 
 export function _getSubstrateGenesisHash (chainInfo: _ChainInfo) {
@@ -206,6 +206,10 @@ export function _isChainSupportGRC20 (chainInfo: _ChainInfo) {
   return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.GRC20) || false;
 }
 
+export function _isChainSupportVFT (chainInfo: _ChainInfo) {
+  return chainInfo.substrateInfo?.supportSmartContract?.includes(_AssetType.VFT) || false;
+}
+
 export const _isSupportOrdinal = (chain: string) => {
   const chains = ['polkadot', 'astar', 'bifrost_dot', 'moonbeam'];
 
@@ -239,7 +243,7 @@ export function _getTokenTypesSupportedByChain (chainInfo: _ChainInfo): _AssetTy
 
   if (chainInfo.substrateInfo && chainInfo.substrateInfo.supportSmartContract) {
     chainInfo.substrateInfo.supportSmartContract.forEach((assetType) => {
-      if ([_AssetType.PSP22, _AssetType.GRC20].includes(assetType)) {
+      if ([_AssetType.PSP22, _AssetType.GRC20, _AssetType.VFT].includes(assetType)) {
         result.push(assetType);
       }
     });
@@ -307,7 +311,7 @@ export function _isAssetSmartContractNft (assetInfo: _ChainAsset) {
 }
 
 export function _isTokenGearSmartContract (tokenInfo: _ChainAsset) {
-  return [_AssetType.GRC20, _AssetType.GRC721].includes(tokenInfo.assetType);
+  return [_AssetType.GRC20, _AssetType.GRC721, _AssetType.VFT].includes(tokenInfo.assetType);
 }
 
 export function _parseAssetRefKey (originTokenSlug: string, destinationTokenSlug: string) {
@@ -338,6 +342,10 @@ export function _getXcmAssetMultilocation (tokenInfo: _ChainAsset) {
 
 export function _getXcmTransferType (originChainInfo: _ChainInfo, destinationChainInfo: _ChainInfo) {
   return `${originChainInfo.substrateInfo?.chainType || ''}-${destinationChainInfo.substrateInfo?.chainType || ''}`;
+}
+
+export function _isRelayChain (chainInfo: _ChainInfo) {
+  return _isSubstrateRelayChain(chainInfo) || _isPureEvmChain(chainInfo);
 }
 
 export function _isSubstrateRelayChain (chainInfo: _ChainInfo) {
@@ -476,6 +484,14 @@ export const findChainInfoByChainId = (chainMap: Record<string, _ChainInfo>, cha
 
 export function _isMantaZkAsset (chainAsset: _ChainAsset) {
   return _MANTA_ZK_CHAIN_GROUP.includes(chainAsset.originChain) && chainAsset.symbol.startsWith(_ZK_ASSET_PREFIX);
+}
+
+export function _getChainExistentialDeposit (chainInfo: _ChainInfo): string {
+  return chainInfo?.substrateInfo?.existentialDeposit || '0';
+}
+
+export function _getAssetExistentialDeposit (chainAsset: _ChainAsset): string {
+  return chainAsset?.minAmount || '0';
 }
 
 export function randomizeProvider (providers: Record<string, string>, excludedKeys?: string[]) {

@@ -127,10 +127,18 @@ const Component: React.FC<Props> = ({ className }: Props) => {
     }
   }, [isPopup, hasMasterPassword]);
 
+  const waitReady = useMemo(() => {
+    return new Promise((resolve) => {
+      if (seedPhrase) {
+        resolve(true);
+      }
+    });
+  }, [seedPhrase]);
+
   return (
     <PageWrapper
       className={CN(className)}
-      resolve={new Promise((resolve) => !!seedPhrase && resolve(true))}
+      resolve={waitReady}
     >
       <Layout.WithSubHeaderOnly
         onBack={onBack}

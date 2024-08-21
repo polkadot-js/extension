@@ -6,6 +6,7 @@ import { AuthUrlInfo } from '@subwallet/extension-base/background/handlers/State
 import { AddressBookState, AllLogoMap, AssetSetting, CampaignBanner, ChainStakingMetadata, ConfirmationDefinitions, ConfirmationsQueue, ConfirmationType, CrowdloanItem, KeyringState, LanguageType, MantaPayConfig, NftCollection, NftItem, NominatorMetadata, PriceJson, StakingItem, StakingRewardItem, TransactionHistoryItem, UiSettings, ValidatorInfo } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, AccountsContext, AuthorizeRequest, MetadataRequest, SigningRequest } from '@subwallet/extension-base/background/types';
 import { _ChainApiStatus, _ChainState } from '@subwallet/extension-base/services/chain-service/types';
+import { AppBannerData, AppConfirmationData, AppPopupData } from '@subwallet/extension-base/services/mkt-campaign-service/types';
 import { SWTransactionResult } from '@subwallet/extension-base/services/transaction-service/types';
 import { WalletConnectNotSupportRequest, WalletConnectSessionRequest } from '@subwallet/extension-base/services/wallet-connect-service/types';
 import { BalanceMap, BuyServiceInfo, BuyTokenInfo, EarningRewardHistoryItem, EarningRewardItem, NominationPoolInfo, YieldPoolInfo, YieldPoolTarget, YieldPositionInfo } from '@subwallet/extension-base/types';
@@ -14,6 +15,8 @@ import { MissionInfo } from '@subwallet/extension-koni-ui/types';
 import { SessionTypes } from '@walletconnect/types';
 
 import { SettingsStruct } from '@polkadot/ui-settings/types';
+
+import { MktCampaignHistoryData } from '../types/staticContent';
 
 // todo: move this file to extension-koni-ui/src/types/
 
@@ -121,6 +124,7 @@ export interface ChainStore extends BaseReduxStore {
   chainInfoMap: Record<string, _ChainInfo>,
   chainStateMap: Record<string, _ChainState>
   chainStatusMap: Record<string, _ChainApiStatus>
+  ledgerGenericAllowNetworks: string[];
 }
 
 export interface BalanceStore extends BaseReduxStore {
@@ -128,7 +132,17 @@ export interface BalanceStore extends BaseReduxStore {
 }
 
 export interface CampaignStore extends BaseReduxStore {
-  banners: CampaignBanner[]
+  banners: CampaignBanner[],
+  isPopupVisible: boolean
+}
+
+export interface AppOnlineContent {
+  appPopupData: AppPopupData[];
+  appBannerData: AppBannerData[];
+  appConfirmationData: AppConfirmationData[];
+  popupHistoryMap: Record<string, MktCampaignHistoryData>;
+  bannerHistoryMap: Record<string, MktCampaignHistoryData>;
+  confirmationHistoryMap: Record<string, MktCampaignHistoryData>;
 }
 
 export interface BuyServiceStore extends BaseReduxStore {

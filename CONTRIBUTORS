@@ -1,22 +1,23 @@
-    2633	AnhMTV                        	Release version 1.2.1
-    2355	Nam Phạm                      	[Issue 3129] fix: force apply patch
-    2050	S2kael                        	[Issue-3121] Fix HTTP provider error when subscribe tx status
-     815	lw-cdm                        	Fix eslint issues
+    2797	AnhMTV                        	Release version 1.2.26
+    2532	Nam Phạm                      	[Issue 3450] fix: get era stakers overview
+    2180	S2kael                        	[Issue-3450] Update stable version for chain-list
+     848	lw-cdm                        	[Issue-3407] WebApp - Support Avail Ledger app
+     561	nguyentiendung                	[Issue-2845] Fix UI bugs export accounts
      465	Jaco                          	0.42.5 (#969)
-     416	nguyentiendung                	[Issue-2914] Update yarn.lock
+     262	bluezdot                      	[Issue-3450] fix: bug rounding number
+     209	Thiendekaco                   	[Issue 2501] [update]  Extension - Update message error has been standardized #2
      185	quangdo                       	
-     150	bluezdot                      	[Issue-3088] Update logo earning option
-     129	Thiendekaco                   	[Issue 3117] [fix] [mv3] Extension - Still show icon ZK mode on Export account screen in case upgrade version MV2 -> MV3
-     108	Automation Bot                	[CI Skip] Auto increase webapp build number
-     106	dominhquang                   	[Issue-2649] Add send crash log feature
+     160	Automation Bot                	[CI Skip] Auto increase webapp build number
+     145	dominhquang                   	[Issue-3414] Fix bug re-open popup
+     118	lw-cdm                        	
      104	khainh                        	predefine metadata for Polkadot & Kusama chains
-     101	lw-cdm                        	
       83	Hieu Dao                      	Update README.md
       82	Thibaut Sardan                	Add account filtering feature (#832)
       81	leewong                       	Swap - Change idle time to 300s
+      67	bluedot                       	[Issue-2965] fix: Handle earning status for request redeem
       63	Roman                         	fix ui issues
       53	Dominhquangdev                	update Bridge code
-      48	bluedot                       	[Issue-2771] Update multichain asset logo for ASTR
+      32	Frenkie Nguyen                	[Issue 3413] WebApp - Do not show earning position for Bifrost liquid staking
       24	S2kael                        	
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
@@ -27,6 +28,7 @@
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
+       4	Thanh                         	[Issue-3450] Add Story Partner Testnet
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
        2	Axel Chalon                   	Add typings to messages (#130)
@@ -49,6 +51,7 @@
        1	Forrest                       	Add Web3AccountsOptions to web3FromAddress function (#617)
        1	itsonal                       	add new language - Urdu (#847)
        1	KarishmaBothara               	Added code to support custom signed extension/user extension (#670)
+       1	lw                            	[UI] Fix issue related to input overflow width
        1	Marcel Jackisch               	Minor changes to readme (#376)
        1	Michael Healy                 	Small typo (#932)
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)

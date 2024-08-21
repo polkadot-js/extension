@@ -3,7 +3,7 @@
 
 import { _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { ApiMap, ServiceInfo } from '@subwallet/extension-base/background/KoniTypes';
-import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_NFT_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
+import { CRON_REFRESH_CHAIN_STAKING_METADATA, CRON_REFRESH_MKT_CAMPAIGN_INTERVAL, CRON_REFRESH_NFT_INTERVAL, CRON_SYNC_MANTA_PAY } from '@subwallet/extension-base/constants';
 import { KoniSubscription } from '@subwallet/extension-base/koni/background/subscription';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft } from '@subwallet/extension-base/services/chain-service/utils';
 import { EventItem, EventType } from '@subwallet/extension-base/services/event-service/types';
@@ -88,9 +88,16 @@ export class KoniCron {
       'asset.updateState'
     ];
 
+    const mktCampaignReloadEvents: EventType[] = [
+      'account.add',
+      'account.remove'
+    ];
+
     this.eventHandler = (events, eventTypes) => {
       const serviceInfo = this.state.getServiceInfo();
       const commonReload = eventTypes.some((eventType) => commonReloadEvents.includes(eventType));
+
+      const mktCampaignNeedReload = eventTypes.some((eventType) => mktCampaignReloadEvents.includes(eventType));
 
       const chainUpdated = eventTypes.includes('chain.updateState');
       const reloadMantaPay = eventTypes.includes('mantaPay.submitTransaction') || eventTypes.includes('mantaPay.enable');
@@ -129,6 +136,11 @@ export class KoniCron {
       (commonReload || needUpdateNft) && this.removeCron('refreshNft');
       commonReload && this.removeCron('refreshPoolingStakingReward');
 
+      if (mktCampaignNeedReload) {
+        this.removeCron('fetchMktCampaignData');
+        this.addCron('fetchMktCampaignData', this.fetchMktCampaignData, CRON_REFRESH_MKT_CAMPAIGN_INTERVAL);
+      }
+
       if (chainUpdated) {
         this.stopPoolInfo();
         this.removeCron('fetchPoolInfo');
@@ -145,6 +157,8 @@ export class KoniCron {
     this.state.eventService.onLazy(this.eventHandler);
 
     this.addCron('fetchPoolInfo', this.fetchPoolInfo, CRON_REFRESH_CHAIN_STAKING_METADATA);
+
+    this.addCron('fetchMktCampaignData', this.fetchMktCampaignData, CRON_REFRESH_MKT_CAMPAIGN_INTERVAL);
 
     if (!currentAccountInfo?.address) {
       return;
@@ -192,6 +206,10 @@ export class KoniCron {
 
   fetchPoolInfo = () => {
     this.state.earningService.runSubscribePoolsInfo().catch(console.error);
+  };
+
+  fetchMktCampaignData = () => {
+    this.state.mktCampaignService.fetchMktCampaignData();
   };
 
   stopPoolInfo = () => {

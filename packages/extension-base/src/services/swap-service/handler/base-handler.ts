@@ -4,23 +4,24 @@
 import { SwapError } from '@subwallet/extension-base/background/errors/SwapError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { BasicTxErrorType } from '@subwallet/extension-base/background/KoniTypes';
+import { _validateBalanceToSwap, _validateSwapRecipient } from '@subwallet/extension-base/core/logic-validation/swap';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ChainService } from '@subwallet/extension-base/services/chain-service';
-import { _getAssetDecimals, _getTokenMinAmount, _isChainEvmCompatible, _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
-import { DEFAULT_SWAP_FIRST_STEP, getSwapAlternativeAsset, MOCK_SWAP_FEE } from '@subwallet/extension-base/services/swap-service/utils';
-import { BaseStepDetail } from '@subwallet/extension-base/types/service-base';
-import { GenSwapStepFunc, OptimalSwapPath, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeInfo, SwapFeeType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
+import { _isNativeToken } from '@subwallet/extension-base/services/chain-service/utils';
+import { getSwapAlternativeAsset } from '@subwallet/extension-base/services/swap-service/utils';
+import { BaseStepDetail, CommonOptimalPath, CommonStepFeeInfo, DEFAULT_FIRST_STEP, MOCK_STEP_FEE } from '@subwallet/extension-base/types/service-base';
+import { GenSwapStepFunc, OptimalSwapPathParams, SwapEarlyValidation, SwapErrorType, SwapFeeType, SwapProvider, SwapProviderId, SwapQuote, SwapRequest, SwapSubmitParams, SwapSubmitStepData, ValidateSwapProcessParams } from '@subwallet/extension-base/types/swap';
 import { formatNumber } from '@subwallet/extension-base/utils';
 import BigNumber from 'bignumber.js';
 import { t } from 'i18next';
 
-import { isEthereumAddress } from '@polkadot/util-crypto';
-
 export interface SwapBaseInterface {
-  getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
-  generateOptimalProcess: (params: OptimalSwapPathParams) => Promise<OptimalSwapPath>;
+  providerSlug: SwapProviderId;
 
-  getSubmitStep: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, SwapFeeInfo] | undefined>;
+  getSwapQuote: (request: SwapRequest) => Promise<SwapQuote | SwapError>;
+  generateOptimalProcess: (params: OptimalSwapPathParams) => Promise<CommonOptimalPath>;
+
+  getSubmitStep: (params: OptimalSwapPathParams) => Promise<[BaseStepDetail, CommonStepFeeInfo] | undefined>;
 
   validateSwapRequest: (request: SwapRequest) => Promise<SwapEarlyValidation>;
   validateSwapProcess: (params: ValidateSwapProcessParams) => Promise<TransactionError[]>;
@@ -33,14 +34,14 @@ export interface SwapBaseInterface {
 }
 
 export interface SwapBaseHandlerInitParams {
-  providerSlug: string,
+  providerSlug: SwapProviderId,
   providerName: string,
   chainService: ChainService,
   balanceService: BalanceService
 }
 
 export class SwapBaseHandler {
-  private readonly providerSlug: string;
+  private readonly providerSlug: SwapProviderId;
   private readonly providerName: string;
   public chainService: ChainService;
   public balanceService: BalanceService;
@@ -53,10 +54,10 @@ export class SwapBaseHandler {
   }
 
   // public abstract getSwapQuote(request: SwapRequest): Promise<SwapQuote | SwapError>;
-  public async generateOptimalProcess (params: OptimalSwapPathParams, genStepFuncList: GenSwapStepFunc[]): Promise<OptimalSwapPath> {
-    const result: OptimalSwapPath = {
-      totalFee: [MOCK_SWAP_FEE],
-      steps: [DEFAULT_SWAP_FIRST_STEP]
+  public async generateOptimalProcess (params: OptimalSwapPathParams, genStepFuncList: GenSwapStepFunc[]): Promise<CommonOptimalPath> {
+    const result: CommonOptimalPath = {
+      totalFee: [MOCK_STEP_FEE],
+      steps: [DEFAULT_FIRST_STEP]
     };
 
     try {
@@ -92,8 +93,8 @@ export class SwapBaseHandler {
     const fromAsset = this.chainService.getAssetBySlug(swapPair.from);
 
     const [alternativeAssetBalance, fromAssetBalance] = await Promise.all([
-      this.balanceService.getTokenFreeBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug),
-      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+      this.balanceService.getTransferableBalance(params.address, alternativeAsset.originChain, alternativeAssetSlug),
+      this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
     ]);
 
     const bnAlternativeAssetBalance = new BigNumber(alternativeAssetBalance.value);
@@ -102,15 +103,15 @@ export class SwapBaseHandler {
     const xcmFeeComponent = params.process.totalFee[stepIndex].feeComponent[0]; // todo: can do better than indexing
     const xcmFee = new BigNumber(xcmFeeComponent.amount || '0');
     let xcmAmount = bnAmount.minus(bnFromAssetBalance);
+    let editedXcmFee = new BigNumber(0);
 
     if (_isNativeToken(alternativeAsset)) {
       xcmAmount = xcmAmount.plus(xcmFee);
+      editedXcmFee = xcmFee.times(2);
     }
 
-    const alternativeTokenMinAmount = new BigNumber(alternativeAsset.minAmount || '0');
-
-    if (!bnAlternativeAssetBalance.minus(xcmAmount).gte(alternativeTokenMinAmount)) {
-      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(xcmFee).minus(alternativeTokenMinAmount);
+    if (!bnAlternativeAssetBalance.minus(_isNativeToken(alternativeAsset) ? xcmAmount.plus(xcmFee) : xcmFee).gt(0)) {
+      const maxBn = bnFromAssetBalance.plus(new BigNumber(alternativeAssetBalance.value)).minus(_isNativeToken(alternativeAsset) ? editedXcmFee : xcmFee);
       const maxValue = formatNumber(maxBn.toString(), fromAsset.decimals || 0);
 
       const altInputTokenInfo = this.chainService.getAssetBySlug(alternativeAssetSlug);
@@ -123,7 +124,7 @@ export class SwapBaseHandler {
       const altNetworkName = alternativeChain.name;
 
       const currentValue = formatNumber(bnFromAssetBalance.toString(), fromAsset.decimals || 0);
-      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(xcmFee).minus(alternativeTokenMinAmount);
+      const bnMaxXCM = new BigNumber(alternativeAssetBalance.value).minus(_isNativeToken(alternativeAsset) ? editedXcmFee : xcmFee);
       const maxXCMValue = formatNumber(bnMaxXCM.toString(), fromAsset.decimals || 0);
 
       if (maxBn.lte(0) || bnFromAssetBalance.lte(0) || bnMaxXCM.lte(0)) {
@@ -161,7 +162,7 @@ export class SwapBaseHandler {
     const feeAmount = feeInfo.feeComponent[0];
     const feeTokenInfo = this.chainService.getAssetBySlug(feeInfo.defaultFeeToken);
 
-    const feeTokenBalance = await this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug);
+    const feeTokenBalance = await this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug);
     const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
     const bnFeeAmount = new BigNumber(feeAmount.amount);
 
@@ -173,6 +174,9 @@ export class SwapBaseHandler {
   }
 
   public async validateSwapStep (params: ValidateSwapProcessParams, isXcmOk: boolean, stepIndex: number): Promise<TransactionError[]> {
+    // check swap quote timestamp
+    // check balance to pay transaction fee
+    // check balance against spending amount
     if (!params.selectedQuote) {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
@@ -184,9 +188,6 @@ export class SwapBaseHandler {
       return Promise.resolve([new TransactionError(SwapErrorType.QUOTE_TIMEOUT)]);
     }
 
-    const bnAmount = new BigNumber(params.selectedQuote.fromAmount);
-    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
-
     const stepFee = params.process.totalFee[stepIndex].feeComponent;
     const networkFee = stepFee.find((fee) => fee.feeType === SwapFeeType.NETWORK_FEE);
 
@@ -194,61 +195,34 @@ export class SwapBaseHandler {
       return Promise.resolve([new TransactionError(BasicTxErrorType.INTERNAL_ERROR)]);
     }
 
+    const fromAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.from);
     const feeTokenInfo = this.chainService.getAssetBySlug(networkFee.tokenSlug);
     const feeTokenChain = this.chainService.getChainInfoByKey(feeTokenInfo.originChain);
 
+    const { fromAmount, minSwap } = params.selectedQuote;
+
     const [feeTokenBalance, fromAssetBalance] = await Promise.all([
-      this.balanceService.getTokenFreeBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
-      this.balanceService.getTokenFreeBalance(params.address, fromAsset.originChain, fromAsset.slug)
+      this.balanceService.getTransferableBalance(params.address, feeTokenInfo.originChain, feeTokenInfo.slug),
+      this.balanceService.getTransferableBalance(params.address, fromAsset.originChain, fromAsset.slug)
     ]);
 
-    const bnFeeTokenBalance = new BigNumber(feeTokenBalance.value);
-    const bnFromAssetBalance = new BigNumber(fromAssetBalance.value);
-    const bnFeeAmount = new BigNumber(networkFee.amount);
+    const balanceError = _validateBalanceToSwap(fromAsset, feeTokenInfo, feeTokenChain, networkFee.amount, fromAssetBalance.value, feeTokenBalance.value, fromAmount, isXcmOk, minSwap);
 
-    if (bnFeeTokenBalance.lte(bnFeeAmount)) {
-      return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
-        `You don't have enough ${feeTokenInfo.symbol} (${feeTokenChain.name}) to pay transaction fee`)]);
+    if (balanceError) {
+      return Promise.resolve([balanceError]);
     }
 
-    if (fromAsset.slug === feeTokenInfo.slug) {
-      if (bnFromAssetBalance.lte(bnFeeAmount.plus(bnAmount))) {
-        return Promise.resolve([new TransactionError(BasicTxErrorType.NOT_ENOUGH_BALANCE,
-          `Insufficient balance. Deposit ${fromAsset.symbol} and try again.`)]);
-      }
+    if (!params.recipient) {
+      return Promise.resolve([]);
     }
 
-    if (params.selectedQuote.minSwap) {
-      const minProtocolSwap = new BigNumber(params.selectedQuote.minSwap);
+    const toAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.to);
+    const toAssetChain = this.chainService.getChainInfoByKey(toAsset.originChain);
 
-      if (!isXcmOk && bnFromAssetBalance.lte(minProtocolSwap)) {
-        const parsedMinSwapValue = formatNumber(minProtocolSwap, _getAssetDecimals(fromAsset));
+    const recipientError = _validateSwapRecipient(toAssetChain, params.recipient);
 
-        return Promise.resolve([new TransactionError(SwapErrorType.SWAP_NOT_ENOUGH_BALANCE,
-          `Insufficient balance. You need more than ${parsedMinSwapValue} ${fromAsset.symbol} to start swapping. Deposit ${fromAsset.symbol} and try again.`)]); // todo: min swap or amount?
-      }
-    }
-
-    const bnSrcAssetMinAmount = new BigNumber(_getTokenMinAmount(fromAsset));
-    const bnMaxBalanceSwap = bnFromAssetBalance.minus(bnSrcAssetMinAmount);
-
-    if (!isXcmOk && bnAmount.gte(bnMaxBalanceSwap)) {
-      const parsedMaxBalanceSwap = formatNumber(bnMaxBalanceSwap, _getAssetDecimals(fromAsset));
-
-      return Promise.resolve([new TransactionError(SwapErrorType.SWAP_EXCEED_ALLOWANCE,
-        `Amount too high. Lower your amount ${bnMaxBalanceSwap.gt(0) ? `below ${parsedMaxBalanceSwap} ${fromAsset.symbol}` : ''} and try again`)]);
-    }
-
-    if (params.recipient) {
-      const toAsset = this.chainService.getAssetBySlug(params.selectedQuote.pair.to);
-      const destChainInfo = this.chainService.getChainInfoByKey(toAsset.originChain);
-
-      const isEvmAddress = isEthereumAddress(params.recipient);
-      const isEvmDestChain = _isChainEvmCompatible(destChainInfo);
-
-      if ((isEvmAddress && !isEvmDestChain) || (!isEvmAddress && isEvmDestChain)) {
-        return Promise.resolve([new TransactionError(SwapErrorType.INVALID_RECIPIENT)]);
-      }
+    if (recipientError) {
+      return Promise.resolve([recipientError]);
     }
 
     return Promise.resolve([]);
@@ -264,7 +238,7 @@ export class SwapBaseHandler {
 
   get providerInfo (): SwapProvider {
     return {
-      id: this.providerSlug as SwapProviderId,
+      id: this.providerSlug,
       name: this.providerName
     };
   }

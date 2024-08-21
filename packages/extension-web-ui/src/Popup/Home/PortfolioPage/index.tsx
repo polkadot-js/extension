@@ -127,6 +127,13 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
   const isShowReloadNft = useMemo(() => pathname.startsWith('/home/nfts/collections'), [pathname]);
 
+  const outletValue = useMemo(() => ({
+    searchInput,
+    setDetailTitle,
+    setSearchPlaceholder,
+    setShowSearchInput
+  }), [searchInput]);
+
   return (
     <div className={CN(className, 'portfolio-container')}>
       <div className='portfolio-header'>
@@ -205,12 +212,7 @@ function Component ({ className }: Props): React.ReactElement<Props> {
 
       <div className='portfolio-content'>
         <Outlet
-          context={{
-            searchInput,
-            setDetailTitle,
-            setSearchPlaceholder,
-            setShowSearchInput
-          }}
+          context={outletValue}
         />
       </div>
     </div>

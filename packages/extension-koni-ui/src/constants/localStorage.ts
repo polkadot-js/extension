@@ -25,9 +25,13 @@ export const SELECTED_ACCOUNT_TYPE = 'account.selected-type';
 export const SEED_PREVENT_MODAL = 'seed.prevent-modal';
 
 export const CONFIRM_GENERAL_TERM = 'general.term-and-condition';
+export const MISSIONS_POOL_LIVE_ID = 'mission-pool-live-id';
 export const CONFIRM_SWAP_TERM = 'swap.term-and-service';
 export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
 export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';
 export const EARNING_MIGRATION_ANNOUNCEMENT = 'announcement.earning-migration';
 export const TIME_OUT_RECORD = 'general.time-out-record';
+export const APP_INSTRUCTION_DATA = 'static.instruction-data';
+export const SHOW_APP_POPUP = 'static.show-app-popup';
 export const LATEST_SESSION = 'general.latest-session';
+export const UPGRADE_FIREFOX_VERSION = 'general.updated-version-firefox';

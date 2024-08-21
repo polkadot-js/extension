@@ -1,4 +1,4 @@
-// Copyright 2019-2022 @polkadot/extension-koni-ui authors & contributors
+// Copyright 2019-2022 @polkadot/extension-web-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import { ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -14,7 +14,9 @@ import LogoWithSquircleBorder from './LogoWithSquircleBorder';
 interface Props extends ThemeProps {
   leftLogo?: React.ReactNode;
   rightLogo?: React.ReactNode;
-
+  sizeSquircleBorder?: number;
+  innerSize?: number;
+  sizeLinkIcon?: number;
   linkIcon?: React.ReactNode;
   linkIconBg?: string;
 }
@@ -28,23 +30,23 @@ const defaultLinkIcon = (
 
 const defaultLogo = <Logo2D />;
 
-const Component = ({ className, leftLogo = defaultLogo, linkIcon = defaultLinkIcon, rightLogo = defaultLogo }: Props) => {
+const Component = ({ className, leftLogo = defaultLogo, linkIcon = defaultLinkIcon, rightLogo = defaultLogo, sizeSquircleBorder, innerSize }: Props) => {
   return (
     <div className={CN(className, 'dual-logo-container')}>
-      <LogoWithSquircleBorder>
+      <LogoWithSquircleBorder size={sizeSquircleBorder} innerSize={innerSize}>
         {leftLogo}
       </LogoWithSquircleBorder>
       <div className='link-icon'>
         {linkIcon}
       </div>
-      <LogoWithSquircleBorder>
+      <LogoWithSquircleBorder size={sizeSquircleBorder} innerSize={innerSize}>
         {rightLogo}
       </LogoWithSquircleBorder>
     </div>
   );
 };
 
-const DualLogo = styled(Component)<Props>(({ linkIconBg, theme }: Props) => ({
+const DualLogo = styled(Component)<Props>(({ linkIconBg, sizeLinkIcon, theme }: Props) => ({
   display: 'flex',
   flexWrap: 'wrap',
   alignItems: 'center',
@@ -57,10 +59,10 @@ const DualLogo = styled(Component)<Props>(({ linkIconBg, theme }: Props) => ({
     backgroundColor: linkIconBg || theme.token['gray-1'],
     zIndex: 10,
     textAlign: 'center',
-    width: 40,
-    height: 40,
+    width: sizeLinkIcon || 40,
+    height: sizeLinkIcon || 40,
     borderRadius: 20,
-    padding: (40 - 24) / 2,
+    padding: ((sizeLinkIcon || 40) - 24) / 2,
     margin: '0 -12px'
   }
 }));

@@ -42,7 +42,7 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceMap, EvmFeeInfo, StorageDataInterface } from '@subwallet/extension-base/types';
-import { isAccountAll, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
+import { isAccountAll, isManifestV3, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -1519,12 +1519,16 @@ export default class KoniState {
     const migrationStatus = await SWStorage.instance.getItem('mv3_migration');
 
     if (!migrationStatus || migrationStatus !== 'done') {
-      // Open migration tab
-      const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
+      if (isManifestV3) {
+        // Open migration tab
+        const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
 
-      await openPopup(url);
+        await openPopup(url);
 
-      // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+        // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+      } else {
+        this.migrateMV3LocalStorage(JSON.stringify(self.localStorage)).catch(console.error);
+      }
     }
   }
 

@@ -32,7 +32,7 @@ export function _getAssetsPalletLocked (accountInfo: PalletAssetsAssetAccount): 
 export function _getAssetsPalletTransferableWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus, existentialDeposit: string, strictMode?: boolean) {
   const bnAppliedExistentialDeposit = _getAppliedExistentialDeposit(existentialDeposit, strictMode);
 
-  return ['Liquid'].includes(accountInfo.status as string) ? BigInt(accountInfo.balance) - bnAppliedExistentialDeposit : BigInt(0);
+  return accountInfo.status === 'Liquid' ? BigInt(accountInfo.balance) - bnAppliedExistentialDeposit : BigInt(0);
 }
 
 export function _getAssetsPalletTransferableWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus, existentialDeposit: string, strictMode?: boolean) {
@@ -42,7 +42,7 @@ export function _getAssetsPalletTransferableWithoutStatus (accountInfo: PalletAs
 }
 
 export function _getAssetsPalletLockedWithStatus (accountInfo: PalletAssetsAssetAccountWithStatus) {
-  return !['Liquid'].includes(accountInfo.status as string) ? BigInt(accountInfo.balance) : BigInt(0);
+  return accountInfo.status !== 'Liquid' ? BigInt(accountInfo.balance) : BigInt(0);
 }
 
 export function _getAssetsPalletLockedWithoutStatus (accountInfo: PalletAssetsAssetAccountWithoutStatus) {

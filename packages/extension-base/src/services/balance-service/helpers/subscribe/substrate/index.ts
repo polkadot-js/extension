@@ -4,7 +4,7 @@
 import { _AssetType, _ChainAsset, _ChainInfo } from '@subwallet/chain-list/types';
 import { APIItemState, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { SUB_TOKEN_REFRESH_BALANCE_INTERVAL } from '@subwallet/extension-base/constants';
-import { _getAssetsPalletLockedBalance, _getAssetsPalletTransferable } from '@subwallet/extension-base/core/substrate/assets-pallet';
+import { _getAssetsPalletLocked, _getAssetsPalletTransferable } from '@subwallet/extension-base/core/substrate/assets-pallet';
 import { _getForeignAssetPalletLockedBalance, _getForeignAssetPalletTransferable } from '@subwallet/extension-base/core/substrate/foreign-asset-pallet';
 import { _getTotalStakeInNominationPool } from '@subwallet/extension-base/core/substrate/nominationpools-pallet';
 import { _getOrmlTokensPalletLockedBalance, _getOrmlTokensPalletTransferable } from '@subwallet/extension-base/core/substrate/ormlTokens-pallet';
@@ -379,7 +379,7 @@ const subscribeAssetsAccountPallet = async ({ addresses, assetMap, callback, cha
         const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
           const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
           const transferableBalance = _getAssetsPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
-          const totalLockedFromTransfer = _getAssetsPalletLockedBalance(balanceInfo);
+          const totalLockedFromTransfer = _getAssetsPalletLocked(balanceInfo);
 
           return {
             address: addresses[index],

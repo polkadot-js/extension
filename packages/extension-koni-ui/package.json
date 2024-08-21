@@ -85,7 +85,7 @@
     "usehooks-ts": "^2.9.1"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.2.24-2",
+    "@subwallet/extension-mocks": "^1.2.26-0",
     "@types/bn.js": "^5.1.1",
     "@types/enzyme": "^3.10.12",
     "@types/enzyme-adapter-react-16": "^1.0.6",

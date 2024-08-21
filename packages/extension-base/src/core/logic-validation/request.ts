@@ -573,6 +573,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
           throw new Error('Unsupported action');
       }
     } catch (e) {
+      console.error(e);
       handleError((e as Error).message);
     }
   } else {
@@ -715,7 +716,7 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
 
   // Sign Message
   if (message.includes('not found address or payload to sign')) {
-    return [t('An error occurred when signing this request. Try again or contact support at agent@subwallet.app'), t('Unable to sign message')];
+    return [t('An error occurred when signing this request. Try again or contact support at agent@subwallet.app'), t('Unable to sign')];
   }
 
   if (message.includes('unsupported method') || message.includes('unsupported action')) {
@@ -723,7 +724,7 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
   }
 
   if (message.includes('eip712 typed data') || message.includes('invalid message')) {
-    return [t('An error occurred when signing this request. Contact support at agent@subwallet.app'), t('Unable to sign message')];
+    return [t('An error occurred when attempting to sign this request. Contact support at email: agent@subwallet.app'), t('Unable to sign')];
   }
 
   return [message, name || ''];

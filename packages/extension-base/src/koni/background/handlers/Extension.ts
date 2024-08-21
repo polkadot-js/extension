@@ -4521,6 +4521,26 @@ export default class KoniExtension {
   }
   /* Swap service */
 
+  /* Ledger */
+
+  private async subscribeLedgerGenericAllowChains (id: string, port: chrome.runtime.Port): Promise<string[]> {
+    const cb = createSubscription<'pri(ledger.generic.allow)'>(id, port);
+
+    await this.#koniState.eventService.waitLedgerReady;
+
+    const subscription = this.#koniState.chainService.observable.ledgerGenericAllowChains.subscribe(cb);
+
+    this.createUnsubscriptionHandle(id, subscription.unsubscribe);
+
+    port.onDisconnect.addListener((): void => {
+      this.cancelSubscription(id);
+    });
+
+    return this.#koniState.chainService.value.ledgerGenericAllowChains;
+  }
+
+  /* Ledger */
+
   // --------------------------------------------------------------
   // eslint-disable-next-line @typescript-eslint/require-await
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], port: chrome.runtime.Port): Promise<ResponseType<TMessageType>> {
@@ -5117,6 +5137,11 @@ export default class KoniExtension {
       case 'pri(swapService.handleSwapStep)':
         return this.handleSwapStep(request as SwapSubmitParams);
         /* Swap service */
+
+        /* Ledger */
+      case 'pri(ledger.generic.allow)':
+        return this.subscribeLedgerGenericAllowChains(id, port);
+        /* Ledger */
       // Default
       default:
         throw new Error(`Unable to handle message of type ${type}`);

@@ -2436,6 +2436,10 @@ export interface KoniRequestSignatures {
   'pri(swapService.getLatestQuote)': [SwapRequest, SwapQuoteResponse];
   'pri(swapService.validateSwapProcess)': [ValidateSwapProcessParams, TransactionError[]];
   /* Swap */
+
+  /* Ledger */
+
+  'pri(ledger.generic.allow)': [null, string[], string[]];
 }
 
 export interface ApplicationMetadataType {

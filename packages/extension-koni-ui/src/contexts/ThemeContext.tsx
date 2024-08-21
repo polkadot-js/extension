@@ -253,6 +253,20 @@ const GlobalStyle = createGlobalStyle<ThemeProps>(({ theme }) => {
         display: 'block',
         'white-space': 'nowrap'
       }
+    },
+
+    '.ledger-warning-modal': {
+      '.ant-sw-modal-confirm-btns': {
+        flexDirection: 'row',
+
+        button: {
+          flex: 1,
+
+          '.anticon': {
+            display: 'none'
+          }
+        }
+      }
     }
   });
 });

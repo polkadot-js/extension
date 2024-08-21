@@ -61,11 +61,11 @@ export function _isEqualSmartContractAsset (asset1: _ChainAsset, asset2: _ChainA
 }
 
 export function _isPureEvmChain (chainInfo: _ChainInfo) {
-  return (chainInfo.evmInfo !== null && chainInfo.substrateInfo === null);
+  return (!!chainInfo.evmInfo && !chainInfo.substrateInfo);
 }
 
 export function _isPureSubstrateChain (chainInfo: _ChainInfo) {
-  return (chainInfo.evmInfo === null && chainInfo.substrateInfo !== null);
+  return (!chainInfo.evmInfo && !!chainInfo.substrateInfo);
 }
 
 export function _getOriginChainOfAsset (assetSlug: string) {

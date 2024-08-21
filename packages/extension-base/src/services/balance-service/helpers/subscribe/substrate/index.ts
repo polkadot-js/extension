@@ -10,7 +10,7 @@ import { _getTotalStakeInNominationPool } from '@subwallet/extension-base/core/s
 import { _getOrmlTokensPalletLockedBalance, _getOrmlTokensPalletTransferable } from '@subwallet/extension-base/core/substrate/ormlTokens-pallet';
 import { _getSystemPalletTotalBalance, _getSystemPalletTransferable } from '@subwallet/extension-base/core/substrate/system-pallet';
 import { _getTokensPalletLocked, _getTokensPalletTransferable } from '@subwallet/extension-base/core/substrate/tokens-pallet';
-import { FrameSystemAccountInfo, OrmlTokensAccountData, PalletAssetsAssetAccount, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
+import { FrameSystemAccountInfo, OrmlTokensAccountData, PalletAssetsAssetAccount, PalletAssetsAssetAccountWithStatus, PalletNominationPoolsPoolMember } from '@subwallet/extension-base/core/substrate/types';
 import { _adaptX1Interior } from '@subwallet/extension-base/core/substrate/xcm-parser';
 import { getPSP22ContractPromise } from '@subwallet/extension-base/koni/api/contract-handler/wasm';
 import { getDefaultWeightV2 } from '@subwallet/extension-base/koni/api/contract-handler/wasm/utils';
@@ -198,7 +198,18 @@ const subscribeForeignAssetBalance = async ({ addresses, assetMap, callback, cha
         return substrateApi.subscribeDataWithMulti(params, (rs) => {
           const balances = rs[foreignAssetsAccountKey];
           const items: BalanceItem[] = balances.map((_balance, index): BalanceItem => {
-            const balanceInfo = _balance as unknown as PalletAssetsAssetAccount | undefined;
+            const balanceInfo = _balance as unknown as PalletAssetsAssetAccountWithStatus | undefined;
+
+            if (balanceInfo === undefined) { // no balance info response
+              return {
+                address: addresses[index],
+                tokenSlug: tokenInfo.slug,
+                free: '0',
+                locked: '0',
+                state: APIItemState.READY
+              };
+            }
+
             const transferableBalance = _getForeignAssetPalletTransferable(balanceInfo, _getAssetExistentialDeposit(tokenInfo), extrinsicType);
             const totalLockedFromTransfer = _getForeignAssetPalletLockedBalance(balanceInfo);
 

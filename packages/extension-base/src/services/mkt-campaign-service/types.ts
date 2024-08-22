@@ -83,6 +83,8 @@ export interface AppCommonData {
   position_params: PositionParam[];
   conditions: MktCampaignCondition;
   info?: AppBasicInfoData;
+  comparison_operator: 'AND' | 'OR';
+  locations: string[];
 }
 
 export interface AppPopupData extends AppCommonData {

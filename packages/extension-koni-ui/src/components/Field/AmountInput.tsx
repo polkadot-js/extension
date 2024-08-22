@@ -149,7 +149,11 @@ const Component = (props: Props, ref: ForwardedRef<InputRef>) => {
         const newValue = `${value.substring(0, i || 0)}${event.key}${value.substring(j || 0)}`;
 
         if (!isUseControl) {
-          if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue)) {
+          const dotIndex: number = newValue.indexOf('.');
+
+          if (dotIndex !== -1 && (i === 0 && event.key === '0')) {
+            event.preventDefault();
+          } else if (!(/^(0|[1-9]\d*)(\.\d*)?$/).test(newValue) && !(i === 0 && event.key === '0')) {
             event.preventDefault();
           }
         }

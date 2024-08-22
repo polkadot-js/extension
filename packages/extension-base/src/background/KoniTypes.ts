@@ -1274,18 +1274,23 @@ export interface EvmSignRequest {
   canSign: boolean;
 }
 
+export interface ErrorValidation {
+  message: string;
+  name: string;
+}
+
 export interface EvmSignatureRequest extends EvmSignRequest {
   id: string;
   type: string;
   payload: unknown;
-  errors?: Error[]
+  errors?: ErrorValidation[]
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
   estimateGas: string;
   parseData: EvmTransactionData;
   isToContract: boolean;
-  errors?: TransactionError[]
+  errors?: ErrorValidation[]
 }
 
 export type EvmWatchTransactionRequest = EvmSendTransactionRequest;
@@ -1336,7 +1341,7 @@ export interface AddTokenRequestExternal {
 export interface ErrorNetworkConnection {
   networkKey: string,
   address: string,
-  errors: Error[]
+  errors: ErrorValidation[]
 }
 
 export interface ConfirmationDefinitions {

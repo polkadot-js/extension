@@ -1278,12 +1278,14 @@ export interface EvmSignatureRequest extends EvmSignRequest {
   id: string;
   type: string;
   payload: unknown;
+  errors?: Error[]
 }
 
 export interface EvmSendTransactionRequest extends TransactionConfig, EvmSignRequest {
   estimateGas: string;
   parseData: EvmTransactionData;
   isToContract: boolean;
+  errors?: TransactionError[]
 }
 
 export type EvmWatchTransactionRequest = EvmSendTransactionRequest;
@@ -1331,13 +1333,20 @@ export interface AddTokenRequestExternal {
   contractError: boolean;
 }
 
+export interface ErrorNetworkConnection {
+  networkKey: string,
+  address: string,
+  errors: Error[]
+}
+
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<_NetworkUpsertParams>, ConfirmationResult<null>],
   addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
   switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
-  evmWatchTransactionRequest: [ConfirmationsQueueItem<EvmWatchTransactionRequest>, ConfirmationResult<string>]
+  evmWatchTransactionRequest: [ConfirmationsQueueItem<EvmWatchTransactionRequest>, ConfirmationResult<string>],
+  errorConnectNetwork: [ConfirmationsQueueItem<ErrorNetworkConnection>, ConfirmationResult<null>]
 }
 
 export type ConfirmationType = keyof ConfirmationDefinitions;
@@ -2433,6 +2442,10 @@ export interface KoniRequestSignatures {
   'pri(swapService.getLatestQuote)': [SwapRequest, SwapQuoteResponse];
   'pri(swapService.validateSwapProcess)': [ValidateSwapProcessParams, TransactionError[]];
   /* Swap */
+
+  /* Ledger */
+
+  'pri(ledger.generic.allow)': [null, string[], string[]];
 }
 
 export interface ApplicationMetadataType {

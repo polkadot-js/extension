@@ -11,6 +11,7 @@ import { useMemo } from 'react';
 interface Result {
   compound: YieldPositionInfo | undefined;
   list: YieldPositionInfo[];
+  specificList: YieldPositionInfo[];
 }
 
 const useYieldPositionDetail = (slug: string, address?: string): Result => {
@@ -31,6 +32,7 @@ const useYieldPositionDetail = (slug: string, address?: string): Result => {
     };
 
     const infoList: YieldPositionInfo[] = [];
+    const infoSpecificList: YieldPositionInfo[] = [];
 
     for (const info of yieldPositions) {
       if (chainsByAccountType.includes(info.chain) && poolInfoMap[info.slug]) {
@@ -39,6 +41,10 @@ const useYieldPositionDetail = (slug: string, address?: string): Result => {
 
         if (isValid && haveStake && info.slug === slug) {
           infoList.push(info);
+        }
+
+        if (isValid && haveStake) {
+          infoSpecificList.push(info);
         }
       }
     }
@@ -116,18 +122,21 @@ const useYieldPositionDetail = (slug: string, address?: string): Result => {
 
         return {
           compound: rs,
-          list: infoList
+          list: infoList,
+          specificList: infoSpecificList
         };
       } else {
         return {
           compound: infoList[0],
-          list: infoList
+          list: infoList,
+          specificList: infoSpecificList
         };
       }
     } else {
       return {
         compound: undefined,
-        list: infoList
+        list: infoList,
+        specificList: infoSpecificList
       };
     }
   }, [chainsByAccountType, currentAccount?.address, poolInfoMap, slug, yieldPositions, address]);

@@ -14,7 +14,7 @@ import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earn
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useSpecificYieldPosition, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -81,8 +81,8 @@ const Component = () => {
   const firstStep = currentStep === 0;
   const submitStepType = processState.steps?.[!currentStep ? currentStep + 1 : currentStep]?.type;
 
-  const earningPositionSpecific = useSpecificYieldPosition(fromValue);
-  const { compound } = useYieldPositionDetail(slug);
+  const { compound, specificList } = useYieldPositionDetail(slug, fromValue);
+
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
@@ -112,14 +112,14 @@ const Component = () => {
   );
 
   const chainStakingBoth = useMemo(() => {
-    const hasNativeStaking = (chain: string) => earningPositionSpecific.some((item) => item.chain === chain && item.type === YieldPoolType.NATIVE_STAKING);
-    const hasNominationPool = (chain: string) => earningPositionSpecific.some((item) => item.chain === chain && item.type === YieldPoolType.NOMINATION_POOL);
+    const hasNativeStaking = (chain: string) => specificList.some((item) => item.chain === chain && item.type === YieldPoolType.NATIVE_STAKING);
+    const hasNominationPool = (chain: string) => specificList.some((item) => item.chain === chain && item.type === YieldPoolType.NOMINATION_POOL);
 
     const chains = ['polkadot', 'kusama'];
     let chainStakingInBoth;
 
     for (const chain of chains) {
-      if (hasNativeStaking(chain) && hasNominationPool(chain)) {
+      if (hasNativeStaking(chain) && hasNominationPool(chain) && [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolType)) {
         chainStakingInBoth = chain;
         break;
       } else if ((hasNativeStaking(chain) && poolType === YieldPoolType.NOMINATION_POOL) || (hasNominationPool(chain) && poolType === YieldPoolType.NATIVE_STAKING)) {
@@ -129,7 +129,7 @@ const Component = () => {
     }
 
     return chainStakingInBoth;
-  }, [earningPositionSpecific, poolType]);
+  }, [specificList, poolType]);
 
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];

@@ -1,12 +1,15 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
+import { NotificationType } from '@subwallet/extension-base/background/KoniTypes';
+import { ALL_ACCOUNT_KEY } from '@subwallet/extension-base/constants';
 import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/types';
 import { AlertModal, EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
-import { ASTAR_PORTAL_URL, BN_TEN } from '@subwallet/extension-koni-ui/constants';
-import { useAlert, useFilterModal, useSelector, useTranslation } from '@subwallet/extension-koni-ui/hooks';
+import { ASTAR_PORTAL_URL, BN_TEN, EARNING_WARNING_ANNOUNCEMENT } from '@subwallet/extension-koni-ui/constants';
+import { useAlert, useFilterModal, useSelector, useTranslation, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
+import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
 import { isRelatedToAstar, openInNewTab } from '@subwallet/extension-koni-ui/utils';
 import { Button, ButtonProps, Icon, ModalContext, SwList } from '@subwallet/react-ui';
@@ -16,6 +19,7 @@ import { ArrowsClockwise, FadersHorizontal, Plus, PlusCircle, Vault } from 'phos
 import React, { SyntheticEvent, useCallback, useContext, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useLocalStorage } from 'usehooks-ts';
 
 type Props = ThemeProps & {
   earningPositions: YieldPositionInfo[];
@@ -38,8 +42,11 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const { assetRegistry: assetInfoMap } = useSelector((state) => state.assetRegistry);
   const chainInfoMap = useSelector((state) => state.chainStore.chainInfoMap);
   const { currentAccount } = useSelector((state) => state.accountState);
+  const accounts = useSelector((root: RootState) => root.accountState.accounts);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
+  const { specificList } = useYieldPositionDetail(currentAccount?.address);
+  const [announcement, setAnnouncement] = useLocalStorage(EARNING_WARNING_ANNOUNCEMENT, 'nonConfirmed');
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {
     if (!earningPositions.length) {
@@ -69,6 +76,91 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         return getValue(secondItem) - getValue(firstItem);
       });
   }, [assetInfoMap, currencyData, earningPositions, priceMap]);
+
+  const chainStakingBoth = useMemo(() => {
+    const chains = ['polkadot', 'kusama'];
+
+    const findChainWithStaking = (list: YieldPositionInfo[]) => {
+      const hasNativeStaking = (chain: string) => list.some((item) => item.chain === chain && item.type === YieldPoolType.NATIVE_STAKING);
+      const hasNominationPool = (chain: string) => list.some((item) => item.chain === chain && item.type === YieldPoolType.NOMINATION_POOL);
+
+      for (const chain of chains) {
+        if (hasNativeStaking(chain) && hasNominationPool(chain)) {
+          return chain;
+        }
+      }
+
+      return null;
+    };
+
+    if (currentAccount?.address !== ALL_ACCOUNT_KEY) {
+      return findChainWithStaking(specificList);
+    }
+
+    for (const acc of accounts) {
+      if (acc.address !== ALL_ACCOUNT_KEY) {
+        const listStaking = specificList.filter((item) => item.address === acc.address);
+        const chain = findChainWithStaking(listStaking);
+
+        if (chain) {
+          return chain;
+        }
+      }
+    }
+
+    return null;
+  }, [accounts, currentAccount?.address, specificList]);
+
+  const learnMore = useCallback(() => {
+    window.open('https://support.polkadot.network/support/solutions/articles/65000188140-changes-for-nomination-pool-members-and-opengov-participation');
+  }, []);
+
+  useEffect(() => {
+    if (chainStakingBoth && announcement.includes('nonConfirmed')) {
+      const chainInfo = chainStakingBoth && chainInfoMap[chainStakingBoth];
+
+      const symbol = (!!chainInfo && chainInfo?.substrateInfo?.symbol) || '';
+      const originChain = (!!chainInfo && chainInfo?.name) || '';
+
+      openAlert({
+        type: NotificationType.WARNING,
+        content:
+          (<>
+            <div className={CN(className, 'earning-alert-content')}>
+              <span>{t(`Nomination pool members will soon be allowed to vote on ${originChain} OpenGov. Following this update, accounts that are`)}&nbsp;</span>
+              <span className={'__info-highlight'}>{t('dual staking via direct nomination (solo staking) and nomination pool')}&nbsp;</span>
+              <span>will not be able to use pool-staked funds for voting.</span>
+            </div>
+            {t(`To avoid future complications, unstake your ${symbol} from `)}
+            &nbsp;<a
+              href={'https://docs.subwallet.app/main/extension-user-guide/manage-staking/nominate-for-validator/unstake'}
+              rel='noreferrer'
+              style={{ textDecoration: 'underline' }}
+              target={'_blank'}
+            >direct nomination</a> or &nbsp;
+            <a
+              href={'https://docs.subwallet.app/main/extension-user-guide/manage-staking/nomination-pool/unstake'}
+              rel='noreferrer'
+              style={{ textDecoration: 'underline' }}
+              target={'_blank'}
+            >nomination pool</a>.
+          </>),
+        title: t(`Unstake your ${symbol} now!`),
+        okButton: {
+          text: t('Read update'),
+          onClick: () => {
+            learnMore();
+            closeAlert();
+          }
+        },
+        cancelButton: {
+          text: t('Dismiss'),
+          onClick: closeAlert
+        }
+      });
+      setAnnouncement('confirmed');
+    }
+  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, openAlert, setAnnouncement, t]);
 
   const lastItem = useMemo(() => {
     return items[items.length - 1];
@@ -318,6 +410,13 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
   '.__section-list-container': {
     height: '100%',
     flex: 1
+  },
+
+  '&.earning-alert-content': {
+    '.__info-highlight': {
+      color: token.colorWhite,
+      fontWeight: token.fontWeightStrong
+    }
   },
 
   '.__footer-button': {

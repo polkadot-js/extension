@@ -14,7 +14,7 @@ interface Result {
   specificList: YieldPositionInfo[];
 }
 
-const useYieldPositionDetail = (slug: string, address?: string): Result => {
+const useYieldPositionDetail = (slug?: string, address?: string): Result => {
   const { poolInfoMap, yieldPositions } = useSelector((state) => state.earning);
   const { currentAccount } = useSelector((state) => state.accountState);
   const chainsByAccountType = useGetChainSlugsByAccountType();
@@ -53,7 +53,7 @@ const useYieldPositionDetail = (slug: string, address?: string): Result => {
       if (isAll) {
         const positionInfo = infoList[0];
         const base: AbstractYieldPositionInfo = {
-          slug: slug,
+          slug: slug || '',
           chain: positionInfo.chain,
           type: positionInfo.type,
           address: ALL_ACCOUNT_KEY,

@@ -6,4 +6,5 @@ export { default as useGroupYieldPosition } from './useGroupYieldPosition';
 export { default as useYieldGroupInfo } from './useYieldGroupInfo';
 export { default as useYieldPoolInfoByGroup } from './useYieldPoolInfoByGroup';
 export { default as useYieldPositionDetail } from './useYieldPositionDetail';
+export { default as useSpecificYieldPosition } from './useSpecificYieldPosition';
 export { default as useYieldRewardTotal } from './useYieldRewardTotal';

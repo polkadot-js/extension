@@ -7,7 +7,7 @@ import { YieldPoolType, YieldPositionInfo } from '@subwallet/extension-base/type
 import { AlertModal, EmptyList, FilterModal, Layout } from '@subwallet/extension-koni-ui/components';
 import { EarningPositionItem } from '@subwallet/extension-koni-ui/components/Earning';
 import { ASTAR_PORTAL_URL, BN_TEN, EARNING_WARNING_ANNOUNCEMENT } from '@subwallet/extension-koni-ui/constants';
-import { useAlert, useFilterModal, useSelector, useTranslation, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useAlert, useFilterModal, useSelector, useSpecificYieldPosition, useTranslation } from '@subwallet/extension-koni-ui/hooks';
 import { reloadCron } from '@subwallet/extension-koni-ui/messaging';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { EarningEntryView, EarningPositionDetailParam, ExtraYieldPositionInfo, ThemeProps } from '@subwallet/extension-koni-ui/types';
@@ -45,7 +45,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const accounts = useSelector((root: RootState) => root.accountState.accounts);
   const { filterSelectionMap, onApplyFilter, onChangeFilterOption, onCloseFilterModal, selectedFilters } = useFilterModal(FILTER_MODAL_ID);
   const { alertProps, closeAlert, openAlert } = useAlert(alertModalId);
-  const { specificList } = useYieldPositionDetail(currentAccount?.address);
+  const specificList = useSpecificYieldPosition(currentAccount?.address);
   const [announcement, setAnnouncement] = useLocalStorage(EARNING_WARNING_ANNOUNCEMENT, 'nonConfirmed');
 
   const items: ExtraYieldPositionInfo[] = useMemo(() => {

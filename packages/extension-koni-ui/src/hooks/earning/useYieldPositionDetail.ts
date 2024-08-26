@@ -11,10 +11,9 @@ import { useMemo } from 'react';
 interface Result {
   compound: YieldPositionInfo | undefined;
   list: YieldPositionInfo[];
-  specificList: YieldPositionInfo[];
 }
 
-const useYieldPositionDetail = (slug?: string, address?: string): Result => {
+const useYieldPositionDetail = (slug: string, address?: string): Result => {
   const { poolInfoMap, yieldPositions } = useSelector((state) => state.earning);
   const { currentAccount } = useSelector((state) => state.accountState);
   const chainsByAccountType = useGetChainSlugsByAccountType();
@@ -32,7 +31,6 @@ const useYieldPositionDetail = (slug?: string, address?: string): Result => {
     };
 
     const infoList: YieldPositionInfo[] = [];
-    const infoSpecificList: YieldPositionInfo[] = [];
 
     for (const info of yieldPositions) {
       if (chainsByAccountType.includes(info.chain) && poolInfoMap[info.slug]) {
@@ -42,10 +40,6 @@ const useYieldPositionDetail = (slug?: string, address?: string): Result => {
         if (isValid && haveStake && info.slug === slug) {
           infoList.push(info);
         }
-
-        if (isValid && haveStake) {
-          infoSpecificList.push(info);
-        }
       }
     }
 
@@ -53,7 +47,7 @@ const useYieldPositionDetail = (slug?: string, address?: string): Result => {
       if (isAll) {
         const positionInfo = infoList[0];
         const base: AbstractYieldPositionInfo = {
-          slug: slug || '',
+          slug: slug,
           chain: positionInfo.chain,
           type: positionInfo.type,
           address: ALL_ACCOUNT_KEY,
@@ -122,21 +116,18 @@ const useYieldPositionDetail = (slug?: string, address?: string): Result => {
 
         return {
           compound: rs,
-          list: infoList,
-          specificList: infoSpecificList
+          list: infoList
         };
       } else {
         return {
           compound: infoList[0],
-          list: infoList,
-          specificList: infoSpecificList
+          list: infoList
         };
       }
     } else {
       return {
         compound: undefined,
-        list: infoList,
-        specificList: infoSpecificList
+        list: infoList
       };
     }
   }, [chainsByAccountType, currentAccount?.address, poolInfoMap, slug, yieldPositions, address]);

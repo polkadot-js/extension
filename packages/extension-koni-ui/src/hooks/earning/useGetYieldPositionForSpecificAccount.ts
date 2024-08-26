@@ -7,7 +7,7 @@ import { useGetChainSlugsByAccountType, useSelector } from '@subwallet/extension
 import BigN from 'bignumber.js';
 import { useMemo } from 'react';
 
-const useSpecificYieldPosition = (_address?: string): YieldPositionInfo[] => {
+const useGetYieldPositionForSpecificAccount = (_address?: string): YieldPositionInfo[] => {
   const poolInfoMap = useSelector((state) => state.earning.poolInfoMap);
   const yieldPositions = useSelector((state) => state.earning.yieldPositions);
   const currentAccount = useSelector((state) => state.accountState.currentAccount);
@@ -39,7 +39,7 @@ const useSpecificYieldPosition = (_address?: string): YieldPositionInfo[] => {
     }
 
     return infoSpecificList;
-  }, [chainsByAccountType, currentAccount?.address, poolInfoMap, yieldPositions]);
+  }, [_address, chainsByAccountType, currentAccount?.address, poolInfoMap, yieldPositions]);
 };
 
-export default useSpecificYieldPosition;
+export default useGetYieldPositionForSpecificAccount;

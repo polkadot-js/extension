@@ -85,7 +85,6 @@ const Component = () => {
   const { compound } = useYieldPositionDetail(slug);
   const specificList = useSpecificYieldPosition(fromValue);
 
-
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);

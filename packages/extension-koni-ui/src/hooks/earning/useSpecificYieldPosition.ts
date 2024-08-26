@@ -39,7 +39,7 @@ const useSpecificYieldPosition = (_address?: string): YieldPositionInfo[] => {
     }
 
     return infoSpecificList;
-  }, [chainsByAccountType, currentAccount?.address, poolInfoMap, yieldPositions]);
+  }, [_address, chainsByAccountType, currentAccount?.address, poolInfoMap, yieldPositions]);
 };
 
 export default useSpecificYieldPosition;

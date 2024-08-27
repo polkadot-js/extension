@@ -316,7 +316,11 @@ export default class MktCampaignService {
           return conditionMap[JSON.stringify(condition)];
         });
 
-        isPassValidation.push(isValidArr.some((i) => i));
+        if (item.comparison_operator === 'AND') {
+          isPassValidation.push(isValidArr.every((i) => i));
+        } else {
+          isPassValidation.push(isValidArr.some((i) => i));
+        }
       }
 
       if (conditionEarning && conditionEarning.length) {
@@ -324,7 +328,11 @@ export default class MktCampaignService {
           return conditionMap[JSON.stringify(condition)];
         });
 
-        isPassValidation.push(isValidArr.some((i) => i));
+        if (item.comparison_operator === 'AND') {
+          isPassValidation.push(isValidArr.every((i) => i));
+        } else {
+          isPassValidation.push(isValidArr.some((i) => i));
+        }
       }
 
       if (conditionNft && conditionNft.length) {
@@ -332,7 +340,11 @@ export default class MktCampaignService {
           return conditionMap[JSON.stringify(condition)];
         });
 
-        isPassValidation.push(isValidArr.some((i) => i));
+        if (item.comparison_operator === 'AND') {
+          isPassValidation.push(isValidArr.every((i) => i));
+        } else {
+          isPassValidation.push(isValidArr.some((i) => i));
+        }
       }
 
       if (conditionCrowdloan && conditionCrowdloan.length) {
@@ -340,7 +352,11 @@ export default class MktCampaignService {
           return conditionMap[JSON.stringify(condition)];
         });
 
-        isPassValidation.push(isValidArr.some((i) => i));
+        if (item.comparison_operator === 'AND') {
+          isPassValidation.push(isValidArr.every((i) => i));
+        } else {
+          isPassValidation.push(isValidArr.some((i) => i));
+        }
       }
 
       if (conditionHasMoney && conditionHasMoney.length) {
@@ -348,12 +364,20 @@ export default class MktCampaignService {
           return conditionMap[JSON.stringify(condition)];
         });
 
-        isPassValidation.push(isValidArr.some((i) => i));
+        if (item.comparison_operator === 'AND') {
+          isPassValidation.push(isValidArr.every((i) => i));
+        } else {
+          isPassValidation.push(isValidArr.some((i) => i));
+        }
       }
     }
 
     if (isPassValidation && isPassValidation.length) {
-      return isPassValidation.some((_i) => _i);
+      if (item.comparison_operator === 'AND') {
+        return isPassValidation.every((_i) => _i);
+      } else {
+        return isPassValidation.some((_i) => _i);
+      }
     } else {
       return true;
     }

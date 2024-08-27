@@ -32,7 +32,6 @@ const titleMap: Record<ConfirmationType, string> = {
   evmSignatureRequest: detectTranslate('Signature request'),
   metadataRequest: detectTranslate('Update metadata'),
   signingRequest: detectTranslate('Signature request'),
-  switchNetworkRequest: detectTranslate('Add network request'),
   connectWCRequest: detectTranslate('WalletConnect'),
   notSupportWCRequest: detectTranslate('WalletConnect')
 } as Record<ConfirmationType, string>;

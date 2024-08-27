@@ -1,10 +1,10 @@
-    2797	AnhMTV                        	Release version 1.2.26
+    2800	AnhMTV                        	Release version 1.2.27
     2532	Nam Phạm                      	[Issue 3450] fix: get era stakers overview
-    2180	S2kael                        	[Issue-3450] Update stable version for chain-list
+    2181	S2kael                        	[Issue-3478] Update stable version for chain-list
      848	lw-cdm                        	[Issue-3407] WebApp - Support Avail Ledger app
      561	nguyentiendung                	[Issue-2845] Fix UI bugs export accounts
      465	Jaco                          	0.42.5 (#969)
-     262	bluezdot                      	[Issue-3450] fix: bug rounding number
+     268	bluezdot                      	[Issue-3478] Update chainlist
      209	Thiendekaco                   	[Issue 2501] [update]  Extension - Update message error has been standardized #2
      185	quangdo                       	
      160	Automation Bot                	[CI Skip] Auto increase webapp build number
@@ -22,13 +22,13 @@
       10	Trang Trịnh                   	api get karura and acala nfts
        9	Minh Le                       	
        9	minhld1029                    	[#115] [ForgetAccount] catch exception refList undefined
+       9	Thanh                         	
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	unknown                       	refactor code
        5	anhnhu                        	[issue-2231]: add condition branch_name webapp-dev auto increase run scripts change build number
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        4	namph                         	update UI for nft
        4	Quangdm-cdm                   	
-       4	Thanh                         	[Issue-3450] Add Story Partner Testnet
        3	Antoine Estienne              	Add eth test for extension signature (#909)
        3	quangdm                       	Update style for Auth Transaction Screen, Export Screen, Derive Screen
        2	Axel Chalon                   	Add typings to messages (#130)

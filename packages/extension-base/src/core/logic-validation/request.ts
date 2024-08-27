@@ -1,9 +1,10 @@
 // Copyright 2019-2022 @subwallet/extension-base
 // SPDX-License-Identifier: Apache-2.0
 
+import { TypedDataV1Field, typedSignatureHash } from '@metamask/eth-sig-util';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ConfirmationType, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ConfirmationType, ErrorValidation, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
@@ -16,6 +17,7 @@ import { getSdkError } from '@walletconnect/utils';
 import BigN from 'bignumber.js';
 import BN from 'bn.js';
 import { t } from 'i18next';
+import Joi from 'joi';
 import { TransactionConfig } from 'web3-core';
 
 import { isString } from '@polkadot/util';
@@ -33,6 +35,153 @@ export interface PayloadValidated {
   errorPosition?: 'dApp' | 'ui',
   confirmationType?: ConfirmationType,
   errors: Error[]
+}
+
+export type SignTypedDataMessageV3V4 = {
+  types: Record<string, unknown>;
+  domain: Record<string, unknown>;
+  primaryType: string;
+  message: unknown;
+};
+
+export type DataMessageParam = Record<string, unknown>[] | string | SignTypedDataMessageV3V4
+
+export interface TypedMessageParams {
+  from: string;
+  data: DataMessageParam;
+}
+
+export interface PersonalMessageParams {
+  data: string;
+  from: string;
+}
+
+export const joiValidate = Joi.object({
+  types: Joi.object()
+    .pattern(
+      Joi.string(), // Key của object types
+      Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          type: Joi.string().required()
+        })
+      )
+    )
+    .required(),
+  primaryType: Joi.string().required(),
+  domain: Joi.object().required(),
+  message: Joi.object().required()
+});
+
+function validateAddress (address: string, propertyName: string) {
+  if (!address || typeof address !== 'string' || !isEthereumAddress(address)) {
+    throw new Error(
+      `Invalid "${propertyName}" address: ${address} must be a valid string.`
+    );
+  }
+}
+
+export function validateSignMessageData (messageData: PersonalMessageParams) {
+  const { data, from } = messageData;
+
+  validateAddress(from, 'from');
+
+  if (!data || typeof data !== 'string') {
+    throw new Error(`Invalid message "data": ${data} must be a valid string.`);
+  }
+
+  return data;
+}
+
+export function validateTypedSignMessageDataV1 (messageData: TypedMessageParams) {
+  validateAddress(messageData.from, 'from');
+
+  if (!messageData.data || !Array.isArray(messageData.data)) {
+    throw new Error(
+      // TODO: Either fix this lint violation or explain why it's necessary to ignore.
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      `Invalid message "data": ${messageData.data} must be a valid array.`
+    );
+  }
+
+  try {
+    // typedSignatureHash will throw if the data is invalid.
+    // TODO: Replace `any` with type
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    typedSignatureHash(messageData.data as TypedDataV1Field[]);
+
+    return messageData.data;
+  } catch (e) {
+    throw new Error('Invalid message "data": Expected EIP712 typed data.');
+  }
+}
+
+export function validateTypedSignMessageDataV3V4 (
+  messageData: TypedMessageParams
+) {
+  validateAddress(messageData.from, 'from');
+
+  if (
+    !messageData.data ||
+    Array.isArray(messageData.data) ||
+    (typeof messageData.data !== 'object' &&
+      typeof messageData.data !== 'string')
+  ) {
+    throw new Error(
+      'Invalid message "data": Must be a valid string or object.'
+    );
+  }
+
+  let data;
+
+  if (typeof messageData.data === 'object') {
+    data = messageData.data;
+  } else {
+    try {
+      data = JSON.parse(messageData.data) as SignTypedDataMessageV3V4;
+    } catch (e) {
+      throw new Error('Invalid message "data" must be passed as a valid JSON string.');
+    }
+  }
+
+  const validation = joiValidate.validate(data);
+
+  if (validation.error) {
+    throw new Error(
+      'Invalid message "data" must conform to EIP-712 schema. See https://git.io/fNtcx.'
+    );
+  }
+
+  // if (!currentChainId) {
+  //   throw new Error('Current chainId cannot be null or undefined.');
+  // }
+
+  // let { chainId } = data.domain;
+  //
+  // if (chainId) {
+  //   if (typeof chainId === 'string') {
+  //     chainId = parseInt(chainId, chainId.startsWith('0x') ? 16 : 10);
+  //   }
+  //
+  //   const activeChainId = parseInt(currentChainId, 16);
+  //
+  //   if (Number.isNaN(activeChainId)) {
+  //     throw new Error(
+  //       // TODO: Either fix this lint violation or explain why it's necessary to ignore.
+  //       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  //       `Cannot sign messages for chainId "${chainId}", because MetaMask is switching networks.`
+  //     );
+  //   }
+  //
+  //   if (chainId !== activeChainId) {
+  //     throw new Error(
+  //       // TODO: Either fix this lint violation or explain why it's necessary to ignore.
+  //       // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+  //       `Provided chainId "${chainId}" must match the active chainId "${activeChainId}"`
+  //     );
+  //   }
+  // }
+  return data;
 }
 
 export async function generateValidationProcess (koni: KoniState, url: string, payloadValidate: PayloadValidated, validationMiddlewareSteps: ValidateStepFunction[], topic?: string): Promise<PayloadValidated> {
@@ -360,7 +509,7 @@ export async function validationEvmDataTransactionMiddleware (koni: KoniState, u
 
 export async function validationEvmSignMessageMiddleware (koni: KoniState, url: string, payload_: PayloadValidated): Promise<PayloadValidated> {
   const { address, errors, method, pair: pair_ } = payload_;
-  let payload = payload_.payloadAfterValidated as string;
+  let payload = payload_.payloadAfterValidated as DataMessageParam;
   const { promise, resolve } = createPromiseHandler<PayloadValidated>();
   let hashPayload = '';
   let canSign = false;
@@ -372,7 +521,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
     const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name);
 
     console.error(error);
-    errors.push(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name));
+    errors.push(error);
   };
 
   if (address === '' || !payload) {
@@ -388,28 +537,44 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
       handleError('Unsupported action');
     }
 
-    if (['eth_signTypedData_v3', 'eth_signTypedData_v4'].indexOf(method) > -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument,@typescript-eslint/no-unsafe-assignment
-      payload = JSON.parse(payload);
-    }
-
-    switch (method) {
-      case 'personal_sign':
-        canSign = true;
-        hashPayload = payload;
-        break;
-      case 'eth_sign':
-      case 'eth_signTypedData':
-      case 'eth_signTypedData_v1':
-      case 'eth_signTypedData_v3':
-      case 'eth_signTypedData_v4':
-        if (!account.isExternal) {
+    try {
+      switch (method) {
+        case 'personal_sign':
           canSign = true;
-        }
+          payload = validateSignMessageData({ data: payload as string, from: address });
+          hashPayload = payload;
+          break;
+        case 'eth_sign':
+          if (!account.isExternal) {
+            canSign = true;
+          }
 
-        break;
-      default:
-        handleError('Unsupported action');
+          break;
+        case 'eth_signTypedData':
+        case 'eth_signTypedData_v1':
+          if (!account.isExternal) {
+            canSign = true;
+          }
+
+          payload = validateTypedSignMessageDataV1({ data: payload as Record<string, unknown>[], from: address });
+
+          break;
+
+        case 'eth_signTypedData_v3':
+        case 'eth_signTypedData_v4':
+          if (!account.isExternal) {
+            canSign = true;
+          }
+
+          payload = validateTypedSignMessageDataV3V4({ data: payload as SignTypedDataMessageV3V4, from: address });
+
+          break;
+        default:
+          throw new Error('Unsupported action');
+      }
+    } catch (e) {
+      console.error(e);
+      handleError((e as Error).message);
     }
   } else {
     handleError('Unsupported method');
@@ -506,7 +671,7 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
   }
 
   if (message.includes('network is currently not supported')) {
-    return [t('This network is not yet supported on SubWallet. |Import the network|https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks| on SubWallet and try again'), t('Network not supported')];
+    return [t('This network is not yet supported on SubWallet. (Import the network)[https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks] on SubWallet and try again'), t('Network not supported')];
   }
 
   // Authentication
@@ -551,12 +716,24 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
 
   // Sign Message
   if (message.includes('not found address or payload to sign')) {
-    return [t('An error occurred when signing this request. Try again or contact support at agent@subwallet.app'), t('Unable to sign message')];
+    return [t('An error occurred when signing this request. Try again or contact support at agent@subwallet.app'), t('Unable to sign')];
   }
 
   if (message.includes('unsupported method') || message.includes('unsupported action')) {
     return [t('This sign method is not supported by SubWallet. Try again or contact support at agent@subwallet.app'), t('Method not supported')];
   }
 
-  return [message, name || ''];
+  if (message.includes('eip712 typed data') || message.includes('invalid message')) {
+    return [t('An error occurred when attempting to sign this request. Contact support at email: agent@subwallet.app'), t('Unable to sign')];
+  }
+
+  return [message, name || 'Error'];
+}
+
+export function convertErrorFormat (errors: Error[]): ErrorValidation[] {
+  if (errors.length > 0) {
+    return [{ name: errors[0].name, message: errors[0].message }];
+  }
+
+  return [];
 }

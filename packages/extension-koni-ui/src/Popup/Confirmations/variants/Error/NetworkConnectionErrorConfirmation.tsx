@@ -40,12 +40,32 @@ function Component ({ className, request, type }: Props) {
     });
   }, [id, type]);
 
-  const errorMessage = useMemo(() => {
+  const error = useMemo(() => {
+    const regex = /\(([^)]+)\)\[([^\]]+)\]/g;
+    const components: Record<string, React.ReactElement> = {};
+    let message = '';
+    let name = 'Error';
+
     if (errors && errors.length > 0) {
-      return errors[0].message.split('|');
+      name = errors[0].name || name;
+      message = errors[0].message.replace(regex, (match, text: string, link: string) => {
+        const key = Date.now();
+
+        components[key] = <a
+          className='link'
+          href={link}
+          target='__blank'
+        />;
+
+        return `<${key}>${text}</${key}>`;
+      });
     }
 
-    return [];
+    return {
+      components,
+      message,
+      name
+    };
   }, [errors]);
 
   return (
@@ -79,21 +99,11 @@ function Component ({ className, request, type }: Props) {
           errors && errors.length > 0 && (
             <AlertBox
               className={CN(className, 'alert-box')}
-              description={errorMessage.length > 1
-                ? <Trans
-                  components={{
-                    highlight: (
-                      <a
-                        className='link'
-                        href={errorMessage[2]}
-                        target='__blank'
-                      />
-                    )
-                  }}
-                  i18nKey={detectTranslate(`${errorMessage[0]}<highlight>${errorMessage[1]}</highlight>${errorMessage[3]}`)}
-                />
-                : errors[0].message}
-              title={errors[0].name}
+              description={ <Trans
+                components={error.components}
+                i18nKey={detectTranslate(error.message)}
+              />}
+              title={error.name}
               type={'error'}
             />
           )
@@ -104,7 +114,7 @@ function Component ({ className, request, type }: Props) {
           onClick={onCancel}
           schema={'primary'}
         >
-          {t('Back to home')}
+          {t('I understand')}
         </Button>
       </div>
     </>

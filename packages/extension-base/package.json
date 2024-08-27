@@ -17,7 +17,7 @@
     "./detectPackage.cjs"
   ],
   "type": "module",
-  "version": "1.2.26-0",
+  "version": "1.2.27-0",
   "main": "index.js",
   "dependencies": {
     "@acala-network/api": "^5.0.2",
@@ -31,6 +31,7 @@
     "@galacticcouncil/sdk": "^2.1.0",
     "@gear-js/api": "^0.38.1",
     "@json-rpc-tools/utils": "^1.7.6",
+    "@metamask/eth-sig-util": "^7.0.3",
     "@metamask/safe-event-emitter": "^2.0.0",
     "@metaverse-network-sdk/type-definitions": "^0.0.1-13",
     "@oak-foundation/types": "^0.0.23",
@@ -55,16 +56,16 @@
     "@sora-substrate/type-definitions": "^1.17.7",
     "@substrate/connect": "^0.8.9",
     "@subwallet/chain-list": "0.2.83",
-    "@subwallet/extension-base": "^1.2.26-0",
-    "@subwallet/extension-chains": "^1.2.26-0",
-    "@subwallet/extension-dapp": "^1.2.26-0",
-    "@subwallet/extension-inject": "^1.2.26-0",
-    "@subwallet/keyring": "^0.1.5",
-    "@subwallet/ui-keyring": "^0.1.5",
+    "@subwallet/extension-base": "^1.2.27-0",
+    "@subwallet/extension-chains": "^1.2.27-0",
+    "@subwallet/extension-dapp": "^1.2.27-0",
+    "@subwallet/extension-inject": "^1.2.27-0",
+    "@subwallet/keyring": "^0.1.6",
+    "@subwallet/ui-keyring": "^0.1.6",
     "@walletconnect/keyvaluestorage": "^1.1.1",
-    "@walletconnect/sign-client": "^2.13.1",
-    "@walletconnect/types": "^2.13.1",
-    "@walletconnect/utils": "^2.13.1",
+    "@walletconnect/sign-client": "^2.14.0",
+    "@walletconnect/types": "^2.14.0",
+    "@walletconnect/utils": "^2.14.0",
     "avail-js-sdk": "^0.2.12",
     "axios": "^1.6.2",
     "bignumber.js": "^9.1.1",
@@ -82,6 +83,7 @@
     "graphql": "^16.8.1",
     "i18next": "^21.9.2",
     "is-buffer": "^2.0.5",
+    "joi": "^17.13.3",
     "json-rpc-engine": "^6.1.0",
     "manta-extension-sdk": "^1.1.0",
     "moment": "^2.29.4",
@@ -98,7 +100,7 @@
     "web3-utils": "^1.10.0"
   },
   "devDependencies": {
-    "@subwallet/extension-mocks": "^1.2.26-0",
+    "@subwallet/extension-mocks": "^1.2.27-0",
     "@types/uuid": "^9.0.1"
   }
 }

@@ -1,7 +1,6 @@
 // Copyright 2019-2022 @subwallet/extension-koni-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
 import { ConfirmationDefinitions, ConfirmationResult, EvmSendTransactionRequest, ExtrinsicType } from '@subwallet/extension-base/background/KoniTypes';
 import { AlertBox } from '@subwallet/extension-koni-ui/components';
 import { CONFIRMATION_QR_MODAL } from '@subwallet/extension-koni-ui/constants/modal';
@@ -30,7 +29,6 @@ interface Props extends ThemeProps {
   payload: ConfirmationDefinitions[EvmSignatureSupportType][0];
   extrinsicType?: ExtrinsicType;
   txExpirationTime?: number;
-  errors?: TransactionError[];
 }
 
 const handleConfirm = async (type: EvmSignatureSupportType, id: string, payload: string) => {
@@ -292,7 +290,7 @@ const Component: React.FC<Props> = (props: Props) => {
             onClick={onCancel}
             schema={'primary'}
           >
-            {t('Back to home')}
+            {t('I understand')}
           </Button>
           : <Button
             disabled={loading}
@@ -303,7 +301,7 @@ const Component: React.FC<Props> = (props: Props) => {
               />
             )}
             onClick={onCancel}
-            schema={isErrorTransaction ? 'primary' : 'secondary'}
+            schema={'secondary'}
           >
             {t('Cancel')}
           </Button>

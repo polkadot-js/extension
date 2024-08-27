@@ -9,7 +9,7 @@ import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/ba
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
-import { generateValidationProcess, PayloadValidated, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
+import { convertErrorFormat, generateValidationProcess, PayloadValidated, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -1328,9 +1328,10 @@ export default class KoniState {
       ];
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
+    const errorsFormated = convertErrorFormat(result.errors);
     const payloadAfterValidated: EvmSignatureRequest = {
       ...result.payloadAfterValidated as EvmSignatureRequest,
-      errors: result.errors,
+      errors: errorsFormated,
       id
     };
 
@@ -1401,10 +1402,11 @@ export default class KoniState {
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const { confirmationType, errors, networkKey: networkKey_ } = result;
+    const errorsFormated = convertErrorFormat(errors);
 
-    if (errors && errors.length > 0 && confirmationType) {
+    if (errorsFormated && errorsFormated.length > 0 && confirmationType) {
       if (ERROR_CONFIRMATION_TYPE.includes(confirmationType)) {
-        return this.requestService.addConfirmation(id, url, confirmationType, result, {})
+        return this.requestService.addConfirmation(id, url, confirmationType, { ...result, errors: errorsFormated }, {})
           .then(() => {
             throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
           });
@@ -1416,7 +1418,7 @@ export default class KoniState {
 
     const requestPayload: EvmSendTransactionRequest = {
       ...transactionValidated,
-      errors: errors as TransactionError[]
+      errors: errorsFormated
     };
 
     const eType = transactionValidated.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;

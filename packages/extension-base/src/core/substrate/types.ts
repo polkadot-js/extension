@@ -33,12 +33,18 @@ export type OrmlTokensAccountData = {
   frozen: number
 }
 
-export type PalletAssetsAssetAccount = {
+export type PalletAssetsAssetAccountWithStatus = {
   balance: number | string,
   status: 'Frozen' | 'Liquid' | 'Blocked',
   reason: Record<string, unknown>,
   extra: unknown
 }
+
+export type PalletAssetsAssetAccountWithoutStatus = Omit<PalletAssetsAssetAccountWithStatus, 'status'> & {
+  isFrozen: boolean
+}
+
+export type PalletAssetsAssetAccount = PalletAssetsAssetAccountWithStatus | PalletAssetsAssetAccountWithoutStatus
 
 export type PalletNominationPoolsPoolMember = {
   poolId: number,

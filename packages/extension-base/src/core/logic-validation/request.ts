@@ -4,7 +4,7 @@
 import { TypedDataV1Field, typedSignatureHash } from '@metamask/eth-sig-util';
 import { EvmProviderError } from '@subwallet/extension-base/background/errors/EvmProviderError';
 import { TransactionError } from '@subwallet/extension-base/background/errors/TransactionError';
-import { BasicTxErrorType, ConfirmationType, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
+import { BasicTxErrorType, ConfirmationType, ErrorValidation, EvmProviderErrorType, EvmSendTransactionParams, EvmSignatureRequest, EvmTransactionData } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson } from '@subwallet/extension-base/background/types';
 import KoniState from '@subwallet/extension-base/koni/background/handlers/State';
 import { calculateGasFeeParams } from '@subwallet/extension-base/services/fee-service/utils';
@@ -521,7 +521,7 @@ export async function validationEvmSignMessageMiddleware (koni: KoniState, url: 
     const error = new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name);
 
     console.error(error);
-    errors.push(new EvmProviderError(EvmProviderErrorType.INVALID_PARAMS, message, undefined, name));
+    errors.push(error);
   };
 
   if (address === '' || !payload) {
@@ -671,7 +671,7 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
   }
 
   if (message.includes('network is currently not supported')) {
-    return [t('This network is not yet supported on SubWallet. |Import the network|https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks| on SubWallet and try again'), t('Network not supported')];
+    return [t('This network is not yet supported on SubWallet. (Import the network)[https://docs.subwallet.app/main/extension-user-guide/customize-your-networks#import-networks] on SubWallet and try again'), t('Network not supported')];
   }
 
   // Authentication
@@ -727,5 +727,13 @@ export function convertErrorMessage (message_: string, name?: string): string[] 
     return [t('An error occurred when attempting to sign this request. Contact support at email: agent@subwallet.app'), t('Unable to sign')];
   }
 
-  return [message, name || ''];
+  return [message, name || 'Error'];
+}
+
+export function convertErrorFormat (errors: Error[]): ErrorValidation[] {
+  if (errors.length > 0) {
+    return [{ name: errors[0].name, message: errors[0].message }];
+  }
+
+  return [];
 }

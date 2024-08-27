@@ -419,7 +419,6 @@ const EarningPositions = styled(Component)<Props>(({ theme: { token } }: Props) 
 
   '&.earning-alert-content': {
     '.__info-highlight': {
-      color: token.colorWhite,
       fontWeight: token.fontWeightStrong
     }
   },

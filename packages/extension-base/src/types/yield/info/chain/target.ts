@@ -38,6 +38,11 @@ export interface ValidatorInfo {
   topQuartile?: boolean;
 }
 
+export interface AllValidatorInfo {
+  currenSelectedValidatorList: ValidatorInfo[];
+  waitingValidatorList: ValidatorInfo[];
+}
+
 export type YieldPoolTarget = NominationPoolInfo | ValidatorInfo;
 
 export interface RequestGetYieldPoolTargets {

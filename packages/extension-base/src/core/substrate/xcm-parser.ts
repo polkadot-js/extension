@@ -215,7 +215,9 @@ function _getAssetIdentifier (tokenInfo: _ChainAsset, version: number) {
     throw new Error('Asset must have multilocation');
   }
 
-  const assetIdentifier = _adaptX1Interior(structuredClone(_assetIdentifier), version);
+  const assetIdentifier = ['statemint-LOCAL-KSM'].includes(tokenInfo.slug) // todo: hotfix for ksm statemint recheck all chain
+    ? _assetIdentifier
+    : _adaptX1Interior(structuredClone(_assetIdentifier), version);
 
   return version >= 4 // from V4, Concrete is removed
     ? assetIdentifier

@@ -114,7 +114,7 @@ function Component ({ className, request, type }: Props) {
           onClick={onCancel}
           schema={'primary'}
         >
-          {t('Back to home')}
+          {t('I understand')}
         </Button>
       </div>
     </>

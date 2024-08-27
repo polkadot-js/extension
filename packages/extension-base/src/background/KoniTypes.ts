@@ -1263,11 +1263,6 @@ export interface EvmSendTransactionParams {
   gas?: string | number;
 }
 
-export interface SwitchNetworkRequest {
-  networkKey: string;
-  address?: string;
-}
-
 export interface EvmSignRequest {
   account: AccountJson;
   hashPayload: string;
@@ -1347,7 +1342,6 @@ export interface ErrorNetworkConnection {
 export interface ConfirmationDefinitions {
   addNetworkRequest: [ConfirmationsQueueItem<_NetworkUpsertParams>, ConfirmationResult<null>],
   addTokenRequest: [ConfirmationsQueueItem<AddTokenRequestExternal>, ConfirmationResult<boolean>],
-  switchNetworkRequest: [ConfirmationsQueueItem<SwitchNetworkRequest>, ConfirmationResult<boolean>],
   evmSignatureRequest: [ConfirmationsQueueItem<EvmSignatureRequest>, ConfirmationResult<string>],
   evmSendTransactionRequest: [ConfirmationsQueueItem<EvmSendTransactionRequest>, ConfirmationResult<string>]
   evmWatchTransactionRequest: [ConfirmationsQueueItem<EvmWatchTransactionRequest>, ConfirmationResult<string>],

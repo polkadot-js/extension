@@ -50,8 +50,6 @@ const Component: React.FC<Props> = (props: Props) => {
     inactiveModal(modalId);
   }, [inactiveModal, modalId]);
 
-  console.log('closable',closable);
-
   return (
     <>
       <SwModal

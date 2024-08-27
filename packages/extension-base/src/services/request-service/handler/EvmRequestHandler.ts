@@ -26,7 +26,6 @@ export default class EvmRequestHandler {
   private readonly confirmationsQueueSubject = new BehaviorSubject<ConfirmationsQueue>({
     addNetworkRequest: {},
     addTokenRequest: {},
-    switchNetworkRequest: {},
     evmSignatureRequest: {},
     evmSendTransactionRequest: {},
     evmWatchTransactionRequest: {},

@@ -38,5 +38,7 @@ export const NETWORK_MULTI_GAS_FEE = ['*'];
 export const ORDINAL_COLLECTION = '__Ordinal__';
 export const ORDINAL_METHODS = ['drc-20', 'pol-20'];
 
+export const PERMISSIONS_TO_REVOKE = ['eth_accounts'];
+
 export * from './staking';
 export * from './storage';

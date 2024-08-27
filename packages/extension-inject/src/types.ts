@@ -33,7 +33,7 @@ export interface InjectedAccounts {
   subscribe: (cb: (accounts: InjectedAccount[]) => void | Promise<void>) => Unsubcall;
 }
 
-export type AuthAccountSubstrateType = 'substrate' | 'both';
+export type AuthAccountSubstrateType = 'substrate' | 'both' | 'evm';
 
 export interface AuthRequestOption {
   accountAuthType: AuthAccountSubstrateType

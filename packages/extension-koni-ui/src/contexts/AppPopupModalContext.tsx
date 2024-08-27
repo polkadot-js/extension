@@ -38,6 +38,7 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
   const { isPopupVisible } = useSelector((state: RootState) => state.campaign);
   const storageEarningPosition = window.localStorage.getItem(EARNING_WARNING_ANNOUNCEMENT);
 
+  // TODO: This is a hotfix solution; a better solution must be found.
   const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
     if (isPopupVisible && !!storageEarningPosition && storageEarningPosition.includes('confirmed')) {
       setAppPopupModal(data);

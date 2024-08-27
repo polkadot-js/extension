@@ -36,7 +36,6 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const navigate = useNavigate();
 
   const { activeModal } = useContext(ModalContext);
-  const { inactiveModal } = useContext(ModalContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const { currencyData, priceMap } = useSelector((state) => state.price);
@@ -116,10 +115,10 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     window.open('https://support.polkadot.network/support/solutions/articles/65000188140-changes-for-nomination-pool-members-and-opengov-participation');
   }, []);
 
-  const onCancelBtn = useCallback(() => {
-    inactiveModal(alertModalId);
+  const onCancel = useCallback(() => {
+    closeAlert();
     setAnnouncement('confirmed');
-  }, [inactiveModal, setAnnouncement]);
+  }, [closeAlert, setAnnouncement]);
 
   useEffect(() => {
     if (chainStakingBoth && announcement.includes('nonConfirmed')) {
@@ -130,7 +129,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
       openAlert({
         type: NotificationType.WARNING,
-        onCancelBtn: onCancelBtn,
+        onCancel: onCancel,
         content:
           (<>
             <div className={CN(className, 'earning-alert-content')}>
@@ -138,7 +137,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
               <span className={'__info-highlight'}>{t('will not be supported')}&nbsp;</span>
               <span>{t(`in the upcoming ${originChain} runtime upgrade. Read more to learn about the upgrade, and`)}&nbsp;</span>
               <a
-                href={'https://docs.subwallet.app/main/extension-user-guide/manage-staking/nominate-for-validator/unstake'}
+                href={'https://docs.subwallet.app/main/mobile-app-user-guide/manage-staking/unstake'}
                 rel='noreferrer'
                 style={{ textDecoration: 'underline' }}
                 target={'_blank'}
@@ -166,7 +165,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         }
       });
     }
-  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, onCancelBtn, openAlert, setAnnouncement, t]);
+  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, onCancel, openAlert, setAnnouncement, t]);
 
   const lastItem = useMemo(() => {
     return items[items.length - 1];

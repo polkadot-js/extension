@@ -486,7 +486,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     }
   }
 
-  private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], waitingValidatorList: Record<string, string>, topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
+  private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], waitingValidatorLedger: Record<string, string>, topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], ValidatorInfo[]] {
     const totalStakeMap: Record<string, BN> = {};
     const allValidatorAddresses: string[] = [];
     const validatorInfoList: ValidatorInfo[] = [];
@@ -545,14 +545,14 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
       }
     }
 
-    for (const waitingValidator of Object.keys(waitingValidatorList)) {
+    for (const waitingValidator of Object.keys(waitingValidatorLedger)) {
       if (!allValidatorAddresses.includes(waitingValidator)) {
         allValidatorAddresses.push(waitingValidator);
 
         validatorInfoList.push({
           address: waitingValidator,
-          totalStake: waitingValidatorList[waitingValidator],
-          ownStake: waitingValidatorList[waitingValidator],
+          totalStake: waitingValidatorLedger[waitingValidator],
+          ownStake: waitingValidatorLedger[waitingValidator],
           otherStake: '0',
           nominatorCount: 0,
           // to be added later

@@ -384,13 +384,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const endEraForPoints = parseInt(activeEra) - 1;
     const startEraForPoints = Math.max(endEraForPoints - maxEraRewardPointsEras + 1, 0);
 
-    let _eraStakersPromise;
-
-    if (chainApi.api.query.staking.erasStakersOverview) { // todo: review all relaychains later
-      _eraStakersPromise = chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra));
-    } else {
-      _eraStakersPromise = chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
-    }
+    const _eraStakersPromise: Promise<any[]> = chainApi.api.query.staking.erasStakersOverview // todo: review all relaychains later
+      ? chainApi.api.query.staking.erasStakersOverview.entries(parseInt(currentEra))
+      : chainApi.api.query.staking.erasStakers.entries(parseInt(currentEra));
 
     const [_totalEraStake, _eraStakers, _minBond, _stakingRewards, _validators, ..._eraRewardPoints] = await Promise.all([
       chainApi.api.query.staking.erasTotalStake(parseInt(currentEra)),
@@ -405,11 +401,12 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const validatorPointsMap = getRelayValidatorPointsMap(eraRewardMap);
     const topValidatorList = getRelayTopValidatorByPoints(validatorPointsMap);
 
-    const validators = _validators as any[];
+    const allValidatorList = _validators as any[];
 
-    const blockedValidatorList = getRelayBlockedValidatorList(validators);
-    const waitingValidatorList = getRelayWaitingValidatorList(validators);
+    const blockedValidatorList = getRelayBlockedValidatorList(allValidatorList);
+    const waitingValidatorList = getRelayWaitingValidatorList(allValidatorList);
 
+    // todo: improve handle waitingValidatorLedger
     const _waitingValidatorLedger = await chainApi.api.query.staking.ledger.multi(waitingValidatorList);
 
     const waitingValidatorLedger: Record<string, string> = {};

@@ -176,10 +176,27 @@ export default class WalletConnectService {
     }
   }
 
+  async #onPingReply ({ topic }: SignClientTypes.EventArguments['session_ping']) {
+    // Doc: https://specs.walletconnect.com/2.0/specs/clients/sign/session-events#session_ping
+
+    this.#checkClient();
+
+    try {
+      const requestSession = this.getSession(topic);
+      const sessionAccounts = (requestSession.namespaces.eip155?.accounts || []).concat(requestSession.namespaces.polkadot?.accounts || []);
+
+      if (sessionAccounts.length > 0 && this.#client) {
+        await this.#client.ping({ topic });
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   #createListener () {
     this.#client?.on('session_proposal', this.#onSessionProposal.bind(this));
     this.#client?.on('session_request', this.#onSessionRequest.bind(this));
-    this.#client?.on('session_ping', (data) => console.log('ping', data));
+    this.#client?.on('session_ping', this.#onPingReply.bind(this));
     this.#client?.on('session_event', (data) => console.log('event', data));
     this.#client?.on('session_update', (data) => console.log('update', data));
     this.#client?.on('session_delete', this.#updateSessions.bind(this));

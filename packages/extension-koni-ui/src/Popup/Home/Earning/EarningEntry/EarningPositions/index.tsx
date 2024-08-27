@@ -36,6 +36,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
   const navigate = useNavigate();
 
   const { activeModal } = useContext(ModalContext);
+  const { inactiveModal } = useContext(ModalContext);
 
   const isShowBalance = useSelector((state) => state.settings.isShowBalance);
   const { currencyData, priceMap } = useSelector((state) => state.price);
@@ -115,6 +116,11 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     window.open('https://support.polkadot.network/support/solutions/articles/65000188140-changes-for-nomination-pool-members-and-opengov-participation');
   }, []);
 
+  const onCancelBtn = useCallback(() => {
+    inactiveModal(alertModalId);
+    setAnnouncement('confirmed');
+  }, [inactiveModal, setAnnouncement]);
+
   useEffect(() => {
     if (chainStakingBoth && announcement.includes('nonConfirmed')) {
       const chainInfo = chainStakingBoth && chainInfoMap[chainStakingBoth];
@@ -124,6 +130,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
       openAlert({
         type: NotificationType.WARNING,
+        onCancelBtn: onCancelBtn,
         content:
           (<>
             <div className={CN(className, 'earning-alert-content')}>
@@ -159,7 +166,7 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
         }
       });
     }
-  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, openAlert, setAnnouncement, t]);
+  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, onCancelBtn, openAlert, setAnnouncement, t]);
 
   const lastItem = useMemo(() => {
     return items[items.length - 1];

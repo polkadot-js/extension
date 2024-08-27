@@ -426,7 +426,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
     const minBond = _minBond.toPrimitive() as number;
 
     const [totalStakeMap, allValidatorAddresses, allValidatorInfo] = this.parseEraStakerData(_eraStakers, blockedValidatorList, waitingValidatorLedger, topValidatorList, validatorPointsMap, minBond, maxNominatorRewarded, unlimitedNominatorRewarded);
-    const currentSelectedValidatorList = allValidatorInfo.currenSelectedValidatorList;
+    const currentSelectedValidatorList = allValidatorInfo.currentSelectedValidatorList;
     const allValidatorInfoList = [...currentSelectedValidatorList, ...allValidatorInfo.waitingValidatorList];
 
     const extraInfoMap: Record<string, ValidatorExtraInfo> = {};
@@ -489,7 +489,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
   private parseEraStakerData (_eraStakers: any[], blockedValidatorList: string[], waitingValidatorLedger: Record<string, string>, topValidatorList: string[], validatorPointsMap: Record<string, BigN>, minBond: number, maxNominatorRewarded: string, unlimitedNominatorRewarded: boolean): [Record<string, BN>, string[], AllValidatorInfo] {
     const totalStakeMap: Record<string, BN> = {};
     const allValidatorAddresses: string[] = [];
-    const allValidatorInfo: AllValidatorInfo = { currenSelectedValidatorList: [], waitingValidatorList: [] };
+    const allValidatorInfo: AllValidatorInfo = { currentSelectedValidatorList: [], waitingValidatorList: [] };
 
     for (const item of _eraStakers) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
@@ -526,7 +526,7 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
         allValidatorAddresses.push(validatorAddress);
 
-        allValidatorInfo.currenSelectedValidatorList.push({
+        allValidatorInfo.currentSelectedValidatorList.push({
           address: validatorAddress,
           totalStake: bnTotalStake.toString(),
           ownStake: bnOwnStake.toString(),

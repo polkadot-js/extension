@@ -39,7 +39,7 @@ export interface ValidatorInfo {
 }
 
 export interface AllValidatorInfo {
-  currenSelectedValidatorList: ValidatorInfo[];
+  currentSelectedValidatorList: ValidatorInfo[];
   waitingValidatorList: ValidatorInfo[];
 }
 

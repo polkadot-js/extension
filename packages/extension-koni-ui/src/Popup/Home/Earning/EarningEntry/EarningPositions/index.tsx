@@ -115,6 +115,11 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
     window.open('https://support.polkadot.network/support/solutions/articles/65000188140-changes-for-nomination-pool-members-and-opengov-participation');
   }, []);
 
+  const onCancel = useCallback(() => {
+    closeAlert();
+    setAnnouncement('confirmed');
+  }, [closeAlert, setAnnouncement]);
+
   useEffect(() => {
     if (chainStakingBoth && announcement.includes('nonConfirmed')) {
       const chainInfo = chainStakingBoth && chainInfoMap[chainStakingBoth];
@@ -124,43 +129,43 @@ function Component ({ className, earningPositions, setEntryView, setLoading }: P
 
       openAlert({
         type: NotificationType.WARNING,
+        onCancel: onCancel,
         content:
           (<>
             <div className={CN(className, 'earning-alert-content')}>
-              <span>{t(`Nomination pool members will soon be allowed to vote on ${originChain} OpenGov. Following this update, accounts that are`)}&nbsp;</span>
-              <span className={'__info-highlight'}>{t('dual staking via direct nomination (solo staking) and nomination pool')}&nbsp;</span>
-              <span>will not be able to use pool-staked funds for voting.</span>
+              <span>{t('You’re dual staking via both direct nomination and nomination pool, which')}&nbsp;</span>
+              <span className={'__info-highlight'}>{t('will not be supported')}&nbsp;</span>
+              <span>{t(`in the upcoming ${originChain} runtime upgrade. Read more to learn about the upgrade, and`)}&nbsp;</span>
+              <a
+                href={'https://docs.subwallet.app/main/mobile-app-user-guide/manage-staking/unstake'}
+                rel='noreferrer'
+                style={{ textDecoration: 'underline' }}
+                target={'_blank'}
+              >{(`unstake your ${symbol}`)}
+              </a>&nbsp;
+              <span>{t('from one of the methods to avoid issues')}</span>
             </div>
-            {t(`To avoid future complications, unstake your ${symbol} from `)}
-            &nbsp;<a
-              href={'https://docs.subwallet.app/main/extension-user-guide/manage-staking/nominate-for-validator/unstake'}
-              rel='noreferrer'
-              style={{ textDecoration: 'underline' }}
-              target={'_blank'}
-            >direct nomination</a> or &nbsp;
-            <a
-              href={'https://docs.subwallet.app/main/extension-user-guide/manage-staking/nomination-pool/unstake'}
-              rel='noreferrer'
-              style={{ textDecoration: 'underline' }}
-              target={'_blank'}
-            >nomination pool</a>.
+
           </>),
         title: t(`Unstake your ${symbol} now!`),
         okButton: {
           text: t('Read update'),
           onClick: () => {
             learnMore();
+            setAnnouncement('confirmed');
             closeAlert();
           }
         },
         cancelButton: {
           text: t('Dismiss'),
-          onClick: closeAlert
+          onClick: () => {
+            closeAlert();
+            setAnnouncement('confirmed');
+          }
         }
       });
-      setAnnouncement('confirmed');
     }
-  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, openAlert, setAnnouncement, t]);
+  }, [announcement, chainInfoMap, chainStakingBoth, className, closeAlert, learnMore, onCancel, openAlert, setAnnouncement, t]);
 
   const lastItem = useMemo(() => {
     return items[items.length - 1];

@@ -403,8 +403,9 @@ export default class RelayNativeStakingPoolHandler extends BaseNativeStakingPool
 
     const allValidatorList = _validators as any[];
 
+    // todo: optimize naming for all filtered validatorList: all, block, waiting, selected, waiting but is not selected, waiting but is not blocked, ...
     const blockedValidatorList = getRelayBlockedValidatorList(allValidatorList);
-    const waitingValidatorList = getRelayWaitingValidatorList(allValidatorList);
+    const waitingValidatorList = getRelayWaitingValidatorList(allValidatorList); // all validators that are not blocked
 
     // todo: improve handle waitingValidatorLedger
     const _waitingValidatorLedger = await chainApi.api.query.staking.ledger.multi(waitingValidatorList);

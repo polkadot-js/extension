@@ -231,7 +231,7 @@ export function calculateTernoaValidatorReturn (rewardPerValidator: number, vali
 export function calculateValidatorStakedReturn (chainStakedReturn: number, totalValidatorStake: BN, avgStake: BN, commission: number) {
   const bnAdjusted = avgStake.mul(BN_HUNDRED).div(totalValidatorStake);
   const adjusted = bnAdjusted.toNumber() * chainStakedReturn;
-
+  // todo: should calculated in bignumber instead number?
   const stakedReturn = (adjusted > Number.MAX_SAFE_INTEGER ? Number.MAX_SAFE_INTEGER : adjusted) / 100;
 
   return stakedReturn * (100 - commission) / 100; // Deduct commission

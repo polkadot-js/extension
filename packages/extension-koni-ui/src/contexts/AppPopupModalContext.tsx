@@ -1,7 +1,7 @@
 // Copyright 2019-2022 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { APP_POPUP_MODAL } from '@subwallet/extension-koni-ui/constants';
+import { APP_POPUP_MODAL, EARNING_WARNING_ANNOUNCEMENT } from '@subwallet/extension-koni-ui/constants';
 import { toggleCampaignPopup } from '@subwallet/extension-koni-ui/messaging/campaigns';
 import { RootState } from '@subwallet/extension-koni-ui/stores';
 import { ModalContext } from '@subwallet/react-ui';
@@ -36,13 +36,15 @@ export const AppPopupModalContextProvider = ({ children }: AppPopupModalContextP
   const [appPopupModal, setAppPopupModal] = useState<AppPopupModalInfo>({});
   const { activeModal, inactiveModal } = useContext(ModalContext);
   const { isPopupVisible } = useSelector((state: RootState) => state.campaign);
+  const storageEarningPosition = window.localStorage.getItem(EARNING_WARNING_ANNOUNCEMENT);
 
+  // TODO: This is a hotfix solution; a better solution must be found.
   const openAppPopupModal = useCallback((data: AppPopupModalInfo) => {
-    if (isPopupVisible) {
+    if (isPopupVisible && ((!storageEarningPosition || storageEarningPosition.includes('confirmed')))) {
       setAppPopupModal(data);
       activeModal(APP_POPUP_MODAL);
     }
-  }, [activeModal, isPopupVisible]);
+  }, [activeModal, isPopupVisible, storageEarningPosition]);
 
   const hideAppPopupModal = useCallback(() => {
     toggleCampaignPopup({ value: false }).then(() => {

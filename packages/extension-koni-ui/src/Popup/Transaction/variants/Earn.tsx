@@ -14,7 +14,7 @@ import { EarningProcessItem } from '@subwallet/extension-koni-ui/components/Earn
 import { getInputValuesFromString } from '@subwallet/extension-koni-ui/components/Field/AmountInput';
 import { EarningInstructionModal } from '@subwallet/extension-koni-ui/components/Modal/Earning';
 import { EARNING_INSTRUCTION_MODAL, STAKE_ALERT_DATA } from '@subwallet/extension-koni-ui/constants';
-import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
+import { useChainConnection, useFetchChainState, useGetBalance, useGetNativeTokenSlug, useGetYieldPositionForSpecificAccount, useInitValidateTransaction, useNotification, usePreCheckAction, useRestoreTransaction, useSelector, useTransactionContext, useWatchTransaction, useYieldPositionDetail } from '@subwallet/extension-koni-ui/hooks';
 import { fetchPoolTarget, getOptimalYieldPath, submitJoinYieldPool, validateYieldProcess } from '@subwallet/extension-koni-ui/messaging';
 import { DEFAULT_YIELD_PROCESS, EarningActionType, earningReducer } from '@subwallet/extension-koni-ui/reducer';
 import { store } from '@subwallet/extension-koni-ui/stores';
@@ -82,6 +82,8 @@ const Component = () => {
   const submitStepType = processState.steps?.[!currentStep ? currentStep + 1 : currentStep]?.type;
 
   const { compound } = useYieldPositionDetail(slug);
+  const specificList = useGetYieldPositionForSpecificAccount(fromValue);
+
   const { nativeTokenBalance } = useGetBalance(chainValue, fromValue);
   const { checkChainConnected, turnOnChain } = useChainConnection();
   const [isConnectingChainSuccess, setIsConnectingChainSuccess] = useState<boolean>(false);
@@ -109,6 +111,26 @@ const Component = () => {
     () => [YieldPoolType.NATIVE_STAKING, YieldPoolType.NOMINATION_POOL].includes(poolType),
     [poolType]
   );
+
+  const chainStakingBoth = useMemo(() => {
+    const hasNativeStaking = (chain: string) => specificList.some((item) => item.chain === chain && item.type === YieldPoolType.NATIVE_STAKING);
+    const hasNominationPool = (chain: string) => specificList.some((item) => item.chain === chain && item.type === YieldPoolType.NOMINATION_POOL);
+
+    const chains = ['polkadot', 'kusama'];
+    let chainStakingInBoth;
+
+    for (const chain of chains) {
+      if (hasNativeStaking(chain) && hasNominationPool(chain) && [YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolType) && chain === chainValue) {
+        chainStakingInBoth = chain;
+        break;
+      } else if (((hasNativeStaking(chain) && poolType === YieldPoolType.NOMINATION_POOL) || (hasNominationPool(chain) && poolType === YieldPoolType.NATIVE_STAKING)) && chain === chainValue) {
+        chainStakingInBoth = chain;
+        break;
+      }
+    }
+
+    return chainStakingInBoth;
+  }, [specificList, poolType, chainValue]);
 
   const balanceTokens = useMemo(() => {
     const result: Array<{ chain: string; token: string }> = [];
@@ -392,108 +414,141 @@ const Component = () => {
   );
 
   const onSubmit: FormCallbacks<EarnParams>['onFinish'] = useCallback((values: EarnParams) => {
-    setSubmitLoading(true);
-    setIsDisableHeader(true);
-    const { from, slug, target, value: _currentAmount } = values;
+    const transactionBlockProcess = () => {
+      setSubmitLoading(true);
+      setIsDisableHeader(true);
+      const { from, slug, target, value: _currentAmount } = values;
 
-    const getData = (submitStep: number): SubmitYieldJoinData => {
-      if ([YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo.type) && target) {
-        const targets = poolTargets;
+      const getData = (submitStep: number): SubmitYieldJoinData => {
+        if ([YieldPoolType.NOMINATION_POOL, YieldPoolType.NATIVE_STAKING].includes(poolInfo.type) && target) {
+          const targets = poolTargets;
 
-        if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
-          const selectedPool = targets[0];
+          if (poolInfo.type === YieldPoolType.NOMINATION_POOL) {
+            const selectedPool = targets[0];
 
-          return {
-            slug: slug,
-            address: from,
-            amount: _currentAmount,
-            selectedPool
-          } as SubmitJoinNominationPool;
-        } else {
-          return {
-            slug: slug,
-            address: from,
-            amount: _currentAmount,
-            selectedValidators: targets
-          } as SubmitJoinNativeStaking;
-        }
-      } else {
-        return getJoinYieldParams(poolInfo, from, _currentAmount, processState.feeStructure[submitStep]);
-      }
-    };
-
-    const path: OptimalYieldPath = {
-      steps: processState.steps,
-      totalFee: processState.feeStructure
-    };
-
-    const submitData = async (step: number): Promise<boolean> => {
-      dispatchProcessState({
-        type: EarningActionType.STEP_SUBMIT,
-        payload: null
-      });
-      const isFirstStep = step === 0;
-      const isLastStep = step === processState.steps.length - 1;
-      const needRollback = step === 1;
-      const data = getData(step);
-
-      try {
-        if (isFirstStep) {
-          const validatePromise = validateYieldProcess({
-            path: path,
-            data: data
-          });
-
-          const _errors = await validatePromise;
-
-          if (_errors.length) {
-            onError(_errors[0]);
-
-            return false;
+            return {
+              slug: slug,
+              address: from,
+              amount: _currentAmount,
+              selectedPool
+            } as SubmitJoinNominationPool;
           } else {
-            dispatchProcessState({
-              type: EarningActionType.STEP_COMPLETE,
-              payload: true
-            });
-            dispatchProcessState({
-              type: EarningActionType.STEP_SUBMIT,
-              payload: null
-            });
-
-            return await submitData(step + 1);
+            return {
+              slug: slug,
+              address: from,
+              amount: _currentAmount,
+              selectedValidators: targets
+            } as SubmitJoinNativeStaking;
           }
         } else {
-          const submitPromise: Promise<SWTransactionResponse> = submitJoinYieldPool({
-            path: path,
-            data: data,
-            currentStep: step
-          });
-
-          const rs = await submitPromise;
-          const success = onSuccess(isLastStep, needRollback)(rs);
-
-          if (success) {
-            return await submitData(step + 1);
-          } else {
-            return false;
-          }
+          return getJoinYieldParams(poolInfo, from, _currentAmount, processState.feeStructure[submitStep]);
         }
-      } catch (e) {
-        onError(e as Error);
+      };
 
-        return false;
-      }
-    };
+      const path: OptimalYieldPath = {
+        steps: processState.steps,
+        totalFee: processState.feeStructure
+      };
 
-    setTimeout(() => {
-      submitData(currentStep)
-        .catch(onError)
-        .finally(() => {
-          setSubmitLoading(false);
-          setIsDisableHeader(false);
+      const submitData = async (step: number): Promise<boolean> => {
+        dispatchProcessState({
+          type: EarningActionType.STEP_SUBMIT,
+          payload: null
         });
-    }, 300);
-  }, [currentStep, onError, onSuccess, poolInfo, poolTargets, processState.feeStructure, processState.steps, setIsDisableHeader]);
+        const isFirstStep = step === 0;
+        const isLastStep = step === processState.steps.length - 1;
+        const needRollback = step === 1;
+        const data = getData(step);
+
+        try {
+          if (isFirstStep) {
+            const validatePromise = validateYieldProcess({
+              path: path,
+              data: data
+            });
+
+            const _errors = await validatePromise;
+
+            if (_errors.length) {
+              onError(_errors[0]);
+
+              return false;
+            } else {
+              dispatchProcessState({
+                type: EarningActionType.STEP_COMPLETE,
+                payload: true
+              });
+              dispatchProcessState({
+                type: EarningActionType.STEP_SUBMIT,
+                payload: null
+              });
+
+              return await submitData(step + 1);
+            }
+          } else {
+            const submitPromise: Promise<SWTransactionResponse> = submitJoinYieldPool({
+              path: path,
+              data: data,
+              currentStep: step
+            });
+
+            const rs = await submitPromise;
+            const success = onSuccess(isLastStep, needRollback)(rs);
+
+            if (success) {
+              return await submitData(step + 1);
+            } else {
+              return false;
+            }
+          }
+        } catch (e) {
+          onError(e as Error);
+
+          return false;
+        }
+      };
+
+      setTimeout(() => {
+        submitData(currentStep)
+          .catch(onError)
+          .finally(() => {
+            setSubmitLoading(false);
+            setIsDisableHeader(false);
+          });
+      }, 300);
+    };
+
+    if (chainStakingBoth) {
+      const chainInfo = chainStakingBoth && chainInfoMap[chainStakingBoth];
+
+      const symbol = (!!chainInfo && chainInfo?.substrateInfo?.symbol) || '';
+      const originChain = (!!chainInfo && chainInfo?.name) || '';
+
+      openAlert({
+        type: NotificationType.WARNING,
+        content:
+          (<>
+            <div className={'earning-alert-content'}>
+              {t(`You're currently staking ${symbol} via direct nomination. Due to ${originChain}'s upcoming changes, continuing to stake via nomination pool will lead to pool-staked funds being frozen (e.g., can't unstake, claim rewards)`)}
+            </div>
+          </>),
+        title: t('Continue staking?'),
+        okButton: {
+          text: t('Continue'),
+          onClick: () => {
+            closeAlert();
+            transactionBlockProcess();
+          }
+        },
+        cancelButton: {
+          text: t('Cancel'),
+          onClick: closeAlert
+        }
+      });
+    } else {
+      transactionBlockProcess();
+    }
+  }, [chainInfoMap, chainStakingBoth, closeAlert, currentStep, onError, onSuccess, openAlert, poolInfo, poolTargets, processState.feeStructure, processState.steps, setIsDisableHeader, t]);
 
   const renderMetaInfo = useCallback(() => {
     const value = amountValue ? parseFloat(amountValue) / 10 ** assetDecimals : 0;

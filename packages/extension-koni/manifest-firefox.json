@@ -4,17 +4,18 @@
   "homepage_url": "https://subwallet.app/",
   "name": "SubWallet - Polkadot Wallet",
   "short_name": "SubWallet",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "permissions": [
     "notifications",
     "storage",
     "tabs"
   ],
-  "minimum_chrome_version": "105",
+  "minimum_chrome_version": "66",
   "background": {
-    "service_worker": "background.js"
+    "page": "background.html",
+    "persistent": true
   },
-  "action": {
+  "browser_action": {
     "default_title": "SubWallet",
     "default_popup": "index.html"
   },
@@ -27,7 +28,8 @@
         "http://*/*",
         "https://*/*"
       ],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "all_frames": true
     }
   ],
   "icons": {
@@ -37,10 +39,10 @@
     "64": "images/icon-64.png",
     "128": "images/icon-128.png"
   },
-  "web_accessible_resources": {
-    "resources": ["page.js"],
-    "matches": ["<all_urls>"]
-  },
+  "web_accessible_resources": [
+    "page.js",
+    "images/icons/__error__.png"
+  ],
   "content_security_policy": "script-src 'self' blob: 'unsafe-eval' 'wasm-eval'; object-src 'self'",
   "version": "0.0.1"
 }

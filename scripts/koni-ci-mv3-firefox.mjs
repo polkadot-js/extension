@@ -1,6 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+/**
+ * This  script will be used later
+ * */
 async function updateManifest() {
   const filePath = path.resolve('./packages/extension-koni/build/manifest.json');
 
@@ -38,6 +41,5 @@ async function updateManifest() {
     console.error('Error updating manifest.json:', error);
   }
 }
-
 
 updateManifest();

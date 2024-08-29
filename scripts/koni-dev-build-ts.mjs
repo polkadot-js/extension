@@ -31,9 +31,11 @@ const IGNORE_IMPORTS = [
 
 // webpack build
 function buildWebpack () {
-  const config = WP_CONFIGS.find((c) => fs.existsSync(path.join(process.cwd(), c)));
+  execSync(`yarn polkadot-exec-webpack --config webpack.config.cjs --mode production`);
+}
 
-  execSync(`yarn polkadot-exec-webpack --config ${config} --mode production`);
+function buildWebpackFirefox () {
+  execSync(`yarn polkadot-exec-webpack --config webpack.config-firefox.cjs --mode production`);
 }
 
 // compile via babel, either via supplied config or default
@@ -573,6 +575,7 @@ async function buildJs (repoPath, dir, locals) {
 
     if (fs.existsSync(path.join(process.cwd(), 'public'))) {
       buildWebpack();
+      buildWebpackFirefox();
     } else {
       await buildBabel(dir, 'cjs');
       await buildBabel(dir, 'esm');

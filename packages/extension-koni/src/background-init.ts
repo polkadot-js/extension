@@ -15,7 +15,7 @@ xglobal.addEventListener('fetch', function (event: FetchEvent) {
   }
 });
 
-withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
+withErrorLog(() => chrome.action?.setBadgeBackgroundColor({ color: '#d90000' }));
 
 chrome.runtime.onConnect.addListener((port): void => {
   actionHandler.handlePort(port);

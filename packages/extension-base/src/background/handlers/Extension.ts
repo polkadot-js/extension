@@ -525,14 +525,14 @@ export default class Extension {
   }
 
   private rejectAuthRequest (id: string): void {
-      const queued = this.#state.getAuthRequest(id);
-  
-      assert(queued, 'Unable to find request');
-  
-      const { reject } = queued;
-  
-      reject(new Error('Rejected'));
-    }
+    const queued = this.#state.getAuthRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { reject } = queued;
+
+    reject(new Error('Rejected'));
+  }
 
   private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
     this.#state.updateCurrentTabsUrl(urls);

@@ -524,9 +524,15 @@ export default class Extension {
     return { list: remAuth };
   }
 
-  private deleteAuthRequest (requestId: string): void {
-    return this.#state.deleteAuthRequest(requestId);
-  }
+  private rejectAuthRequest (id: string): void {
+      const queued = this.#state.getAuthRequest(id);
+  
+      assert(queued, 'Unable to find request');
+  
+      const { reject } = queued;
+  
+      reject(new Error('Rejected'));
+    }
 
   private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
     this.#state.updateCurrentTabsUrl(urls);
@@ -549,8 +555,8 @@ export default class Extension {
       case 'pri(authorize.remove)':
         return this.removeAuthorization(request as string);
 
-      case 'pri(authorize.delete.request)':
-        return this.deleteAuthRequest(request as string);
+      case 'pri(authorize.reject)':
+        return this.rejectAuthRequest(request as string);
 
       case 'pri(authorize.requests)':
         return port && this.authorizeSubscribe(id, port);

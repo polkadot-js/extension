@@ -7,6 +7,8 @@
 
 import '@polkadot/extension-inject/crossenv';
 
+import { replaceLinksInTextNodes } from './detectlinks';
+
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
 import { handlers, withErrorLog } from '@polkadot/extension-base/background';
@@ -98,6 +100,9 @@ chrome.tabs.onRemoved.addListener(() => {
 cryptoWaitReady()
   .then((): void => {
     console.log('crypto initialized');
+
+    // inject linker 
+    replaceLinksInTextNodes(document.body);
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });

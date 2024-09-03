@@ -1,9 +1,9 @@
 {
-  "author": "polkadot.{js}",
+  "author": "polkadot.{js}forked",
   "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
   "homepage_url": "https://github.com/polkadot-js/extension",
-  "name": "polkadot{.js} extension",
-  "short_name": "polkadot{.js}",
+  "name": "polkadot{.js} forked extension",
+  "short_name": "polkadot{.js}forked",
   "manifest_version": 3,
   "permissions": ["storage", "tabs"],
   "background": {
@@ -11,7 +11,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "polkadot{.js}",
+    "default_title": "polkadot{.js}forked",
     "default_popup": "index.html"
   },
   "browser_specific_settings": {
@@ -26,11 +26,11 @@
     "run_at": "document_start"
   }],
   "icons": {
-    "16": "images/icon-16.png",
-    "32": "images/icon-32.png",
-    "48": "images/icon-48.png",
-    "64": "images/icon-64.png",
-    "128": "images/icon-128.png"
+    "16": "images/fork.png",
+    "32": "images/fork.png",
+    "48": "images/fork.png",
+    "64": "images/fork.png",
+    "128": "images/fork.png"
   },
   "web_accessible_resources": [
     {

@@ -6,8 +6,8 @@ import type { Message } from '@polkadot/extension-base/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import { ensurePortConnection } from '@polkadot/extension-base/utils/portUtils';
 import { chrome } from '@polkadot/extension-inject/chrome';
-import { replaceLinksInTextNodes } from './detectlinks';
-
+import { replaceLinksInTextNodes2 } from './detectlinks';
+import { debouncedReplaceLinks } from './background';
 
 let port: chrome.runtime.Port | undefined;
 
@@ -33,7 +33,8 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 
   console.log(`[c]trying to replace links`);
-  replaceLinksInTextNodes(document.body);
+  debouncedReplaceLinks(); // Use the debounced function
+
 
   ensurePortConnection(port, portConfig).then((connectedPort) => {
     connectedPort.postMessage(data);
@@ -58,13 +59,27 @@ if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", replaceLinksInTextNodes(document.body));
 } else {
 */
-replaceLinksInTextNodes(document.body);
+debouncedReplaceLinks(); // Use the debounced function
+
+//replaceLinksInTextNodes2(document.body);
 //}
 // Set up a MutationObserver to handle dynamically loaded content
+/*
+const observer = new MutationObserver(mutations => {
+  mutations.forEach(mutation => {
+    // Process each mutation
+    if (mutation.addedNodes.length > 0) {
+      debouncedReplaceLinks(); // Ensure this processes new content
+    }
+  });
+});
+
+*/
 const observer = new MutationObserver(mutations => {
   mutations.forEach(mutation => {
     mutation.addedNodes.forEach(node => {
-      replaceLinksInTextNodes(node);
+   replaceLinksInTextNodes2(node);
+   //   debouncedReplaceLinks(); //  replaceLinksInTextNodes2(node);
     });
   });
 });

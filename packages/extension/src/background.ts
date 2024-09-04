@@ -15,7 +15,7 @@ import { AccountsStore } from '@polkadot/extension-base/stores';
 import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-import { replaceLinksInTextNodes } from './detectlinks';
+import { replaceLinksInTextNodes2 } from './detectlinks'; //replaceLinksInTextNodes, 
 
 
 
@@ -64,12 +64,38 @@ function getActiveTabs () {
   });
 }
 
+
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout | null = null;
+  console.log(`debounce called`);
+  return function(this: any, ...args: Parameters<T>) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  } as T;
+}
+
+export const debouncedReplaceLinks = debounce(() => {
+  console.log('Debounced replace links in node');
+  replaceLinksInTextNodes2(document.body);
+}, 2000);
+
+
+
+
+
+
 chrome.runtime.onMessage.addListener((message: { type: string }, _, sendResponse) => {
  
+
+
+
   
   console.log(`replace links in node`);
   // inject linker 
-  replaceLinksInTextNodes(document.body);
+  debouncedReplaceLinks();
+//  replaceLinksInTextNodes2(document.body);
 
 
   if (message.type === 'wakeup') {

@@ -9,12 +9,21 @@ import '@polkadot/extension-inject/crossenv';
 
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
+import { ksmcc3, polkadot, westend2 } from '@substrate/connect-known-chains';
+import { register } from '@substrate/light-client-extension-helpers/background';
+import { start } from '@substrate/light-client-extension-helpers/smoldot';
+
 import { handlers, withErrorLog } from '@polkadot/extension-base/background';
 import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+
+register({
+  getWellKnownChainSpecs: () => Promise.resolve([polkadot, ksmcc3, westend2]),
+  smoldotClient: start({ maxLogLevel: 4 })
+});
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));

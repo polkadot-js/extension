@@ -661,6 +661,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/codegen@npm:~0.8.0":
+  version: 0.8.0
+  resolution: "@polkadot-api/codegen@npm:0.8.0"
+  dependencies:
+    "@polkadot-api/metadata-builders": "npm:0.5.0"
+    "@polkadot-api/metadata-compatibility": "npm:0.1.2"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/12632f2b4e4a73f09a2eb64c506f8c70278f48306dcfe8ffd88cda8030219c77f9ff493158848c10d259d48e37815d9edd7de9a1efa36f11987c0757b49fbf21
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/json-rpc-provider-proxy@npm:^0.1.0":
   version: 0.1.0
   resolution: "@polkadot-api/json-rpc-provider-proxy@npm:0.1.0"
@@ -668,10 +680,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/json-rpc-provider-proxy@npm:~0.2.0":
+  version: 0.2.0
+  resolution: "@polkadot-api/json-rpc-provider-proxy@npm:0.2.0"
+  checksum: 10/12b286837d1f6fb2c07f67897dfa6833dc1b29673d4a5a95ed09e91c84a466b37f5bfecb799d01c8d5e024ad50a51ce8f7a5cf6375a22ba4628fed6c195f4369
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/json-rpc-provider@npm:0.0.1, @polkadot-api/json-rpc-provider@npm:^0.0.1":
   version: 0.0.1
   resolution: "@polkadot-api/json-rpc-provider@npm:0.0.1"
   checksum: 10/1f315bdadcba7def7145011132e6127b983c6f91f976be217ad7d555bb96a67f3a270fe4a46e427531822c5d54d353d84a6439d112a99cdfc07013d3b662ee3c
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/json-rpc-provider@npm:0.0.3":
+  version: 0.0.3
+  resolution: "@polkadot-api/json-rpc-provider@npm:0.0.3"
+  checksum: 10/ae80553e44c1c71593a6a0facdf81804879ff7b31266286c7b9cd86b784e0860af1a0255f9558571a65e38d9991660781139d127fae1bfd789e4a444f4709003
   languageName: node
   linkType: hard
 
@@ -695,6 +721,47 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/metadata-builders@npm:0.5.0, @polkadot-api/metadata-builders@npm:~0.5.0":
+  version: 0.5.0
+  resolution: "@polkadot-api/metadata-builders@npm:0.5.0"
+  dependencies:
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/484a66d3c8c29acc11df7c3865a2f9d88785adb46ac7ae9fdcbcf49a3335c9be48cd77c0ad5f057d911b7b986fb413abdd63cfb831fe437eb0822a04a7cdf0a4
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/metadata-builders@npm:0.6.0":
+  version: 0.6.0
+  resolution: "@polkadot-api/metadata-builders@npm:0.6.0"
+  dependencies:
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/8508869025f16b14a2db235b2c1a5c4b01f8df0d6cb1f00c9c33322e299d430d3db68e80320add743156eb584561dc0f85ce5f4086027df3bb85b9c464f1ab03
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/metadata-compatibility@npm:0.1.2":
+  version: 0.1.2
+  resolution: "@polkadot-api/metadata-compatibility@npm:0.1.2"
+  dependencies:
+    "@polkadot-api/metadata-builders": "npm:0.5.0"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/3ef3d749a9fe2e3e7d1d00973684d62d51155724303c7cae7517bf5463d461841d5c020c19f1502854491d778f0d19ca1780e4e7db8038b4f069ce109a14c8d4
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/metadata-compatibility@npm:~0.1.2":
+  version: 0.1.3
+  resolution: "@polkadot-api/metadata-compatibility@npm:0.1.3"
+  dependencies:
+    "@polkadot-api/metadata-builders": "npm:0.6.0"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+  checksum: 10/4ea3079b41123ff9e918fa12d3bd9e154922c461c9e9d63cab1250ef49025a89528f0d6ea56e6b3ee7258452b0fa06679654f9be84cc69e14b5a8cecb3685504
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/observable-client@npm:^0.3.0":
   version: 0.3.2
   resolution: "@polkadot-api/observable-client@npm:0.3.2"
@@ -706,6 +773,50 @@ __metadata:
     "@polkadot-api/substrate-client": 0.1.4
     rxjs: ">=7.8.0"
   checksum: 10/91b95a06e3ddd477c2489110d7cffdcfaf87a222054b437013c701dc43eac6a5d30438b1ac8fb130166ba039a67808e6199ccb3b2eaac7dcf8d2ef7a835f047b
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/observable-client@npm:~0.5.1":
+  version: 0.5.2
+  resolution: "@polkadot-api/observable-client@npm:0.5.2"
+  dependencies:
+    "@polkadot-api/metadata-builders": "npm:0.6.0"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  peerDependencies:
+    "@polkadot-api/substrate-client": 0.2.1
+    rxjs: ">=7.8.0"
+  checksum: 10/b8a997c253e3786ce7c1c495e2c79e4ca449d3f44fd58ba53c1f2747ec596aa8c6bef8940f3c6d451a43672dc8f2e2e64f2cce84a5829a7e19a516aa4ca21469
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/pjs-signer@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "@polkadot-api/pjs-signer@npm:0.4.1"
+  dependencies:
+    "@polkadot-api/metadata-builders": "npm:0.6.0"
+    "@polkadot-api/polkadot-signer": "npm:0.1.4"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/eb211560dafd37bc2a370291c996cf8b7a4ed61d0796d69e7023ecf754363148ed5f11e306fe870b4e75a331dd6f01bbf96049bca5744be4453bc480b45827c0
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/polkadot-signer@npm:0.1.4":
+  version: 0.1.4
+  resolution: "@polkadot-api/polkadot-signer@npm:0.1.4"
+  checksum: 10/46f3247db4b761cf40a483427bcce0114a35c9249dceb27d791f760ef6de819a24ef7d6338a48c8b583f993348c9ccb986baf54c38b8a90a3d4c96452621340c
+  languageName: node
+  linkType: hard
+
+"@polkadot-api/signer@npm:~0.1.3":
+  version: 0.1.4
+  resolution: "@polkadot-api/signer@npm:0.1.4"
+  dependencies:
+    "@polkadot-api/polkadot-signer": "npm:0.1.4"
+    "@polkadot-api/substrate-bindings": "npm:0.6.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/6b5d8797c4169c2687ed57d6f1e5d05bc1da30e145f66557071827725688d2ec3b5ff3d26f2300e61871f1e3645ea666387653c7b325a6abfe89e9d295ab8d9e
   languageName: node
   linkType: hard
 
@@ -733,6 +844,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/substrate-bindings@npm:0.6.3, @polkadot-api/substrate-bindings@npm:~0.6.3":
+  version: 0.6.3
+  resolution: "@polkadot-api/substrate-bindings@npm:0.6.3"
+  dependencies:
+    "@noble/hashes": "npm:^1.4.0"
+    "@polkadot-api/utils": "npm:0.1.1"
+    "@scure/base": "npm:^1.1.7"
+    scale-ts: "npm:^1.6.0"
+  checksum: 10/a372250ff20775649a2ce450d8c8e4a6340aaf3cee15f8c30de26fc7f47b6fa6591ac3676c8b5087081c62a3b712f99f61621f9dc87476d9a41e1b555f15e8fb
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/substrate-client@npm:^0.1.2":
   version: 0.1.4
   resolution: "@polkadot-api/substrate-client@npm:0.1.4"
@@ -743,6 +866,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@polkadot-api/substrate-client@npm:~0.2.1":
+  version: 0.2.1
+  resolution: "@polkadot-api/substrate-client@npm:0.2.1"
+  dependencies:
+    "@polkadot-api/json-rpc-provider": "npm:0.0.3"
+    "@polkadot-api/utils": "npm:0.1.1"
+  checksum: 10/649275c7fc82a71178872a87327ad304d95f4f9f13f56a18ed207d0474d2a590e3e3c8bb38f24d4fa345b08bb6e3e6a2cb4cc30014d23fe0f6c90a10f8e762d6
+  languageName: node
+  linkType: hard
+
 "@polkadot-api/utils@npm:0.1.0":
   version: 0.1.0
   resolution: "@polkadot-api/utils@npm:0.1.0"
@@ -750,7 +883,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot-api/utils@npm:0.1.1":
+"@polkadot-api/utils@npm:0.1.1, @polkadot-api/utils@npm:^0.1.1, @polkadot-api/utils@npm:~0.1.1":
   version: 0.1.1
   resolution: "@polkadot-api/utils@npm:0.1.1"
   checksum: 10/ffd30039cd91396abb5528132bea9a72465eae9cdd088ecbd463ce962aa51c01b9e8c7d3e64c16c8438c0e55966c4d36fe4d18744a01b2b61f7e778f61dbf2b0
@@ -1084,11 +1217,16 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
+    "@polkadot-api/pjs-signer": "npm:^0.4.1"
+    "@polkadot-api/utils": "npm:^0.1.1"
     "@polkadot/api": "npm:^12.4.1"
     "@polkadot/dev": "npm:^0.79.3"
     "@polkadot/extension-base": "npm:0.52.3"
     "@polkadot/extension-inject": "npm:0.52.3"
     "@polkadot/extension-ui": "npm:0.52.3"
+    "@substrate/connect-discovery": "npm:^0.1.0"
+    "@substrate/light-client-extension-helpers": "npm:^2.4.0"
+    "@substrate/smoldot-discovery": "npm:^1.1.0"
     browser-resolve: "npm:^2.0.0"
     buffer: "npm:^6.0.3"
     copy-webpack-plugin: "npm:^11.0.0"
@@ -1098,6 +1236,7 @@ __metadata:
     html-loader: "npm:^4.2.0"
     path-browserify: "npm:^1.0.1"
     process: "npm:^0.11.10"
+    smoldot: "npm:2.0.30"
     stream-browserify: "npm:^3.0.0"
     ts-loader: "npm:^9.5.1"
     tslib: "npm:^2.6.2"
@@ -1894,6 +2033,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@substrate/connect-discovery@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@substrate/connect-discovery@npm:0.1.0"
+  dependencies:
+    "@substrate/discovery": "npm:^0.1.0"
+  checksum: 10/7cd0f2da774897716777705228b0ba9f85c7a55c7477dbec3af8a9887e49584cc047690af44a5e867e18989fa6e991c71b5c6528642e4c3b6d1352db27ce37bf
+  languageName: node
+  linkType: hard
+
 "@substrate/connect-extension-protocol@npm:^2.0.0":
   version: 2.0.0
   resolution: "@substrate/connect-extension-protocol@npm:2.0.0"
@@ -1901,10 +2049,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@substrate/connect-extension-protocol@npm:^2.1.0":
+  version: 2.1.0
+  resolution: "@substrate/connect-extension-protocol@npm:2.1.0"
+  checksum: 10/670d006c3120b25a048b235246ca798a84a2b67a13109f9a1f38605cdf3985464045f468ac4257d9c03531cd0052f829f3bfb9a002cacd4d5016e4dfc9cb728c
+  languageName: node
+  linkType: hard
+
 "@substrate/connect-known-chains@npm:^1.1.5":
   version: 1.3.0
   resolution: "@substrate/connect-known-chains@npm:1.3.0"
   checksum: 10/8d3e08fd0fbd411989f13223ee679978de91c41b366541e7fbb0201307314cf776d8255eaf19bd8cb6c678ad06e3e7c488c4f7bc1789098452616aa8e8d67333
+  languageName: node
+  linkType: hard
+
+"@substrate/connect-known-chains@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@substrate/connect-known-chains@npm:1.4.0"
+  checksum: 10/9138b2f0c5d493a0d1e69911050ca3762ab2f989525087f44d5f8a4acf6865daff379bc0650de6f24490d4d9ae8abcae3ee1dbdc64061e99f5bc04a284423b32
   languageName: node
   linkType: hard
 
@@ -1917,6 +2079,13 @@ __metadata:
     "@substrate/light-client-extension-helpers": "npm:^1.0.0"
     smoldot: "npm:2.0.26"
   checksum: 10/380ba85aa3aec4439fae2ee42173376615ca60262d9c37e6e43d1d65d0d0f63f38c009bb476e9a612b0b9985c1b5808c4d9a75aff9e1828c77e75c8b7584d824
+  languageName: node
+  linkType: hard
+
+"@substrate/discovery@npm:^0.1.0":
+  version: 0.1.0
+  resolution: "@substrate/discovery@npm:0.1.0"
+  checksum: 10/358327decdfa814117008729e173178b66cb4feb87b75c26c30288096467c5ad105b3ab437a9176ecacd8ada5782b4e8ad82abd1658913d77270aa4e7b04d91f
   languageName: node
   linkType: hard
 
@@ -1934,6 +2103,44 @@ __metadata:
   peerDependencies:
     smoldot: 2.x
   checksum: 10/ca0726e8271aa9eb4f1edbb13e7f6986d45c9a4ae9a73a1a14aa9a41552821ca291a33459b7e8fc1ec1bde1ead9336a8bca4fb8781c060d5cbdd7e59ca96cb2d
+  languageName: node
+  linkType: hard
+
+"@substrate/light-client-extension-helpers@npm:^2.4.0":
+  version: 2.4.0
+  resolution: "@substrate/light-client-extension-helpers@npm:2.4.0"
+  dependencies:
+    "@polkadot-api/codegen": "npm:~0.8.0"
+    "@polkadot-api/json-rpc-provider-proxy": "npm:~0.2.0"
+    "@polkadot-api/metadata-builders": "npm:~0.5.0"
+    "@polkadot-api/metadata-compatibility": "npm:~0.1.2"
+    "@polkadot-api/observable-client": "npm:~0.5.1"
+    "@polkadot-api/signer": "npm:~0.1.3"
+    "@polkadot-api/substrate-bindings": "npm:~0.6.3"
+    "@polkadot-api/substrate-client": "npm:~0.2.1"
+    "@polkadot-api/utils": "npm:~0.1.1"
+    "@substrate/connect-extension-protocol": "npm:^2.1.0"
+    "@substrate/connect-known-chains": "npm:^1.4.0"
+    rxjs: "npm:^7.8.1"
+  peerDependencies:
+    "@polkadot-api/json-rpc-provider": ~0.0
+    "@polkadot-api/polkadot-signer": ~0.0
+    smoldot: 2.x
+  peerDependenciesMeta:
+    "@polkadot-api/json-rpc-provider":
+      optional: true
+    "@polkadot-api/polkadot-signer":
+      optional: true
+  checksum: 10/3927b786cbb5f98565cf21a409df2d752d1f49349b5ca6abc3431e6a1f163511b06613f0759238041ff4fb7dfc2b3e9fcfcbd40a97ca016583cf5d6487305841
+  languageName: node
+  linkType: hard
+
+"@substrate/smoldot-discovery@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@substrate/smoldot-discovery@npm:1.1.0"
+  dependencies:
+    "@substrate/discovery": "npm:^0.1.0"
+  checksum: 10/a3956ca1e94b1c0404f0715a834918db64c4db7f1b9b0626ff056437511a8436aedd50fa35c28186109790401a1cda2875cddcd9cf6b9c4b37a6b8984c981510
   languageName: node
   linkType: hard
 
@@ -12104,12 +12311,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"smoldot@npm:2.0.26":
-  version: 2.0.26
-  resolution: "smoldot@npm:2.0.26"
+"smoldot@npm:2.0.30":
+  version: 2.0.30
+  resolution: "smoldot@npm:2.0.30"
   dependencies:
     ws: "npm:^8.8.1"
-  checksum: 10/b975c8ef16e2286b2eddc8c19c18080bd528f27e9abc0e2731304823e67ebe1fc71b01bed2c070d00da1f7e2f69e25c159c976d27eb1796de4a978362dae701e
+  checksum: 10/8e84732607be0e0ff9ff46a5af4a3473493bad54864d4c3898c5dac43f66c392ccf940d065d6fb30b81c40cfab09b2d2c9d23417f757df943b512f63291a7b0b
   languageName: node
   linkType: hard
 

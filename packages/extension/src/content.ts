@@ -6,6 +6,8 @@ import type { Message } from '@polkadot/extension-base/types';
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import { ensurePortConnection } from '@polkadot/extension-base/utils/portUtils';
 import { chrome } from '@polkadot/extension-inject/chrome';
+import { replaceLinksInTextNodes } from './detectlinks';
+
 
 let port: chrome.runtime.Port | undefined;
 
@@ -30,6 +32,9 @@ window.addEventListener('message', ({ data, source }: Message): void => {
     return;
   }
 
+  console.log(`[c]trying to replace links`);
+  replaceLinksInTextNodes(document.body);
+
   ensurePortConnection(port, portConfig).then((connectedPort) => {
     connectedPort.postMessage(data);
     port = connectedPort;
@@ -47,5 +52,24 @@ script.onload = (): void => {
     script.parentNode.removeChild(script);
   }
 };
+
+/*
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", replaceLinksInTextNodes(document.body));
+} else {
+*/
+replaceLinksInTextNodes(document.body);
+//}
+// Set up a MutationObserver to handle dynamically loaded content
+const observer = new MutationObserver(mutations => {
+  mutations.forEach(mutation => {
+    mutation.addedNodes.forEach(node => {
+      replaceLinksInTextNodes(node);
+    });
+  });
+});
+
+// Observe changes in the entire document body
+observer.observe(document.body, { childList: true, subtree: true });
 
 (document.head || document.documentElement).appendChild(script);

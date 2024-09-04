@@ -3,7 +3,9 @@
 
 
 // THE LINK REGEX
-var regex_links = "polkadotlink\:\/\/[A-Z-a-z-0-9]{46}"
+const regexPattern2 = /polkadotlink:\/\/[A-Za-z0-9]{46}/g; // Note the 'g' flag for global matching
+
+//var regex_links = "polkadotlink\:\/\/[A-Z-a-z-0-9]{46}"
 
 // import { chrome } from '@polkadot/extension-inject/chrome';
 /// polkadotlink://QmPLVqWgEoNBjyTPBKw5prq6uuU1id2Wr39QWmpmyafEpF ipfs test
@@ -11,12 +13,18 @@ var regex_links = "polkadotlink\:\/\/[A-Z-a-z-0-9]{46}"
 
 
 export function replaceLinksInTextNodes(node: Node) {
+    console.log(`replaceLinksInTextNodes called`);
+    console.log(`node type is: `, node.nodeType);
+    console.log(`node object: `, node);
+    console.log(`node text object: `, node?.textContent);
   if (node.nodeType === Node.TEXT_NODE) {
     // Type assertion to ensure node is of type Text
     const textNode = node as Text;
     // Replace text in text nodes
-    textNode.textContent = textNode.textContent?.replace(regex_links, match => {
+    console.log(`replace strings `);
+    textNode.textContent = textNode.textContent?.replace(regexPattern2, match => {
       // Process each matched link
+      console.log(`Found match: ${match}`);
       return get_link_data(match);
     }) ?? '';
   } else if (node.nodeType === Node.ELEMENT_NODE) {

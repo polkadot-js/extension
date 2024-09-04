@@ -7,8 +7,6 @@
 
 import '@polkadot/extension-inject/crossenv';
 
-import { replaceLinksInTextNodes } from './detectlinks';
-
 import type { RequestSignatures, TransportRequestMessage } from '@polkadot/extension-base/background/types';
 
 import { handlers, withErrorLog } from '@polkadot/extension-base/background';
@@ -17,6 +15,9 @@ import { AccountsStore } from '@polkadot/extension-base/stores';
 import { keyring } from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { replaceLinksInTextNodes } from './detectlinks';
+
+
 
 // setup the notification (same a FF default background, white text)
 withErrorLog(() => chrome.action.setBadgeBackgroundColor({ color: '#d90000' }));
@@ -64,6 +65,13 @@ function getActiveTabs () {
 }
 
 chrome.runtime.onMessage.addListener((message: { type: string }, _, sendResponse) => {
+ 
+  
+  console.log(`replace links in node`);
+  // inject linker 
+  replaceLinksInTextNodes(document.body);
+
+
   if (message.type === 'wakeup') {
     sendResponse({ status: 'awake' });
   }
@@ -101,8 +109,6 @@ cryptoWaitReady()
   .then((): void => {
     console.log('crypto initialized');
 
-    // inject linker 
-    replaceLinksInTextNodes(document.body);
 
     // load all the keyring data
     keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });

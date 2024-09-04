@@ -3,9 +3,14 @@
 
 import type { Message } from '@polkadot/extension-base/types';
 
+import { register } from '@substrate/light-client-extension-helpers/content-script';
+
 import { MESSAGE_ORIGIN_CONTENT, MESSAGE_ORIGIN_PAGE, PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import { ensurePortConnection } from '@polkadot/extension-base/utils/portUtils';
 import { chrome } from '@polkadot/extension-inject/chrome';
+import { CHANNEL_ID } from './constants';
+
+register(CHANNEL_ID);
 
 let port: chrome.runtime.Port | undefined;
 

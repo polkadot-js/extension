@@ -1,5 +1,5 @@
      634	Jaco                          	2024 (#1302)
-      92	Thibaut Sardan                	Fix: forget account for legacy account without authorizedAccounts (#1381)
+      93	Thibaut Sardan                	Ability to Reject an authentication request instead of ignoring it (#1453)
       56	Tarik Gul                     	0.52.3 (#1452)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)

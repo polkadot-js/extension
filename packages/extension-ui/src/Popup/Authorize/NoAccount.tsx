@@ -6,7 +6,7 @@ import React, { useCallback } from 'react';
 import { Trans } from 'react-i18next';
 
 import { Button, Warning } from '../../components/index.js';
-import { deleteAuthRequest } from '../../messaging.js';
+import { rejectAuthRequest } from '../../messaging.js';
 import { styled } from '../../styled.js';
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 
 function NoAccount ({ authId, className }: Props): React.ReactElement<Props> {
   const _onClick = useCallback(() => {
-    deleteAuthRequest(authId).catch(console.error);
+    rejectAuthRequest(authId).catch(console.error);
   }, [authId]
   );
 

@@ -7,7 +7,7 @@ import React, { useCallback, useContext, useEffect } from 'react';
 
 import { AccountContext, ActionBar, ActionContext, Button, Link } from '../../components/index.js';
 import { useTranslation } from '../../hooks/index.js';
-import { approveAuthRequest, deleteAuthRequest } from '../../messaging.js';
+import { approveAuthRequest, rejectAuthRequest } from '../../messaging.js';
 import { AccountSelection } from '../../partials/index.js';
 import { styled } from '../../styled.js';
 import NoAccount from './NoAccount.js';
@@ -44,7 +44,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
 
   const _onClose = useCallback(
     (): void => {
-      deleteAuthRequest(authId)
+      rejectAuthRequest(authId)
         .then(() => onAction())
         .catch((error: Error) => console.error(error));
     },
@@ -77,7 +77,7 @@ function Request ({ authId, className, isFirst, request: { origin }, url }: Prop
           isDanger
           onClick={_onClose}
         >
-          {t('Ask again later')}
+          {t('Reject')}
         </Link>
       </ActionBar>
     </div>

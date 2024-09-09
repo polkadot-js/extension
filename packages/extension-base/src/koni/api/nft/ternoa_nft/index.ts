@@ -1,7 +1,10 @@
-import { BaseNftApi } from "../nft";
+// Copyright 2019-2022 @subwallet/extension-koni authors & contributors
+// SPDX-License-Identifier: Apache-2.0
+
+import { BaseNftApi, HandleNftParams } from "../nft";
 import { TERNOA_ALPHANET_CLIENT_NFT, TERNOA_MAINNET_CLIENT_NFT } from "../config";
 import { _SubstrateApi } from "@subwallet/extension-base/services/chain-service/types";
-import { HandleNftParams } from "../nft";
+
 interface NftMetadata {
     nftId: string;
     owner: string;

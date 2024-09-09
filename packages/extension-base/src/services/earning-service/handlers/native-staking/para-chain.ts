@@ -555,7 +555,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const binaryAmount = new BN(amount);
     const selectedCollatorInfo = selectedValidators[0];
 
-    // eslint-disable-next-line @typescript-eslint/require-await0
+    // eslint-disable-next-line @typescript-eslint/require-await
     const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
       const tokenSlug = this.nativeToken.slug;
       // const feeInfo = await extrinsic.paymentInfo(address);
@@ -619,7 +619,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const { selectedUnstaking } = params;
     const chainApi = await this.substrateApi.isReady;
 
-    return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress)
+    return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress);
   }
 
   async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {

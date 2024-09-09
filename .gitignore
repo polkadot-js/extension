@@ -1,4 +1,5 @@
 build/
+build-firefox/
 build-cjs/
 coverage/
 node_modules/

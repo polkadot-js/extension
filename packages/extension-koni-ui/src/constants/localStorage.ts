@@ -30,6 +30,7 @@ export const CONFIRM_SWAP_TERM = 'swap.term-and-service';
 export const CONFIRM_TERM_SEED_PHRASE = 'seed-phrase.term-and-condition';
 export const CLAIM_DAPP_STAKING_REWARDS = 'general.claim-dapp-staking-rewards';
 export const EARNING_MIGRATION_ANNOUNCEMENT = 'announcement.earning-migration';
+export const EARNING_WARNING_ANNOUNCEMENT = 'announcement.earning-position';
 export const TIME_OUT_RECORD = 'general.time-out-record';
 export const APP_INSTRUCTION_DATA = 'static.instruction-data';
 export const SHOW_APP_POPUP = 'static.show-app-popup';

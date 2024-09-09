@@ -105,7 +105,6 @@ function Component ({ className, request, type }: Props) {
         }
       </div>
       <EvmSignArea
-        errors={errors}
         id={id}
         payload={request}
         type={type}

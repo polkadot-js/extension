@@ -9,7 +9,7 @@ import { isSubscriptionRunning, unsubscribe } from '@subwallet/extension-base/ba
 import { AccountRefMap, AddTokenRequestExternal, AmountData, APIItemState, ApiMap, AuthRequestV2, BasicTxErrorType, ChainStakingMetadata, ChainType, ConfirmationsQueue, CrowdloanItem, CrowdloanJson, CurrencyType, CurrentAccountInfo, EvmProviderErrorType, EvmSendTransactionParams, EvmSendTransactionRequest, EvmSignatureRequest, ExternalRequestPromise, ExternalRequestPromiseStatus, ExtrinsicType, MantaAuthorizationContext, MantaPayConfig, MantaPaySyncState, NftCollection, NftItem, NftJson, NominatorMetadata, RequestAccountExportPrivateKey, RequestCheckPublicAndSecretKey, RequestConfirmationComplete, RequestCrowdloanContributions, RequestSettingsType, ResponseAccountExportPrivateKey, ResponseCheckPublicAndSecretKey, ServiceInfo, SingleModeJson, StakingItem, StakingJson, StakingRewardItem, StakingRewardJson, StakingType, UiSettings } from '@subwallet/extension-base/background/KoniTypes';
 import { AccountJson, RequestAuthorizeTab, RequestRpcSend, RequestRpcSubscribe, RequestRpcUnsubscribe, RequestSign, ResponseRpcListProviders, ResponseSigning } from '@subwallet/extension-base/background/types';
 import { ALL_ACCOUNT_KEY, ALL_GENESIS_HASH, MANTA_PAY_BALANCE_INTERVAL, REMIND_EXPORT_ACCOUNT } from '@subwallet/extension-base/constants';
-import { generateValidationProcess, PayloadValidated, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
+import { convertErrorFormat, generateValidationProcess, PayloadValidated, ValidateStepFunction, validationAuthMiddleware, validationAuthWCMiddleware, validationConnectMiddleware, validationEvmDataTransactionMiddleware, validationEvmSignMessageMiddleware } from '@subwallet/extension-base/core/logic-validation';
 import { BalanceService } from '@subwallet/extension-base/services/balance-service';
 import { ServiceStatus } from '@subwallet/extension-base/services/base/types';
 import BuyService from '@subwallet/extension-base/services/buy-service';
@@ -42,7 +42,7 @@ import WalletConnectService from '@subwallet/extension-base/services/wallet-conn
 import { SWStorage } from '@subwallet/extension-base/storage';
 import AccountRefStore from '@subwallet/extension-base/stores/AccountRef';
 import { BalanceItem, BalanceMap, EvmFeeInfo, StorageDataInterface } from '@subwallet/extension-base/types';
-import { isAccountAll, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
+import { isAccountAll, isManifestV3, stripUrl, targetIsWeb } from '@subwallet/extension-base/utils';
 import { createPromiseHandler } from '@subwallet/extension-base/utils/promise';
 import { MetadataDef, ProviderMeta } from '@subwallet/extension-inject/types';
 import { decodePair } from '@subwallet/keyring/pair/decode';
@@ -719,43 +719,6 @@ export default class KoniState {
     }
   }
 
-  public async switchNetworkAccount (id: string, url: string, networkKey: string, changeAddress?: string): Promise<boolean> {
-    const chainInfo = this.chainService.getChainInfoByKey(networkKey);
-    const chainState = this.chainService.getChainStateByKey(networkKey);
-    const { address, currentGenesisHash } = this.keyringService.currentAccount;
-
-    return this.requestService.addConfirmation(id, url, 'switchNetworkRequest', {
-      networkKey,
-      address: changeAddress
-    }, { address: changeAddress })
-      .then(({ isApproved }) => {
-        if (isApproved) {
-          const useAddress = changeAddress || address;
-
-          if (chainInfo && !_isChainEnabled(chainState)) {
-            this.enableChain(networkKey).catch(console.error);
-          }
-
-          if (useAddress !== ALL_ACCOUNT_KEY) {
-            const pair = keyring.getPair(useAddress);
-
-            assert(pair, t('Unable to find account'));
-
-            keyring.saveAccountMeta(pair, { ...pair.meta, genesisHash: _getSubstrateGenesisHash(chainInfo) });
-          }
-
-          if (address !== changeAddress || _getSubstrateGenesisHash(chainInfo) !== currentGenesisHash || isApproved) {
-            this.setCurrentAccount({
-              address: useAddress,
-              currentGenesisHash: _getSubstrateGenesisHash(chainInfo)
-            });
-          }
-        }
-
-        return isApproved;
-      });
-  }
-
   public async addNetworkConfirm (id: string, url: string, networkData: _NetworkUpsertParams) {
     return this.requestService.addConfirmation(id, url, 'addNetworkRequest', networkData)
       .then(async ({ isApproved }) => {
@@ -1365,9 +1328,10 @@ export default class KoniState {
       ];
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
+    const errorsFormated = convertErrorFormat(result.errors);
     const payloadAfterValidated: EvmSignatureRequest = {
       ...result.payloadAfterValidated as EvmSignatureRequest,
-      errors: result.errors,
+      errors: errorsFormated,
       id
     };
 
@@ -1438,10 +1402,11 @@ export default class KoniState {
 
     const result = await generateValidationProcess(this, url, payloadValidation, validationSteps, topic);
     const { confirmationType, errors, networkKey: networkKey_ } = result;
+    const errorsFormated = convertErrorFormat(errors);
 
-    if (errors && errors.length > 0 && confirmationType) {
+    if (errorsFormated && errorsFormated.length > 0 && confirmationType) {
       if (ERROR_CONFIRMATION_TYPE.includes(confirmationType)) {
-        return this.requestService.addConfirmation(id, url, confirmationType, result, {})
+        return this.requestService.addConfirmation(id, url, confirmationType, { ...result, errors: errorsFormated }, {})
           .then(() => {
             throw new EvmProviderError(EvmProviderErrorType.USER_REJECTED_REQUEST);
           });
@@ -1453,7 +1418,7 @@ export default class KoniState {
 
     const requestPayload: EvmSendTransactionRequest = {
       ...transactionValidated,
-      errors: errors as TransactionError[]
+      errors: errorsFormated
     };
 
     const eType = transactionValidated.value ? ExtrinsicType.TRANSFER_BALANCE : ExtrinsicType.EVM_EXECUTE;
@@ -1519,12 +1484,16 @@ export default class KoniState {
     const migrationStatus = await SWStorage.instance.getItem('mv3_migration');
 
     if (!migrationStatus || migrationStatus !== 'done') {
-      // Open migration tab
-      const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
+      if (isManifestV3) {
+        // Open migration tab
+        const url = `${chrome.runtime.getURL('index.html')}#/mv3-migration`;
 
-      await openPopup(url);
+        await openPopup(url);
 
-      // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+        // migrateMV3LocalStorage will be called when user open migration tab with data from localStorage on frontend
+      } else {
+        this.migrateMV3LocalStorage(JSON.stringify(self.localStorage)).catch(console.error);
+      }
     }
   }
 

@@ -469,14 +469,16 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const apiProps = await this.substrateApi.isReady;
     const allCollators: ValidatorInfo[] = [];
 
-    const [_allCollators, _collatorCommission] = await Promise.all([
+    const [_allCollators, _collatorCommission, _selectedCandidates] = await Promise.all([
       apiProps.api.query.parachainStaking.candidateInfo.entries(),
-      apiProps.api.query.parachainStaking.collatorCommission()
+      apiProps.api.query.parachainStaking.collatorCommission(),
+      apiProps.api.query.parachainStaking.selectedCandidates()
     ]);
 
     const maxDelegationPerCollator = apiProps.api.consts.parachainStaking.maxTopDelegationsPerCandidate.toString();
     const rawCollatorCommission = _collatorCommission.toHuman() as string;
     const collatorCommission = parseFloat(rawCollatorCommission.split('%')[0]);
+    const selectedCollators = _selectedCandidates.toPrimitive() as string[];
 
     for (const collator of _allCollators) {
       const _collatorAddress = collator[0].toHuman() as string[];
@@ -488,7 +490,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       const bnOtherStake = bnTotalStake.sub(bnOwnStake);
       const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
       const maxNominatorRewarded = parseInt(maxDelegationPerCollator);
-
+      if (selectedCollators.includes(collatorAddress)) {
       allCollators.push({
         commission: 0,
         expectedReturn: 0,
@@ -503,7 +505,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
         chain: this.chain,
         isCrowded: collatorInfo.delegationCount ? collatorInfo.delegationCount >= maxNominatorRewarded : false
       });
-    }
+    }}
 
     const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 
@@ -553,7 +555,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const binaryAmount = new BN(amount);
     const selectedCollatorInfo = selectedValidators[0];
 
-    // eslint-disable-next-line @typescript-eslint/require-await
+    // eslint-disable-next-line @typescript-eslint/require-await0
     const compoundResult = async (extrinsic: SubmittableExtrinsic<'promise'>): Promise<[TransactionData, YieldTokenBaseInfo]> => {
       const tokenSlug = this.nativeToken.slug;
       // const feeInfo = await extrinsic.paymentInfo(address);
@@ -617,7 +619,7 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
     const { selectedUnstaking } = params;
     const chainApi = await this.substrateApi.isReady;
 
-    return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress);
+    return chainApi.api.tx.parachainStaking.cancelDelegationRequest(selectedUnstaking.validatorAddress)
   }
 
   async handleYieldWithdraw (address: string, unstakingInfo: UnstakingInfo): Promise<TransactionData> {

@@ -73,6 +73,11 @@ export const IPFS2_RMRK = 'https://ipfs2.rmrk.link/ipfs/'; // ????
 export const IPFS_ETH_ARAGON = 'https://ipfs.eth.aragon.network/ipfs/'; // 400
 export const SUBWALLET_IPFS = 'https://ipfs.subwallet.app/ipfs/'; // ???
 
+// XOrigin
+export const TERNOA_MAINNET_CLIENT_NFT = 'https://indexer-mainnet.ternoa.dev';
+export const TERNOA_ALPHANET_CLIENT_NFT = 'https://indexer-alphanet.ternoa.dev';
+
+
 export enum SUPPORTED_NFT_NETWORKS {
   karura = 'karura',
   acala = 'acala',

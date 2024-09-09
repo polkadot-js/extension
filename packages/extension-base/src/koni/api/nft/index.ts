@@ -16,6 +16,7 @@ import { UniqueNftApi } from '@subwallet/extension-base/koni/api/nft/unique_netw
 // import UniqueNftApi from '@subwallet/extension-base/koni/api/nft/unique_nft';
 import { VaraNftApi } from '@subwallet/extension-base/koni/api/nft/vara_nft';
 import { WasmNftApi } from '@subwallet/extension-base/koni/api/nft/wasm_nft';
+import { TernoaNftApi } from '@subwallet/extension-base/koni/api/nft/ternoa_nft';
 import { _NFT_CHAIN_GROUP } from '@subwallet/extension-base/services/chain-service/constants';
 import { _EvmApi, _SubstrateApi } from '@subwallet/extension-base/services/chain-service/types';
 import { _isChainSupportEvmNft, _isChainSupportNativeNft, _isChainSupportWasmNft, _isSupportOrdinal } from '@subwallet/extension-base/services/chain-service/utils';
@@ -46,8 +47,9 @@ function createSubstrateNftApi (chain: string, substrateApi: _SubstrateApi | nul
     return [new VaraNftApi(chain, substrateAddresses)];
   } else if (_NFT_CHAIN_GROUP.avail.includes(chain)) {
     return [new BlobInscriptionApi(chain, substrateAddresses)];
+  }  else if (_NFT_CHAIN_GROUP.ternoa.includes(chain)) {
+    return [new TernoaNftApi(chain, substrateAddresses)];
   }
-
   return null;
 }
 

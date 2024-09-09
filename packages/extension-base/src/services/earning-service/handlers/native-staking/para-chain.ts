@@ -490,22 +490,24 @@ export default class ParaNativeStakingPoolHandler extends BaseParaNativeStakingP
       const bnOtherStake = bnTotalStake.sub(bnOwnStake);
       const bnMinBond = new BN(collatorInfo.lowestTopDelegationAmount);
       const maxNominatorRewarded = parseInt(maxDelegationPerCollator);
+
       if (selectedCollators.includes(collatorAddress)) {
-      allCollators.push({
-        commission: 0,
-        expectedReturn: 0,
-        address: collatorAddress,
-        totalStake: bnTotalStake.toString(),
-        ownStake: bnOwnStake.toString(),
-        otherStake: bnOtherStake.toString(),
-        nominatorCount: collatorInfo.delegationCount,
-        blocked: false,
-        isVerified: false,
-        minBond: bnMinBond.toString(),
-        chain: this.chain,
-        isCrowded: collatorInfo.delegationCount ? collatorInfo.delegationCount >= maxNominatorRewarded : false
-      });
-    }}
+        allCollators.push({
+          commission: 0,
+          expectedReturn: 0,
+          address: collatorAddress,
+          totalStake: bnTotalStake.toString(),
+          ownStake: bnOwnStake.toString(),
+          otherStake: bnOtherStake.toString(),
+          nominatorCount: collatorInfo.delegationCount,
+          blocked: false,
+          isVerified: false,
+          minBond: bnMinBond.toString(),
+          chain: this.chain,
+          isCrowded: collatorInfo.delegationCount ? collatorInfo.delegationCount >= maxNominatorRewarded : false
+        });
+      }
+    }
 
     const extraInfoMap: Record<string, CollatorExtraInfo> = {};
 

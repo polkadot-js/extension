@@ -14,7 +14,7 @@ module.exports = {
   parserOptions: {
     ...base.parserOptions,
     project: [
-      './subwallet/SubWallet-Extension/tsconfig.eslint.json'
+      './tsconfig.eslint.json'
     ]
   },
   rules: {

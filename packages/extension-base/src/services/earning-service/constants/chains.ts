@@ -14,7 +14,8 @@ export const _STAKING_CHAIN_GROUP = {
   liquidStaking: ['bifrost_dot', 'acala', 'parallel', 'moonbeam'],
   lending: ['interlay'],
   krest_network: ['krest_network'],
-  manta: ['manta_network']
+  manta: ['manta_network'],
+  bittensor: ['bittensor']
 };
 
 export const MaxEraRewardPointsEras = 14;

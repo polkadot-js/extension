@@ -82,6 +82,10 @@ export default class EarningService implements StoppableServiceInterface, Persis
         handlers.push(new AmplitudeNativeStakingPoolHandler(this.state, chain));
       }
 
+      if (_STAKING_CHAIN_GROUP.bittensor.includes(chain)) {
+        handlers.push(new TaoNativeStakingPoolHandler(this.state, chain));
+      }
+
       if (_STAKING_CHAIN_GROUP.nominationPool.includes(chain)) {
         handlers.push(new NominationPoolHandler(this.state, chain));
       }

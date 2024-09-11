@@ -84,5 +84,5 @@ export async function getPoolingStakingRewardData (addresses: string[], networkM
     return;
   }
 
-  await getNominationPoolReward(addresses, networkMap, dotSamaApiMap, callback);
+  await getNominationPoolReward(addresses, networkMap, dotSamaApiMap, callback);  
 }

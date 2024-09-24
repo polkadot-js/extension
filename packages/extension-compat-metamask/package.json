@@ -23,8 +23,8 @@
   "dependencies": {
     "@metamask/detect-provider": "^2.0.0",
     "@polkadot/extension-inject": "0.52.4-0-x",
-    "@polkadot/types": "^12.4.1",
-    "@polkadot/util": "^13.0.2",
+    "@polkadot/types": "^13.2.1",
+    "@polkadot/util": "^13.1.1",
     "tslib": "^2.6.2",
     "web3": "^4.7.0"
   },

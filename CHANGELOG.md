@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.53.1 Sep 24, 2024
+
+Contributed:
+
+- Ability to Reject an authentication request instead of ignoring it ([#1453](https://github.com/polkadot-js/extension/pull/1453)) (Thanks to https://github.com/Tbaut)
+
+Changes:
+
+- Upgrade polkadot-js deps ([#1462](https://github.com/polkadot-js/extension/pull/1462))
+    - This contains breaking changes in the API that was released in [13.0.1](https://github.com/polkadot-js/api/releases/tag/v13.0.1). The release changed the way AssetId is returned from `toPayload` in the Signer interface. `Option<TAssetConversion>` is now returned as a SCALE encoded hex.
+
+
 ## 0.52.3 Aug 19, 2024
 
 Changes:

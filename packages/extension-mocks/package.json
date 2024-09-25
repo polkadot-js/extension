@@ -15,7 +15,7 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.52.4-1-x",
+  "version": "0.53.1",
   "main": "index.js",
   "dependencies": {
     "sinon-chrome": "^3.0.1",

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.54.1 Oct 14, 2024
+
+Changes:
+
+- Update polkadot-js deps ([#1466](https://github.com/polkadot-js/extension/pull/1466))
+    - Polkadot-js api -> 14.0.1
+        - NOTE: This adds support for Extrinsic V5.
+    - Polkadot-js phishing -> 0.23.7
+- Bump yarn to 4.5.0 ([#1467](https://github.com/polkadot-js/extension/pull/1467))
+
+
 ## 0.53.1 Sep 24, 2024
 
 Contributed:

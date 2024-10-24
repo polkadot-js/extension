@@ -1,5 +1,19 @@
 # CHANGELOG
 
+## 0.55.1 Oct 24, 2024
+
+Changes:
+
+- Bump dev to 0.81.2 ([#1469](https://github.com/polkadot-js/extension/pull/1469))
+    - Export CJS and ESM correctly
+- Bump all polkadot deps ([#1470](https://github.com/polkadot-js/extension/pull/1470))
+    - polkadot/api -> 14.1.1
+    - polkadot/common -> 13.2.1
+    - polkadot/ui -> 3.11.1
+    - polkadot/phishing -> 0.24.1
+- Bump yarn to 4.5.1 ([#1471](https://github.com/polkadot-js/extension/pull/1471))
+
+
 ## 0.54.1 Oct 14, 2024
 
 Changes:

@@ -851,34 +851,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/dev-test@npm:^0.79.3":
-  version: 0.79.3
-  resolution: "@polkadot/dev-test@npm:0.79.3"
+"@polkadot/dev-test@npm:^0.81.2":
+  version: 0.81.2
+  resolution: "@polkadot/dev-test@npm:0.81.2"
   dependencies:
     jsdom: "npm:^24.0.0"
-    tslib: "npm:^2.6.2"
-  checksum: 10/30c3145c174e09416d713bcd5eb93e13c6f90f71f2d75defbdc11aa09d87d88aad222ef8ca33e8372317692aa51eb976fbf60c9ccf0901f6db0275a550915c69
+    tslib: "npm:^2.7.0"
+  checksum: 10/1028c3b1804567128f1cc796df2285827bb8d9d54afee8c81f28821d2205e7f4522bd9659eb2e7645a080568d43b394279db12b1c2debdc447d5567317b7c2fc
   languageName: node
   linkType: hard
 
-"@polkadot/dev-ts@npm:^0.79.3":
-  version: 0.79.3
-  resolution: "@polkadot/dev-ts@npm:0.79.3"
+"@polkadot/dev-ts@npm:^0.81.2":
+  version: 0.81.2
+  resolution: "@polkadot/dev-ts@npm:0.81.2"
   dependencies:
     json5: "npm:^2.2.3"
-    tslib: "npm:^2.6.2"
-    typescript: "npm:^5.3.3"
-  checksum: 10/097d579647abda70fe71c98c5c9aa79488a25af27a5d17c754dc70aad33770a49637a1d297aa0d50863b6db2e606dffa005c4336886b0030c73eef34180c6863
+    tslib: "npm:^2.7.0"
+    typescript: "npm:^5.5.4"
+  checksum: 10/cb25e9523cbad5029f7e149135aa003286d9c907677902e6a1ffe4a905d6c31f6c88a647b3be0e51b09e62528fca2a3121f12a748942ecd6eccefd8da1eb3369
   languageName: node
   linkType: hard
 
-"@polkadot/dev@npm:^0.79.3":
-  version: 0.79.3
-  resolution: "@polkadot/dev@npm:0.79.3"
+"@polkadot/dev@npm:^0.81.2":
+  version: 0.81.2
+  resolution: "@polkadot/dev@npm:0.81.2"
   dependencies:
     "@eslint/js": "npm:^8.56.0"
-    "@polkadot/dev-test": "npm:^0.79.3"
-    "@polkadot/dev-ts": "npm:^0.79.3"
+    "@polkadot/dev-test": "npm:^0.81.2"
+    "@polkadot/dev-ts": "npm:^0.81.2"
     "@rollup/plugin-alias": "npm:^5.1.0"
     "@rollup/plugin-commonjs": "npm:^25.0.7"
     "@rollup/plugin-dynamic-import-vars": "npm:^2.1.2"
@@ -911,8 +911,8 @@ __metadata:
     madge: "npm:^6.1.0"
     rollup: "npm:^4.9.6"
     rollup-plugin-cleanup: "npm:^3.2.1"
-    tslib: "npm:^2.6.2"
-    typescript: "npm:^5.3.3"
+    tslib: "npm:^2.7.0"
+    typescript: "npm:^5.5.4"
     webpack: "npm:^5.89.0"
     webpack-cli: "npm:^5.1.4"
     webpack-dev-server: "npm:^4.15.1"
@@ -943,7 +943,7 @@ __metadata:
     polkadot-exec-rollup: scripts/polkadot-exec-rollup.mjs
     polkadot-exec-tsc: scripts/polkadot-exec-tsc.mjs
     polkadot-exec-webpack: scripts/polkadot-exec-webpack.mjs
-  checksum: 10/fa7b6834ce28e16f2287d26cad481e43ec047d015ba38ffb3b2953326e087191a7393d1d55cb5973dd3803bc07258312946dec98a2cf0956c657283a7c49341d
+  checksum: 10/304d2e1e5a5669b0888026fd0fb3e82dba75e1a85c9c40481d0832b072bac9ba6f9e9755db4bdce4c2aa10c631ef7f4fba84114a1b6490d25aa5b4f6dff65299
   languageName: node
   linkType: hard
 
@@ -952,7 +952,7 @@ __metadata:
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@polkadot/api": "npm:^14.0.1"
-    "@polkadot/dev-test": "npm:^0.79.3"
+    "@polkadot/dev-test": "npm:^0.81.2"
     "@polkadot/extension-chains": "npm:0.54.1"
     "@polkadot/extension-dapp": "npm:0.54.1"
     "@polkadot/extension-inject": "npm:0.54.1"
@@ -1007,7 +1007,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
-    "@polkadot/dev-test": "npm:^0.79.3"
+    "@polkadot/dev-test": "npm:^0.81.2"
     "@polkadot/extension-inject": "npm:0.54.1"
     "@polkadot/util": "npm:^13.1.1"
     "@polkadot/util-crypto": "npm:^13.1.1"
@@ -1024,7 +1024,7 @@ __metadata:
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
     "@polkadot/api": "npm:^14.0.1"
-    "@polkadot/dev-test": "npm:^0.79.3"
+    "@polkadot/dev-test": "npm:^0.81.2"
     "@polkadot/rpc-provider": "npm:^14.0.1"
     "@polkadot/types": "npm:^14.0.1"
     "@polkadot/util": "npm:^13.1.1"
@@ -1060,7 +1060,7 @@ __metadata:
     "@paraspell/xcm-analyser": "npm:^1.3.1"
     "@polkadot-api/merkleize-metadata": "npm:^1.1.7"
     "@polkadot/api": "npm:^14.0.1"
-    "@polkadot/dev-test": "npm:^0.79.3"
+    "@polkadot/dev-test": "npm:^0.81.2"
     "@polkadot/extension-base": "npm:0.54.1"
     "@polkadot/extension-chains": "npm:0.54.1"
     "@polkadot/extension-dapp": "npm:0.54.1"
@@ -1108,7 +1108,7 @@ __metadata:
   resolution: "@polkadot/extension@workspace:packages/extension"
   dependencies:
     "@polkadot/api": "npm:^14.0.1"
-    "@polkadot/dev": "npm:^0.79.3"
+    "@polkadot/dev": "npm:^0.81.2"
     "@polkadot/extension-base": "npm:0.54.1"
     "@polkadot/extension-inject": "npm:0.54.1"
     "@polkadot/extension-ui": "npm:0.54.1"
@@ -11639,7 +11639,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "root-workspace-0b6124@workspace:."
   dependencies:
-    "@polkadot/dev": "npm:^0.79.3"
+    "@polkadot/dev": "npm:^0.81.2"
     "@types/node": "npm:^20.10.5"
     i18next-scanner: "npm:^4.4.0"
     sinon-chrome: "npm:^3.0.1"

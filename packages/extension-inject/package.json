@@ -27,7 +27,7 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.79.3",
+    "@polkadot/dev-test": "^0.81.2",
     "@types/chrome": "^0.0.254",
     "@types/firefox-webext-browser": "^111.0.5"
   },

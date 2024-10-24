@@ -53,7 +53,7 @@
     "tslib": "^2.6.2"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.79.3",
+    "@polkadot/dev-test": "^0.81.2",
     "@polkadot/extension-mocks": "0.54.1",
     "@types/enzyme": "^3.10.18",
     "@types/enzyme-adapter-react-16": "^1.0.9",

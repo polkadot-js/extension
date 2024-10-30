@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.56.1 Oct 30, 2024
+
+Changes:
+
+- Bump all polkadot deps ([#1473](https://github.com/polkadot-js/extension/pull/1473))
+    - polkadot/api -> 14.2.1
+    - polkadot/common -> 13.2.2
+        - Gives support for Frequency, and Polimec
+    - polkadot/ui -> 3.11.2
+    - polkadot/phishing -> 0.24.2
+
+
 ## 0.55.1 Oct 24, 2024
 
 Changes:

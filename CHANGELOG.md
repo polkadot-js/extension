@@ -1,5 +1,18 @@
 # CHANGELOG
 
+## 0.56.2 Nov 12, 2024
+
+Changes:
+
+- Bump dev to 0.82.1 w/ tslib ([#1476](https://github.com/polkadot-js/extension/pull/1476))
+- Bump polkadot-js deps ([#1477](https://github.com/polkadot-js/extension/pull/1477))
+    - polkadot/api -> 14.3.1
+    - polkadot/common -> 13.2.3
+    - polkadot/phishing -> 0.24.3
+    - polkadot/ui -> 3.11.3
+- Bump typescript to 5.5.4 ([#1478](https://github.com/polkadot-js/extension/pull/1478))
+
+
 ## 0.56.1 Oct 30, 2024
 
 Changes:

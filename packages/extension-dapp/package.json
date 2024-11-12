@@ -24,10 +24,10 @@
     "@polkadot/extension-inject": "0.56.1",
     "@polkadot/util": "^13.2.2",
     "@polkadot/util-crypto": "^13.2.2",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.81.2"
+    "@polkadot/dev-test": "^0.82.1"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

@@ -21,10 +21,10 @@
     "@polkadot/extension-base": "0.56.1",
     "@polkadot/extension-inject": "0.56.1",
     "@polkadot/extension-ui": "0.56.1",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.81.2",
+    "@polkadot/dev": "^0.82.1",
     "browser-resolve": "^2.0.0",
     "buffer": "^6.0.3",
     "copy-webpack-plugin": "^11.0.0",

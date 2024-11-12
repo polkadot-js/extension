@@ -59,6 +59,6 @@
     "@polkadot/util-crypto": "^13.2.3",
     "@polkadot/x-fetch": "^13.2.3",
     "safe-buffer": "^5.2.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.5.4"
   }
 }

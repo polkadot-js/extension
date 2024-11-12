@@ -50,10 +50,10 @@
     "react-router": "^5.3.4",
     "react-router-dom": "^5.3.4",
     "styled-components": "^6.1.1",
-    "tslib": "^2.6.2"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.81.2",
+    "@polkadot/dev-test": "^0.82.1",
     "@polkadot/extension-mocks": "0.56.1",
     "@types/enzyme": "^3.10.18",
     "@types/enzyme-adapter-react-16": "^1.0.9",

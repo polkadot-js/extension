@@ -23,7 +23,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@paraspell/xcm-analyser": "^1.3.1",
-    "@polkadot-api/merkleize-metadata": "^1.1.9",
+    "@polkadot-api/merkleize-metadata": "^1.1.10",
     "@polkadot/api": "^15.0.1",
     "@polkadot/extension-base": "0.56.3-0-x",
     "@polkadot/extension-chains": "0.56.3-0-x",

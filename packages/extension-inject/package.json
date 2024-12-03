@@ -18,9 +18,9 @@
   "version": "0.56.2",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/api": "^14.3.1",
-    "@polkadot/rpc-provider": "^14.3.1",
-    "@polkadot/types": "^14.3.1",
+    "@polkadot/api": "^15.0.1",
+    "@polkadot/rpc-provider": "^15.0.1",
+    "@polkadot/types": "^15.0.1",
     "@polkadot/util": "^13.2.3",
     "@polkadot/util-crypto": "^13.2.3",
     "@polkadot/x-global": "^13.2.3",

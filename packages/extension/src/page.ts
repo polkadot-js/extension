@@ -31,11 +31,5 @@ window.addEventListener('message', ({ data, source }: Message): void => {
   }
 });
 
-redirectIfPhishing().then((gotRedirected) => {
-  if (!gotRedirected) {
-    inject();
-  }
-}).catch((e) => {
-  console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`);
-  inject();
-});
+inject();
+redirectIfPhishing().catch((e) => console.warn(`Unable to determine if the site is in the phishing list: ${(e as Error).message}`));

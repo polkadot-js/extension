@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 0.57.1 Dev 4, 2024
+
+Breaking Changes:
+
+- Upgrade polkadot-js/api to 15.0.1 ([#1483](https://github.com/polkadot-js/extension/pull/1483))
+    - This contains breaking changes where the api now allows the signer to alter the call data. Please reference [PR #6030](https://github.com/polkadot-js/api/pull/6030) for more information.
+- Upgrade polkadot-js/phishing to 0.24.4 ([#1483](https://github.com/polkadot-js/extension/pull/1483))
+
+Contributed:
+
+- fix: extension does not get injected on page load ([#1486](https://github.com/polkadot-js/extension/pull/1486))
+
+Changes:
+
+- Upgrade @polkadot-api/merkleize-metadata to 1.1.10 ([#1484](https://github.com/polkadot-js/extension/pull/1484))
+- Bump yarn to 4.5.3 ([#1485](https://github.com/polkadot-js/extension/pull/1485))
+
+
 ## 0.56.2 Nov 12, 2024
 
 Changes:

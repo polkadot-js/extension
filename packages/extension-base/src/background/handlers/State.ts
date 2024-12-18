@@ -23,7 +23,11 @@ interface Resolver<T> {
   resolve: (result: T) => void;
 }
 
-interface AuthRequest extends Resolver<AuthResponse> {
+interface AuthResolver<T> extends Resolver<T> {
+  cancelRequest: (error: Error) => void;
+}
+
+interface AuthRequest extends AuthResolver<AuthResponse> {
   id: string;
   idStr: string;
   request: RequestAuthorizeTab;
@@ -242,7 +246,7 @@ export default class State {
         });
   }
 
-  private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): Resolver<AuthResponse> => {
+  private authComplete = (id: string, resolve: (resValue: AuthResponse) => void, reject: (error: Error) => void): AuthResolver<AuthResponse> => {
     const complete = async (authorizedAccounts: string[] = []) => {
       const { idStr, request: { origin }, url } = this.#authRequests[id];
 
@@ -271,6 +275,11 @@ export default class State {
     };
 
     return {
+      cancelRequest: (error: Error): void => {
+        delete this.#authRequests[id];
+        this.updateIconAuth(true);
+        reject(error);
+      },
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       reject: async (error: Error): Promise<void> => {
         await complete();

@@ -273,8 +273,14 @@ export default class State {
     return {
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       reject: async (error: Error): Promise<void> => {
-        await complete();
-        reject(error);
+        if (error.message === 'Cancelled') {
+          delete this.#authRequests[id];
+          this.updateIconAuth(true);
+          reject(new Error('Connection request was cancelled by the user.'));
+        } else {
+          await complete();
+          reject(new Error('Connection request was rejected by the user.'));
+        }
       },
       // eslint-disable-next-line @typescript-eslint/no-misused-promises
       resolve: async ({ authorizedAccounts, result }: AuthResponse): Promise<void> => {

@@ -42,41 +42,54 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   );
 
   return (
-    <>
+    <div className={`${className}`}>
       <Header
         showBackArrow
         smallMargin={true}
         text={t('Accounts connected to {{url}}', { replace: { url } })}
       />
-      <div className={className}>
+      <div className='content'>
         <AccountSelection
-          className='accountSelection'
-          origin={origin}
+          origin={url}
           showHidden={true}
           url={url}
           withWarning={false}
         />
-        <Button
-          className='acceptButton'
-          onClick={_onApprove}
-        >
-          {t('Connect {{total}} account(s)', { replace: {
-            total: selectedAccounts.length
-          } })}
-        </Button>
+        <div className='footer'>
+          <Button
+            className='acceptButton'
+            onClick={_onApprove}
+          >
+            {t('Connect {{total}} account(s)', { replace: {
+              total: selectedAccounts.length
+            } })}
+          </Button>
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
 export default styled(AccountManagement)<Props>`
-  .accountSelection{
-    .accountList{
-      height: 390px;
-    }
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 550px;
+
+  .content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
   }
+
+  .footer {
+    background: var(--background);
+    flex-shrink: 0;
+  }
+
   .acceptButton {
     width: 90%;
-    margin: 0.5rem auto 0;
+    margin: 0.5rem auto;
   }
 `;

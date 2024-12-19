@@ -17,7 +17,7 @@ interface Props {
   withWarning?: boolean;
 }
 
-function AccounSelection ({ className, origin, showHidden = false, url, withWarning = true }: Props): React.ReactElement<Props> {
+function AccountSelection ({ className, origin, showHidden = false, url, withWarning = true }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
@@ -90,10 +90,15 @@ function AccounSelection ({ className, origin, showHidden = false, url, withWarn
   );
 }
 
-export default styled(AccounSelection)<Props>`
+export default styled(AccountSelection)<Props>`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+
   .accountList {
     overflow-y: auto;
-    height: 270px;
+    min-height: 250px;
   }
 
   .tab-name,

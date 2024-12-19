@@ -224,6 +224,10 @@ export async function rejectAuthRequest (requestId: string): Promise<void> {
   return sendMessage('pri(authorize.reject)', requestId);
 }
 
+export async function cancelAuthRequest (requestId: string): Promise<void> {
+  return sendMessage('pri(authorize.cancel)', requestId);
+}
+
 export async function subscribeMetadataRequests (cb: (accounts: MetadataRequest[]) => void): Promise<boolean> {
   return sendMessage('pri(metadata.requests)', null, cb);
 }

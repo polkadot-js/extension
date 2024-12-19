@@ -97,6 +97,7 @@ export interface RequestSignatures {
   'pri(authorize.requests)': [RequestAuthorizeSubscribe, boolean, AuthorizeRequest[]];
   'pri(authorize.remove)': [string, ResponseAuthorizeList];
   'pri(authorize.reject)': [string, void];
+  'pri(authorize.cancel)': [string, void];
   'pri(authorize.update)': [RequestUpdateAuthorizedAccounts, void];
   'pri(activeTabsUrl.update)': [RequestActiveTabsUrlUpdate, void];
   'pri(connectedTabsUrl.get)': [null, ConnectedTabsUrlResponse];

@@ -524,6 +524,8 @@ export default class Extension {
     return { list: remAuth };
   }
 
+  // Reject the authorization request and add the URL to the authorized list with no keys.
+  // The site will not prompt for re-authorization on future visits.
   private rejectAuthRequest (id: string): void {
     const queued = this.#state.getAuthRequest(id);
 
@@ -532,6 +534,18 @@ export default class Extension {
     const { reject } = queued;
 
     reject(new Error('Rejected'));
+  }
+
+  // Cancel the authorization request and do not add the URL to the authorized list.
+  // The site will prompt for authorization on future visits.
+  private cancelAuthRequest (id: string): void {
+    const queued = this.#state.getAuthRequest(id);
+
+    assert(queued, 'Unable to find request');
+
+    const { reject } = queued;
+
+    reject(new Error('Cancelled'));
   }
 
   private updateCurrentTabs ({ urls }: RequestActiveTabsUrlUpdate) {
@@ -557,6 +571,9 @@ export default class Extension {
 
       case 'pri(authorize.reject)':
         return this.rejectAuthRequest(request as string);
+
+      case 'pri(authorize.cancel)':
+        return this.cancelAuthRequest(request as string);
 
       case 'pri(authorize.requests)':
         return port && this.authorizeSubscribe(id, port);

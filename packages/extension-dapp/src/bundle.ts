@@ -1,4 +1,4 @@
-// Copyright 2019-2024 @polkadot/extension-dapp authors & contributors
+// Copyright 2019-2025 @polkadot/extension-dapp authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type { InjectedAccount, InjectedAccountWithMeta, InjectedExtension, InjectedProviderWithMeta, InjectedWindow, ProviderList, Unsubcall, Web3AccountsOptions } from '@polkadot/extension-inject/types';

@@ -1,4 +1,4 @@
-// Copyright 2019-2024 @polkadot/extension-bg authors & contributors
+// Copyright 2019-2025 @polkadot/extension-bg authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 /* global chrome */

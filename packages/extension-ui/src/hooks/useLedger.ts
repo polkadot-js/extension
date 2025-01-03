@@ -1,4 +1,4 @@
-// Copyright 2019-2024 @polkadot/extension-ui authors & contributors
+// Copyright 2019-2025 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 // This is to ensure the legacy `class Ledger` doesn't throw linting errors.

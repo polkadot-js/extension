@@ -1,4 +1,4 @@
-// Copyright 2019-2024 @polkadot/extension-inject authors & contributors
+// Copyright 2019-2025 @polkadot/extension-inject authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
 import type * as _ from '@polkadot/dev-test/globals.d.ts';

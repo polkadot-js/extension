@@ -962,8 +962,8 @@ __metadata:
     "@polkadot/phishing": "npm:^0.25.1"
     "@polkadot/rpc-provider": "npm:^15.2.1"
     "@polkadot/types": "npm:^15.2.1"
-    "@polkadot/ui-keyring": "npm:^3.11.3"
-    "@polkadot/ui-settings": "npm:^3.11.3"
+    "@polkadot/ui-keyring": "npm:^3.12.1"
+    "@polkadot/ui-settings": "npm:^3.12.1"
     "@polkadot/util": "npm:^13.3.1"
     "@polkadot/util-crypto": "npm:^13.3.1"
     eventemitter3: "npm:^5.0.1"
@@ -1069,12 +1069,12 @@ __metadata:
     "@polkadot/hw-ledger": "npm:^13.3.1"
     "@polkadot/keyring": "npm:^13.3.1"
     "@polkadot/networks": "npm:^13.3.1"
-    "@polkadot/react-identicon": "npm:^3.11.3"
-    "@polkadot/react-qr": "npm:^3.11.3"
+    "@polkadot/react-identicon": "npm:^3.12.1"
+    "@polkadot/react-qr": "npm:^3.12.1"
     "@polkadot/types": "npm:^15.2.1"
     "@polkadot/types-augment": "npm:^15.2.1"
-    "@polkadot/ui-keyring": "npm:^3.11.3"
-    "@polkadot/ui-settings": "npm:^3.11.3"
+    "@polkadot/ui-keyring": "npm:^3.12.1"
+    "@polkadot/ui-settings": "npm:^3.12.1"
     "@polkadot/util": "npm:^13.3.1"
     "@polkadot/util-crypto": "npm:^13.3.1"
     "@types/enzyme": "npm:^3.10.18"
@@ -1198,15 +1198,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/react-identicon@npm:^3.11.3":
-  version: 3.11.3
-  resolution: "@polkadot/react-identicon@npm:3.11.3"
+"@polkadot/react-identicon@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "@polkadot/react-identicon@npm:3.12.1"
   dependencies:
-    "@polkadot/keyring": "npm:^13.2.3"
-    "@polkadot/ui-settings": "npm:3.11.3"
-    "@polkadot/ui-shared": "npm:3.11.3"
-    "@polkadot/util": "npm:^13.2.3"
-    "@polkadot/util-crypto": "npm:^13.2.3"
+    "@polkadot/keyring": "npm:^13.3.1"
+    "@polkadot/ui-settings": "npm:3.12.1"
+    "@polkadot/ui-shared": "npm:3.12.1"
+    "@polkadot/util": "npm:^13.3.1"
+    "@polkadot/util-crypto": "npm:^13.3.1"
     ethereum-blockies-base64: "npm:^1.0.2"
     jdenticon: "npm:3.2.0"
     react-copy-to-clipboard: "npm:^5.1.0"
@@ -1219,17 +1219,17 @@ __metadata:
     react: "*"
     react-dom: "*"
     react-is: "*"
-  checksum: 10/321b82a320dd584e54fd82db4ff6ab1b15bcf79f260ae8a7f3a23bdb76e0eb4c20b99fd8c2399e1bf275444cb8c2c556acc4c87013ace1064c90dcbc1bc37eae
+  checksum: 10/e751f293e8f1c26aedb012bfe4d477406cd40748d812fbc9f29d65a1b8319ab8b48a98410b523e3588ce8ef30703fd13ae7f14edd276e1197f500d0f23e35646
   languageName: node
   linkType: hard
 
-"@polkadot/react-qr@npm:^3.11.3":
-  version: 3.11.3
-  resolution: "@polkadot/react-qr@npm:3.11.3"
+"@polkadot/react-qr@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "@polkadot/react-qr@npm:3.12.1"
   dependencies:
-    "@polkadot/ui-settings": "npm:3.11.3"
-    "@polkadot/util": "npm:^13.2.3"
-    "@polkadot/util-crypto": "npm:^13.2.3"
+    "@polkadot/ui-settings": "npm:3.12.1"
+    "@polkadot/util": "npm:^13.3.1"
+    "@polkadot/util-crypto": "npm:^13.3.1"
     "@zxing/browser": "npm:^0.1.5"
     "@zxing/library": "npm:^0.21.2"
     qrcode-generator: "npm:^1.4.4"
@@ -1241,7 +1241,7 @@ __metadata:
     react: "*"
     react-dom: "*"
     react-is: "*"
-  checksum: 10/cf0a375cafa52be774f3c0ef2abd24d738f3d5e863d30d56dc94f7f3c755eb036418123665af4c038b49d392a6efb02ce5a9a36ae1f202ed72d3e88420cdecb1
+  checksum: 10/017bae9e556092512d35b9f97047e9121724289023742e9206b976fbc9216333b277d2aae550186356768b65b66c8ed2ba2457bd0a3ed54497793f67f6030ae4
   languageName: node
   linkType: hard
 
@@ -1370,14 +1370,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/ui-keyring@npm:^3.11.3":
-  version: 3.11.3
-  resolution: "@polkadot/ui-keyring@npm:3.11.3"
+"@polkadot/ui-keyring@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "@polkadot/ui-keyring@npm:3.12.1"
   dependencies:
-    "@polkadot/keyring": "npm:^13.2.3"
-    "@polkadot/ui-settings": "npm:3.11.3"
-    "@polkadot/util": "npm:^13.2.3"
-    "@polkadot/util-crypto": "npm:^13.2.3"
+    "@polkadot/keyring": "npm:^13.3.1"
+    "@polkadot/ui-settings": "npm:3.12.1"
+    "@polkadot/util": "npm:^13.3.1"
+    "@polkadot/util-crypto": "npm:^13.3.1"
     mkdirp: "npm:^3.0.1"
     rxjs: "npm:^7.8.1"
     store: "npm:^2.0.12"
@@ -1386,36 +1386,36 @@ __metadata:
     "@polkadot/keyring": "*"
     "@polkadot/ui-settings": "*"
     "@polkadot/util": "*"
-  checksum: 10/23b8720935c35ee5a734b0a5ca693a8368014646cb38974edf84c016d3f2fc57714d7c2122ad3b34c167e4c81889a1673ef93247761d8cd2b1f5f9651ad77bdb
+  checksum: 10/d18ee8cdc16937416cd8b8e3986d4ba4eaff0370063c641384f50e0becc8cbc27452a31d71ee6ee2e0bf73caa1ed540fa4d7e2874a3840ef2775100cb85a963a
   languageName: node
   linkType: hard
 
-"@polkadot/ui-settings@npm:3.11.3, @polkadot/ui-settings@npm:^3.11.3":
-  version: 3.11.3
-  resolution: "@polkadot/ui-settings@npm:3.11.3"
+"@polkadot/ui-settings@npm:3.12.1, @polkadot/ui-settings@npm:^3.12.1":
+  version: 3.12.1
+  resolution: "@polkadot/ui-settings@npm:3.12.1"
   dependencies:
-    "@polkadot/networks": "npm:^13.2.3"
-    "@polkadot/util": "npm:^13.2.3"
+    "@polkadot/networks": "npm:^13.3.1"
+    "@polkadot/util": "npm:^13.3.1"
     eventemitter3: "npm:^5.0.1"
     store: "npm:^2.0.12"
     tslib: "npm:^2.8.1"
   peerDependencies:
     "@polkadot/networks": "*"
     "@polkadot/util": "*"
-  checksum: 10/977bff03e2231313be89451687860a0c39b2bb45f3498acad57331bd19391510f05ce04465bada2ab00e6357514e109ced0bb086fa61b9e659e91c63bb001c23
+  checksum: 10/10a40e844753f2c967e81a9f89ed9cbf49c267663ec42a7bbf43f1852b03f2ed5be49328426c5400e442529ccd7bc78aa36eb08d5469e2cde7d0a450d0f6fe2e
   languageName: node
   linkType: hard
 
-"@polkadot/ui-shared@npm:3.11.3":
-  version: 3.11.3
-  resolution: "@polkadot/ui-shared@npm:3.11.3"
+"@polkadot/ui-shared@npm:3.12.1":
+  version: 3.12.1
+  resolution: "@polkadot/ui-shared@npm:3.12.1"
   dependencies:
     colord: "npm:^2.9.3"
     tslib: "npm:^2.8.1"
   peerDependencies:
     "@polkadot/util": "*"
     "@polkadot/util-crypto": "*"
-  checksum: 10/a42207e07abc268e94902bc1184fbac8532c62d2422b53f6a6c10b365337c9e9775757c030a8be1395317b90204c0f030fdcc507af4f920ab375d891962a4bff
+  checksum: 10/c92a3088474dcfab5c5492b8c9b3ddf9de48698df70e93e905971d138ee98e27593fc95b6e5436d926670a9558910dadef19349b09f605fe921ceab1d2aed11c
   languageName: node
   linkType: hard
 

@@ -1,6 +1,25 @@
 # CHANGELOG
 
-## 0.57.1 Dev 4, 2024
+## 0.58.1 Jan 8, 2025
+
+Contributed:
+
+- Add support for canceling authorization requests without authorizing sites ([#1491](https://github.com/polkadot-js/extension/pull/1491)) (Thanks to https://github.com/F-OBrien)
+
+Changes:
+
+- Upgrade polkadot-js deps ([#1494](https://github.com/polkadot-js/extension/pull/1494)) ([#1498](https://github.com/polkadot-js/extension/pull/1498))
+    - `@polkadot/api` -> 15.2.1
+    - `@polkadot/common` -> 13.3.1
+    - `@polkadot/phishing` -> 0.25.1
+    - `@polkadot/ui` -> 3.12.1
+- Bump dev w/ @polkadot-api/merkelize-metadata ([#1495](https://github.com/polkadot-js/extension/pull/1495))
+- Bump @fortawesome/* deps ([#1496](https://github.com/polkadot-js/extension/pull/1496))
+- Bump yarn to 4.6.0 ([#1497](https://github.com/polkadot-js/extension/pull/1497))
+- Update headers to 2025 ([#1493](https://github.com/polkadot-js/extension/pull/1493))
+
+
+## 0.57.1 Dec 4, 2024
 
 Breaking Changes:
 

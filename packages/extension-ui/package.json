@@ -23,7 +23,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.5.1",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@paraspell/xcm-analyser": "^1.3.1",
-    "@polkadot-api/merkleize-metadata": "^1.1.10",
+    "@polkadot-api/merkleize-metadata": "^1.1.12",
     "@polkadot/api": "^15.2.1",
     "@polkadot/extension-base": "0.57.2-2-x",
     "@polkadot/extension-chains": "0.57.2-2-x",
@@ -53,7 +53,7 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.82.1",
+    "@polkadot/dev-test": "^0.82.6",
     "@polkadot/extension-mocks": "0.57.2-2-x",
     "@types/enzyme": "^3.10.18",
     "@types/enzyme-adapter-react-16": "^1.0.9",

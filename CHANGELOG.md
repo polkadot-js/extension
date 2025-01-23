@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.58.2 Jan 23, 2025
+
+Changes:
+
+- Upgrade polkadot-js api, and phishing ([#1501](https://github.com/polkadot-js/extension/pull/1501))
+- Bump dev to 0.83.2 ([#1500](https://github.com/polkadot-js/extension/pull/1500))
+
+
 ## 0.58.1 Jan 8, 2025
 
 Contributed:

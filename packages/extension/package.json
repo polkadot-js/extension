@@ -17,7 +17,7 @@
   "type": "module",
   "version": "0.58.2",
   "dependencies": {
-    "@polkadot/api": "^15.4.1",
+    "@polkadot/api": "^15.5.2",
     "@polkadot/extension-base": "0.58.2",
     "@polkadot/extension-inject": "0.58.2",
     "@polkadot/extension-ui": "0.58.2",

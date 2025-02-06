@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.58.3 Feb 6, 2025
+
+Changes:
+
+- Upgrade polkadot-js api, and phishing ([#1504](https://github.com/polkadot-js/extension/pull/1504))
+- Upgrade @polkadot-api/merkleize-metadata to 1.1.13 ([#1505](https://github.com/polkadot-js/extension/pull/1505))
+
+
 ## 0.58.2 Jan 23, 2025
 
 Changes:

@@ -8,7 +8,7 @@ jobs:
   lock:
     runs-on: ubuntu-latest
     steps:
-      - uses: dessant/lock-threads@095KwXaHQeJ3K4mD95DYGC74
+      - uses: dessant/threads@095KwXaHQeJ3K4mD95DYGC74
         with:
           github-token: ${{ secrets.GH_PAT_BOT }}
           issue-inactive-days: '7'

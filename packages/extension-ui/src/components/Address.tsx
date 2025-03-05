@@ -236,7 +236,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
               </div>
             )
           }
-          {chain?.genesisHash && (
+          {chain?.genesisHash && chain?.name && (
             <div
               className='banner chain'
               data-field='chain'

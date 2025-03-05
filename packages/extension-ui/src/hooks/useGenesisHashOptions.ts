@@ -53,6 +53,7 @@ export default function useGenesisHashOptions (): Option[] {
           )
         )
       )
+      // rel: https://github.com/polkadot-js/extension/pull/1515
       .filter((arr) => arr?.text)
       .sort((a, b) => a.text.localeCompare(b.text))
   ], [metadataChains, t]);

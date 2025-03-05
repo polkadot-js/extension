@@ -53,6 +53,7 @@ export default function useGenesisHashOptions (): Option[] {
           )
         )
       )
+      .filter((arr) => arr?.text)
       .sort((a, b) => a.text.localeCompare(b.text))
   ], [metadataChains, t]);
 

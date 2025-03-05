@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.58.5 Mar 5, 2025
+
+Changes:
+
+- Ensure text is filtered so it doesnt cause white screens ([#1515](https://github.com/polkadot-js/extension/pull/1515))
+- Fix .name error with whitescreen ([#1516](https://github.com/polkadot-js/extension/pull/1516))
+- Upgrade polkadot-js deps ([#1517](https://github.com/polkadot-js/extension/pull/1517))
+
+
 ## 0.58.4 Feb 19, 2025
 
 Changes:

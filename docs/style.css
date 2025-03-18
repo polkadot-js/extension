@@ -391,7 +391,11 @@ footer {
 @media screen and (max-width: 600px) {
   body {
     padding: 2rem 0.5rem;
-    max-width: 100vw;
+    max-width: 98vw;
+  }
+
+  .cardWrapper {
+    flex-direction: column-reverse;
   }
 
   .footer__left > section {

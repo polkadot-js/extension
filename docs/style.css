@@ -93,6 +93,7 @@ body {
   font-weight: 400;
   color: var(--primary);
   line-height: 250%;
+  color: #000000B2;
 }
 
 /* Info Badge */
@@ -237,6 +238,7 @@ body {
   font-size: 18px;
   line-height: 150%;
   letter-spacing: 0px;
+  color: #000000B2;
 }
 
 /* Chip Item */

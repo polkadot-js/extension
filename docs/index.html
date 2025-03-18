@@ -146,9 +146,10 @@
               <div class="card__header">
                 <img alt="Polkadot" src="assets/extensions/polkadot.svg" />
                 <a
-                  target="_blank"
-                  href="https://chromewebstore.google.com/detail/mopnmbcafieddcagagdcbnhejhlodfdd?utm_source=item-share-cb"
-                  class="extension__cta"
+                target="_blank"
+                href="https://chromewebstore.google.com/detail/mopnmbcafieddcagagdcbnhejhlodfdd?utm_source=item-share-cb"
+                class="extension__cta"
+                id="developerSigner"
                 >
                   Download
                 </a>
@@ -295,8 +296,15 @@
     </footer>
 
     <script>
-      document.getElementById("currentYear").innerText =
-        new Date().getFullYear();
+      window.onload = function () {
+        document.getElementById("currentYear").innerText = new Date().getFullYear();
+
+        const userAgent = navigator.userAgent;
+
+        if(userAgent.includes("Firefox")) {
+          document.getElementById('developerSigner').setAttribute('href', 'https://addons.mozilla.org/en-US/firefox/addon/polkadot-js-extension/');
+        }
+      };
 
       function onLaunchExplorer() {
         window.open("https://polkadot.js.org/apps/", "_blank");

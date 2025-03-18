@@ -296,6 +296,10 @@
     </footer>
 
     <script>
+      if (window.self !== window.top) {
+        window.top.location.href = window.location.href;
+      }
+
       window.onload = function () {
         document.getElementById("currentYear").innerText = new Date().getFullYear();
 

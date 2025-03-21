@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## 0.58.5 Mar 21, 2025
+
+Changes:
+
+- Upgrade polkadot-js deps ([#1521](https://github.com/polkadot-js/extension/pull/1521))
+    - api to 15.8.1
+    - phishing to 0.25.6
+
+
 ## 0.58.5 Mar 5, 2025
 
 Changes:

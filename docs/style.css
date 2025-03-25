@@ -398,6 +398,11 @@ footer {
     flex-direction: column-reverse;
   }
 
+  footer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .footer__left > section {
     display: none;
   }

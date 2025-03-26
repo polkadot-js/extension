@@ -21,6 +21,7 @@
        2	WoeOm                         	add darwinia network (#493)
        1	Aleksandr Ishchenko           	[#897] signer.signRaw signing doesn't work with Ledger Nano X (#905)
        1	Andrei Eres                   	Add extension prefix (#891)
+       1	Arjun Porwal                  	Revamped Polkadot Extension Page with UI Enhancements (#1520)
        1	Caio                          	Implement signRaw (#196)
        1	Chakrarin Sarnt               	Add Thai language (#788)
        1	CustomBlink                   	Add authorized URL removal  (#1029)

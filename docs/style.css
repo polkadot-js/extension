@@ -57,7 +57,7 @@ body {
 }
 
 #main {
-  max-width: 75vw;
+  max-width: 65vw;
   margin-inline: auto;
 }
 
@@ -216,13 +216,13 @@ body {
 
 @media screen and (max-width: 1650px) {
   #main {
-    max-width: 85vw;
+    max-width: 80vw;
   }
 }
 
 @media screen and (max-width: 1400px) {
   #main {
-    max-width: 90vw;
+    max-width: 85vw;
     width: 90%;
   }
 

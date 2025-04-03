@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.58.7 Apr 3, 2025
+
+Changes:
+
+- Revamped Polkadot Extension Page with UI Enhancements ([#1527](https://github.com/polkadot-js/extension/pull/1527))
+- Upgrade polkadot-js deps ([#1528](https://github.com/polkadot-js/extension/pull/1528))
+
+
 ## 0.58.6 Mar 21, 2025
 
 Changes:

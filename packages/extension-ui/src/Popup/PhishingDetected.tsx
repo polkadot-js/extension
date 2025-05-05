@@ -27,7 +27,7 @@ function PhishingDetected ({ className }: Props): React.ReactElement<Props> {
       <Header text={t('Phishing detected')} />
       <div className={className}>
         <p>
-          {t('You have been redirected because the Polkadot{.js} extension believes that this website could compromise the security of your accounts and your tokens.')}
+          {t('You have been redirected because the Polkadot Developer Signer believes that this website could compromise the security of your accounts and your tokens.')}
         </p>
         <p className='websiteAddress'>
           {decodedWebsite}

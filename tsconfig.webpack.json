@@ -5,6 +5,7 @@
     "jsx": "react-jsx",
     "module": "esnext",
     "skipLibCheck": true,
-    "target": "esnext"
+    "target": "ep
+    snext"
   }
 }

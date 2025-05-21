@@ -157,10 +157,8 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     const currApp = settings.get().ledgerApp;
 
-    console.log('Hit the outside of the if statement!!: ', isEcdsa);
     if (currApp === 'generic' || currApp === 'migration') {
       if (isEcdsa) {
-        console.log('getAddressEcdsa', isEcdsa, accountIndex, addressOffset);
         (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
           .then((res) => {
             setIsLoading(false);

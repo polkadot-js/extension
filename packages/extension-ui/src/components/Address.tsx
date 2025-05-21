@@ -70,7 +70,6 @@ function findAccountByAddress (accounts: AccountJson[], _address: string): Accou
 
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
 function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
-  console.log('recodeAddress: address', address);
   // decode and create a shortcut for the encoded address
   const publicKey = decodeAddress(address);
 
@@ -114,18 +113,14 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
     }
 
     const account = findAccountByAddress(accounts, address);
-    if (account && account.address.startsWith('35485')) {
-      (account as AccountJson).address = '0x02bd7d6baea5abb91145b7ea32a83faebf25a21b8df2796e2a4b2c4005c7db1ee2'
-    }
 
     setRecoded(
       (
         chain?.definition.chainType === 'ethereum' ||
         account?.type === 'ethereum' ||
-        (!account && givenType === 'ethereum') ||
-        address.startsWith('35485')
+        (!account && givenType === 'ethereum')
       )
-        ? { account, formatted: '0x02bd7d6baea5abb91145b7ea32a83faebf25a21b8df2796e2a4b2c4005c7db1ee2', type: 'ethereum' }
+        ? { account, formatted: address, type: 'ethereum' }
         : recodeAddress(address, accounts, chain, settings)
     );
   }, [accounts, address, chain, givenType, settings]);

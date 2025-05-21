@@ -82,7 +82,7 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
   return ledger;
 }
 
-export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEcdsa = false): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);
@@ -157,14 +157,26 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     const currApp = settings.get().ledgerApp;
 
+    console.log('Hit the outside of the if statement!!: ', isEcdsa);
     if (currApp === 'generic' || currApp === 'migration') {
-      (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
-        .then((res) => {
-          setIsLoading(false);
-          setAddress(res.address);
-        }).catch((e: Error) => {
-          handleGetAddressError(e, genesis);
-        });
+      if (isEcdsa) {
+        console.log('getAddressEcdsa', isEcdsa, accountIndex, addressOffset);
+        (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
+          .then((res) => {
+            setIsLoading(false);
+            setAddress(res.address);
+          }).catch((e: Error) => {
+            handleGetAddressError(e, genesis);
+          });
+      } else {
+        (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
+          .then((res) => {
+            setIsLoading(false);
+            setAddress(res.address);
+          }).catch((e: Error) => {
+            handleGetAddressError(e, genesis);
+          });
+      }
     } else if (currApp === 'chainSpecific') {
       (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
         .then((res) => {
@@ -177,7 +189,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountIndex, addressOffset, genesis, ledger]);
+  }, [accountIndex, addressOffset, genesis, ledger, isEcdsa]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);

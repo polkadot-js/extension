@@ -181,5 +181,7 @@
   "This network is not available, please report an issue to update the known chains": "",
   "Ledger App": "",
   "Don't ask again": "",
-  "Previous": ""
+  "Previous": "",
+  "ECDSA Account": "",
+  "ED25519 Account": ""
 }

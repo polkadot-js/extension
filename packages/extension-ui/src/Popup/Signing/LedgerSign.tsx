@@ -27,6 +27,7 @@ interface Props {
   className?: string;
   error: string | null;
   genesisHash?: string;
+  isEcdsa?: boolean;
   onSignature?: ({ signature }: { signature: HexString }, signedTransaction?: HexString) => void;
   payloadJson?: SignerPayloadJSON;
   payloadExt?: ExtrinsicPayload
@@ -55,11 +56,11 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, isEcdsa = false, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
 
   useEffect(() => {
     if (ledgerError) {

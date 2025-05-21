@@ -162,7 +162,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
         (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
           .then((res) => {
             setIsLoading(false);
-            setAddress(res.address);
+            setAddress(res.publicKey);
           }).catch((e: Error) => {
             handleGetAddressError(e, genesis);
           });

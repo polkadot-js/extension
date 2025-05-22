@@ -31,8 +31,8 @@ interface State extends StateBase {
   isLoading: boolean;
   isLocked: boolean;
   ledger: LedgerGeneric | Ledger | null;
-  type: KeypairType | null;
   refresh: () => void;
+  type: KeypairType | null;
   warning: string | null;
 }
 
@@ -200,5 +200,5 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setWarning(null);
   }, []);
 
-  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning, type });
+  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, type, warning });
 }

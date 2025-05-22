@@ -106,7 +106,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
                 { method: raw.method },
                 { version: 4 }
               );
-  
+
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
                 .then(({ address }) => {
                   extrinsic.addSignature(address, signature.signature, raw.toHex());
@@ -128,7 +128,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
                 { method: raw.method },
                 { version: 4 }
               );
-  
+
               (ledger as LedgerGeneric).getAddress(chain.ss58Format, false, accountIndex, addressOffset)
                 .then(({ address }) => {
                   extrinsic.addSignature(address, signature.signature, raw.toHex());
@@ -153,7 +153,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           });
       }
     },
-    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError]
+    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError, isEcdsa]
   );
 
   return (

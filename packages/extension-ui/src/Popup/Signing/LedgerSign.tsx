@@ -98,27 +98,51 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
 
         const metaBuff = Buffer.from(txMetadata);
 
-        (ledger as LedgerGeneric).signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
-          .then((signature) => {
-            const extrinsic = chain.registry.createType(
-              'Extrinsic',
-              { method: raw.method },
-              { version: 4 }
-            );
-
-            (ledger as LedgerGeneric).getAddress(chain.ss58Format, false, accountIndex, addressOffset)
-              .then(({ address }) => {
-                extrinsic.addSignature(address, signature.signature, raw.toHex());
-                onSignature(signature, extrinsic.toHex());
-              })
-              .catch((e: Error) => {
-                setError(e.message);
-                setIsBusy(false);
-              });
-          }).catch((e: Error) => {
-            setError(e.message);
-            setIsBusy(false);
-          });
+        if (isEcdsa) {
+          (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
+            .then((signature) => {
+              const extrinsic = chain.registry.createType(
+                'Extrinsic',
+                { method: raw.method },
+                { version: 4 }
+              );
+  
+              (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
+                .then(({ address }) => {
+                  extrinsic.addSignature(address, signature.signature, raw.toHex());
+                  onSignature(signature, extrinsic.toHex());
+                })
+                .catch((e: Error) => {
+                  setError(e.message);
+                  setIsBusy(false);
+                });
+            }).catch((e: Error) => {
+              setError(e.message);
+              setIsBusy(false);
+            });
+        } else {
+          (ledger as LedgerGeneric).signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
+            .then((signature) => {
+              const extrinsic = chain.registry.createType(
+                'Extrinsic',
+                { method: raw.method },
+                { version: 4 }
+              );
+  
+              (ledger as LedgerGeneric).getAddress(chain.ss58Format, false, accountIndex, addressOffset)
+                .then(({ address }) => {
+                  extrinsic.addSignature(address, signature.signature, raw.toHex());
+                  onSignature(signature, extrinsic.toHex());
+                })
+                .catch((e: Error) => {
+                  setError(e.message);
+                  setIsBusy(false);
+                });
+            }).catch((e: Error) => {
+              setError(e.message);
+              setIsBusy(false);
+            });
+        }
       } else if (currApp === 'chainSpecific') {
         (ledger as Ledger).sign(payloadExt.toU8a(true), accountIndex, addressOffset)
           .then((signature) => {

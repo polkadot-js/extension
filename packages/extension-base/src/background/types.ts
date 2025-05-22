@@ -204,6 +204,7 @@ export interface RequestAccountCreateHardware {
   genesisHash: HexString;
   hardwareType: string;
   name: string;
+  type: KeypairType;
 }
 
 export interface RequestAccountChangePassword {

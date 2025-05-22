@@ -42,7 +42,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [isEcdsa, setIsEcdsa] = useState(false);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
-  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEcdsa);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning, type } = useLedger(genesis, accountIndex, addressOffset, isEcdsa);
 
   useEffect(() => {
     if (address) {
@@ -73,10 +73,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const _onSave = useCallback(
     () => {
-      if (address && genesis && name) {
+      if (address && genesis && name && type) {
         setIsBusy(true);
 
-        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
+        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis, type)
           .then(() => onAction('/'))
           .catch((error: Error) => {
             console.error(error);

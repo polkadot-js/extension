@@ -7,6 +7,7 @@
 
 import type { Network } from '@polkadot/networks/types';
 import type { HexString } from '@polkadot/util/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -30,6 +31,7 @@ interface State extends StateBase {
   isLoading: boolean;
   isLocked: boolean;
   ledger: LedgerGeneric | Ledger | null;
+  type: KeypairType | null;
   refresh: () => void;
   warning: string | null;
 }
@@ -89,6 +91,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const [type, setType] = useState<KeypairType | null>(null);
   const { t } = useTranslation();
 
   const handleGetAddressError = (e: Error, genesis: string) => {
@@ -163,6 +166,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
           .then((res) => {
             setIsLoading(false);
             setAddress(res.publicKey);
+            setType('ecdsa');
           }).catch((e: Error) => {
             handleGetAddressError(e, genesis);
           });
@@ -171,6 +175,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
           .then((res) => {
             setIsLoading(false);
             setAddress(res.address);
+            setType('ed25519');
           }).catch((e: Error) => {
             handleGetAddressError(e, genesis);
           });
@@ -195,5 +200,5 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setWarning(null);
   }, []);
 
-  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning });
+  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning, type });
 }

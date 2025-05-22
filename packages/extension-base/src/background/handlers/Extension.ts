@@ -64,8 +64,8 @@ export default class Extension {
     return true;
   }
 
-  private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name }: RequestAccountCreateHardware): boolean {
-    keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name });
+  private accountsCreateHardware ({ accountIndex, address, addressOffset, genesisHash, hardwareType, name, type }: RequestAccountCreateHardware): boolean {
+    keyring.addHardware(address, hardwareType, { accountIndex, addressOffset, genesisHash, name, type });
 
     return true;
   }

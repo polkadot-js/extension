@@ -108,8 +108,8 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
               );
 
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
-                .then(({ address }) => {
-                  extrinsic.addSignature(address, signature.signature, raw.toHex());
+                .then(({ publicKey }) => {
+                  extrinsic.addSignature(publicKey, signature.signature, raw.toHex());
                   onSignature(signature, extrinsic.toHex());
                 })
                 .catch((e: Error) => {

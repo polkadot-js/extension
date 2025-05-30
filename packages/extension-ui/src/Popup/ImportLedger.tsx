@@ -106,6 +106,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           isExternal
           isHardware
           name={name}
+          type={type ?? undefined}
         />
         <Dropdown
           className='network'

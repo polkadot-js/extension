@@ -14,9 +14,9 @@
   },
   "sideEffects": false,
   "type": "module",
-  "version": "0.58.10",
+  "version": "0.58.11-0-x",
   "versions": {
-    "git": "0.58.10",
+    "git": "0.58.11-0-x",
     "npm": "0.58.10"
   },
   "workspaces": [
@@ -54,8 +54,8 @@
     "@polkadot/api": "~16.0.1",
     "@polkadot/keyring": "^13.5.1",
     "@polkadot/networks": "^13.5.1",
-    "@polkadot/types": "~16.0.1",
     "@polkadot/rpc-provider": "~16.0.1",
+    "@polkadot/types": "~16.0.1",
     "@polkadot/util": "^13.5.1",
     "@polkadot/util-crypto": "^13.5.1",
     "@polkadot/x-fetch": "^13.5.1",

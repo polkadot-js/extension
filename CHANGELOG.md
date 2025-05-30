@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.59.1 May 30, 2025
+
+Changes:
+
+- Upgrade @polkadot/* deps ([#1550](https://github.com/polkadot-js/extension/pull/1550))
+    ```
+    @polkdot/api -> 16.0.1
+    @polkadot/common -> 13.5.1
+    @polkadot/phishing -> 0.25.11
+    ```
+
 ## 0.58.10 May 14, 2025
 
 Changes:

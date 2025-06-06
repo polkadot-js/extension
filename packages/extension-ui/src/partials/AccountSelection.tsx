@@ -80,7 +80,7 @@ function AccountSelection ({ className, origin, showHidden = false, url, withWar
       )}
       {isSuspiciousOrigin && (
         <Warning className='warningError'>
-          It looks like this request is coming from an suspicious origin. Please verify the source carefully.
+          {t('It looks like this request is coming from an suspicious origin. Please verify the source carefully.')}
         </Warning>
       )}
       <Checkbox

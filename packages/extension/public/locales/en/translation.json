@@ -181,5 +181,6 @@
   "This network is not available, please report an issue to update the known chains": "",
   "Ledger App": "",
   "Don't ask again": "",
-  "Previous": ""
+  "Previous": "",
+  "It looks like this request is coming from an suspicious origin. Please verify the source carefully.": ""
 }

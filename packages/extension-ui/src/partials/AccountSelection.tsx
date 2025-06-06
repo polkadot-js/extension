@@ -8,6 +8,7 @@ import { AccountContext, Checkbox, Warning } from '../components/index.js';
 import { useTranslation } from '../hooks/index.js';
 import AccountsTree from '../Popup/Accounts/AccountsTree.js';
 import { styled } from '../styled.js';
+import { sanitizeOrigin, validateOrigin } from '../util/sanitizeOrigin.js';
 
 interface Props {
   className?: string;
@@ -20,7 +21,10 @@ interface Props {
 function AccountSelection ({ className, origin, showHidden = false, url, withWarning = true }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const { accounts, hierarchy, selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
+  const [sanitizedOrigin, setSanitizedOrigin] = useState('');
+  const [isSuspiciousOrigin, setIsSuspiciousOrigin] = useState(false);
   const [isIndeterminate, setIsIndeterminate] = useState(false);
+
   const allVisibleAccounts = useMemo(() => accounts.filter(({ isHidden }) => !isHidden), [accounts]);
   const noAccountSelected = useMemo(() => selectedAccounts.length === 0, [selectedAccounts.length]);
   const allDisplayedAddresses = useMemo(
@@ -33,6 +37,14 @@ function AccountSelection ({ className, origin, showHidden = false, url, withWar
     () => selectedAccounts.length === allDisplayedAddresses.length
     , [allDisplayedAddresses.length, selectedAccounts.length]
   );
+
+  useEffect(() => {
+    const cleaned = sanitizeOrigin(origin);
+    const isValid = validateOrigin(origin);
+
+    setSanitizedOrigin(cleaned);
+    setIsSuspiciousOrigin(!isValid || cleaned !== origin);
+  }, [origin]);
 
   useEffect(() => {
     const nextIndeterminateState = !noAccountSelected && !areAllAccountsSelected;
@@ -55,7 +67,7 @@ function AccountSelection ({ className, origin, showHidden = false, url, withWar
     <div className={className}>
       {withWarning && (
         <Warning className='warningMargin'>
-          <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{origin}</span> is requesting access from{' '}
+          <Trans key='accessRequest'>An application, self-identifying as <span className='tab-name'>{sanitizedOrigin}</span> is requesting access from{' '}
             <a
               href={url}
               rel='noopener noreferrer'
@@ -64,6 +76,11 @@ function AccountSelection ({ className, origin, showHidden = false, url, withWar
               <span className='tab-url'>{url}</span>
             </a>
           </Trans>
+        </Warning>
+      )}
+      {isSuspiciousOrigin && (
+        <Warning className='warningError'>
+          It looks like this request is coming from an suspicious origin. Please verify the source carefully.
         </Warning>
       )}
       <Checkbox
@@ -121,6 +138,17 @@ export default styled(AccountSelection)<Props>`
     .warning-message {
       display: block;
       width: 100%
+    }
+  }
+
+  .warningError {
+    padding-block: 0.3rem;
+    margin-top: 1rem;
+    border: 1px solid var(--errorBorderColor);
+    background-color: #AF111170;
+
+    [data-theme="light"] & {
+      color: black;
     }
   }
 `;

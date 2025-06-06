@@ -1,5 +1,5 @@
      634	Jaco                          	2024 (#1302)
-     108	Tarik Gul                     	Upgrade polkadot-api, and polkadot-js deps (#1552)
+     109	Tarik Gul                     	0.59.2 (#1553)
       93	Thibaut Sardan                	Ability to Reject an authentication request instead of ignoring it (#1453)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	Francis O'Brien               	feat: add cancel authorization request functionality and improve UI components (#1491)

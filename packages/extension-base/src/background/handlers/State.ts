@@ -377,12 +377,24 @@ export default class State {
   };
 
   public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+    try {
+      const parsedUrl = new URL(url);
 
-    const parts = url.split('/');
+      if (!['http:', 'https:', 'ipfs:', 'ipns:'].includes(parsedUrl.protocol)) {
+        throw new Error(`Invalid protocol ${parsedUrl.protocol}`);
+      }
 
-    // Keep protocol to distinguish http/https origins for security
-    return `${parts[0]}//${parts[2]}`;
+      // For ipfs/ipns which don't have a standard origin, we handle it differently.
+      if (parsedUrl.protocol === 'ipfs:' || parsedUrl.protocol === 'ipns:') {
+        // ipfs://<hash> | ipns://<hash>
+        return `${parsedUrl.protocol}//${parsedUrl.hostname}`;
+      }
+
+      return parsedUrl.origin;
+    } catch (e) {
+      console.error(e);
+      throw new Error('Invalid URL');
+    }
   }
 
   private updateIcon (shouldClose?: boolean): void {

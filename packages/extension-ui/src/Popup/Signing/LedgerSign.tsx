@@ -20,6 +20,7 @@ import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 import { Button, Warning } from '../../components/index.js';
 import { useLedger, useMetadata, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
+import { blake2AsU8a, keccakAsU8a } from '@polkadot/util-crypto';
 
 interface Props {
   accountIndex?: number;
@@ -60,7 +61,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: LedgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
 
   useEffect(() => {
     if (ledgerError) {
@@ -99,7 +100,9 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         const metaBuff = Buffer.from(txMetadata);
 
         if (isEcdsa) {
-          (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
+          let hashedMessage = LedgerType == 'ecdsa'? blake2AsU8a(raw.toU8a(true), undefined, undefined, false) : keccakAsU8a(raw.toU8a(true), undefined, false);
+
+          (ledger as LedgerGeneric).signWithMetadataEcdsa(hashedMessage, accountIndex, addressOffset, { metadata: metaBuff })
             .then((signature) => {
               const extrinsic = chain.registry.createType(
                 'Extrinsic',

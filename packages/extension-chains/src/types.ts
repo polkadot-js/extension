@@ -9,6 +9,7 @@ export interface Chain {
   genesisHash?: string;
   hasMetadata: boolean;
   icon: string;
+  isEthereum?: boolean;
   isUnknown?: boolean;
   name: string;
   registry: Registry;

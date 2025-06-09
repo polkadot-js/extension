@@ -162,11 +162,15 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     if (currApp === 'generic' || currApp === 'migration') {
       if (isEcdsa) {
+        // It can either be use MultiSignature::Ecdsa or EthereumSignature so we need to
+        // set the type accordingly
+        const keyringType = chosenNetwork.chainType == 'ethereum'? 'ethereum' : 'ecdsa';
+
         (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
           .then((res) => {
             setIsLoading(false);
             setAddress(res.publicKey);
-            setType('ecdsa');
+            setType(keyringType);
           }).catch((e: Error) => {
             handleGetAddressError(e, genesis);
           });

@@ -381,7 +381,8 @@ export default class State {
 
     const parts = url.split('/');
 
-    return parts[2];
+    // Keep protocol to distinguish http/https origins for security
+    return `${parts[0]}//${parts[2]}`;
   }
 
   private updateIcon (shouldClose?: boolean): void {

@@ -126,7 +126,7 @@ async function extractMetadata (store: MetadataStore): Promise<void> {
 }
 
 export default class State {
-  #authUrls: AuthUrls = {};
+  #authUrls = new Map<string, AuthUrlInfo>();
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
@@ -169,10 +169,10 @@ export default class State {
     const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
-    this.#authUrls = previousAuth;
+    this.#authUrls = new Map(Object.entries(previousAuth));
 
     // Initialize authUrlSubjects for each URL
-    Object.entries(previousAuth).forEach(([url, authInfo]) => {
+    this.#authUrls.forEach((authInfo, url) => {
       this.authUrlSubjects[url] = new BehaviorSubject<AuthUrlInfo>(authInfo);
     });
 
@@ -219,7 +219,7 @@ export default class State {
   }
 
   public get authUrls (): AuthUrls {
-    return this.#authUrls;
+    return Object.fromEntries(this.#authUrls);
   }
 
   private popupClose (): void {
@@ -256,7 +256,7 @@ export default class State {
         url
       };
 
-      this.#authUrls[strippedUrl] = authInfo;
+      this.#authUrls.set(strippedUrl, authInfo);
 
       if (!this.authUrlSubjects[strippedUrl]) {
         this.authUrlSubjects[strippedUrl] = new BehaviorSubject<AuthUrlInfo>(authInfo);
@@ -328,7 +328,7 @@ export default class State {
   }
 
   private async saveCurrentAuthList () {
-    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(this.#authUrls) });
+    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(Object.fromEntries(this.#authUrls)) });
   }
 
   private async saveDefaultAuthAccounts () {
@@ -404,11 +404,11 @@ export default class State {
   }
 
   public async removeAuthorization (url: string): Promise<AuthUrls> {
-    const entry = this.#authUrls[url];
+    const entry = this.#authUrls.get(url);
 
     assert(entry, `The source ${url} is not known`);
 
-    delete this.#authUrls[url];
+    this.#authUrls.delete(url);
     await this.saveCurrentAuthList();
 
     if (this.authUrlSubjects[url]) {
@@ -416,7 +416,7 @@ export default class State {
       this.authUrlSubjects[url].next(entry);
     }
 
-    return this.#authUrls;
+    return this.authUrls;
   }
 
   private updateIconAuth (shouldClose?: boolean): void {
@@ -436,8 +436,13 @@ export default class State {
 
   public async updateAuthorizedAccounts (authorizedAccountsDiff: AuthorizedAccountsDiff): Promise<void> {
     authorizedAccountsDiff.forEach(([url, authorizedAccountDiff]) => {
-      this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
-      this.authUrlSubjects[url].next(this.#authUrls[url]);
+      const authInfo = this.#authUrls.get(url);
+
+      if (authInfo) {
+        authInfo.authorizedAccounts = authorizedAccountDiff;
+        this.#authUrls.set(url, authInfo);
+        this.authUrlSubjects[url].next(authInfo);
+      }
     });
 
     await this.saveCurrentAuthList();
@@ -453,9 +458,11 @@ export default class State {
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
-    if (this.#authUrls[idStr]) {
+    if (this.#authUrls.has(idStr)) {
       // this url was seen in the past
-      assert(this.#authUrls[idStr].authorizedAccounts || this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+      const authInfo = this.#authUrls.get(idStr);
+
+      assert(authInfo?.authorizedAccounts || authInfo?.isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return {
         authorizedAccounts: [],
@@ -480,7 +487,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls.get(this.stripUrl(url));
 
     assert(entry, `The source ${url} has not been enabled yet`);
 

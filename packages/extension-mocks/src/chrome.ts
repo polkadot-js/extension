@@ -33,7 +33,7 @@ chrome.storage.local.get.returns(
     try {
       const result = {
         authUrls: JSON.stringify({
-          'localhost:3000': {
+          'http://localhost:3000': {
             authorizedAccounts: ['5FbSap4BsWfjyRhCchoVdZHkDnmDm3NEgLZ25mesq4aw2WvX'],
             count: 0,
             id: '11',

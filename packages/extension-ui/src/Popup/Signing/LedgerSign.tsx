@@ -14,13 +14,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import settings from '@polkadot/ui-settings';
-import { assert, objectSpread, u8aToHex } from '@polkadot/util';
+import { assert, hexToU8a, objectSpread, u8aToHex } from '@polkadot/util';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
 import { Button, Warning } from '../../components/index.js';
 import { useLedger, useMetadata, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
-import { blake2AsU8a, keccakAsU8a } from '@polkadot/util-crypto';
+import { encodeAddress } from '@polkadot/util-crypto';
+//import type { KeypairType } from '@polkadot/util-crypto/types';
+//import { blake2AsU8a, keccakAsU8a } from '@polkadot/util-crypto';
 
 interface Props {
   accountIndex?: number;
@@ -61,7 +63,8 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: LedgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
+  //@ts-ignore
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: ledgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
 
   useEffect(() => {
     if (ledgerError) {
@@ -94,32 +97,43 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         if (!chain?.definition.rawMetadata) {
           setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
         }
-
         const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
-
         const metaBuff = Buffer.from(txMetadata);
 
         if (isEcdsa) {
-          let hashedMessage = LedgerType == 'ecdsa'? blake2AsU8a(raw.toU8a(true), undefined, undefined, false) : keccakAsU8a(raw.toU8a(true), undefined, false);
+          //let hashedMessage = ledgerType == 'ecdsa'? blake2AsU8a(raw.toU8a(true), undefined, undefined, false) : keccakAsU8a(raw.toU8a(true), undefined, false);
 
-          (ledger as LedgerGeneric).signWithMetadataEcdsa(hashedMessage, accountIndex, addressOffset, { metadata: metaBuff })
+          (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
             .then((signature) => {
+              ledgerType == 'ecdsa' ? signature.signature = `0x${'02'+ signature.signature}` : null;
+
               const extrinsic = chain.registry.createType(
                 'Extrinsic',
                 { method: raw.method },
                 { version: 4 }
               );
 
+              const sigU8a = hexToU8a(signature.signature);
+
+              console.log("Sig byte length:", sigU8a.length); // should be 65
+              console.log("Sig hex:", signature.signature);
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
                 .then(({ publicKey }) => {
-                  extrinsic.addSignature(publicKey, signature.signature, raw.toHex());
+                  const ss58Address = encodeAddress(publicKey, chain.ss58Format);
+                  console.log('Public Key:', publicKey);
+                  console.log('Address:', ss58Address);
+                  console.log('Signature:', signature.signature);
+                  const addressType = chain.registry.createType('Address', ss58Address);
+                  extrinsic.addSignature(addressType, signature.signature, raw.toHex());
                   onSignature(signature, extrinsic.toHex());
                 })
                 .catch((e: Error) => {
+                  console.log(e)
                   setError(e.message);
                   setIsBusy(false);
                 });
             }).catch((e: Error) => {
+              console.log(e)
               setError(e.message);
               setIsBusy(false);
             });

@@ -119,12 +119,8 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
               console.log("Sig hex:", signature.signature);
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
                 .then(({ publicKey }) => {
-                  const ss58Address = encodeAddress(publicKey, chain.ss58Format);
                   console.log('Public Key:', publicKey);
-                  console.log('Address:', ss58Address);
-                  console.log('Signature:', signature.signature);
-                  const addressType = chain.registry.createType('Address', ss58Address);
-                  extrinsic.addSignature(addressType, signature.signature, raw.toHex());
+                  extrinsic.addSignature(publicKey, signature.signature, raw.toHex());
                   onSignature(signature, extrinsic.toHex());
                 })
                 .catch((e: Error) => {

@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 0.60.1 June 18, 2025
+
+Changes:
+
+- Sanitize dApp origin ([#1554](https://github.com/polkadot-js/extension/pull/1554))
+- Enforce distinct authorization for HTTP and HTTPS origins ([#1555](https://github.com/polkadot-js/extension/pull/1555))
+- Use Map instead of object for storing authorized URLs ([#1556](https://github.com/polkadot-js/extension/pull/1556))
+- Update polkadot-js deps ([#1557](https://github.com/polkadot-js/extension/pull/1557))
+- Set yarn to 4.9.2 ([#1558](https://github.com/polkadot-js/extension/pull/1558))
+
+
 ## 0.59.2 June 5, 2025
 
 Changes:

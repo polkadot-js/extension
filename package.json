@@ -45,20 +45,20 @@
     "test:one": "EXTENSION_PREFIX='test' polkadot-dev-run-test --env browser"
   },
   "devDependencies": {
-    "@polkadot/dev": "^0.83.2",
+    "@polkadot/dev": "^0.83.3",
     "@types/node": "^20.10.5",
     "i18next-scanner": "^4.4.0",
     "sinon-chrome": "^3.0.1"
   },
   "resolutions": {
-    "@polkadot/api": "^16.1.2",
-    "@polkadot/keyring": "^13.5.1",
-    "@polkadot/networks": "^13.5.1",
-    "@polkadot/rpc-provider": "^16.1.2",
-    "@polkadot/types": "^16.1.2",
-    "@polkadot/util": "^13.5.1",
-    "@polkadot/util-crypto": "^13.5.1",
-    "@polkadot/x-fetch": "^13.5.1",
+    "@polkadot/api": "^16.2.2",
+    "@polkadot/keyring": "^13.5.2",
+    "@polkadot/networks": "^13.5.2",
+    "@polkadot/rpc-provider": "^16.2.2",
+    "@polkadot/types": "^16.2.2",
+    "@polkadot/util": "^13.5.2",
+    "@polkadot/util-crypto": "^13.5.2",
+    "@polkadot/x-fetch": "^13.5.2",
     "safe-buffer": "^5.2.1",
     "typescript": "^5.5.4"
   }

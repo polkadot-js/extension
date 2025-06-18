@@ -22,12 +22,12 @@
   "main": "index.js",
   "dependencies": {
     "@polkadot/extension-inject": "0.59.3-2-x",
-    "@polkadot/util": "^13.5.1",
-    "@polkadot/util-crypto": "^13.5.1",
+    "@polkadot/util": "^13.5.2",
+    "@polkadot/util-crypto": "^13.5.2",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.83.2"
+    "@polkadot/dev-test": "^0.83.3"
   },
   "peerDependencies": {
     "@polkadot/api": "*",

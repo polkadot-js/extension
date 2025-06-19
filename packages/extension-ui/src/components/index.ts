@@ -29,6 +29,7 @@ export { default as MenuDivider } from './MenuDivider.js';
 export { default as MenuItem } from './MenuItem.js';
 export { default as MnemonicSeed } from './MnemonicSeed.js';
 export { default as NextStepButton } from './NextStepButton.js';
+export { default as PasswordStrengthIndicator } from './PasswordStrengthIndicator.js';
 export { default as RemoveAuth } from './RemoveAuth.js';
 export { default as Spinner } from './Spinner.js';
 export { default as Svg } from './Svg.js';

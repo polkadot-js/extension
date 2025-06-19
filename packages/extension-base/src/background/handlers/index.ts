@@ -5,6 +5,8 @@
 
 import type { MessageTypes, TransportRequestMessage } from '../types.js';
 
+import { parse } from 'tldts';
+
 import { assert } from '@polkadot/util';
 
 import { PORT_EXTENSION } from '../../defaults.js';
@@ -28,9 +30,19 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
     throw new Error('Unable to extract message sender');
   }
 
-  const from = isExtension
-    ? 'extension'
-    : sender?.url || sender?.tab?.url || '<unknown>';
+  const rawUrl = sender?.url || sender?.tab?.url || '';
+  let from = 'extension';
+
+  if (!isExtension && rawUrl) {
+    try {
+      const { hostname } = parse(rawUrl);
+
+      from = hostname || '<unknown>'; // Only use the hostname
+    } catch {
+      from = '<unknown>';
+    }
+  }
+
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

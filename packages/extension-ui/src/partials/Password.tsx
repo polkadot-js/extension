@@ -3,11 +3,12 @@
 
 import type { Validator } from '../util/validators.js';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { InputWithLabel, ValidatedInput } from '../components/index.js';
+import { InputWithLabel, PasswordStrengthIndicator, ValidatedInput } from '../components/index.js';
 import { useTranslation } from '../hooks/index.js';
-import { allOf, isNotShorterThan, isSameAs } from '../util/validators.js';
+import { validatePasswordStrength } from '../util/passwordValidation.js';
+import { allOf, isNotShorterThan, isSameAs, Result } from '../util/validators.js';
 
 interface Props {
   isFocussed?: boolean;
@@ -20,7 +21,28 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const { t } = useTranslation();
   const [pass1, setPass1] = useState<string | null>(null);
   const [pass2, setPass2] = useState<string | null>(null);
-  const isFirstPasswordValid = useMemo(() => isNotShorterThan(MIN_LENGTH, t('Password is too short')), [t]);
+  const [passwordStrength, setPasswordStrength] = useState(validatePasswordStrength(''));
+  const [isPass1Focused, setIsPass1Focused] = useState(false);
+  const [isPass1ResultInit, setisPass1ResultInit] = useState(false);
+
+  const handlePass1Focus = useCallback((): void => setIsPass1Focused(true), []);
+  const handlePass1Blur = useCallback((): void => setIsPass1Focused(false), []);
+
+  // Primary password validation using zxcvbn
+  const isFirstPasswordValid = useCallback<Validator<string>>((password) => {
+    setisPass1ResultInit(true);
+
+    const strength = validatePasswordStrength(password);
+
+    setPasswordStrength(strength);
+
+    if (!strength.isStrong) {
+      return Promise.resolve(Result.error(t(strength.feedback.warning)));
+    }
+
+    return Promise.resolve(Result.ok<string>(password));
+  }, [t]);
+
   const isSecondPasswordValid = useCallback((firstPassword: string): Validator<string> => allOf(
     isNotShorterThan(MIN_LENGTH, t('Password is too short')),
     isSameAs(firstPassword, t('Passwords do not match'))
@@ -37,10 +59,13 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         data-input-password
         isFocused={isFocussed}
         label={t('A new password for this account')}
+        onBlur={(handlePass1Blur)}
+        onFocus={handlePass1Focus}
         onValidatedChange={setPass1}
         type='password'
         validator={isFirstPasswordValid}
       />
+      {isPass1Focused && isPass1ResultInit && <PasswordStrengthIndicator passwordStrength={passwordStrength} />}
       {pass1 && (
         <ValidatedInput
           component={InputWithLabel}

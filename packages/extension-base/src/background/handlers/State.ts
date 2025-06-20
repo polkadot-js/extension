@@ -128,6 +128,10 @@ async function extractMetadata (store: MetadataStore): Promise<void> {
 export default class State {
   #authUrls = new Map<string, AuthUrlInfo>();
 
+  #lastRequestTimestamps = new Map<string, number>();
+  #maxEntries = 10;
+  #rateLimitInterval = 3000; // 3 seconds
+
   readonly #authRequests: Record<string, AuthRequest> = {};
 
   readonly #metaStore = new MetadataStore();
@@ -615,8 +619,32 @@ export default class State {
     return true;
   }
 
+  private handleSignRequest (origin: string) {
+    const now = Date.now();
+    const lastTime = this.#lastRequestTimestamps.get(origin) || 0;
+
+    if (now - lastTime < this.#rateLimitInterval) {
+      throw new Error('Rate limit exceeded. Try again later.');
+    }
+
+    // If we're about to exceed max entries, evict the oldest
+    if (!this.#lastRequestTimestamps.has(origin) && this.#lastRequestTimestamps.size >= this.#maxEntries) {
+      const oldestKey = this.#lastRequestTimestamps.keys().next().value;
+
+      oldestKey && this.#lastRequestTimestamps.delete(oldestKey);
+    }
+
+    this.#lastRequestTimestamps.set(origin, now);
+  }
+
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
     const id = getId();
+
+    try {
+      this.handleSignRequest(url);
+    } catch (error) {
+      return Promise.reject(error);
+    }
 
     return new Promise((resolve, reject): void => {
       this.#signRequests[id] = {

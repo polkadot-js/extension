@@ -3,9 +3,9 @@
 
 import type { RequestAuthorizeTab } from '@polkadot/extension-base/background/types';
 
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-import { AccountContext, ActionContext, Button } from '../../components/index.js';
+import { AccountContext, ActionContext } from '../../components/index.js';
 import { useTranslation } from '../../hooks/index.js';
 import { approveAuthRequest, cancelAuthRequest, rejectAuthRequest } from '../../messaging.js';
 import { AccountSelection } from '../../partials/index.js';
@@ -24,6 +24,8 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
   const [dontAskAgain, setDontAskAgain] = useState(false);
+  const approveButtonRef = useRef<HTMLButtonElement>(null);
+  const rejectButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const defaultAccountSelection = accounts
@@ -33,25 +35,47 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
     setSelectedAccounts && setSelectedAccounts(defaultAccountSelection);
   }, [accounts, setSelectedAccounts]);
 
-  const _onApprove = useCallback(
-    (): void => {
+  // Direct DOM event handlers to provide support for Brave
+  useEffect(() => {
+    const handleApprove = () => {
+      if (selectedAccounts.length === 0) return;
+
       approveAuthRequest(authId, selectedAccounts)
         .then(() => onAction())
         .catch((error: Error) => console.error(error));
-    },
-    [authId, onAction, selectedAccounts]
-  );
+    };
 
-  const _onReject = useCallback(
-    (): void => {
+    const handleReject = () => {
       const rejectFunction = dontAskAgain ? rejectAuthRequest : cancelAuthRequest;
 
       rejectFunction(authId)
         .then(() => onAction())
         .catch((error: Error) => console.error(error));
-    },
-    [authId, onAction, dontAskAgain]
-  );
+    };
+
+    // Add direct event listeners to the button elements
+    const approveBtn = approveButtonRef.current;
+    const rejectBtn = rejectButtonRef.current;
+
+    if (approveBtn) {
+      approveBtn.addEventListener('click', handleApprove);
+    }
+
+    if (rejectBtn) {
+      rejectBtn.addEventListener('click', handleReject);
+    }
+
+    // Clean up event listeners
+    return () => {
+      if (approveBtn) {
+        approveBtn.removeEventListener('click', handleApprove);
+      }
+
+      if (rejectBtn) {
+        rejectBtn.removeEventListener('click', handleReject);
+      }
+    };
+  }, [authId, onAction, selectedAccounts, dontAskAgain]);
 
   const _onToggleDontAskAgain = useCallback(
     (): void => {
@@ -72,21 +96,21 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
       />
       <div className='footer'>
         <div className='buttonContainer'>
-          <Button
+          <button
             className='acceptButton'
-            onClick={_onApprove}
+            disabled={selectedAccounts.length === 0}
+            ref={approveButtonRef}
           >
             {t('Connect {{total}} account(s)', { replace: {
               total: selectedAccounts.length
             } })}
-          </Button>
-          <Button
+          </button>
+          <button
             className='rejectButton'
-            isDanger
-            onClick={_onReject}
+            ref={rejectButtonRef}
           >
             {t('Reject')}
-          </Button>
+          </button>
         </div>
         <div className='dontAskAgainContainer'>
           <input
@@ -102,6 +126,7 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   );
 }
 
+// eslint-disable-next-line no-unsafe-call
 export default styled(Request)<Props>`
   display: flex;
   flex-direction: column;
@@ -123,6 +148,34 @@ export default styled(Request)<Props>`
   .acceptButton, .rejectButton {
     width: 48%;
     height: 40px;
+    border: none;
+    border-radius: var(--borderRadius);
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .acceptButton {
+    background: var(--buttonBackground);
+    color: var(--buttonTextColor);
+  }
+
+  .acceptButton:hover:not(:disabled) {
+    background: var(--buttonBackgroundHover);
+  }
+
+  .acceptButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .rejectButton {
+    background: var(--buttonBackgroundDanger);
+    color: var(--buttonTextColor);
+  }
+
+  .rejectButton:hover {
+    background: var(--buttonBackgroundDangerHover);
   }
 
   .dontAskAgainContainer {

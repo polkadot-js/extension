@@ -31,6 +31,7 @@ export default function handler<TMessageType extends MessageTypes> ({ id, messag
   const from = isExtension
     ? 'extension'
     : sender?.url || sender?.tab?.url || '<unknown>';
+
   const source = `${from}: ${id}: ${message}`;
 
   console.log(` [in] ${source}`); // :: ${JSON.stringify(request)}`);

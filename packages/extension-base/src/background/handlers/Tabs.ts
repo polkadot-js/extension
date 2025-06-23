@@ -13,6 +13,7 @@ import type { AuthResponse } from './State.js';
 import type State from './State.js';
 
 import { combineLatest, type Subscription } from 'rxjs';
+import { parse } from 'tldts';
 
 import { checkIfDenied } from '@polkadot/phishing';
 import { keyring } from '@polkadot/ui-keyring';
@@ -215,6 +216,22 @@ export default class Tabs {
     });
   }
 
+  private parseUrl (rawUrl: string): string {
+    let from = 'extension';
+
+    if (rawUrl) {
+      try {
+        const { hostname } = parse(rawUrl);
+
+        from = hostname || '<unknown>'; // Only use the hostname
+      } catch {
+        from = '<unknown>';
+      }
+    }
+
+    return from;
+  }
+
   private async redirectIfPhishing (url: string): Promise<boolean> {
     const isInDenyList = await checkIfDenied(url);
 
@@ -229,7 +246,9 @@ export default class Tabs {
 
   public async handle<TMessageType extends MessageTypes> (id: string, type: TMessageType, request: RequestTypes[TMessageType], url: string, port?: chrome.runtime.Port): Promise<ResponseTypes[keyof ResponseTypes]> {
     if (type === 'pub(phishing.redirectIfDenied)') {
-      return this.redirectIfPhishing(url);
+      const parsedUrl = this.parseUrl(url);
+
+      return this.redirectIfPhishing(parsedUrl);
     }
 
     if (type !== 'pub(authorize.tab)') {

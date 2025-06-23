@@ -38,7 +38,9 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   // Direct DOM event handlers to provide support for Brave
   useEffect(() => {
     const handleApprove = () => {
-      if (selectedAccounts.length === 0) return;
+      if (selectedAccounts.length === 0) {
+        return;
+      }
 
       approveAuthRequest(authId, selectedAccounts)
         .then(() => onAction())
@@ -126,7 +128,6 @@ function Request ({ authId, className, request: { origin }, url }: Props): React
   );
 }
 
-// eslint-disable-next-line no-unsafe-call
 export default styled(Request)<Props>`
   display: flex;
   flex-direction: column;

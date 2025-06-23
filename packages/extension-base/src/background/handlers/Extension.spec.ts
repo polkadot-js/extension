@@ -22,6 +22,8 @@ import Extension from './Extension.js';
 import State from './State.js';
 import Tabs from './Tabs.js';
 
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 3000));
+
 describe('Extension', () => {
   let extension: Extension;
   let state: State;
@@ -228,7 +230,24 @@ describe('Extension', () => {
       expect(res).toEqual(true);
     });
 
+    it('should throw error for rate-limited signing requests', async () => {
+      const registry = new TypeRegistry();
+
+      registry.setSignedExtensions(payload.signedExtensions);
+
+      await expect(
+        tabs.handle(
+          '1615191860871.5',
+          'pub(extrinsic.sign)',
+          payload,
+          'http://localhost:3000',
+          {} as chrome.runtime.Port
+        )
+      ).rejects.toThrow('Rate limit exceeded. Try again later.');
+    });
+
     it('signs with default signed extensions - ethereum', async () => {
+      await sleep();
       const ethAddress = await createAccount('ethereum');
       const ethPair = keyring.getPair(ethAddress);
 
@@ -279,6 +298,7 @@ describe('Extension', () => {
     });
 
     it('signs with user extensions, known types', async () => {
+      await sleep();
       const types = {} as unknown as Record<string, string>;
 
       const userExtensions = {
@@ -345,6 +365,7 @@ describe('Extension', () => {
     });
 
     it('override default signed extension', async () => {
+      await sleep();
       const types = {
         FeeExchangeV1: {
           assetId: 'Compact<AssetId>',
@@ -405,6 +426,7 @@ describe('Extension', () => {
     });
 
     it('signs with user extensions, additional types', async () => {
+      await sleep();
       const types = {
         myCustomType: {
           feeExchange: 'Compact<AssetId>',

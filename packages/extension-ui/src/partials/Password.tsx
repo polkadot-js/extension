@@ -21,7 +21,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const { t } = useTranslation();
   const [password, setPassword] = useState<string | null>(null);
   const [confirmPassword, setConfirmPassword] = useState<string | null>(null);
-  const [passwordStrength, setPasswordStrength] = useState(validatePasswordStrength(''));
+  const [passwordStrength, setPasswordStrength] = useState(validatePasswordStrength('', t));
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [isPasswordResultInit, setIsPasswordResultInit] = useState(false);
 
@@ -32,7 +32,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   const isFirstPasswordValid = useCallback<Validator<string>>((password) => {
     setIsPasswordResultInit(true);
 
-    const strength = validatePasswordStrength(password);
+    const strength = validatePasswordStrength(password, t);
 
     setPasswordStrength(strength);
 
@@ -59,7 +59,7 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         data-input-password
         isFocused={isFocussed}
         label={t('A new password for this account')}
-        onBlur={(handlePasswordBlur)}
+        onBlur={handlePasswordBlur}
         onFocus={handlePasswordFocus}
         onValidatedChange={setPassword}
         type='password'

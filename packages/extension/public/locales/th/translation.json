@@ -158,5 +158,6 @@
   "Export all accounts": "ส่งออกทุกบัญชี",
   "All account": "ทุกบัญชี",
   "password for encrypting all accounts": "รหัสผ่านสำหรับการเข้ารหัสทุกบัญชี",
-  "I want to export all my accounts": "ฉันอยากจะนำออกทุกบัญชี"
+  "I want to export all my accounts": "ฉันอยากจะนำออกทุกบัญชี",
+  "Password must be at least {{length}} characters long": "รหัสผ่านต้องมีอย่างน้อย {{length}} ตัวอักษร"
 }

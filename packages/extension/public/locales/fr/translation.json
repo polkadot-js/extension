@@ -153,5 +153,6 @@
   "Import Account": "Importer",
   "Sign on Ledger": "Signer sur Ledger",
   "Allow use on any chain": "Toutes les blockchains",
-  "Select network": "Sélectionner un réseau"
+  "Select network": "Sélectionner un réseau",
+  "Password must be at least {{length}} characters long": "Le mot de passe doit contenir au moins {{length}} caractères"
 }

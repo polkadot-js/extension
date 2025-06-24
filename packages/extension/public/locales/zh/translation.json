@@ -103,5 +103,6 @@
   "Please write down your wallet's mnemonic seed and keep it in a safe place. The mnemonic can be used to restore your wallet. Keep it carefully to not lose your assets.": "请写下你的钱包助记词，放在安全的地方。这个助记词可以用来恢复你的钱包。小心保管，以免失去你的资产。",
   "You are exporting your account. Keep it safe and don't share it with anyone.": "您正在导出帐户。保管好它，不要与任何人分享。",
   "Manage Website Access": "管理网站访问",
-  "Notifications": "通知"
+  "Notifications": "通知",
+  "Password must be at least {{length}} characters long": "密码必须至少{{length}}个字符"
 }

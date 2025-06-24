@@ -183,5 +183,6 @@
   "Don't ask again": "",
   "Previous": "",
   "It looks like this request is coming from an suspicious origin. Please verify the source carefully.": "",
-  "Password is not strong enough": ""
+  "Password is not strong enough": "",
+  "Password must be at least {{length}} characters long": ""
 }

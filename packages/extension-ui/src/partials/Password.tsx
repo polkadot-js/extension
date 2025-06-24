@@ -19,18 +19,18 @@ const MIN_LENGTH = 6;
 
 export default function Password ({ isFocussed, onChange }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
-  const [pass1, setPass1] = useState<string | null>(null);
-  const [pass2, setPass2] = useState<string | null>(null);
+  const [password, setPassword] = useState<string | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState<string | null>(null);
   const [passwordStrength, setPasswordStrength] = useState(validatePasswordStrength(''));
-  const [isPass1Focused, setIsPass1Focused] = useState(false);
-  const [isPass1ResultInit, setisPass1ResultInit] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+  const [isPasswordResultInit, setIsPasswordResultInit] = useState(false);
 
-  const handlePass1Focus = useCallback((): void => setIsPass1Focused(true), []);
-  const handlePass1Blur = useCallback((): void => setIsPass1Focused(false), []);
+  const handlePasswordFocus = useCallback((): void => setIsPasswordFocused(true), []);
+  const handlePasswordBlur = useCallback((): void => setIsPasswordFocused(false), []);
 
   // Primary password validation using zxcvbn
   const isFirstPasswordValid = useCallback<Validator<string>>((password) => {
-    setisPass1ResultInit(true);
+    setIsPasswordResultInit(true);
 
     const strength = validatePasswordStrength(password);
 
@@ -49,8 +49,8 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
   ), [t]);
 
   useEffect((): void => {
-    onChange(pass1 && pass2 ? pass1 : null);
-  }, [onChange, pass1, pass2]);
+    onChange(password && confirmPassword ? password : null);
+  }, [onChange, password, confirmPassword]);
 
   return (
     <>
@@ -59,21 +59,21 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
         data-input-password
         isFocused={isFocussed}
         label={t('A new password for this account')}
-        onBlur={(handlePass1Blur)}
-        onFocus={handlePass1Focus}
-        onValidatedChange={setPass1}
+        onBlur={(handlePasswordBlur)}
+        onFocus={handlePasswordFocus}
+        onValidatedChange={setPassword}
         type='password'
         validator={isFirstPasswordValid}
       />
-      {isPass1Focused && isPass1ResultInit && <PasswordStrengthIndicator passwordStrength={passwordStrength} />}
-      {pass1 && (
+      {isPasswordFocused && isPasswordResultInit && <PasswordStrengthIndicator passwordStrength={passwordStrength} />}
+      {password && (
         <ValidatedInput
           component={InputWithLabel}
           data-input-repeat-password
           label={t('Repeat password for verification')}
-          onValidatedChange={setPass2}
+          onValidatedChange={setConfirmPassword}
           type='password'
-          validator={isSecondPasswordValid(pass1)}
+          validator={isSecondPasswordValid(password)}
         />
       )}
     </>

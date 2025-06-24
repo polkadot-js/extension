@@ -36,8 +36,8 @@ export default function Password ({ isFocussed, onChange }: Props): React.ReactE
 
     setPasswordStrength(strength);
 
-    if (!strength.isStrong) {
-      return Promise.resolve(Result.error(t(strength.feedback.warning)));
+    if (password.length < MIN_LENGTH) {
+      return Promise.resolve(Result.error(t('Password is too short')));
     }
 
     return Promise.resolve(Result.ok<string>(password));

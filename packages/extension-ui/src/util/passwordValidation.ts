@@ -20,12 +20,10 @@ export interface PasswordStrength {
     warning: string;
     suggestions: string[];
   };
-  isStrong: boolean;
   score: number; // 0-4 (0: very weak, 4: very strong)
 }
 
 const MIN_LENGTH = 6; // Minimum password length requirement
-const MIN_STRENGTH_SCORE = 3; // Minimum zxcvbn score required to consider password strong
 
 export function validatePasswordStrength (password: string): PasswordStrength {
   const result = zxcvbn(password);
@@ -37,7 +35,6 @@ export function validatePasswordStrength (password: string): PasswordStrength {
         suggestions: [`Password must be at least ${MIN_LENGTH} characters long`],
         warning: 'Password is too short'
       },
-      isStrong: false,
       score: 0
     };
   }
@@ -48,9 +45,8 @@ export function validatePasswordStrength (password: string): PasswordStrength {
   return {
     feedback: {
       suggestions,
-      warning: result.feedback.warning || 'Password is not strong enough'
+      warning: result.feedback.warning || ''
     },
-    isStrong: result.score >= MIN_STRENGTH_SCORE, // Password is considered strong if it meets minimum score threshold
     score: result.score
   };
 }

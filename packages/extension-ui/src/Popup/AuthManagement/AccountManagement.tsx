@@ -21,7 +21,6 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
 
-
   useEffect(() => {
     getAuthList()
       .then(({ list }) => {

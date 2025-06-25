@@ -48,10 +48,10 @@ export const validateOrigin = (origin: string): boolean => {
 
   // Check for suspicious patterns
   const suspiciousPatterns = [
-    /https?:\/\//i, // URLs in origin name
-    /[<>]/, // Remaining HTML characters
+    /[<>]/, // HTML characters
     /^\s*$/, // Empty or whitespace only
-    /.{50,}/ // Extremely long names
+    /.{50,}/, // Extremely long names
+    /^(?!https?:\/\/).*:\/\// // Any protocol other than http/https
   ];
 
   return !suspiciousPatterns.some((pattern) => pattern.test(sanitized));

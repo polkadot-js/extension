@@ -158,7 +158,8 @@
     "Export all accounts": "تماماکاؤنٹسبرآمدکریں۔",
     "All account": "تماماکاؤنٹ",
     "password for encrypting all accounts": "تماماکاؤنٹسکوخفیہکرنےکےلیےپاسورڈ۔",
-    "I want to export all my accounts": "میںاپنےتماماکاؤنٹسبرآمدکرناچاہتاہوں۔"
+    "I want to export all my accounts": "میںاپنےتماماکاؤنٹسبرآمدکرناچاہتاہوں۔",
+    "Password must be at least {{length}} characters long": "پاس ورڈ کم از کم {{length}} حروف کا ہونا چاہیے۔"
 }
 
 

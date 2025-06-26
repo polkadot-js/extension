@@ -46,12 +46,18 @@ export const sanitizeOrigin = (origin: string): string => {
 export const validateOrigin = (origin: string): boolean => {
   const sanitized = sanitizeOrigin(origin);
 
+  // Special case: always allow localhost URLs
+  if (/^https?:\/\/(?:localhost|127\.0\.0\.1|0\.0\.0\.0|::1)(?::\d+)?(?:\/|$)/.test(sanitized)) {
+    return true;
+  }
+
   // Check for suspicious patterns
   const suspiciousPatterns = [
     /[<>]/, // HTML characters
     /^\s*$/, // Empty or whitespace only
     /.{50,}/, // Extremely long names
-    /^(?!https?:\/\/).*:\/\// // Any protocol other than http/https
+    /^(?!https?:\/\/).*:\/\//, // Any protocol other than http/https
+    /^https?:\/\/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?::\d+)?(?:\/|$)/ // Raw IP addresses (except localhost)
   ];
 
   return !suspiciousPatterns.some((pattern) => pattern.test(sanitized));

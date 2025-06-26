@@ -121,7 +121,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               <div className='connectedAccountsWrapper'>
                 <Link
                   className='connectedAccounts'
-                  to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
+                  to={connectedTabsUrl.length === 1 ? `/url/manage/${encodeURIComponent(connectedTabsUrl[0])}` : '/auth-list'}
                 >
                   <span className='greenDot'>•</span>Connect Accounts
                 </Link>

@@ -158,5 +158,6 @@
     "Export all accounts": "সমস্ত অ্যাকাউন্ট এক্সপোর্ট করুন",
     "All account": "সমস্ত অ্যাকাউন্ট",
     "password for encrypting all accounts": "সকল অ্যাকাউন্ট এনক্রিপ্ট করার জন্য পাসওয়ার্ড",
-    "I want to export all my accounts": "আমি আমার সকল অ্যাকাউন্ট এক্সপোর্ট করতে চাই"
+    "I want to export all my accounts": "আমি আমার সকল অ্যাকাউন্ট এক্সপোর্ট করতে চাই",
+    "Password must be at least {{length}} characters long": "পাসওয়ার্ড কমপক্ষে {{length}} অক্ষরের হতে হবে"
 }

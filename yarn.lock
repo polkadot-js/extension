@@ -923,16 +923,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/extension-base@npm:0.60.2-1-x, @polkadot/extension-base@workspace:packages/extension-base":
+"@polkadot/extension-base@npm:0.60.2-2-x, @polkadot/extension-base@workspace:packages/extension-base":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-base@workspace:packages/extension-base"
   dependencies:
     "@polkadot/api": "npm:^16.2.2"
     "@polkadot/dev-test": "npm:^0.83.3"
-    "@polkadot/extension-chains": "npm:0.60.2-1-x"
-    "@polkadot/extension-dapp": "npm:0.60.2-1-x"
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
-    "@polkadot/extension-mocks": "npm:0.60.2-1-x"
+    "@polkadot/extension-chains": "npm:0.60.2-2-x"
+    "@polkadot/extension-dapp": "npm:0.60.2-2-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
+    "@polkadot/extension-mocks": "npm:0.60.2-2-x"
     "@polkadot/keyring": "npm:^13.5.2"
     "@polkadot/networks": "npm:^13.5.2"
     "@polkadot/phishing": "npm:^0.25.13"
@@ -949,11 +949,11 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-chains@npm:0.60.2-1-x, @polkadot/extension-chains@workspace:packages/extension-chains":
+"@polkadot/extension-chains@npm:0.60.2-2-x, @polkadot/extension-chains@workspace:packages/extension-chains":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-chains@workspace:packages/extension-chains"
   dependencies:
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
     "@polkadot/networks": "npm:^13.5.2"
     "@polkadot/util": "npm:^13.5.2"
     "@polkadot/util-crypto": "npm:^13.5.2"
@@ -969,7 +969,7 @@ __metadata:
   resolution: "@polkadot/extension-compat-metamask@workspace:packages/extension-compat-metamask"
   dependencies:
     "@metamask/detect-provider": "npm:^2.0.0"
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
     "@polkadot/types": "npm:^16.2.2"
     "@polkadot/util": "npm:^13.5.2"
     tslib: "npm:^2.8.1"
@@ -980,12 +980,12 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-dapp@npm:0.60.2-1-x, @polkadot/extension-dapp@workspace:packages/extension-dapp":
+"@polkadot/extension-dapp@npm:0.60.2-2-x, @polkadot/extension-dapp@workspace:packages/extension-dapp":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-dapp@workspace:packages/extension-dapp"
   dependencies:
     "@polkadot/dev-test": "npm:^0.83.3"
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
     "@polkadot/util": "npm:^13.5.2"
     "@polkadot/util-crypto": "npm:^13.5.2"
     tslib: "npm:^2.8.1"
@@ -996,7 +996,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-inject@npm:0.60.2-1-x, @polkadot/extension-inject@workspace:packages/extension-inject":
+"@polkadot/extension-inject@npm:0.60.2-2-x, @polkadot/extension-inject@workspace:packages/extension-inject":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-inject@workspace:packages/extension-inject"
   dependencies:
@@ -1016,7 +1016,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-mocks@npm:0.60.2-1-x, @polkadot/extension-mocks@workspace:packages/extension-mocks":
+"@polkadot/extension-mocks@npm:0.60.2-2-x, @polkadot/extension-mocks@workspace:packages/extension-mocks":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-mocks@workspace:packages/extension-mocks"
   dependencies:
@@ -1025,7 +1025,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/extension-ui@npm:0.60.2-1-x, @polkadot/extension-ui@workspace:packages/extension-ui":
+"@polkadot/extension-ui@npm:0.60.2-2-x, @polkadot/extension-ui@workspace:packages/extension-ui":
   version: 0.0.0-use.local
   resolution: "@polkadot/extension-ui@workspace:packages/extension-ui"
   dependencies:
@@ -1038,11 +1038,11 @@ __metadata:
     "@polkadot-api/merkleize-metadata": "npm:^1.1.18"
     "@polkadot/api": "npm:^16.2.2"
     "@polkadot/dev-test": "npm:^0.83.3"
-    "@polkadot/extension-base": "npm:0.60.2-1-x"
-    "@polkadot/extension-chains": "npm:0.60.2-1-x"
-    "@polkadot/extension-dapp": "npm:0.60.2-1-x"
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
-    "@polkadot/extension-mocks": "npm:0.60.2-1-x"
+    "@polkadot/extension-base": "npm:0.60.2-2-x"
+    "@polkadot/extension-chains": "npm:0.60.2-2-x"
+    "@polkadot/extension-dapp": "npm:0.60.2-2-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
+    "@polkadot/extension-mocks": "npm:0.60.2-2-x"
     "@polkadot/hw-ledger": "npm:^13.5.2"
     "@polkadot/keyring": "npm:^13.5.2"
     "@polkadot/networks": "npm:^13.5.2"
@@ -1063,6 +1063,9 @@ __metadata:
     "@types/react-router-dom": "npm:^5.3.3"
     "@types/sinon-chrome": "npm:^2.2.15"
     "@wojtekmaj/enzyme-adapter-react-17": "npm:^0.8.0"
+    "@zxcvbn-ts/core": "npm:^3.0.4"
+    "@zxcvbn-ts/language-common": "npm:^3.0.4"
+    "@zxcvbn-ts/language-en": "npm:^3.0.2"
     enzyme: "npm:^3.11.0"
     enzyme-adapter-react-16: "npm:^1.15.7"
     file-saver: "npm:^2.0.5"
@@ -1086,9 +1089,9 @@ __metadata:
   dependencies:
     "@polkadot/api": "npm:^16.2.2"
     "@polkadot/dev": "npm:^0.83.3"
-    "@polkadot/extension-base": "npm:0.60.2-1-x"
-    "@polkadot/extension-inject": "npm:0.60.2-1-x"
-    "@polkadot/extension-ui": "npm:0.60.2-1-x"
+    "@polkadot/extension-base": "npm:0.60.2-2-x"
+    "@polkadot/extension-inject": "npm:0.60.2-2-x"
+    "@polkadot/extension-ui": "npm:0.60.2-2-x"
     browser-resolve: "npm:^2.0.0"
     buffer: "npm:^6.0.3"
     copy-webpack-plugin: "npm:^11.0.0"
@@ -2872,6 +2875,29 @@ __metadata:
     "@zondax/ledger-js": "npm:^1.2.0"
     axios: "npm:^1.8.4"
   checksum: 10/039ffef55b31870f82c6b0f20b518089ad9ce0295d695f880640cb586256adacd4a326c10157ccaf82e897abde7358f9e4e02c069dac672ec90881e21d250722
+  languageName: node
+  linkType: hard
+
+"@zxcvbn-ts/core@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "@zxcvbn-ts/core@npm:3.0.4"
+  dependencies:
+    fastest-levenshtein: "npm:1.0.16"
+  checksum: 10/9036257b0fdc317832a1942769bf5816dedf5ac2379ad6e4d27ef29a87c5e28e8088788fc42efa15510a57f067f4bfce2843342fa248f3598de4e75fb7ae6fbf
+  languageName: node
+  linkType: hard
+
+"@zxcvbn-ts/language-common@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "@zxcvbn-ts/language-common@npm:3.0.4"
+  checksum: 10/90a00418ef0586da77032e59aff45a2c8e6325b21e2930b6c0fdcaba5f9d6c473aac34cfe443d58994dab05c347819fbccfaa310d65b353319ec4f5b63d36c9f
+  languageName: node
+  linkType: hard
+
+"@zxcvbn-ts/language-en@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "@zxcvbn-ts/language-en@npm:3.0.2"
+  checksum: 10/f627a07e4c635dd3f84f0738d480882ab67fa77c114bb7e63343162cbd442dbed6325cd99ef2eff578ac61984f7a7031051f335bf9313e1ad6737ef2e3c6cd25
   languageName: node
   linkType: hard
 
@@ -6813,6 +6839,13 @@ __metadata:
   version: 2.0.6
   resolution: "fast-levenshtein@npm:2.0.6"
   checksum: 10/eb7e220ecf2bab5159d157350b81d01f75726a4382f5a9266f42b9150c4523b9795f7f5d9fbbbeaeac09a441b2369f05ee02db48ea938584205530fe5693cfe1
+  languageName: node
+  linkType: hard
+
+"fastest-levenshtein@npm:1.0.16":
+  version: 1.0.16
+  resolution: "fastest-levenshtein@npm:1.0.16"
+  checksum: 10/ee85d33b5cef592033f70e1c13ae8624055950b4eb832435099cd56aa313d7f251b873bedbc06a517adfaff7b31756d139535991e2406967438e03a1bf1b008e
   languageName: node
   linkType: hard
 

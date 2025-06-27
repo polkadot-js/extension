@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## 0.61.1 June 27, 2025
+
+Changes:
+
+- Implement rate limiting for sign requests  ([#1562](https://github.com/polkadot-js/extension/pull/1562))
+- Prevent phishing validation bypass via credentialed URLs using tldts ([#1560](https://github.com/polkadot-js/extension/pull/1560))
+- feat: add password strength validation ([#1561](https://github.com/polkadot-js/extension/pull/1561))
+- Fixed missing checkmark for connected accounts (website access) ([#1567](https://github.com/polkadot-js/extension/pull/1567))
+
+
 ## 0.60.1 June 18, 2025
 
 Changes:

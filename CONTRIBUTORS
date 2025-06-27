@@ -1,5 +1,5 @@
      634	Jaco                          	2024 (#1302)
-     112	Tarik Gul                     	0.60.1 (#1559)
+     113	Tarik Gul                     	0.61.1 (#1570)
       93	Thibaut Sardan                	Ability to Reject an authentication request instead of ignoring it (#1453)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	Arjun Porwal                  	Prevent phishing validation bypass via credentialed URLs using tldts (#1560)

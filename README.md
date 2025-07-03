@@ -14,7 +14,7 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 ## Documentation and examples
 Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
 
-## Firefox installation from source instructions.
+## Firefox installation from source instructions
 
 1. Uncompress `master-ff-src.zip`
 2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)

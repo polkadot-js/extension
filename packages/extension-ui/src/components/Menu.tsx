@@ -1,26 +1,27 @@
 // Copyright 2019-2025 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 
 import { styled } from '../styled.js';
 
 interface Props {
   children: React.ReactNode;
   className?: string;
-  reference: React.RefObject<HTMLDivElement>;
 }
 
-function Menu ({ children, className, reference }: Props): React.ReactElement<Props> {
+const Menu = forwardRef<HTMLDivElement, Props>(({ children, className }, ref) => {
   return (
     <div
       className={className}
-      ref={reference}
+      ref={ref}
     >
       {children}
     </div>
   );
-}
+});
+
+Menu.displayName = 'Menu';
 
 export default styled(Menu)<Props>`
   background: var(--popupBackground);

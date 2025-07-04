@@ -19,7 +19,7 @@ interface Option {
 
 interface Props {
   className?: string;
-  reference: React.RefObject<HTMLDivElement>;
+  reference: React.RefObject<HTMLDivElement | null>;
 }
 
 const notificationOptions = ['Extension', 'PopUp', 'Window']
@@ -98,7 +98,7 @@ function MenuSettings ({ className, reference }: Props): React.ReactElement<Prop
   return (
     <Menu
       className={className}
-      reference={reference}
+      ref={reference}
     >
       <MenuItem
         className='setting'

@@ -13,7 +13,7 @@ import { styled } from '../styled.js';
 
 interface Props {
   className?: string;
-  reference: React.RefObject<HTMLDivElement>;
+  reference: React.RefObject<HTMLDivElement | null>;
 }
 
 const jsonPath = '/account/restore-json';
@@ -41,7 +41,7 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
   return (
     <Menu
       className={className}
-      reference={reference}
+      ref={reference}
     >
       <MenuItem className='menuItem'>
         <Link to={'/account/create'}>

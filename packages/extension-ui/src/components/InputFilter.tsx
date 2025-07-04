@@ -17,7 +17,7 @@ interface Props {
 }
 
 function InputFilter ({ className, onChange, placeholder, value, withReset = false }: Props) {
-  const inputRef: React.RefObject<HTMLInputElement> | null = useRef(null);
+  const inputRef: React.RefObject<HTMLInputElement | null> = useRef(null);
 
   const onChangeFilter = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
@@ -25,7 +25,7 @@ function InputFilter ({ className, onChange, placeholder, value, withReset = fal
 
   const onResetFilter = useCallback(() => {
     onChange('');
-    inputRef.current && inputRef.current.select();
+    inputRef?.current && inputRef.current.select();
   }, [onChange]);
 
   return (

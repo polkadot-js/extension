@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.61.2 June 27, 2025
+## 0.61.2 July 4, 2025
 
 Changes:
 

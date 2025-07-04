@@ -9,5 +9,11 @@ export default [
     rules: {
       'import/extensions': 'off'
     }
+  },
+  {
+    files: ['**/*.spec.ts', '**/*.spec.tsx'],
+    rules: {
+      'deprecation/deprecation': 'off'
+    }
   }
 ];

@@ -162,8 +162,10 @@ export default class State {
 
   public defaultAuthAccountSelection: string[] = [];
 
-  constructor (providers: Providers = {}) {
+  constructor (providers: Providers = {}, rateLimitInterval = 3000) {
+    assert(rateLimitInterval >= 0, 'Expects non-negative number for rateLimitInterval');
     this.#providers = providers;
+    this.#rateLimitInterval = rateLimitInterval;
   }
 
   public async init () {

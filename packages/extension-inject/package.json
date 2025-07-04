@@ -15,7 +15,7 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.61.2-0-x",
+  "version": "0.61.2",
   "main": "index.js",
   "dependencies": {
     "@polkadot/api": "^16.3.1",

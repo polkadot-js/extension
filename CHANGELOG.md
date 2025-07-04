@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.61.2 July 4, 2025
+
+Changes:
+
+- Update polkadot-js deps ([#1571](https://github.com/polkadot-js/extension/pull/1571))
+
+
 ## 0.61.1 June 27, 2025
 
 Changes:

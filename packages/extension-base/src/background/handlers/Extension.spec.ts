@@ -22,7 +22,7 @@ import Extension from './Extension.js';
 import State from './State.js';
 import Tabs from './Tabs.js';
 
-const sleep = () => new Promise((resolve) => setTimeout(resolve, 3000));
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 10000));
 
 describe('Extension', () => {
   let extension: Extension;

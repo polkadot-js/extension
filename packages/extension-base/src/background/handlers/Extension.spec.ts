@@ -22,17 +22,7 @@ import Extension from './Extension.js';
 import State from './State.js';
 import Tabs from './Tabs.js';
 
-async function waitForRateLimit (readyFn: () => boolean, timeout = 10000) {
-  const start = Date.now();
-
-  while (!readyFn()) {
-    if (Date.now() - start > timeout) {
-      throw new Error('Timeout exceeded while waiting for rate limit to reset');
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 100)); // poll every 100ms
-  }
-}
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 3000));
 
 describe('Extension', () => {
   let extension: Extension;
@@ -257,9 +247,7 @@ describe('Extension', () => {
     });
 
     it('signs with default signed extensions - ethereum', async () => {
-      await waitForRateLimit(() => {
-        return Date.now() - state.lastRequestTimestamps['http://localhost:3000'] >= 3000;
-      });
+      await sleep();
       const ethAddress = await createAccount('ethereum');
       const ethPair = keyring.getPair(ethAddress);
 
@@ -310,9 +298,7 @@ describe('Extension', () => {
     });
 
     it('signs with user extensions, known types', async () => {
-      await waitForRateLimit(() => {
-        return Date.now() - state.lastRequestTimestamps['http://localhost:3000'] >= 3000;
-      });
+      await sleep();
       const types = {} as unknown as Record<string, string>;
 
       const userExtensions = {
@@ -379,9 +365,7 @@ describe('Extension', () => {
     });
 
     it('override default signed extension', async () => {
-      await waitForRateLimit(() => {
-        return Date.now() - state.lastRequestTimestamps['http://localhost:3000'] >= 3000;
-      });
+      await sleep();
       const types = {
         FeeExchangeV1: {
           assetId: 'Compact<AssetId>',
@@ -442,9 +426,7 @@ describe('Extension', () => {
     });
 
     it('signs with user extensions, additional types', async () => {
-      await waitForRateLimit(() => {
-        return Date.now() - state.lastRequestTimestamps['http://localhost:3000'] >= 3000;
-      });
+      await sleep();
       const types = {
         myCustomType: {
           feeExchange: 'Compact<AssetId>',

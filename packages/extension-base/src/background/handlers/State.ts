@@ -226,10 +226,6 @@ export default class State {
     return Object.fromEntries(this.#authUrls);
   }
 
-  public get lastRequestTimestamps (): Record<string, number> {
-    return Object.fromEntries(this.#lastRequestTimestamps);
-  }
-
   private popupClose (): void {
     this.#windows.forEach((id: number) =>
       withErrorLog(() => chrome.windows.remove(id))

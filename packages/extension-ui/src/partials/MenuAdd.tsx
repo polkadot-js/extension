@@ -13,7 +13,7 @@ import { styled } from '../styled.js';
 
 interface Props {
   className?: string;
-  reference: React.MutableRefObject<null>;
+  reference: React.RefObject<HTMLDivElement>;
 }
 
 const jsonPath = '/account/restore-json';

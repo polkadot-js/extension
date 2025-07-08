@@ -1079,6 +1079,7 @@ __metadata:
     "@polkadot/util-crypto": "npm:^13.5.3"
     eventemitter3: "npm:^5.0.1"
     rxjs: "npm:^7.8.1"
+    tldts: "npm:^7.0.8"
     tslib: "npm:^2.8.1"
   languageName: unknown
   linkType: soft

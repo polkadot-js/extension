@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.61.3 July 8, 2025
+
+Changes:
+
+- Revert #1560 ([#1573](https://github.com/polkadot-js/extension/pull/1573))
+
+
 ## 0.61.2 July 4, 2025
 
 Changes:

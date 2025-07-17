@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.61.4 July 16, 2025
+
+Changes:
+
+- Update polkadot-api and polkadot-js ([#1575](https://github.com/polkadot-js/extension/pull/1575))
+
+
 ## 0.61.3 July 8, 2025
 
 Changes:

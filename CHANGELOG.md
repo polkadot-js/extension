@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.61.5 July 30, 2025
+
+Changes:
+
+- fix: signing extrinsics on ledger device ([#1579](https://github.com/polkadot-js/extension/pull/1579))
+- Update polkadot-api and polkadot-js ([#1580](https://github.com/polkadot-js/extension/pull/1580))
+
+
 ## 0.61.4 July 16, 2025
 
 Changes:

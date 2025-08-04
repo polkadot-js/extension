@@ -35,7 +35,7 @@ describe('Extension', () => {
 
       keyring.loadAll({ store: new AccountsStore() });
 
-      state = new State();
+      state = new State({}, 0);
       await state.init();
       tabs = new Tabs(state);
 

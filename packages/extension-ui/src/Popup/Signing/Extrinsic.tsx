@@ -157,7 +157,7 @@ function Extrinsic ({ className, payload, request: { blockNumber, genesisHash, m
           <td className='data'>{formatNumber(payload.tip)}</td>
         </tr>
       )}
-      {assetId && (
+      {!!assetId && (
         <tr>
           <td className='label'>{t('assetId')}</td>
           <td className='data'>

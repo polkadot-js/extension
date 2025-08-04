@@ -36,9 +36,9 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
   const [connectedTabsUrl, setConnectedTabsUrl] = useState<string[]>([]);
   const { t } = useTranslation();
   const addIconRef = useRef(null);
-  const addMenuRef = useRef(null);
+  const addMenuRef = useRef<HTMLDivElement>(null);
   const setIconRef = useRef(null);
-  const setMenuRef = useRef(null);
+  const setMenuRef = useRef<HTMLDivElement>(null);
   const isConnected = useMemo(() => connectedTabsUrl.length >= 1
     , [connectedTabsUrl]);
   const onAction = useContext(ActionContext);
@@ -121,7 +121,7 @@ function Header ({ children, className = '', onFilter, showAdd, showBackArrow, s
               <div className='connectedAccountsWrapper'>
                 <Link
                   className='connectedAccounts'
-                  to={connectedTabsUrl.length === 1 ? `/url/manage/${connectedTabsUrl[0]}` : '/auth-list'}
+                  to={connectedTabsUrl.length === 1 ? `/url/manage/${encodeURIComponent(connectedTabsUrl[0])}` : '/auth-list'}
                 >
                   <span className='greenDot'>•</span>Connect Accounts
                 </Link>

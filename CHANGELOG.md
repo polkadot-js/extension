@@ -1,5 +1,73 @@
 # CHANGELOG
 
+## 0.61.5 July 30, 2025
+
+Changes:
+
+- fix: signing extrinsics on ledger device ([#1579](https://github.com/polkadot-js/extension/pull/1579))
+- Update polkadot-api and polkadot-js ([#1580](https://github.com/polkadot-js/extension/pull/1580))
+
+
+## 0.61.4 July 16, 2025
+
+Changes:
+
+- Update polkadot-api and polkadot-js ([#1575](https://github.com/polkadot-js/extension/pull/1575))
+
+
+## 0.61.3 July 8, 2025
+
+Changes:
+
+- Revert #1560 ([#1573](https://github.com/polkadot-js/extension/pull/1573))
+
+
+## 0.61.2 July 4, 2025
+
+Changes:
+
+- Update polkadot-js deps ([#1571](https://github.com/polkadot-js/extension/pull/1571))
+
+
+## 0.61.1 June 27, 2025
+
+Changes:
+
+- Implement rate limiting for sign requests  ([#1562](https://github.com/polkadot-js/extension/pull/1562))
+- Prevent phishing validation bypass via credentialed URLs using tldts ([#1560](https://github.com/polkadot-js/extension/pull/1560))
+- feat: add password strength validation ([#1561](https://github.com/polkadot-js/extension/pull/1561))
+- Fixed missing checkmark for connected accounts (website access) ([#1567](https://github.com/polkadot-js/extension/pull/1567))
+
+
+## 0.60.1 June 18, 2025
+
+Changes:
+
+- Sanitize dApp origin ([#1554](https://github.com/polkadot-js/extension/pull/1554))
+- Enforce distinct authorization for HTTP and HTTPS origins ([#1555](https://github.com/polkadot-js/extension/pull/1555))
+- Use Map instead of object for storing authorized URLs ([#1556](https://github.com/polkadot-js/extension/pull/1556))
+- Update polkadot-js deps ([#1557](https://github.com/polkadot-js/extension/pull/1557))
+- Set yarn to 4.9.2 ([#1558](https://github.com/polkadot-js/extension/pull/1558))
+
+
+## 0.59.2 June 5, 2025
+
+Changes:
+
+- Upgrade polkadot-api, and polkadot-js deps ([#1552](https://github.com/polkadot-js/extension/pull/1552))
+
+
+## 0.59.1 May 30, 2025
+
+Changes:
+
+- Upgrade @polkadot/* deps ([#1550](https://github.com/polkadot-js/extension/pull/1550))
+    ```
+    @polkdot/api -> 16.0.1
+    @polkadot/common -> 13.5.1
+    @polkadot/phishing -> 0.25.11
+    ```
+
 ## 0.58.10 May 14, 2025
 
 Changes:

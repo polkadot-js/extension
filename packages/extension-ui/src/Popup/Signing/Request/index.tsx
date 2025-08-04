@@ -11,7 +11,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
-import { useTranslation } from '../../../hooks/index.js';
+import { useMetadata, useTranslation } from '../../../hooks/index.js';
 import { approveSignSignature } from '../../../messaging.js';
 import Bytes from '../Bytes.js';
 import Extrinsic from '../Extrinsic.js';
@@ -48,6 +48,15 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const chain = useMetadata(genesisHash);
+
+  useEffect((): void => {
+    // When the chain and request are ready, configure the chain's registry.
+    // This will be picked up by LedgerSign.
+    if (chain && !isRawPayload(request.payload)) {
+      chain.registry.setSignedExtensions(request.payload.signedExtensions, chain.definition.userExtensions);
+    }
+  }, [chain, request]);
 
   useEffect((): void => {
     const payload = request.payload;

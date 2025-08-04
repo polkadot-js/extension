@@ -13,6 +13,8 @@ interface BasicProps {
   isError?: boolean;
   value?: string | null;
   onChange?: (value: string) => void;
+  onFocus?: () => void;
+  onBlur?: () => void;
 }
 
 type Props<T extends BasicProps> = T & {

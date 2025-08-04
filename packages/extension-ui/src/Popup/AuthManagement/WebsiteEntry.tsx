@@ -33,7 +33,7 @@ function WebsiteEntry ({ className = '', info: { authorizedAccounts, isAllowed }
       </div>
       <Link
         className='connectedAccounts'
-        to={`/url/manage/${url}`}
+        to={`/url/manage/${encodeURIComponent(url)}`}
       >{
           authorizedAccounts?.length
             ? t('{{total}} accounts', {

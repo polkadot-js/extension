@@ -18,6 +18,7 @@ interface Props {
   isReadOnly?: boolean;
   label: string;
   onBlur?: () => void;
+  onFocus?: () => void;
   onChange?: (value: string) => void;
   onEnter?: () => void;
   placeholder?: string;
@@ -26,7 +27,7 @@ interface Props {
   withoutMargin?: boolean;
 }
 
-function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
+function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused, isReadOnly, label = '', onBlur, onChange, onEnter, onFocus, placeholder, type = 'text', value, withoutMargin }: Props): React.ReactElement<Props> {
   const [isCapsLock, setIsCapsLock] = useState(false);
   const { t } = useTranslation();
 
@@ -65,6 +66,7 @@ function InputWithLabel ({ className, defaultValue, disabled, isError, isFocused
         disabled={disabled}
         onBlur={onBlur}
         onChange={_onChange}
+        onFocus={onFocus}
         onKeyPress={_checkKey}
         placeholder={placeholder}
         readOnly={isReadOnly}

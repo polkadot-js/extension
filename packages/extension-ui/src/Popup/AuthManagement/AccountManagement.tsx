@@ -16,6 +16,7 @@ interface Props {
 
 function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   const { url } = useParams<{url: string}>();
+  const decodedUrl = decodeURIComponent(url);
   const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const { t } = useTranslation();
   const onAction = useContext(ActionContext);
@@ -23,22 +24,22 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
   useEffect(() => {
     getAuthList()
       .then(({ list }) => {
-        if (!list[url]) {
+        if (!list[decodedUrl]) {
           return;
         }
 
-        setSelectedAccounts && setSelectedAccounts(list[url].authorizedAccounts);
+        setSelectedAccounts && setSelectedAccounts(list[decodedUrl].authorizedAccounts);
       })
       .catch(console.error);
-  }, [setSelectedAccounts, url]);
+  }, [setSelectedAccounts, decodedUrl]);
 
   const _onApprove = useCallback(
     (): void => {
-      updateAuthorization(selectedAccounts, url)
+      updateAuthorization(selectedAccounts, decodedUrl)
         .then(() => onAction('../index.js'))
         .catch(console.error);
     },
-    [onAction, selectedAccounts, url]
+    [onAction, selectedAccounts, decodedUrl]
   );
 
   return (
@@ -46,13 +47,13 @@ function AccountManagement ({ className }: Props): React.ReactElement<Props> {
       <Header
         showBackArrow
         smallMargin={true}
-        text={t('Accounts connected to {{url}}', { replace: { url } })}
+        text={t('Accounts connected to {{url}}', { replace: { url: decodedUrl } })}
       />
       <div className='content'>
         <AccountSelection
-          origin={url}
+          origin={decodedUrl}
           showHidden={true}
-          url={url}
+          url={decodedUrl}
           withWarning={false}
         />
         <div className='footer'>

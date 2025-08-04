@@ -15,19 +15,19 @@
   },
   "sideEffects": true,
   "type": "module",
-  "version": "0.58.10",
+  "version": "0.61.5",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/api": "^15.10.2",
-    "@polkadot/rpc-provider": "^15.10.2",
-    "@polkadot/types": "^15.10.2",
-    "@polkadot/util": "^13.5.1",
-    "@polkadot/util-crypto": "^13.5.1",
-    "@polkadot/x-global": "^13.5.1",
+    "@polkadot/api": "^16.4.3",
+    "@polkadot/rpc-provider": "^16.4.3",
+    "@polkadot/types": "^16.4.3",
+    "@polkadot/util": "^13.5.4",
+    "@polkadot/util-crypto": "^13.5.4",
+    "@polkadot/x-global": "^13.5.4",
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@polkadot/dev-test": "^0.83.2",
+    "@polkadot/dev-test": "^0.83.3",
     "@types/chrome": "^0.0.254",
     "@types/firefox-webext-browser": "^111.0.5"
   },

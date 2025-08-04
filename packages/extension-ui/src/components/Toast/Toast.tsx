@@ -6,7 +6,7 @@ import React from 'react';
 import { styled } from '../../styled.js';
 
 interface Props {
-  content: React.ReactChild;
+  content: React.ReactNode;
   className?: string;
   visible?: boolean;
 }

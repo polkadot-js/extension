@@ -126,7 +126,11 @@ async function extractMetadata (store: MetadataStore): Promise<void> {
 }
 
 export default class State {
-  #authUrls: AuthUrls = {};
+  #authUrls = new Map<string, AuthUrlInfo>();
+
+  #lastRequestTimestamps = new Map<string, number>();
+  #maxEntries = 10;
+  #rateLimitInterval = 3000; // 3 seconds
 
   readonly #authRequests: Record<string, AuthRequest> = {};
 
@@ -158,8 +162,10 @@ export default class State {
 
   public defaultAuthAccountSelection: string[] = [];
 
-  constructor (providers: Providers = {}) {
+  constructor (providers: Providers = {}, rateLimitInterval = 3000) {
+    assert(rateLimitInterval >= 0, 'Expects non-negative number for rateLimitInterval');
     this.#providers = providers;
+    this.#rateLimitInterval = rateLimitInterval;
   }
 
   public async init () {
@@ -169,10 +175,10 @@ export default class State {
     const authString = storageAuthUrls?.[AUTH_URLS_KEY] || '{}';
     const previousAuth = JSON.parse(authString) as AuthUrls;
 
-    this.#authUrls = previousAuth;
+    this.#authUrls = new Map(Object.entries(previousAuth));
 
     // Initialize authUrlSubjects for each URL
-    Object.entries(previousAuth).forEach(([url, authInfo]) => {
+    this.#authUrls.forEach((authInfo, url) => {
       this.authUrlSubjects[url] = new BehaviorSubject<AuthUrlInfo>(authInfo);
     });
 
@@ -219,7 +225,7 @@ export default class State {
   }
 
   public get authUrls (): AuthUrls {
-    return this.#authUrls;
+    return Object.fromEntries(this.#authUrls);
   }
 
   private popupClose (): void {
@@ -256,7 +262,7 @@ export default class State {
         url
       };
 
-      this.#authUrls[strippedUrl] = authInfo;
+      this.#authUrls.set(strippedUrl, authInfo);
 
       if (!this.authUrlSubjects[strippedUrl]) {
         this.authUrlSubjects[strippedUrl] = new BehaviorSubject<AuthUrlInfo>(authInfo);
@@ -328,7 +334,7 @@ export default class State {
   }
 
   private async saveCurrentAuthList () {
-    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(this.#authUrls) });
+    await chrome.storage.local.set({ [AUTH_URLS_KEY]: JSON.stringify(Object.fromEntries(this.#authUrls)) });
   }
 
   private async saveDefaultAuthAccounts () {
@@ -377,11 +383,24 @@ export default class State {
   };
 
   public stripUrl (url: string): string {
-    assert(url && (url.startsWith('http:') || url.startsWith('https:') || url.startsWith('ipfs:') || url.startsWith('ipns:')), `Invalid url ${url}, expected to start with http: or https: or ipfs: or ipns:`);
+    try {
+      const parsedUrl = new URL(url);
 
-    const parts = url.split('/');
+      if (!['http:', 'https:', 'ipfs:', 'ipns:'].includes(parsedUrl.protocol)) {
+        throw new Error(`Invalid protocol ${parsedUrl.protocol}`);
+      }
 
-    return parts[2];
+      // For ipfs/ipns which don't have a standard origin, we handle it differently.
+      if (parsedUrl.protocol === 'ipfs:' || parsedUrl.protocol === 'ipns:') {
+        // ipfs://<hash> | ipns://<hash>
+        return `${parsedUrl.protocol}//${parsedUrl.hostname}`;
+      }
+
+      return parsedUrl.origin;
+    } catch (e) {
+      console.error(e);
+      throw new Error('Invalid URL');
+    }
   }
 
   private updateIcon (shouldClose?: boolean): void {
@@ -404,11 +423,11 @@ export default class State {
   }
 
   public async removeAuthorization (url: string): Promise<AuthUrls> {
-    const entry = this.#authUrls[url];
+    const entry = this.#authUrls.get(url);
 
     assert(entry, `The source ${url} is not known`);
 
-    delete this.#authUrls[url];
+    this.#authUrls.delete(url);
     await this.saveCurrentAuthList();
 
     if (this.authUrlSubjects[url]) {
@@ -416,7 +435,7 @@ export default class State {
       this.authUrlSubjects[url].next(entry);
     }
 
-    return this.#authUrls;
+    return this.authUrls;
   }
 
   private updateIconAuth (shouldClose?: boolean): void {
@@ -436,8 +455,13 @@ export default class State {
 
   public async updateAuthorizedAccounts (authorizedAccountsDiff: AuthorizedAccountsDiff): Promise<void> {
     authorizedAccountsDiff.forEach(([url, authorizedAccountDiff]) => {
-      this.#authUrls[url].authorizedAccounts = authorizedAccountDiff;
-      this.authUrlSubjects[url].next(this.#authUrls[url]);
+      const authInfo = this.#authUrls.get(url);
+
+      if (authInfo) {
+        authInfo.authorizedAccounts = authorizedAccountDiff;
+        this.#authUrls.set(url, authInfo);
+        this.authUrlSubjects[url].next(authInfo);
+      }
     });
 
     await this.saveCurrentAuthList();
@@ -453,9 +477,11 @@ export default class State {
 
     assert(!isDuplicate, `The source ${url} has a pending authorization request`);
 
-    if (this.#authUrls[idStr]) {
+    if (this.#authUrls.has(idStr)) {
       // this url was seen in the past
-      assert(this.#authUrls[idStr].authorizedAccounts || this.#authUrls[idStr].isAllowed, `The source ${url} is not allowed to interact with this extension`);
+      const authInfo = this.#authUrls.get(idStr);
+
+      assert(authInfo?.authorizedAccounts || authInfo?.isAllowed, `The source ${url} is not allowed to interact with this extension`);
 
       return {
         authorizedAccounts: [],
@@ -480,7 +506,7 @@ export default class State {
   }
 
   public ensureUrlAuthorized (url: string): boolean {
-    const entry = this.#authUrls[this.stripUrl(url)];
+    const entry = this.#authUrls.get(this.stripUrl(url));
 
     assert(entry, `The source ${url} has not been enabled yet`);
 
@@ -595,8 +621,32 @@ export default class State {
     return true;
   }
 
+  private handleSignRequest (origin: string) {
+    const now = Date.now();
+    const lastTime = this.#lastRequestTimestamps.get(origin) || 0;
+
+    if (now - lastTime < this.#rateLimitInterval) {
+      throw new Error('Rate limit exceeded. Try again later.');
+    }
+
+    // If we're about to exceed max entries, evict the oldest
+    if (!this.#lastRequestTimestamps.has(origin) && this.#lastRequestTimestamps.size >= this.#maxEntries) {
+      const oldestKey = this.#lastRequestTimestamps.keys().next().value;
+
+      oldestKey && this.#lastRequestTimestamps.delete(oldestKey);
+    }
+
+    this.#lastRequestTimestamps.set(origin, now);
+  }
+
   public sign (url: string, request: RequestSign, account: AccountJson): Promise<ResponseSigning> {
     const id = getId();
+
+    try {
+      this.handleSignRequest(url);
+    } catch (error) {
+      return Promise.reject(error);
+    }
 
     return new Promise((resolve, reject): void => {
       this.#signRequests[id] = {

@@ -291,7 +291,7 @@ function Address ({ actions, address, children, className, genesisHash, isExtern
             {showActionsMenu && (
               <Menu
                 className={`movableMenu ${moveMenuUp ? 'isMoved' : ''}`}
-                reference={actMenuRef}
+                ref={actMenuRef}
               >
                 {actions}
               </Menu>

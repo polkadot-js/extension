@@ -84,7 +84,7 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
   return ledger;
 }
 
-export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEcdsa = false): State {
+export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEthereum = false): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);
@@ -157,20 +157,14 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     // Just in case, but this shouldn't be triggered
     assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
-
     const currApp = settings.get().ledgerApp;
-
     if (currApp === 'generic' || currApp === 'migration') {
-      if (isEcdsa) {
-        // It can either be use MultiSignature::Ecdsa or EthereumSignature so we need to
-        // set the type accordingly
-        const keyringType = chosenNetwork.chainType == 'ethereum'? 'ethereum' : 'ecdsa';
-
+      if (isEthereum) {
         (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
           .then((res) => {
             setIsLoading(false);
-            setAddress(res.publicKey);
-            setType(keyringType);
+            setAddress(`0x${res.address}`);
+            setType('ethereum');
           }).catch((e: Error) => {
             handleGetAddressError(e, genesis);
           });
@@ -196,7 +190,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountIndex, addressOffset, genesis, ledger, isEcdsa]);
+  }, [accountIndex, addressOffset, genesis, ledger, isEthereum]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);

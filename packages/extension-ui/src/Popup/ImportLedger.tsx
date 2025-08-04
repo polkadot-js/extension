@@ -39,11 +39,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<HexString | null>(null);
-  const [isEcdsa, setIsEcdsa] = useState(false);
+  const [isEthereum, setIsEthereum] = useState(false);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
-  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEcdsa);
-
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEthereum);
   useEffect(() => {
     if (address) {
       settings.set({ ledgerConn: 'webusb' });
@@ -108,6 +107,14 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           name={name}
           type={type ?? undefined}
         />
+        <div className='ethereum-toggle'>
+              <Switch
+                checked={isEthereum}
+                checkedLabel={t('Ethereum Account')}
+                onChange={setIsEthereum}
+                uncheckedLabel={t('ED25519 Account')}
+              />
+            </div>
         <Dropdown
           className='network'
           label={t('Network')}
@@ -139,14 +146,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
               options={addOps.current}
               value={addressOffset}
             />
-            <div className='ecdsa-toggle'>
-              <Switch
-                checked={isEcdsa}
-                checkedLabel={t('ECDSA Account')}
-                onChange={setIsEcdsa}
-                uncheckedLabel={t('ED25519 Account')}
-              />
-            </div>
+
           </>
         )}
         {!!ledgerWarning && (
@@ -194,7 +194,7 @@ export default styled(ImportLedger)<Props>`
     margin-right: 0.3rem;
   }
 
-  .ecdsa-toggle {
+  .ethereum-toggle {
     margin: 1rem 0;
   }
 `;

@@ -116,7 +116,7 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             addressOffset={addressOffset || 0}
             error={error}
             genesisHash={json.genesisHash}
-            isEcdsa={type === 'ecdsa'}
+            isEthereum={type === 'ethereum'}
             onSignature={_onSignature}
             payloadExt={payload}
             payloadJson={json}

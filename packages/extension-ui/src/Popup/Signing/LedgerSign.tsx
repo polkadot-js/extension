@@ -14,15 +14,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import settings from '@polkadot/ui-settings';
-import { assert, hexToU8a, objectSpread, u8aToHex } from '@polkadot/util';
+import { assert, objectSpread, u8aToHex } from '@polkadot/util';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
 import { Button, Warning } from '../../components/index.js';
 import { useLedger, useMetadata, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
-import { encodeAddress } from '@polkadot/util-crypto';
-//import type { KeypairType } from '@polkadot/util-crypto/types';
-//import { blake2AsU8a, keccakAsU8a } from '@polkadot/util-crypto';
 
 interface Props {
   accountIndex?: number;
@@ -30,7 +27,7 @@ interface Props {
   className?: string;
   error: string | null;
   genesisHash?: string;
-  isEcdsa?: boolean;
+  isEthereum?: boolean;
   onSignature?: ({ signature }: { signature: HexString }, signedTransaction?: HexString) => void;
   payloadJson?: SignerPayloadJSON;
   payloadExt?: ExtrinsicPayload
@@ -59,12 +56,12 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, isEcdsa = false, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, isEthereum = false, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
   //@ts-ignore
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: ledgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEcdsa);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: ledgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
     if (ledgerError) {
@@ -100,12 +97,9 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
         const metaBuff = Buffer.from(txMetadata);
 
-        if (isEcdsa) {
-          //let hashedMessage = ledgerType == 'ecdsa'? blake2AsU8a(raw.toU8a(true), undefined, undefined, false) : keccakAsU8a(raw.toU8a(true), undefined, false);
-
+        if (isEthereum) {
           (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
-            .then((signature) => {
-              ledgerType == 'ecdsa' ? signature.signature = `0x${'02'+ signature.signature}` : null;
+            .then(({signature}) => {
 
               const extrinsic = chain.registry.createType(
                 'Extrinsic',
@@ -113,23 +107,17 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
                 { version: 4 }
               );
 
-              const sigU8a = hexToU8a(signature.signature);
 
-              console.log("Sig byte length:", sigU8a.length); // should be 65
-              console.log("Sig hex:", signature.signature);
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
-                .then(({ publicKey }) => {
-                  console.log('Public Key:', publicKey);
-                  extrinsic.addSignature(publicKey, signature.signature, raw.toHex());
-                  onSignature(signature, extrinsic.toHex());
+                .then(({ address }) => {
+                  extrinsic.addSignature(`0x${address}`, signature, raw.toHex());
+                  onSignature({signature}, extrinsic.toHex());
                 })
                 .catch((e: Error) => {
-                  console.log(e)
                   setError(e.message);
                   setIsBusy(false);
                 });
             }).catch((e: Error) => {
-              console.log(e)
               setError(e.message);
               setIsBusy(false);
             });
@@ -166,7 +154,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           });
       }
     },
-    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError, isEcdsa]
+    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError, isEthereum]
   );
 
   return (

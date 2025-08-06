@@ -60,8 +60,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
-  //@ts-ignore
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning, type: ledgerType } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, type: _ledgerType, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
     if (ledgerError) {
@@ -94,24 +93,23 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         if (!chain?.definition.rawMetadata) {
           setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
         }
+
         const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
         const metaBuff = Buffer.from(txMetadata);
 
         if (isEthereum) {
           (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
-            .then(({signature}) => {
-
+            .then(({ signature }) => {
               const extrinsic = chain.registry.createType(
                 'Extrinsic',
                 { method: raw.method },
                 { version: 4 }
               );
 
-
               (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
                 .then(({ address }) => {
                   extrinsic.addSignature(`0x${address}`, signature, raw.toHex());
-                  onSignature({signature}, extrinsic.toHex());
+                  onSignature({ signature }, extrinsic.toHex());
                 })
                 .catch((e: Error) => {
                   setError(e.message);

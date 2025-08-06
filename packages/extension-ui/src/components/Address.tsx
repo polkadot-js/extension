@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
+import { hexToU8a } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
@@ -26,7 +27,6 @@ import { AccountContext, SettingsContext } from './contexts.js';
 import Identicon from './Identicon.js';
 import Menu from './Menu.js';
 import Svg from './Svg.js';
-import { hexToU8a } from '@polkadot/util';
 
 export interface Props {
   actions?: React.ReactNode;

@@ -158,6 +158,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     // Just in case, but this shouldn't be triggered
     assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
     const currApp = settings.get().ledgerApp;
+
     if (currApp === 'generic' || currApp === 'migration') {
       if (isEthereum) {
         (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)

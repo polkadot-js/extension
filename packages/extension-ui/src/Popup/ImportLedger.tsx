@@ -43,6 +43,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEthereum);
+
   useEffect(() => {
     if (address) {
       settings.set({ ledgerConn: 'webusb' });
@@ -108,13 +109,13 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           type={type ?? undefined}
         />
         <div className='ethereum-toggle'>
-              <Switch
-                checked={isEthereum}
-                checkedLabel={t('Ethereum Account')}
-                onChange={setIsEthereum}
-                uncheckedLabel={t('ED25519 Account')}
-              />
-            </div>
+          <Switch
+            checked={isEthereum}
+            checkedLabel={t('Ethereum Account')}
+            onChange={setIsEthereum}
+            uncheckedLabel={t('ED25519 Account')}
+          />
+        </div>
         <Dropdown
           className='network'
           label={t('Network')}

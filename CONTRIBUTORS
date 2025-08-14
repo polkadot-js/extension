@@ -1,7 +1,7 @@
      634	Jaco                          	2024 (#1302)
      118	Tarik Gul                     	0.61.4 (#1576)
       93	Thibaut Sardan                	Ability to Reject an authentication request instead of ignoring it (#1453)
-      10	Arjun Porwal                  	chore: bump deps (#1582)
+      11	Arjun Porwal                  	0.61.6 (#1583)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	Francis O'Brien               	feat: add cancel authorization request functionality and improve UI components (#1491)
        5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)

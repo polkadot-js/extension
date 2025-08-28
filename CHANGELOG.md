@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.61.7 Aug 28, 2025
+
+Changes:
+
+- Update polkadot-api, @polkadot/common, @polkadot/api, @polkadot/ui, @polkadot/phishing  ([#1588](https://github.com/polkadot-js/extension/pull/1588))
+
+
 ## 0.61.6 Aug 15, 2025
 
 Changes:

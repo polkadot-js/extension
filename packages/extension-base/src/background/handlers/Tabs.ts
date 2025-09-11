@@ -61,8 +61,6 @@ export default class Tabs {
       return [];
     }
 
-    console.log('accounts', accounts);
-
     return accounts.filter(
       (allAcc) =>
         auth.authorizedAccounts

@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
-import { hexToU8a } from '@polkadot/util';
+import { hexToU8a, isHex } from '@polkadot/util';
 import { decodeAddress, encodeAddress } from '@polkadot/util-crypto';
 
 import details from '../assets/details.svg';
@@ -72,7 +72,7 @@ function findAccountByAddress (accounts: AccountJson[], _address: string): Accou
 // recodes an supplied address using the prefix/genesisHash, include the actual saved account & chain
 function recodeAddress (address: string, accounts: AccountWithChildren[], chain: Chain | null, settings: SettingsStruct): Recoded {
   // decode and create a shortcut for the encoded address
-  const publicKey = address.startsWith('0x') ? hexToU8a(address) : decodeAddress(address);
+  const publicKey = isHex(address) ? hexToU8a(address) : decodeAddress(address);
   // find our account using the actual publicKey, and then find the associated chain
   const account = findSubstrateAccount(accounts, publicKey);
   const prefix = chain ? chain.ss58Format : (settings.prefix === -1 ? 42 : settings.prefix);

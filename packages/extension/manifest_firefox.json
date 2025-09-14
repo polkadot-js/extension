@@ -2,8 +2,8 @@
   "author": "polkadot.{js}",
   "description": "Manage your Polkadot accounts outside of dapps. Injects the accounts and allows signing transactions for a specific account.",
   "homepage_url": "https://github.com/polkadot-js/extension",
-  "name": "polkadot{.js} extension",
-  "short_name": "polkadot{.js}",
+  "name": "Polkadot Developer Signer",
+  "short_name": "Polkadot Developer Signer",
   "manifest_version": 3,
   "permissions": ["storage", "tabs"],
   "background": {
@@ -11,7 +11,7 @@
     "type": "module"
   },
   "action": {
-    "default_title": "polkadot{.js}",
+    "default_title": "Polkadot Developer Signer",
     "default_popup": "index.html"
   },
   "browser_specific_settings": {

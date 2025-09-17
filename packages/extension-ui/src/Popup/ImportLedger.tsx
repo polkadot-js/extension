@@ -9,7 +9,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 
 import { settings } from '@polkadot/ui-settings';
 
-import { ActionContext, Address, Button, ButtonArea, Dropdown, VerticalSpace, Warning } from '../components/index.js';
+import { ActionContext, Address, Button, ButtonArea, Dropdown, Switch, VerticalSpace, Warning } from '../components/index.js';
 import { useLedger, useTranslation } from '../hooks/index.js';
 import { createAccountHardware } from '../messaging.js';
 import { Header, Name } from '../partials/index.js';
@@ -39,9 +39,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setIsBusy] = useState(false);
   const [genesis, setGenesis] = useState<HexString | null>(null);
+  const [isEthereum, setIsEthereum] = useState(false);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
-  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
     if (address) {
@@ -72,10 +73,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 
   const _onSave = useCallback(
     () => {
-      if (address && genesis && name) {
+      if (address && genesis && name && type) {
         setIsBusy(true);
 
-        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis)
+        createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis, type)
           .then(() => onAction('/'))
           .catch((error: Error) => {
             console.error(error);
@@ -85,7 +86,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           });
       }
     },
-    [accountIndex, address, addressOffset, genesis, name, onAction]
+    [accountIndex, address, addressOffset, genesis, name, onAction, type]
   );
 
   // select element is returning a string
@@ -105,7 +106,16 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           isExternal
           isHardware
           name={name}
+          type={type ?? undefined}
         />
+        <div className='ethereum-toggle'>
+          <Switch
+            checked={isEthereum}
+            checkedLabel={t('Ethereum Account')}
+            onChange={setIsEthereum}
+            uncheckedLabel={t('ED25519 Account')}
+          />
+        </div>
         <Dropdown
           className='network'
           label={t('Network')}
@@ -137,6 +147,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
               options={addOps.current}
               value={addressOffset}
             />
+
           </>
         )}
         {!!ledgerWarning && (
@@ -182,5 +193,9 @@ function ImportLedger ({ className }: Props): React.ReactElement {
 export default styled(ImportLedger)<Props>`
   .refreshIcon {
     margin-right: 0.3rem;
+  }
+
+  .ethereum-toggle {
+    margin: 1rem 0;
   }
 `;

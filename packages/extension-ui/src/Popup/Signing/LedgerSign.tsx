@@ -27,6 +27,7 @@ interface Props {
   className?: string;
   error: string | null;
   genesisHash?: string;
+  isEthereum?: boolean;
   onSignature?: ({ signature }: { signature: HexString }, signedTransaction?: HexString) => void;
   payloadJson?: SignerPayloadJSON;
   payloadExt?: ExtrinsicPayload
@@ -55,11 +56,11 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
-function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
+function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, isEthereum = false, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
   const chain = useMetadata(genesisHash);
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset);
+  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, type: _ledgerType, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
     if (ledgerError) {
@@ -94,30 +95,53 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         }
 
         const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
-
         const metaBuff = Buffer.from(txMetadata);
 
-        (ledger as LedgerGeneric).signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
-          .then((signature) => {
-            const extrinsic = chain.registry.createType(
-              'Extrinsic',
-              { method: raw.method },
-              { version: 4 }
-            );
+        if (isEthereum) {
+          (ledger as LedgerGeneric).signWithMetadataEcdsa(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
+            .then(({ signature }) => {
+              const extrinsic = chain.registry.createType(
+                'Extrinsic',
+                { method: raw.method },
+                { version: 4 }
+              );
 
-            (ledger as LedgerGeneric).getAddress(chain.ss58Format, false, accountIndex, addressOffset)
-              .then(({ address }) => {
-                extrinsic.addSignature(address, signature.signature, raw.toHex());
-                onSignature(signature, extrinsic.toHex());
-              })
-              .catch((e: Error) => {
-                setError(e.message);
-                setIsBusy(false);
-              });
-          }).catch((e: Error) => {
-            setError(e.message);
-            setIsBusy(false);
-          });
+              (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
+                .then(({ address }) => {
+                  extrinsic.addSignature(`0x${address}`, signature, raw.toHex());
+                  onSignature({ signature }, extrinsic.toHex());
+                })
+                .catch((e: Error) => {
+                  setError(e.message);
+                  setIsBusy(false);
+                });
+            }).catch((e: Error) => {
+              setError(e.message);
+              setIsBusy(false);
+            });
+        } else {
+          (ledger as LedgerGeneric).signWithMetadata(raw.toU8a(true), accountIndex, addressOffset, { metadata: metaBuff })
+            .then((signature) => {
+              const extrinsic = chain.registry.createType(
+                'Extrinsic',
+                { method: raw.method },
+                { version: 4 }
+              );
+
+              (ledger as LedgerGeneric).getAddress(chain.ss58Format, false, accountIndex, addressOffset)
+                .then(({ address }) => {
+                  extrinsic.addSignature(address, signature.signature, raw.toHex());
+                  onSignature(signature, extrinsic.toHex());
+                })
+                .catch((e: Error) => {
+                  setError(e.message);
+                  setIsBusy(false);
+                });
+            }).catch((e: Error) => {
+              setError(e.message);
+              setIsBusy(false);
+            });
+        }
       } else if (currApp === 'chainSpecific') {
         (ledger as Ledger).sign(payloadExt.toU8a(true), accountIndex, addressOffset)
           .then((signature) => {
@@ -128,7 +152,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           });
       }
     },
-    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError]
+    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError, isEthereum]
   );
 
   return (

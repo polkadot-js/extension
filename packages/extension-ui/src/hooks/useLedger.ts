@@ -7,6 +7,7 @@
 
 import type { Network } from '@polkadot/networks/types';
 import type { HexString } from '@polkadot/util/types';
+import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -31,6 +32,7 @@ interface State extends StateBase {
   isLocked: boolean;
   ledger: LedgerGeneric | Ledger | null;
   refresh: () => void;
+  type: KeypairType | null;
   warning: string | null;
 }
 
@@ -82,13 +84,14 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
   return ledger;
 }
 
-export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0): State {
+export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEthereum = false): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
   const [refreshLock, setRefreshLock] = useState(false);
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const [type, setType] = useState<KeypairType | null>(null);
   const { t } = useTranslation();
 
   const handleGetAddressError = (e: Error, genesis: string) => {
@@ -154,17 +157,28 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     // Just in case, but this shouldn't be triggered
     assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
-
     const currApp = settings.get().ledgerApp;
 
     if (currApp === 'generic' || currApp === 'migration') {
-      (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
-        .then((res) => {
-          setIsLoading(false);
-          setAddress(res.address);
-        }).catch((e: Error) => {
-          handleGetAddressError(e, genesis);
-        });
+      if (isEthereum) {
+        (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
+          .then((res) => {
+            setIsLoading(false);
+            setAddress(`0x${res.address}`);
+            setType('ethereum');
+          }).catch((e: Error) => {
+            handleGetAddressError(e, genesis);
+          });
+      } else {
+        (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
+          .then((res) => {
+            setIsLoading(false);
+            setAddress(res.address);
+            setType('ed25519');
+          }).catch((e: Error) => {
+            handleGetAddressError(e, genesis);
+          });
+      }
     } else if (currApp === 'chainSpecific') {
       (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
         .then((res) => {
@@ -177,7 +191,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountIndex, addressOffset, genesis, ledger]);
+  }, [accountIndex, addressOffset, genesis, ledger, isEthereum]);
 
   const refresh = useCallback(() => {
     setRefreshLock(true);
@@ -185,5 +199,5 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setWarning(null);
   }, []);
 
-  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, warning });
+  return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, type, warning });
 }

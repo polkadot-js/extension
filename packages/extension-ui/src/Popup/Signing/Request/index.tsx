@@ -43,7 +43,7 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware, type }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +125,7 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             addressOffset={addressOffset || 0}
             error={error}
             genesisHash={json.genesisHash}
+            isEthereum={type === 'ethereum'}
             onSignature={_onSignature}
             payloadExt={payload}
             payloadJson={json}

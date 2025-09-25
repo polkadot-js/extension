@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 0.62.1 Sep 25, 2025
+
+Changes:
+
+- Ethereum Ledger signing ([#1542](https://github.com/polkadot-js/extension/pull/1542))
+- Update polkadot-api, @polkadot/api, @polkadot/phishing  ([#1591](https://github.com/polkadot-js/extension/pull/1591))
+
+
 ## 0.61.7 Aug 28, 2025
 
 Changes:

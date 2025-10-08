@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.62.2 Oct 8, 2025
+
+Changes:
+
+- Update @polkadot/phishing  ([#1593](https://github.com/polkadot-js/extension/pull/1593))
+
+
 ## 0.62.1 Sep 25, 2025
 
 Changes:

@@ -1077,7 +1077,7 @@ __metadata:
     "@polkadot/extension-mocks": "npm:0.62.1"
     "@polkadot/keyring": "npm:^13.5.6"
     "@polkadot/networks": "npm:^13.5.6"
-    "@polkadot/phishing": "npm:^0.25.19"
+    "@polkadot/phishing": "npm:^0.25.20"
     "@polkadot/rpc-provider": "npm:^16.4.8"
     "@polkadot/types": "npm:^16.4.8"
     "@polkadot/ui-keyring": "npm:^3.16.1"
@@ -1307,16 +1307,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@polkadot/phishing@npm:^0.25.19":
-  version: 0.25.19
-  resolution: "@polkadot/phishing@npm:0.25.19"
+"@polkadot/phishing@npm:^0.25.20":
+  version: 0.25.20
+  resolution: "@polkadot/phishing@npm:0.25.20"
   dependencies:
     "@polkadot/util": "npm:^13.5.6"
     "@polkadot/util-crypto": "npm:^13.5.6"
     "@polkadot/x-fetch": "npm:^13.5.6"
     tldts: "npm:^7.0.8"
     tslib: "npm:^2.8.1"
-  checksum: 10/e89ab7a403a251f087066722e38aa6631230d53794382bd10458e3386b341affcc9e8f83874a0e6163bf368510c342fc3f2db0c895001f7bfaf092a735d37424
+  checksum: 10/4a6ada471235a8c1932057812c22c2f4909fdee9bf9993ba35d3818debbfe3aa7dbfbb42e10ceb480a992fef6574903cb63d23290a8fe8676224ef32399ce8e2
   languageName: node
   linkType: hard
 

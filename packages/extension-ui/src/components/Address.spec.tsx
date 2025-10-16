@@ -149,7 +149,7 @@ const getWrapper = async (account: AccountJson, contextAccounts: AccountJson[], 
   // In case the account is not in the context, then more info are needed as props
   // to display accurately
   const mountedComponent = withAccountsInContext
-  // only the address is passed as props, the full acount info are loaded in the context
+  // only the address is passed as props, the full account info are loaded in the context
     ? await mountComponent({ address: account.address }, contextAccounts)
   // the context is empty, all account's info are passed as props to the Address component
     : await mountComponent(account, []);

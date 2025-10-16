@@ -78,7 +78,7 @@ chrome.tabs.onUpdated.addListener((_, changeInfo) => {
 });
 
 // the list of active tab changes when switching window
-// in a mutli window setup
+// in a multi window setup
 chrome.windows.onFocusChanged.addListener(() =>
   getActiveTabs()
 );

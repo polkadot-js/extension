@@ -132,7 +132,7 @@ describe('Derive', () => {
       expect(wrapper.find('Warning')).toHaveLength(0);
     });
 
-    it('An error is visible, input higlighted and the button disabled when password is incorrect', async () => {
+    it('An error is visible, input highlighted and the button disabled when password is incorrect', async () => {
       await type(wrapper.find('input[type="password"]'), 'wrong_pass');
       wrapper.find('[data-button-action="create derived account"] button').simulate('click');
       await act(flushAllPromises);

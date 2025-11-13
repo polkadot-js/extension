@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.62.4 Nov 13, 2025
+
+Changes:
+
+- Update polkadot-api and polkadot-js dependecies  ([#1599](https://github.com/polkadot-js/extension/pull/1599))
+
+
 ## 0.62.3 Oct 23, 2025
 
 Changes:

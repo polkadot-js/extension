@@ -186,5 +186,16 @@
   "Ethereum Account": "",
   "It looks like this request is coming from an suspicious origin. Please verify the source carefully.": "",
   "Password is not strong enough": "",
-  "Password must be at least {{length}} characters long": ""
+  "Password must be at least {{length}} characters long": "",
+  "Asset Hub Migration Notice": "",
+  "The Asset Hub migration has been completed. Please note the following important changes:": "",
+  "All balances have been migrated from the Relay Chain to Asset Hub": "",
+  "All on-chain functionality has been moved to Asset Hub": "",
+  "Asset Hub now holds user balances and provides general functionality": "",
+  "⚠️ Do not teleport balances to the Relay Chain unless:": "",
+  "You are opening HRMP channels, or": "",
+  "You are starting a Parachain": "",
+  "For all other operations, your balances are already on Asset Hub.": "",
+  "I Understand": "",
+  "Do not teleport balances to the Relay Chain unless:": ""
 }

@@ -25,6 +25,7 @@ import Derive from './Derive/index.js';
 import ImportSeed from './ImportSeed/index.js';
 import Metadata from './Metadata/index.js';
 import Signing from './Signing/index.js';
+import AssetHubMigration from './AssetHubMigration.js';
 import Export from './Export.js';
 import ExportAll from './ExportAll.js';
 import Forget from './Forget.js';
@@ -76,12 +77,14 @@ export default function Popup (): React.ReactElement {
   const [metaRequests, setMetaRequests] = useState<null | MetadataRequest[]>(null);
   const [signRequests, setSignRequests] = useState<null | SigningRequest[]>(null);
   const [isWelcomeDone, setWelcomeDone] = useState(false);
+  const [isMigrationDone, setMigrationDone] = useState(false);
   const [settingsCtx, setSettingsCtx] = useState<SettingsStruct>(startSettings);
   const history = useHistory();
 
   const _onAction = useCallback(
     (to?: string): void => {
       setWelcomeDone(window.localStorage.getItem('welcome_read') === 'ok');
+      setMigrationDone(window.localStorage.getItem('asset_hub_migration_read') === 'ok');
 
       if (!to) {
         return;
@@ -130,15 +133,17 @@ export default function Popup (): React.ReactElement {
     return <ErrorBoundary trigger={trigger}>{component}</ErrorBoundary>;
   }
 
-  const Root = isWelcomeDone
-    ? authRequests?.length
-      ? wrapWithErrorBoundary(<Authorize />, 'authorize')
-      : metaRequests?.length
-        ? wrapWithErrorBoundary(<Metadata />, 'metadata')
-        : signRequests?.length
-          ? wrapWithErrorBoundary(<Signing />, 'signing')
-          : wrapWithErrorBoundary(<Accounts />, 'accounts')
-    : wrapWithErrorBoundary(<Welcome />, 'welcome');
+  const Root = !isWelcomeDone
+    ? wrapWithErrorBoundary(<Welcome />, 'welcome')
+    : !isMigrationDone
+      ? wrapWithErrorBoundary(<AssetHubMigration />, 'asset-hub-migration')
+      : authRequests?.length
+        ? wrapWithErrorBoundary(<Authorize />, 'authorize')
+        : metaRequests?.length
+          ? wrapWithErrorBoundary(<Metadata />, 'metadata')
+          : signRequests?.length
+            ? wrapWithErrorBoundary(<Signing />, 'signing')
+            : wrapWithErrorBoundary(<Accounts />, 'accounts');
 
   return (
     <Loading>{accounts && authRequests && metaRequests && signRequests && (

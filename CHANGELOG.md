@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 0.62.5 Nov 17, 2025
+
+Changes:
+
+- Add AHM warning page ([#1601](https://github.com/polkadot-js/extension/pull/1601))
+
+
 ## 0.62.4 Nov 13, 2025
 
 Changes:

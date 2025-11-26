@@ -1,7 +1,7 @@
      634	Jaco                          	2024 (#1302)
      120	Tarik Gul                     	Add AHM warning page (#1601)
       93	Thibaut Sardan                	Ability to Reject an authentication request instead of ignoring it (#1453)
-      22	Arjun Porwal                  	0.62.5 (#1602)
+      23	Arjun Porwal                  	chore: bump deps (#1603)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
        6	Francis O'Brien               	feat: add cancel authorization request functionality and improve UI components (#1491)
        5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)

@@ -20,6 +20,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import { resolveDynamicExtensions } from '../utils/dynamicExtensions.js';
 import { withErrorLog } from './helpers.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
@@ -379,7 +380,12 @@ export default class Extension {
         const expanded = metadataExpand(metadata, false);
 
         registry = expanded.registry;
-        registry.setSignedExtensions(payload.signedExtensions, expanded.definition.userExtensions);
+
+        // Resolve custom extensions from metadata, merge with any explicit userExtensions
+        const dynamicExt = resolveDynamicExtensions(registry, payload.signedExtensions);
+        const userExtensions = { ...dynamicExt, ...expanded.definition.userExtensions };
+
+        registry.setSignedExtensions(payload.signedExtensions, userExtensions);
       } else {
         // we have no metadata, create a new registry
         registry = new TypeRegistry();

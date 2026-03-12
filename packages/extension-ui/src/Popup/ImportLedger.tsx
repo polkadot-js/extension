@@ -42,6 +42,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [isEthereum, setIsEthereum] = useState(false);
   const onAction = useContext(ActionContext);
   const [name, setName] = useState<string | null>(null);
+  const isChainSpecific = settings.ledgerApp === 'chainSpecific';
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
@@ -49,6 +50,12 @@ function ImportLedger ({ className }: Props): React.ReactElement {
       settings.set({ ledgerConn: 'webusb' });
     }
   }, [address]);
+
+  useEffect(() => {
+    if (isChainSpecific) {
+      setIsEthereum(false);
+    }
+  }, [isChainSpecific]);
 
   const accOps = useRef(AVAIL.map((value): AccOption => ({
     text: t('Account type {{index}}', { replace: { index: value } }),
@@ -112,6 +119,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           <Switch
             checked={isEthereum}
             checkedLabel={t('Ethereum Account')}
+            isDisabled={isChainSpecific}
             onChange={setIsEthereum}
             uncheckedLabel={t('ED25519 Account')}
           />

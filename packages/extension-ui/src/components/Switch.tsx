@@ -11,21 +11,23 @@ interface Props {
   uncheckedLabel: string;
   checkedLabel: string;
   className?: string;
+  isDisabled?: boolean;
 }
 
-function Switch ({ checked, checkedLabel, className, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
+function Switch ({ checked, checkedLabel, className, isDisabled, onChange, uncheckedLabel }: Props): React.ReactElement<Props> {
   const _onChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => onChange(event.target.checked),
     [onChange]
   );
 
   return (
-    <div className={className}>
+    <div className={`${className}${isDisabled ? ' isDisabled' : ''}`}>
       <span>{uncheckedLabel}</span>
       <label>
         <input
           checked={checked}
           className='checkbox'
+          disabled={isDisabled}
           onChange={_onChange}
           type='checkbox'
         />
@@ -77,6 +79,14 @@ export default styled(Switch)<Props>`
       background-color: var(--primaryColor);
       transition: 0.4s;
       border-radius: 50%;
+    }
+  }
+
+  &.isDisabled {
+    opacity: 0.6;
+
+    .slider {
+      cursor: default;
     }
   }
 `;

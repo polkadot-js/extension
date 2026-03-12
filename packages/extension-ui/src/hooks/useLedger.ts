@@ -16,7 +16,7 @@ import { knownLedger } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
-import chains from '../../../extension-ui/src/util/chains';
+import chains from '../util/chains.js';
 import ledgerChains from '../util/legerChains.js';
 import useTranslation from './useTranslation.js';
 
@@ -114,6 +114,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     ));
     console.error(e);
     setAddress(null);
+    setType(null);
   };
 
   const ledger = useMemo(() => {
@@ -142,6 +143,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   useEffect(() => {
     if (!ledger || !genesis) {
       setAddress(null);
+      setType(null);
 
       return;
     }
@@ -184,6 +186,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
         .then((res) => {
           setIsLoading(false);
           setAddress(res.address);
+          setType('ed25519');
         }).catch((e: Error) => {
           handleGetAddressError(e, genesis);
         });

@@ -101,8 +101,8 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           ? (
             <Link
               isDisabled={!isLedgerCapable}
+              onClick={_onOpenLedgerConnect}
               title={ (!isLedgerCapable && t('Ledger devices can only be connected with Chrome browser')) || ''}
-              to={ledgerPath}
             >
               <FontAwesomeIcon
                 icon={faUsb}

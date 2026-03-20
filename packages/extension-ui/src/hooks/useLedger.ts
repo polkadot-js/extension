@@ -40,8 +40,14 @@ function getNetwork (genesisHash: string): Network | undefined {
   return ledgerChains.find(({ genesisHash: [hash] }) => hash === genesisHash);
 }
 
+function getTransportType (): 'hid' | 'webusb' {
+  // prefer WebHID over WebUSB.
+  return ('hid' in navigator) ? 'hid' : 'webusb';
+}
+
 function getState (): StateBase {
-  const isLedgerCapable = !!(window as unknown as { USB?: unknown }).USB;
+  const w = window as unknown as { USB?: unknown; hid?: unknown };
+  const isLedgerCapable = !!(w.hid || w.USB);
 
   return {
     isLedgerCapable,
@@ -64,21 +70,19 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
 
   assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
 
-  // All chains use the `slip44` from polkadot in their derivation path in ledger.
-  // This interface is specific to the underlying PolkadotGenericApp.
-  ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+  const transport = getTransportType();
 
   if (currApp === 'generic') {
     // All chains use the `slip44` from polkadot in their derivation path in ledger.
     // This interface is specific to the underlying PolkadotGenericApp.
-    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+    ledger = new LedgerGeneric(transport, def.network, knownLedger['polkadot']);
   } else if (currApp === 'migration') {
-    ledger = new LedgerGeneric('webusb', def.network, knownLedger[def.network]);
+    ledger = new LedgerGeneric(transport, def.network, knownLedger[def.network]);
   } else if (currApp === 'chainSpecific') {
-    ledger = new Ledger('webusb', def.network);
+    ledger = new Ledger(transport, def.network);
   } else {
     // This will never get touched since it will always hit the above two. This satisfies the compiler.
-    ledger = new LedgerGeneric('webusb', def.network, knownLedger['polkadot']);
+    ledger = new LedgerGeneric(transport, def.network, knownLedger['polkadot']);
   }
 
   return ledger;

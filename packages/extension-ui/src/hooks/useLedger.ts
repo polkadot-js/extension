@@ -124,21 +124,25 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     setType(null);
   };
 
-  const ledger = useMemo(() => {
+  const { ledger, ledgerInitError } = useMemo(() => {
     if (refreshCount > 0 || genesis) {
       if (!genesis) {
-        return null;
+        return { ledger: null, ledgerInitError: null };
       }
 
       try {
-        return retrieveLedger(genesis, ledgerApp);
+        return { ledger: retrieveLedger(genesis, ledgerApp), ledgerInitError: null };
       } catch (error) {
-        setError((error as Error).message);
+        return { ledger: null, ledgerInitError: (error as Error).message };
       }
     }
 
-    return null;
+    return { ledger: null, ledgerInitError: null };
   }, [genesis, ledgerApp, refreshCount]);
+
+  useEffect(() => {
+    setError(ledgerInitError);
+  }, [ledgerInitError]);
 
   useEffect(() => {
     let isStale = false;
@@ -196,6 +200,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
             .then((res) => {
               runIfCurrent(() => {
                 setIsLoading(false);
+                setIsLocked(false);
                 setAddress(`0x${res.address}`);
                 setType('ethereum');
               });
@@ -204,6 +209,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
           (ledger as LedgerGeneric).getAddress(ss58Prefix, false, accountIndex, addressOffset).then((res) => {
             runIfCurrent(() => {
               setIsLoading(false);
+              setIsLocked(false);
               setAddress(res.address);
               setType('ed25519');
             });
@@ -214,6 +220,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
           .then((res) => {
             runIfCurrent(() => {
               setIsLoading(false);
+              setIsLocked(false);
               setAddress(res.address);
               setType('ed25519');
             });

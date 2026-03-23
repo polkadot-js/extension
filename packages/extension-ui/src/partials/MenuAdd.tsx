@@ -101,8 +101,9 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
           ? (
             <Link
               isDisabled={!isLedgerCapable}
-              onClick={_onOpenLedgerConnect}
+              onClick={isPopup ? _onOpenLedgerConnect : undefined}
               title={ (!isLedgerCapable && t('Ledger devices can only be connected with Chrome browser')) || ''}
+              to={isPopup ? undefined : ledgerPath}
             >
               <FontAwesomeIcon
                 icon={faUsb}
@@ -112,7 +113,10 @@ function MenuAdd ({ className, reference }: Props): React.ReactElement<Props> {
             </Link>
           )
           : (
-            <Link onClick={_onOpenLedgerConnect}>
+            <Link
+              onClick={isPopup ? _onOpenLedgerConnect : undefined}
+              to={isPopup ? undefined : ledgerPath}
+            >
               <FontAwesomeIcon
                 icon={faUsb}
                 rotation={270}

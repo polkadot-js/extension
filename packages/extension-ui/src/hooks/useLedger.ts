@@ -9,13 +9,14 @@ import type { Network } from '@polkadot/networks/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Ledger, LedgerGeneric } from '@polkadot/hw-ledger';
 import { knownLedger } from '@polkadot/networks/defaults';
 import { settings } from '@polkadot/ui-settings';
 import { assert } from '@polkadot/util';
 
+import { SettingsContext } from '../components/contexts.js';
 import chains from '../util/chains.js';
 import ledgerChains from '../util/legerChains.js';
 import useTranslation from './useTranslation.js';
@@ -55,10 +56,8 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
+function retrieveLedger (genesis: string, ledgerApp: string): LedgerGeneric | Ledger {
   let ledger: LedgerGeneric | Ledger | null = null;
-
-  const currApp = settings.get().ledgerApp;
 
   const { isLedgerCapable } = getState();
 
@@ -72,13 +71,13 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
 
   const transport = getTransportType();
 
-  if (currApp === 'generic') {
+  if (ledgerApp === 'generic') {
     // All chains use the `slip44` from polkadot in their derivation path in ledger.
     // This interface is specific to the underlying PolkadotGenericApp.
     ledger = new LedgerGeneric(transport, def.network, knownLedger['polkadot']);
-  } else if (currApp === 'migration') {
+  } else if (ledgerApp === 'migration') {
     ledger = new LedgerGeneric(transport, def.network, knownLedger[def.network]);
-  } else if (currApp === 'chainSpecific') {
+  } else if (ledgerApp === 'chainSpecific') {
     ledger = new Ledger(transport, def.network);
   } else {
     // This will never get touched since it will always hit the above two. This satisfies the compiler.
@@ -97,6 +96,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [address, setAddress] = useState<string | null>(null);
   const [type, setType] = useState<KeypairType | null>(null);
   const { t } = useTranslation();
+  const { ledgerApp } = useContext(SettingsContext);
   // Holds the ledger from the previous effect run so we can close its
   // transport when the network changes and a new instance is created.
   const prevLedgerRef = useRef<LedgerGeneric | Ledger | null>(null);
@@ -131,14 +131,14 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
       }
 
       try {
-        return retrieveLedger(genesis);
+        return retrieveLedger(genesis, ledgerApp);
       } catch (error) {
         setError((error as Error).message);
       }
     }
 
     return null;
-  }, [genesis, refreshCount]);
+  }, [genesis, ledgerApp, refreshCount]);
 
   useEffect(() => {
     let isStale = false;
@@ -189,9 +189,8 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
       // Use the chain's SS58 prefix when known; fall back to 42 (substrate default).
       const ss58Prefix = chosenNetwork?.ss58Format ?? 42;
-      const currApp = settings.get().ledgerApp;
 
-      if (currApp === 'generic' || currApp === 'migration') {
+      if (ledgerApp === 'generic' || ledgerApp === 'migration') {
         if (isEthereum) {
           (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
             .then((res) => {
@@ -210,7 +209,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
             });
           }).catch(onAddressError);
         }
-      } else if (currApp === 'chainSpecific') {
+      } else if (ledgerApp === 'chainSpecific') {
         (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
           .then((res) => {
             runIfCurrent(() => {
@@ -222,7 +221,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
       }
     };
 
-    // Disconnect the previous instance before opening the new one (network change).
+    // Disconnect the previous instance before opening the new one (network or ledger app change).
     if (prevLedger && prevLedger !== ledger) {
       prevLedger.disconnect().catch(console.error).finally(fetchLedgerAddress);
     } else {
@@ -235,7 +234,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountIndex, addressOffset, genesis, ledger, isEthereum]);
+  }, [accountIndex, addressOffset, genesis, ledger, ledgerApp, isEthereum]);
 
   const ledgerRef = useRef(ledger);
 

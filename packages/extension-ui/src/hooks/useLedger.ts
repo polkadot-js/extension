@@ -57,11 +57,16 @@ function getState (): StateBase {
 }
 
 function retrieveLedger (genesis: string, ledgerApp: string): LedgerGeneric | Ledger {
-  let ledger: LedgerGeneric | Ledger | null = null;
-
   const { isLedgerCapable } = getState();
 
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
+
+  const transport = getTransportType();
+
+  if (ledgerApp === 'generic') {
+    // Generic app: all chains use Polkadot's slip44 in the derivation path.
+    return new LedgerGeneric(transport, 'polkadot', knownLedger['polkadot']);
+  }
 
   const def = getNetwork(genesis);
 
@@ -69,22 +74,16 @@ function retrieveLedger (genesis: string, ledgerApp: string): LedgerGeneric | Le
 
   assert(def.slip44, 'Slip44 is not available for this network, please report an issue to update this chains slip44');
 
-  const transport = getTransportType();
-
-  if (ledgerApp === 'generic') {
-    // All chains use the `slip44` from polkadot in their derivation path in ledger.
-    // This interface is specific to the underlying PolkadotGenericApp.
-    ledger = new LedgerGeneric(transport, def.network, knownLedger['polkadot']);
-  } else if (ledgerApp === 'migration') {
-    ledger = new LedgerGeneric(transport, def.network, knownLedger[def.network]);
-  } else if (ledgerApp === 'chainSpecific') {
-    ledger = new Ledger(transport, def.network);
-  } else {
-    // This will never get touched since it will always hit the above two. This satisfies the compiler.
-    ledger = new LedgerGeneric(transport, def.network, knownLedger['polkadot']);
+  if (ledgerApp === 'migration') {
+    return new LedgerGeneric(transport, def.network, knownLedger[def.network]);
   }
 
-  return ledger;
+  if (ledgerApp === 'chainSpecific') {
+    return new Ledger(transport, def.network);
+  }
+
+  // This will never get touched since it will always hit the above two. This satisfies the compiler.
+  return new LedgerGeneric(transport, 'polkadot', knownLedger['polkadot']);
 }
 
 export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEthereum = false): State {
@@ -101,9 +100,9 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   // transport when the network changes and a new instance is created.
   const prevLedgerRef = useRef<LedgerGeneric | Ledger | null>(null);
 
-  const handleGetAddressError = (e: Error, genesis: string) => {
+  const handleGetAddressError = (e: Error, genesis: string, ledgerApp: string) => {
     setIsLoading(false);
-    const { network } = getNetwork(genesis) || { network: 'unknown network' };
+    const { network } = getNetwork(genesis) || { network: ledgerApp === 'generic' ? 'Polkadot' : 'unknown network' };
 
     const warningMessage = e.message.includes('Code: 26628')
       ? t('Is your ledger locked?')
@@ -172,7 +171,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     const onAddressError = (e: Error): void => {
       if (!isStale) {
-        handleGetAddressError(e, genesis);
+        handleGetAddressError(e, genesis, ledgerApp);
       }
     };
 

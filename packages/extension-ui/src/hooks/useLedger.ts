@@ -9,7 +9,7 @@ import type { Network } from '@polkadot/networks/types';
 import type { HexString } from '@polkadot/util/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { Ledger, LedgerGeneric } from '@polkadot/hw-ledger';
 import { knownLedger } from '@polkadot/networks/defaults';
@@ -91,12 +91,15 @@ function retrieveLedger (genesis: string): LedgerGeneric | Ledger {
 export default function useLedger (genesis?: string | null, accountIndex = 0, addressOffset = 0, isEthereum = false): State {
   const [isLoading, setIsLoading] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
-  const [refreshLock, setRefreshLock] = useState(false);
+  const [refreshCount, setRefreshCount] = useState(0);
   const [warning, setWarning] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
   const [type, setType] = useState<KeypairType | null>(null);
   const { t } = useTranslation();
+  // Holds the ledger from the previous effect run so we can close its
+  // transport when the network changes and a new instance is created.
+  const prevLedgerRef = useRef<LedgerGeneric | Ledger | null>(null);
 
   const handleGetAddressError = (e: Error, genesis: string) => {
     setIsLoading(false);
@@ -122,14 +125,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   };
 
   const ledger = useMemo(() => {
-    setError(null);
-    setIsLocked(false);
-    setRefreshLock(false);
-
-    // this trick allows to refresh the ledger on demand
-    // when it is shown as locked and the user has actually
-    // unlocked it, which we can't know.
-    if (refreshLock || genesis) {
+    if (refreshCount > 0 || genesis) {
       if (!genesis) {
         return null;
       }
@@ -142,69 +138,131 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     }
 
     return null;
-  }, [genesis, refreshLock]);
+  }, [genesis, refreshCount]);
 
   useEffect(() => {
+    let isStale = false;
+
     if (!ledger || !genesis) {
+      if (prevLedgerRef.current) {
+        prevLedgerRef.current.disconnect().catch(console.error);
+        prevLedgerRef.current = null;
+      }
+
+      setIsLoading(false);
+      setIsLocked(false);
+      setWarning(null);
       setAddress(null);
       setType(null);
 
-      return;
+      return () => {
+        isStale = true;
+      };
     }
+
+    const runIfCurrent = (fn: () => void): void => {
+      if (!isStale) {
+        fn();
+      }
+    };
+
+    const onAddressError = (e: Error): void => {
+      if (!isStale) {
+        handleGetAddressError(e, genesis);
+      }
+    };
 
     setIsLoading(true);
     setError(null);
     setWarning(null);
 
-    // This is used with a genesisHash only when importing the Ledger account
-    // and when signing with Ledger. In both cases, the genesisHash is known and
-    // will be in this array.
-    const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
+    const prevLedger = prevLedgerRef.current;
 
-    // Just in case, but this shouldn't be triggered
-    assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
-    const currApp = settings.get().ledgerApp;
+    prevLedgerRef.current = ledger;
 
-    if (currApp === 'generic' || currApp === 'migration') {
-      if (isEthereum) {
-        (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
-          .then((res) => {
-            setIsLoading(false);
-            setAddress(`0x${res.address}`);
-            setType('ethereum');
-          }).catch((e: Error) => {
-            handleGetAddressError(e, genesis);
-          });
-      } else {
-        (ledger as LedgerGeneric).getAddress(chosenNetwork.ss58Format, false, accountIndex, addressOffset)
-          .then((res) => {
-            setIsLoading(false);
-            setAddress(res.address);
-            setType('ed25519');
-          }).catch((e: Error) => {
-            handleGetAddressError(e, genesis);
-          });
+    const fetchLedgerAddress = () => {
+      if (isStale) {
+        return;
       }
-    } else if (currApp === 'chainSpecific') {
-      (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
-        .then((res) => {
-          setIsLoading(false);
-          setAddress(res.address);
-          setType('ed25519');
-        }).catch((e: Error) => {
-          handleGetAddressError(e, genesis);
-        });
+
+      const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
+
+      // Use the chain's SS58 prefix when known; fall back to 42 (substrate default).
+      const ss58Prefix = chosenNetwork?.ss58Format ?? 42;
+      const currApp = settings.get().ledgerApp;
+
+      if (currApp === 'generic' || currApp === 'migration') {
+        if (isEthereum) {
+          (ledger as LedgerGeneric).getAddressEcdsa(false, accountIndex, addressOffset)
+            .then((res) => {
+              runIfCurrent(() => {
+                setIsLoading(false);
+                setAddress(`0x${res.address}`);
+                setType('ethereum');
+              });
+            }).catch(onAddressError);
+        } else {
+          (ledger as LedgerGeneric).getAddress(ss58Prefix, false, accountIndex, addressOffset).then((res) => {
+            runIfCurrent(() => {
+              setIsLoading(false);
+              setAddress(res.address);
+              setType('ed25519');
+            });
+          }).catch(onAddressError);
+        }
+      } else if (currApp === 'chainSpecific') {
+        (ledger as Ledger).getAddress(false, accountIndex, addressOffset)
+          .then((res) => {
+            runIfCurrent(() => {
+              setIsLoading(false);
+              setAddress(res.address);
+              setType('ed25519');
+            });
+          }).catch(onAddressError);
+      }
+    };
+
+    // Disconnect the previous instance before opening the new one (network change).
+    if (prevLedger && prevLedger !== ledger) {
+      prevLedger.disconnect().catch(console.error).finally(fetchLedgerAddress);
+    } else {
+      fetchLedgerAddress();
     }
+
+    return () => {
+      isStale = true;
+    };
   // If the dependency array is exhaustive, with t, the translation function, it
   // triggers a useless re-render when ledger device is connected.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountIndex, addressOffset, genesis, ledger, isEthereum]);
 
+  const ledgerRef = useRef(ledger);
+
+  // Keep in sync so the unmount cleanup always closes the latest instance.
+  ledgerRef.current = ledger;
+
+  // On unmount, release the transport so the next session can open it.
+  useEffect(() => {
+    return () => {
+      ledgerRef.current?.disconnect().catch(console.error);
+    };
+  }, []);
+
   const refresh = useCallback(() => {
-    setRefreshLock(true);
     setError(null);
     setWarning(null);
-  }, []);
+
+    if (ledger) {
+      // Prevent the address-fetch effect from disconnecting this instance again.
+      prevLedgerRef.current = null;
+      ledger.disconnect()
+        .catch(console.error)
+        .finally(() => setRefreshCount((c) => c + 1));
+    } else {
+      setRefreshCount((c) => c + 1);
+    }
+  }, [ledger]);
 
   return ({ ...getState(), address, error, isLoading, isLocked, ledger, refresh, type, warning });
 }

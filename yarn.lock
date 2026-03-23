@@ -1184,7 +1184,7 @@ __metadata:
     "@polkadot/extension-dapp": "npm:0.62.7-1-x"
     "@polkadot/extension-inject": "npm:0.62.7-1-x"
     "@polkadot/extension-mocks": "npm:0.62.7-1-x"
-    "@polkadot/hw-ledger": "npm:^13.5.9"
+    "@polkadot/hw-ledger": "npm:^14.0.3"
     "@polkadot/keyring": "npm:^13.5.9"
     "@polkadot/networks": "npm:^13.5.9"
     "@polkadot/react-identicon": "npm:^3.16.4"
@@ -1253,32 +1253,32 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@polkadot/hw-ledger-transports@npm:13.5.9":
-  version: 13.5.9
-  resolution: "@polkadot/hw-ledger-transports@npm:13.5.9"
+"@polkadot/hw-ledger-transports@npm:14.0.3":
+  version: 14.0.3
+  resolution: "@polkadot/hw-ledger-transports@npm:14.0.3"
   dependencies:
     "@ledgerhq/hw-transport": "npm:^6.31.4"
     "@ledgerhq/hw-transport-node-hid-singleton": "npm:^6.31.5"
     "@ledgerhq/hw-transport-webhid": "npm:^6.29.4"
     "@ledgerhq/hw-transport-webusb": "npm:^6.29.4"
-    "@polkadot/util": "npm:13.5.9"
+    "@polkadot/util": "npm:14.0.3"
     tslib: "npm:^2.8.0"
   dependenciesMeta:
     "@ledgerhq/hw-transport-node-hid-singleton":
       optional: true
-  checksum: 10/2ea7ee7873d6a3208342a5c5919c4e1ca6fe78ee014f3442a0bb094243cb28d179cfefe550e81a6b64a26e7af8daaa2b45f2b5615fbd6796c266ff0d57c1076c
+  checksum: 10/5cf48a41079e06ea4c46df4c4aaf2efcca786b19f9eecb0c7c0ba505a1f5a98f730518cff41e3b0fa27f09d6dc74329e2f2b982a2dd8f1c7e59db9d65b90eabe
   languageName: node
   linkType: hard
 
-"@polkadot/hw-ledger@npm:^13.5.9":
-  version: 13.5.9
-  resolution: "@polkadot/hw-ledger@npm:13.5.9"
+"@polkadot/hw-ledger@npm:^14.0.3":
+  version: 14.0.3
+  resolution: "@polkadot/hw-ledger@npm:14.0.3"
   dependencies:
-    "@polkadot/hw-ledger-transports": "npm:13.5.9"
-    "@polkadot/util": "npm:13.5.9"
+    "@polkadot/hw-ledger-transports": "npm:14.0.3"
+    "@polkadot/util": "npm:14.0.3"
     "@zondax/ledger-substrate": "npm:1.1.1"
     tslib: "npm:^2.8.0"
-  checksum: 10/92f598cd8a761e7bce0e6eeb00279ace512dbb34265dab55f23c0ea58ec854c894c64d50765a768d9e30c7bc8825779e33a254f0abb35595c749ed19b7dfe50c
+  checksum: 10/1f4746a3fd7f311211c451ba26ff1cd11bcfc729c27bc9516e619e5df2d57a9e79e94b163d2e00448864680c7afa0d20b933932134bafa709af091db1e6d9b10
   languageName: node
   linkType: hard
 

@@ -29,7 +29,7 @@
     "@polkadot/extension-chains": "0.62.7-1-x",
     "@polkadot/extension-dapp": "0.62.7-1-x",
     "@polkadot/extension-inject": "0.62.7-1-x",
-    "@polkadot/hw-ledger": "^13.5.9",
+    "@polkadot/hw-ledger": "^14.0.3",
     "@polkadot/keyring": "^13.5.9",
     "@polkadot/networks": "^13.5.9",
     "@polkadot/react-identicon": "^3.16.4",

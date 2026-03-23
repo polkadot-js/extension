@@ -256,9 +256,6 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   }, []);
 
   const refresh = useCallback(() => {
-    setError(null);
-    setWarning(null);
-
     if (ledger) {
       // Prevent the address-fetch effect from disconnecting this instance again.
       prevLedgerRef.current = null;

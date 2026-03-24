@@ -6,6 +6,7 @@ import type { ChainProperties } from '@polkadot/types/interfaces';
 import type { Chain } from './types.js';
 
 import { Metadata, TypeRegistry } from '@polkadot/types';
+import { hexToU8a } from '@polkadot/util';
 import { base64Decode } from '@polkadot/util-crypto';
 
 export { packageInfo } from './packageInfo.js';
@@ -26,7 +27,7 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     return cached;
   }
 
-  const { chain, genesisHash, icon, metaCalls, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
+  const { chain, genesisHash, icon, metaCalls, rawMetadata, specVersion, ss58Format, tokenDecimals, tokenSymbol, types, userExtensions } = definition;
   const registry = new TypeRegistry();
 
   if (!isPartial) {
@@ -39,10 +40,15 @@ export function metadataExpand (definition: MetadataDef, isPartial = false): Cha
     tokenSymbol
   }) as unknown as ChainProperties);
 
-  const hasMetadata = !!metaCalls && !isPartial;
+  const metadataBytes = metaCalls
+    ? base64Decode(metaCalls)
+    : rawMetadata
+      ? hexToU8a(rawMetadata)
+      : null;
+  const hasMetadata = !!metadataBytes && !isPartial;
 
   if (hasMetadata) {
-    registry.setMetadata(new Metadata(registry, base64Decode(metaCalls)), undefined, userExtensions);
+    registry.setMetadata(new Metadata(registry, metadataBytes), undefined, userExtensions);
   }
 
   const isUnknown = genesisHash === '0x';

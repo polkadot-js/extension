@@ -5,11 +5,11 @@ import type { HexString } from '@polkadot/util/types';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { settings } from '@polkadot/ui-settings';
 
-import { ActionContext, Address, Button, ButtonArea, Dropdown, Switch, VerticalSpace, Warning } from '../components/index.js';
+import { ActionContext, Address, Button, ButtonArea, Dropdown, SettingsContext, Switch, VerticalSpace, Warning } from '../components/index.js';
 import { useLedger, useTranslation } from '../hooks/index.js';
 import { createAccountHardware } from '../messaging.js';
 import { Header, Name } from '../partials/index.js';
@@ -23,10 +23,12 @@ interface AccOption {
 
 interface NetworkOption {
   text: string;
-  value: string | null;
+  value: string;
 }
 
 const AVAIL: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+const SELECT_NETWORK = '';
+const ALLOW_ANY_NETWORK = '__allow_any_network__';
 
 interface Props {
   className?: string;
@@ -41,8 +43,10 @@ function ImportLedger ({ className }: Props): React.ReactElement {
   const [genesis, setGenesis] = useState<HexString | null>(null);
   const [isEthereum, setIsEthereum] = useState(false);
   const onAction = useContext(ActionContext);
+  const { ledgerApp } = useContext(SettingsContext);
   const [name, setName] = useState<string | null>(null);
-  const isChainSpecific = settings.ledgerApp === 'chainSpecific';
+  const isGenericLedgerApp = ledgerApp === 'generic';
+  const isChainSpecific = ledgerApp === 'chainSpecific';
   const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, refresh, type, warning: ledgerWarning } = useLedger(genesis, accountIndex, addressOffset, isEthereum);
 
   useEffect(() => {
@@ -67,20 +71,32 @@ function ImportLedger ({ className }: Props): React.ReactElement {
     value
   })));
 
-  const networkOps = useRef(
-    [{
-      text: t('Select network'),
-      value: ''
-    },
-    ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
-      text: displayName,
-      value: genesisHash[0]
-    }))]
+  const onNetworkChange = useCallback((value: string) => {
+    if (value === ALLOW_ANY_NETWORK) {
+      setGenesis(null);
+
+      return;
+    }
+
+    setGenesis(value ? value as HexString : null);
+  }, []);
+
+  const networkOps = useMemo(
+    () => [
+      ...(isGenericLedgerApp
+        ? [{ text: t('Allow use on any chain'), value: ALLOW_ANY_NETWORK }]
+        : [{ text: t('Select network'), value: SELECT_NETWORK }]),
+      ...ledgerChains.map(({ displayName, genesisHash }): NetworkOption => ({
+        text: displayName,
+        value: genesisHash[0]
+      }))
+    ],
+    [isGenericLedgerApp, t]
   );
 
   const _onSave = useCallback(
     () => {
-      if (address && genesis && name && type) {
+      if (address && name && type) {
         setIsBusy(true);
 
         createAccountHardware(address, 'ledger', accountIndex, addressOffset, name, genesis, type)
@@ -127,11 +143,11 @@ function ImportLedger ({ className }: Props): React.ReactElement {
         <Dropdown
           className='network'
           label={t('Network')}
-          onChange={setGenesis}
-          options={networkOps.current}
-          value={genesis}
+          onChange={onNetworkChange}
+          options={networkOps}
+          value={genesis ?? (isGenericLedgerApp ? ALLOW_ANY_NETWORK : SELECT_NETWORK)}
         />
-        {!!genesis && !!address && !ledgerError && (
+        {!!address && !ledgerError && (
           <Name
             onChange={setName}
             value={name || ''}
@@ -186,7 +202,7 @@ function ImportLedger ({ className }: Props): React.ReactElement {
           : (
             <Button
               isBusy={ledgerLoading || isBusy}
-              isDisabled={!!error || !!ledgerError || !address || !genesis}
+              isDisabled={!!error || !!ledgerError || !address || (!isGenericLedgerApp && !genesis)}
               onClick={_onSave}
             >
               {t('Import Account')}

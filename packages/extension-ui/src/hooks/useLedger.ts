@@ -56,7 +56,7 @@ function getState (): StateBase {
   };
 }
 
-function retrieveLedger (genesis: string, ledgerApp: string): LedgerGeneric | Ledger {
+function retrieveLedger (genesis: string | null, ledgerApp: string): LedgerGeneric | Ledger {
   const { isLedgerCapable } = getState();
 
   assert(isLedgerCapable, 'Incompatible browser, only Chrome is supported');
@@ -64,9 +64,12 @@ function retrieveLedger (genesis: string, ledgerApp: string): LedgerGeneric | Le
   const transport = getTransportType();
 
   if (ledgerApp === 'generic') {
-    // Generic app: all chains use Polkadot's slip44 in the derivation path.
+    // Generic app always uses Polkadot's slip44, regardless of chain genesis.
     return new LedgerGeneric(transport, 'polkadot', knownLedger['polkadot']);
   }
+
+  // Shouldn't happen but guard to satisfy the compiler
+  assert(genesis, 'Genesis hash is required to connect to the Ledger in non-generic mode');
 
   const def = getNetwork(genesis);
 
@@ -124,19 +127,18 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   };
 
   const { ledger, ledgerInitError } = useMemo(() => {
-    if (refreshCount > 0 || genesis) {
-      if (!genesis) {
-        return { ledger: null, ledgerInitError: null };
-      }
+    // Generic app connects without a specific chain genesis (always derives from polkadot).
+    const canConnect = ledgerApp === 'generic' || refreshCount > 0 || !!genesis;
 
-      try {
-        return { ledger: retrieveLedger(genesis, ledgerApp), ledgerInitError: null };
-      } catch (error) {
-        return { ledger: null, ledgerInitError: (error as Error).message };
-      }
+    if (!canConnect || (ledgerApp !== 'generic' && !genesis)) {
+      return { ledger: null, ledgerInitError: null };
     }
 
-    return { ledger: null, ledgerInitError: null };
+    try {
+      return { ledger: retrieveLedger(genesis ?? null, ledgerApp), ledgerInitError: null };
+    } catch (error) {
+      return { ledger: null, ledgerInitError: (error as Error).message };
+    }
   }, [genesis, ledgerApp, refreshCount]);
 
   useEffect(() => {
@@ -146,7 +148,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   useEffect(() => {
     let isStale = false;
 
-    if (!ledger || !genesis) {
+    if (!ledger || (ledgerApp !== 'generic' && !genesis)) {
       if (prevLedgerRef.current) {
         prevLedgerRef.current.disconnect().catch(console.error);
         prevLedgerRef.current = null;
@@ -171,7 +173,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
     const onAddressError = (e: Error): void => {
       if (!isStale) {
-        handleGetAddressError(e, genesis, ledgerApp);
+        handleGetAddressError(e, genesis ?? '', ledgerApp);
       }
     };
 
@@ -189,9 +191,13 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
       }
 
       const chosenNetwork = chains.find(({ genesisHash }) => genesisHash === genesis as HexString);
-
       // Use the chain's SS58 prefix when known; fall back to 42 (substrate default).
       const ss58Prefix = chosenNetwork?.ss58Format ?? 42;
+
+      if (ledgerApp === 'migration') {
+        // Migration app is only expected on known, mapped chains.
+        assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
+      }
 
       if (ledgerApp === 'generic' || ledgerApp === 'migration') {
         if (isEthereum) {
@@ -205,14 +211,15 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
               });
             }).catch(onAddressError);
         } else {
-          (ledger as LedgerGeneric).getAddress(ss58Prefix, false, accountIndex, addressOffset).then((res) => {
-            runIfCurrent(() => {
-              setIsLoading(false);
-              setIsLocked(false);
-              setAddress(res.address);
-              setType('ed25519');
-            });
-          }).catch(onAddressError);
+          (ledger as LedgerGeneric).getAddress(ss58Prefix, false, accountIndex, addressOffset)
+            .then((res) => {
+              runIfCurrent(() => {
+                setIsLoading(false);
+                setIsLocked(false);
+                setAddress(res.address);
+                setType('ed25519');
+              });
+            }).catch(onAddressError);
         }
       } else if (ledgerApp === 'chainSpecific') {
         (ledger as Ledger).getAddress(false, accountIndex, addressOffset)

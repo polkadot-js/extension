@@ -43,12 +43,17 @@ function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload i
   return !!(payload as SignerPayloadRaw).data;
 }
 
-export default function Request ({ account: { accountIndex, addressOffset, genesisHash, isExternal, isHardware, type }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
+export default function Request ({ account: { accountIndex, addressOffset, genesisHash: accountGenesisHash, isExternal, isHardware, type }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
-  const chain = useMetadata(genesisHash);
+  // Use payload genesis for transaction-signing flow. Account genesis can be null
+  // for allow-any accounts and should not drive payload decoding/signing setup.
+  const payloadGenesisHash = !isRawPayload(request.payload)
+    ? request.payload.genesisHash
+    : null;
+  const chain = useMetadata(payloadGenesisHash);
 
   useEffect((): void => {
     // When the chain and request are ready, configure the chain's registry.
@@ -153,12 +158,12 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
             isExternal={isExternal}
           />
         </div>
-        {isExternal && !isHardware && genesisHash
+        {isExternal && !isHardware && accountGenesisHash
           ? (
             <Qr
               address={address}
               cmd={CMD_SIGN_MESSAGE}
-              genesisHash={genesisHash}
+              genesisHash={accountGenesisHash}
               onSignature={_onSignature}
               payload={data}
             />
@@ -171,7 +176,7 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
           )
         }
         <VerticalSpace />
-        {isExternal && !isHardware && !genesisHash && (
+        {isExternal && !isHardware && !accountGenesisHash && (
           <>
             <Warning isDanger>{t('"Allow use on any network" is not supported to show a QR code. You must associate this account with a network.')}</Warning>
             <VerticalSpace />

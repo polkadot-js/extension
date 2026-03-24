@@ -8,7 +8,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useState } from 're
 
 import { canDerive } from '@polkadot/extension-base/utils';
 
-import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider } from '../../components/index.js';
+import { AccountContext, Address, Checkbox, Dropdown, Link, MenuDivider, SettingsContext } from '../../components/index.js';
 import { useGenesisHashOptions, useTranslation } from '../../hooks/index.js';
 import { editAccount, tieAccount } from '../../messaging.js';
 import { Name } from '../../partials/index.js';
@@ -33,8 +33,10 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
   const [editedName, setName] = useState<string | undefined | null>(name);
   const [checked, setChecked] = useState(false);
   const genesisOptions = useGenesisHashOptions();
+  const { ledgerApp } = useContext(SettingsContext);
   const { selectedAccounts = [], setSelectedAccounts } = useContext(AccountContext);
   const isSelected = useMemo(() => selectedAccounts?.includes(address) || false, [address, selectedAccounts]);
+  const canEditGenesis = !isHardware || ledgerApp === 'generic';
 
   useEffect(() => {
     setChecked(isSelected);
@@ -50,7 +52,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
 
   const _onChangeGenesis = useCallback(
     (genesisHash?: HexString | null): void => {
-      tieAccount(address, genesisHash ?? null)
+      tieAccount(address, genesisHash || null)
         .catch(console.error);
     },
     [address]
@@ -105,7 +107,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
       >
         {t('Forget Account')}
       </Link>
-      {!isHardware && (
+      {canEditGenesis && (
         <>
           <MenuDivider />
           <div className='menuItem'>
@@ -120,7 +122,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         </>
       )}
     </>
-  ), [_onChangeGenesis, _toggleEdit, address, genesisHash, genesisOptions, isExternal, isHardware, t, type]);
+  ), [_onChangeGenesis, _toggleEdit, address, canEditGenesis, genesisHash, genesisOptions, isExternal, t, type]);
 
   return (
     <div className={className}>
@@ -138,6 +140,7 @@ function Account ({ address, className, genesisHash, isExternal, isHardware, isH
         className='address'
         genesisHash={genesisHash}
         isExternal={isExternal}
+        isHardware={isHardware}
         isHidden={isHidden}
         name={editedName}
         parentName={parentName}

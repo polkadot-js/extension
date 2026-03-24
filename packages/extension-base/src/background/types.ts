@@ -201,7 +201,7 @@ export interface RequestAccountCreateHardware {
   accountIndex: number;
   address: string;
   addressOffset: number;
-  genesisHash: HexString;
+  genesisHash?: HexString | null;
   hardwareType: string;
   name: string;
   type: KeypairType;

@@ -12,6 +12,9 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router';
 
+import { settings } from '@polkadot/ui-settings';
+
+import { SettingsContext } from '../../components/index.js';
 import * as messaging from '../../messaging.js';
 import { flushAllPromises } from '../../testHelpers.js';
 import Account from './Account.js';
@@ -34,11 +37,13 @@ describe('Account component', () => {
   let wrapper: ReactWrapper;
   const VALID_ADDRESS = 'HjoBp62cvsWDA3vtNMWxz6c9q13ReEHi9UGHK7JbZweH5g5';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>): ReactWrapper => mount(
+  const mountAccountComponent = (additionalAccountProperties: Record<string, unknown>, ledgerApp: 'generic' | 'migration' | 'chainSpecific' = 'chainSpecific'): ReactWrapper => mount(
     <MemoryRouter>
-      <Account
-        {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}
-      />
+      <SettingsContext.Provider value={{ ...settings.get(), ledgerApp }}>
+        <Account
+          {...{ address: VALID_ADDRESS, ...additionalAccountProperties }}
+        />
+      </SettingsContext.Provider>
     </MemoryRouter>);
 
   it('shows Export option if account is not external', async () => {
@@ -79,7 +84,7 @@ describe('Account component', () => {
   });
 
   it('does not show genesis hash selection dropsown if account is hardware', async () => {
-    wrapper = mountAccountComponent({ isExternal: true, isHardware: true });
+    wrapper = mountAccountComponent({ isExternal: true, isHardware: true }, 'chainSpecific');
     wrapper.find('.settings').first().simulate('click');
     await act(flushAllPromises);
 
@@ -87,5 +92,16 @@ describe('Account component', () => {
     expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
     expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
     expect(wrapper.find('.genesisSelection').exists()).toBe(false);
+  });
+
+  it('shows genesis hash selection for hardware account in generic mode', async () => {
+    wrapper = mountAccountComponent({ isExternal: true, isHardware: true }, 'generic');
+    wrapper.find('.settings').first().simulate('click');
+    await act(flushAllPromises);
+
+    expect(wrapper.find('a.menuItem').length).toBe(2);
+    expect(wrapper.find('a.menuItem').at(0).text()).toBe('Rename');
+    expect(wrapper.find('a.menuItem').at(1).text()).toBe('Forget Account');
+    expect(wrapper.find('.genesisSelection').exists()).toBe(true);
   });
 });

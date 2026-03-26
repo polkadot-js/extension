@@ -99,34 +99,47 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
   const [type, setType] = useState<KeypairType | null>(null);
   const { t } = useTranslation();
   const { ledgerApp } = useContext(SettingsContext);
+  const tRef = useRef(t);
   // Holds the ledger from the previous effect run so we can close its
   // transport when the network changes and a new instance is created.
   const prevLedgerRef = useRef<LedgerGeneric | Ledger | null>(null);
 
-  const handleGetAddressError = (e: Error, genesis: string, ledgerApp: string) => {
+  // Keep a stable reference so effects and callbacks don't depend on
+  // i18n function identity changes.
+  tRef.current = t;
+
+  const handleGetAddressError = useCallback((e: Error, genesis: string, ledgerApp: string) => {
     setIsLoading(false);
     const { network } = getNetwork(genesis) || { network: ledgerApp === 'generic' ? 'Polkadot' : 'unknown network' };
 
     const warningMessage = e.message.includes('Code: 26628')
-      ? t('Is your ledger locked?')
+      ? tRef.current('Is your ledger locked?')
       : null;
 
     const errorMessage = e.message.includes('App does not seem to be open')
-      ? t('App "{{network}}" does not seem to be open', { replace: { network } })
+      ? tRef.current('App "{{network}}" does not seem to be open', { replace: { network } })
       : e.message;
 
     setIsLocked(true);
     setWarning(warningMessage);
-    setError(t(
+    setError(tRef.current(
       'Ledger error: {{errorMessage}}',
       { replace: { errorMessage } }
     ));
     console.error(e);
     setAddress(null);
     setType(null);
-  };
+  }, []);
 
   const { ledger, ledgerInitError } = useMemo(() => {
+    // undefined means no ledger connection attempt.
+    // null means connect using the generic app without a specific chain genesis.
+    // Prevents hook instances that only check isLedgerCapable or isLedgerEnabled
+    // from attempting a connection when ledgerApp === 'generic'.
+    if (genesis === undefined) {
+      return { ledger: null, ledgerInitError: null };
+    }
+
     // Generic app connects without a specific chain genesis (always derives from polkadot).
     const canConnect = ledgerApp === 'generic' || refreshCount > 0 || !!genesis;
 
@@ -196,7 +209,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
 
       if (ledgerApp === 'migration') {
         // Migration app is only expected on known, mapped chains.
-        assert(chosenNetwork, t('This network is not available, please report an issue to update the known chains'));
+        assert(chosenNetwork, tRef.current('This network is not available, please report an issue to update the known chains'));
       }
 
       if (ledgerApp === 'generic' || ledgerApp === 'migration') {
@@ -244,10 +257,7 @@ export default function useLedger (genesis?: string | null, accountIndex = 0, ad
     return () => {
       isStale = true;
     };
-  // If the dependency array is exhaustive, with t, the translation function, it
-  // triggers a useless re-render when ledger device is connected.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountIndex, addressOffset, genesis, ledger, ledgerApp, isEthereum]);
+  }, [accountIndex, addressOffset, genesis, handleGetAddressError, ledger, ledgerApp, isEthereum]);
 
   const ledgerRef = useRef(ledger);
 

@@ -197,5 +197,7 @@
   "You are starting a Parachain": "",
   "For all other operations, your balances are already on Asset Hub.": "",
   "I Understand": "",
-  "Do not teleport balances to the Relay Chain unless:": ""
+  "Do not teleport balances to the Relay Chain unless:": "",
+  "Address mismatch: derived {{derived}}, expected {{expected}}. Check that the correct Ledger device is connected and the correct app is selected.": "",
+  "Possible cause: the Ledger App setting differs from the app originally used to derive this account.": ""
 }

@@ -11,13 +11,13 @@ import type { HexString } from '@polkadot/util/types';
 
 import { faSync } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useContext, useState } from 'react';
 
-import settings from '@polkadot/ui-settings';
-import { assert, objectSpread, u8aToHex } from '@polkadot/util';
+import { assert, objectSpread, stringShorten, u8aToHex } from '@polkadot/util';
+import { decodeAddress } from '@polkadot/util-crypto';
 import { merkleizeMetadata } from '@polkadot-api/merkleize-metadata';
 
-import { Button, Warning } from '../../components/index.js';
+import { Button, SettingsContext, Warning } from '../../components/index.js';
 import { useLedger, useMetadata, useTranslation } from '../../hooks/index.js';
 import { styled } from '../../styled.js';
 
@@ -42,7 +42,6 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   const merkleizedMetadata = merkleizeMetadata(m, {
     base58Prefix: chain.ss58Format,
     decimals: chain.tokenDecimals,
-    specName: chain.name.toLowerCase(),
     specVersion: chain.specVersion,
     tokenSymbol: chain.tokenSymbol
   });
@@ -56,25 +55,48 @@ function getMetadataProof (chain: Chain, payload: SignerPayloadJSON) {
   };
 }
 
+function matchesExpectedSigner (derivedAddress: string, expectedAddress: string, isEthereum: boolean): boolean {
+  if (isEthereum) {
+    return derivedAddress.toLowerCase() === expectedAddress.toLowerCase();
+  }
+
+  try {
+    return u8aToHex(decodeAddress(derivedAddress)) === u8aToHex(decodeAddress(expectedAddress));
+  } catch {
+    return derivedAddress === expectedAddress;
+  }
+}
+
 function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHash, isEthereum = false, onSignature, payloadExt, payloadJson, setError }: Props): React.ReactElement<Props> {
   const [isBusy, setIsBusy] = useState(false);
   const { t } = useTranslation();
+  const { ledgerApp } = useContext(SettingsContext);
   const chain = useMetadata(genesisHash);
-  const { error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, type: _ledgerType, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
-
-  useEffect(() => {
-    if (ledgerError) {
-      setError(ledgerError);
-    }
-  }, [chain, ledgerError, setError]);
+  const { address, error: ledgerError, isLoading: ledgerLoading, isLocked: ledgerLocked, ledger, refresh, type: _ledgerType, warning: ledgerWarning } = useLedger(genesisHash, accountIndex, addressOffset, isEthereum);
+  const expectedAddress = payloadJson?.address;
+  const signerMismatchError = address && expectedAddress && !matchesExpectedSigner(address, expectedAddress, isEthereum)
+    ? t('Address mismatch: derived {{derived}}, expected {{expected}}. Check that the correct Ledger device is connected and the correct app is selected.', {
+      replace: {
+        derived: stringShorten(address, 8),
+        expected: stringShorten(expectedAddress, 8)
+      }
+    })
+    : null;
+  const signerMismatchHint = signerMismatchError
+    ? t('Possible cause: the Ledger App setting differs from the app originally used to derive this account.')
+    : null;
 
   const _onRefresh = useCallback(() => {
-    refresh();
     setError(null);
+    refresh();
   }, [refresh, setError]);
 
   const _onSignLedger = useCallback(
     (): void => {
+      if (signerMismatchError) {
+        return;
+      }
+
       if (!ledger || !payloadJson || !onSignature || !chain || !payloadExt) {
         if (!chain) {
           setError('No chain information found. You may need to update/upload the metadata.');
@@ -87,11 +109,14 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
       setError(null);
       setIsBusy(true);
 
-      const currApp = settings.get().ledgerApp;
+      const currApp = ledgerApp;
 
       if (currApp === 'generic' || currApp === 'migration') {
         if (!chain?.definition.rawMetadata) {
           setError('No metadata found for this chain. You must upload the metadata to the extension in order to use Ledger.');
+          setIsBusy(false);
+
+          return;
         }
 
         const { raw, txMetadata } = getMetadataProof(chain, payloadJson);
@@ -152,8 +177,11 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           });
       }
     },
-    [accountIndex, addressOffset, chain, ledger, onSignature, payloadJson, payloadExt, setError, isEthereum]
+    [accountIndex, addressOffset, chain, ledger, ledgerApp, onSignature, payloadJson, payloadExt, setError, signerMismatchError, isEthereum]
   );
+
+  const activeError = ledgerError || error;
+  const hasActiveError = !!activeError;
 
   return (
     <div className={className}>
@@ -162,17 +190,22 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
           {ledgerWarning}
         </Warning>
       )}
-      {error && (
+      {hasActiveError && (
         <Warning isDanger>
-          {error}
+          {activeError}
         </Warning>
       )}
-      {
-        <Warning>
-          {`You are using the Ledger ${settings.ledgerApp.toUpperCase()} App. If you would like to switch it, please go to "MANAGE LEDGER APP" in the extension's settings.`}
+      {signerMismatchError && !hasActiveError && (
+        <Warning isDanger>
+          {signerMismatchError}
         </Warning>
-      }
-      {(ledgerLocked || error)
+      )}
+      {signerMismatchHint && !hasActiveError && (
+        <Warning>
+          {signerMismatchHint}
+        </Warning>
+      )}
+      {(ledgerLocked || hasActiveError)
         ? (
           <Button
             isBusy={isBusy || ledgerLoading}
@@ -185,6 +218,7 @@ function LedgerSign ({ accountIndex, addressOffset, className, error, genesisHas
         : (
           <Button
             isBusy={isBusy || ledgerLoading}
+            isDisabled={!!signerMismatchError}
             onClick={_onSignLedger}
           >
             {t('Sign on Ledger')}

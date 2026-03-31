@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 0.63.1 Mar 30, 2026
+
+Changes:
+
+- Allow Ledger generic app accounts to sign on any chain ([#1613](https://github.com/polkadot-js/extension/pull/1613))
+- Bump polkadot-js dependencies ([#1614](https://github.com/polkadot-js/extension/pull/1614))
+- Support rawMetadata in metadataExpand alongside metaCalls ([#1612](https://github.com/polkadot-js/extension/pull/1612))
+- Improve Ledger reliability and signing (WebHID, lifecycle, mismatch guard) ([#1611](https://github.com/polkadot-js/extension/pull/1611))
+- Fix: set chainSpecific account type and disable Ethereum switch ([#1608](https://github.com/polkadot-js/extension/pull/1608))
+- Set headers to 2026 ([#1609](https://github.com/polkadot-js/extension/pull/1609))
+
+Contributed:
+
+- Ledger improvements, allow-any-chain support, rawMetadata in metadataExpand, and chainSpecific account fix ([#1608](https://github.com/polkadot-js/extension/pull/1608), [#1611](https://github.com/polkadot-js/extension/pull/1611), [#1612](https://github.com/polkadot-js/extension/pull/1612), [#1613](https://github.com/polkadot-js/extension/pull/1613)) (Thanks to https://github.com/F-OBrien)
+
+
 ## 0.62.6 Nov 26, 2025
 
 Changes:

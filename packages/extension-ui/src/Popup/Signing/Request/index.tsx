@@ -8,6 +8,7 @@ import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import { resolveDynamicExtensions } from '@polkadot/extension-base/background/utils/dynamicExtensions';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
@@ -59,7 +60,10 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
     // When the chain and request are ready, configure the chain's registry.
     // This will be picked up by LedgerSign.
     if (chain && !isRawPayload(request.payload)) {
-      chain.registry.setSignedExtensions(request.payload.signedExtensions, chain.definition.userExtensions);
+      const dynamicExt = resolveDynamicExtensions(chain.registry, request.payload.signedExtensions);
+      const userExtensions = { ...dynamicExt, ...chain.definition.userExtensions };
+
+      chain.registry.setSignedExtensions(request.payload.signedExtensions, userExtensions);
     }
   }, [chain, request]);
 

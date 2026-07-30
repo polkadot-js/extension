@@ -12,14 +12,14 @@ As it stands, it does one thing: it _only_ manages accounts and allows the signi
 ![interface screenshots](docs/extension-overview.png)
 
 ## Documentation and examples
-Find out more about how to use the extension as a Dapp developper, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
+Find out more about how to use the extension as a Dapp developer, cookbook, as well as answers to most frequent questions in the [Polkadot-js extension documentation](https://polkadot.js.org/docs/extension/)
 
 ## Firefox installation from source instructions.
 
 1. Uncompress `master-ff-src.zip`
 2. Run `corepack enable` [More information](https://github.com/nodejs/corepack?tab=readme-ov-file#corepack-enable--name)
-2. Install dependencies via `yarn install`
-3. Build all packages via `yarn build`
+3. Install dependencies via `yarn install`
+4. Build all packages via `yarn build`
   - The `/packages/extension/build` directory will contain the exact code used in the add-on, and should exactly match the uncompressed `master-ff-build`.
   
 NOTE: If you would like to regenerate the compressed `master-ff-build.zip`, and `master-ff-src.zip` files run: `yarn build:zip:ff`
@@ -61,7 +61,7 @@ It also contains a [`manifest_chrome.json`](packages/extension/manifest_chrome.j
 
 ## Dapp developers
 
-The actual in-depth technical breakdown is given in the next section for any dapp developer wishing to work with the raw objects injected into the window. However, convenience wrappers are provided that allows for any dapp to use this extension (or any other extension that conforms to the interface) without having to manage any additional info.
+The actual in-depth technical breakdown is given in the next section for any dapp developer wishing to work with the raw objects injected into the window. However, convenience wrappers are provided that allow for any dapp to use this extension (or any other extension that conforms to the interface) without having to manage any additional info.
 
 The documentation for Dapp development is available [in the polkadot-js doc](https://polkadot.js.org/docs/extension).
 

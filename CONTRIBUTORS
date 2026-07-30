@@ -4,7 +4,7 @@
       24	Arjun Porwal                  	0.62.6 (#1604)
       10	Francis O'Brien               	Allow Ledger generic app accounts to sign on any chain (#1613)
        7	Ivan Rukhavets                	Mention derivation in FAQ (#334)
-       5	Alberto Nicolas Penayo        	fix(bug): extension stuck in `... loading ...` screen after `service_worker` got terminated (#1424)
+       6	Alberto Nicolas Penayo        	chore: fix docs typos (#1623)
        5	rajk93                        	fix: signing extrinsics on ledger device (#1579)
        4	Amaury Martiny                	PostMessageProvider with on('connected' | 'disconnected') (#279)
        3	Antoine Estienne              	Add eth test for extension signature (#909)

@@ -2,3 +2,4 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export { canDerive } from './canDerive.js';
+export { isExtrinsicRequest } from './isExtrinsicRequest.js';

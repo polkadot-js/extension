@@ -3,11 +3,11 @@
 
 import type { AccountJson, RequestSign } from '@polkadot/extension-base/background/types';
 import type { ExtrinsicPayload } from '@polkadot/types/interfaces';
-import type { SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
 
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 
+import { isExtrinsicRequest } from '@polkadot/extension-base/utils';
 import { TypeRegistry } from '@polkadot/types';
 
 import { ActionContext, Address, VerticalSpace, Warning } from '../../../components/index.js';
@@ -39,18 +39,16 @@ export const CMD_SIGN_MESSAGE = 3;
 // keep it global, we can and will re-use this across requests
 const registry = new TypeRegistry();
 
-function isRawPayload (payload: SignerPayloadJSON | SignerPayloadRaw): payload is SignerPayloadRaw {
-  return !!(payload as SignerPayloadRaw).data;
-}
-
 export default function Request ({ account: { accountIndex, addressOffset, genesisHash: accountGenesisHash, isExternal, isHardware, type }, buttonText, isFirst, request, signId, url }: Props): React.ReactElement<Props> | null {
   const onAction = useContext(ActionContext);
   const [{ hexBytes, payload }, setData] = useState<Data>({ hexBytes: null, payload: null });
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  // Raw vs extrinsic follows the channel the request arrived on, never the
+  // payload fields - those are dapp-supplied and can describe either shape.
   // Use payload genesis for transaction-signing flow. Account genesis can be null
   // for allow-any accounts and should not drive payload decoding/signing setup.
-  const payloadGenesisHash = !isRawPayload(request.payload)
+  const payloadGenesisHash = isExtrinsicRequest(request)
     ? request.payload.genesisHash
     : null;
   const chain = useMetadata(payloadGenesisHash);
@@ -58,25 +56,25 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
   useEffect((): void => {
     // When the chain and request are ready, configure the chain's registry.
     // This will be picked up by LedgerSign.
-    if (chain && !isRawPayload(request.payload)) {
+    if (chain && isExtrinsicRequest(request)) {
       chain.registry.setSignedExtensions(request.payload.signedExtensions, chain.definition.userExtensions);
     }
   }, [chain, request]);
 
   useEffect((): void => {
-    const payload = request.payload;
+    if (isExtrinsicRequest(request)) {
+      const json = request.payload;
 
-    if (isRawPayload(payload)) {
-      setData({
-        hexBytes: payload.data,
-        payload: null
-      });
-    } else {
-      registry.setSignedExtensions(payload.signedExtensions);
+      registry.setSignedExtensions(json.signedExtensions);
 
       setData({
         hexBytes: null,
-        payload: registry.createType('ExtrinsicPayload', payload, { version: payload.version })
+        payload: registry.createType('ExtrinsicPayload', json, { version: json.version })
+      });
+    } else {
+      setData({
+        hexBytes: request.payload.data,
+        payload: null
       });
     }
   }, [request]);
@@ -93,8 +91,15 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
     [onAction, signId]
   );
 
-  if (payload !== null) {
-    const json = request.payload as SignerPayloadJSON;
+  // Branch on the request itself rather than on the decoded state, so a render
+  // that lands before the effect has caught up shows nothing instead of feeding
+  // the previous request's view a payload of the other shape.
+  if (isExtrinsicRequest(request)) {
+    const json = request.payload;
+
+    if (payload === null) {
+      return null;
+    }
 
     return (
       <>
@@ -147,8 +152,12 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
         />
       </>
     );
-  } else if (hexBytes !== null) {
-    const { address, data } = request.payload as SignerPayloadRaw;
+  } else {
+    const { address, data } = request.payload;
+
+    if (hexBytes === null) {
+      return null;
+    }
 
     return (
       <>
@@ -197,6 +206,4 @@ export default function Request ({ account: { accountIndex, addressOffset, genes
       </>
     );
   }
-
-  return null;
 }

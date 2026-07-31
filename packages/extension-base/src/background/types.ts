@@ -398,11 +398,25 @@ export type SubscriptionMessageTypes = NoUndefinedValues<{
 export type MessageTypesWithSubscriptions = keyof SubscriptionMessageTypes;
 export type MessageTypesWithNoSubscriptions = Exclude<MessageTypes, keyof SubscriptionMessageTypes>
 
-export interface RequestSign {
-  readonly payload: SignerPayloadJSON | SignerPayloadRaw;
-
+interface RequestSignBase {
   sign (registry: Registry, pair: KeyringPair): { signature: HexString };
 }
+
+// `channel` is set by the background from the message type the request arrived
+// on, never derived from the payload - the payload comes from the dapp and
+// cannot be trusted to describe what will actually be signed. Discriminating on
+// it also correlates the payload type, so consumers narrow instead of casting.
+export interface RequestSignBytes extends RequestSignBase {
+  readonly channel: 'bytes';
+  readonly payload: SignerPayloadRaw;
+}
+
+export interface RequestSignExtrinsic extends RequestSignBase {
+  readonly channel: 'extrinsic';
+  readonly payload: SignerPayloadJSON;
+}
+
+export type RequestSign = RequestSignBytes | RequestSignExtrinsic;
 
 export interface RequestJsonRestore {
   file: KeyringPair$Json;

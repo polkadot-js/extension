@@ -141,6 +141,10 @@ export default class Tabs {
   }
 
   private extrinsicSign (url: string, request: SignerPayloadJSON): Promise<ResponseSigning> {
+    // matches the predicate the UI used to key off, so payloads that were
+    // never ambiguous (absent, null, empty) keep working
+    assert(!(request as unknown as SignerPayloadRaw).data, 'Unexpected raw data in a signPayload payload');
+
     const address = request.address;
     const pair = this.getSigningPair(address);
 

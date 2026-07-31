@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 0.64.0 Jul 31, 2026
+
+Changes:
+
+- Derive raw vs extrinsic signing from the request channel ([#1624](https://github.com/polkadot-js/extension/pull/1624))
+- Fix docs typos ([#1623](https://github.com/polkadot-js/extension/pull/1623))
+
+Contributed:
+
+- Derive raw vs extrinsic signing from the request channel ([#1624](https://github.com/polkadot-js/extension/pull/1624)) (Thanks to https://github.com/patriciobcs)
+
+
 ## 0.63.1 Mar 30, 2026
 
 Changes:

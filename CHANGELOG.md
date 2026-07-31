@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.64.0 Jul 31, 2026
+## 0.64.1 Jul 31, 2026
 
 Changes:
 

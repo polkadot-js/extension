@@ -18,10 +18,10 @@
     "./packageDetect.cjs"
   ],
   "type": "module",
-  "version": "0.64.0",
+  "version": "0.64.1",
   "main": "index.js",
   "dependencies": {
-    "@polkadot/extension-inject": "0.64.0",
+    "@polkadot/extension-inject": "0.64.1",
     "@polkadot/networks": "^14.0.3",
     "@polkadot/util": "^14.0.3",
     "@polkadot/util-crypto": "^14.0.3",

@@ -15,6 +15,7 @@ import type { KeypairType } from '@polkadot/util-crypto/types';
 
 import { TypeRegistry } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
+import { stringToHex } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
 
 import { AccountsStore } from '../../stores/index.js';
@@ -468,6 +469,80 @@ describe('Extension', () => {
 
       const res = await extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
         id: state.allSignRequests[0].id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
+    });
+  });
+
+  describe('signer channel', () => {
+    let address: string, payload: SignerPayloadJSON;
+
+    beforeEach(async () => {
+      address = await createAccount();
+      payload = {
+        address,
+        blockHash: '0xe1b1dda72998846487e4d858909d4f9a6bbd6e338e4588e5d809de16b1317b80',
+        blockNumber: '0x00000393',
+        era: '0x3601',
+        genesisHash: '0x242a54b35e1aad38f37b884eddeb71f6f9931b02fac27bf52dfb62ef754e5e62',
+        method: '0x040105fa8eaf04151687736326c9fea17e25fc5287613693c912909cb226aa4794f26a4882380100',
+        nonce: '0x0000000000000000',
+        signedExtensions: ['CheckSpecVersion', 'CheckTxVersion', 'CheckGenesis', 'CheckMortality', 'CheckNonce', 'CheckWeight', 'ChargeTransactionPayment'],
+        specVersion: '0x00000026',
+        tip: '0x00000000000000000000000000000000',
+        transactionVersion: '0x00000005',
+        version: 4
+      };
+    });
+
+    // `data` has no meaning on the extrinsic channel and does not affect what is
+    // signed, so it must not reach the UI and steer how the request is shown.
+    it('rejects a signPayload request carrying raw data', async () => {
+      const { blockNumber: _omitted, ...rest } = payload;
+
+      await expect(tabs.handle('1615191860871.6', 'pub(extrinsic.sign)', {
+        ...rest,
+        data: stringToHex('Sign in to EvilDapp')
+      } as unknown as SignerPayloadJSON, 'http://localhost:3000', {} as chrome.runtime.Port))
+        .rejects.toThrow(/Unexpected raw data/);
+    });
+
+    // a falsy `data` never selected the message view, so it must keep signing
+    it('accepts a signPayload request with a falsy data field', async () => {
+      // eslint-disable-next-line jest/valid-expect-in-promise
+      tabs.handle('1615191860871.7', 'pub(extrinsic.sign)', {
+        ...payload,
+        data: null
+      } as unknown as SignerPayloadJSON, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .catch((err) => console.log(err));
+
+      const queued = state.allSignRequests[state.allSignRequests.length - 1];
+
+      const res = await extension.handle('1615192062290.7', 'pri(signing.approve.password)', {
+        id: queued.id,
+        password,
+        savePass: false
+      }, {} as chrome.runtime.Port);
+
+      expect(res).toEqual(true);
+    });
+
+    // The UI reads this instead of sniffing the payload, so a request cannot be
+    // displayed as one kind and signed as the other.
+    it('tags a request with the channel it arrived on', async () => {
+      // eslint-disable-next-line jest/valid-expect-in-promise
+      tabs.handle('1615191860871.8', 'pub(extrinsic.sign)', payload, 'http://localhost:3000', {} as chrome.runtime.Port)
+        .catch((err) => console.log(err));
+
+      const queued = state.allSignRequests[state.allSignRequests.length - 1];
+
+      expect(queued.request.channel).toEqual('extrinsic');
+
+      const res = await extension.handle('1615192062290.8', 'pri(signing.approve.password)', {
+        id: queued.id,
         password,
         savePass: false
       }, {} as chrome.runtime.Port);

@@ -5,11 +5,12 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import type { TypeRegistry } from '@polkadot/types';
 import type { SignerPayloadRaw } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
-import type { RequestSign } from './types.js';
+import type { RequestSignBytes } from './types.js';
 
 import { u8aToHex, u8aWrapBytes } from '@polkadot/util';
 
-export default class RequestBytesSign implements RequestSign {
+export default class RequestBytesSign implements RequestSignBytes {
+  public readonly channel = 'bytes' as const;
   public readonly payload: SignerPayloadRaw;
 
   constructor (payload: SignerPayloadRaw) {

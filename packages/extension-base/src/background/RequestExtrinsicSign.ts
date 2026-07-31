@@ -5,9 +5,10 @@ import type { KeyringPair } from '@polkadot/keyring/types';
 import type { TypeRegistry } from '@polkadot/types';
 import type { SignerPayloadJSON } from '@polkadot/types/types';
 import type { HexString } from '@polkadot/util/types';
-import type { RequestSign } from './types.js';
+import type { RequestSignExtrinsic } from './types.js';
 
-export default class RequestExtrinsicSign implements RequestSign {
+export default class RequestExtrinsicSign implements RequestSignExtrinsic {
+  public readonly channel = 'extrinsic' as const;
   public readonly payload: SignerPayloadJSON;
 
   constructor (payload: SignerPayloadJSON) {

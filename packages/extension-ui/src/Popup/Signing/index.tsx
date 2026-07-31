@@ -1,9 +1,9 @@
 // Copyright 2019-2026 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import type { SignerPayloadJSON } from '@polkadot/types/types';
-
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+
+import { isExtrinsicRequest } from '@polkadot/extension-base/utils';
 
 import { Loading, SigningReqContext } from '../../components/index.js';
 import { useTranslation } from '../../hooks/index.js';
@@ -42,7 +42,7 @@ export default function Signing (): React.ReactElement {
         : requests[requests.length - 1]
       : requests[0]
     : null;
-  const isTransaction = !!((request?.request?.payload as SignerPayloadJSON)?.blockNumber);
+  const isTransaction = !!request && isExtrinsicRequest(request.request);
 
   return request
     ? (

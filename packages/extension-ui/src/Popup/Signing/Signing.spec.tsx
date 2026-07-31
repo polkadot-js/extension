@@ -95,6 +95,7 @@ describe('Signing requests', () => {
         },
         id: '1607347015530.2',
         request: {
+          channel: 'extrinsic',
           payload: {
             address: '5D4bqjQRPgdMBK8bNvhX4tSuCtSGZS7rZjD5XH5SoKcFeKn5',
             blockHash: '0x661f57d206d4fecda0408943427d4d25436518acbff543735e7569da9db6bdd7',
@@ -132,6 +133,7 @@ describe('Signing requests', () => {
         },
         id: '1607356155395.3',
         request: {
+          channel: 'extrinsic',
           payload: {
             address: '5Ggap6soAPaP5UeNaiJsgqQwdVhhNnm6ez7Ba1w9jJ62LM2Q',
             blockHash: '0xcf69b7935b785f90b22d2b36f2227132ef9c5dd33db1dbac9ecdafac05bf9476',
@@ -221,6 +223,7 @@ describe('Signing requests', () => {
         },
         id: '1607357806151.5',
         request: {
+          channel: 'extrinsic',
           payload: {
             address: '5Cf1CGZas62RWwce3d2EPqUvSoi1txaXKd9M5w9bEFSsQtRe',
             blockHash: '0xd2f2dfb56c16af1d0faf5b454153d3199aeb6647537f4161c26a34541c591ec8',

@@ -5,7 +5,7 @@
 
 import type { MetadataDef } from '@polkadot/extension-inject/types';
 import type { KeyringPair, KeyringPair$Json, KeyringPair$Meta } from '@polkadot/keyring/types';
-import type { Registry, SignerPayloadJSON, SignerPayloadRaw } from '@polkadot/types/types';
+import type { Registry } from '@polkadot/types/types';
 import type { SubjectInfo } from '@polkadot/ui-keyring/observable/types';
 import type { KeypairType } from '@polkadot/util-crypto/types';
 import type { AccountJson, AllowedPath, AuthorizeRequest, MessageTypes, MetadataRequest, RequestAccountBatchExport, RequestAccountChangePassword, RequestAccountCreateExternal, RequestAccountCreateHardware, RequestAccountCreateSuri, RequestAccountEdit, RequestAccountExport, RequestAccountForget, RequestAccountShow, RequestAccountTie, RequestAccountValidate, RequestActiveTabsUrlUpdate, RequestAuthorizeApprove, RequestBatchRestore, RequestDeriveCreate, RequestDeriveValidate, RequestJsonRestore, RequestMetadataApprove, RequestMetadataReject, RequestSeedCreate, RequestSeedValidate, RequestSigningApprovePassword, RequestSigningApproveSignature, RequestSigningCancel, RequestSigningIsLocked, RequestTypes, RequestUpdateAuthorizedAccounts, ResponseAccountExport, ResponseAccountsExport, ResponseAuthorizeList, ResponseDeriveValidate, ResponseJsonGetAccountInfo, ResponseSeedCreate, ResponseSeedValidate, ResponseSigningIsLocked, ResponseType, SigningRequest } from '../types.js';
@@ -20,6 +20,7 @@ import { accounts as accountsObservable } from '@polkadot/ui-keyring/observable/
 import { assert, isHex } from '@polkadot/util';
 import { keyExtractSuri, mnemonicGenerate, mnemonicValidate } from '@polkadot/util-crypto';
 
+import { isExtrinsicRequest } from '../../utils/index.js';
 import { withErrorLog } from './helpers.js';
 import { createSubscription, unsubscribe } from './subscriptions.js';
 
@@ -33,10 +34,6 @@ function getSuri (seed: string, type?: KeypairType): string {
   return type === 'ethereum'
     ? `${seed}${ETH_DERIVE_DEFAULT}`
     : seed;
-}
-
-function isJsonPayload (value: SignerPayloadJSON | SignerPayloadRaw): value is SignerPayloadJSON {
-  return (value as SignerPayloadJSON).genesisHash !== undefined;
 }
 
 export default class Extension {
@@ -368,9 +365,10 @@ export default class Extension {
 
     // construct a new registry (avoiding pollution), between requests
     let registry: Registry;
-    const { payload } = request;
 
-    if (isJsonPayload(payload)) {
+    if (isExtrinsicRequest(request)) {
+      const payload = request.payload;
+
       // Get the metadata for the genesisHash
       const metadata = this.#state.knownMetadata.find(({ genesisHash }) => genesisHash === payload.genesisHash);
 

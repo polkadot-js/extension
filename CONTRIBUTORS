@@ -37,6 +37,7 @@
        1	Minh Ha                       	✨ allows background handler to handle custom extention port name (#685)
        1	murat onur                    	tr language support added (#681)
        1	Nikos Kontakis                	Fix issue that was breaking extension ui (height collapsed and non-visible); Fixes #720 (#731)
+       1	Patricio                      	fix: derive raw vs extrinsic signing from the request channel (#1624)
        1	Pedro Filho                   	adding correct nvm version (#1075)
        1	roiLeo                        	fix(RemoveAuth): icon cursor & size (#1082)
        1	Stéphane P                    	README Fix typo (#700)

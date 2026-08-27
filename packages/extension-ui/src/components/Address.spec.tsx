@@ -149,7 +149,7 @@ const getWrapper = async (account: AccountJson, contextAccounts: AccountJson[], 
   // In case the account is not in the context, then more info are needed as props
   // to display accurately
   const mountedComponent = withAccountsInContext
-  // only the address is passed as props, the full acount info are loaded in the context
+  // only the address is passed as props, the full account info is loaded in the context
     ? await mountComponent({ address: account.address }, contextAccounts)
   // the context is empty, all account's info are passed as props to the Address component
     : await mountComponent(account, []);
@@ -181,7 +181,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(wrapper.find('CopyToClipboard').at(1).prop('text')).toEqual(address);
     });
 
-    it('has the account visiblity icon', () => {
+    it('has the account visibility icon', () => {
       expect(wrapper.find('FontAwesomeIcon.visibleIcon')).toHaveLength(1);
     });
 
@@ -223,7 +223,7 @@ const genericTestSuite = (account: AccountTestJson, withAccountsInContext = true
       expect(wrapper.find('.settings')).toHaveLength(1);
     });
 
-    it('has no account hidding and settings button if no action is provided', async () => {
+    it('has no account hiding and settings button if no action is provided', async () => {
       const additionalProps = { actions: null };
 
       const mountedComponentWithoutAction = withAccountsInContext

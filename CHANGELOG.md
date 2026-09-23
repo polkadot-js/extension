@@ -1,9 +1,10 @@
 # CHANGELOG
 
-## 0.64.0 Jul 31, 2026
+## 0.64.1 Sep 23, 2026
 
 Changes:
 
+- Bump polkadot-js dependencies to api 17.0.1 ([#1628](https://github.com/polkadot-js/extension/pull/1628))
 - Derive raw vs extrinsic signing from the request channel ([#1624](https://github.com/polkadot-js/extension/pull/1624))
 - Fix docs typos ([#1623](https://github.com/polkadot-js/extension/pull/1623))
 

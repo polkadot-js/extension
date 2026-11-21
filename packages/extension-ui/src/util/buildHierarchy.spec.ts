@@ -18,13 +18,13 @@ const testHierarchy = (accounts: AccountJson[], expected: AccountWithChildren[])
 };
 
 describe('Use Account Hierarchy', () => {
-  const acc = (address: string, parentAddress?: string, whenCreated?: number, name?: string, suri?: string): {
+  const acc = (address: string, parentAddress?: string, whenCreated?: number, name?: string, suri?: string, extra?: Partial<AccountJson>): {
     address: string;
     name?: string;
     parentAddress?: string;
     suri?: string;
     whenCreated?: number;
-  } => ({ address, name, parentAddress, suri, whenCreated });
+  } => ({ address, name, parentAddress, suri, whenCreated, ...extra });
 
   it('for empty account list, returns empty list', () => {
     testHierarchy([], []);
@@ -106,6 +106,71 @@ describe('Use Account Hierarchy', () => {
     testHierarchy(
       [acc('a'), acc('b', undefined, 2), acc('c', undefined, 1)],
       [acc('c', undefined, 1), acc('b', undefined, 2), acc('a')]
+    );
+  });
+
+  it('sorts hidden accounts after visible ones', () => {
+    testHierarchy(
+      [acc('b', undefined, undefined, 'b', undefined, { isHidden: true }), acc('a', undefined, undefined, 'a'), acc('c', undefined, undefined, 'c', undefined, { isHidden: true })],
+      [acc('a', undefined, undefined, 'a'), acc('b', undefined, undefined, 'b', undefined, { isHidden: true }), acc('c', undefined, undefined, 'c', undefined, { isHidden: true })]
+    );
+  });
+
+  it('sorts hidden accounts after visible ones, keeping network and name order inside each group', () => {
+    testHierarchy(
+      [
+        { address: 'hidden-polkadot', genesisHash: genesisExample.POLKADOT, isHidden: true, name: 'a-hidden' },
+        { address: 'visible-kusama', genesisHash: genesisExample.KUSAMA, name: 'z-visible' },
+        { address: 'visible-polkadot', genesisHash: genesisExample.POLKADOT, name: 'a-visible' },
+        { address: 'hidden-kusama', genesisHash: genesisExample.KUSAMA, isHidden: true, name: 'z-hidden' }
+      ],
+      [
+        { address: 'visible-kusama', genesisHash: genesisExample.KUSAMA, name: 'z-visible' },
+        { address: 'visible-polkadot', genesisHash: genesisExample.POLKADOT, name: 'a-visible' },
+        { address: 'hidden-kusama', genesisHash: genesisExample.KUSAMA, isHidden: true, name: 'z-hidden' },
+        { address: 'hidden-polkadot', genesisHash: genesisExample.POLKADOT, isHidden: true, name: 'a-hidden' }
+      ]
+    );
+  });
+
+  it('produces the same order regardless of the input order (duplicate names, missing creation time)', () => {
+    const accounts = [
+      acc('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', undefined, undefined, 'same name'),
+      acc('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty', undefined, undefined, 'same name'),
+      acc('5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy', undefined, undefined, 'another')
+    ];
+    const expected = [
+      acc('5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy', undefined, undefined, 'another'),
+      acc('5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty', undefined, undefined, 'same name'),
+      acc('5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY', undefined, undefined, 'same name')
+    ];
+
+    testHierarchy(accounts, expected);
+    // reversed input must yield the very same output
+    testHierarchy([...accounts].reverse(), expected);
+  });
+
+  it('orders accounts on unknown networks deterministically by genesisHash, not by input order', () => {
+    const customA = '0x0000000000000000000000000000000000000000000000000000000000000001';
+    const customB = '0x0000000000000000000000000000000000000000000000000000000000000002';
+
+    testHierarchy(
+      [{ address: 'b', genesisHash: customB, name: 'a-name' }, { address: 'a', genesisHash: customA, name: 'z-name' }],
+      [{ address: 'a', genesisHash: customA, name: 'z-name' }, { address: 'b', genesisHash: customB, name: 'a-name' }]
+    );
+  });
+
+  it('does not sort by name across different networks', () => {
+    testHierarchy(
+      [{ address: 'a', genesisHash: genesisExample.POLKADOT, name: 'a-polkadot' }, { address: 'b', genesisHash: genesisExample.KUSAMA, name: 'z-kusama' }],
+      [{ address: 'b', genesisHash: genesisExample.KUSAMA, name: 'z-kusama' }, { address: 'a', genesisHash: genesisExample.POLKADOT, name: 'a-polkadot' }]
+    );
+  });
+
+  it('sorts hidden children after visible children', () => {
+    testHierarchy(
+      [acc('a', undefined, 1, 'a'), acc('c', 'a', 1, 'c', undefined, { isHidden: true }), acc('b', 'a', 1, 'b')],
+      [{ address: 'a', children: [acc('b', 'a', 1, 'b'), acc('c', 'a', 1, 'c', undefined, { isHidden: true })], name: 'a', parentAddress: undefined, suri: undefined, whenCreated: 1 }]
     );
   });
 });

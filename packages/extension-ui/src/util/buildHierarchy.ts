@@ -7,8 +7,24 @@ import getNetworkMap from './getNetworkMap.js';
 
 type ChildFilter = (account: AccountJson) => AccountWithChildren;
 
-function compareByCreation (a: AccountJson, b: AccountJson): number {
-  return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
+// the network map is static for the lifetime of the popup, so build it once
+const networkMap = getNetworkMap();
+
+// visible accounts are shown before hidden ones
+function compareByHidden (a: AccountJson, b: AccountJson): number {
+  return (a.isHidden ? 1 : 0) - (b.isHidden ? 1 : 0);
+}
+
+// sort by the network display name. When the names are equal (e.g. accounts
+// tied to "any chain" or to custom networks not present in the map), fall back
+// to the genesisHash so that the resulting order is always deterministic and
+// does not depend on the order accounts are received in from storage
+function compareByNetwork (a: AccountJson, b: AccountJson): number {
+  const networkA = networkMap.get(a.genesisHash || '') || '';
+  const networkB = networkMap.get(b.genesisHash || '') || '';
+
+  return networkA.localeCompare(networkB) ||
+    (a.genesisHash || '').localeCompare(b.genesisHash || '');
 }
 
 function compareByName (a: AccountJson, b: AccountJson): number {
@@ -25,28 +41,27 @@ function compareByPath (a: AccountJson, b: AccountJson): number {
   return suriA.localeCompare(suriB);
 }
 
-function compareByNetwork (a: AccountJson, b: AccountJson): number {
-  const networkMap = getNetworkMap();
-  const networkA = networkMap.get(a?.genesisHash || '') || '';
-  const networkB = networkMap.get(b?.genesisHash || '') || '';
-
-  return networkA.localeCompare(networkB);
+// accounts without a creation time are moved to the back of their group
+function compareByCreation (a: AccountJson, b: AccountJson): number {
+  return (a.whenCreated || Infinity) - (b.whenCreated || Infinity);
 }
 
-function compareByPathThenCreation (a: AccountJson, b: AccountJson): number {
-  // if the paths are equal, compare by creation time
-  return compareByPath(a, b) || compareByCreation(a, b);
+// the address is unique, so this final tiebreaker makes the comparator total:
+// two accounts that are equal on all other keys can never swap places depending
+// on the input order
+function compareByAddress (a: AccountJson, b: AccountJson): number {
+  return a.address.localeCompare(b.address);
 }
 
-function compareByNameThenPathThenCreation (a: AccountJson, b: AccountJson): number {
-  // This comparison happens after an initial sorting by network.
-  // if the 2 accounts are from different networks, don't touch their order
-  if (a.genesisHash !== b.genesisHash) {
-    return 0;
-  }
-
-  // if the names are equal, compare by path then creation time
-  return compareByName(a, b) || compareByPathThenCreation(a, b);
+// visible accounts first, then grouped by network, then ordered by name, path
+// (derivation path), creation time and finally address (see #1000)
+function compareAccounts (a: AccountJson, b: AccountJson): number {
+  return compareByHidden(a, b) ||
+    compareByNetwork(a, b) ||
+    compareByName(a, b) ||
+    compareByPath(a, b) ||
+    compareByCreation(a, b) ||
+    compareByAddress(a, b);
 }
 
 export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
@@ -54,7 +69,7 @@ export function accountWithChildren (accounts: AccountJson[]): ChildFilter {
     const children = accounts
       .filter(({ parentAddress }) => account.address === parentAddress)
       .map(accountWithChildren(accounts))
-      .sort(compareByNameThenPathThenCreation);
+      .sort(compareAccounts);
 
     return children.length === 0
       ? account
@@ -71,6 +86,5 @@ export function buildHierarchy (accounts: AccountJson[]): AccountWithChildren[] 
       !accounts.some(({ address }) => parentAddress === address)
     )
     .map(accountWithChildren(accounts))
-    .sort(compareByNetwork)
-    .sort(compareByNameThenPathThenCreation);
+    .sort(compareAccounts);
 }
